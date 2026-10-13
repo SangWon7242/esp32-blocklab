@@ -72,9 +72,11 @@ export function registerForBlocks(gen: Gen): void {
     const params = block.getVarModels().map((v) => g.getVariableName(v.getId()));
     let body = g.statementToCode(block, "STACK");
     const ret = block.getInput("RETURN") ? g.valueToCode(block, "RETURN", Order.NONE) : "";
-    const returnLine = ret ? `${g.INDENT}return ${ret}\n` : "";
+    // 코드 지도: return 줄은 몸통 마지막 블록과 같은 들여쓰기라 정의 블록 표식을 다시 연다
+    const returnLine = ret ? `${g.markFor(block, g.INDENT)}${g.INDENT}return ${ret}\n` : "";
     if (!body && !returnLine) body = g.PASS;
-    const code = `def ${name}(${params.join(", ")}):\n${body}${returnLine}`;
+    // 함수 정의 블록은 null 을 돌려주므로 Blockly 가 표식을 붙이지 않는다. def 줄 앞에 직접 넣는다 (지도 모드에서만)
+    const code = `${g.markFor(block)}def ${name}(${params.join(", ")}):\n${body}${returnLine}`;
     g.setDefinition(`%${name}`, g.scrubBlock(block, code));
     return null;
   };

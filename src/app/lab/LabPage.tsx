@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
-import type { WorkspaceJson } from "@/codegen";
+import type { LineMap, WorkspaceJson } from "@/codegen";
 import { countCodeBlocks, editorReducer, initialEditorState, type Source } from "./editorSync";
 import { SAMPLE_CODE } from "./sample";
 import { BottomPanel } from "./BottomPanel";
@@ -111,19 +111,31 @@ export function LabPage() {
     setPanels((p) => ({ ...p, [key]: open, ...(open ? {} : { [other]: true }) }));
   };
 
+  /** 작업판에 블록을 올린 뒤 그 작업판(블록 id)으로 코드 지도를 다시 잰다. load 는 변경 이벤트를 내지 않는다 */
+  const refreshMap = useCallback(() => {
+    const handle = blocklyRef.current;
+    if (handle) dispatch({ type: "mapUpdated", map: handle.getCodeWithMap().map });
+  }, []);
+
   // 코드가 기준일 때: 파싱 결과가 바뀌면 작업판에 올린다 (보던 자리는 그대로)
   useEffect(() => {
-    if (state.source === "code" && state.blocks) blocklyRef.current?.load(state.blocks, { keepScroll: true });
-  }, [state.source, state.blocks]);
+    if (state.source === "code" && state.blocks) {
+      blocklyRef.current?.load(state.blocks, { keepScroll: true });
+      refreshMap();
+    }
+  }, [state.source, state.blocks, refreshMap]);
 
   // 처음 한 번: 예시 블록을 작업판에 올린다
   useEffect(() => {
-    if (state.blocks) blocklyRef.current?.load(state.blocks);
+    if (state.blocks) {
+      blocklyRef.current?.load(state.blocks);
+      refreshMap();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onBlocksChange = useCallback((json: WorkspaceJson, code: string) => {
-    dispatch({ type: "blocksChanged", json, code });
+  const onBlocksChange = useCallback((json: WorkspaceJson, code: string, map: LineMap) => {
+    dispatch({ type: "blocksChanged", json, code, map });
   }, []);
 
   const onCodeChange = useCallback((code: string) => {
@@ -154,6 +166,7 @@ export function LabPage() {
     sourceRef.current = source;
     if (source === "blocks" && blocklyRef.current && current.blocks) blocklyRef.current.load(current.blocks, { keepScroll: true });
     dispatch({ type: "switchSource", source });
+    if (source === "blocks") refreshMap();
   };
 
   const codeMode = state.source === "code";

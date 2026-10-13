@@ -63,6 +63,18 @@ describe("editorReducer", () => {
     const s1 = editorReducer(s0, { type: "codeChanged", code: "x = time.ticks_us()\n" });
     expect(s1.unparsed).toHaveLength(1);
   });
+  it("코드 지도: blocksChanged·mapUpdated 가 지도를 넣고, 블록을 새로 만든 codeChanged 는 비운다", () => {
+    const map = { blockToLines: { a: [4] }, lineToBlock: { 4: "a" } };
+    const s0 = initialEditorState(LED);
+    expect(s0.map).toBeNull();
+    const s1 = editorReducer(s0, { type: "blocksChanged", json: s0.blocks!, code: LED, map });
+    expect(s1.map).toBe(map);
+    const s2 = editorReducer(editorReducer(s1, { type: "switchSource", source: "code" }), { type: "codeChanged", code: LED + "led.value(0)\n" });
+    expect(s2.map).toBeNull();
+    const s3 = editorReducer(s2, { type: "mapUpdated", map });
+    expect(s3.map).toBe(map);
+    expect(editorReducer(s3, { type: "codeChanged", code: "if x\n" }).map).toBe(map);
+  });
 });
 
 describe("countCodeBlocks", () => {

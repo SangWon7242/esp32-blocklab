@@ -58,14 +58,14 @@ function importRank(line: string): number {
 
 /**
  * 본문 맨 앞 칸의 import 줄(블록이 다시 만들지 못해 code_stmt 로 남은 것)을 뽑아
- * 생성한 import 와 함께 맨 위로 모은다. 준비 줄이 본문보다 위로 올라가므로 그대로 두면
+ * 생성한 import 와 함께 맨 위로 모은다. clean 은 뽑은 줄에서 덧붙은 표시(코드 지도 꼬리표)를 걷는다. 준비 줄이 본문보다 위로 올라가므로 그대로 두면
  * `led = Pin(...)` 이 `from machine import Pin, ADC` 보다 먼저 나와 실행되지 않는다.
  */
-export function hoistImports(body: string, generated: string[]): { imports: string[]; body: string } {
+export function hoistImports(body: string, generated: string[], clean: (line: string) => string = (line) => line): { imports: string[]; body: string } {
   const kept: string[] = [];
   const rest = body.split("\n").filter((line) => {
     if (!IMPORT_LINE.test(line)) return true;
-    kept.push(line);
+    kept.push(clean(line));
     return false;
   });
   const imports = [...generated, ...kept]

@@ -39,10 +39,12 @@ export function registerDeviceGenerators(gen: MicroPythonGenerator): void {
       const s = d.setup;
       gen.forBlock[s.blockType] = (block, g) => {
         const G = g as MicroPythonGenerator;
-        G.addSetup(...s.lines(readValues(block, G, s.parts)));
+        // 코드 지도 장부: 준비 줄과 도우미 함수는 끌어올려지므로 표식 대신 이 블록 id 를 적어 둔다
+        G.noteSetupBlock(block.id, G.addSetup(...s.lines(readValues(block, G, s.parts))));
         // provideFunction_ 은 앞쪽 공백 2칸을 INDENT(4칸)로 바꾸므로 도우미 본문은 2칸 단위로 적는다
         for (const h of s.helpers ?? []) {
           G.provideHelper(h.name, [`def ${G.FUNCTION_NAME_PLACEHOLDER_}(${h.params}):`, ...h.body.map((l) => "  " + markHelperCalls(l, helpers, G))]);
+          G.noteHelperOwner(h.name, block.id);
         }
         return "";
       };

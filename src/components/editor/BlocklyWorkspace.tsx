@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import * as Blockly from "blockly";
 import { entryTheme, registerBlocks, toolbox } from "@/blocks";
-import { generateCode, type WorkspaceJson } from "@/codegen";
+import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
 import { cn } from "@/lib/utils";
 import { createNamePrompt } from "./namePrompt";
 
@@ -14,11 +14,13 @@ export type BlocklyHandle = {
   load(json: WorkspaceJson, opts?: LoadOptions): void;
   getJson(): WorkspaceJson;
   getCode(): string;
+  /** 지금 작업판의 코드와 코드 지도 (블록 id ↔ 줄 번호, id 는 살아 있는 작업판의 것) */
+  getCodeWithMap(): { code: string; map: LineMap };
 };
 
 type Props = {
   /** 사용자가 블록을 바꿀 때마다 (프로그램이 load 한 경우는 제외) */
-  onChange: (json: WorkspaceJson, code: string) => void;
+  onChange: (json: WorkspaceJson, code: string, map: LineMap) => void;
   className?: string;
 };
 
@@ -69,7 +71,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
 
     const listener = (e: Blockly.Events.Abstract) => {
       if (loadingRef.current || e.isUiEvent || ws.isDragging()) return;
-      onChangeRef.current(Blockly.serialization.workspaces.save(ws) as WorkspaceJson, generateCode(ws));
+      const { code, map } = generateCodeWithMap(ws);
+      onChangeRef.current(Blockly.serialization.workspaces.save(ws) as WorkspaceJson, code, map);
     };
     ws.addChangeListener(listener);
 
@@ -112,6 +115,7 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     },
     getJson: () => Blockly.serialization.workspaces.save(wsRef.current!) as WorkspaceJson,
     getCode: () => (wsRef.current ? generateCode(wsRef.current) : ""),
+    getCodeWithMap: () => (wsRef.current ? generateCodeWithMap(wsRef.current) : { code: "", map: emptyLineMap() }),
   }));
 
   return <div ref={hostRef} className={cn("h-full w-full", className)} data-testid="blockly-host" />;

@@ -3,6 +3,7 @@ import { PythonGenerator, pythonGenerator } from "blockly/python";
 import { PYTHON_KEYWORDS } from "@/blocks/names";
 import { HELPER_MARK } from "@/devices/specs/common";
 import { collectImports, hoistImports } from "./imports";
+import { buildLineMap, countLines, isMarksOnly, leadingMarkLength, marksToTags, shiftLineMap, STATEMENT_MARK, stripTags, tagLine, tagLines, type LineMap } from "./linemap";
 
 type SplitComment = { above: string[]; trailing: string | null };
 
@@ -50,6 +51,20 @@ export class MicroPythonGenerator extends PythonGenerator {
   /** 방금 생성한 준비 블록이 넣은(또는 이미 있던) 첫 줄 번호. scrub_ 가 코멘트를 붙이고 비운다 */
   private lastSetupLine: number | null = null;
 
+  /**
+   * 코드 지도 모드. 켜면 명령 블록 코드 앞에 블록 id 표식 줄(STATEMENT_PREFIX)을 넣고, finish 가 표식을 걷어 내며
+   * 지도(lastMap)를 만든다. 내놓는 코드는 꺼졌을 때와 같은 글자열이다. workspaceToCodeWithMap 만 켠다.
+   */
+  withMap = false;
+  /** 마지막 workspaceToCode 의 코드 지도 (withMap 일 때만) */
+  lastMap: LineMap | null = null;
+  /** finish 가 만든 코드와 지도. workspaceToCode 가 마지막 공백 다듬기에 맞춰 줄 번호를 고친다 */
+  private finished: { code: string; map: LineMap } | null = null;
+  /** 준비 줄 장부: setupLines 번호 → 그 줄을 낸 준비 블록 id 들 */
+  private setupOwners: string[][] = [];
+  /** 도우미 장부: provideHelper 이름 → 그 도우미를 준비한 블록 id 들 */
+  private helperOwners = new Map<string, string[]>();
+
   constructor() {
     super("MicroPython");
     this.INDENT = "    ";
@@ -66,15 +81,85 @@ export class MicroPythonGenerator extends PythonGenerator {
     this.setupComments.clear();
     this.headerLines = [];
     this.lastSetupLine = null;
+    this.STATEMENT_PREFIX = this.withMap ? STATEMENT_MARK : null;
+    this.lastMap = null;
+    this.finished = null;
+    this.setupOwners = [];
+    this.helperOwners.clear();
   }
 
-  /** 준비 블록이 부르는 함수. 같은 줄은 한 번만 넣는다. */
-  addSetup(...lines: string[]): void {
-    lines.forEach((line, i) => {
+  /** 준비 블록이 부르는 함수. 같은 줄은 한 번만 넣는다. 넣은(또는 이미 있던) 줄 번호들을 돌려준다 */
+  addSetup(...lines: string[]): number[] {
+    return lines.map((line, i) => {
       let at = this.setupLines.indexOf(line);
       if (at < 0) at = this.setupLines.push(line) - 1;
       if (i === 0) this.lastSetupLine = at;
+      return at;
     });
+  }
+
+  /** 준비 블록 장부: 이 블록이 낸 준비 줄들 (addSetup 이 돌려준 번호) */
+  noteSetupBlock(blockId: string, indices: number[]): void {
+    for (const i of indices) {
+      const owners = (this.setupOwners[i] ??= []);
+      if (!owners.includes(blockId)) owners.push(blockId);
+    }
+  }
+  /** 도우미 장부: 이 준비 블록이 provideHelper(name) 를 불렀다 */
+  noteHelperOwner(name: string, blockId: string): void {
+    const owners = this.helperOwners.get(name) ?? [];
+    if (!owners.includes(blockId)) this.helperOwners.set(name, [...owners, blockId]);
+  }
+  /**
+   * 블록 표식 줄 (지도 모드가 아니면 ""). 스스로 코드를 definitions_ 에 넣는 함수 정의 블록은 Blockly 가 표식을 붙이지
+   * 않으므로 직접 넣는다. indent 는 그 표식이 열 구역의 들여쓰기 (return 줄처럼 몸통 블록 뒤에 오는 줄).
+   */
+  markFor(block: Blockly.Block, indent = ""): string {
+    return this.withMap && this.STATEMENT_PREFIX ? indent + this.injectId(this.STATEMENT_PREFIX, block) : "";
+  }
+
+  /** 작업판 → 코드와 코드 지도. 코드는 workspaceToCode 와 같은 글자열 */
+  workspaceToCodeWithMap(workspace: Blockly.Workspace): { code: string; map: LineMap } {
+    this.withMap = true;
+    try {
+      const code = this.workspaceToCode(workspace);
+      return { code, map: this.lastMap ?? { blockToLines: {}, lineToBlock: {} } };
+    } finally {
+      this.withMap = false;
+      this.STATEMENT_PREFIX = null;
+    }
+  }
+
+  override workspaceToCode(workspace?: Blockly.Workspace): string {
+    const code = super.workspaceToCode(workspace);
+    if (this.withMap && this.finished) {
+      // CodeGenerator 가 finish 뒤에 맨 앞 빈 줄·맨 끝 공백 줄을 지운다. 지운 만큼 줄 번호를 옮긴다
+      const leading = /^\s+\n/.exec(this.finished.code)?.[0].split("\n").length ?? 1;
+      this.lastMap = shiftLineMap(this.finished.map, -(leading - 1), countLines(code));
+    }
+    this.finished = null;
+    return code;
+  }
+
+  /**
+   * 내용 없이 표식만 남은 명령 블록 코드(준비 블록·빈 시작 블록)는 "" 로 돌려준다. 표식이 있다고 빈 몸통이 비지 않은
+   * 것으로 보이면 `|| PASS` 가 빠지고, 최상위 블록 사이 빈 줄 수가 달라진다 (표식 없는 코드와 글자 하나까지 같아야 한다).
+   * 준비 블록의 줄은 장부로 지도에 넣으므로 표식이 필요 없다.
+   */
+  override blockToCode(block: Blockly.Block | null, opt_thisOnly?: boolean): string | [string, number] {
+    const code = super.blockToCode(block, opt_thisOnly);
+    return this.withMap && typeof code === "string" && isMarksOnly(code) ? "" : code;
+  }
+
+  /** 내장 반복 블록이 몸통 끝에 넣는 반복 블록 표식은 빼다 (빈 몸통의 pass 가 빠지고, 몸통 마지막 줄이 반복 블록 것이 된다) */
+  override addLoopTrap(branch: string, block: Blockly.Block): string {
+    const prefix = this.STATEMENT_PREFIX;
+    this.STATEMENT_PREFIX = null;
+    try {
+      return super.addLoopTrap(branch, block);
+    } finally {
+      this.STATEMENT_PREFIX = prefix;
+    }
   }
 
   // definitions_ / provideFunction_ / scrub_ 는 protected 라서 forBlock.ts 가 쓸 공개 창구를 둔다
@@ -92,25 +177,32 @@ export class MicroPythonGenerator extends PythonGenerator {
   scrubBlock(block: Blockly.Block, code: string): string { return this.scrub_(block, code, true); }
 
   override finish(code: string): string {
+    const mapped = this.withMap;
+    // 지도 모드: 표식 줄을 줄 끝 꼬리표로 바꾼다. 꼬리표는 줄과 함께 움직이므로 아래 조립(import 끌어올리기, 빈 줄 다듬기)이
+    // 꺼졌을 때와 똑같이 돌고, 맨 끝에 buildLineMap 이 걷어 낸다. 꼬리표가 import 계산에 끼지 않게 stripTags 로 본다.
     code = this.resolveHelperCalls(code);
+    if (mapped) code = marksToTags(code);
     const helpers: string[] = [];
     const defs: string[] = [];
     for (const name of Object.keys(this.definitions_)) {
-      const def = this.resolveHelperCalls(this.definitions_[name]);
+      let def = this.resolveHelperCalls(this.definitions_[name]);
       if (/^(from\s+\S+\s+)?import\s+\S+/.test(def)) continue; // import 는 collectImports 가 다시 계산
+      // 사용자 함수는 defGenerator 가 넣은 표식으로, 도우미 함수는 그것을 준비한 블록 장부로
+      if (mapped) def = name.startsWith("%") ? marksToTags(def) : tagLines(def, this.helperOwners.get(name) ?? []);
       (name.startsWith("%") ? defs : helpers).push(def.replace(/\n+$/, ""));
     }
     this.isInitialized = false;
     this.nameDB_?.reset();
 
     const functions = [...helpers, ...defs];
-    const generated = collectImports([this.setupLines.join("\n"), ...functions, code].join("\n"));
-    const { imports, body: rest } = hoistImports(code, generated);
+    const generated = collectImports(stripTags([this.setupLines.join("\n"), ...functions, code].join("\n")));
+    const { imports, body: rest } = hoistImports(code, generated, stripTags);
     const body = rest.replace(/\n+$/, "");
     const sections: string[] = [];
     const setup = this.setupLines.map((line, i) => {
+      const tag = (l: string) => (mapped ? tagLine(l, this.setupOwners[i] ?? []) : l);
       const c = this.setupComments.get(i);
-      return c ? [...c.above.map(commentLine), c.trailing ? `${line}  # ${c.trailing}` : line].join("\n") : line;
+      return c ? [...c.above.map(commentLine), c.trailing ? `${line}  # ${c.trailing}` : line].map(tag).join("\n") : tag(line);
     });
     if (setup.length) sections.push(setup.join("\n"));
     if (functions.length) sections.push(functions.join("\n\n\n"));
@@ -118,7 +210,10 @@ export class MicroPythonGenerator extends PythonGenerator {
     const text = sections.join(sections.length > 1 && functions.length ? "\n\n\n" : "\n\n");
     const header = this.headerLines.length ? this.headerLines.map(commentLine).join("\n") + "\n\n" : "";
     const out = header + (imports.length ? imports.join("\n") + "\n\n" : "") + text;
-    return out.trim() ? out.replace(/\n*$/, "\n") : "";
+    const final = out.trim() ? out.replace(/\n*$/, "\n") : "";
+    if (!mapped) return final;
+    this.finished = buildLineMap(final);
+    return this.finished.code;
   }
 
   override scrub_(block: Blockly.Block, code: string, thisOnly = false): string {
@@ -128,6 +223,10 @@ export class MicroPythonGenerator extends PythonGenerator {
       this.headerLines = text.trim() ? text.split("\n").map((l) => (ESCAPED_PIPE.test(l) ? l.slice(1) : l.replace(/^\|/, "")).replace(/\s+$/, "")) : [];
       return code;
     }
+    // 지도 모드의 표식 줄은 떼어 두고 문장 코드만 다룬다: 표식 → 위 주석 줄 → 문장(줄 끝 주석) 순서가 되어 주석 줄도 그 블록 것이 된다
+    const markLength = this.withMap ? leadingMarkLength(code) : 0;
+    const mark = code.slice(0, markLength);
+    code = code.slice(markLength);
     const comment = text.trim() ? splitComment(text) : null;
     const hasComment = !!comment && (comment.above.length > 0 || comment.trailing !== null);
     const setupLine = this.lastSetupLine;
@@ -142,6 +241,7 @@ export class MicroPythonGenerator extends PythonGenerator {
       // 위 주석 줄은 문장과 같은 들여쓰기로 (부모의 statementToCode 가 줄마다 들여쓴다)
       if (comment.above.length) code = comment.above.map(commentLine).join("\n") + "\n" + code;
     }
+    code = mark + code;
     const next = block.nextConnection?.targetBlock();
     return thisOnly || !next ? code : code + this.blockToCode(next);
   }
