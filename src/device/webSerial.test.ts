@@ -115,6 +115,22 @@ describe("WebSerialTransport.open 오류", () => {
     vi.stubGlobal("navigator", { serial: { requestPort: async () => { throw new DOMException("No port selected by the user.", "NotFoundError"); } } });
     await expect(WebSerialTransport.open()).rejects.toMatchObject({ code: "cancelled" });
   });
+  it("전에 허락한 보드가 있으면 고르기 창 없이 바로 연다", async () => {
+    let opened = 0; let asked = 0;
+    const granted = { open: async () => { opened++; }, setSignals: async () => undefined };
+    vi.stubGlobal("navigator", { serial: { getPorts: async () => [granted], requestPort: async () => { asked++; return granted; } } });
+    await WebSerialTransport.open();
+    expect(opened).toBe(1);
+    expect(asked).toBe(0);
+  });
+  it("허락한 보드가 안 열리면(뽑힘·사용 중) 고르기 창으로 넘어간다", async () => {
+    let asked = 0;
+    const stale = { open: async () => { throw new DOMException("Failed to open serial port.", "NetworkError"); } };
+    const fresh = { open: async () => undefined, setSignals: async () => undefined };
+    vi.stubGlobal("navigator", { serial: { getPorts: async () => [stale], requestPort: async () => { asked++; return fresh; } } });
+    await WebSerialTransport.open();
+    expect(asked).toBe(1);
+  });
   it("열기 실패(다른 프로그램 사용 중·드라이버 문제) → busy", async () => {
     const port = { open: async () => { throw new DOMException("Failed to open serial port.", "NetworkError"); } };
     vi.stubGlobal("navigator", { serial: { requestPort: async () => port } });

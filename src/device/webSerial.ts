@@ -15,6 +15,8 @@ interface SerialPortLike extends EventTarget {
 }
 interface SerialLike {
   requestPort(options?: { filters?: Array<{ usbVendorId?: number; usbProductId?: number }> }): Promise<SerialPortLike>;
+  /** 전에 허락한 포트들 (오래된 브라우저는 없을 수 있다) */
+  getPorts?(): Promise<SerialPortLike[]>;
 }
 
 const BAUD_RATE = 115200;
@@ -35,17 +37,30 @@ export class WebSerialTransport implements Transport {
   static async open(): Promise<WebSerialTransport> {
     const serial = typeof navigator === "undefined" ? undefined : (navigator as Navigator & { serial?: SerialLike }).serial;
     if (!serial) throw new DeviceError("unsupported");
-    let port: SerialPortLike;
-    try {
-      port = await serial.requestPort();
-    } catch (cause) {
-      if (cause instanceof Error && cause.name === "SecurityError") throw new DeviceError("unsupported", { cause });
-      throw new DeviceError("cancelled", { cause });
+    // 전에 허락한 보드가 꽂혀 있으면 고르기 창 없이 바로 연다 (학생이 매번 포트를 고르지 않게)
+    const granted = (await serial.getPorts?.().catch(() => [])) ?? [];
+    let port: SerialPortLike | null = null;
+    for (const candidate of granted) {
+      try {
+        await candidate.open({ baudRate: BAUD_RATE });
+        port = candidate;
+        break;
+      } catch {
+        /* 다음 후보 (뽑혔거나 다른 프로그램이 쓰는 중) */
+      }
     }
-    try {
-      await port.open({ baudRate: BAUD_RATE });
-    } catch (cause) {
-      throw new DeviceError("busy", { cause });
+    if (!port) {
+      try {
+        port = await serial.requestPort();
+      } catch (cause) {
+        if (cause instanceof Error && cause.name === "SecurityError") throw new DeviceError("unsupported", { cause });
+        throw new DeviceError("cancelled", { cause });
+      }
+      try {
+        await port.open({ baudRate: BAUD_RATE });
+      } catch (cause) {
+        throw new DeviceError("busy", { cause });
+      }
     }
     // ESP32 자동 리셋 회로: DTR/RTS 를 내려 EN/IO0 을 건드리지 않게 (지원하지 않으면 그냥 넘어감)
     try {
