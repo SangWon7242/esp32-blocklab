@@ -42,13 +42,14 @@ export interface Device {
   softReset(): Promise<void>;
 }
 
-export type DeviceErrorCode = "unsupported" | "cancelled" | "busy" | "timeout" | "disconnected";
+export type DeviceErrorCode = "unsupported" | "cancelled" | "busy" | "no-response" | "timeout" | "disconnected";
 
 /** 학생 화면 문구 (기준 문서 7장) */
 export const DEVICE_ERROR_MESSAGES: Record<DeviceErrorCode, string> = {
   unsupported: "Chrome에서 열어 주세요",
   cancelled: "보드를 고르지 않았어요",
-  busy: "다른 프로그램(PyCharm 등)이 보드를 쓰고 있어요",
+  busy: "보드 포트를 열 수 없어요. 다른 프로그램(PyCharm 등)이 쓰고 있으면 닫고, 아니면 USB를 뽑았다 다시 꽂아 보세요",
+  "no-response": "보드가 대답하지 않아요. MicroPython이 들어 있는 보드인지 확인해 주세요",
   timeout: "코드가 지금 무엇을 기다리고 있을까요? 멈춤을 눌러 보세요",
   disconnected: "보드 연결이 끊겼어요",
 };

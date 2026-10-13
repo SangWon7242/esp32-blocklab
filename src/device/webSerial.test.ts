@@ -91,11 +91,11 @@ describe("WebSerialDevice (가짜 전송)", () => {
     expect(d.status).toBe("disconnected");
   });
 
-  it("connect 실패(응답 없음)면 disconnected 로 돌아가고 전송을 닫는다", async () => {
+  it("connect 실패(응답 없음)면 no-response 로 실패하고 disconnected 로 돌아가 전송을 닫는다", async () => {
     vi.useFakeTimers();
     try {
       const { t, d } = setup([]);
-      const check = expect(d.connect()).rejects.toMatchObject({ code: "timeout" });
+      const check = expect(d.connect()).rejects.toMatchObject({ code: "no-response", message: "보드가 대답하지 않아요. MicroPython이 들어 있는 보드인지 확인해 주세요" });
       await vi.advanceTimersByTimeAsync(6000);
       await check;
       expect(d.status).toBe("disconnected");
@@ -115,10 +115,10 @@ describe("WebSerialTransport.open 오류", () => {
     vi.stubGlobal("navigator", { serial: { requestPort: async () => { throw new DOMException("No port selected by the user.", "NotFoundError"); } } });
     await expect(WebSerialTransport.open()).rejects.toMatchObject({ code: "cancelled" });
   });
-  it("열기 실패(다른 프로그램 사용 중) → busy", async () => {
+  it("열기 실패(다른 프로그램 사용 중·드라이버 문제) → busy", async () => {
     const port = { open: async () => { throw new DOMException("Failed to open serial port.", "NetworkError"); } };
     vi.stubGlobal("navigator", { serial: { requestPort: async () => port } });
-    await expect(WebSerialTransport.open()).rejects.toMatchObject({ code: "busy", message: "다른 프로그램(PyCharm 등)이 보드를 쓰고 있어요" });
+    await expect(WebSerialTransport.open()).rejects.toMatchObject({ code: "busy", message: "보드 포트를 열 수 없어요. 다른 프로그램(PyCharm 등)이 쓰고 있으면 닫고, 아니면 USB를 뽑았다 다시 꽂아 보세요" });
   });
 });
 

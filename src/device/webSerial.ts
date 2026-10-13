@@ -158,7 +158,13 @@ export class WebSerialDevice extends DeviceBase implements Device {
       } catch (e) {
         // 포트를 열 때 보드가 다시 켜지는 중이면 첫 Ctrl-C 를 놓칠 수 있어 한 번 더
         if (!(e instanceof DeviceError && e.code === "timeout")) throw e;
-        await repl.enterRaw();
+        try {
+          await repl.enterRaw();
+        } catch (e2) {
+          // 포트는 열렸는데 raw REPL 응답이 없다: MicroPython 이 없는 보드(아두이노 스케치 등)
+          if (e2 instanceof DeviceError && e2.code === "timeout") throw new DeviceError("no-response", { cause: e2 });
+          throw e2;
+        }
       }
     } catch (e) {
       await transport.close().catch(() => undefined);
