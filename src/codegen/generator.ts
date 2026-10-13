@@ -176,6 +176,31 @@ export class MicroPythonGenerator extends PythonGenerator {
   }
   scrubBlock(block: Blockly.Block, code: string): string { return this.scrub_(block, code, true); }
 
+  /**
+   * 블록 하나(뒤에 이어진 블록은 빼고, 몸통 안 블록은 넣어)가 내는 코드. 블록 사전·블록 설명 팝업용.
+   * 준비 블록이 모은 준비 줄과 도우미·사용자 함수 정의도 그 블록이 낸 것이므로 앞에 붙인다 (finish 와 같은 순서:
+   * 준비 줄 → 도우미 함수 → 사용자 함수 → 블록 코드). import 는 넣지 않는다. 값 블록이면 식 하나.
+   * 도우미 호출 표시는 finish 와 같이 정의된 이름으로 바꾼다. 지도 모드가 아닐 때만 부른다 (표식 줄이 없다).
+   */
+  blockSnippet(block: Blockly.Block): string {
+    this.init(block.workspace);
+    try {
+      const out = this.blockToCode(block, true);
+      const code = (Array.isArray(out) ? out[0] : out).replace(/\n+$/, "");
+      const helpers: string[] = [];
+      const defs: string[] = [];
+      for (const [name, def] of Object.entries(this.definitions_)) {
+        if (/^(from\s+\S+\s+)?import\s+\S+/.test(def)) continue;
+        (name.startsWith("%") ? defs : helpers).push(def.replace(/\n+$/, ""));
+      }
+      const sections = [this.setupLines.join("\n"), ...helpers, ...defs, code].filter((s) => s.trim());
+      return this.resolveHelperCalls(sections.join("\n\n"));
+    } finally {
+      this.isInitialized = false;
+      this.nameDB_?.reset();
+    }
+  }
+
   override finish(code: string): string {
     const mapped = this.withMap;
     // 지도 모드: 표식 줄을 줄 끝 꼬리표로 바꾼다. 꼬리표는 줄과 함께 움직이므로 아래 조립(import 끌어올리기, 빈 줄 다듬기)이

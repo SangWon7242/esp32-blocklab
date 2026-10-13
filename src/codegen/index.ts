@@ -33,6 +33,17 @@ export function generateCodeWithMap(workspace: Blockly.Workspace): { code: strin
   return shared.workspaceToCodeWithMap(workspace);
 }
 
+let snippetGen: MicroPythonGenerator | null = null;
+
+/**
+ * 블록 하나(뒤에 이어진 블록은 빼고)가 내는 코드: 준비 줄·함수 정의 + 그 블록의 코드 (값 블록이면 식).
+ * import 는 넣지 않는다. 블록 사전과 블록 설명 팝업이 쓴다 (MicroPythonGenerator.blockSnippet).
+ */
+export function blockSnippet(block: Blockly.Block): string {
+  snippetGen ??= createGenerator();
+  return snippetGen.blockSnippet(block);
+}
+
 /** 직렬화 JSON을 헤드리스 작업판에 올려 코드로 바꾼다 (테스트·동기화용) */
 export function workspaceJsonToCode(json: WorkspaceJson): string {
   registerBlocks();
