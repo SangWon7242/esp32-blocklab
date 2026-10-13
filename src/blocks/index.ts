@@ -6,10 +6,11 @@ import { flowBlocks } from "./definitions/flow";
 import { calcBlocks } from "./definitions/calc";
 import { esp32Blocks } from "./definitions/esp32";
 import { codeBlocks } from "./definitions/code";
+import { isValidPythonName } from "./names";
 
 export { entryTheme } from "./theme";
 export { toolbox } from "./toolbox";
-export { isProgramName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
+export { FUNCTION_NAME_HINT, isProgramName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
 
 const definitions = [...startBlocks, ...flowBlocks, ...calcBlocks, ...esp32Blocks, ...codeBlocks];
 
@@ -46,5 +47,40 @@ export function registerBlocks(): void {
       this.setStyle("loop_blocks");
     };
   }
+  // 함수 이름 칸은 직접 고치는 글 칸이라 이름 창(namePrompt)을 거치지 않는다. 칸에 같은 이름 검사를 단다
+  for (const type of ["procedures_defnoreturn", "procedures_defreturn"]) {
+    const def = Blockly.Blocks[type];
+    const originalInit = def.init;
+    def.init = function (this: Blockly.Block) {
+      originalInit.call(this);
+      const name = this.getField("NAME") as Blockly.Field<string> | null;
+      if (name) guardProcedureName(name);
+    };
+  }
   registered = true;
+}
+
+/**
+ * 함수 이름 칸에 파이썬 이름 검사를 단다. 한글 이름·키워드는 생성기가 다른 이름으로 바꿔 써서 코드와 블록이
+ * 어긋나고, print·show 처럼 프로그램이 쓰는 이름은 덮으면 생성 코드가 깨진다. 통과하면 Blockly 의 원래 검사
+ * (Procedures.rename: 겹치는 이름 피하기, 호출 블록 이름 바꾸기)를 그대로 부른다.
+ * 저장된 작업판·코드에서 온 이름(loadState)은 막지 않는다: 코드의 `def show(a, b):` 같은 사용자 함수가
+ * 기본 이름으로 바뀌면 호출 블록과 어긋난다.
+ */
+function guardProcedureName(field: Blockly.Field<string>): void {
+  const original = field.getValidator();
+  let loading = false;
+  const loadState = field.loadState.bind(field);
+  field.loadState = (state: unknown) => {
+    loading = true;
+    try {
+      loadState(state);
+    } finally {
+      loading = false;
+    }
+  };
+  field.setValidator(function (this: Blockly.Field<string>, value: string) {
+    if (!loading && !isValidPythonName(value.trim())) return null;
+    return original ? original.call(this, value) : value;
+  });
 }

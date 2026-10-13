@@ -5,8 +5,13 @@ import { generateCode, type WorkspaceJson } from "@/codegen";
 import { cn } from "@/lib/utils";
 import { createNamePrompt } from "./namePrompt";
 
+export type LoadOptions = {
+  /** 지금 보던 자리를 그대로 둔다 (코드 ↔ 블록 전환·코드 고칠 때). 아니면 프로그램 왼쪽 위로 맞춘다 */
+  keepScroll?: boolean;
+};
+
 export type BlocklyHandle = {
-  load(json: WorkspaceJson): void;
+  load(json: WorkspaceJson, opts?: LoadOptions): void;
   getJson(): WorkspaceJson;
   getCode(): string;
 };
@@ -83,20 +88,24 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
   }, []);
 
   useImperativeHandle(ref, () => ({
-    load(json) {
+    load(json, opts) {
       const ws = wsRef.current;
       if (!ws) return;
+      const { scrollX, scrollY } = ws;
       loadingRef.current = true;
       try {
         Blockly.Events.disable();
         ws.clear();
         Blockly.serialization.workspaces.load(json, ws);
+        if (opts?.keepScroll) ws.scroll(scrollX, scrollY);
         // 패널 크기가 아직 정해지지 않았으면(첫 화면) ResizeObserver 가 크기를 받은 뒤 맞춘다
-        needsRevealRef.current = !revealProgram(ws);
+        else needsRevealRef.current = !revealProgram(ws);
       } finally {
         Blockly.Events.enable();
         loadingRef.current = false;
       }
+      // 실행취소가 load 이전 작업판으로 되돌아가 코드와 어긋나지 않게 한다
+      ws.clearUndo();
     },
     getJson: () => Blockly.serialization.workspaces.save(wsRef.current!) as WorkspaceJson,
     getCode: () => (wsRef.current ? generateCode(wsRef.current) : ""),

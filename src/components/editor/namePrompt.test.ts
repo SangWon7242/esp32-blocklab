@@ -24,4 +24,14 @@ describe("createNamePrompt", () => {
     createNamePrompt(() => null)("새 변수 이름:", "", (r) => { result = r; });
     expect(result).toBeNull();
   });
+  it("함수 이름 창이면 함수 이름 안내를 보이고 같은 검사를 한다", () => {
+    const answers = ["깜빡이기", "blink"];
+    const asked: string[] = [];
+    let result: string | null | undefined;
+    createNamePrompt((m) => { asked.push(m); return answers.shift() ?? null; })("새 함수 이름:", "", (r) => { result = r; });
+    expect(result).toBe("blink");
+    expect(asked[0]).toContain("함수 이름은 영어 글자, 숫자, _ 만 쓸 수 있어요 (예: blink)");
+    expect(asked[1]).toContain("함수 이름은 영어 글자, 숫자, _ 만 쓸 수 있어요 (예: blink)");
+    expect(asked.join("\n")).not.toContain("변수 이름은");
+  });
 });

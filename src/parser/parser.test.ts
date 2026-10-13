@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { workspaceJsonToCode } from "@/codegen";
 import { codeToBlocks } from "./index";
 import type { BlockJson } from "./types";
 
@@ -325,5 +326,45 @@ describe("최종 리뷰 I5: 주석 줄", () => {
   });
   it("함수 정의 위 주석 줄은 함수 블록 코멘트", () => {
     expect(tops("# 깜빡이기\ndef blink(t):  # 한 번\n    pass\n")[0].icons?.comment.text).toBe("깜빡이기\n|한 번");
+  });
+});
+
+describe("계획 2A 편집기 정리", () => {
+  const commentLines = (code: string) => code.split("\n").filter((l) => l.trim().startsWith("#")).map((l) => l.trim());
+  const roundTrip = (src: string) => workspaceJsonToCode(parse(src).json);
+
+  it("함수 블록은 시작 블록 오른쪽에 나란히 놓인다", () => {
+    const fns = tops("def a():\n    pass\n\ndef b():\n    pass\n");
+    expect(fns.map((f) => [f.x, f.y])).toEqual([[560, 40], [1080, 40]]);
+  });
+
+  it("for i in range(n) 몸통의 i 는 변수 블록", () => {
+    const r = parse("for i in range(3):\n    print(i)\n");
+    const loop = body("for i in range(3):\n    print(i)\n")[0];
+    expect(loop.type).toBe("flow_repeat_n");
+    const print = loop.inputs?.DO?.block;
+    expect(print?.type).toBe("esp_print");
+    expect(print?.inputs?.VALUE?.block).toEqual({ type: "variables_get", fields: { VAR: { id: "var_i" } } });
+    expect(r.unparsed).toHaveLength(0);
+    expect(roundTrip("for i in range(3):\n    print(i)\n")).toBe("for i in range(3):\n    print(i)\n");
+  });
+
+  it("| 로 시작하는 윗줄 주석은 \\| 로 적어 줄 끝 주석 표시와 구별한다", () => {
+    expect(body("# | a | b |\nprint(1)\n")[0].icons?.comment.text).toBe("\\| a | b |\n|");
+    expect(body("# | a\n# b\nprint(1)  # c\n")[0].icons?.comment.text).toBe("\\| a\nb\n|c");
+  });
+
+  it("| 로 시작하는 주석 줄이 왕복에서 그대로 돌아온다", () => {
+    for (const src of [
+      "# | a | b |\nprint(1)\n",
+      "# | a | b |\n# | 1 | 2 |\nprint(1)\n",
+      "# | a\nprint(1)  # 끝\n",
+      "print(1)  # | 줄 끝\n",
+      "# \\| 이미 역슬래시\nprint(1)\n",
+      "while True:\n    # | 몸통 |\n    print(1)\n",
+      "# | 머리말 |\nfrom machine import Pin\nled = Pin(26, Pin.OUT)\n",
+    ]) {
+      expect(commentLines(roundTrip(src)), src).toEqual(commentLines(src));
+    }
   });
 });

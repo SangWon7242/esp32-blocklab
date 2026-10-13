@@ -5,21 +5,26 @@ import { collectImports, hoistImports } from "./imports";
 
 type SplitComment = { above: string[]; trailing: string | null };
 
+/** 파서가 `|` 로 시작하는 원문 윗줄 앞에 붙인 역슬래시 (`\|`, `\\|` …). 하나를 떼면 원문이 된다 */
+const ESCAPED_PIPE = /^\\+\|/;
+const unescapeLine = (line: string) => (ESCAPED_PIPE.test(line) ? line.slice(1) : line);
+
 /**
  * 블록 코멘트를 문장 위 주석 줄(above)과 줄 끝 주석(trailing)으로 나눈다.
  * - `|` 로 시작하는 줄이 하나라도 있으면(파서가 만든 꼴): `|` 줄은 줄 끝 주석, 나머지는 위 주석 줄.
  *   `|` 뒤가 비었으면 줄 끝 주석 없음 (위 주석 한 줄만 있던 문장).
  * - 아니면(작업판에서 친 코멘트): 한 줄이면 줄 끝 주석, 여러 줄이면 모두 위 주석 줄.
+ * - `\|` 로 시작하는 줄은 `|` 로 시작하는 위 주석 줄 (파서 escapeCommentLine 과 짝). 역슬래시 하나를 뗀다.
  */
 export function splitComment(text: string): SplitComment {
   const lines = text.split("\n").map((l) => l.replace(/\s+$/, ""));
   if (lines.some((l) => l.startsWith("|"))) {
     const trailing = lines.filter((l) => l.startsWith("|")).map((l) => l.slice(1).trim()).filter(Boolean).join(" ");
-    return { above: lines.filter((l) => !l.startsWith("|")), trailing: trailing || null };
+    return { above: lines.filter((l) => !l.startsWith("|")).map(unescapeLine), trailing: trailing || null };
   }
   const filled = lines.filter((l) => l.trim());
-  if (filled.length <= 1) return { above: [], trailing: filled[0]?.trim() || null };
-  return { above: lines.slice(lines.findIndex((l) => l.trim()), lines.findLastIndex((l) => l.trim()) + 1), trailing: null };
+  if (filled.length <= 1 && !ESCAPED_PIPE.test(filled[0] ?? "")) return { above: [], trailing: filled[0]?.trim() || null };
+  return { above: lines.slice(lines.findIndex((l) => l.trim()), lines.findLastIndex((l) => l.trim()) + 1).map(unescapeLine), trailing: null };
 }
 
 const commentLine = (text: string) => (text ? `# ${text}` : "#");
@@ -104,9 +109,9 @@ export class MicroPythonGenerator extends PythonGenerator {
 
   override scrub_(block: Blockly.Block, code: string, thisOnly = false): string {
     const text = block.getCommentText() ?? "";
-    // 시작 블록 코멘트는 파일 머리말. 줄마다 맨 위 주석 줄로 (| 표시는 뗀다)
+    // 시작 블록 코멘트는 파일 머리말. 줄마다 맨 위 주석 줄로 (| 표시는 떼고, \| 는 | 로 되돌린다)
     if (block.type === "start_program") {
-      this.headerLines = text.trim() ? text.split("\n").map((l) => l.replace(/^\|/, "").replace(/\s+$/, "")) : [];
+      this.headerLines = text.trim() ? text.split("\n").map((l) => (ESCAPED_PIPE.test(l) ? l.slice(1) : l.replace(/^\|/, "")).replace(/\s+$/, "")) : [];
       return code;
     }
     const comment = text.trim() ? splitComment(text) : null;

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { HashRouter, Link, NavLink, Route, Routes } from "react-router";
 import { Blocks, Cpu, Route as RouteIcon, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { HomePage } from "./pages/HomePage";
-import { LabPage } from "./lab/LabPage";
+
+// 편집기(Blockly·CodeMirror)는 무거우므로 자유 코딩 화면을 열 때 따로 받는다
+const LabPage = lazy(() => import("./lab/LabPage").then((m) => ({ default: m.LabPage })));
 
 const navItems = [
   { to: "/lab", label: "자유 코딩", icon: Blocks },
@@ -45,10 +48,12 @@ export function App() {
             </nav>
           </header>
           <main className="min-h-0 flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/lab" element={<LabPage />} />
-            </Routes>
+            <Suspense fallback={<div className="p-8 text-muted-foreground">편집기를 불러오는 중…</div>}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/lab" element={<LabPage />} />
+              </Routes>
+            </Suspense>
           </main>
         </div>
         <Toaster />

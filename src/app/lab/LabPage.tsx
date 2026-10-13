@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
 import type { WorkspaceJson } from "@/codegen";
-import { editorReducer, initialEditorState, type Source } from "./editorSync";
+import { countCodeBlocks, editorReducer, initialEditorState, type Source } from "./editorSync";
 import { SAMPLE_CODE } from "./sample";
 
 const DEVICE_BUTTONS = [
@@ -32,9 +32,9 @@ export function LabPage() {
   const sourceRef = useRef(state.source);
   sourceRef.current = state.source;
 
-  // 코드가 기준일 때: 파싱 결과가 바뀌면 작업판에 올린다
+  // 코드가 기준일 때: 파싱 결과가 바뀌면 작업판에 올린다 (보던 자리는 그대로)
   useEffect(() => {
-    if (state.source === "code" && state.blocks) blocklyRef.current?.load(state.blocks);
+    if (state.source === "code" && state.blocks) blocklyRef.current?.load(state.blocks, { keepScroll: true });
   }, [state.source, state.blocks]);
 
   // 처음 한 번: 예시 블록을 작업판에 올린다
@@ -73,11 +73,13 @@ export function LabPage() {
       return;
     }
     sourceRef.current = source;
-    if (source === "blocks" && blocklyRef.current && current.blocks) blocklyRef.current.load(current.blocks);
+    if (source === "blocks" && blocklyRef.current && current.blocks) blocklyRef.current.load(current.blocks, { keepScroll: true });
     dispatch({ type: "switchSource", source });
   };
 
   const codeMode = state.source === "code";
+  // 블록 모드에서는 지금 작업판에 남은 코드 블록 수 (지난 파싱의 unparsed 는 블록을 지우면 낡는다)
+  const unconvertedCount = codeMode ? state.unparsed.length : countCodeBlocks(state.blocks);
 
   return (
     <div className="flex h-full flex-col">
@@ -119,12 +121,14 @@ export function LabPage() {
         <ResizablePanel defaultSize="38" minSize="25" className="flex flex-col">
           <div className="flex h-9 shrink-0 items-center gap-2 border-b px-3 text-sm">
             <span className="font-medium">main.py</span>
-            {state.unparsed.length > 0 && (
+            {unconvertedCount > 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="outline" className="gap-1"><AlertTriangle className="size-3" />블록으로 바꾸지 못한 줄 {state.unparsed.length}개</Badge>
+                  <Badge variant="outline" className="gap-1" data-testid="unconverted-badge"><AlertTriangle className="size-3" />블록으로 바꾸지 못한 줄 {unconvertedCount}개</Badge>
                 </TooltipTrigger>
-                <TooltipContent className="whitespace-pre-line">{state.unparsed.map((u) => `${u.line}줄: ${u.text}`).join("\n")}</TooltipContent>
+                <TooltipContent className="whitespace-pre-line">
+                  {codeMode ? state.unparsed.map((u) => `${u.line}줄: ${u.text}`).join("\n") : "작업판에 코드 블록으로 남아 있어요"}
+                </TooltipContent>
               </Tooltip>
             )}
             {state.parseError && (

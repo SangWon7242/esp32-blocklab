@@ -111,3 +111,45 @@ describe("최종 리뷰", () => {
     ws.dispose();
   });
 });
+
+describe("함수 이름 검사", () => {
+  for (const type of ["procedures_defnoreturn", "procedures_defreturn"]) {
+    it(`${type} 이름 칸은 파이썬에서 쓸 수 있는 이름만 받는다`, () => {
+      const ws = new Blockly.Workspace();
+      const def = ws.newBlock(type);
+      const name = def.getField("NAME")!;
+      name.setValue("blink");
+      expect(name.getValue()).toBe("blink");
+      for (const bad of ["함수", "while", "print", "2go", ""]) {
+        name.setValue(bad);
+        expect(name.getValue(), bad).toBe("blink");
+      }
+      name.setValue("blink2");
+      expect(name.getValue()).toBe("blink2");
+      ws.dispose();
+    });
+  }
+
+  it("이름을 바꾸면 호출 블록도 따라 바뀐다 (Blockly 의 원래 이름 바꾸기는 그대로)", () => {
+    const ws = new Blockly.Workspace();
+    Blockly.serialization.workspaces.load({
+      blocks: { languageVersion: 0, blocks: [
+        { type: "procedures_defnoreturn", fields: { NAME: "blink" } },
+        { type: "procedures_callnoreturn", y: 200, extraState: { name: "blink" } },
+      ] },
+    }, ws);
+    const def = ws.getBlocksByType("procedures_defnoreturn", false)[0];
+    def.getField("NAME")!.setValue("flash");
+    expect(ws.getBlocksByType("procedures_callnoreturn", false)[0].getFieldValue("NAME")).toBe("flash");
+    ws.dispose();
+  });
+
+  it("불러온 함수 이름은 그대로 둔다 (코드에서 온 show·get_distance 같은 사용자 함수)", () => {
+    const ws = new Blockly.Workspace();
+    Blockly.serialization.workspaces.load({
+      blocks: { languageVersion: 0, blocks: [{ type: "procedures_defnoreturn", fields: { NAME: "show" } }] },
+    }, ws);
+    expect(ws.getBlocksByType("procedures_defnoreturn", false)[0].getFieldValue("NAME")).toBe("show");
+    ws.dispose();
+  });
+});

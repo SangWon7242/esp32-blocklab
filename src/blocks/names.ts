@@ -18,6 +18,8 @@ export const PROGRAM_NAMES: readonly string[] = [
 
 /** 변수 이름 안내 문구 (변수 만들기·이름 바꾸기 창) */
 export const VARIABLE_NAME_HINT = "변수 이름은 영어 글자, 숫자, _ 만 쓸 수 있어요 (예: led, count)";
+/** 함수 이름 안내 문구 (함수 이름 창) */
+export const FUNCTION_NAME_HINT = "함수 이름은 영어 글자, 숫자, _ 만 쓸 수 있어요 (예: blink)";
 /** 프로그램이 이미 쓰는 이름을 골랐을 때 */
 export const PROGRAM_NAME_HINT = "이 이름은 프로그램이 이미 쓰고 있어요. 다른 이름을 골라 주세요";
 

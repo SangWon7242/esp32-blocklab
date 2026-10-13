@@ -1,5 +1,5 @@
 import { workspaceJsonToCode, type WorkspaceJson } from "@/codegen";
-import { codeToBlocks, type UnparsedItem } from "@/parser";
+import { codeToBlocks, type BlockJson, type UnparsedItem } from "@/parser";
 
 export type Source = "blocks" | "code";
 
@@ -50,4 +50,18 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "loadCode":
       return fromCode(action.code, { ...state, source: "blocks" });
   }
+}
+
+/** 작업판에 남은 코드 블록(code_stmt·code_expr) 수. 블록 모드의 "변환 못 한" 배지가 쓴다 */
+export function countCodeBlocks(json: WorkspaceJson | null): number {
+  if (!json) return 0;
+  let n = 0;
+  const visit = (b: BlockJson | undefined): void => {
+    if (!b) return;
+    if (b.type === "code_stmt" || b.type === "code_expr") n++;
+    for (const input of Object.values(b.inputs ?? {})) { visit(input.block); visit(input.shadow); }
+    visit(b.next?.block);
+  };
+  for (const top of (json.blocks?.blocks ?? []) as BlockJson[]) visit(top);
+  return n;
 }

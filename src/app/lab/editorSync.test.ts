@@ -1,6 +1,8 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import { registerBlocks } from "@/blocks";
-import { editorReducer, initialEditorState } from "./editorSync";
+import { codeToBlocks } from "@/parser";
+import { countCodeBlocks, editorReducer, initialEditorState } from "./editorSync";
+import { SAMPLE_CODE } from "./sample";
 
 beforeAll(() => registerBlocks());
 
@@ -60,5 +62,23 @@ describe("editorReducer", () => {
     const s0 = editorReducer(initialEditorState(LED), { type: "switchSource", source: "code" });
     const s1 = editorReducer(s0, { type: "codeChanged", code: "x = time.ticks_us()\n" });
     expect(s1.unparsed).toHaveLength(1);
+  });
+});
+
+describe("countCodeBlocks", () => {
+  const json = (code: string) => {
+    const r = codeToBlocks(code);
+    if (!r.ok) throw new Error(r.error.message);
+    return r.json;
+  };
+  it("작업판에 남은 코드 블록(code_stmt·code_expr)을 센다", () => {
+    expect(countCodeBlocks(json("x = time.ticks_us()\noled.fill(0)\n"))).toBe(2);
+  });
+  it("몸통·값 칸 안의 코드 블록도 센다", () => {
+    expect(countCodeBlocks(json("while True:\n    print(time.ticks_us())\n"))).toBe(1);
+  });
+  it("예시 코드와 빈 작업판은 0", () => {
+    expect(countCodeBlocks(json(SAMPLE_CODE))).toBe(0);
+    expect(countCodeBlocks(null)).toBe(0);
   });
 });

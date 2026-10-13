@@ -31,13 +31,21 @@ export function withComment(b: BlockJson, text: string | null): BlockJson {
   return b;
 }
 
+/** `|` 로 시작하는 줄(앞에 역슬래시가 몇 개 있어도). 블록 코멘트에서는 줄 끝 주석 표시와 겹친다 */
+const PIPE_LINE = /^\\*\|/;
+
+/** 윗줄 주석이 `|`(또는 `\|`)로 시작하면 역슬래시를 하나 붙여 줄 끝 주석 표시와 구별한다. 생성기 splitComment 가 하나를 뗀다 */
+export const escapeCommentLine = (line: string): string => (PIPE_LINE.test(line) ? `\\${line}` : line);
+
 /**
  * 블록 코멘트 글. 줄 끝 주석만 있으면 그 글 그대로. 문장 위 주석 줄(leading)이 있으면 줄마다 한 줄씩,
  * 줄 끝 주석은 `|` 를 붙인 마지막 줄. 위 주석이 한 줄뿐이고 줄 끝 주석이 없으면 빈 `|` 줄을 붙여
  * (한 줄짜리 코멘트는 생성기가 줄 끝 주석으로 쓰므로) 위 주석임을 표시한다. 생성기 splitComment 와 짝.
+ * 원문 윗줄이 `|` 로 시작하면 `\|` 로 적고(escapeCommentLine), 줄 끝 주석만 있는데 `|` 로 시작하면 `|` 를 하나 더 붙인다.
  */
 export function commentText(leading: string[], trailing: string | null): string | null {
-  if (!leading.length) return trailing;
-  if (trailing) return [...leading, `|${trailing}`].join("\n");
-  return leading.length === 1 ? `${leading[0]}\n|` : leading.join("\n");
+  if (!leading.length) return trailing && PIPE_LINE.test(trailing) ? `|${trailing}` : trailing;
+  const above = leading.map(escapeCommentLine);
+  if (trailing) return [...above, `|${trailing}`].join("\n");
+  return above.length === 1 ? `${above[0]}\n|` : above.join("\n");
 }

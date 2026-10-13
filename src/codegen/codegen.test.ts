@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import { registerBlocks } from "@/blocks";
 import { workspaceJsonToCode, type WorkspaceJson } from "./index";
+import { splitComment } from "./generator";
 
 beforeAll(() => registerBlocks());
 
@@ -306,5 +307,23 @@ describe("최종 리뷰: 주석 줄·이름·여러 줄 코드·떨어진 블록
   });
   it("I9d 문자열의 \\r 은 이스케이프한다", () => {
     expect(workspaceJsonToCode(program([{ type: "esp_print", inputs: { VALUE: { block: str("a\rb") } } }]))).toBe('print("a\\rb")\n');
+  });
+});
+
+describe("splitComment", () => {
+  it("한 줄은 줄 끝 주석, 여러 줄은 윗줄 주석, | 줄은 줄 끝 주석", () => {
+    expect(splitComment("켜기")).toEqual({ above: [], trailing: "켜기" });
+    expect(splitComment("가\n나")).toEqual({ above: ["가", "나"], trailing: null });
+    expect(splitComment("가\n|나")).toEqual({ above: ["가"], trailing: "나" });
+    expect(splitComment("가\n|")).toEqual({ above: ["가"], trailing: null });
+  });
+  it("\\| 로 시작하는 줄은 | 로 시작하는 윗줄 주석 (역슬래시 하나를 뗀다)", () => {
+    expect(splitComment("\\| a | b |\n|")).toEqual({ above: ["| a | b |"], trailing: null });
+    expect(splitComment("\\| a\nb\n|c")).toEqual({ above: ["| a", "b"], trailing: "c" });
+    expect(splitComment("\\| 혼자")).toEqual({ above: ["| 혼자"], trailing: null });
+    expect(splitComment("\\\\| a\n|")).toEqual({ above: ["\\| a"], trailing: null });
+  });
+  it("|| 로 시작하는 줄은 | 로 시작하는 줄 끝 주석", () => {
+    expect(splitComment("|| 끝")).toEqual({ above: [], trailing: "| 끝" });
   });
 });

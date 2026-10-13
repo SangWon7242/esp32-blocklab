@@ -153,7 +153,12 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
       const target = ops[0]?.name === "VariableName" ? ctx.src.slice(ops[0]) : null;
       if (target === "i" && iter?.name === "CallExpression") {
         const { callee, args, plain } = callParts(iter);
-        if (plain && ctx.src.slice(callee) === "range" && args.length === 1) return one(block("flow_repeat_n", undefined, { TIMES: convertExpr(args[0], ctx, "Number"), DO: convertBody(body, ctx) }));
+        if (plain && ctx.src.slice(callee) === "range" && args.length === 1) {
+          const TIMES = convertExpr(args[0], ctx, "Number");
+          // 블록이 늘 `for i` 를 쓰므로 몸통의 i 는 변수 블록으로 받는다 (코드 식으로 남기지 않는다)
+          ctx.varId("i");
+          return one(block("flow_repeat_n", undefined, { TIMES, DO: convertBody(body, ctx) }));
+        }
       }
       return unknown(node, ctx);
     }

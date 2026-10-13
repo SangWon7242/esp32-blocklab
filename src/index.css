@@ -129,4 +129,8 @@
   html {
     @apply font-sans;
     }
+  /* Blockly 는 숨길 요소에 display="none" 속성을 두는데 preflight 의 svg { display: block } 이 이긴다 */
+  svg[display="none"], g[display="none"] {
+    display: none !important;
+  }
 }

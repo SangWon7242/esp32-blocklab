@@ -2,7 +2,7 @@ import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
 import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody, isValidPin, returnsValue } from "./patterns";
-import { withComment } from "./builders";
+import { escapeCommentLine, withComment } from "./builders";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
 import type { BlockJson, ParseResult, WorkspaceJson } from "./types";
@@ -111,12 +111,13 @@ export function codeToBlocks(code: string): ParseResult {
   ctx.setCommentLines(commentOnlyLines(script, ctx));
   const { blocks, tops } = convertStatements(children(script), ctx, true);
 
-  const start: BlockJson = withComment({ type: "start_program", x: 40, y: 40 }, ctx.header.length ? ctx.header.join("\n") : null);
+  const start: BlockJson = withComment({ type: "start_program", x: 40, y: 40 }, ctx.header.length ? ctx.header.map(escapeCommentLine).join("\n") : null);
   if (blocks.length) {
     for (let i = 0; i < blocks.length - 1; i++) blocks[i].next = { block: blocks[i + 1] };
     start.inputs = { BODY: { block: blocks[0] } };
   }
-  tops.forEach((t, i) => { t.x = 40; t.y = 40 + 400 * (i + 1); });
+  // 함수 블록은 시작 블록 오른쪽에 나란히 (아래로 쌓으면 긴 프로그램과 겹친다)
+  tops.forEach((t, i) => { t.x = 40 + 520 * (i + 1); t.y = 40; });
 
   // 접힌 함수 몸통이나 접힌 준비 줄에서만 쓰인 이름은 변수 목록에 남기지 않는다
   const used = usedVariableIds([...tops, start]);

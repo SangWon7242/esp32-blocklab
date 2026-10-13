@@ -14,9 +14,10 @@ export function applyKoreanMessages(): void {
     LOGIC_BOOLEAN_FALSE: "거짓",
     VARIABLES_SET: "%1 를 %2 로 정하기",
     PROCEDURES_DEFNORETURN_TITLE: "함수 정의하기",
-    PROCEDURES_DEFNORETURN_PROCEDURE: "이름",
+    // 팔레트 함수 블록의 처음 이름. 그대로 써도 코드에 같은 이름이 나오도록 파이썬 이름으로 둔다
+    PROCEDURES_DEFNORETURN_PROCEDURE: "my_function",
     PROCEDURES_DEFRETURN_TITLE: "함수 정의하기",
-    PROCEDURES_DEFRETURN_PROCEDURE: "이름",
+    PROCEDURES_DEFRETURN_PROCEDURE: "my_function",
     PROCEDURES_DEFRETURN_RETURN: "돌려주기",
     PROCEDURES_BEFORE_PARAMS: "매개변수:",
     PROCEDURES_CALL_BEFORE_PARAMS: "값:",

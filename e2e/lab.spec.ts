@@ -103,3 +103,47 @@ test("작업판에서 블록을 끌어 놓으면 탭을 바꾸지 않아도 코�
   const text = await code.locator(".cm-content").innerText();
   expect(text).toMatch(/\n {4}time\.sleep_us\(10\)/);
 });
+
+test("팔레트를 닫으면 팔레트 스크롤바도 사라진다", async ({ page }) => {
+  await page.goto("/#/lab");
+  // 글자 span 은 포인터를 받지 않으므로 카테고리 줄(div)을 누른다
+  const category = (name: string) => page.locator(".blocklyToolboxCategory").filter({ hasText: new RegExp(`^${name}$`) });
+  const flyout = page.locator(".blocklyToolboxFlyout");
+  const flyoutBar = page.locator(".blocklyFlyoutScrollbar").first();
+  // ESP32 팔레트는 블록이 많아 스크롤바가 필요하다
+  await category("ESP32").click();
+  await expect(flyoutBar).toBeVisible();
+  await page.locator(".blocklyMainBackground").click({ position: { x: 600, y: 500 } });
+  await expect(flyout).toBeHidden();
+  await expect(flyoutBar).toBeHidden();
+  // 흐름 팔레트는 화면에 다 들어가므로 스크롤바를 그리지 않는다
+  await category("흐름").click();
+  await expect(flyout).toBeVisible();
+  await expect(flyoutBar).toBeHidden();
+});
+
+test("코드 ↔ 블록 전환과 코드 고치기는 작업판의 보던 자리를 그대로 둔다", async ({ page }) => {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  const program = host.locator("svg.blocklySvg > g.blocklyWorkspace > g.blocklyBlockCanvas > .blocklyDraggable").first();
+  // 빈 바탕을 끌어 작업판을 옮긴다
+  const bg = (await host.boundingBox())!;
+  await page.mouse.move(bg.x + bg.width - 80, bg.y + bg.height - 80);
+  await page.mouse.down();
+  await page.mouse.move(bg.x + bg.width - 80 + 200, bg.y + bg.height - 80 + 60, { steps: 10 });
+  await page.mouse.up();
+  const before = (await program.boundingBox())!;
+
+  await page.getByRole("tab", { name: "코드" }).click();
+  await page.getByTestId("code-panel").locator(".cm-content").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.keyboard.type('\nprint("stay")\n');
+  await expect(blockWithText(page, "stay")).toBeVisible();
+  await page.getByRole("tab", { name: "블록" }).click();
+  await expect(page.getByText("블록을 놓으면 코드가 바로 바뀝니다")).toBeVisible();
+
+  const after = (await program.boundingBox())!;
+  expect(Math.abs(after.x - before.x)).toBeLessThan(2);
+  expect(Math.abs(after.y - before.y)).toBeLessThan(2);
+});
