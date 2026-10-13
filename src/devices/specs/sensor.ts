@@ -121,22 +121,21 @@ export const dht11: DeviceSpec = {
  * 아날로그 3줄 + 도우미로 온도를 재는 센서의 준비 패턴. 도우미가 이름을 고정해 쓰므로 그 이름일 때만 접는다
  * (다른 이름이거나 도우미가 표준 꼴이 아니면 adc 선언이 dev_adc_setup 으로 잡는다). 그래서 레지스트리에서 adc 보다 앞.
  */
-const fixedAdcPattern = (name: string, withVar: boolean) => ({
+const fixedAdcPattern = (name: string) => ({
   lines: adcPatternLines(),
-  fields: ([a, b, c]: RegExpExecArray[]) =>
-    a[1] === name && b[1] === name && c[1] === name && validPins(a[2]) ? { PIN: a[2], ...(withVar ? { VAR: name } : {}) } : null,
+  fields: ([a, b, c]: RegExpExecArray[]) => (a[1] === name && b[1] === name && c[1] === name && validPins(a[2]) ? { PIN: a[2] } : null),
   vars: () => [name],
 });
 
-/** 서미스터 (dev_ntc_setup). ntc_temperature() 도우미가 10kΩ NTC(B 3950)의 저항을 온도로 바꾼다 */
+/** 서미스터 (dev_ntc_setup). 이름 ntc 고정, ntc_temperature() 도우미가 10kΩ NTC(B 3950)의 저항을 온도로 바꾼다 */
 export const ntc: DeviceSpec = {
   id: "ntc", category: "sensor", label: "온도(서미스터)", toolboxOrder: 44,
   setup: {
     blockType: "dev_ntc_setup",
-    message: "서미스터를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [{ kind: "pin", name: "PIN", default: 36, inputOnly: true }, { kind: "var", name: "VAR", default: "ntc" }],
+    message: "서미스터를 핀 %1 에 준비하기",
+    parts: [{ kind: "pin", name: "PIN", default: 36, inputOnly: true }],
     tooltip: "ntc = ADC(Pin(36)) 와 온도(℃)를 돌려주는 ntc_temperature() 함수를 준비합니다.",
-    lines: (v) => adcLines(v.VAR, v.PIN),
+    lines: (v) => adcLines("ntc", v.PIN),
     helpers: [
       {
         name: "ntc_temperature", params: "",
@@ -148,7 +147,7 @@ export const ntc: DeviceSpec = {
       },
     ],
     kind: "adc",
-    pattern: fixedAdcPattern("ntc", true),
+    pattern: fixedAdcPattern("ntc"),
   },
   actions: [],
   values: [
@@ -173,7 +172,7 @@ export const lm35: DeviceSpec = {
     lines: (v) => adcLines("lm35", v.PIN),
     helpers: [{ name: "lm35_temperature", params: "", body: ["return lm35.read() * 330 / 4095"] }],
     kind: "adc",
-    pattern: fixedAdcPattern("lm35", false),
+    pattern: fixedAdcPattern("lm35"),
   },
   actions: [],
   values: [

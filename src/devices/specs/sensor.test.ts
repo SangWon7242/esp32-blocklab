@@ -35,7 +35,7 @@ describe("온습도 센서 DHT11 (dev_dht_setup)", () => {
   });
 });
 
-describe("서미스터 (dev_ntc_setup)", () => {
+describe("서미스터 (dev_ntc_setup, 이름 ntc 고정)", () => {
   const code = [
     "from machine import Pin, ADC",
     "import math",
@@ -56,13 +56,13 @@ describe("서미스터 (dev_ntc_setup)", () => {
   ].join("\n");
 
   it("아날로그 3줄과 ntc_temperature 도우미 (import math)", () => {
-    expect(toCode([{ type: "dev_ntc_setup", fields: { PIN: 36, VAR: v("ntc") } }, print(val("dev_ntc_temp"))], ["ntc"])).toBe(code);
+    expect(toCode([{ type: "dev_ntc_setup", fields: { PIN: 36 } }, print(val("dev_ntc_temp"))])).toBe(code);
   });
   it("왕복: 도우미까지 접혀 같은 블록들, unparsed 0", () => {
     const r = fromCode(code);
     expect(r.tops).toEqual(["start_program"]);
     expect(r.types).toEqual(["dev_ntc_setup", "esp_print", "dev_ntc_temp"]);
-    expect(r.body[0].fields).toEqual({ PIN: 36, VAR: v("ntc") });
+    expect(r.body[0].fields).toEqual({ PIN: 36 });
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
@@ -71,6 +71,11 @@ describe("서미스터 (dev_ntc_setup)", () => {
     expect(r.types).not.toContain("dev_ntc_setup");
     expect(r.types[0]).toBe("dev_adc_setup");
     expect(r.tops).toContain("procedures_defreturn");
+  });
+  it("준비 3줄의 이름이 ntc 가 아니면 접지 않는다 (도우미가 ntc 를 읽으므로)", () => {
+    const r = fromCode(code.replace("ntc = ADC(Pin(36))\nntc.atten(ADC.ATTN_11DB)\nntc.width", "t = ADC(Pin(36))\nt.atten(ADC.ATTN_11DB)\nt.width"));
+    expect(r.types).not.toContain("dev_ntc_setup");
+    expect(r.types[0]).toBe("dev_adc_setup");
   });
   it("도우미 없이 ntc 3줄만 있으면 아날로그 핀", () => {
     const r = fromCode("from machine import Pin, ADC\n\nntc = ADC(Pin(36))\nntc.atten(ADC.ATTN_11DB)\nntc.width(ADC.WIDTH_12BIT)\n\nprint(ntc.read())\n");
