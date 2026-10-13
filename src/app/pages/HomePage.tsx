@@ -20,12 +20,14 @@ export function HomePage() {
             <Button asChild><Link to="/lab">열기 <ArrowRight className="size-4" /></Link></Button>
           </CardContent>
         </Card>
-        <Card className="opacity-70">
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><RouteIcon className="size-5" />트랙</CardTitle>
-            <CardDescription>챕터별 미션을 순서대로 풀며 넘어갑니다. 준비 중입니다.</CardDescription>
+            <CardDescription>챕터별 단계를 순서대로 풀며 넘어갑니다.</CardDescription>
           </CardHeader>
-          <CardContent><Button disabled>준비 중</Button></CardContent>
+          <CardContent>
+            <Button asChild><Link to="/track">열기 <ArrowRight className="size-4" /></Link></Button>
+          </CardContent>
         </Card>
       </div>
     </div>

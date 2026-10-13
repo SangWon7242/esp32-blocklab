@@ -17,6 +17,8 @@ import type { LineMap, WorkspaceJson } from "@/codegen";
 import type { ConsoleEntry, Issue } from "@/lint";
 import { countCodeBlocks, editorReducer, initialEditorState, type EditorState, type Source } from "./editorSync";
 import { SAMPLE_CODE } from "./sample";
+import { contentFile } from "@/track/files";
+import { readSettings } from "../settings/settings";
 import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { DeviceBar } from "./DeviceBar";
@@ -52,7 +54,9 @@ function PanelToggle({ label, icon: Icon, text, onClick }: PanelToggleProps) {
 }
 
 export function LabPage() {
-  const [state, dispatch] = useReducer(editorReducer, SAMPLE_CODE, initialEditorState);
+  const [searchParams] = useSearchParams();
+  // ?code=<챕터 id>/<파일> 이면 그 콘텐츠 코드로 시작한다 (트랙 편집기 단계에서 넘어올 때). 모르는 이름이면 예시 코드
+  const [state, dispatch] = useReducer(editorReducer, contentFile(searchParams.get("code")) ?? SAMPLE_CODE, initialEditorState);
   const blocklyRef = useRef<BlocklyHandle>(null);
   const debounceRef = useRef<number | undefined>(undefined);
   /** 아직 debounce 를 기다리는 코드. 탭을 바꿀 때 먼저 반영해야 마지막 입력이 사라지지 않는다 */
@@ -202,9 +206,9 @@ export function LabPage() {
     reveal(blockAtLine(view, errorLine.line), errorLine.line);
   }, [errorLine, state.code, view, viewCode, reveal]);
 
-  const [searchParams] = useSearchParams();
   const device = useDevice({
-    fake: searchParams.get("device") === "fake",
+    // 설정의 "가짜 보드" 또는 ?device=fake
+    fake: searchParams.get("device") === "fake" || readSettings().fakeBoard,
     getProgram: () => {
       const current = flushPendingCode();
       // 코드 모드 문법 오류: 보드도 SyntaxError 만 낼 것이고 검사가 이미 콘솔에 보여 준다

@@ -1,0 +1,13 @@
+import type { LoadedChapter } from "@/track/content";
+import type { StepOf, StepType } from "@/track/schema";
+
+/** 단계 활동 컴포넌트가 받는 것. input 은 StepRecord.input 그대로 */
+export type StepProps<T extends StepType> = {
+  step: StepOf<T>;
+  chapter: LoadedChapter;
+  input: Record<string, unknown>;
+  /** 입력을 바꾸고 저장한다. attempt 면 시도 횟수를 하나 올린다 (읽기 체크 "확인") */
+  onInput(next: Record<string, unknown>, opts?: { attempt?: boolean }): void;
+  teacherMode: boolean;
+  attempts: number;
+};

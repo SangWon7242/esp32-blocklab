@@ -9,12 +9,17 @@ import { HomePage } from "./pages/HomePage";
 
 // 편집기(Blockly·CodeMirror)는 무거우므로 자유 코딩 화면을 열 때 따로 받는다
 const LabPage = lazy(() => import("./lab/LabPage").then((m) => ({ default: m.LabPage })));
+// 트랙 화면은 콘텐츠(YAML·코드 글)를 함께 받으므로 열 때 받는다
+const TrackPage = lazy(() => import("./track/TrackPage").then((m) => ({ default: m.TrackPage })));
+const ChapterPage = lazy(() => import("./track/ChapterPage").then((m) => ({ default: m.ChapterPage })));
+const StepPage = lazy(() => import("./track/StepPage").then((m) => ({ default: m.StepPage })));
+const SettingsPage = lazy(() => import("./settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 
 const navItems = [
   { to: "/lab", label: "자유 코딩", icon: Blocks },
-  { to: "/track", label: "트랙", icon: RouteIcon, soon: true },
-  { to: "/settings", label: "설정", icon: Settings, soon: true },
-];
+  { to: "/track", label: "트랙", icon: RouteIcon },
+  { to: "/settings", label: "설정", icon: Settings },
+] as { to: string; label: string; icon: typeof Blocks; soon?: boolean }[];
 
 export function App() {
   return (
@@ -51,10 +56,14 @@ export function App() {
             </nav>
           </header>
           <main className="min-h-0 flex-1">
-            <Suspense fallback={<div className="p-8 text-muted-foreground">편집기를 불러오는 중…</div>}>
+            <Suspense fallback={<div className="p-8 text-muted-foreground">불러오는 중…</div>}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/lab" element={<LabPage />} />
+                <Route path="/track" element={<TrackPage />} />
+                <Route path="/track/:chapter" element={<ChapterPage />} />
+                <Route path="/track/:chapter/:step" element={<StepPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
               </Routes>
             </Suspense>
           </main>
