@@ -23,6 +23,13 @@ export const BUILTIN_BLOCK_TYPES: readonly string[] = [
   "procedures_defnoreturn", "procedures_defreturn", "procedures_callnoreturn", "procedures_callreturn",
 ];
 
+/** DOM 없이 "#rrggbb" 값만 지니는 field_colour 대역 (화면에 그리지 않는 작업판 전용) */
+class HeadlessColourField extends Blockly.FieldTextInput {
+  static override fromJson(options: Blockly.FieldTextInputFromJsonConfig & { colour?: string }): HeadlessColourField {
+    return new HeadlessColourField(options.colour ?? "#ffffff");
+  }
+}
+
 let registered = false;
 
 /** 로케일을 적용하고 커스텀 블록을 정의한다. 여러 번 불러도 안전하다. */
@@ -31,8 +38,9 @@ export function registerBlocks(): void {
   applyKoreanMessages();
   // code_stmt 의 여러 줄 칸 (field_multilinetext)
   registerFieldMultilineInput();
-  // RGB LED 색 칸 (field_colour)
-  registerFieldColour();
+  // RGB LED 색 칸 (field_colour). 견본 div 를 만들어야 해서 DOM 이 없는 곳(노드 테스트의 헤드리스 코드 생성)에서는 값만 지니는 칸으로
+  if (typeof document === "undefined") Blockly.fieldRegistry.register("field_colour", HeadlessColourField);
+  else registerFieldColour();
   // 변수·함수 꾸러미는 꺼낼 때마다 Blockly.Blocks 에 이 블록이 있는지 본다. 지우면 꾸러미에 나오지 않는다.
   // math_change 는 `x = (x if isinstance(x, Number) else 0) + 1` 처럼 수업 코드에 없는 꼴을 내고,
   // procedures_ifreturn 은 함수 밖에서 깨진 코드를 낸다. 둘 다 코드 → 블록으로 돌아오지 않는다.

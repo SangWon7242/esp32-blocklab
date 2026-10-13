@@ -3,6 +3,7 @@ import * as Blockly from "blockly";
 import { workspaceJsonToCode, type WorkspaceJson } from "@/codegen";
 import { codeToBlocks } from "@/parser";
 import { registerBlocks, toolbox } from "./index";
+import { findActionByBlock, findValueByBlock } from "@/devices/registry";
 
 type B = Record<string, unknown> & { type: string };
 
@@ -74,8 +75,17 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
       const name = (entry.extraState as { name: string }).name;
       return { body: [], tops: [defOf[name]] };
     }
-    default: return { body: [], tops: [] };
+    default: return { body: deviceSetup(entry.type, varName), tops: [] };
   }
+}
+
+/** 장치 명령·값 블록: 그 장치의 준비 블록 (변수 칸은 같은 이름으로). 준비가 없는 LED 는 출력 핀 준비 */
+function deviceSetup(type: string, varName: string | undefined): B[] {
+  const device = (findActionByBlock(type) ?? findValueByBlock(type))?.device;
+  if (!device || device.id === "print") return [];
+  const s = device.setup;
+  if (!s) return [setup("esp_pin_setup", { VAR: { name: varName ?? "led" } })];
+  return [setup(s.blockType, s.parts.some((p) => p.kind === "var") && varName ? { VAR: { name: varName } } : {})];
 }
 
 /** 문장 블록은 시작 블록 안에, 값 블록은 print 안에, 머리 블록(시작·함수 정의)은 맨 위에 */

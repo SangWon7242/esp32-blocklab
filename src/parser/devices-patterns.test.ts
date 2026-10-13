@@ -105,7 +105,8 @@ vi.mock("@/devices/registry", async (importOriginal) => {
     ],
     values: [],
   };
-  const DEVICES = [beeper, lcd, ...actual.DEVICES, tilt, motor];
+  // 가짜 틸트는 진짜 틸트(dev_tilt_tilted, 같은 정규식)보다 앞에 둔다
+  const DEVICES = [beeper, lcd, tilt, ...actual.DEVICES, motor];
   const withDevice = <T,>(d: D, x: T) => ({ ...x, device: d });
   const all = <K extends "actions" | "values">(k: K) => new Map(DEVICES.flatMap((d) => d[k].map((s) => [s.blockType, withDevice(d, s)] as const)));
   const setups = new Map(DEVICES.flatMap((d) => (d.setup ? [[d.setup.blockType, withDevice(d, d.setup)] as const] : [])));

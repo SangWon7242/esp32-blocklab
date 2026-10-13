@@ -1,5 +1,5 @@
 import type { DeviceSpec } from "../types";
-import { pinNo, validPins } from "./common";
+import { adcLines, NO_SETUP_PATTERN, pinNo, validPins } from "./common";
 
 /**
  * 초음파 (esp_ultrasonic_setup). 이름 trig/echo 고정, get_distance() 도우미.
@@ -44,3 +44,30 @@ export const ultrasonic: DeviceSpec = {
     },
   ],
 };
+
+/**
+ * 아날로그 센서 (조도·가변저항·소리·불꽃). 준비 줄은 아날로그 핀과 같은 3줄이라 dev_adc_setup 으로 접히고,
+ * 값은 dev_adc_read 를 함께 쓴다 (툴박스에는 그 센서 이름으로 넣는다).
+ */
+function adcSensor(id: string, label: string, subject: string, name: string): DeviceSpec {
+  return {
+    id, category: "sensor", label,
+    setup: {
+      blockType: `dev_${id}_setup`,
+      message: `${subject} 핀 %1 에 준비하고 %2 이름 붙이기`,
+      parts: [{ kind: "pin", name: "PIN", default: 36, inputOnly: true }, { kind: "var", name: "VAR", default: name }],
+      tooltip: `${name} = ADC(Pin(36)) — 값은 0~4095 로 읽습니다.`,
+      lines: (v) => adcLines(v.VAR, v.PIN),
+      kind: "adc",
+      pattern: NO_SETUP_PATTERN,
+    },
+    actions: [],
+    values: [],
+    extraToolbox: [{ blockType: "dev_adc_read", fields: { VAR: name } }],
+  };
+}
+
+export const light = adcSensor("light", "조도 센서", "조도 센서를", "light");
+export const knob = adcSensor("knob", "가변저항", "가변저항을", "knob");
+export const sound = adcSensor("sound", "소리 센서", "소리 센서를", "sound");
+export const flame = adcSensor("flame", "불꽃 센서", "불꽃 센서를", "flame");
