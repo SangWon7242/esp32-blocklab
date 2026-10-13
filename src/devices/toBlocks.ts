@@ -35,6 +35,16 @@ export function deviceBlockDefinitions(): Record<string, unknown>[] {
   return out;
 }
 
+/**
+ * 맞는 글만 받아야 하는 글 칸(text part 의 validate): 블록 type·칸 이름·정규식.
+ * field_input JSON 은 검사 함수를 실을 수 없으므로 src/blocks/index.ts 가 블록 init 에서 칸에 단다.
+ */
+export function textFieldValidators(): { blockType: string; field: string; pattern: RegExp }[] {
+  return DEVICES.flatMap((d) => [...(d.setup ? [d.setup] : []), ...d.actions, ...d.values]).flatMap((s) =>
+    s.parts.flatMap((p) => (p.kind === "text" && p.validate ? [{ blockType: s.blockType, field: p.name, pattern: p.validate }] : [])),
+  );
+}
+
 export type ToolboxItem = { kind: "label"; text: string } | { kind: "block"; type: string; fields?: Record<string, unknown>; inputs?: Record<string, unknown> };
 export type ToolboxCategory = { kind: "category"; name: string; categorystyle: string; contents: ToolboxItem[] };
 

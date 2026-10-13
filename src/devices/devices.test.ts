@@ -129,6 +129,17 @@ describe("계획 2B 검사용 메타데이터", () => {
 });
 
 describe("레지스트리 불변식", () => {
+  it("명령·값 템플릿은 도우미를 맨 앞에서만, 자기 장치의 것만 부른다 (생성기가 맨 앞 호출만 바뀐 이름으로 고친다)", () => {
+    const helperOwner = new Map(DEVICES.flatMap((d) => (d.setup?.helpers ?? []).map((h) => [h.name, d.id] as const)));
+    for (const d of DEVICES) for (const spec of [...d.actions, ...d.values]) {
+      const code = spec.code(defaultValues(spec.parts));
+      for (const [name, owner] of helperOwner) {
+        const at = [...code.matchAll(new RegExp(String.raw`(?<![\w.])${name}\(`, "g"))].map((m) => m.index);
+        if (!at.length) continue;
+        expect({ at, owner }, `${spec.blockType}: ${code}`).toEqual({ at: [0], owner: d.id });
+      }
+    }
+  });
   it("명령 lines 패턴의 첫 정규식은 어느 준비 블록의 첫 줄(기본값)에도 맞지 않는다", () => {
     const firstLines = setupSpecs().map((s) => ({ type: s.blockType, line: s.lines(defaultValues(s.parts))[0] }));
     for (const d of DEVICES) for (const a of d.actions) {

@@ -60,14 +60,17 @@ function topLevelChars(text: string): string | null {
   return quote || stack.length ? null : out;
 }
 
+/** 곱셈보다 약하게 묶는 것: 덧셈·뺄셈, 시프트·비트·비교·대입식 연산자 글자, 쉼표, 조건식·논리·lambda·in·is 낱말 */
+const LOOSER_THAN_MUL = /[-+<>&|^=!,]|\b(?:if|else|and|or|not|lambda|in|is)\b/;
+
 /**
- * 곱셈 앞에 놓인 그룹이 피연산자 하나인지: 괄호가 맞고, 괄호 밖에 + 나 - 가 없다.
+ * 곱셈 앞에 놓인 그룹이 피연산자 하나인지: 괄호가 맞고, 괄호 밖에 곱셈보다 약하게 묶는 연산자가 없다.
  * `1638 + offset + a * 6462 // 180` 의 `offset + a` 처럼 덧셈이 그룹에 걸려 든 것을 접으면
- * `(offset + a) * 6462` 로 다시 묶여 뜻이 바뀌므로 접지 않는다 (서보 각도·LED 밝기).
+ * `(offset + a) * 6462` 로 다시 묶여 뜻이 바뀌므로 접지 않는다 (서보 각도·LED 밝기). `a << 1`·`a if c else b` 도 같다.
  */
 export const isSingleOperand = (text: string): boolean => {
   const top = topLevelChars(text);
-  return top !== null && !/[+-]/.test(top);
+  return top !== null && !LOOSER_THAN_MUL.test(top);
 };
 
 /** 그룹이 함수 인자 하나인지: 괄호가 맞고, 괄호 밖에 쉼표가 없다 (`lcd.Cursor(0, f(a, b))` 를 잘못 나누지 않게) */

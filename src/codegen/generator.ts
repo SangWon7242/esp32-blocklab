@@ -29,6 +29,10 @@ export function splitComment(text: string): SplitComment {
 
 const commentLine = (text: string) => (text ? `# ${text}` : "#");
 
+/** 도우미 호출 표시 글자 (유니코드 사용자 영역). helperCall 이 이름 앞뒤에 붙이고 finish 가 지운다 */
+const HELPER_MARK = "\uE000";
+const HELPER_CALL = new RegExp(`${HELPER_MARK}(\\w+)${HELPER_MARK}`, "g");
+
 /**
  * 수업 저장소 코드 모양을 내는 MicroPython 생성기.
  * - 들여쓰기 4칸, 변수 `= None` 선언 없음
@@ -76,13 +80,23 @@ export class MicroPythonGenerator extends PythonGenerator {
   // definitions_ / provideFunction_ / scrub_ 는 protected 라서 forBlock.ts 가 쓸 공개 창구를 둔다
   setDefinition(name: string, code: string): void { this.definitions_[name] = code; }
   provideHelper(name: string, lines: string[]): string { return this.provideFunction_(name, lines); }
+  /**
+   * 장치 도우미를 부르는 코드에 쓸 이름 자리. provideFunction_ 은 사용자 함수·변수와 겹치면 도우미를 stop2 처럼 다른 이름으로
+   * 정의하는데, 그 이름은 준비 블록을 만들 때에야 정해진다 (함수 정의 안의 명령 블록이 먼저 만들어질 수 있다).
+   * 그래서 표시만 남겨 두고 finish 가 실제로 정의된 이름(functionNames_)으로 바꾼다. 정의되지 않았으면 원래 이름.
+   */
+  helperCall(name: string): string { return `${HELPER_MARK}${name}${HELPER_MARK}`; }
+  private resolveHelperCalls(text: string): string {
+    return text.replace(HELPER_CALL, (_, name: string) => this.functionNames_[name] ?? name);
+  }
   scrubBlock(block: Blockly.Block, code: string): string { return this.scrub_(block, code, true); }
 
   override finish(code: string): string {
+    code = this.resolveHelperCalls(code);
     const helpers: string[] = [];
     const defs: string[] = [];
     for (const name of Object.keys(this.definitions_)) {
-      const def = this.definitions_[name];
+      const def = this.resolveHelperCalls(this.definitions_[name]);
       if (/^(from\s+\S+\s+)?import\s+\S+/.test(def)) continue; // import 는 collectImports 가 다시 계산
       (name.startsWith("%") ? defs : helpers).push(def.replace(/\n+$/, ""));
     }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { arith, fromCode, num, toCode, v, type B } from "../testkit";
 import { DEVICES } from "../registry";
+import { workspaceJsonToCode, type WorkspaceJson } from "@/codegen";
 import { deviceToolboxCategories } from "../toBlocks";
 
 const angle = (a: B, name = "servo"): B => ({ type: "dev_servo_angle", fields: { VAR: v(name) }, inputs: { ANGLE: { block: a } } });
@@ -129,5 +130,55 @@ describe("릴레이 (준비 줄은 esp_pin_setup 이 접는다)", () => {
       { kind: "block", type: "dev_relay_setup" },
       { kind: "block", type: "esp_pin_write", fields: { VAR: { name: "relay" } } },
     ]);
+  });
+});
+
+describe("도우미 이름이 사용자 함수와 겹치면 (편집기에서 친 코드)", () => {
+  /** 맨 위 블록들(함수 정의 → 시작 블록 순)로 된 작업판 */
+  const workspace = (tops: B[]): WorkspaceJson =>
+    ({ blocks: { languageVersion: 0, blocks: tops.map((t, i) => ({ x: 0, y: 200 * i, ...t })) } }) as unknown as WorkspaceJson;
+  const proc = (name: string, body: B[]): B => ({ type: "procedures_defnoreturn", fields: { NAME: name }, inputs: body.length ? { STACK: { block: chainOf(body) } } : {} });
+  const call = (name: string): B => ({ type: "procedures_callnoreturn", extraState: { name } });
+  const start = (body: B[]): B => ({ type: "start_program", inputs: { BODY: { block: chainOf(body) } } });
+  function chainOf(blocks: B[]): B {
+    const copies = blocks.map((b) => ({ ...b }));
+    for (let i = 0; i < copies.length - 1; i++) copies[i].next = { block: copies[i + 1] };
+    return copies[0];
+  }
+
+  it("사용자 함수 stop + 모터 정지: 도우미는 stop2 가 되고 모터 정지 블록도 stop2() 를 부른다 (함수 안에서 먼저 만들어져도)", () => {
+    const code = workspaceJsonToCode(workspace([
+      proc("halt", [{ type: "dev_motor_stop" }]),
+      proc("stop", [{ type: "esp_print", inputs: { VALUE: { block: { type: "text", fields: { TEXT: "bye" } } } } }]),
+      start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }, call("stop"), call("halt")]),
+    ]));
+    expect(code).toContain("\ndef stop2():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
+    expect(code).toContain('\ndef stop():\n    print("bye")\n');
+    expect(code).toContain("\ndef halt():\n    stop2()\n");
+    expect(code).toMatch(/\nstop2\(\)\nstop\(\)\nhalt\(\)\n$/);
+    expect(code).not.toContain("\uE000");
+  });
+  it("사용자 함수 hc595_shift + 7세그먼트: 다른 도우미 본문과 지우기 블록도 바뀐 이름을 부른다", () => {
+    const code = workspaceJsonToCode(workspace([
+      proc("hc595_shift", []),
+      start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_clear" }, call("hc595_shift")]),
+    ]));
+    expect(code).toContain("\ndef hc595_shift2(dat):\n");
+    expect(code).toContain("\ndef show_digit(n, dot):\n    hc595_shift2(SEGCODE[n] | (0x80 if dot else 0))\n");
+    expect(code).toMatch(/\nhc595_shift2\(0\)\nhc595_shift\(\)\n$/);
+  });
+  it("사용자 함수 show + OLED: show2 도우미 안의 oled.show() 메서드 호출은 그대로", () => {
+    const text = (t: string): B => ({ type: "text", fields: { TEXT: t } });
+    const code = workspaceJsonToCode(workspace([
+      proc("show", []),
+      start([{ type: "esp_oled_setup", fields: { SCL: 22, SDA: 21 } }, { type: "esp_oled_show", inputs: { A: { block: text("a") }, B: { block: text("b") } } }, { type: "dev_oled_update" }]),
+    ]));
+    expect(code).toContain("\ndef show2(a, b):\n    oled.fill(0)\n    oled.text(a, 0, 20)\n    oled.text(b, 0, 36)\n    oled.show()\n");
+    expect(code).toMatch(/\nshow2\("a", "b"\)\noled\.show\(\)\n$/);
+  });
+  it("겹치지 않으면 그대로 (stop)", () => {
+    const code = workspaceJsonToCode(workspace([start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }])]));
+    expect(code).toContain("\ndef stop():\n");
+    expect(code).toMatch(/\nstop\(\)\n$/);
   });
 });

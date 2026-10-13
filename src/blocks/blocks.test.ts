@@ -153,3 +153,36 @@ describe("함수 이름 검사", () => {
     ws.dispose();
   });
 });
+
+describe("장치 글 칸 검사 (I2C 주소·핀 목록)", () => {
+  const cases: [type: string, field: string, good: string[], bad: string[]][] = [
+    ["dev_lcd_setup", "ADDR", ["0x27", "0x3F", "0x8"], ["3f", "0x", "0x123", "27", "0x3g", ""]],
+    ["dev_rfid_setup", "ADDR", ["0x28"], ["28", "0xzz"]],
+    ["dev_flow_setup", "PINS", ["18, 5, 14", "2", "1,2 ,3"], ["a, b", "1,", ", 1", "1 2", ""]],
+  ];
+  for (const [type, field, good, bad] of cases) {
+    it(`${type}.${field} 는 맞는 글만 받는다`, () => {
+      const ws = new Blockly.Workspace();
+      const f = ws.newBlock(type).getField(field)!;
+      for (const g of good) {
+        f.setValue(g);
+        expect(f.getValue(), g).toBe(g);
+      }
+      const last = good[good.length - 1];
+      for (const b of bad) {
+        f.setValue(b);
+        expect(f.getValue(), b).toBe(last);
+      }
+      ws.dispose();
+    });
+  }
+
+  it("불러온 값은 그대로 둔다 (코드에서 온 0x123 같은 주소도 블록과 코드가 어긋나지 않게)", () => {
+    const ws = new Blockly.Workspace();
+    Blockly.serialization.workspaces.load({
+      blocks: { languageVersion: 0, blocks: [{ type: "dev_lcd_setup", fields: { SDA: 21, SCL: 22, ADDR: "0x123" } }] },
+    }, ws);
+    expect(ws.getBlocksByType("dev_lcd_setup", false)[0].getFieldValue("ADDR")).toBe("0x123");
+    ws.dispose();
+  });
+});

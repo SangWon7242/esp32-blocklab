@@ -7,7 +7,7 @@ import { flowBlocks } from "./definitions/flow";
 import { calcBlocks } from "./definitions/calc";
 import { codeBlocks } from "./definitions/code";
 import { isValidPythonName } from "./names";
-import { deviceBlockDefinitions } from "@/devices/toBlocks";
+import { deviceBlockDefinitions, textFieldValidators } from "@/devices/toBlocks";
 
 export { entryTheme } from "./theme";
 export { toolbox } from "./toolbox";
@@ -68,6 +68,16 @@ export function registerBlocks(): void {
       if (name) guardProcedureName(name);
     };
   }
+  // 장치 글 칸(I2C 주소·핀 목록)은 맞는 꼴만 받는다. 코드에서 불러온 값은 함수 이름처럼 그대로 둔다
+  for (const { blockType, field, pattern } of textFieldValidators()) {
+    const def = Blockly.Blocks[blockType];
+    const originalInit = def.init;
+    def.init = function (this: Blockly.Block) {
+      originalInit.call(this);
+      const f = this.getField(field) as Blockly.Field<string> | null;
+      if (f) guardField(f, (value) => pattern.test(value));
+    };
+  }
   registered = true;
 }
 
@@ -79,6 +89,14 @@ export function registerBlocks(): void {
  * 기본 이름으로 바뀌면 호출 블록과 어긋난다.
  */
 function guardProcedureName(field: Blockly.Field<string>): void {
+  guardField(field, (value) => isValidPythonName(value.trim()));
+}
+
+/**
+ * 칸에 검사를 단다: ok 가 거짓이면 값을 받지 않는다(null). 불러오는 동안(loadState)은 검사하지 않고,
+ * 통과하면 칸에 원래 있던 검사를 그대로 부른다.
+ */
+function guardField(field: Blockly.Field<string>, ok: (value: string) => boolean): void {
   const original = field.getValidator();
   let loading = false;
   const loadState = field.loadState.bind(field);
@@ -91,7 +109,7 @@ function guardProcedureName(field: Blockly.Field<string>): void {
     }
   };
   field.setValidator(function (this: Blockly.Field<string>, value: string) {
-    if (!loading && !isValidPythonName(value.trim())) return null;
+    if (!loading && !ok(value)) return null;
     return original ? original.call(this, value) : value;
   });
 }
