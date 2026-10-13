@@ -4,6 +4,7 @@ import { entryTheme, registerBlocks, toolbox } from "@/blocks";
 import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
 import type { Issue } from "@/lint";
 import { cn } from "@/lib/utils";
+import { registerBlockDocMenu, type BlockDocRequest } from "./blockDocMenu";
 import { diffLintMarks, type LintMark, type MarkedBlock } from "./lintMarks";
 import { createNamePrompt } from "./namePrompt";
 
@@ -42,6 +43,8 @@ type Props = {
   onSelect?: (blockId: string | null) => void;
   /** 블록의 경고 말풍선을 열 때 */
   onWarningOpen?: (blockId: string) => void;
+  /** 블록 우클릭 메뉴 "이 블록 설명 보기" (작업판·팔레트 블록. 그림자 블록이면 담은 블록) */
+  onDocRequest?: (req: BlockDocRequest) => void;
   className?: string;
 };
 
@@ -77,7 +80,7 @@ function revealProgram(ws: Blockly.WorkspaceSvg): boolean {
   return true;
 }
 
-export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, onSelect, onWarningOpen, className }, ref) {
+export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, onSelect, onWarningOpen, onDocRequest, className }, ref) {
   const hostRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<Blockly.WorkspaceSvg | null>(null);
   const loadingRef = useRef(false);
@@ -89,6 +92,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
   onSelectRef.current = onSelect;
   const onWarningOpenRef = useRef(onWarningOpen);
   onWarningOpenRef.current = onWarningOpen;
+  const onDocRequestRef = useRef(onDocRequest);
+  onDocRequestRef.current = onDocRequest;
   /** 지금 검사 경고를 단 블록들 (블록 id → 블록·말풍선 글·수준) */
   const lintMarksRef = useRef(new Map<string, MarkedBlock<Blockly.BlockSvg>>());
   /** 지금 파란 테두리를 단 블록 */
@@ -98,6 +103,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     const host = hostRef.current;
     if (!host) return;
     registerBlocks();
+    // 메뉴 항목은 전역에 한 번만 등록되고, 콜백은 지금 마운트된 작업판의 것으로 바뀐다
+    registerBlockDocMenu((req) => onDocRequestRef.current?.(req));
     const ws = Blockly.inject(host, {
       toolbox,
       theme: entryTheme,

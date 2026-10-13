@@ -151,3 +151,10 @@
   stroke: #3b82f6;
   stroke-width: 3px;
 }
+/*
+ * Blockly 툴박스는 z-index 70 이라 화면 위에 뜨는 창(Dialog·AlertDialog·Tooltip, z-50)을 뚫고 보인다.
+ * 날개(flyout, 20)보다는 위, 뜨는 창보다는 아래로 내린다 (Blockly 가 나중에 넣는 스타일보다 앞서도록 특정도 0,2,0)
+ */
+.injectionDiv .blocklyToolbox {
+  z-index: 40;
+}

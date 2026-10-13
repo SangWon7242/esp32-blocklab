@@ -12,6 +12,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
+import { BlockDocDialog } from "@/components/editor/BlockDocDialog";
+import type { BlockDocRequest } from "@/components/editor/blockDocMenu";
+import { findDoc } from "@/docs/catalog";
 import type { LineMap, WorkspaceJson } from "@/codegen";
 import type { ConsoleEntry, Issue } from "@/lint";
 import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateFromBlocks, type EditorState, type Source } from "./editorSync";
@@ -326,6 +329,36 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, as
     if (source === "blocks") refreshMap();
   };
 
+  /** 블록 우클릭 → "이 블록 설명 보기" 로 연 블록 (null 이면 팝업 닫힘) */
+  const [docRequest, setDocRequest] = useState<BlockDocRequest | null>(null);
+  const doc = useMemo(() => (docRequest ? findDoc(docRequest.type) : undefined), [docRequest]);
+  /** 예시를 작업판에 싣는 것은 자유 코딩에서만 (트랙 단계·설계 조립은 정해진 작업판이 있다) */
+  const canOpenExample = !hideSave && !assemblyMode;
+
+  /**
+   * 예시 프로그램을 작업판에 싣는다: initialCode 처럼 코드 → 블록(loadCode)으로 바꿔 작업판에 올리고,
+   * 코드 패널·검사가 작업판과 같은 줄을 보도록 그 작업판이 만드는 코드(import 포함)와 지도로 맞춘다.
+   */
+  const openExample = useCallback((code: string) => {
+    window.clearTimeout(debounceRef.current);
+    pendingCodeRef.current = null;
+    const next = editorReducer(stateRef.current, { type: "loadCode", code });
+    if (next.parseError || !next.blocks) {
+      toast.error("예시를 블록으로 바꾸지 못했어요");
+      return;
+    }
+    sourceRef.current = "blocks";
+    stateRef.current = next;
+    dispatch({ type: "loadCode", code });
+    const handle = blocklyRef.current;
+    if (handle) {
+      handle.load(next.blocks);
+      const generated = handle.getCodeWithMap();
+      dispatch({ type: "blocksChanged", json: handle.getJson(), code: generated.code, map: generated.map });
+    }
+    setDocRequest(null);
+  }, []);
+
   const codeMode = state.source === "code";
   // 블록 모드에서는 지금 작업판에 남은 코드 블록 수 (지난 파싱의 unparsed 는 블록을 지우면 낡는다)
   const unconvertedCount = codeMode ? state.unparsed.length : countCodeBlocks(state.blocks);
@@ -381,7 +414,7 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, as
               </div>
             )}
             <div className="relative min-h-0 flex-1">
-              <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} onSelect={onBlockSelect} onWarningOpen={onWarningOpen} />
+              <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} onSelect={onBlockSelect} onWarningOpen={onWarningOpen} onDocRequest={setDocRequest} />
               {codeMode && (
                 <div className="pointer-events-auto absolute inset-0 flex items-start justify-center bg-background/40 pt-6" data-testid="blocks-overlay">
                   <Badge variant="secondary">코드 편집 중 — 블록은 코드에 따라 갱신됩니다</Badge>
@@ -449,6 +482,13 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, as
         <TabsContent value="problems"><ProblemsPanel issues={issues} onSelect={onProblemSelect} /></TabsContent>
         <TabsContent value="console"><ConsolePanel entries={consoleEntries} onSelect={onConsoleSelect} onClear={device.clear} /></TabsContent>
       </BottomPanel>
+
+      <BlockDocDialog
+        request={docRequest}
+        doc={doc}
+        onClose={() => setDocRequest(null)}
+        onOpenExample={canOpenExample ? openExample : undefined}
+      />
     </div>
   );
 }
