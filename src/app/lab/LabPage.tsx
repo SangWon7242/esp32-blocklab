@@ -164,9 +164,13 @@ export function LabPage() {
 
   const highlightLines = useMemo(() => highlightFor(issues, focus.lines), [issues, focus.lines]);
 
-  /** 블록을 선택하고(있으면) 그 블록의 코드 줄과 line 을 강조한다 */
+  /**
+   * 블록을 선택하고(있으면) 그 블록의 코드 줄과 line 을 강조한다. 코드 모드에서는 작업판이 오버레이 아래에 숨어 있으므로
+   * 블록을 가운데로 옮기기만 하고 키보드 포커스는 코드 편집기에 남긴다 (다음 글자·Backspace 가 숨은 블록을 지우지 않게).
+   */
   const reveal = useCallback((blockId: string | undefined, line: number | undefined) => {
-    const selected = blockId ? blocklyRef.current?.selectBlock(blockId) ?? null : null;
+    const focus = sourceRef.current !== "code";
+    const selected = blockId ? blocklyRef.current?.selectBlock(blockId, { focus }) ?? null : null;
     setTarget({ blockId: selected ?? blockId, line });
   }, [setTarget]);
 

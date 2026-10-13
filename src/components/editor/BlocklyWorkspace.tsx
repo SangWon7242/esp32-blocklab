@@ -22,8 +22,11 @@ export type BlocklyHandle = {
    * 주의는 노란 테두리(lint-warning). 지난번과 달라진 블록만 고치고 사라진 문제는 지운다. 정보 수준은 달지 않는다.
    */
   setIssues(issues: Issue[]): void;
-  /** 블록을 선택하고 화면 가운데로. 그림자 블록이면 담은 블록. 실제로 선택한 블록 id (없으면 null) */
-  selectBlock(id: string): string | null;
+  /**
+   * 블록을 선택하고 화면 가운데로. 그림자 블록이면 담은 블록. 실제로 고른 블록 id (없으면 null).
+   * `focus: false` 면 가운데로 옮기기만 하고 선택·키보드 포커스는 건드리지 않는다 (코드 모드: 치던 글자가 작업판으로 가지 않게)
+   */
+  selectBlock(id: string, opts?: { focus?: boolean }): string | null;
 };
 
 type Props = {
@@ -209,11 +212,11 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
       }
       lintMarksRef.current = next;
     },
-    selectBlock(id) {
+    selectBlock(id, opts) {
       const ws = wsRef.current;
       const block = ws && realBlock(ws, id);
       if (!ws || !block) return null;
-      Blockly.getFocusManager().focusNode(block);
+      if (opts?.focus !== false) Blockly.getFocusManager().focusNode(block);
       ws.centerOnBlock(block.id, true);
       return block.id;
     },

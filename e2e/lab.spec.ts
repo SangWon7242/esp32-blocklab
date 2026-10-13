@@ -293,3 +293,39 @@ test("코드 모드의 콘솔은 영어로 문법 오류를 보여 준다", asyn
   await expect(focus).toHaveCount(1);
   await expect(focus).toHaveText("if x");
 });
+
+test("코드 모드에서 줄 번호를 눌러도 다음 글자는 코드 편집기로 간다", async ({ page }) => {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  const blocksBefore = await host.locator(".blocklyBlockCanvas .blocklyDraggable").count();
+  await page.getByRole("tab", { name: "코드" }).click();
+  const code = page.getByTestId("code-panel");
+  await code.locator(".cm-content").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  // 7번째 줄(led.value(1)) 번호를 누르면 그 줄이 강조된다
+  await code.locator(".cm-lineNumbers .cm-gutterElement", { hasText: /^7$/ }).click();
+  await expect(code.locator(".cm-lint-focus")).toHaveText("    led.value(1)");
+  // 이어서 친 글자와 Backspace 는 코드 편집기로 간다 (숨은 작업판의 블록을 지우지 않는다)
+  await page.keyboard.type("#");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.type("# 끝");
+  await expect(code.locator(".cm-content")).toContainText("# 끝");
+  await expect(page.getByTestId("blocks-overlay")).toBeVisible();
+  await page.waitForTimeout(500); // 코드 debounce 뒤 작업판이 다시 올라온 다음에 센다
+  const blocks = host.locator(".blocklyBlockCanvas .blocklyDraggable");
+  expect(await blocks.count()).toBe(blocksBefore);
+
+  // 문제 항목(바꾸지 못한 줄 = 코드 블록)을 눌러도 숨은 블록에 키보드 포커스가 가지 않는다 (Backspace·Delete 가 블록을 지우지 않는다)
+  await page.keyboard.type("\np = Pin(40, Pin.OUT)\n");
+  await page.getByRole("button", { name: "하단 패널 펼치기" }).click();
+  const item = page.getByTestId("problem-item").filter({ hasText: "블록으로 바꾸지 못했어요" });
+  await expect(item).toHaveCount(1);
+  const count = await blocks.count();
+  await item.click();
+  await expect(code.locator(".cm-lint-focus")).toHaveText("p = Pin(40, Pin.OUT)");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.press("Delete");
+  await page.waitForTimeout(300);
+  expect(await blocks.count()).toBe(count);
+});

@@ -90,9 +90,12 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
     const extensions: Extension[] = [
       lineNumbers({
         domEventHandlers: {
-          mousedown(view, line) {
+          mousedown(view, line, event) {
             onLineClickRef.current?.(view.state.doc.lineAt(line.from).number);
-            return false;
+            // 줄 번호를 눌러도 키보드 포커스는 편집기에 둔다 (다음 글자가 다른 곳으로 가지 않게)
+            event.preventDefault();
+            view.focus();
+            return true;
           },
         },
       }),
