@@ -36,6 +36,19 @@ const GET_DISTANCE_BODY = [
 ];
 const SHOW_BODY = ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"];
 
+/** 이름·속성 연결(a.b) 이거나, 첫 `(` 가 맨 끝 `)` 와 짝을 이루는 호출 하나인지 */
+function isSimpleCallOrName(text: string): boolean {
+  if (/^[A-Za-z_][\w.]*$/.test(text)) return true;
+  const head = /^[A-Za-z_][\w.]*\(/.exec(text);
+  if (!head) return false;
+  let depth = 0;
+  for (let i = head[0].length - 1; i < text.length; i++) {
+    if (text[i] === "(") depth++;
+    else if (text[i] === ")" && --depth === 0) return i === text.length - 1;
+  }
+  return false;
+}
+
 export function registerForBlocks(gen: Gen): void {
   const f = gen.forBlock;
 
@@ -124,6 +137,6 @@ export function registerForBlocks(gen: Gen): void {
   // 섞였을 수 있으니 NONE 으로 두어 식 안에서 괄호로 감싸게 한다
   f["code_expr"] = (block) => {
     const code = String(block.getFieldValue("CODE"));
-    return [code, /^[A-Za-z_][\w.]*(\(.*\))?$/.test(code) ? Order.FUNCTION_CALL : Order.NONE];
+    return [code, isSimpleCallOrName(code) ? Order.FUNCTION_CALL : Order.NONE];
   };
 }

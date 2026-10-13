@@ -234,6 +234,12 @@ describe("식과 우선순위", () => {
   it("연산자가 든 코드 식은 계산 안에서 괄호로 감싼다", () => {
     expect(body(arith("MULTIPLY", { type: "code_expr", fields: { CODE: "a + b" } }, num(3)))).toBe("t = (a + b) * 3");
   });
+  it("호출 두 개가 이어진 코드 식은 괄호로 감싼다", () => {
+    expect(body(arith("MULTIPLY", { type: "code_expr", fields: { CODE: "f(a) + g(b)" } }, num(3)))).toBe("t = (f(a) + g(b)) * 3");
+  });
+  it("중첩 호출 하나인 코드 식은 괄호 없이", () => {
+    expect(body({ type: "code_expr", fields: { CODE: "PWM(Pin(4))" } })).toBe("from machine import Pin, PWM\n\nt = PWM(Pin(4))");
+  });
   it("호출 하나인 코드 식은 괄호 없이", () => {
     expect(body({ type: "code_expr", fields: { CODE: "time.ticks_us()" } })).toBe("import time\n\nt = time.ticks_us()");
     expect(body(arith("FLOORDIV", { type: "code_expr", fields: { CODE: "time.ticks_diff(stop, start)" } }, num(2)))).toBe(
