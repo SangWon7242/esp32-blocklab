@@ -154,3 +154,68 @@ describe("문장", () => {
     expect(b[1].inputs?.VALUE?.block).toEqual({ type: "text", fields: { TEXT: 'a"b' } });
   });
 });
+
+describe("뜻이 바뀔 수 있는 구문은 코드 블록으로", () => {
+  const lines = (code: string) => parse(code).unparsed.map((u) => u.line);
+
+  it("(a) 기본값·*args 매개변수가 있는 def 는 통째로 code_stmt, 함수로 등록하지 않는다", () => {
+    const src = "def f(a, b=1):\n    pass\n\nf(1)\n";
+    const b = body(src);
+    expect(b.map((x) => x.type)).toEqual(["code_stmt", "code_stmt"]);
+    expect(String(b[0].fields?.CODE)).toMatch(/^def f\(a, b=1\):\n    pass/);
+    expect(b[1].fields?.CODE).toBe("f(1)");
+    expect(tops(src)).toHaveLength(0);
+    expect(lines(src)).toEqual([1, 4]);
+    const star = body("def g(*args):\n    pass\n");
+    expect(star.map((x) => x.type)).toEqual(["code_stmt"]);
+    expect(lines("def g(*args):\n    pass\n")).toEqual([1]);
+  });
+
+  it("(b) 이름 붙인 인자·* 인자가 있는 호출은 code_stmt / code_expr", () => {
+    const stmt = "def g(a, b):\n    pass\n\ng(b=2)\nprint(*items)\nprint(1, end=\"\")\n";
+    expect(body(stmt).map((x) => [x.type, x.fields])).toEqual([
+      ["code_stmt", { CODE: "g(b=2)" }],
+      ["code_stmt", { CODE: "print(*items)" }],
+      ["code_stmt", { CODE: 'print(1, end="")' }],
+    ]);
+    expect(lines(stmt)).toEqual([4, 5, 6]);
+    const expr = "def f(a, b):\n    return a\n\nx = f(b=1)\n";
+    expect(body(expr)[0].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: "f(b=1)" } });
+    expect(lines(expr)).toEqual([4]);
+  });
+
+  it("(c) 반복 변수가 i 가 아닌 for 는 code_stmt", () => {
+    const src = "for j in range(3):\n    pass\n";
+    expect(body(src)).toEqual([{ type: "code_stmt", fields: { CODE: "for j in range(3):\n    pass" } }]);
+    expect(lines(src)).toEqual([1]);
+  });
+
+  it("(d) 쓴 그대로 돌아오지 않는 숫자는 code_expr", () => {
+    const src = "x = 1_000\ny = 0x1F\nz = 0.5\nw = -1.0\n";
+    expect(body(src).map((b) => b.inputs?.VALUE?.block)).toEqual([
+      { type: "code_expr", fields: { CODE: "1_000" } },
+      { type: "code_expr", fields: { CODE: "0x1F" } },
+      { type: "math_number", fields: { NUM: 0.5 } },
+      { type: "code_expr", fields: { CODE: "-1.0" } },
+    ]);
+    expect(lines(src)).toEqual([1, 2, 4]);
+  });
+
+  it("(e) 접두사 문자열·세 따옴표 문자열은 code_expr", () => {
+    const src = 'print(r"a\\d")\nprint("""hi""")\nprint(b"x")\n';
+    expect(body(src).map((b) => b.inputs?.VALUE?.block)).toEqual([
+      { type: "code_expr", fields: { CODE: 'r"a\\d"' } },
+      { type: "code_expr", fields: { CODE: '"""hi"""' } },
+      { type: "code_expr", fields: { CODE: 'b"x"' } },
+    ]);
+    expect(lines(src)).toEqual([1, 2, 3]);
+  });
+
+  it("값 없는 return 만 있는 함수는 돌려주지 않는 함수", () => {
+    const src = "def f():\n    return\n\nf()\nx = f()\n";
+    expect(tops(src)[0].type).toBe("procedures_defnoreturn");
+    expect(body(src)[0].type).toBe("procedures_callnoreturn");
+    // 값을 돌려주지 않으므로 식 자리의 호출은 procedures_callreturn 이 아니다
+    expect(body(src)[1].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: "f()" } });
+  });
+});

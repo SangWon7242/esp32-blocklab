@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "@lezer/common";
-import { bodyStatements, children } from "./tree";
+import { bodyStatements, children, operands } from "./tree";
 import { normalizeCode } from "./normalize";
 import type { ParseContext } from "./context";
 
@@ -28,11 +28,22 @@ export function isStandardBody(body: SyntaxNode, ctx: ParseContext, standard: st
   return lines.length === standard.length && lines.every((l, i) => l === standard[i]);
 }
 
-export function functionParts(def: SyntaxNode, ctx: ParseContext): { name: string; params: string[]; body: SyntaxNode | null } {
+const SIMPLE_PARAM_TOKENS = new Set(["(", ")", ",", "VariableName"]);
+
+/** simple 은 매개변수가 이름뿐인지(기본값·*args·**kw 없음). 아니면 함수 블록으로 옮길 수 없다. */
+export function functionParts(def: SyntaxNode, ctx: ParseContext): { name: string; params: string[]; body: SyntaxNode | null; simple: boolean } {
   const kids = children(def);
   const nameNode = kids.find((k) => k.name === "VariableName");
   const paramList = kids.find((k) => k.name === "ParamList");
   const body = kids.find((k) => k.name === "Body") ?? null;
   const params = paramList ? children(paramList).filter((p) => p.name === "VariableName").map((p) => ctx.src.slice(p)) : [];
-  return { name: nameNode ? ctx.src.slice(nameNode) : "", params, body };
+  const simple = !paramList || children(paramList).every((p) => SIMPLE_PARAM_TOKENS.has(p.name));
+  return { name: nameNode ? ctx.src.slice(nameNode) : "", params, body, simple };
+}
+
+/** 몸통의 마지막 문장이 값을 돌려주는 return 인지. 정의 블록 종류와 호출 블록 종류가 이 기준 하나를 함께 쓴다. */
+export function returnsValue(body: SyntaxNode | null): boolean {
+  const stmts = body ? bodyStatements(body) : [];
+  const last = stmts[stmts.length - 1];
+  return last?.name === "ReturnStatement" && operands(last).length > 0;
 }

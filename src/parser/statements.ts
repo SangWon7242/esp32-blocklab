@@ -2,7 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { block, chain, codeStmt, varSet, withComment } from "./builders";
 import type { ParseContext } from "./context";
 import { callBlock, callParts, convertExpr, memberParts } from "./expressions";
-import { RE_DUTY, RE_FREQ, RE_I2C_SETUP, RE_KNOWN_IMPORT, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, functionParts } from "./patterns";
+import { RE_DUTY, RE_FREQ, RE_I2C_SETUP, RE_KNOWN_IMPORT, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, functionParts, returnsValue } from "./patterns";
 import { bodyStatements, children, operands } from "./tree";
 import type { BlockJson } from "./types";
 
@@ -44,7 +44,8 @@ export function convertStatements(all: SyntaxNode[], ctx: ParseContext, topLevel
 
 const one = (b: BlockJson, consumed = 1): Converted => ({ blocks: [b], tops: [], consumed });
 const none = (consumed = 1): Converted => ({ blocks: [], tops: [], consumed });
-const unknown = (node: SyntaxNode, ctx: ParseContext): Converted => { ctx.markUnparsed(node); return one(codeStmt(ctx.src.dedent(node))); };
+// 복합문 조각은 Body 끝의 줄바꿈까지 담기므로 끝 공백을 뗀다 (code_stmt 생성기가 줄바꿈을 붙인다)
+const unknown = (node: SyntaxNode, ctx: ParseContext): Converted => { ctx.markUnparsed(node); return one(codeStmt(ctx.src.dedent(node).replace(/\s+$/, ""))); };
 
 function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseContext, topLevel: boolean): Converted {
   const text = ctx.src.slice(node).trim();
@@ -84,18 +85,19 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
     case "ExpressionStatement": {
       const expr = node.firstChild;
       if (!expr || expr.name !== "CallExpression") return unknown(node, ctx);
-      const { callee, args } = callParts(expr);
+      const { callee, args, plain } = callParts(expr);
+      if (!plain) return unknown(node, ctx);
       const member = memberParts(callee, ctx);
       if (member) {
         const { obj, prop } = member;
         const argText = args.length === 1 ? ctx.src.slice(args[0]) : null;
         if (prop === "value" && ctx.pins.has(obj) && (argText === "0" || argText === "1")) return one(block("esp_pin_write", { VAR: { id: ctx.varId(obj) }, VALUE: argText }));
         if (prop === "duty_u16" && ctx.servos.has(obj) && (argText === "8100" || argText === "1638")) return one(block("esp_servo_door", { VAR: { id: ctx.varId(obj) }, ACTION: argText }));
-        if (prop === "duty_u16" && (ctx.pwms.has(obj) || ctx.servos.has(obj)) && args.length === 1) return one(block("esp_pwm_duty", { VAR: { id: ctx.varId(obj) } }, { DUTY: convertExpr(args[0], ctx) }));
+        if (prop === "duty_u16" && (ctx.pwms.has(obj) || ctx.servos.has(obj)) && args.length === 1) return one(block("esp_pwm_duty", { VAR: { id: ctx.varId(obj) } }, { DUTY: convertExpr(args[0], ctx, "Number") }));
         if (obj === "time" && args.length === 1) {
-          if (prop === "sleep") return one(block("flow_wait", undefined, { SEC: convertExpr(args[0], ctx) }));
-          if (prop === "sleep_ms") return one(block("flow_wait_ms", undefined, { MS: convertExpr(args[0], ctx) }));
-          if (prop === "sleep_us") return one(block("flow_wait_us", undefined, { US: convertExpr(args[0], ctx) }));
+          if (prop === "sleep") return one(block("flow_wait", undefined, { SEC: convertExpr(args[0], ctx, "Number") }));
+          if (prop === "sleep_ms") return one(block("flow_wait_ms", undefined, { MS: convertExpr(args[0], ctx, "Number") }));
+          if (prop === "sleep_us") return one(block("flow_wait_us", undefined, { US: convertExpr(args[0], ctx, "Number") }));
         }
         return unknown(node, ctx);
       }
@@ -117,17 +119,19 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
       const DO = convertBody(body, ctx);
       if (cond.name === "Boolean" && ctx.src.slice(cond) === "True") return one(block("flow_repeat_forever", undefined, { DO }));
       const kids = children(cond);
-      if (cond.name === "UnaryExpression" && ctx.src.slice(kids[0]) === "not" && kids[1]) return one(block("controls_whileUntil", { MODE: "UNTIL" }, { BOOL: convertExpr(kids[1], ctx), DO }));
-      return one(block("controls_whileUntil", { MODE: "WHILE" }, { BOOL: convertExpr(cond, ctx), DO }));
+      if (cond.name === "UnaryExpression" && ctx.src.slice(kids[0]) === "not" && kids[1]) return one(block("controls_whileUntil", { MODE: "UNTIL" }, { BOOL: convertExpr(kids[1], ctx, "Boolean"), DO }));
+      return one(block("controls_whileUntil", { MODE: "WHILE" }, { BOOL: convertExpr(cond, ctx, "Boolean"), DO }));
     }
 
     case "ForStatement": {
       const ops = operands(node); // [VariableName, iterable]
       const iter = ops[1];
       const body = children(node).find((k) => k.name === "Body") ?? null;
-      if (iter?.name === "CallExpression") {
-        const { callee, args } = callParts(iter);
-        if (ctx.src.slice(callee) === "range" && args.length === 1) return one(block("flow_repeat_n", undefined, { TIMES: convertExpr(args[0], ctx), DO: convertBody(body, ctx) }));
+      // flow_repeat_n 은 늘 `for i in range(n):` 을 쓰므로 반복 변수가 i 일 때만 블록으로
+      const target = ops[0]?.name === "VariableName" ? ctx.src.slice(ops[0]) : null;
+      if (target === "i" && iter?.name === "CallExpression") {
+        const { callee, args, plain } = callParts(iter);
+        if (plain && ctx.src.slice(callee) === "range" && args.length === 1) return one(block("flow_repeat_n", undefined, { TIMES: convertExpr(args[0], ctx, "Number"), DO: convertBody(body, ctx) }));
       }
       return unknown(node, ctx);
     }
@@ -145,21 +149,21 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
           else { inputs[`IF${elseIfCount}`] = pendingCond ?? undefined; inputs[`DO${elseIfCount}`] = convertBody(k, ctx); pendingCond = null; }
           continue;
         }
-        if (k.name !== "Comment") pendingCond = convertExpr(k, ctx);
+        if (k.name !== "Comment") pendingCond = convertExpr(k, ctx, "Boolean");
       }
       const extra = elseIfCount > 0 || hasElse ? { ...(elseIfCount > 0 ? { elseIfCount } : {}), ...(hasElse ? { hasElse } : {}) } : undefined;
       return one(block("controls_if", undefined, inputs, extra));
     }
 
     case "FunctionDefinition": {
-      if (!topLevel) return unknown(node, ctx);
-      const { name, params, body } = functionParts(node, ctx);
+      const { name, params, body, simple } = functionParts(node, ctx);
+      if (!topLevel || !simple) return unknown(node, ctx);
       if ((name === "get_distance" && ctx.ultrasonicFolded) || (name === "show" && ctx.oledFolded)) return none();
       const stmts = body ? bodyStatements(body) : [];
       const last = stmts[stmts.length - 1];
       let RETURN: BlockJson | undefined;
       let bodyStmts = stmts;
-      if (last?.name === "ReturnStatement" && operands(last)[0]) { RETURN = convertExpr(operands(last)[0], ctx); bodyStmts = stmts.slice(0, -1); }
+      if (returnsValue(body)) { RETURN = convertExpr(operands(last)[0], ctx); bodyStmts = stmts.slice(0, -1); }
       const STACK = bodyStmts.every((s) => s.name === "PassStatement") ? undefined : chain(convertStatements(bodyStmts, ctx, false).blocks);
       const def = block(RETURN ? "procedures_defreturn" : "procedures_defnoreturn", { NAME: name }, { STACK, RETURN }, { params: params.map((p) => ({ name: p, id: ctx.varId(p) })) });
       withComment(def, inlineComment(node, ctx));

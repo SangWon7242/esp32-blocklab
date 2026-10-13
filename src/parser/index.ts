@@ -1,7 +1,7 @@
 import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
-import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody } from "./patterns";
+import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody, returnsValue } from "./patterns";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
 import type { BlockJson, ParseResult, WorkspaceJson } from "./types";
@@ -17,10 +17,10 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
       if (kids[0]?.name === "VariableName" && ctx.src.slice(kids[1]) === "=") ctx.varId(ctx.src.slice(kids[0]));
     }
     if (node.name === "FunctionDefinition") {
-      const { name, params, body } = functionParts(node, ctx);
+      const { name, params, body, simple } = functionParts(node, ctx);
       params.forEach((p) => ctx.varId(p));
-      const stmts = body ? children(body).filter((k) => k.name !== ":" && k.name !== "Comment") : [];
-      ctx.functions.set(name, { params, returns: stmts[stmts.length - 1]?.name === "ReturnStatement" });
+      // 기본값·*args 가 있는 def 는 code_stmt 로 남으므로 함수 표에 올리지 않는다 (호출도 코드 블록이 된다)
+      if (simple) ctx.functions.set(name, { params, returns: returnsValue(body) });
     }
     for (const c of children(node)) walk(c);
   };
@@ -46,7 +46,8 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
     if (RE_I2C_SETUP.test(texts[i])) hasI2c = true;
     if (RE_OLED_SETUP.test(texts[i])) hasOled = true;
     if (node.name === "FunctionDefinition") {
-      const { name, params, body } = functionParts(node, ctx);
+      const { name, params, body, simple } = functionParts(node, ctx);
+      if (!simple) return;
       if (name === "get_distance" && params.length === 0 && body && isStandardBody(body, ctx, STANDARD_GET_DISTANCE)) stdDistance = true;
       if (name === "show" && params.join(",") === "a,b" && body && isStandardBody(body, ctx, STANDARD_SHOW)) stdShow = true;
     }
