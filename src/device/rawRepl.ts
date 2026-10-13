@@ -283,6 +283,8 @@ export class RawRepl {
     this.mode = "unknown";
     await this.transport.write("\x03\x03");
     if (this.settleMs > 0) await sleep(this.settleMs);
+    // 멈춘 프로그램의 남은 출력·KeyboardInterrupt 를 버려 옛 프롬프트를 새 것으로 오인하지 않게
+    this.buf = "";
     await this.transport.write("\x01");
     await this.readUntil(RAW_PROMPT, this.timeoutMs);
     this.mode = "raw";

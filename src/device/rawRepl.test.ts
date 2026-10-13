@@ -33,6 +33,21 @@ describe("RawRepl.enterRaw", () => {
   });
 });
 
+describe("RawRepl.enterRaw 잔여 출력", () => {
+  it("멈춘 뒤 쉬는 동안 온 글자는 버리고 \\x01 뒤의 프롬프트를 기다린다", async () => {
+    const t = new FakeTransport([{ on: "\x03\x03", reply: `old output ${RAW_PROMPT}` }]);
+    const repl = new RawRepl(t, { settleMs: 5, chunkDelayMs: 0 });
+    let done = false;
+    const p = repl.enterRaw().then(() => { done = true; });
+    await new Promise((r) => setTimeout(r, 20));
+    expect(t.writtenText).toBe("\x03\x03\x01");
+    expect(done).toBe(false);
+    t.push(RAW_PROMPT);
+    await p;
+    expect(repl.mode).toBe("raw");
+  });
+});
+
 describe("RawRepl.exec", () => {
   it("코드 + \\x04 를 보내고 OK 뒤 출력, \\x04\\x04> 에서 ok", async () => {
     const { t, repl } = setup([enter, { on: "\x04", reply: "OK1\r\n\x04\x04>" }]);

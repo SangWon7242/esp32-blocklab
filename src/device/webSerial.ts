@@ -11,6 +11,7 @@ interface SerialPortLike extends EventTarget {
   readonly writable: WritableStream<Uint8Array> | null;
   open(options: { baudRate: number }): Promise<void>;
   close(): Promise<void>;
+  setSignals?(signals: { dataTerminalReady?: boolean; requestToSend?: boolean }): Promise<void>;
 }
 interface SerialLike {
   requestPort(options?: { filters?: Array<{ usbVendorId?: number; usbProductId?: number }> }): Promise<SerialPortLike>;
@@ -23,6 +24,8 @@ export class WebSerialTransport implements Transport {
   private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   private closing = false;
   private readonly encoder = new TextEncoder();
+  /** 쓰기 차례 (멈춤·끊기가 코드 올리기와 겹쳐도 writer 잠금이 부딪히지 않게) */
+  private writeChain: Promise<void> = Promise.resolve();
 
   private constructor(port: SerialPortLike) {
     this.port = port;
@@ -44,15 +47,35 @@ export class WebSerialTransport implements Transport {
     } catch (cause) {
       throw new DeviceError("busy", { cause });
     }
+    // ESP32 자동 리셋 회로: DTR/RTS 를 내려 EN/IO0 을 건드리지 않게 (지원하지 않으면 그냥 넘어감)
+    try {
+      await port.setSignals?.({ dataTerminalReady: false, requestToSend: false });
+    } catch {
+      /* 무시 */
+    }
     return new WebSerialTransport(port);
   }
 
-  async write(data: Uint8Array | string): Promise<void> {
+  write(data: Uint8Array | string): Promise<void> {
+    const bytes = typeof data === "string" ? this.encoder.encode(data) : data;
+    const run = this.writeChain.then(() => this.writeNow(bytes));
+    this.writeChain = run.catch(() => undefined);
+    return run;
+  }
+
+  private async writeNow(bytes: Uint8Array): Promise<void> {
     const writable = this.port.writable;
     if (!writable) throw new DeviceError("disconnected");
-    const writer = writable.getWriter();
+    let writer: WritableStreamDefaultWriter<Uint8Array>;
     try {
-      await writer.write(typeof data === "string" ? this.encoder.encode(data) : data);
+      writer = writable.getWriter();
+    } catch (cause) {
+      throw new DeviceError("disconnected", { cause });
+    }
+    try {
+      await writer.write(bytes);
+    } catch (cause) {
+      throw new DeviceError("disconnected", { cause });
     } finally {
       writer.releaseLock();
     }
@@ -106,6 +129,8 @@ export class WebSerialDevice extends DeviceBase implements Device {
   private readonly replOptions: RawReplOptions;
   private transport: Transport | null = null;
   private repl: RawRepl | null = null;
+  /** 실행 중에 사용자가 끊은 연결 (그 run 은 오류 대신 stopped) */
+  private userClosed: RawRepl | null = null;
 
   constructor(options: WebSerialDeviceOptions = {}) {
     super();
@@ -147,9 +172,17 @@ export class WebSerialDevice extends DeviceBase implements Device {
 
   async disconnect(): Promise<void> {
     const { transport, repl } = this;
+    const wasRunning = this.status === "running";
     this.transport = null;
     this.repl = null;
-    if (repl) await repl.exitRaw().catch(() => undefined);
+    if (repl) {
+      // 실행 중이면 먼저 멈춰 두고 (run() 은 stopped 로 끝난다) 일반 REPL 로 돌려놓는다
+      if (wasRunning) {
+        this.userClosed = repl;
+        await repl.interrupt().catch(() => undefined);
+      }
+      await repl.exitRaw().catch(() => undefined);
+    }
     if (transport) await transport.close().catch(() => undefined);
     this.setStatus("disconnected");
   }
@@ -160,7 +193,11 @@ export class WebSerialDevice extends DeviceBase implements Device {
     try {
       const { output: _output, ...result } = await repl.exec(code, (text) => this.emit({ kind: "stdout", text }));
       return result;
+    } catch (e) {
+      if (this.userClosed === repl && e instanceof DeviceError && e.code === "disconnected") return { ok: true, stopped: true };
+      throw e;
     } finally {
+      if (this.userClosed === repl) this.userClosed = null;
       if (this.repl === repl) this.setStatus("connected");
     }
   }

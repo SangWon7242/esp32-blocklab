@@ -80,6 +80,17 @@ describe("WebSerialDevice (가짜 전송)", () => {
     expect(out.filter((e) => e.kind === "system")).toEqual([]);
   });
 
+  it("실행 중 disconnect: \\x03\\x03 먼저 보내고, 실행은 stopped 로 끝난다", async () => {
+    const { t, d } = setup([enter, { on: "\x04", reply: "OKtick\r\n" }]);
+    await d.connect();
+    const p = d.run("while True: pass");
+    await tick();
+    await d.disconnect();
+    expect(t.writtenText.endsWith("\x04\x03\x03\x02")).toBe(true);
+    expect(await p).toEqual({ ok: true, stopped: true });
+    expect(d.status).toBe("disconnected");
+  });
+
   it("connect 실패(응답 없음)면 disconnected 로 돌아가고 전송을 닫는다", async () => {
     vi.useFakeTimers();
     try {
@@ -108,6 +119,45 @@ describe("WebSerialTransport.open 오류", () => {
     const port = { open: async () => { throw new DOMException("Failed to open serial port.", "NetworkError"); } };
     vi.stubGlobal("navigator", { serial: { requestPort: async () => port } });
     await expect(WebSerialTransport.open()).rejects.toMatchObject({ code: "busy", message: "다른 프로그램(PyCharm 등)이 보드를 쓰고 있어요" });
+  });
+});
+
+function stubPort(write: (chunk: Uint8Array) => Promise<void> | void) {
+  const readable = new ReadableStream<Uint8Array>();
+  const writable = new WritableStream<Uint8Array>({ write });
+  const port = Object.assign(new EventTarget(), {
+    readable, writable,
+    open: vi.fn(async () => {}),
+    close: vi.fn(async () => {}),
+    setSignals: vi.fn(async () => {}),
+  });
+  vi.stubGlobal("navigator", { serial: { requestPort: async () => port } });
+  return port;
+}
+
+describe("WebSerialTransport 쓰기", () => {
+  it("열고 나서 DTR/RTS 를 내린다 (실패해도 계속)", async () => {
+    const port = stubPort(() => {});
+    port.setSignals.mockRejectedValueOnce(new Error("not supported"));
+    await WebSerialTransport.open();
+    expect(port.setSignals).toHaveBeenCalledWith({ dataTerminalReady: false, requestToSend: false });
+  });
+
+  it("동시에 부른 write 는 차례로 모두 보낸다", async () => {
+    const sent: string[] = [];
+    stubPort(async (chunk) => {
+      await new Promise((r) => setTimeout(r, 5));
+      sent.push(new TextDecoder().decode(chunk));
+    });
+    const t = await WebSerialTransport.open();
+    await Promise.all([t.write("code"), t.write("\x03\x03"), t.write(new TextEncoder().encode("\x02"))]);
+    expect(sent).toEqual(["code", "\x03\x03", "\x02"]);
+  });
+
+  it("쓰기가 실패하면(뽑힘) disconnected", async () => {
+    stubPort(() => { throw new DOMException("The device has been lost.", "NetworkError"); });
+    const t = await WebSerialTransport.open();
+    await expect(t.write("a")).rejects.toMatchObject({ code: "disconnected" });
   });
 });
 
