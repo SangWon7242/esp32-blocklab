@@ -154,6 +154,8 @@ test("좁은 화면에서는 블록과 코드가 탭으로 바뀐다", async ({ 
   const host = page.getByTestId("blockly-host");
   await expect(host.locator(".blocklyMainBackground")).toBeVisible();
   await expect(page.getByTestId("code-panel")).toBeHidden();
+  // 처음 열 때부터(탭을 바꾸지 않아도) 작업판이 폭을 다 쓴다 (숨긴 코드 패널 자리가 빈 칸으로 남지 않는다)
+  await expect.poll(async () => (await host.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(780);
   // 빈 바탕을 끌어 작업판을 옮겨 둔다 (숨겼다 보여도 이 자리가 남아야 한다)
   const program = host.locator("svg.blocklySvg > g.blocklyWorkspace > g.blocklyBlockCanvas > .blocklyDraggable").first();
   const bg = (await host.boundingBox())!;

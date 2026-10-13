@@ -29,14 +29,20 @@ const DEVICE_BUTTONS = [
 export type Panels = { blocks: boolean; code: boolean; bottom: boolean };
 const INITIAL_PANELS: Panels = { blocks: true, code: true, bottom: false };
 
-type PanelToggleProps = { label: string; icon: typeof PanelLeftClose; onClick(): void };
+type PanelToggleProps = {
+  label: string;
+  icon: typeof PanelLeftClose;
+  /** 아이콘 옆 글자 (펼치기 버튼이 바로 옆 접기 버튼과 헷갈리지 않게) */
+  text?: string;
+  onClick(): void;
+};
 
-function PanelToggle({ label, icon: Icon, onClick }: PanelToggleProps) {
+function PanelToggle({ label, icon: Icon, text, onClick }: PanelToggleProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-7" aria-label={label} onClick={onClick}>
-          <Icon className="size-4" />
+        <Button variant="ghost" size={text ? "sm" : "icon"} className={text ? "h-7" : "size-7"} aria-label={label} onClick={onClick}>
+          <Icon className="size-4" />{text}
         </Button>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
@@ -67,24 +73,37 @@ export function LabPage() {
   const showBlocks = narrow ? state.source === "blocks" : panels.blocks;
   const showCode = narrow ? state.source === "code" : panels.code;
 
-  // 보일 패널을 펼치고 숨길 패널을 접는다. 둘 다 접을 수는 없으므로 펼치기를 먼저 한다.
-  useLayoutEffect(() => {
-    const targets = [
-      { ref: blocksPanelRef, show: showBlocks },
-      { ref: codePanelRef, show: showCode },
-    ];
-    for (const { ref, show } of targets) if (show && ref.current?.isCollapsed()) ref.current.expand();
-    for (const { ref, show } of targets) if (!show && !ref.current?.isCollapsed()) ref.current?.collapse();
-  }, [showBlocks, showCode, blocksPanelRef, codePanelRef]);
+  /** 지금 보여야 할 패널. 그룹이 크기를 잰 뒤의 onResize 에서도 읽는다 */
+  const wantRef = useRef({ blocks: showBlocks, code: showCode });
+  wantRef.current = { blocks: showBlocks, code: showCode };
 
-  // 넓은 화면에서 손잡이를 끌어 패널을 접거나 펼치면 버튼 상태도 따라간다
-  const syncPanel = useCallback((key: "blocks" | "code", size: PanelSize) => {
-    if (narrowRef.current) return;
+  // 보일 패널을 펼치고 숨길 패널을 접는다. 둘 다 접을 수는 없으므로 펼치기를 먼저 한다.
+  const applyVisibility = useCallback(() => {
+    const targets = [
+      { panel: blocksPanelRef.current, show: wantRef.current.blocks },
+      { panel: codePanelRef.current, show: wantRef.current.code },
+    ];
+    for (const { panel, show } of targets) if (show && panel?.isCollapsed()) panel.expand();
+    for (const { panel, show } of targets) if (!show && panel && !panel.isCollapsed()) panel.collapse();
+  }, [blocksPanelRef, codePanelRef]);
+
+  useLayoutEffect(applyVisibility, [showBlocks, showCode, applyVisibility]);
+
+  /**
+   * 패널 크기가 바뀔 때. 처음 그릴 때는 위 effect 가 그룹이 크기를 재기 전에 돌아 접기가 먹지 않으므로
+   * (좁은 화면에서 숨긴 코드 패널 자리가 빈 칸으로 남던 원인), 크기가 원하는 상태와 어긋나면 다시 맞춘다.
+   * 넓은 화면에서 손잡이를 끌어 패널을 접거나 펼친 것이면 버튼 상태가 따라간다.
+   */
+  const onPanelResize = useCallback((key: "blocks" | "code", size: PanelSize) => {
     const open = size.asPercentage > 0;
+    if (narrowRef.current) {
+      if (open !== wantRef.current[key]) requestAnimationFrame(applyVisibility);
+      return;
+    }
     setPanels((p) => (p[key] === open ? p : { ...p, [key]: open }));
-  }, []);
-  const onBlocksResize = useCallback((size: PanelSize) => syncPanel("blocks", size), [syncPanel]);
-  const onCodeResize = useCallback((size: PanelSize) => syncPanel("code", size), [syncPanel]);
+  }, [applyVisibility]);
+  const onBlocksResize = useCallback((size: PanelSize) => onPanelResize("blocks", size), [onPanelResize]);
+  const onCodeResize = useCallback((size: PanelSize) => onPanelResize("code", size), [onPanelResize]);
 
   /** 한쪽을 접으면 다른 쪽은 반드시 펼친다 (둘 다 접힌 화면은 없다) */
   const setSidePanel = (key: "blocks" | "code", open: boolean) => {
@@ -186,7 +205,7 @@ export function LabPage() {
               <div className="flex h-9 shrink-0 items-center gap-2 border-b px-3 text-sm">
                 <span className="font-medium">작업판</span>
                 <div className="ml-auto flex items-center">
-                  {!panels.code && <PanelToggle label="코드 패널 펼치기" icon={PanelRightOpen} onClick={() => setSidePanel("code", true)} />}
+                  {!panels.code && <PanelToggle label="코드 패널 펼치기" icon={PanelRightOpen} text="코드" onClick={() => setSidePanel("code", true)} />}
                   <PanelToggle label="블록 패널 접기" icon={PanelLeftClose} onClick={() => setSidePanel("blocks", false)} />
                 </div>
               </div>
@@ -213,7 +232,7 @@ export function LabPage() {
         >
           <div className={cn("flex h-full min-h-0 flex-col", !showCode && "hidden")}>
             <div className="flex h-9 shrink-0 items-center gap-2 overflow-hidden border-b px-3 text-sm whitespace-nowrap">
-              {!narrow && !panels.blocks && <PanelToggle label="블록 패널 펼치기" icon={PanelLeftOpen} onClick={() => setSidePanel("blocks", true)} />}
+              {!narrow && !panels.blocks && <PanelToggle label="블록 패널 펼치기" icon={PanelLeftOpen} text="블록" onClick={() => setSidePanel("blocks", true)} />}
               <span className="font-medium">main.py</span>
               {unconvertedCount > 0 && (
                 <Tooltip>
