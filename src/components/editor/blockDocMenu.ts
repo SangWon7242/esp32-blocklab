@@ -38,7 +38,14 @@ function enableSubtree(state: BlockState | undefined, id: string, inside = false
  * 시작 블록에 붙지 않아 꺼진 블록은 생성기가 건너뛰므로, 헤드리스 사본에서 켜서 만든다.
  */
 export function codeOfBlock(block: Blockly.Block): string {
-  if (block.isEnabled()) return blockSnippet(block);
+  if (block.isEnabled()) {
+    // 생성기가 던지면 메뉴 콜백이 죽어 팝업이 아예 안 열리므로 빈 코드로 대신한다
+    try {
+      return blockSnippet(block);
+    } catch {
+      return "";
+    }
+  }
   const json = Blockly.serialization.workspaces.save(block.workspace) as WorkspaceJson & {
     blocks?: { blocks?: BlockState[] };
   };
