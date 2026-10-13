@@ -231,6 +231,14 @@ describe("식과 우선순위", () => {
     );
     expect(code).toBe("led.value(1)  # 켜기 그리고 기다리기\n");
   });
+  it("준비 블록 코멘트는 끌어올린 첫 줄 끝 주석으로", () => {
+    const servo = { type: "esp_servo_setup", fields: { PIN: 4, VAR: { id: "var_servo" } }, icons: { comment: { text: "문 모터", pinned: false, height: 80, width: 160 } } };
+    const led = { ...pinSetup("led", 26), icons: { comment: { text: "time 켜기용", pinned: false, height: 80, width: 160 } } };
+    const code = workspaceJsonToCode(program([servo, led, pinWrite("led", 1)], { vars: ["servo", "led"] }));
+    expect(code).toBe(
+      "from machine import Pin, PWM\n\nservo = PWM(Pin(4))  # 문 모터\nservo.freq(50)\nservo.duty_u16(1638)\nled = Pin(26, Pin.OUT)  # time 켜기용\n\nled.value(1)\n",
+    );
+  });
   it("연산자가 든 코드 식은 계산 안에서 괄호로 감싼다", () => {
     expect(body(arith("MULTIPLY", { type: "code_expr", fields: { CODE: "a + b" } }, num(3)))).toBe("t = (a + b) * 3");
   });
