@@ -19,6 +19,9 @@ export type Values = Record<string, string>;
  * - method: 등록된 장치 변수의 메서드 호출 `obj.name(args)`. args 는 인자별 허용 리터럴(드롭다운 값) 또는 null(아무 식).
  * - call:   접힌 도우미 함수 호출 `name(args)`.
  * - expr:   식 전체 텍스트의 정규식(값 블록 전용, 예: `button.value() == 0`). 그룹 1은 장치 변수 이름.
+ * - lines:  (명령) 연속 문장 N개의 정규식. 몸통 안에서도 맞추며 method·call 보다 먼저 본다. values 의 값 입력 칸 글은 다시 식으로 파싱된다.
+ * objPart 가 있는 꼴은 그 변수가 objKinds(기본: 자기 장치 준비의 kind)로 등록돼 있어야 맞는다.
+ * objPart 도 objName 도 없는 call·lines·expr 은 그 장치가 준비돼 있어야(도우미가 있으면 접혀 있어야) 맞는다 (src/parser/devices.ts).
  */
 export type SetupPattern = {
   lines: RegExp[];
@@ -31,8 +34,8 @@ export type ActionPattern =
   | { kind: "none" }                                   // 파서가 되돌리지 않는 명령(다른 블록들로 돌아온다)
   | { kind: "method"; name: string; args: (string[] | null)[]; objPart?: string /* VAR 필드 이름 */; objName?: string /* 고정 이름 */; objKinds?: string[] /* 기본: 자기 장치 kind */ }
   | { kind: "call"; name: string; args: (string[] | null)[] }
-  | { kind: "lines"; lines: RegExp[]; values: (m: RegExpExecArray[]) => Values | null; objPart?: string }
-  | { kind: "expr"; regex: RegExp; objPart?: string; values?: (m: RegExpExecArray) => Values };
+  | { kind: "lines"; lines: RegExp[]; values: (m: RegExpExecArray[]) => Values | null; objPart?: string; objKinds?: string[] }
+  | { kind: "expr"; regex: RegExp; objPart?: string; objKinds?: string[]; values?: (m: RegExpExecArray) => Values };
 
 export type HelperSpec = { name: string; params: string; body: string[] /* 2칸 단위 들여쓰기 */ };
 

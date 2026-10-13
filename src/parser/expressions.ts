@@ -1,6 +1,8 @@
 import type { SyntaxNode } from "@lezer/common";
 import { block, bool, codeExpr, num, str, varGet } from "./builders";
 import type { ParseContext } from "./context";
+import { findValueByBlock } from "@/devices/registry";
+import { matchCall, matchExpr } from "./devices";
 import { children, operands } from "./tree";
 import type { BlockJson } from "./types";
 
@@ -50,15 +52,22 @@ function fallback(node: SyntaxNode, ctx: ParseContext): BlockJson {
 }
 
 /** 입력의 형식 검사(check). 블록 정의의 input_value check 와 같은 이름. */
-export type Check = "Boolean" | "Number";
+export type Check = "Boolean" | "Number" | "String";
 
-/** 파서가 내는 값 블록의 출력 형식. 표에 없는 블록(variables_get·code_expr·procedures_callreturn)은 형식이 없어 어디든 끼운다. */
+/** 파서가 내는 기본 값 블록의 출력 형식. 장치 값 블록은 레지스트리의 output 을 쓴다 */
 const OUTPUT_TYPES: Record<string, readonly string[]> = {
-  math_number: ["Number"], calc_arith: ["Number"], calc_int: ["Number"], esp_distance: ["Number"],
-  esp_pin_read: ["Number", "Boolean"],
+  math_number: ["Number"], calc_arith: ["Number"], calc_int: ["Number"],
   text: ["String"], calc_str: ["String"], calc_concat: ["String"],
   logic_compare: ["Boolean"], logic_operation: ["Boolean"], logic_negate: ["Boolean"], logic_boolean: ["Boolean"],
 };
+
+/** 값 블록의 출력 형식. 형식이 없는 블록(variables_get·code_expr·procedures_callreturn, output null 인 장치 값)은 어디든 끼운다 */
+function outputTypes(type: string): readonly string[] | undefined {
+  if (OUTPUT_TYPES[type]) return OUTPUT_TYPES[type];
+  const output = findValueByBlock(type)?.output;
+  if (output === undefined || output === null) return undefined;
+  return typeof output === "string" ? [output] : output;
+}
 
 /** Blockly 는 math_number 를 String(Number(NUM)) 로 쓰므로, 그 결과가 원문과 같은 숫자만 블록으로 */
 const isCanonicalNumber = (text: string) => String(Number(text)) === text;
@@ -73,13 +82,16 @@ const isPlainString = (text: string) => /^["']/.test(text) && !text.startsWith('
 export function convertExpr(node: SyntaxNode, ctx: ParseContext, expect?: Check): BlockJson {
   const mark = ctx.unparsed.length;
   const out = convertAny(node, ctx);
-  const types = OUTPUT_TYPES[out.type];
+  const types = outputTypes(out.type);
   if (!expect || !types || types.includes(expect)) return out;
   ctx.unparsed.length = mark; // 버린 하위 블록이 남긴 표시를 지우고 식 전체를 한 번만 표시
   return fallback(node, ctx);
 }
 
 function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
+  // 장치 값: 식 전체 정규식(expr) 먼저, 그다음 method·call
+  const device = matchExpr(node, ctx) ?? matchCall(node, ctx, "values");
+  if (device) return device;
   const text = ctx.src.slice(node);
   switch (node.name) {
     case "Number": return isCanonicalNumber(text) ? num(Number(text)) : fallback(node, ctx);
@@ -122,13 +134,10 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
         const name = ctx.src.slice(callee);
         if (name === "str" && args.length === 1) return block("calc_str", undefined, { X: convertExpr(args[0], ctx) });
         if (name === "int" && args.length === 1) return block("calc_int", undefined, { X: convertExpr(args[0], ctx) });
-        if (name === "get_distance" && ctx.ultrasonicFolded && args.length === 0) return block("esp_distance");
         const fn = ctx.functions.get(name);
         if (fn && fn.returns && args.length === fn.params.length) return callBlock("procedures_callreturn", name, fn.params, args, ctx);
         return fallback(node, ctx);
       }
-      const member = memberParts(callee, ctx);
-      if (member && member.prop === "value" && args.length === 0 && ctx.pins.has(member.obj)) return block("esp_pin_read", { VAR: { id: ctx.varId(member.obj) } });
       return fallback(node, ctx);
     }
     default:

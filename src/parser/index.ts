@@ -1,7 +1,9 @@
 import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
-import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody, isValidPin, returnsValue } from "./patterns";
+import { setupSpecs } from "@/devices/registry";
+import { functionParts, returnsValue } from "./patterns";
+import { isStandardHelper, matchSetupAt, setupLinesAt } from "./devices";
 import { escapeCommentLine, withComment } from "./builders";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
@@ -10,7 +12,10 @@ import type { BlockJson, ParseResult, WorkspaceJson } from "./types";
 export { normalizeCode } from "./normalize";
 export type { BlockJson, ParseResult, UnparsedItem, WorkspaceJson } from "./types";
 
-/** 대입·매개변수로 쓰인 이름을 모두 변수로 등록하고, 핀·PWM·함수 표와 접기 여부를 정한다 */
+/**
+ * 대입·매개변수로 쓰인 이름을 모두 변수로 등록하고, 함수 표를 만들고, 레지스트리의 준비 선언으로
+ * 장치 변수(ctx.devices)와 도우미까지 접힌 장치(ctx.folded)를 정한다.
+ */
 function survey(script: SyntaxNode, ctx: ParseContext): void {
   const walk = (node: SyntaxNode) => {
     if (node.name === "AssignStatement") {
@@ -26,45 +31,43 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
   // 함수 블록은 맨 바깥 def 만. 안쪽 def 는 code_stmt 로 남으니 등록하지 않는다.
   // 같은 이름의 def 가 또 나오면 뒤의 것은 code_stmt 로 남긴다 (블록 정의는 맨 위로 올라가므로 순서가 바뀌면 뜻이 바뀐다).
   // 기본값·*args·여러 값 return 이 있는 def 도 code_stmt 로 남으므로 함수 표에 올리지 않는다 (호출도 코드 블록이 된다).
-  const seenDefs = new Set<string>();
+  const defs = new Map<string, { params: string[]; body: SyntaxNode | null }>();
   for (const node of top) {
     if (node.name !== "FunctionDefinition") continue;
     const { name, params, body, simple } = functionParts(node, ctx);
-    if (seenDefs.has(name)) { ctx.duplicateDefs.add(node.from); continue; }
-    seenDefs.add(name);
+    if (defs.has(name)) { ctx.duplicateDefs.add(node.from); continue; }
+    defs.set(name, { params, body: simple ? body : null });
     if (simple) ctx.functions.set(name, { params, returns: returnsValue(body) });
   }
 
+  // 도우미 접기 후보: 모든 도우미가 같은 이름·매개변수·표준 본문의 최상위 def 로 있고, 준비 줄들도 최상위에 연달아 있다
   const texts = top.map((n) => ctx.src.slice(n).trim());
-  let hasTrig = false, hasEcho = false, hasI2c = false, hasOled = false, stdDistance = false, stdShow = false;
-  top.forEach((node, i) => {
-    const pin = RE_PIN_SETUP.exec(texts[i]);
-    if (pin && isValidPin(pin[2])) {
-      ctx.pins.add(pin[1]);
-      if (pin[1] === "trig" && pin[3] === "OUT") hasTrig = true;
-      if (pin[1] === "echo" && pin[3] === "IN") { hasEcho = true; ctx.echoPin = Number(pin[2]); }
+  const candidates = new Set<string>();
+  for (const spec of setupSpecs()) {
+    const helpers = spec.helpers ?? [];
+    if (!helpers.length || !helpers.every((h) => isStandardHelper(h, defs.get(h.name), ctx))) continue;
+    if (texts.some((_, i) => setupLinesAt(spec, texts, i))) candidates.add(spec.device.id);
+  }
+
+  // 문장 변환과 같은 순서로 준비 줄을 접어 보며 장치 변수를 미리 등록한다 (몸통 안의 메서드 호출이 쓴다).
+  // 후보인데 더 앞선 선언에 줄을 빼앗겨 접히지 못한 장치는 후보에서 빼고 다시 본다 (도우미 def 를 지우면 안 되므로).
+  for (;;) {
+    ctx.folded.clear();
+    ctx.devices.clear();
+    candidates.forEach((id) => ctx.folded.add(id));
+    const seen = new Set<string>();
+    for (let i = 0; i < texts.length; ) {
+      const m = matchSetupAt(texts, i, ctx);
+      if (!m) { i++; continue; }
+      ctx.registerDevice(m.vars, m.spec.device.id, m.spec.kind);
+      seen.add(m.spec.device.id);
+      i += m.consumed;
     }
-    const pwm = RE_PWM_SETUP.exec(texts[i]);
-    if (pwm && isValidPin(pwm[2])) {
-      const freq = RE_FREQ.exec(texts[i + 1] ?? "");
-      const duty = RE_DUTY.exec(texts[i + 2] ?? "");
-      if (freq?.[1] === pwm[1] && freq[2] === "50" && duty?.[1] === pwm[1] && duty[2] === "1638") ctx.servos.add(pwm[1]);
-      else ctx.pwms.add(pwm[1]);
-    }
-    const i2c = RE_I2C_SETUP.exec(texts[i]);
-    if (i2c && isValidPin(i2c[1]) && isValidPin(i2c[2])) hasI2c = true;
-    if (RE_OLED_SETUP.test(texts[i])) hasOled = true;
-    if (node.name === "FunctionDefinition") {
-      const { name, params, body, simple } = functionParts(node, ctx);
-      if (!simple || ctx.duplicateDefs.has(node.from)) return;
-      if (name === "get_distance" && params.length === 0 && body && isStandardBody(body, ctx, STANDARD_GET_DISTANCE)) stdDistance = true;
-      if (name === "show" && params.join(",") === "a,b" && body && isStandardBody(body, ctx, STANDARD_SHOW)) stdShow = true;
-    }
-  });
-  ctx.ultrasonicFolded = hasTrig && hasEcho && stdDistance;
-  ctx.oledFolded = hasI2c && hasOled && stdShow;
-  if (ctx.ultrasonicFolded) ctx.functions.delete("get_distance");
-  if (ctx.oledFolded) ctx.functions.delete("show");
+    const lost = [...candidates].filter((id) => !seen.has(id));
+    if (!lost.length) break;
+    lost.forEach((id) => candidates.delete(id));
+  }
+  for (const spec of setupSpecs()) if (ctx.folded.has(spec.device.id)) for (const h of spec.helpers ?? []) ctx.functions.delete(h.name);
 }
 
 /** 앞에 코드 없이 주석만 있는 줄들 (위치 순). `#` 와 그 뒤 공백 하나, 끝 공백을 뗀 글 */

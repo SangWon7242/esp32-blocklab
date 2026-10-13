@@ -4,13 +4,15 @@ import type { UnparsedItem } from "./types";
 
 export type FunctionInfo = { params: string[]; returns: boolean };
 
-/** 한 번 파싱하는 동안의 상태: 변수·핀·PWM·함수 표와 접기 여부 */
+/** 한 번 파싱하는 동안의 상태: 변수·장치·함수 표와 접기 여부 */
 export class ParseContext {
-  readonly src: Source;
+  /** 지금 노드 위치가 가리키는 글. 접힌 명령의 값 조각을 다시 파싱하는 동안(withSource)만 바뀐다 */
+  src: Source;
   readonly variables = new Map<string, string>();
-  readonly pins = new Set<string>();
-  readonly pwms = new Set<string>();
-  readonly servos = new Set<string>();
+  /** 장치 변수 이름 → 어느 장치의 어떤 종류인지 (메서드 패턴이 objKind 로 맞춘다) */
+  readonly devices = new Map<string, { deviceId: string; kind: string }>();
+  /** 도우미 함수까지 표준 본문으로 확인되어 접힌 장치 id. 그 장치의 call 패턴과 def 생략이 켜진다 */
+  readonly folded = new Set<string>();
   readonly functions = new Map<string, FunctionInfo>();
   readonly unparsed: UnparsedItem[] = [];
   /** 같은 이름이 앞에 이미 있는 맨 바깥 def 의 시작 위치. code_stmt 로 남긴다 */
@@ -20,9 +22,8 @@ export class ParseContext {
   /** 주석만 있는 줄들(위치 순). takeLeading 이 앞에서부터 하나씩 가져간다 */
   private commentLines: { from: number; text: string }[] = [];
   private commentIndex = 0;
-  ultrasonicFolded = false;
-  oledFolded = false;
-  echoPin = 12;
+  /** withSource 동안 조각의 1번 줄이 원문의 몇 번째 줄 다음인지 */
+  private lineBase = 0;
 
   constructor(text: string) { this.src = new Source(text); }
 
@@ -31,6 +32,18 @@ export class ParseContext {
     return this.variables.get(name)!;
   }
   hasVar(name: string): boolean { return this.variables.has(name); }
+
+  registerDevice(names: string[], deviceId: string, kind: string): void {
+    for (const n of names) { this.devices.set(n, { deviceId, kind }); this.varId(n); }
+  }
+
+  /** text 를 지금 글로 삼아 fn 을 부른다. 그 안의 markUnparsed 는 원문 line 번째 줄을 가리킨다 */
+  withSource<T>(text: string, line: number, fn: () => T): T {
+    const [src, base] = [this.src, this.lineBase];
+    this.src = new Source(text);
+    this.lineBase = base + line - 1;
+    try { return fn(); } finally { this.src = src; this.lineBase = base; }
+  }
 
   /** 주석만 있는 줄을 등록한다 (`#` 와 그 뒤 공백 하나를 뗀 내용) */
   setCommentLines(lines: { from: number; text: string }[]): void {
@@ -51,6 +64,6 @@ export class ParseContext {
   }
 
   markUnparsed(node: SyntaxNode, text = this.src.slice(node)): void {
-    this.unparsed.push({ line: this.src.lineOf(node.from), text });
+    this.unparsed.push({ line: this.lineBase + this.src.lineOf(node.from), text });
   }
 }

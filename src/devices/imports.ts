@@ -11,18 +11,13 @@ export const IMPORT_RULES: ImportRule[] = [
 export const MACHINE_NAMES = ["Pin", "PWM", "SoftI2C", "ADC"];
 
 /**
- * 파서가 지워도 되는 machine 이름. ADC 는 생성기가 가져오지만, 학생이 적은 `from machine import Pin, ADC` 에서
- * ADC 를 쓰지 않으면 다시 만들어지지 않으므로 지금은 지우지 않는다 (기존 왕복 테스트: 쓰지 않는 import 도 남는다).
- */
-const DROPPABLE_MACHINE_NAMES = new Set(["Pin", "PWM", "SoftI2C"]);
-
-/**
  * 생성기가 똑같이 다시 만드는 import 줄인지 (파서가 code_stmt 로 남기지 않고 지워도 되는지).
- * `from machine import …` 는 이름이 모두 생성 이름이고 `as` 가 없을 때, 그 밖에는 IMPORT_RULES 의 줄과 정확히 같을 때.
+ * `from machine import …` 는 이름이 모두 MACHINE_NAMES 이고 `as` 가 없을 때, 그 밖에는 IMPORT_RULES 의 줄과 정확히 같을 때.
+ * (지운 이름 중 코드에 `Name(` 이 남지 않는 것은 다시 생기지 않는다 — 쓰지 않는 import 이므로 괜찮다.)
  */
 export function isGeneratedImport(line: string): boolean {
   const from = /^from\s+machine\s+import\s+(.+)$/.exec(line);
-  if (from) return from[1].split(",").every((name) => DROPPABLE_MACHINE_NAMES.has(name.trim()));
+  if (from) return from[1].split(",").every((name) => MACHINE_NAMES.includes(name.trim()));
   const normalized = line.trim().replace(/\s+/g, " ");
   return IMPORT_RULES.some((r) => r.line === normalized);
 }

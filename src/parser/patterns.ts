@@ -4,35 +4,18 @@ import { normalizeCode } from "./normalize";
 import type { ParseContext } from "./context";
 import { isGeneratedImport } from "@/devices/imports";
 
-export const STANDARD_GET_DISTANCE = [
-  "trig.value(1)", "time.sleep_us(10)", "trig.value(0)", "while not echo.value():", "pass",
-  "start = time.ticks_us()", "while echo.value():", "pass", "stop = time.ticks_us()",
-  "t = time.ticks_diff(stop, start) // 2", "return int(340 * t // 10000)",
-];
-export const STANDARD_SHOW = ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"];
-
-export const RE_PIN_SETUP = /^(\w+)\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.(OUT|IN)\s*\)$/;
-export const RE_PWM_SETUP = /^(\w+)\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/;
-export const RE_FREQ = /^(\w+)\.freq\(\s*(\d+)\s*\)$/;
-export const RE_DUTY = /^(\w+)\.duty_u16\(\s*(\d+)\s*\)$/;
-export const RE_I2C_SETUP = /^i2c\s*=\s*SoftI2C\(\s*scl\s*=\s*Pin\(\s*(\d+)\s*\)\s*,\s*sda\s*=\s*Pin\(\s*(\d+)\s*\)\s*\)$/;
-export const RE_OLED_SETUP = /^oled\s*=\s*ssd1306\.SSD1306_I2C\(\s*128\s*,\s*64\s*,\s*i2c\s*\)$/;
-
 /**
  * 생성기가 똑같이 다시 만드는 import 인지 (레지스트리의 import 규칙). 나머지는 code_stmt 로 남겨야 사라지지 않는다.
+ * 준비 줄 정규식과 도우미 표준 본문은 레지스트리(src/devices)에 있고, 맞추기는 ./devices.ts 가 한다.
  */
-export function isKnownImport(text: string): boolean {
-  return isGeneratedImport(text);
-}
-
-/** ESP32 GPIO 번호(0~39). 블록의 핀 칸이 이 범위로 잘라 버리므로 밖의 번호는 준비 블록으로 바꾸지 않는다. */
-export const isValidPin = (text: string | number): boolean => Number(text) >= 0 && Number(text) <= 39;
+export const isKnownImport = isGeneratedImport;
 
 /** 함수 몸통의 문장들을 주석 없이, 들여쓰기 없이 한 줄씩 */
 export function bodyLines(body: SyntaxNode, ctx: ParseContext): string[] {
   return bodyStatements(body).flatMap((s) => normalizeCode(ctx.src.slice(s)).map((l) => l.trim()));
 }
 
+/** 몸통이 표준 본문(들여쓰기를 뗀 줄들)과 같은지. 도우미 접기가 쓴다 */
 export function isStandardBody(body: SyntaxNode, ctx: ParseContext, standard: string[]): boolean {
   const lines = bodyLines(body, ctx);
   return lines.length === standard.length && lines.every((l, i) => l === standard[i]);
