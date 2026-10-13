@@ -24,6 +24,12 @@ export function LabPage() {
   const debounceRef = useRef<number | undefined>(undefined);
   /** 아직 debounce 를 기다리는 코드. 탭을 바꿀 때 먼저 반영해야 마지막 입력이 사라지지 않는다 */
   const pendingCodeRef = useRef<string | null>(null);
+  /**
+   * 지금 기준. Radix Tabs 는 한 번 누를 때 onValueChange 를 두 번(mousedown, focus) 부르고, 두 번째는
+   * 다시 그리기 전의 state 를 보므로 옛 블록을 다시 올린다. 같은 쪽으로의 전환은 여기서 걸러 낸다.
+   */
+  const sourceRef = useRef(state.source);
+  sourceRef.current = state.source;
 
   // 코드가 기준일 때: 파싱 결과가 바뀌면 작업판에 올린다
   useEffect(() => {
@@ -50,6 +56,8 @@ export function LabPage() {
   }, []);
 
   const switchSource = (source: Source) => {
+    if (source === sourceRef.current) return;
+    sourceRef.current = source;
     let current = state;
     if (pendingCodeRef.current !== null) {
       window.clearTimeout(debounceRef.current);

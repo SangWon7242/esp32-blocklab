@@ -16,10 +16,27 @@ type Props = {
   className?: string;
 };
 
+const REVEAL_MARGIN = 24;
+
+/**
+ * 프로그램 왼쪽 위가 여백을 두고 보이도록 스크롤한다. 작업판 크기가 0이면 Blockly 가 스크롤을
+ * 0 폭 기준으로 잘라 두므로(첫 화면에서 시작 블록이 왼쪽에 잘리던 원인) 하지 않고 false 를 돌려준다.
+ */
+function revealProgram(ws: Blockly.WorkspaceSvg): boolean {
+  const host = ws.getInjectionDiv();
+  if (!host || host.clientWidth === 0 || host.clientHeight === 0) return false;
+  Blockly.svgResize(ws);
+  const box = ws.getBlocksBoundingBox();
+  ws.scroll(REVEAL_MARGIN - box.left * ws.scale, REVEAL_MARGIN - box.top * ws.scale);
+  return true;
+}
+
 export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, className }, ref) {
   const hostRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<Blockly.WorkspaceSvg | null>(null);
   const loadingRef = useRef(false);
+  /** load 했지만 작업판 크기가 0이라 아직 프로그램을 화면에 맞추지 못했다 */
+  const needsRevealRef = useRef(false);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -44,7 +61,10 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     };
     ws.addChangeListener(listener);
 
-    const observer = new ResizeObserver(() => Blockly.svgResize(ws));
+    const observer = new ResizeObserver(() => {
+      Blockly.svgResize(ws);
+      if (needsRevealRef.current && revealProgram(ws)) needsRevealRef.current = false;
+    });
     observer.observe(host);
     return () => {
       observer.disconnect();
@@ -63,6 +83,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
         Blockly.Events.disable();
         ws.clear();
         Blockly.serialization.workspaces.load(json, ws);
+        // 패널 크기가 아직 정해지지 않았으면(첫 화면) ResizeObserver 가 크기를 받은 뒤 맞춘다
+        needsRevealRef.current = !revealProgram(ws);
       } finally {
         Blockly.Events.enable();
         loadingRef.current = false;

@@ -5,6 +5,7 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirro
 import { python } from "@codemirror/lang-python";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
 import { cn } from "@/lib/utils";
+import { createEchoGuard } from "./echoGuard";
 
 type Props = {
   value: string;
@@ -44,6 +45,10 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, classNa
   const readOnlyComp = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  /** 편집기가 보낸 글. 늦게 돌아온 메아리로 문서를 덮어 막 친 글자를 지우지 않게 한다 */
+  const echoRef = useRef(createEchoGuard());
+  /** value 를 문서에 넣는 동안은 onChange 를 다시 보내지 않는다 */
+  const applyingRef = useRef(false);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -53,7 +58,12 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, classNa
       syntaxHighlighting(defaultHighlightStyle), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       readOnlyComp.current.of(EditorState.readOnly.of(readOnly)),
       errorLineField, theme,
-      EditorView.updateListener.of((u) => { if (u.docChanged) onChangeRef.current(u.state.doc.toString()); }),
+      EditorView.updateListener.of((u) => {
+        if (!u.docChanged || applyingRef.current) return;
+        const text = u.state.doc.toString();
+        echoRef.current.emitted(text);
+        onChangeRef.current(text);
+      }),
     ];
     const view = new EditorView({ state: EditorState.create({ doc: value, extensions }), parent: host });
     viewRef.current = view;
@@ -65,6 +75,7 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, classNa
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
+    if (readOnly) echoRef.current.reset();
     view.dispatch({ effects: readOnlyComp.current.reconfigure(EditorState.readOnly.of(readOnly)) });
   }, [readOnly]);
 
@@ -72,7 +83,14 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, classNa
     const view = viewRef.current;
     if (!view) return;
     const current = view.state.doc.toString();
-    if (current !== value) view.dispatch({ changes: { from: 0, to: current.length, insert: value } });
+    // 편집기가 보냈던 글이 debounce 뒤 돌아온 것이면 문서가 이미 더 앞서 있으니 그대로 둔다
+    if (current === value || echoRef.current.isEcho(value)) return;
+    applyingRef.current = true;
+    try {
+      view.dispatch({ changes: { from: 0, to: current.length, insert: value } });
+    } finally {
+      applyingRef.current = false;
+    }
   }, [value]);
 
   useEffect(() => {
