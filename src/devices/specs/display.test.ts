@@ -168,6 +168,31 @@ describe("7세그먼트 (dev_seg_setup)", () => {
     expect(r.types.slice(0, 3)).toEqual(["esp_pin_setup", "esp_pin_setup", "esp_pin_setup"]);
     expect(r.tops).toContain("procedures_defnoreturn");
   });
+  describe("SEGCODE 표를 고치면(13칸) 접지 않고 코드로 둔다 (핀 셋 + 코드, unparsed > 0)", () => {
+    const table = "SEGCODE = [0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39]";
+    const standard = "SEGCODE = [0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f]";
+    it("함수 정의 뒤에 둔 고친 표는 글자 그대로 왕복한다", () => {
+      const edited = code.replace(standard + "\n", "").replace("\n\nshow_digit(3, False)", `\n\n${table}\nshow_digit(3, False)`);
+      const r = fromCode(edited);
+      expect(r.types).not.toContain("dev_seg_setup");
+      expect(r.types.slice(0, 3)).toEqual(["esp_pin_setup", "esp_pin_setup", "esp_pin_setup"]);
+      expect(r.unparsed.length).toBeGreaterThan(0);
+      expect(r.code).toBe(edited);
+    });
+    it("준비 줄 자리에서 고친 표도 사라지지 않는다 (문장은 함수 정의 뒤로 옮겨지고, 그다음부터는 글자 그대로)", () => {
+      const r = fromCode(code.replace(standard, table));
+      expect(r.types).not.toContain("dev_seg_setup");
+      expect(r.unparsed.length).toBeGreaterThan(0);
+      expect(r.code).toContain(table + "\n");
+      expect(r.code).not.toContain(standard);
+      expect(fromCode(r.code).code).toBe(r.code);
+    });
+  });
+  it("SEGCODE 표가 표준이면 띄어쓰기가 달라도 접는다", () => {
+    const r = fromCode(code.replace("SEGCODE = [0x3f, 0x06,", "SEGCODE=[ 0x3f,0x06 ,"));
+    expect(r.types[0]).toBe("dev_seg_setup");
+    expect(r.code).toBe(code);
+  });
   it("7세그먼트 선언이 출력 핀 선언보다 앞에 있다", () => {
     const ids = DEVICES.map((d) => d.id);
     expect(ids.indexOf("seg7")).toBeLessThan(ids.indexOf("pin_out"));

@@ -9,7 +9,7 @@ export const ultrasonic: DeviceSpec = {
   id: "ultrasonic", category: "sensor", label: "초음파 센서", toolboxOrder: 46,
   setup: {
     blockType: "esp_ultrasonic_setup", message: "초음파 센서 준비하기 (trig 핀 %1, echo 핀 %2)",
-    parts: [pinNo("TRIG", 13), pinNo("ECHO", 12)],
+    parts: [pinNo("TRIG", 13, "out"), pinNo("ECHO", 12, "in")],
     tooltip: "trig/echo 핀을 만들고 거리를 재는 get_distance() 함수를 준비합니다.",
     lines: (v) => [`trig = Pin(${v.TRIG}, Pin.OUT)`, `echo = Pin(${v.ECHO}, Pin.IN)`],
     helpers: [
@@ -27,10 +27,10 @@ export const ultrasonic: DeviceSpec = {
       },
     ],
     kind: "ultrasonic",
+    provides: () => ["trig", "echo", "get_distance"],
     pattern: {
       lines: [/^trig\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.OUT\s*\)$/, /^echo\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.IN\s*\)$/],
       fields: ([t, e]) => (validPins(t[1], e[1]) ? { TRIG: t[1], ECHO: e[1] } : null),
-      vars: () => ["trig", "echo"],
     },
   },
   actions: [],
@@ -55,10 +55,11 @@ function adcSensor(id: string, label: string, subject: string, name: string, too
     setup: {
       blockType: `dev_${id}_setup`,
       message: `${subject} 핀 %1 에 준비하고 %2 이름 붙이기`,
-      parts: [{ kind: "pin", name: "PIN", default: 36, inputOnly: true }, { kind: "var", name: "VAR", default: name }],
+      parts: [pinNo("PIN", 36, "adc"), { kind: "var", name: "VAR", default: name }],
       tooltip: `${name} = ADC(Pin(36)) — 값은 0~4095 로 읽습니다.`,
       lines: (v) => adcLines(v.VAR, v.PIN),
       kind: "adc",
+      provides: (v) => [v.VAR],
       pattern: NO_SETUP_PATTERN,
     },
     actions: [],
@@ -78,14 +79,14 @@ export const dht11: DeviceSpec = {
   setup: {
     blockType: "dev_dht_setup",
     message: "온습도 센서(DHT11)를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 13), { kind: "var", name: "VAR", default: "dht11" }],
+    parts: [pinNo("PIN", 13, "bus"), { kind: "var", name: "VAR", default: "dht11" }], // 한 선으로 신호를 주고받는다
     tooltip: "dht11 = dht.DHT11(Pin(13)) — 측정하기 뒤에 온도·습도를 읽습니다.",
     lines: (v) => [`${v.VAR} = dht.DHT11(Pin(${v.PIN}))`],
     kind: "dht",
+    provides: (v) => [v.VAR],
     pattern: {
       lines: [/^(\w+)\s*=\s*dht\.DHT11\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/],
       fields: ([m]) => (validPins(m[2]) ? { PIN: m[2], VAR: m[1] } : null),
-      vars: ([m]) => [m[1]],
     },
   },
   actions: [
@@ -124,7 +125,6 @@ export const dht11: DeviceSpec = {
 const fixedAdcPattern = (name: string) => ({
   lines: adcPatternLines(),
   fields: ([a, b, c]: RegExpExecArray[]) => (a[1] === name && b[1] === name && c[1] === name && validPins(a[2]) ? { PIN: a[2] } : null),
-  vars: () => [name],
 });
 
 /** 서미스터 (dev_ntc_setup). 이름 ntc 고정, ntc_temperature() 도우미가 10kΩ NTC(B 3950)의 저항을 온도로 바꾼다 */
@@ -133,7 +133,7 @@ export const ntc: DeviceSpec = {
   setup: {
     blockType: "dev_ntc_setup",
     message: "서미스터를 핀 %1 에 준비하기",
-    parts: [{ kind: "pin", name: "PIN", default: 36, inputOnly: true }],
+    parts: [pinNo("PIN", 36, "adc")],
     tooltip: "ntc = ADC(Pin(36)) 와 온도(℃)를 돌려주는 ntc_temperature() 함수를 준비합니다.",
     lines: (v) => adcLines("ntc", v.PIN),
     helpers: [
@@ -147,6 +147,7 @@ export const ntc: DeviceSpec = {
       },
     ],
     kind: "adc",
+    provides: () => ["ntc", "ntc_temperature"],
     pattern: fixedAdcPattern("ntc"),
   },
   actions: [],
@@ -167,11 +168,12 @@ export const lm35: DeviceSpec = {
   setup: {
     blockType: "dev_lm35_setup",
     message: "LM35 온도 센서를 핀 %1 에 준비하기",
-    parts: [{ kind: "pin", name: "PIN", default: 36, inputOnly: true }],
+    parts: [pinNo("PIN", 36, "adc")],
     tooltip: "lm35 = ADC(Pin(36)) 와 온도(℃)를 돌려주는 lm35_temperature() 함수를 준비합니다.",
     lines: (v) => adcLines("lm35", v.PIN),
     helpers: [{ name: "lm35_temperature", params: "", body: ["return lm35.read() * 330 / 4095"] }],
     kind: "adc",
+    provides: () => ["lm35", "lm35_temperature"],
     pattern: fixedAdcPattern("lm35"),
   },
   actions: [],

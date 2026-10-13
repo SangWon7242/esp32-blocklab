@@ -1,12 +1,21 @@
 export type DeviceCategory = "pin" | "led" | "switch" | "sensor" | "sound" | "motor" | "display" | "input";
 
+/**
+ * 핀의 쓰임 (계획 2B 검사용). out: 출력(LED·릴레이·부저·서보·PWM·모터·7세그먼트·trig),
+ * in: 디지털 입력(버튼·틸트·PIR·echo·조이스틱 버튼·IR), adc: 아날로그 입력(ADC_PINS 중 하나여야),
+ * bus: 양방향 데이터 선(I2C scl/sda, DHT11 한 선 데이터). 출력·버스 핀은 입력 전용 핀(34~39)을 쓸 수 없다.
+ */
+export type PinDir = "out" | "in" | "adc" | "bus";
+
 /** 블록 한 칸. 필드(고정 값)와 값 입력(다른 블록이 끼워짐)을 메시지의 %n 순서대로 나열한다 */
 export type Part =
-  | { kind: "pin"; name: string; default: number; inputOnly?: boolean } // field_number 0..39
+  /** field_number 0..39. dir 이 "mode" 면 modeField 드롭다운 값(OUT→out, IN→in)이 쓰임을 정한다 (esp_pin_setup) */
+  | { kind: "pin"; name: string; default: number; dir: PinDir | "mode"; modeField?: string }
   | { kind: "var"; name: string; default: string }                      // field_variable (보통 "VAR")
   | { kind: "number"; name: string; default: number; min?: number; max?: number; precision?: number }
   | { kind: "dropdown"; name: string; options: [label: string, value: string][] }
-  | { kind: "text"; name: string; default: string }                     // field_input
+  /** field_input. validate 가 있으면 블록 칸이 맞지 않는 글을 받지 않는다 (src/blocks/index.ts 가 검사를 단다) */
+  | { kind: "text"; name: string; default: string; validate?: RegExp }
   | { kind: "colour"; name: string; default: string }                   // field_colour "#rrggbb"
   | { kind: "value"; name: string; check?: "Number" | "String" | "Boolean"; shadow?: number | string }; // input_value
 
@@ -21,14 +30,19 @@ export type Values = Record<string, string>;
  * - expr:   식 전체 텍스트의 정규식(값 블록 전용, 예: `button.value() == 0`). 그룹 1은 장치 변수 이름.
  * - lines:  (명령) 연속 문장 N개의 정규식. 몸통 안에서도 맞추며 method·call 보다 먼저 본다. values 의 값 입력 칸 글은 다시 식으로 파싱된다.
  * objPart 가 있는 꼴은 그 변수가 objKinds(기본: 자기 장치 준비의 kind)로 등록돼 있어야 맞는다.
+ * objName(고정 이름) method 꼴도 같다: 그 이름은 장치 준비가 접혀야(도우미가 있으면 도우미까지 접혀야) 장치 변수로 등록되므로,
+ * 준비가 접히지 않은 코드의 `oled.fill(0)` 같은 호출은 블록이 되지 않는다.
  * objPart 도 objName 도 없는 call·lines·expr 은 그 장치가 준비돼 있어야(도우미가 있으면 접혀 있어야) 맞는다 (src/parser/devices.ts).
  */
 export type SetupPattern = {
   lines: RegExp[];
   /** 정규식 매치 배열 → 필드 값. 핀 범위 밖이면 null 을 돌려 접지 않는다 */
   fields: (m: RegExpExecArray[]) => Values | null;
-  /** 접힌 뒤 ctx 에 등록할 장치 변수 이름들 (m 에서 뽑거나 고정 이름) */
-  vars: (m: RegExpExecArray[]) => string[];
+  /**
+   * 접힌 뒤 ctx 에 등록할 장치 변수 이름들. 없으면 준비의 provides(fields) 에서 도우미 이름을 뺀 것
+   * (registry.ts setupVars). provides 와 다를 때만 적는다.
+   */
+  vars?: (m: RegExpExecArray[]) => string[];
 };
 export type ActionPattern =
   | { kind: "none" }                                   // 파서가 되돌리지 않는 명령(다른 블록들로 돌아온다)
@@ -49,9 +63,17 @@ export type SetupSpec = {
   helpers?: HelperSpec[];
   /** 이 장치 변수들의 종류. 메서드 패턴이 objKind 로 맞춘다 */
   kind: string;
+  /**
+   * 이 준비가 프로그램에 만드는 이름: 변수(고정 이름 또는 VAR 필드 값)와 도우미 함수 이름.
+   * 변수 이름 검사(src/blocks/names.ts)와 파서의 장치 변수 등록(pattern.vars 기본값)이 쓴다.
+   */
+  provides: (v: Values) => string[];
   pattern: SetupPattern;
   libFiles?: string[];
 };
+
+/** 검사용 값 범위 (계획 2B). label 은 안내 문구에 쓰는 값 이름 */
+export type RangeSpec = { min: number; max: number; label: { ko: string; en: string } };
 
 export type ActionSpec = {
   blockType: string;
@@ -61,8 +83,13 @@ export type ActionSpec = {
   /** 명령 코드(줄바꿈 없이; 여러 줄이면 \n 으로 잇는다). 생성기가 끝에 \n 을 붙인다 */
   code: (v: Values) => string;
   pattern: ActionPattern;
-  /** 검사용 값 범위 (계획 2B) */
-  range?: Record<string, [number, number]>;
+  /** 검사용 값 범위 (계획 2B). 값 입력 이름 → 범위 */
+  range?: Record<string, RangeSpec>;
+  /**
+   * 변수 칸의 장치가 준비돼 있어야 하는 kind (계획 2B 검사용). 패턴이 none 이라 objKinds 가 없는 블록에 적는다
+   * (예: dev_led_blink → ["pin"]). 실제로 쓰는 값은 registry.ts requiredKinds(spec).
+   */
+  varKinds?: string[];
 };
 
 export type ValueSpec = Omit<ActionSpec, "code"> & {

@@ -1,7 +1,13 @@
-import type { Part, SetupPattern } from "../types";
+import type { Part, PinDir, SetupPattern } from "../types";
 
-/** 핀 번호 칸 (0~39) */
-export const pinNo = (name: string, d: number): Part => ({ kind: "pin", name, default: d });
+/** 핀 번호 칸 (0~39)과 그 핀의 쓰임 */
+export const pinNo = (name: string, d: number, dir: PinDir): Part => ({ kind: "pin", name, default: d, dir });
+
+/** ESP32 에서 ADC 로 읽을 수 있는 GPIO (ADC1: 32~39, ADC2: 0·2·4·12~15·25~27). dir "adc" 핀은 이 중 하나여야 한다 */
+export const ADC_PINS: readonly number[] = [0, 2, 4, 12, 13, 14, 15, 25, 26, 27, 32, 33, 34, 35, 36, 37, 38, 39];
+/** I2C 주소 칸(LCD·RFID)의 글: 16진수 1~2자리 */
+export const I2C_ADDR = /^0x[0-9a-fA-F]{1,2}$/;
+
 /** 패턴 정규식 조각: 이름 `(\w+)`, 숫자 `(\d+)` */
 export const RE_NAME = String.raw`(\w+)`;
 export const RE_PIN = String.raw`(\d+)`;
@@ -21,7 +27,7 @@ export const factor = (code: string): string => (/^[\w.]+$|^[\w.]+\([^()]*\)$/.t
 export const adcLines = (name: string, pin: string): string[] => [`${name} = ADC(Pin(${pin}))`, `${name}.atten(ADC.ATTN_11DB)`, `${name}.width(ADC.WIDTH_12BIT)`];
 
 /** 준비 줄을 다른 선언(esp_pin_setup·dev_adc_setup)이 접는 장치의 패턴. 값 패턴은 objPart + objKinds 로 그 변수에 맞춘다 */
-export const NO_SETUP_PATTERN: SetupPattern = { lines: [], fields: () => null, vars: () => [] };
+export const NO_SETUP_PATTERN: SetupPattern = { lines: [], fields: () => null };
 
 /** 아날로그 핀 준비 3줄의 패턴 정규식 (그룹 1은 이름, 첫 줄 그룹 2는 핀). 이름 셋이 같은지는 fields 가 본다 */
 export const adcPatternLines = (): RegExp[] => [

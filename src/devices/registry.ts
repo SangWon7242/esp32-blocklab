@@ -1,4 +1,4 @@
-import type { ActionSpec, DeviceCategory, DeviceSpec, SetupSpec, ValueSpec } from "./types";
+import type { ActionSpec, DeviceCategory, DeviceSpec, Part, SetupSpec, ValueSpec, Values } from "./types";
 import { adc, pinIn, pinOut, pwm } from "./specs/pin";
 import { flowLed, led, ledPwm, rgb } from "./specs/led";
 import { button, joystick, pir, tilt } from "./specs/switch";
@@ -42,6 +42,51 @@ export const findValueByBlock = (type: string): WithDevice<ValueSpec> | undefine
 /** 모든 준비 선언 (DEVICES 우선순위 순) */
 export const setupSpecs = (): WithDevice<SetupSpec>[] => [...setups.values()];
 export const devicesByCategory = (c: DeviceCategory): DeviceSpec[] => DEVICES.filter((d) => d.category === c);
+
+/**
+ * 이 명령·값 블록의 변수 칸 장치(변수 칸이 없으면 이 블록이 쓰는 장치)가 준비돼 있어야 하는 kind (계획 2B 검사용).
+ * varKinds → 패턴의 objKinds → 자기 장치 준비의 kind 순. 준비가 없는 묶음(print)은 빈 목록.
+ */
+export function requiredKinds(spec: ActionSpec | ValueSpec): string[] {
+  if (spec.varKinds) return spec.varKinds;
+  const p = spec.pattern;
+  if ((p.kind === "method" || p.kind === "lines" || p.kind === "expr") && p.objKinds) return p.objKinds;
+  const device = (actions.get(spec.blockType) ?? values.get(spec.blockType))?.device;
+  return device?.setup ? [device.setup.kind] : [];
+}
+
+/** 칸들의 기본값 (툴박스에서 꺼낸 그대로의 블록이 코드 템플릿에 넘기는 값). 값 입력은 shadow 글 또는 숫자 */
+export function defaultValues(parts: Part[]): Values {
+  const v: Values = {};
+  for (const p of parts) {
+    if (p.kind === "dropdown") v[p.name] = p.options[0][1];
+    else if (p.kind === "value") v[p.name] = typeof p.shadow === "string" ? JSON.stringify(p.shadow) : String(p.shadow ?? 0);
+    else v[p.name] = String(p.default);
+  }
+  return v;
+}
+
+/** 준비가 접힌 뒤 장치 변수로 등록할 이름: pattern.vars 가 없으면 provides(fields) 에서 도우미 이름을 뺀 것 */
+export function setupVars(spec: SetupSpec, fields: Values, ms: RegExpExecArray[]): string[] {
+  if (spec.pattern.vars) return spec.pattern.vars(ms);
+  const helpers = new Set((spec.helpers ?? []).map((h) => h.name));
+  return spec.provides(fields).filter((n) => !helpers.has(n));
+}
+
+/**
+ * 준비 블록이 고정해서 만드는 이름 (도우미 함수 이름 + VAR 칸이 아닌 고정 변수 이름). 학생 변수·함수가 이 이름을
+ * 덮으면 생성 코드가 깨지므로 src/blocks/names.ts 가 막는다.
+ */
+export function fixedSetupNames(): string[] {
+  const out = new Set<string>();
+  for (const s of setupSpecs()) {
+    const v = defaultValues(s.parts);
+    const varValues = new Set(s.parts.filter((p) => p.kind === "var").map((p) => v[p.name]));
+    for (const n of s.provides(v)) if (!varValues.has(n)) out.add(n);
+    for (const h of s.helpers ?? []) out.add(h.name);
+  }
+  return [...out];
+}
 
 /** 이 블록들 중 준비 블록이 쓰는 보드 라이브러리 파일 (public/lib/ 아래 이름, 중복 없이 DEVICES 순) */
 export function libFilesFor(blockTypes: string[]): string[] {

@@ -7,10 +7,11 @@ export const buzzerActive: DeviceSpec = {
   setup: {
     blockType: "dev_buzzer_setup",
     message: "부저를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 15), { kind: "var", name: "VAR", default: "buzzer" }],
+    parts: [pinNo("PIN", 15, "out"), { kind: "var", name: "VAR", default: "buzzer" }],
     tooltip: "buzzer = Pin(15, Pin.OUT) — 켜면 삐 소리가 납니다.",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.OUT)`],
     kind: "pin",
+    provides: (v) => [v.VAR],
     pattern: NO_SETUP_PATTERN,
   },
   actions: [],
@@ -35,10 +36,11 @@ export const buzzerPassive: DeviceSpec = {
   setup: {
     blockType: "dev_beeper_setup",
     message: "소리 나는 부저를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 15), { kind: "var", name: "VAR", default: "beeper" }],
+    parts: [pinNo("PIN", 15, "out"), { kind: "var", name: "VAR", default: "beeper" }],
     tooltip: "beeper = PWM(Pin(15)) — 처음에는 조용히(duty 0) 둡니다.",
     lines: (v) => [`${v.VAR} = PWM(Pin(${v.PIN}))`, `${v.VAR}.freq(440)`, `${v.VAR}.duty(0)`],
     kind: "beeper",
+    provides: (v) => [v.VAR],
     pattern: {
       lines: [
         new RegExp(String.raw`^${RE_NAME}\s*=\s*PWM\(\s*Pin\(\s*${RE_PIN}\s*\)\s*\)$`),
@@ -46,7 +48,6 @@ export const buzzerPassive: DeviceSpec = {
         new RegExp(String.raw`^${RE_NAME}\.duty\(\s*0\s*\)$`),
       ],
       fields: ([a, b, c]) => (a[1] === b[1] && a[1] === c[1] && validPins(a[2]) ? { PIN: a[2], VAR: a[1] } : null),
-      vars: ([a]) => [a[1]],
     },
   },
   actions: [
@@ -60,7 +61,7 @@ export const buzzerPassive: DeviceSpec = {
         lines: [/^(\w+)\.freq\((.+)\)$/, /^(\w+)\.duty\(512\)$/, /^time\.sleep\((.+)\)$/, /^(\w+)\.duty\(0\)$/],
         values: ([f, d, t, z]) => (f[1] === d[1] && f[1] === z[1] ? { VAR: f[1], HZ: f[2], SEC: t[1] } : null),
       },
-      range: { HZ: [20, 20000] },
+      range: { HZ: { min: 20, max: 20000, label: { ko: "주파수", en: "frequency" } } },
     },
     {
       blockType: "dev_beeper_note", message: "%1 로 %2 음을 %3 박 울리기",
@@ -68,6 +69,7 @@ export const buzzerPassive: DeviceSpec = {
       tooltip: "고른 음을 박 수만큼 울립니다 (한 박 = 0.5초).",
       code: (v) => toneCode(v.VAR, v.NOTE, `${factor(v.BEAT)} * 0.5`),
       pattern: { kind: "none" }, // 같은 4줄이라 음 높이(Hz) 블록으로 돌아온다
+      varKinds: ["beeper"],
     },
     {
       blockType: "dev_beeper_stop", message: "%1 소리 멈추기",

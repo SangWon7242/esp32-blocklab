@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock } from "./registry";
+import { defaultValues, DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupSpecs } from "./registry";
+import { ADC_PINS } from "./specs/common";
+import { setupLinesAt } from "@/parser/devices";
 import { deviceBlockDefinitions, deviceToolboxCategories } from "./toBlocks";
 import { collectImports } from "@/codegen/imports";
 import { isGeneratedImport } from "./imports";
@@ -71,5 +73,71 @@ describe("import 규칙", () => {
     expect(isGeneratedImport("import time as t")).toBe(false);
     expect(isGeneratedImport("from machine import Pin as P")).toBe(false);
     expect(isGeneratedImport("import random")).toBe(false);
+  });
+});
+
+describe("계획 2B 검사용 메타데이터", () => {
+  const commands = DEVICES.flatMap((d) => [...d.actions, ...d.values].map((spec) => ({ d, spec })));
+
+  it("print 가 아닌 모든 명령·값 블록은 requiredKinds 가 있다", () => {
+    for (const { d, spec } of commands) {
+      if (d.id === "print") expect(requiredKinds(spec), spec.blockType).toEqual([]);
+      else expect(requiredKinds(spec).length, spec.blockType).toBeGreaterThan(0);
+    }
+    expect(requiredKinds(findActionByBlock("dev_led_blink")!)).toEqual(["pin"]);
+    expect(requiredKinds(findActionByBlock("dev_beeper_note")!)).toEqual(["beeper"]);
+    expect(requiredKinds(findActionByBlock("esp_pin_write")!)).toEqual(["pin", "ultrasonic"]);
+    expect(requiredKinds(findValueByBlock("dev_adc_read")!)).toEqual(["adc"]);
+    expect(requiredKinds(findActionByBlock("dev_motor_stop")!)).toEqual(["motor"]);
+  });
+
+  it("모든 핀 칸에 쓰임(dir)이 있고, mode 는 OUT/IN 드롭다운을 가리키며, adc 핀 기본값은 ADC 핀이다", () => {
+    for (const d of DEVICES) for (const s of specsOf(d)) for (const p of s.parts) {
+      if (p.kind !== "pin") continue;
+      expect(["out", "in", "adc", "bus", "mode"], `${s.blockType}.${p.name}`).toContain(p.dir);
+      if (p.dir === "mode") {
+        const mode = s.parts.find((q) => q.name === p.modeField);
+        expect(mode?.kind === "dropdown" ? mode.options.map(([, v]) => v).sort() : null, s.blockType).toEqual(["IN", "OUT"]);
+      }
+      if (p.dir === "adc") expect(ADC_PINS, `${s.blockType}.${p.name}`).toContain(p.default);
+    }
+  });
+
+  it("값 범위는 값 입력 칸에 { min, max, label: { ko, en } } 로 적는다", () => {
+    for (const { spec } of commands) for (const [name, r] of Object.entries(spec.range ?? {})) {
+      expect(spec.parts.some((p) => p.name === name && p.kind === "value"), `${spec.blockType}.${name}`).toBe(true);
+      expect(r.min, `${spec.blockType}.${name}`).toBeLessThan(r.max);
+      expect(r.label.ko && r.label.en, `${spec.blockType}.${name}`).toBeTruthy();
+    }
+    expect(findActionByBlock("dev_servo_angle")!.range).toEqual({ ANGLE: { min: 0, max: 180, label: { ko: "각도", en: "angle" } } });
+  });
+
+  it("준비의 provides 는 비어 있지 않고 도우미 이름을 모두 담으며, 기본값 준비 줄을 접은 선언의 장치 변수와 같다", () => {
+    for (const s of setupSpecs()) {
+      const v = defaultValues(s.parts);
+      const provided = s.provides(v);
+      expect(provided.length, s.blockType).toBeGreaterThan(0);
+      const helpers = (s.helpers ?? []).map((h) => h.name);
+      expect(provided, s.blockType).toEqual(expect.arrayContaining(helpers));
+      // 이 준비 줄을 실제로 접는 선언 (자기 자신, 또는 같은 줄을 먼저 잡는 esp_pin_setup·dev_adc_setup·dev_button_setup)
+      const lines = s.lines(v);
+      const folder = setupSpecs().find((o) => setupLinesAt(o, lines, 0));
+      expect(folder, s.blockType).toBeTruthy();
+      expect(setupLinesAt(folder!, lines, 0)!.vars, s.blockType).toEqual(provided.filter((n) => !helpers.includes(n)));
+    }
+  });
+});
+
+describe("레지스트리 불변식", () => {
+  it("명령 lines 패턴의 첫 정규식은 어느 준비 블록의 첫 줄(기본값)에도 맞지 않는다", () => {
+    const firstLines = setupSpecs().map((s) => ({ type: s.blockType, line: s.lines(defaultValues(s.parts))[0] }));
+    for (const d of DEVICES) for (const a of d.actions) {
+      if (a.pattern.kind !== "lines") continue;
+      const re = a.pattern.lines[0];
+      for (const { type, line } of firstLines) {
+        re.lastIndex = 0;
+        expect(re.test(line), `${a.blockType} ↔ ${type}: ${line}`).toBe(false);
+      }
+    }
   });
 });

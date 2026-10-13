@@ -31,6 +31,51 @@ describe("입력 핀 (dev_pin_in_setup)", () => {
   });
 });
 
+describe("PWM 핀 주파수 (dev_pwm_freq)", () => {
+  const freq = (name: string, hz: B): B => ({ type: "dev_pwm_freq", fields: { VAR: v(name) }, inputs: { FREQ: { block: hz } } });
+  const blocks: B[] = [
+    { type: "esp_pwm_setup", fields: { VAR: v("pwm"), PIN: 2, FREQ: 1000 } },
+    freq("pwm", num(500)),
+    { type: "dev_pwm_duty10", fields: { VAR: v("pwm") }, inputs: { DUTY: { block: num(512) } } },
+  ];
+  const code = "from machine import Pin, PWM\n\npwm = PWM(Pin(2))\npwm.freq(1000)\n\npwm.freq(500)\npwm.duty(512)\n";
+
+  it("코드: pwm.freq(주파수)", () => {
+    expect(toCode(blocks, ["pwm"])).toBe(code);
+  });
+  it("왕복: 같은 블록들, unparsed 0", () => {
+    const r = fromCode(code);
+    expect(r.types).toEqual(["esp_pwm_setup", "dev_pwm_freq", "math_number", "dev_pwm_duty10", "math_number"]);
+    expect(r.body[0].fields).toEqual({ VAR: v("pwm"), PIN: 2, FREQ: 1000 });
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(code);
+  });
+  it("준비 2줄(x = PWM(Pin(2)), x.freq(1000))은 freq 블록이 아니라 준비 블록 하나로 접힌다", () => {
+    const r = fromCode("from machine import Pin, PWM\n\nx = PWM(Pin(2))\nx.freq(1000)\n");
+    expect(r.types).toEqual(["esp_pwm_setup"]);
+    expect(r.body[0].fields).toEqual({ VAR: v("x"), PIN: 2, FREQ: 1000 });
+  });
+  it("서보·수동 부저 변수의 freq 도 이 블록, 출력 핀 변수의 freq 는 아니다", () => {
+    const servo = fromCode("from machine import Pin, PWM\n\nservo = PWM(Pin(4))\nservo.freq(50)\nservo.duty_u16(1638)\n\nservo.freq(60)\n");
+    expect(servo.types).toEqual(["esp_servo_setup", "dev_pwm_freq", "math_number"]);
+    const beeper = fromCode("from machine import Pin, PWM\n\nbeeper = PWM(Pin(15))\nbeeper.freq(440)\nbeeper.duty(0)\n\nbeeper.freq(880)\n");
+    expect(beeper.types).toEqual(["dev_beeper_setup", "dev_pwm_freq", "math_number"]);
+    const pin = fromCode("from machine import Pin\n\nled = Pin(2, Pin.OUT)\n\nled.freq(5)\n");
+    expect(pin.types).not.toContain("dev_pwm_freq");
+  });
+  it("툴박스: PWM 핀 밑에 준비·세기·주파수, 그리고 0~1023 세기 블록 (이름 pwm)", () => {
+    const pin = deviceToolboxCategories().find((c) => c.name === "핀")!.contents;
+    const at = pin.findIndex((i) => i.kind === "label" && i.text === "PWM 핀");
+    expect(pin.slice(at, at + 5)).toEqual([
+      { kind: "label", text: "PWM 핀" },
+      { kind: "block", type: "esp_pwm_setup" },
+      { kind: "block", type: "esp_pwm_duty", inputs: { DUTY: { shadow: { type: "math_number", fields: { NUM: 32768 } } } } },
+      { kind: "block", type: "dev_pwm_freq", inputs: { FREQ: { shadow: { type: "math_number", fields: { NUM: 1000 } } } } },
+      { kind: "block", type: "dev_pwm_duty10", fields: { VAR: { name: "pwm" } }, inputs: { DUTY: { shadow: { type: "math_number", fields: { NUM: 512 } } } } },
+    ]);
+  });
+});
+
 describe("아날로그 핀 (dev_adc_setup)", () => {
   const blocks: B[] = [
     { type: "dev_adc_setup", fields: { PIN: 36, VAR: v("adc") } },

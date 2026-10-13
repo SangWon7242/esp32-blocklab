@@ -1,12 +1,12 @@
 import type { DeviceSpec } from "../types";
-import { pinNo, RE_PIN, validPins } from "./common";
+import { I2C_ADDR, pinNo, RE_PIN, validPins } from "./common";
 
 /** RFID (dev_rfid_setup). Keyestudio mfrc522_i2c 라이브러리. 이름 rc522 고정, card_present()·card_uid() 도우미 */
 export const rfid: DeviceSpec = {
   id: "rfid", category: "input", label: "RFID", toolboxOrder: 80,
   setup: {
     blockType: "dev_rfid_setup", message: "RFID 준비하기 (scl 핀 %1, sda 핀 %2, 주소 %3)",
-    parts: [pinNo("SCL", 22), pinNo("SDA", 21), { kind: "text", name: "ADDR", default: "0x28" }],
+    parts: [pinNo("SCL", 22, "bus"), pinNo("SDA", 21, "bus"), { kind: "text", name: "ADDR", default: "0x28", validate: I2C_ADDR }],
     tooltip: "rc522 = mfrc522(22, 21, 0x28) 과 카드를 읽는 card_present()·card_uid() 함수를 준비합니다.",
     lines: (v) => [`rc522 = mfrc522(${v.SCL}, ${v.SDA}, ${v.ADDR})`, "rc522.PCD_Init()"],
     helpers: [
@@ -14,10 +14,10 @@ export const rfid: DeviceSpec = {
       { name: "card_uid", params: "", body: ["return rc522.uid.uidByte[0:rc522.uid.size]"] },
     ],
     kind: "rfid",
+    provides: () => ["rc522", "card_present", "card_uid"],
     pattern: {
       lines: [/^rc522\s*=\s*mfrc522\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(0x[0-9a-fA-F]+)\s*\)$/, /^rc522\.PCD_Init\(\s*\)$/],
       fields: ([m]) => (validPins(m[1], m[2]) ? { SCL: m[1], SDA: m[2], ADDR: m[3] } : null),
-      vars: () => ["rc522"],
     },
     libFiles: ["mfrc522_i2c.py", "mfrc522_config.py", "soft_iic.py"],
   },
@@ -48,17 +48,21 @@ export const keypad: DeviceSpec = {
   id: "keypad", category: "input", label: "키패드", toolboxOrder: 81,
   setup: {
     blockType: "dev_keypad_setup", message: "4×4 키패드 준비하기 (행 핀 %1 %2 %3 %4, 열 핀 %5 %6 %7 %8)",
-    parts: [pinNo("R1", 26), pinNo("R2", 25), pinNo("R3", 17), pinNo("R4", 16), pinNo("C1", 27), pinNo("C2", 14), pinNo("C3", 12), pinNo("C4", 13)],
+    // 라이브러리가 행 핀을 출력으로, 열 핀을 풀다운 입력으로 쓴다
+    parts: [
+      pinNo("R1", 26, "out"), pinNo("R2", 25, "out"), pinNo("R3", 17, "out"), pinNo("R4", 16, "out"),
+      pinNo("C1", 27, "in"), pinNo("C2", 14, "in"), pinNo("C3", 12, "in"), pinNo("C4", 13, "in"),
+    ],
     tooltip: "keypad = KeyPad(행 핀 4개, 열 핀 4개)",
     lines: (v) => [`keypad = KeyPad(${KEYPAD_PINS.map((p) => v[p]).join(", ")})`],
     kind: "keypad",
+    provides: () => ["keypad"],
     pattern: {
       lines: [new RegExp(String.raw`^keypad\s*=\s*KeyPad\(\s*${Array(8).fill(RE_PIN).join(String.raw`\s*,\s*`)}\s*\)$`)],
       fields: ([m]) => {
         const pins = m.slice(1, 9);
         return validPins(...pins) ? Object.fromEntries(KEYPAD_PINS.map((p, i) => [p, pins[i]])) : null;
       },
-      vars: () => ["keypad"],
     },
     libFiles: ["keypad.py"],
   },
@@ -79,14 +83,14 @@ export const ir: DeviceSpec = {
   id: "ir", category: "input", label: "IR 리모컨", toolboxOrder: 82,
   setup: {
     blockType: "dev_ir_setup", message: "IR 수신기를 핀 %1 에 준비하기",
-    parts: [pinNo("PIN", 5)],
+    parts: [pinNo("PIN", 5, "in")],
     tooltip: "ir = irGetCMD(5) — 리모컨 신호를 받습니다.",
     lines: (v) => [`ir = irGetCMD(${v.PIN})`],
     kind: "ir",
+    provides: () => ["ir"],
     pattern: {
       lines: [/^ir\s*=\s*irGetCMD\(\s*(\d+)\s*\)$/],
       fields: ([m]) => (validPins(m[1]) ? { PIN: m[1] } : null),
-      vars: () => ["ir"],
     },
     libFiles: ["irrecvdata.py"],
   },

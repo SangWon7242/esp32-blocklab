@@ -6,14 +6,14 @@ export const servo: DeviceSpec = {
   id: "servo", category: "motor", label: "서보 모터", toolboxOrder: 60,
   setup: {
     blockType: "esp_servo_setup", message: "서보 %1 을(를) 핀 %2 에 준비하기 (처음엔 닫기)",
-    parts: [{ kind: "var", name: "VAR", default: "servo" }, pinNo("PIN", 4)],
+    parts: [{ kind: "var", name: "VAR", default: "servo" }, pinNo("PIN", 4, "out")],
     tooltip: "servo = PWM(Pin(4)); servo.freq(50); servo.duty_u16(1638)",
     lines: (v) => [`${v.VAR} = PWM(Pin(${v.PIN}))`, `${v.VAR}.freq(50)`, `${v.VAR}.duty_u16(1638)`],
     kind: "servo",
+    provides: (v) => [v.VAR],
     pattern: {
       lines: [/^(\w+)\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/, /^(\w+)\.freq\(\s*50\s*\)$/, /^(\w+)\.duty_u16\(\s*1638\s*\)$/],
       fields: ([a, b, c]) => (a[1] === b[1] && a[1] === c[1] && validPins(a[2]) ? { VAR: a[1], PIN: a[2] } : null),
-      vars: ([a]) => [a[1]],
     },
   },
   actions: [
@@ -35,7 +35,7 @@ export const servo: DeviceSpec = {
         lines: [/^(\w+)\.duty_u16\(1638 \+ (.+) \* 6462 \/\/ 180\)$/],
         values: ([m]) => (isSingleOperand(m[2]) ? { VAR: m[1], ANGLE: m[2] } : null),
       },
-      range: { ANGLE: [0, 180] },
+      range: { ANGLE: { min: 0, max: 180, label: { ko: "각도", en: "angle" } } },
     },
   ],
   values: [],
@@ -47,7 +47,7 @@ export const dcMotor: DeviceSpec = {
   setup: {
     blockType: "dev_motor_setup",
     message: "DC 모터 준비하기 (IN+ 핀 %1, IN- 핀 %2)",
-    parts: [pinNo("A", 13), pinNo("B", 12)],
+    parts: [pinNo("A", 13, "out"), pinNo("B", 12, "out")],
     tooltip: "motor1a/motor1b PWM 핀과 forward·backward·stop 함수를 준비합니다.",
     lines: (v) => [`motor1a = PWM(Pin(${v.A}))`, `motor1b = PWM(Pin(${v.B}))`, "motor1a.freq(1000)", "motor1b.freq(1000)"],
     helpers: [
@@ -56,6 +56,7 @@ export const dcMotor: DeviceSpec = {
       { name: "stop", params: "", body: ["motor1a.duty(0)", "motor1b.duty(0)"] },
     ],
     kind: "motor",
+    provides: () => ["motor1a", "motor1b", "forward", "backward", "stop"],
     pattern: {
       lines: [
         /^motor1a\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/,
@@ -64,7 +65,6 @@ export const dcMotor: DeviceSpec = {
         /^motor1b\.freq\(\s*1000\s*\)$/,
       ],
       fields: ([a, b]) => (validPins(a[1], b[1]) ? { A: a[1], B: b[1] } : null),
-      vars: () => ["motor1a", "motor1b"],
     },
   },
   actions: [
@@ -74,7 +74,7 @@ export const dcMotor: DeviceSpec = {
       tooltip: "forward(속도) — 0~1023",
       code: (v) => `forward(${v.SPEED})`,
       pattern: { kind: "call", name: "forward", args: [null] },
-      range: { SPEED: [0, 1023] },
+      range: { SPEED: { min: 0, max: 1023, label: { ko: "속도", en: "speed" } } },
     },
     {
       blockType: "dev_motor_backward", message: "모터 뒤로 (속도 %1)",
@@ -82,7 +82,7 @@ export const dcMotor: DeviceSpec = {
       tooltip: "backward(속도) — 0~1023",
       code: (v) => `backward(${v.SPEED})`,
       pattern: { kind: "call", name: "backward", args: [null] },
-      range: { SPEED: [0, 1023] },
+      range: { SPEED: { min: 0, max: 1023, label: { ko: "속도", en: "speed" } } },
     },
     {
       blockType: "dev_motor_stop", message: "모터 정지", parts: [],
@@ -100,10 +100,11 @@ export const relay: DeviceSpec = {
   setup: {
     blockType: "dev_relay_setup",
     message: "릴레이를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 16), { kind: "var", name: "VAR", default: "relay" }],
+    parts: [pinNo("PIN", 16, "out"), { kind: "var", name: "VAR", default: "relay" }],
     tooltip: "relay = Pin(16, Pin.OUT) — 켜면 연결된 회로가 이어집니다.",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.OUT)`],
     kind: "pin",
+    provides: (v) => [v.VAR],
     pattern: NO_SETUP_PATTERN,
   },
   actions: [],

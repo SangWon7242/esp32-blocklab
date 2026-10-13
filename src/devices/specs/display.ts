@@ -1,5 +1,5 @@
 import type { DeviceSpec, Part } from "../types";
-import { isSingleArg, pinNo, validPins } from "./common";
+import { I2C_ADDR, isSingleArg, pinNo, validPins } from "./common";
 
 const numIn = (name: string, shadow: number): Part => ({ kind: "value", name, check: "Number", shadow });
 
@@ -8,18 +8,18 @@ export const oled: DeviceSpec = {
   id: "oled", category: "display", label: "OLED", toolboxOrder: 70,
   setup: {
     blockType: "esp_oled_setup", message: "OLED 화면 준비하기 (scl 핀 %1, sda 핀 %2)",
-    parts: [pinNo("SCL", 22), pinNo("SDA", 21)],
+    parts: [pinNo("SCL", 22, "bus"), pinNo("SDA", 21, "bus")],
     tooltip: "i2c 와 oled 를 만들고 두 줄을 띄우는 show(a, b) 함수를 준비합니다.",
     lines: (v) => [`i2c = SoftI2C(scl=Pin(${v.SCL}), sda=Pin(${v.SDA}))`, "oled = ssd1306.SSD1306_I2C(128, 64, i2c)"],
     helpers: [{ name: "show", params: "a, b", body: ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"] }],
     kind: "oled",
+    provides: () => ["i2c", "oled", "show"],
     pattern: {
       lines: [
         /^i2c\s*=\s*SoftI2C\(\s*scl\s*=\s*Pin\(\s*(\d+)\s*\)\s*,\s*sda\s*=\s*Pin\(\s*(\d+)\s*\)\s*\)$/,
         /^oled\s*=\s*ssd1306\.SSD1306_I2C\(\s*128\s*,\s*64\s*,\s*i2c\s*\)$/,
       ],
       fields: ([m]) => (validPins(m[1], m[2]) ? { SCL: m[1], SDA: m[2] } : null),
-      vars: () => ["i2c", "oled"],
     },
     libFiles: ["ssd1306.py"],
   },
@@ -73,10 +73,11 @@ export const lcd: DeviceSpec = {
   id: "lcd", category: "display", label: "LCD 128×32", toolboxOrder: 71,
   setup: {
     blockType: "dev_lcd_setup", message: "LCD 128×32 준비하기 (sda 핀 %1, scl 핀 %2, 주소 %3)",
-    parts: [pinNo("SDA", 21), pinNo("SCL", 22), { kind: "text", name: "ADDR", default: "0x3f" }],
+    parts: [pinNo("SDA", 21, "bus"), pinNo("SCL", 22, "bus"), { kind: "text", name: "ADDR", default: "0x3f", validate: I2C_ADDR }],
     tooltip: "lcd = lcd128_32(21, 22, 0, 0x3f) — LCD 를 켜고 지웁니다.",
     lines: (v) => [`lcd = lcd128_32(${v.SDA}, ${v.SCL}, 0, ${v.ADDR})`, "lcd.Init()", "lcd.Clear()"],
     kind: "lcd",
+    provides: () => ["lcd"],
     pattern: {
       lines: [
         /^lcd\s*=\s*lcd128_32\(\s*(\d+)\s*,\s*(\d+)\s*,\s*0\s*,\s*(0x[0-9a-fA-F]+)\s*\)$/,
@@ -84,7 +85,6 @@ export const lcd: DeviceSpec = {
         /^lcd\.Clear\(\s*\)$/,
       ],
       fields: ([m]) => (validPins(m[1], m[2]) ? { SDA: m[1], SCL: m[2], ADDR: m[3] } : null),
-      vars: () => ["lcd"],
     },
     libFiles: ["lcd128_32.py", "lcd128_32_fonts.py"],
   },
@@ -111,6 +111,9 @@ export const lcd: DeviceSpec = {
   values: [],
 };
 
+/** 표준 숫자 모양표 (0~9). 준비 줄과 패턴이 함께 쓴다 */
+const SEGCODE = ["0x3f", "0x06", "0x5b", "0x4f", "0x66", "0x6d", "0x7d", "0x07", "0x7f", "0x6f"];
+
 /**
  * 7세그먼트 (dev_seg_setup). 74HC595 로 한 자리를 켠다. 이름 si/rck/sck/SEGCODE 고정, hc595_shift·show_digit 도우미.
  * si·rck·sck 줄은 출력 핀 1줄과 같은 꼴이라 레지스트리에서 pinOut 보다 앞에 둔다 (도우미가 표준이 아니면 출력 핀 셋으로 떨어진다).
@@ -119,11 +122,11 @@ export const seg7: DeviceSpec = {
   id: "seg7", category: "display", label: "7세그먼트", toolboxOrder: 72,
   setup: {
     blockType: "dev_seg_setup", message: "7세그먼트 준비하기 (SI 핀 %1, RCK 핀 %2, SCK 핀 %3)",
-    parts: [pinNo("SI", 5), pinNo("RCK", 23), pinNo("SCK", 18)],
+    parts: [pinNo("SI", 5, "out"), pinNo("RCK", 23, "out"), pinNo("SCK", 18, "out")],
     tooltip: "74HC595 의 세 핀과 숫자 모양표 SEGCODE, show_digit(숫자, 점) 함수를 준비합니다.",
     lines: (v) => [
       `si = Pin(${v.SI}, Pin.OUT)`, `rck = Pin(${v.RCK}, Pin.OUT)`, `sck = Pin(${v.SCK}, Pin.OUT)`,
-      "SEGCODE = [0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f]",
+      `SEGCODE = [${SEGCODE.join(", ")}]`,
     ],
     helpers: [
       {
@@ -141,15 +144,16 @@ export const seg7: DeviceSpec = {
       { name: "show_digit", params: "n, dot", body: ["hc595_shift(SEGCODE[n] | (0x80 if dot else 0))"] },
     ],
     kind: "seg7",
+    provides: () => ["si", "rck", "sck", "SEGCODE", "hc595_shift", "show_digit"],
     pattern: {
       lines: [
         /^si\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.OUT\s*\)$/,
         /^rck\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.OUT\s*\)$/,
         /^sck\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.OUT\s*\)$/,
-        /^SEGCODE\s*=\s*\[.*\]$/,
+        // 표준 표와 값이 똑같을 때만 (띄어쓰기는 무관). 고친 표를 접으면 표준 10칸으로 다시 만들어져 바뀐 값이 사라진다
+        new RegExp(String.raw`^SEGCODE\s*=\s*\[\s*${SEGCODE.join(String.raw`\s*,\s*`)}\s*\]$`),
       ],
       fields: ([a, b, c]) => (validPins(a[1], b[1], c[1]) ? { SI: a[1], RCK: b[1], SCK: c[1] } : null),
-      vars: () => ["si", "rck", "sck", "SEGCODE"],
     },
   },
   actions: [
@@ -159,7 +163,7 @@ export const seg7: DeviceSpec = {
       tooltip: "show_digit(숫자, 점) — 0~9 한 자리를 보여 줍니다.",
       code: (v) => `show_digit(${v.N}, ${v.DOT})`,
       pattern: { kind: "call", name: "show_digit", args: [null, ["False", "True"]] },
-      range: { N: [0, 9] },
+      range: { N: { min: 0, max: 9, label: { ko: "숫자", en: "digit" } } },
     },
     {
       blockType: "dev_seg_clear", message: "7세그먼트 지우기", parts: [],

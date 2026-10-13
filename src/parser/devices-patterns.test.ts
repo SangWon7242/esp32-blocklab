@@ -15,9 +15,9 @@ vi.mock("@/devices/registry", async (importOriginal) => {
   const beeper: D = {
     id: "fake_beeper", category: "sound", label: "가짜 부저",
     setup: {
-      blockType: "fake_beeper_setup", message: "부저 %1 핀 %2", parts: [{ kind: "var", name: "VAR", default: "beeper" }, { kind: "pin", name: "PIN", default: 15 }], tooltip: "",
+      blockType: "fake_beeper_setup", message: "부저 %1 핀 %2", parts: [{ kind: "var", name: "VAR", default: "beeper" }, { kind: "pin", name: "PIN", default: 15, dir: "out" }], tooltip: "",
       lines: (x) => [`${x.VAR} = PWM(Pin(${x.PIN}))`, `${x.VAR}.freq(440)`, `${x.VAR}.duty(0)`],
-      kind: "beeper",
+      kind: "beeper", provides: (x) => [x.VAR],
       pattern: {
         lines: [/^(\w+)\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/, /^(\w+)\.freq\(\s*440\s*\)$/, /^(\w+)\.duty\(\s*0\s*\)$/],
         fields: ([a, b, c]) => (a[1] === b[1] && a[1] === c[1] ? { VAR: a[1], PIN: a[2] } : null),
@@ -51,8 +51,8 @@ vi.mock("@/devices/registry", async (importOriginal) => {
   const lcd: D = {
     id: "fake_lcd", category: "display", label: "가짜 LCD",
     setup: {
-      blockType: "fake_lcd_setup", message: "LCD 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 21 }], tooltip: "",
-      lines: (x) => [`lcd = LCD(${x.PIN})`], kind: "lcd",
+      blockType: "fake_lcd_setup", message: "LCD 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 21, dir: "out" }], tooltip: "",
+      lines: (x) => [`lcd = LCD(${x.PIN})`], kind: "lcd", provides: () => ["lcd"],
       pattern: { lines: [/^lcd\s*=\s*LCD\((\d+)\)$/], fields: ([m]) => ({ PIN: m[1] }), vars: () => ["lcd"] },
     },
     actions: [
@@ -73,8 +73,8 @@ vi.mock("@/devices/registry", async (importOriginal) => {
   const tilt: D = {
     id: "fake_tilt", category: "switch", label: "가짜 틸트",
     setup: {
-      blockType: "fake_tilt_setup", message: "틸트 핀 %1 %2", parts: [{ kind: "pin", name: "PIN", default: 14 }, v("VAR")], tooltip: "",
-      lines: (x) => [`${x.VAR} = Pin(${x.PIN}, Pin.IN)`], kind: "pin",
+      blockType: "fake_tilt_setup", message: "틸트 핀 %1 %2", parts: [{ kind: "pin", name: "PIN", default: 14, dir: "out" }, v("VAR")], tooltip: "",
+      lines: (x) => [`${x.VAR} = Pin(${x.PIN}, Pin.IN)`], kind: "pin", provides: (x) => [x.VAR],
       pattern: { lines: [], fields: () => null, vars: () => [] },
     },
     actions: [],
@@ -89,10 +89,10 @@ vi.mock("@/devices/registry", async (importOriginal) => {
   const motor: D = {
     id: "fake_motor", category: "motor", label: "가짜 모터",
     setup: {
-      blockType: "fake_motor_setup", message: "모터 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 13 }], tooltip: "",
+      blockType: "fake_motor_setup", message: "모터 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 13, dir: "out" }], tooltip: "",
       lines: (x) => [`m = Motor(${x.PIN})`],
       helpers: [{ name: "go", params: "speed, dir", body: ["if dir:", "  m.on(speed)", "else:", "  m.off()"] }],
-      kind: "motor",
+      kind: "motor", provides: () => ["m", "go"],
       pattern: { lines: [/^m\s*=\s*Motor\((\d+)\)$/], fields: ([x]) => ({ PIN: x[1] }), vars: () => ["m"] },
     },
     actions: [

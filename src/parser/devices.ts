@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "@lezer/common";
-import { DEVICES, setupSpecs } from "@/devices/registry";
+import { DEVICES, setupSpecs, setupVars } from "@/devices/registry";
 import type { DeviceSpec, HelperSpec, Part, SetupSpec, Values } from "@/devices/types";
 import { block } from "./builders";
 import type { ParseContext } from "./context";
@@ -39,7 +39,7 @@ export function setupLinesAt(spec: SetupSpec, texts: string[], i: number): { fie
   const ms = execLines(spec.pattern.lines, texts, i);
   if (!ms) return null;
   const fields = spec.pattern.fields(ms);
-  return fields ? { fields, vars: spec.pattern.vars(ms) } : null;
+  return fields ? { fields, vars: setupVars(spec, fields, ms) } : null;
 }
 
 /** 최상위 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. 도우미가 있는 선언은 ctx.folded 에 그 장치가 있을 때만 */

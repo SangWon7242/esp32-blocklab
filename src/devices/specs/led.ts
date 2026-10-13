@@ -10,15 +10,15 @@ export const ledPwm: DeviceSpec = {
   setup: {
     blockType: "dev_led_pwm_setup",
     message: "밝기 조절 LED를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 26), { kind: "var", name: "VAR", default: "led" }],
+    parts: [pinNo("PIN", 26, "out"), { kind: "var", name: "VAR", default: "led" }],
     tooltip: "led = PWM(Pin(26)); led.freq(1000) — 밝기를 0~1023 세기로 조절합니다.",
     lines: (v) => [`${v.VAR} = PWM(Pin(${v.PIN}))`, `${v.VAR}.freq(1000)`],
     kind: "pwm",
+    provides: (v) => [v.VAR],
     pattern: {
       lines: [new RegExp(String.raw`^${RE_NAME}\s*=\s*PWM\(\s*Pin\(\s*${RE_PIN}\s*\)\s*\)$`), new RegExp(String.raw`^${RE_NAME}\.freq\(\s*(\d+)\s*\)$`)],
       // esp_pwm_setup 의 기본 주파수도 1000 이라 같은 줄을 낸다. 이름이 led 로 시작할 때만 밝기 LED 로 접는다 (나머지는 pwm 선언이 잡는다)
       fields: ([a, b]) => (a[1] === b[1] && b[2] === "1000" && /^led/.test(a[1]) && validPins(a[2]) ? { PIN: a[2], VAR: a[1] } : null),
-      vars: ([a]) => [a[1]],
     },
   },
   actions: [
@@ -33,7 +33,7 @@ export const ledPwm: DeviceSpec = {
         lines: [/^(\w+)\.duty\(int\((.+) \* 1023 \/ 100\)\)$/],
         values: ([m]) => (isSingleOperand(m[2]) ? { VAR: m[1], PCT: m[2] } : null),
       },
-      range: { PCT: [0, 100] },
+      range: { PCT: { min: 0, max: 100, label: { ko: "밝기", en: "brightness" } } },
     },
     {
       blockType: "dev_pwm_duty10", message: "%1 세기를 %2 로 정하기 (0~1023)",
@@ -41,7 +41,7 @@ export const ledPwm: DeviceSpec = {
       tooltip: "led.duty(0~1023)",
       code: (v) => `${v.VAR}.duty(${v.DUTY})`,
       pattern: { kind: "method", name: "duty", args: [null], objPart: "VAR", objKinds: ["pwm"] },
-      range: { DUTY: [0, 1023] },
+      range: { DUTY: { min: 0, max: 1023, label: { ko: "세기", en: "duty" } } },
     },
   ],
   values: [],
@@ -57,7 +57,8 @@ export const led: DeviceSpec = {
       tooltip: "켜고 기다리고 끄고 기다리기를 정한 번만큼 되풀이합니다.",
       code: (v) => [`for i in range(${v.TIMES}):`, `    ${v.VAR}.value(1)`, `    time.sleep(${v.SEC})`, `    ${v.VAR}.value(0)`, `    time.sleep(${v.SEC})`].join("\n"),
       pattern: { kind: "none" },
-      range: { TIMES: [1, 1000] },
+      varKinds: ["pin"],
+      range: { TIMES: { min: 1, max: 1000, label: { ko: "횟수", en: "times" } } },
     },
   ],
   values: [],
@@ -72,7 +73,7 @@ export const rgb: DeviceSpec = {
   setup: {
     blockType: "dev_rgb_setup",
     message: "RGB LED 준비하기 (빨강 핀 %1, 초록 핀 %2, 파랑 핀 %3)",
-    parts: [pinNo("R", 27), pinNo("G", 25), pinNo("B", 26)],
+    parts: [pinNo("R", 27, "out"), pinNo("G", 25, "out"), pinNo("B", 26, "out")],
     tooltip: "red/green/blue PWM 핀을 만들고 색을 정하는 set_color(r, g, b) 함수를 준비합니다.",
     lines: (v) => [
       `red = PWM(Pin(${v.R}))`, `green = PWM(Pin(${v.G}))`, `blue = PWM(Pin(${v.B}))`,
@@ -80,13 +81,13 @@ export const rgb: DeviceSpec = {
     ],
     helpers: [{ name: "set_color", params: "r, g, b", body: ["red.duty(r * 1023 // 255)", "green.duty(g * 1023 // 255)", "blue.duty(b * 1023 // 255)"] }],
     kind: "rgb",
+    provides: () => [...RGB_NAMES, "set_color"],
     pattern: {
       lines: [
         ...RGB_NAMES.map((n) => new RegExp(String.raw`^${n}\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$`)),
         ...RGB_NAMES.map((n) => new RegExp(String.raw`^${n}\.freq\(\s*1000\s*\)$`)),
       ],
       fields: ([r, g, b]) => (validPins(r[1], g[1], b[1]) ? { R: r[1], G: g[1], B: b[1] } : null),
-      vars: () => [...RGB_NAMES],
     },
   },
   actions: [
@@ -115,7 +116,11 @@ export const rgb: DeviceSpec = {
       tooltip: "set_color(빨강, 초록, 파랑) — 각각 0~255",
       code: (v) => `set_color(${v.R}, ${v.G}, ${v.B})`,
       pattern: { kind: "call", name: "set_color", args: [null, null, null] },
-      range: { R: [0, 255], G: [0, 255], B: [0, 255] },
+      range: {
+        R: { min: 0, max: 255, label: { ko: "빨강", en: "red" } },
+        G: { min: 0, max: 255, label: { ko: "초록", en: "green" } },
+        B: { min: 0, max: 255, label: { ko: "파랑", en: "blue" } },
+      },
     },
     {
       blockType: "dev_rgb_off", message: "RGB 끄기", parts: [],
@@ -133,7 +138,7 @@ export const flowLed: DeviceSpec = {
   setup: {
     blockType: "dev_flow_setup",
     message: "흐르는 LED 준비하기 (핀 목록 %1)",
-    parts: [{ kind: "text", name: "PINS", default: "18, 5, 14, 17, 26" }],
+    parts: [{ kind: "text", name: "PINS", default: "18, 5, 14, 17, 26", validate: /^\d+(\s*,\s*\d+)*$/ }],
     tooltip: "pins 목록을 만들고 LED 를 차례로 켜는 flow_leds(ms) 함수를 준비합니다.",
     lines: (v) => [`pins = [${v.PINS}]`],
     helpers: [
@@ -143,13 +148,13 @@ export const flowLed: DeviceSpec = {
       },
     ],
     kind: "flow",
+    provides: () => ["pins", "flow_leds"],
     pattern: {
       lines: [/^pins\s*=\s*\[([\d,\s]+)\]$/],
       fields: ([m]) => {
         const pins = m[1].split(",").map((s) => s.trim()).filter(Boolean);
         return pins.length && validPins(...pins) ? { PINS: pins.join(", ") } : null;
       },
-      vars: () => ["pins"],
     },
   },
   actions: [

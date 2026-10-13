@@ -7,14 +7,14 @@ export const button: DeviceSpec = {
   setup: {
     blockType: "dev_button_setup",
     message: "버튼을 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 14), { kind: "var", name: "VAR", default: "button" }],
+    parts: [pinNo("PIN", 14, "in"), { kind: "var", name: "VAR", default: "button" }],
     tooltip: "button = Pin(14, Pin.IN, Pin.PULL_UP) — 누르면 0, 떼면 1",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.IN, Pin.PULL_UP)`],
     kind: "pin",
+    provides: (v) => [v.VAR],
     pattern: {
       lines: [new RegExp(String.raw`^${RE_NAME}\s*=\s*Pin\(\s*${RE_PIN}\s*,\s*Pin\.IN\s*,\s*Pin\.PULL_UP\s*\)$`)],
       fields: ([m]) => (validPins(m[2]) ? { PIN: m[2], VAR: m[1] } : null),
-      vars: ([m]) => [m[1]],
     },
   },
   actions: [],
@@ -37,10 +37,11 @@ export const tilt: DeviceSpec = {
   setup: {
     blockType: "dev_tilt_setup",
     message: "틸트 스위치를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 14), { kind: "var", name: "VAR", default: "tilt" }],
+    parts: [pinNo("PIN", 14, "in"), { kind: "var", name: "VAR", default: "tilt" }],
     tooltip: "tilt = Pin(14, Pin.IN) — 기울면 1",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.IN)`],
     kind: "pin",
+    provides: (v) => [v.VAR],
     pattern: NO_SETUP_PATTERN,
   },
   actions: [],
@@ -63,10 +64,11 @@ export const pir: DeviceSpec = {
   setup: {
     blockType: "dev_pir_setup",
     message: "인체감지 센서를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 14), { kind: "var", name: "VAR", default: "pir" }],
+    parts: [pinNo("PIN", 14, "in"), { kind: "var", name: "VAR", default: "pir" }],
     tooltip: "pir = Pin(14, Pin.IN) — 사람이 움직이면 1",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.IN)`],
     kind: "pin",
+    provides: (v) => [v.VAR],
     pattern: NO_SETUP_PATTERN,
   },
   actions: [],
@@ -89,7 +91,7 @@ export const joystick: DeviceSpec = {
   setup: {
     blockType: "dev_joystick_setup",
     message: "조이스틱 준비하기 (X 핀 %1, Y 핀 %2, 버튼 핀 %3)",
-    parts: [pinNo("X", 36), pinNo("Y", 39), pinNo("Z", 26)],
+    parts: [pinNo("X", 36, "adc"), pinNo("Y", 39, "adc"), pinNo("Z", 26, "in")],
     tooltip: "rocker_x/rocker_y 아날로그 핀과 button_z 풀업 입력 핀을 만듭니다.",
     lines: (v) => [
       `rocker_x = ADC(Pin(${v.X}))`, `rocker_y = ADC(Pin(${v.Y}))`,
@@ -97,6 +99,7 @@ export const joystick: DeviceSpec = {
       `button_z = Pin(${v.Z}, Pin.IN, Pin.PULL_UP)`,
     ],
     kind: "joystick",
+    provides: () => ["rocker_x", "rocker_y", "button_z"],
     pattern: {
       lines: [
         /^rocker_x\s*=\s*ADC\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/,
@@ -106,7 +109,6 @@ export const joystick: DeviceSpec = {
         /^button_z\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.IN\s*,\s*Pin\.PULL_UP\s*\)$/,
       ],
       fields: ([x, y, , , z]) => (validPins(x[1], y[1], z[1]) ? { X: x[1], Y: y[1], Z: z[1] } : null),
-      vars: () => ["rocker_x", "rocker_y", "button_z"],
     },
   },
   actions: [],
