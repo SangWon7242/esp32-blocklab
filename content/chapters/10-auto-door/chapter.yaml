@@ -1,0 +1,188 @@
+# 챕터 10 · 다가가면 열리는 자동문 — 교사용 지도안(110분)·슬라이드 그대로. 형식 설명은 src/track/README.md
+id: 10-auto-door
+order: 10
+title: 다가가면 열리는 자동문
+goals:
+  content: 초음파로 잰 거리를 if 로 판단해 서보(문)와 OLED(화면)를 함께 제어한다
+  thinking: 문제를 세 덩어리로 분해하고, 실행 결과를 미리 예측하고, 증상에서 원인을 역추적한다
+successCriteria:
+  - 센서가 거리를 어떻게 재는지 내 말로 설명할 수 있다
+  - 문이 열리는 기준 숫자를 내가 정하고 그 이유를 말할 수 있다
+  - 오류가 났을 때 어디부터 봐야 할지 안다
+parts:
+  - id: part1
+    title: 1부 · 초음파 센서 익히기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 백화점 문은 어떻게 알까?
+        minutes: 4
+        questions:
+          - 문은 무엇을 '보고' 사람이 왔다고 판단할까요?
+          - 얼마나 가까이 가야 열려야 할까요? 그 숫자는 누가 정하죠?
+          - 사람이 지나간 뒤에 문은 언제 닫혀야 할까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 6
+        answer:
+          know: ["앞에 무언가 있는지", "그것이 몇 cm 떨어져 있는지"]
+          decide: ["몇 cm부터 열 것인지", "몇 초 동안 열어 둘 것인지"]
+          act: ["문을 여닫는 것", "지금 상태를 알려 주는 것"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 실행 전 3문항
+        minutes: 4
+        code: step1_distance.py
+        blanks:
+          - q: 센서 앞 1m 쯤 떨어진 벽을 향하면? (cm)
+          - q: 손바닥으로 센서를 완전히 덮으면? (cm)
+          - q: 창문 밖 허공을 향하면? (cm)
+
+      - id: run1
+        type: run
+        title: 복사 · 실행 — 거리 재기
+        minutes: 5
+        code: step1_distance.py
+
+      - id: readcheck1
+        type: readcheck
+        title: 읽기 체크 ①
+        minutes: 5
+        code: step1_distance.py
+        questions:
+          - { kind: choice, q: "소리를 쏘는 핀은 둘 중 어느 것?", options: ["trig", "echo"], answer: 0, hint: "trig 는 trigger(방아쇠)" }
+          - { kind: number, q: "시간을 적어 두는 줄은 몇 개?", answer: 2 }
+          - { kind: number, q: "t // 2 를 지우면 숫자가 몇 배가 될까요?", answer: 2 }
+
+      - id: mission1
+        type: mission
+        title: 연습 미션 — if 로 판단하기
+        minutes: 7
+        instructions: 15cm보다 가까워지면 창에 '가까워요!' 라고 찍어 주세요
+        code: step1_distance.py
+        hint: "if d < 15: 아래 줄은 한 칸 더 들여쓰기"
+        rules:
+          - codeMatches: "if d < 15:"
+            fail: 거리를 판단하는 if 줄이 있나요? 15보다 작을 때예요
+          - codeMatches: 'print\("가까워요!"\)'
+            fail: 가까울 때 찍을 말이 '가까워요!' 인가요?
+        answerCode: practice_near.py
+
+      - id: debug1
+        type: debug
+        title: 디버깅 미션 ①
+        minutes: 6
+        symptoms:
+          - title: 숫자가 계속 0만 나와요
+            code: "trig = Pin(12, Pin.OUT)\necho = Pin(13, Pin.IN)"
+            question: 어디가 바뀌었나요?
+            rules:
+              - codeMatches: 'trig = Pin\(13'
+                fail: 쏘는 선과 듣는 선, 어느 쪽이 13번이죠?
+          - title: IndentationError 가 떠요
+            code: "if d < 15:\nprint(\"가까워요!\")"
+            question: 무엇이 빠졌나요?
+            rules:
+              - codeMatches: "    print"
+                fail: 에러가 몇 번째 줄이라고 하나요?
+          - title: 10초에 한 번만 재요
+            code: "trig.value(1)\ntime.sleep(10)\ntrig.value(0)"
+            question: 무엇이 잘못됐나요?
+            rules:
+              - codeMatches: 'sleep_us\(10\)'
+                fail: _us 가 붙고 안 붙고가 뭘 바꿀까요?
+
+  - id: part2
+    title: 2부 · 자동문 만들기
+    steps:
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        minutes: 5
+        pseudocode:
+          - text: 계속 반복한다
+          - text: 거리를 __
+            blank: { answer: 잰다 }
+          - text: 만약 거리가 __ 보다 작으면
+            blank: { answer: 15 cm }
+          - text: __ 를 연다
+            blank: { answer: 문(서보) }
+          - text: __ 초 기다린다
+            blank: { answer: "3" }
+          - text: __ 를 닫는다
+            blank: { answer: 문(서보) }
+          - text: __ 초 쉬었다가 다시 잰다
+            blank: { answer: "0.3" }
+        translation:
+          - ["잰다", "get_distance()"]
+          - ["만약 ~면", "if"]
+          - ["연다", "servo.duty_u16(8100)"]
+          - ["닫는다", "servo.duty_u16(1638)"]
+          - ["기다린다", "time.sleep(초)"]
+        targetCode: step2_door.py
+
+      - id: run2
+        type: run
+        title: 복사 · 실행 — 완성 코드
+        minutes: 4
+        code: step3_auto_door.py
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 ②
+        minutes: 4
+        code: step3_auto_door.py
+        questions:
+          - { kind: number, q: "문이 열려 있는 시간은 몇 초?", answer: 3 }
+          - { kind: number, q: "show() 는 한 바퀴에 몇 번 불리나요?", answer: 3, hint: "열릴 때·닫힐 때·대기 화면" }
+          - { kind: number, q: "if d < 15: 안에 들어 있는 줄은 몇 줄?", answer: 7 }
+
+      - id: mission2
+        type: mission
+        title: 미션 — 화면에 거리 표시
+        minutes: 3
+        instructions: 대기 화면에도 지금 거리를 보여 주세요(한 줄 추가)
+        code: step3_auto_door.py
+        rules:
+          - codeMatches: 'show\("AUTO DOOR", str\(d\) \+ " cm"\)'
+            fail: 대기 화면 줄에 거리(d)를 글자로 바꿔 넣었나요?
+        answerCode: mission_show_distance.py
+
+      - id: debug2
+        type: debug
+        title: 디버깅 미션 ②
+        optional: true
+        symptoms:
+          - title: 화면 글씨가 안 바뀌어요
+            code: "oled.text(a, 0, 20)\noled.text(b, 0, 36)"
+            question: 적어 두는 것과 보여 주는 것은 같나요?
+            rules:
+              - codeMatches: 'oled.show\(\)'
+                fail: 적어 두는 것과 보여 주는 것은 같나요?
+
+      - id: extra
+        type: mission
+        title: 추가 미션 — 문이 열리면 LED도 켜기
+        optional: true
+        instructions: 문이 열리면 LED도 같이 켜기
+        code: step3_auto_door.py
+        rules:
+          - useBlock: ["esp_pin_write"]
+            fail: LED를 켜고 끄는 블록이 들어갔나요?
+          - pinIs: { name: led, pin: 26 }
+            fail: LED 핀은 26번이에요
+        answerCode: extra1_led.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        lineExplain: step3_auto_door.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 15 라는 숫자를 왜 그 값으로 정했나요? 30이면 무엇이 달라지나요?
+          - 이 자동문을 학교 어디에 달면 좋을까요? 그러려면 무엇을 바꿔야 하죠?
+          - "다음엔 여기부터 본다: 한 줄로"

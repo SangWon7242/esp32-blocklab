@@ -1,0 +1,81 @@
+# 챕터 1 · LED 켜기 — 형식 설명은 src/track/README.md
+id: 01-led
+order: 1
+title: LED 켜기
+parts:
+  - id: part1
+    title: LED 켜고 깜빡이기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — LED는 어떻게 켜질까?
+        questions:
+          - 전기가 흐르면 켜지는데, 흐르게 하는 건 무엇일까요?
+          - 보드의 핀은 몇 번을 쓸까요? 왜 그 번호일까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        answer:
+          know: ["어느 핀에 LED가 있는지"]
+          decide: ["켤지 끌지", "얼마나 오래 켜 둘지"]
+          act: ["LED 켜기·끄기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기
+        code: step1_led_on.py
+        blanks:
+          - q: 실행하면 LED는?
+          - q: value(0)으로 바꾸면?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — LED 켜기
+        code: step1_led_on.py
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크
+        code: step4_blink_loop.py
+        questions:
+          - { kind: number, q: "켜져 있는 시간은 몇 초?", answer: 1 }
+          - { kind: choice, q: "끄는 줄은?", options: ["led.value(1)", "led.value(0)"], answer: 1 }
+          # 계획에는 7로 적혀 있으나 step4_blink_loop.py 의 첫 time.sleep(1) 은 8번째 줄이다
+          - { kind: line, q: "1초 기다리는 첫 줄을 클릭", answer: 8 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 천천히 깜빡이기
+        instructions: 2초 켜고 1초 끄게 바꾸세요
+        code: step4_blink_loop.py
+        rules:
+          - codeEquals: { file: mission1_slow_blink.py }
+            fail: 켜진 시간과 꺼진 시간이 다른가요? time.sleep 숫자를 다시 보세요
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        pseudocode:
+          - text: 계속 반복한다
+          - text: LED를 켠다
+          - text: __초 기다린다
+            blank: { answer: 1 }
+          - text: LED를 끈다
+          - text: __초 기다린다
+            blank: { answer: 1 }
+        translation:
+          - ["켠다", "led.value(1)"]
+          - ["기다린다", "time.sleep(초)"]
+          - ["계속 반복", "while True:"]
+        targetCode: step4_blink_loop.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        lineExplain: step4_blink_loop.py
+        prompts:
+          - 막힌 곳
+          - 내가 해 본 것
+          - 결국 원인은
+          - 다음엔 여기부터 본다

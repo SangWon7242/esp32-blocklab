@@ -1,0 +1,130 @@
+/// <reference types="node" />
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { beforeAll, describe, expect, it } from "vitest";
+import { registerBlocks } from "@/blocks";
+import { codeToBlocks } from "@/parser";
+import { codeRefs, loadChapters, parseChapter } from "./content";
+import { allSteps } from "./gating";
+import { judge } from "./judge";
+import type { LoadedChapter } from "./content";
+
+const root = join(process.cwd(), "content/chapters");
+
+function readDir(dir: string) {
+  const files: Record<string, string> = {};
+  for (const f of readdirSync(join(root, dir)).filter((f) => f.endsWith(".py"))) files[f] = readFileSync(join(root, dir, f), "utf8");
+  return { yaml: readFileSync(join(root, dir, "chapter.yaml"), "utf8"), files };
+}
+
+const chapters: Record<string, LoadedChapter> = {};
+beforeAll(() => {
+  registerBlocks();
+  for (const dir of ["01-led", "10-auto-door"]) {
+    const { yaml, files } = readDir(dir);
+    chapters[dir] = parseChapter(yaml, files, dir);
+  }
+});
+
+describe("챕터 YAML", () => {
+  it("두 YAML 이 스키마를 통과한다", () => {
+    expect(chapters["01-led"].title).toBe("LED 켜기");
+    expect(chapters["10-auto-door"].title).toBe("다가가면 열리는 자동문");
+  });
+
+  it("단계 수: 챕터 1 은 8, 챕터 10 은 14 (1부 7 + 2부 7)", () => {
+    expect(allSteps(chapters["01-led"]).map((s) => s.type)).toEqual(["problem", "analysis", "predict", "run", "readcheck", "mission", "design", "reflect"]);
+    const ch10 = chapters["10-auto-door"];
+    expect(ch10.parts.map((p) => p.steps.map((s) => s.id))).toEqual([
+      ["problem", "analysis", "predict", "run1", "readcheck1", "mission1", "debug1"],
+      ["design", "run2", "readcheck2", "mission2", "debug2", "extra", "reflect"],
+    ]);
+    expect(allSteps(ch10).filter((s) => s.optional).map((s) => s.id)).toEqual(["debug2", "extra"]);
+  });
+
+  it("참조한 코드 파일이 모두 폴더에 있다", () => {
+    for (const [dir, ch] of Object.entries(chapters)) {
+      const refs = codeRefs(ch);
+      expect(refs.length).toBeGreaterThan(0);
+      for (const ref of refs) expect(readdirSync(join(root, dir))).toContain(ref);
+      expect(Object.keys(ch.files).sort()).toEqual(expect.arrayContaining(refs));
+    }
+  });
+
+  it("읽기 체크의 줄 문항은 그 파일의 해당 줄을 가리킨다", () => {
+    const ch1 = chapters["01-led"];
+    const rc = allSteps(ch1).find((s) => s.type === "readcheck");
+    if (rc?.type !== "readcheck") throw new Error("readcheck 없음");
+    const line = rc.questions.find((q) => q.kind === "line")!;
+    expect(ch1.files[rc.code].split("\n")[line.answer - 1]).toContain("time.sleep(1)");
+  });
+
+  it("정답 코드는 자기 미션 규칙을 통과한다", async () => {
+    for (const ch of Object.values(chapters)) {
+      for (const step of allSteps(ch)) {
+        if (step.type !== "mission" || !step.answerCode) continue;
+        const code = ch.files[step.answerCode];
+        const r = codeToBlocks(code);
+        if (!r.ok) throw new Error(`${step.id} 정답 파싱 실패`);
+        expect(judge(step.rules, { code, blocksJson: r.json }, ch.files), `${ch.id}/${step.id}`).toEqual({ pass: true, failures: [] });
+      }
+    }
+  });
+
+  it("챕터 1 미션은 정답 파일과 같은 코드면 통과, 처음 코드면 실패", () => {
+    const ch1 = chapters["01-led"];
+    const m = allSteps(ch1).find((s) => s.id === "mission");
+    if (m?.type !== "mission") throw new Error("mission 없음");
+    expect(judge(m.rules, { code: ch1.files["mission1_slow_blink.py"] }, ch1.files).pass).toBe(true);
+    expect(judge(m.rules, { code: ch1.files["step4_blink_loop.py"] }, ch1.files).failures).toEqual(["켜진 시간과 꺼진 시간이 다른가요? time.sleep 숫자를 다시 보세요"]);
+  });
+
+  it("디버깅 증상 코드는 고치기 전엔 규칙에 걸린다", () => {
+    for (const ch of Object.values(chapters)) {
+      for (const step of allSteps(ch)) {
+        if (step.type !== "debug") continue;
+        for (const s of step.symptoms) expect(judge(s.rules, { code: s.code }).pass, s.title).toBe(false);
+      }
+    }
+  });
+
+  it("loadChapters 는 import.meta.glob 으로 같은 두 챕터를 order 순으로 읽는다", () => {
+    const loaded = loadChapters();
+    expect(loaded.map((c) => c.id)).toEqual(["01-led", "10-auto-door"]);
+    expect(loaded[1]).toEqual(chapters["10-auto-door"]);
+  });
+});
+
+describe("parseChapter 는 잘못된 YAML 을 거부한다", () => {
+  const files = { "a.py": "print(1)\n" };
+  const base = (step: string) => `id: x\norder: 1\ntitle: x\nparts:\n  - id: p\n    title: p\n    steps:\n${step}`;
+  it("없는 코드 파일", () => {
+    expect(() => parseChapter(base("      - { id: r, type: run, title: r, code: b.py }\n"), files, "x")).toThrow(/b\.py/);
+  });
+  it("모르는 유형·모르는 키", () => {
+    expect(() => parseChapter(base("      - { id: r, type: quiz, title: r }\n"), files, "x")).toThrow();
+    expect(() => parseChapter(base("      - { id: r, type: run, title: r, code: a.py, cod: a.py }\n"), files, "x")).toThrow();
+  });
+  it("겹치는 단계 id", () => {
+    expect(() => parseChapter(base("      - { id: r, type: run, title: r, code: a.py }\n      - { id: r, type: run, title: r2, code: a.py }\n"), files, "x")).toThrow(/r/);
+  });
+  it("폴더 이름과 다른 id", () => {
+    expect(() => parseChapter(base("      - { id: r, type: run, title: r, code: a.py }\n"), files, "y")).toThrow(/y/);
+  });
+  it("정규식이 틀린 codeMatches, 범위 밖 선택지 답, 파일 밖 줄 번호", () => {
+    expect(() => parseChapter(base('      - { id: m, type: mission, title: m, instructions: i, rules: [{ codeMatches: "(", fail: f }] }\n'), files, "x")).toThrow();
+    expect(() => parseChapter(base('      - { id: c, type: readcheck, title: c, code: a.py, questions: [{ kind: choice, q: q, options: [a, b], answer: 2 }] }\n'), files, "x")).toThrow();
+    expect(() => parseChapter(base('      - { id: c, type: readcheck, title: c, code: a.py, questions: [{ kind: line, q: q, answer: 5 }] }\n'), files, "x")).toThrow(/줄/);
+  });
+});
+
+describe("src/track 은 React·Blockly 에 기대지 않는다", () => {
+  const dir = join(process.cwd(), "src/track");
+  for (const f of readdirSync(dir).filter((f) => f.endsWith(".ts") && !f.endsWith(".test.ts"))) {
+    it(f, () => {
+      const text = readFileSync(join(dir, f), "utf8");
+      expect(text).not.toMatch(/from\s+["'](blockly|react)/);
+      expect(text).not.toMatch(/from\s+["']@\/(blocks|components|app|codegen|device)/);
+    });
+  }
+});
