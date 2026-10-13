@@ -14,7 +14,7 @@ import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/Blockl
 import { CodePanel } from "@/components/editor/CodePanel";
 import type { LineMap, WorkspaceJson } from "@/codegen";
 import type { ConsoleEntry, Issue } from "@/lint";
-import { countCodeBlocks, editorReducer, initialEditorState, type EditorState, type Source } from "./editorSync";
+import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateFromBlocks, type EditorState, type Source } from "./editorSync";
 import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { DeviceBar } from "./DeviceBar";
@@ -59,6 +59,8 @@ export type EditorWorkbenchHandle = {
 export type EditorWorkbenchProps = {
   /** 처음 실을 코드 (마운트할 때 한 번만 읽는다) */
   initialCode: string;
+  /** 코드 대신 처음 실을 블록 JSON (있으면 initialCode 보다 먼저. 설계 조립 작업판) */
+  initialBlocks?: WorkspaceJson | null;
   /** 가짜 보드 (?device=fake 또는 설정) */
   fake: boolean;
   /** "보드에 저장" 버튼을 숨긴다 (트랙 단계) */
@@ -74,8 +76,12 @@ export type EditorWorkbenchProps = {
  * 블록·코드 편집기 + 보드 버튼 + 하단 문제/콘솔. 자유 코딩 화면과 트랙 편집기 단계가 함께 쓴다.
  * 부모 높이를 꽉 채운다 (h-full).
  */
-export function EditorWorkbench({ initialCode, fake, hideSave, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
-  const [state, dispatch] = useReducer(editorReducer, initialCode, initialEditorState);
+export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
+  const [state, dispatch] = useReducer(
+    editorReducer,
+    null,
+    () => (initialBlocks ? initialEditorStateFromBlocks(initialBlocks) : initialEditorState(initialCode)),
+  );
   const blocklyRef = useRef<BlocklyHandle>(null);
   const debounceRef = useRef<number | undefined>(undefined);
   /** 아직 debounce 를 기다리는 코드. 탭을 바꿀 때 먼저 반영해야 마지막 입력이 사라지지 않는다 */

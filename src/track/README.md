@@ -48,6 +48,8 @@ parts:
 | `reflect` | `lineExplain`(줄마다 "이 줄은 ___" 을 쓸 코드), `prompts`: 정확히 4개 |
 
 - `design.pseudocode`: `text`의 `__` 자리가 빈칸이고 `blank.answer`가 예시 답이다(글 또는 숫자). 빈칸 없는 줄은 `blank`를 빼면 된다.
+  채점(`src/track/design.ts`): 숫자이거나 숫자로 시작하는 답(`15 cm`)은 학생 글의 첫 숫자를 `tolerance`(기본 0) 범위로, 글 답은 공백을 무시하고 비교한다. `문(서보)`처럼 괄호가 있으면 `문`, `서보`도 맞다.
+  조립 작업판은 `targetCode`를 블록으로 바꾼 뒤 시작 블록 몸통의 명령 블록을 하나씩 떼어(안쪽 몸통은 그대로) 섞어 둔다. 판정은 `codeEquals targetCode`.
 - `debug.symptoms[].rules`: 그 증상의 고장 코드를 고친 결과에 거는 규칙.
 
 ### 읽기 체크 문항

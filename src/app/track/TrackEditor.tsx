@@ -13,6 +13,8 @@ export const PROGRAM_SAVE_DELAY_MS = 1000;
 type Props = {
   /** 처음 실을 코드 (저장한 프로그램이 있으면 그것) */
   initialCode: string;
+  /** 코드 대신 처음 실을 블록 JSON (설계 조립: 떼어 흩어 둔 블록, 저장한 작업판) */
+  initialBlocks?: EditorProgram["blocksJson"];
   /** 코드·블록이 바뀌면 1초 뒤(마지막 변경 기준) 한 번. 화면을 떠날 때 기다리던 것도 저장한다 */
   onProgram(code: string, blocksJson: unknown): void;
   /** 실행 결과와 그 실행의 보드 출력 */
@@ -26,7 +28,7 @@ type Props = {
  * 트랙 편집기 단계(실행·미션·디버깅)의 편집기. 자유 코딩 화면과 같은 편집기(EditorWorkbench)에
  * "보드에 저장"만 숨기고, 가짜 보드(?device=fake·설정)를 따른다.
  */
-export function TrackEditor({ initialCode, onProgram, onRunEnd, compact, ref }: Props) {
+export function TrackEditor({ initialCode, initialBlocks, onProgram, onRunEnd, compact, ref }: Props) {
   const [searchParams] = useSearchParams();
   const fake = searchParams.get("device") === "fake" || readSettings().fakeBoard;
   const inner = useRef<EditorWorkbenchHandle>(null);
@@ -61,7 +63,7 @@ export function TrackEditor({ initialCode, onProgram, onRunEnd, compact, ref }: 
 
   return (
     <div className={cn("overflow-hidden rounded-lg border", compact ? "h-[420px]" : "h-[min(640px,70vh)] min-h-[440px]")} data-testid="track-editor">
-      <EditorWorkbench ref={inner} initialCode={initialCode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
+      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
     </div>
   );
 }

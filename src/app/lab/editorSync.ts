@@ -38,6 +38,11 @@ export function initialEditorState(code: string): EditorState {
   return fromCode(code, base);
 }
 
+/** 블록 JSON 으로 시작한다 (설계 조립: 떼어 흩어 둔 블록). 코드는 그 작업판이 만드는 코드 */
+export function initialEditorStateFromBlocks(blocks: WorkspaceJson): EditorState {
+  return { source: "blocks", code: workspaceJsonToCode(blocks), blocks, unparsed: [], parseError: null, map: null };
+}
+
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case "blocksChanged":

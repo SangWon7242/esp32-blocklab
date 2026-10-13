@@ -3,8 +3,10 @@ import type { ReadQuestion, Step } from "./schema";
 
 /*
  * 글 입력형 단계의 학생 입력 모양과 "완료" 조건. 화면(src/app/track)은 입력을 StepRecord.input 에 그대로 저장한다.
- * 편집기 단계 중 run·mission·debug 는 편집기에서 실행·판정한 결과로 끝내고, design 은 아직 "건너뛰기"로 끝낸다.
+ * 편집기 단계 run·mission·debug·design 은 편집기에서 실행·판정한 결과로 끝낸다 (건너뛰기도 된다).
  */
+
+import type { SavedAiReview } from "@/ai/claude";
 
 export type ProblemInput = { answers?: string[] };
 export type PredictInput = { answers?: string[] };
@@ -29,6 +31,8 @@ export type ReflectInput = {
   /** 줄 번호(1부터) → "이 줄은 ___" */
   lines?: Record<string, string>;
   prompts?: string[];
+  /** "내 설명 점검 받기" AI 결과 */
+  ai?: SavedAiReview;
 };
 export type EditorInput = { skipped?: boolean };
 
@@ -56,10 +60,28 @@ export type DebugInput = EditorInput & {
   saved?: boolean[];
   /** 증상마다 학생 프로그램 */
   programs?: (SavedProgram | null)[];
+  /** 증상마다 "질문 3개만 받기" AI 결과 */
+  ai?: (SavedAiReview | null)[];
   /** 증상마다 마지막 판정의 fail 문장 */
   failures?: (string[] | null)[];
   /** 증상마다 판정 통과 */
   passed?: boolean[];
+};
+
+/** 설계: ① 빈칸 ② 번역표 ③ 조립 판정 */
+export type DesignInput = EditorInput & {
+  /** 의사코드 줄마다 빈칸 답 (빈칸 없는 줄은 비어 있다) */
+  blanks?: string[];
+  /** 마지막 "확인"의 줄마다 채점 (빈칸 없는 줄은 null) */
+  blankResults?: (boolean | null)[];
+  /** 빈칸을 모두 맞혔다 → 번역표로 */
+  blanksDone?: boolean;
+  /** 번역표 "확인했어요" → 조립으로 */
+  tableDone?: boolean;
+  /** 조립 작업판 (다시 열면 블록 위치까지 복원) */
+  program?: SavedProgram;
+  passed?: boolean;
+  failures?: string[] | null;
 };
 
 export const EDITOR_STEP_TYPES = ["run", "mission", "debug", "design"] as const;
@@ -101,7 +123,7 @@ export function explainableLines(code: string): number[] {
     .flatMap((line, i) => (line.trim() === "" || line.trim().startsWith("#") ? [] : [i + 1]));
 }
 
-/** 완료 버튼을 켤 수 있는지. run 은 실행 성공, mission 은 판정 통과, debug 는 모든 증상 통과. design 은 false (건너뛰기) */
+/** 완료 버튼을 켤 수 있는지. run 은 실행 성공, mission 은 판정 통과, debug 는 모든 증상 통과, design 은 조립 판정 통과 */
 export function canComplete(step: Step, input: Record<string, unknown>): boolean {
   switch (step.type) {
     case "problem":
@@ -124,6 +146,8 @@ export function canComplete(step: Step, input: Record<string, unknown>): boolean
       return (input as MissionInput).passed === true;
     case "debug":
       return step.symptoms.every((_, i) => (input as DebugInput).passed?.[i] === true);
+    case "design":
+      return (input as DesignInput).passed === true;
     default:
       return false;
   }

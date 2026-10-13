@@ -16,7 +16,7 @@ import { saveStepRecord, useProgress } from "./progressState";
 import { STEP_TYPE_GUIDE, STEP_TYPE_LABEL } from "./stepMeta";
 import { Analysis } from "./steps/Analysis";
 import { DebugStep } from "./steps/DebugStep";
-import { EditorStepPlaceholder } from "./steps/EditorStepPlaceholder";
+import { DesignStep } from "./steps/DesignStep";
 import { MissionStep } from "./steps/MissionStep";
 import { Predict } from "./steps/Predict";
 import { Problem } from "./steps/Problem";
@@ -116,12 +116,10 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
     case "run": activity = <RunStep step={step} {...props} />; break;
     case "mission": activity = <MissionStep step={step} {...props} />; break;
     case "debug": activity = <DebugStep step={step} {...props} />; break;
-    default: activity = <EditorStepPlaceholder step={step} chapter={chapter} teacherMode={teacherMode} />;
+    case "design": activity = <DesignStep step={step} {...props} />; break;
   }
 
   const ready = canComplete(step, input);
-  /** 설계(조립)만 아직 편집기가 없어 건너뛰기로만 끝낸다 */
-  const skipOnly = editor && step.type === "design";
   const part = chapter.parts.find((p) => p.steps.some((s) => s.id === step.id));
 
   return (
@@ -165,11 +163,9 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
           ) : (
             <>
               {editor && <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>}
-              {!skipOnly && (
-                <Button onClick={() => complete()} disabled={!ready} title={ready ? undefined : "활동을 마치면 누를 수 있어요"}>
-                  <Check className="size-4" />완료
-                </Button>
-              )}
+              <Button onClick={() => complete()} disabled={!ready} title={ready ? undefined : "활동을 마치면 누를 수 있어요"}>
+                <Check className="size-4" />완료
+              </Button>
             </>
           )}
           {next ? (

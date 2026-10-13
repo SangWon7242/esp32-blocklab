@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { debugMessage } from "@/ai/claude";
 import { filled, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
+import { AiCheck } from "./AiCheck";
 import { JudgePanel } from "./JudgePanel";
 import type { StepProps } from "./types";
 import { useStepInput } from "./useStepInput";
@@ -92,6 +94,16 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
           </Button>
           {saved && <span className="text-sm text-muted-foreground">저장했어요. 이제 아래에서 고쳐 보세요</span>}
         </div>
+        <AiCheck
+          key={`ai-${current}`}
+          label="질문 3개만 받기"
+          questionsOnly
+          disabled={!filled(explanation)}
+          disabledTitle="내 생각을 먼저 적어 보세요"
+          buildMessage={() => debugMessage({ code: symptom.code, symptom: symptom.title, explanation })}
+          review={d.ai?.[current]}
+          onReview={(ai) => update((cur) => ({ ai: setAt(cur.ai, current, ai, null) }))}
+        />
       </section>
 
       {!saved ? (

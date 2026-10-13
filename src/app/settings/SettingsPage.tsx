@@ -7,9 +7,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { progressStore, reloadProgress } from "../track/progressState";
+import { DEFAULT_MODEL } from "@/ai/claude";
 import { updateSettings, useSettings } from "./settings";
 
 function downloadText(name: string, text: string) {
@@ -91,6 +93,41 @@ export function SettingsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">보드가 없어도 자유 코딩에서 실행해 볼 수 있게 가짜 장치를 씁니다. 자유 코딩 화면을 다시 열면 적용돼요.</p>
               </div>
               <Switch id="fake-board" checked={settings.fakeBoard} onCheckedChange={(v) => updateSettings({ fakeBoard: v })} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>AI 점검</CardTitle>
+            <CardDescription>
+              키를 넣으면 성찰 단계의 "내 설명 점검 받기"와 디버깅 단계의 "질문 3개만 받기"가 보입니다.
+              키는 이 브라우저에만 저장되고, 이 브라우저에서 Claude API 로 바로 보냅니다. 공용 컴퓨터에서는 수업이 끝나면 지워 주세요.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="claude-key">교사용 Claude API 키</Label>
+              <Input
+                id="claude-key"
+                type="password"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="sk-ant-..."
+                value={settings.claudeApiKey}
+                onChange={(e) => updateSettings({ claudeApiKey: e.target.value.trim() })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="claude-model">모델</Label>
+              <Input
+                id="claude-model"
+                spellCheck={false}
+                value={settings.claudeModel}
+                onChange={(e) => updateSettings({ claudeModel: e.target.value })}
+                onBlur={(e) => { if (!e.target.value.trim()) updateSettings({ claudeModel: DEFAULT_MODEL }); }}
+              />
+              <p className="text-xs text-muted-foreground">기본값 {DEFAULT_MODEL}</p>
             </div>
           </CardContent>
         </Card>
