@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { findDoc } from "@/docs/catalog";
 import { contentFile } from "@/track/files";
@@ -9,8 +10,19 @@ export type { Panels } from "./EditorWorkbench";
 
 /** 자유 코딩 화면 */
 export function LabPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const exampleType = searchParams.get("example");
+  // 예시는 처음 한 번만 싣는다: 실은 뒤(자식의 마운트 효과가 먼저 돈다) 주소에서 ?example= 을 뺀다.
+  // 다시 읽기·뒤로 가기로 예시가 확인 없이 다시 실리지 않게. EditorWorkbench 는 initialExample·initialCode 를
+  // 마운트할 때만 읽으므로 바뀐 props 로 다시 싣지 않는다
+  useEffect(() => {
+    if (!exampleType) return;
+    setSearchParams((p) => {
+      p.delete("example");
+      return p;
+    }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // ?example=<블록 종류> 이면 그 블록의 예시 프로그램으로 시작한다 (블록 사전에서 넘어올 때). ?code= 보다 먼저
   const example = exampleType ? findDoc(exampleType)?.example.code : undefined;
   return (

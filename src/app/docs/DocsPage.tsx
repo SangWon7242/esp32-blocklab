@@ -55,12 +55,13 @@ export function DocsPage() {
     scrollBelowSticky(scrollRef.current, stickyRef.current, el, behavior);
   const [highlighted, setHighlighted] = useState<string | null>(null);
 
-  // ?block=<type>: 그 카드로 스크롤하고 잠시 테두리로 강조한다
+  // ?block=<type>: 그 카드로 스크롤하고 잠시 테두리로 강조한다. 포커스도 그 카드로 (화면 읽기 프로그램)
   useEffect(() => {
     if (!target) return;
     const card = scrollRef.current?.querySelector<HTMLElement>(`[data-testid="block-doc-card"][data-type="${CSS.escape(target)}"]`);
     if (!card) return;
     scrollBelowSticky(scrollRef.current, stickyRef.current, card, "instant");
+    card.focus({ preventScroll: true });
     setHighlighted(target);
     const timer = window.setTimeout(() => setHighlighted(null), HIGHLIGHT_MS);
     return () => window.clearTimeout(timer);
@@ -101,7 +102,7 @@ export function DocsPage() {
                   className="pl-8"
                 />
               </div>
-              <span className="shrink-0 text-sm text-muted-foreground tabular-nums" data-testid="doc-count">{total}개</span>
+              <span className="shrink-0 text-sm text-muted-foreground tabular-nums" data-testid="doc-count" aria-live="polite">{total}개</span>
             </div>
             {/* 좁은 화면: 카테고리를 가로로 넘기는 칩 줄 */}
             <nav aria-label="블록 카테고리" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:hidden">
@@ -112,7 +113,7 @@ export function DocsPage() {
           </div>
 
           {total === 0 ? (
-            <p className="py-12 text-center text-muted-foreground">"{query.trim()}" 이(가) 들어간 블록이 없어요.</p>
+            <p className="py-12 text-center text-muted-foreground">"{query.trim()}"에 맞는 블록이 없어요. 다른 낱말로 찾아보세요.</p>
           ) : (
             <div className="flex flex-col gap-10 pt-3">
               {results.filter((c) => c.blocks.length > 0).map((c) => (

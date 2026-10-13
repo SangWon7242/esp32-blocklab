@@ -1,10 +1,20 @@
 import * as Blockly from "blockly";
 import { blockSnippet, type WorkspaceJson } from "@/codegen";
+import { titleOfBlock, type TitlePart } from "@/docs/catalog";
 
 /** 블록 우클릭 메뉴의 "이 블록 설명 보기" 항목 id */
 export const BLOCK_DOC_MENU_ID = "block_doc";
 
-export type BlockDocRequest = { type: string; code: string; blockId: string };
+export type BlockDocRequest = {
+  type: string;
+  /** 우클릭한 블록의 지금 값으로 읽은 제목 */
+  title: TitlePart[];
+  /** 그 블록 하나가 만드는 코드 (지금 값으로) */
+  code: string;
+  blockId: string;
+  /** 팔레트(flyout)의 블록이면 true: 학생이 놓은 블록이 아니다 */
+  fromFlyout: boolean;
+};
 
 /** 메뉴를 누르면 부를 함수. 등록은 한 번이고 이것만 바꿔 끼운다 (작업판을 다시 만들 때마다) */
 let onOpenRef: ((req: BlockDocRequest) => void) | null = null;
@@ -78,7 +88,13 @@ export function registerBlockDocMenu(onOpen: (req: BlockDocRequest) => void): vo
     callback: (scope) => {
       if (!scope.block) return;
       const block = realBlock(scope.block);
-      onOpenRef?.({ type: block.type, code: codeOfBlock(block), blockId: block.id });
+      onOpenRef?.({
+        type: block.type,
+        title: titleOfBlock(block),
+        code: codeOfBlock(block),
+        blockId: block.id,
+        fromFlyout: block.workspace.isFlyout,
+      });
     },
   });
 }

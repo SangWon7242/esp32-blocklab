@@ -17,9 +17,14 @@ test("블록을 우클릭해 이 블록 설명 보기를 연다", async ({ page 
   const dialog = page.getByTestId("block-doc-dialog");
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("time.sleep(1)");
+  await expect(dialog).toContainText("내 블록이 만드는 코드");
   await expect(dialog).toContainText("무슨 뜻인가요");
   await expect(dialog).toContainText("예시 프로그램");
-  await expect(dialog.getByRole("link", { name: "블록 사전에서 보기" })).toBeVisible();
+  // 작업판을 잃지 않게 블록 사전은 새 탭으로 연다
+  const docsLink = dialog.getByRole("link", { name: "블록 사전에서 보기" });
+  await expect(docsLink).toBeVisible();
+  await expect(docsLink).toHaveAttribute("href", "#/docs?block=flow_wait");
+  await expect(docsLink).toHaveAttribute("target", "_blank");
 
   await dialog.getByRole("button", { name: "닫기" }).click();
   await expect(dialog).toHaveCount(0);
@@ -35,6 +40,8 @@ test("팔레트 블록도 설명을 볼 수 있다", async ({ page }) => {
   await docMenuItem(page).click();
   const dialog = page.getByTestId("block-doc-dialog");
   await expect(dialog).toContainText("time.sleep_ms(500)");
+  // 팔레트 블록은 학생이 놓은 블록이 아니다
+  await expect(dialog).toContainText("이 블록이 만드는 코드");
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
 });
@@ -70,7 +77,9 @@ test("블록 사전에서 찾아 예시를 편집기에서 연다", async ({ pag
 
   await blink.getByRole("button", { name: "예시 프로그램" }).click();
   await blink.getByRole("link", { name: "편집기에서 열어 보기" }).click();
-  await expect(page).toHaveURL(/#\/lab\?example=dev_led_blink/);
+  await expect(page).toHaveURL(/#\/lab/);
+  // 실은 뒤에는 주소에서 ?example= 을 뺀다 (다시 읽어도 예시가 또 실리지 않게)
+  await expect(page).not.toHaveURL(/example=/);
 
   await page.getByRole("tab", { name: "코드" }).click();
   const code = page.getByTestId("code-panel");
@@ -80,5 +89,7 @@ test("블록 사전에서 찾아 예시를 편집기에서 연다", async ({ pag
 
 test("?block= 으로 들어오면 그 카드로 스크롤한다", async ({ page }) => {
   await page.goto("/#/docs?block=flow_wait");
-  await expect(page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]')).toBeInViewport();
+  const card = page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]');
+  await expect(card).toBeInViewport();
+  await expect(card).toBeFocused();
 });

@@ -1,5 +1,4 @@
 import { BookOpen, FileCode2, X } from "lucide-react";
-import { Link } from "react-router";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { BlockDocBody, CategoryBadge, TitleChips } from "@/app/docs/BlockDocCard";
+import { BlockDocBody, CategoryBadge, TitlePill } from "@/app/docs/BlockDocCard";
 import type { BlockDoc } from "@/docs/catalog";
 import type { BlockDocRequest } from "./blockDocMenu";
 
@@ -33,28 +32,36 @@ export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) 
           className="flex max-h-[calc(100dvh-2rem)] flex-col gap-4 overflow-hidden sm:max-w-2xl"
         >
           <DialogHeader className="gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {doc && <CategoryBadge doc={doc} />}
-            </div>
-            <DialogTitle
-              className="inline-flex w-fit flex-wrap items-center gap-1.5 rounded-lg px-3 py-1.5 text-base leading-normal font-medium"
-              style={doc ? { backgroundColor: doc.category.colour, color: "white" } : undefined}
-            >
-              {doc ? <TitleChips parts={doc.title} /> : "블록 설명"}
-            </DialogTitle>
+            {doc && <CategoryBadge doc={doc} />}
+            {doc ? (
+              // 제목은 우클릭한 블록의 지금 값으로 (아래 코드와 같은 값)
+              <DialogTitle asChild className="leading-normal">
+                <TitlePill as="h2" parts={request.title} colour={doc.category.colour} />
+              </DialogTitle>
+            ) : (
+              <DialogTitle>블록 설명</DialogTitle>
+            )}
             <DialogDescription className="sr-only">이 블록이 만드는 코드와 뜻, 예시 프로그램</DialogDescription>
           </DialogHeader>
 
           <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4">
-            <BlockDocBody code={request.code} codeTitle="내 블록이 만드는 코드" doc={doc} />
+            <BlockDocBody
+              code={request.code}
+              codeTitle={request.fromFlyout ? "이 블록이 만드는 코드" : "내 블록이 만드는 코드"}
+              doc={doc}
+              headingLevel={3}
+            />
           </div>
 
           <DialogFooter className="flex-wrap">
-            <Button variant="outline" asChild>
-              <Link to={`/docs?block=${encodeURIComponent(request.type)}`} onClick={onClose}>
-                <BookOpen className="size-4" />블록 사전에서 보기
-              </Link>
-            </Button>
+            {doc && (
+              // 새 탭으로: 같은 창에서 옮기면 자유 코딩 작업판이 사라지고 보드 연결이 끊긴다
+              <Button variant="outline" asChild>
+                <a href={`#/docs?block=${encodeURIComponent(request.type)}`} target="_blank" rel="noopener">
+                  <BookOpen className="size-4" />블록 사전에서 보기
+                </a>
+              </Button>
+            )}
             {doc && onOpenExample && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>

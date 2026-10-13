@@ -10,12 +10,6 @@ const CUSTOM_CATEGORY_TYPES = [
   "procedures_defnoreturn", "procedures_defreturn", "procedures_callnoreturn", "procedures_callreturn", "procedures_ifreturn",
 ];
 
-/**
- * 아직 설명을 쓰지 않은 블록 종류. 이 목록의 블록은 내용 검사를 건너뛴다.
- * 계획 4 Task 2 에서 모든 블록의 설명을 채워 비었다 (새 장치 블록을 넣으면 여기가 아니라 src/docs/content 에 설명을 쓴다).
- */
-const MISSING_CONTENT: readonly string[] = [];
-
 /** 코드 블록의 예시는 바로 그 코드 블록이 되는 코드이다 (블록으로 바꾸지 못한 코드를 담는 블록) */
 const FALLBACK_BLOCKS = new Set(["code_stmt", "code_expr"]);
 
@@ -50,7 +44,6 @@ describe("블록 사전 카탈로그", () => {
     const types = allTypes();
     expect(types.length).toBeGreaterThan(50);
     for (const type of types) {
-      if (MISSING_CONTENT.includes(type)) continue;
       const doc = findDoc(type);
       expect(doc, type).toBeDefined();
       expect(doc!.concept.length, type).toBeGreaterThanOrEqual(20);
@@ -59,16 +52,11 @@ describe("블록 사전 카탈로그", () => {
     }
   });
 
-  it("내용이 없는 블록 목록에는 실제 툴박스 블록만 있다", () => {
-    const types = new Set(allTypes());
-    for (const type of MISSING_CONTENT) expect(types.has(type), type).toBe(true);
-  });
-
   it("꾸러미에서 뺀 블록은 사전에도 없다", () => {
     for (const type of CUSTOM_CATEGORY_TYPES) if (!Blockly.Blocks[type]) expect(findDoc(type), type).toBeUndefined();
   });
 
-  it("모든 툴박스 블록이 카탈로그에 있다 (내용이 없는 블록도)", () => {
+  it("모든 툴박스 블록이 카탈로그에 있다", () => {
     for (const type of allTypes()) expect(findDoc(type), type).toBeDefined();
   });
 
@@ -93,7 +81,7 @@ describe("블록 사전 카탈로그", () => {
 
   it("예시 코드가 코드 블록 없이 블록으로 돌아간다", () => {
     for (const type of allTypes()) {
-      if (MISSING_CONTENT.includes(type) || FALLBACK_BLOCKS.has(type)) continue;
+      if (FALLBACK_BLOCKS.has(type)) continue;
       const result = codeToBlocks(findDoc(type)!.example.code);
       expect(result.ok, type).toBe(true);
       if (!result.ok) continue;

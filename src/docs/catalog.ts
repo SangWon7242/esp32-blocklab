@@ -53,8 +53,11 @@ function categoryColour(style: string): string {
   return typeof colour === "string" ? colour : "";
 }
 
-/** 블록 그림에서 보이는 글을 위에서부터 읽어 제목 조각으로. 고정 글은 text, 바꿀 수 있는 칸은 slot */
-function titleOf(block: Blockly.Block): TitlePart[] {
+/**
+ * 블록 그림에서 보이는 글을 위에서부터 읽어 제목 조각으로. 고정 글은 text, 바꿀 수 있는 칸은 slot.
+ * 사전은 툴박스 그대로의 블록에, 설명 팝업은 학생이 우클릭한 블록(지금 값)에 쓴다
+ */
+export function titleOfBlock(block: Blockly.Block): TitlePart[] {
   const parts: TitlePart[] = [];
   for (const input of block.inputList) {
     if (!input.isVisible()) continue;
@@ -91,15 +94,18 @@ function buildBlock(item: BlockItem, before?: BlockItem): Built {
     const state = (i: BlockItem) => ({ type: i.type, fields: i.fields, inputs: i.inputs, extraState: i.extraState }) as Blockly.serialization.blocks.State;
     if (before) Blockly.serialization.blocks.append(state(before), ws);
     const block = Blockly.serialization.blocks.append(state(item), ws);
-    return { title: titleOf(block), code: blockSnippet(block), tooltip: Blockly.Tooltip.getTooltipOfObject(block) };
+    return { title: titleOfBlock(block), code: blockSnippet(block), tooltip: Blockly.Tooltip.getTooltipOfObject(block) };
   } finally {
     ws.dispose();
     Blockly.Events.enable();
   }
 }
 
-/** 설명이 아직 없는 블록: 도움말을 개념 자리에 두고 예시는 비운다 (계획 4 Task 2 가 채운다) */
-const placeholder = (tooltip: string): BlockContent => ({ concept: tooltip, example: { title: "", code: "" } });
+/**
+ * 대비책: 설명(content)이 없는 블록은 도움말을 개념 자리에 두고 예시는 비운다.
+ * 새 블록을 넣으면 src/docs/content 에 설명을 쓴다 (catalog.test.ts 가 빠진 설명을 잡는다)
+ */
+const fallbackContent = (tooltip: string): BlockContent => ({ concept: tooltip, example: { title: "", code: "" } });
 
 const sameTitle = (a: TitlePart[], b: TitlePart[]) => a.length === b.length && a.every((p, i) => p.kind === b[i].kind && p.text === b[i].text);
 
@@ -123,7 +129,7 @@ function buildCatalog(): DocCategory[] {
         if (!known.some((t) => sameTitle(t, built.title))) seen.variants = [...(seen.variants ?? []), built.title];
         continue;
       }
-      const doc: BlockDoc = { type: item.type, category, ...built, ...(CONTENT[item.type] ?? placeholder(built.tooltip)) };
+      const doc: BlockDoc = { type: item.type, category, ...built, ...(CONTENT[item.type] ?? fallbackContent(built.tooltip)) };
       byType.set(item.type, doc);
       blocks.push(doc);
     }

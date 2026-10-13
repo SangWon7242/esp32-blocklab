@@ -41,11 +41,32 @@ describe("블록 설명 메뉴", () => {
       expect(req.type).toBe("flow_wait");
       expect(req.code).toContain("time.sleep(2)");
       expect(req.blockId).toBe(block.id);
+      expect(req.fromFlyout).toBe(false);
 
       // 그림자 블록이면 담은 블록의 설명
       const shadow = block.getInputTargetBlock("SEC")!;
       item.callback({ block: shadow as Blockly.BlockSvg }, new Event("contextmenu"), new Event("click"), new Blockly.utils.Coordinate(0, 0));
       expect(second.mock.calls[1][0].type).toBe("flow_wait");
+    } finally {
+      ws.dispose();
+    }
+  });
+
+  it("제목은 우클릭한 블록의 지금 값으로 (툴박스 기본값이 아니라)", () => {
+    const onOpen = vi.fn();
+    registerBlockDocMenu(onOpen);
+    const item = Blockly.ContextMenuRegistry.registry.getItem(BLOCK_DOC_MENU_ID) as ActionItem;
+    const ws = new Blockly.Workspace();
+    try {
+      const block = waitBlock(ws, 3);
+      item.callback({ block: block as Blockly.BlockSvg }, new Event("contextmenu"), new Event("click"), new Blockly.utils.Coordinate(0, 0));
+      const req = onOpen.mock.calls[0][0];
+      expect(req.title).toContainEqual({ kind: "slot", text: "3" });
+      expect(req.title.map((p: { text: string }) => p.text).join(" ")).toContain("3");
+      // 꺼진 블록도 진짜 블록의 값으로
+      block.setDisabledReason(true, "orphaned_block");
+      item.callback({ block: block as Blockly.BlockSvg }, new Event("contextmenu"), new Event("click"), new Blockly.utils.Coordinate(0, 0));
+      expect(onOpen.mock.calls[1][0].title).toContainEqual({ kind: "slot", text: "3" });
     } finally {
       ws.dispose();
     }

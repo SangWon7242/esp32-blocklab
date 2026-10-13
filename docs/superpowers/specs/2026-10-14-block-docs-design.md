@@ -20,7 +20,7 @@
 
 - `src/components/editor/blockDocMenu.ts` — `Blockly.ContextMenuRegistry` 에 `block_doc` 항목(블록 범위, 문구 "이 블록 설명 보기", weight 0 으로 맨 위)을 **한 번만** 등록. 팔레트(flyout) 블록에서도 열린다. 콜백은 등록 시 받은 `onOpen(type, codeOfThisBlock)` 을 부른다. `codeOfThisBlock` 은 우클릭한 블록을 생성기로 돌린 코드(학생이 적은 값 그대로; 값 블록이면 식, 명령이면 줄들).
 - `BlocklyWorkspace` 에 `onDocRequest?: (type: string, code: string) => void` prop 추가. `EditorWorkbench` 가 받아 `BlockDocDialog` 를 연다.
-- `src/components/editor/BlockDocDialog.tsx` — shadcn Dialog. 내용: 카테고리 배지 + 제목 칩, "내 블록이 만드는 코드"(우클릭한 블록의 코드, `<pre>`), "무슨 뜻인가요"(concept), "예시 프로그램"(example.code), tips 목록. 버튼: "블록 사전에서 보기"(`#/docs?block=<type>`, 새 탭 아님, 같은 창 이동), 자유 코딩 화면일 때만 "예시를 편집기에 열기"(AlertDialog 로 "지금 작업판을 예시로 바꿀까요?" 확인 뒤 `loadCode(example.code)`).
+- `src/components/editor/BlockDocDialog.tsx` — shadcn Dialog. 내용: 카테고리 배지 + 제목 칩, "내 블록이 만드는 코드"(우클릭한 블록의 코드, `<pre>`), "무슨 뜻인가요"(concept), "예시 프로그램"(example.code), tips 목록. 버튼: "블록 사전에서 보기"(`#/docs?block=<type>`, 새 탭으로 연다: 같은 창 이동은 작업판을 잃고 보드 연결이 끊긴다. 설명이 있는 블록에만), 자유 코딩 화면일 때만 "예시를 편집기에 열기"(AlertDialog 로 "지금 작업판을 예시로 바꿀까요?" 확인 뒤 `loadCode(example.code)`).
 - 모바일 폭에서는 Dialog 가 거의 전체 화면.
 
 ## 4. 블록 사전 화면 `#/docs`
