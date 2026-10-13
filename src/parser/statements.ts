@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "@lezer/common";
-import { block, chain, codeStmt, varSet, withComment } from "./builders";
+import { block, chain, codeStmt, commentText, varSet, withComment } from "./builders";
 import type { ParseContext } from "./context";
 import { callBlock, callParts, convertExpr, memberParts } from "./expressions";
 import { RE_DUTY, RE_FREQ, RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, functionParts, isKnownImport, isValidPin, returnsValue } from "./patterns";
@@ -26,18 +26,35 @@ export function convertBody(body: SyntaxNode | null, ctx: ParseContext): BlockJs
   return chain(convertStatements(stmts, ctx, false).blocks);
 }
 
+/**
+ * 문장들을 위에서부터 블록으로. 주석은 이렇게 붙는다:
+ * - 문장 첫 줄 끝 주석 → 그 블록 코멘트 (줄 끝 주석)
+ * - 문장 앞의 주석만 있는 줄들(빈 줄은 건너뜀, 들여쓰기 상관없이 바로 앞 문장 뒤부터) → 그 블록 코멘트의 윗줄
+ * - 블록이 생기지 않는 문장(지운 import, 접힌 핀·함수) 앞의 주석 줄 → 다음 문장으로 넘김
+ * - 파일 첫 문장이 import 면 그 앞 주석 줄 → 파일 머리말 (시작 블록 코멘트)
+ * - 몸통 끝·파일 끝 주석 줄 → 바깥의 다음 문장 (없으면 버림)
+ */
 export function convertStatements(all: SyntaxNode[], ctx: ParseContext, topLevel: boolean): { blocks: BlockJson[]; tops: BlockJson[] } {
   const blocks: BlockJson[] = [];
   const tops: BlockJson[] = [];
   // 줄 끝 주석은 문장 사이에 형제로 끼어 있으므로 빼야 뒤따르는 문장(freq·duty_u16)을 바로 본다
   const nodes = all.filter((n) => n.name !== "Comment");
+  let pending: string[] = [];
   for (let i = 0; i < nodes.length; ) {
     const node = nodes[i];
+    const leading = [...pending, ...ctx.takeLeading(node.from)];
+    pending = [];
+    if (topLevel && i === 0 && node.name === "ImportStatement") ctx.header.push(...leading.splice(0));
     const r = convertStatement(node, nodes.slice(i + 1), ctx, topLevel);
-    if (r.blocks[0]) withComment(r.blocks[0], inlineComment(node, ctx));
+    const consumed = Math.max(1, r.consumed);
+    // 이 문장(들) 안에서 아직 아무도 가져가지 않은 주석 줄은 code_stmt 원문에 들었거나 접혀 사라진 것
+    ctx.skipComments(nodes[i + consumed - 1].to);
+    const target = r.blocks[0] ?? r.tops[0];
+    if (target) withComment(target, commentText(leading, inlineComment(node, ctx)));
+    else pending = leading;
     blocks.push(...r.blocks);
     tops.push(...r.tops);
-    i += Math.max(1, r.consumed);
+    i += consumed;
   }
   return { blocks, tops };
 }
@@ -171,7 +188,6 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
       if (returnsValue(body)) { RETURN = convertExpr(operands(last)[0], ctx); bodyStmts = stmts.slice(0, -1); }
       const STACK = bodyStmts.every((s) => s.name === "PassStatement") ? undefined : chain(convertStatements(bodyStmts, ctx, false).blocks);
       const def = block(RETURN ? "procedures_defreturn" : "procedures_defnoreturn", { NAME: name }, { STACK, RETURN }, { params: params.map((p) => ({ name: p, id: ctx.varId(p) })) });
-      withComment(def, inlineComment(node, ctx));
       return { blocks: [], tops: [def], consumed: 1 };
     }
 

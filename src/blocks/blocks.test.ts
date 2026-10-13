@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import * as Blockly from "blockly";
+import { FieldMultilineInput } from "@blockly/field-multilineinput";
 import { BUILTIN_BLOCK_TYPES, CUSTOM_BLOCK_TYPES, entryTheme, registerBlocks, toolbox } from "./index";
 
 beforeAll(() => {
@@ -87,5 +88,26 @@ describe("테마와 툴박스", () => {
     walk((toolbox as { contents: unknown[] }).contents);
     expect(types.length).toBeGreaterThan(20);
     for (const type of types) expect(Blockly.Blocks[type], type).toBeDefined();
+  });
+});
+
+describe("최종 리뷰", () => {
+  it("C3 변수 꾸러미가 깨진 코드를 내는 math_change·procedures_ifreturn 을 내놓지 않는다", () => {
+    expect(Blockly.Blocks.math_change).toBeUndefined();
+    expect(Blockly.Blocks.procedures_ifreturn).toBeUndefined();
+  });
+  it("C3 변수 꾸러미에는 변수 만들기·정하기·값만 있다", () => {
+    const ws = new Blockly.Workspace();
+    ws.getVariableMap().createVariable("x");
+    // flyoutCategory 가 버튼 뒤에 붙이는 블록 목록 (math_change 를 넣을지 묻는 includeChangeBlocks = true 그대로)
+    const items = Blockly.Variables.jsonFlyoutCategoryBlocks(ws, ws.getVariableMap().getVariablesOfType(""), true) as { type?: string }[];
+    expect(items.map((i) => i.type)).toEqual(["variables_set", "variables_get"]);
+    ws.dispose();
+  });
+  it("I7 코드 블록(문장)은 여러 줄 칸, 코드 식은 한 줄 칸", () => {
+    const ws = new Blockly.Workspace();
+    expect(ws.newBlock("code_stmt").getField("CODE")).toBeInstanceOf(FieldMultilineInput);
+    expect(ws.newBlock("code_expr").getField("CODE")).not.toBeInstanceOf(FieldMultilineInput);
+    ws.dispose();
   });
 });

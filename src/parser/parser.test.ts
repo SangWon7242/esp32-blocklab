@@ -297,3 +297,33 @@ describe("최종 리뷰: 뜻이 바뀌거나 사라지던 구문", () => {
     expect(body(oled).map((b) => b.type)).not.toContain("esp_oled_setup");
   });
 });
+
+describe("최종 리뷰 I5: 주석 줄", () => {
+  const start = (code: string) => (parse(code).json.blocks.blocks as BlockJson[]).find((b) => b.type === "start_program")!;
+
+  it("문장 바로 위 주석 줄은 그 블록 코멘트의 윗줄, 줄 끝 주석은 | 로 시작하는 마지막 줄", () => {
+    const b = body("led = Pin(26, Pin.OUT)\n# 켜기 전에\n# 한 번 더\nled.value(1)  # 켜기\n");
+    expect(b[1].icons?.comment.text).toBe("켜기 전에\n한 번 더\n|켜기");
+  });
+  it("윗줄 하나만 있으면 끝에 빈 | 줄을 붙여 줄 끝 주석과 구별한다", () => {
+    expect(body("led = Pin(26, Pin.OUT)\n# 켜기\nled.value(1)\n")[1].icons?.comment.text).toBe("켜기\n|");
+    expect(body("led = Pin(26, Pin.OUT)\n# 켜기\n# 정말\nled.value(1)\n")[1].icons?.comment.text).toBe("켜기\n정말");
+  });
+  it("몸통 안 들여쓴 주석 줄도 다음 문장에 붙는다", () => {
+    const b = body("while True:\n    # 기다리기\n    time.sleep(1)\n");
+    expect(b[0].inputs?.DO?.block?.icons?.comment.text).toBe("기다리기\n|");
+  });
+  it("몸통 끝 주석은 바깥의 다음 문장에, 파일 끝 주석은 버린다", () => {
+    const b = body("while True:\n    time.sleep(1)\n    # 몸통 끝\nprint(1)\n# 파일 끝\n");
+    expect(b[1].icons?.comment.text).toBe("몸통 끝\n|");
+  });
+  it("첫 문장이 import 면 그 위 주석은 시작 블록 코멘트(파일 머리말)", () => {
+    expect(start("# 머리말 1\n# 머리말 2\n\nfrom machine import Pin\nled = Pin(26, Pin.OUT)\n").icons?.comment.text).toBe("머리말 1\n머리말 2");
+  });
+  it("지운 import 뒤의 주석 줄은 다음 문장으로 넘어간다", () => {
+    expect(body("from machine import Pin\n# 핀\nimport time\nled = Pin(26, Pin.OUT)\n")[0].icons?.comment.text).toBe("핀\n|");
+  });
+  it("함수 정의 위 주석 줄은 함수 블록 코멘트", () => {
+    expect(tops("# 깜빡이기\ndef blink(t):  # 한 번\n    pass\n")[0].icons?.comment.text).toBe("깜빡이기\n|한 번");
+  });
+});

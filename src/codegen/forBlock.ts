@@ -74,7 +74,7 @@ export function registerForBlocks(gen: Gen): void {
   // 내장 text 는 작은따옴표를 쓰므로 큰따옴표로 바꾼다
   f["text"] = (block) => {
     const raw = String(block.getFieldValue("TEXT"));
-    const escaped = raw.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+    const escaped = raw.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r");
     return [`"${escaped}"`, Order.ATOMIC];
   };
 

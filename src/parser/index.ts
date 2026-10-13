@@ -2,6 +2,7 @@ import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
 import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody, isValidPin, returnsValue } from "./patterns";
+import { withComment } from "./builders";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
 import type { BlockJson, ParseResult, WorkspaceJson } from "./types";
@@ -66,6 +67,20 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
   if (ctx.oledFolded) ctx.functions.delete("show");
 }
 
+/** 앞에 코드 없이 주석만 있는 줄들 (위치 순). `#` 와 그 뒤 공백 하나, 끝 공백을 뗀 글 */
+function commentOnlyLines(script: SyntaxNode, ctx: ParseContext): { from: number; text: string }[] {
+  const out: { from: number; text: string }[] = [];
+  script.toTree().iterate({
+    enter(n) {
+      if (n.name !== "Comment") return;
+      const lineStart = ctx.src.text.lastIndexOf("\n", n.from - 1) + 1;
+      if (ctx.src.text.slice(lineStart, n.from).trim()) return;
+      out.push({ from: n.from, text: ctx.src.text.slice(n.from, n.to).replace(/^#\s?/, "").replace(/\s+$/, "") });
+    },
+  });
+  return out;
+}
+
 /** 블록이 실제로 가리키는 변수 id: `{ id }` 꼴 필드 값과 함수 정의의 매개변수 id */
 function usedVariableIds(roots: BlockJson[]): Set<string> {
   const ids = new Set<string>();
@@ -93,9 +108,10 @@ export function codeToBlocks(code: string): ParseResult {
 
   const script = tree.topNode;
   survey(script, ctx);
+  ctx.setCommentLines(commentOnlyLines(script, ctx));
   const { blocks, tops } = convertStatements(children(script), ctx, true);
 
-  const start: BlockJson = { type: "start_program", x: 40, y: 40 };
+  const start: BlockJson = withComment({ type: "start_program", x: 40, y: 40 }, ctx.header.length ? ctx.header.join("\n") : null);
   if (blocks.length) {
     for (let i = 0; i < blocks.length - 1; i++) blocks[i].next = { block: blocks[i + 1] };
     start.inputs = { BODY: { block: blocks[0] } };

@@ -225,11 +225,11 @@ describe("식과 우선순위", () => {
     );
     expect(code).toBe("led.value(1)  # 켜기\n");
   });
-  it("여러 줄 코멘트는 한 줄 주석으로 합친다", () => {
+  it("여러 줄 코멘트는 문장 위의 주석 줄로", () => {
     const code = workspaceJsonToCode(
       program([{ type: "esp_pin_write", fields: { VAR: { id: "var_led" }, VALUE: "1" }, icons: { comment: { text: "켜기\n그리고 기다리기", pinned: false, height: 80, width: 160 } } }], { vars: ["led"] }),
     );
-    expect(code).toBe("led.value(1)  # 켜기 그리고 기다리기\n");
+    expect(code).toBe("# 켜기\n# 그리고 기다리기\nled.value(1)\n");
   });
   it("준비 블록 코멘트는 끌어올린 첫 줄 끝 주석으로", () => {
     const servo = { type: "esp_servo_setup", fields: { PIN: 4, VAR: { id: "var_servo" } }, icons: { comment: { text: "문 모터", pinned: false, height: 80, width: 160 } } };
@@ -261,5 +261,44 @@ describe("식과 우선순위", () => {
     };
     const code = workspaceJsonToCode(program([setT(num(1))], { tops: [def], vars: ["t"] }));
     expect(code).toBe("def twice():\n    return t * 2\n\n\nt = 1\n");
+  });
+});
+
+const comment = (text: string) => ({ comment: { text, pinned: false, height: 80, width: 160 } });
+
+describe("최종 리뷰: 주석 줄·이름·여러 줄 코드·떨어진 블록", () => {
+  it("I5 | 로 시작하는 줄은 줄 끝 주석, 나머지는 문장 위 주석 줄 (들여쓰기 맞춤)", () => {
+    const write = { type: "esp_pin_write", fields: { VAR: { id: "var_led" }, VALUE: "1" }, icons: comment("켜기 전에\n한 번 더\n|켜기") };
+    expect(workspaceJsonToCode(program([forever([write])], { vars: ["led"] }))).toBe("while True:\n    # 켜기 전에\n    # 한 번 더\n    led.value(1)  # 켜기\n");
+    const only = { ...write, icons: comment("위에만\n|") };
+    expect(workspaceJsonToCode(program([only], { vars: ["led"] }))).toBe("# 위에만\nled.value(1)\n");
+  });
+  it("I5 준비 블록의 윗줄 주석은 끌어올린 첫 줄 위로", () => {
+    const led = { ...pinSetup("led", 26), icons: comment("핀 준비\n|LED") };
+    expect(workspaceJsonToCode(program([led], { vars: ["led"] }))).toBe("from machine import Pin\n\n# 핀 준비\nled = Pin(26, Pin.OUT)  # LED\n");
+  });
+  it("I5 시작 블록 코멘트는 파일 맨 위 머리말", () => {
+    const json = program([pinWrite("led", 1)], { vars: ["led"] });
+    const start = (json.blocks as { blocks: B[] }).blocks.find((b) => b.type === "start_program")!;
+    start.icons = comment("첫 줄\n둘째 줄");
+    expect(workspaceJsonToCode(json)).toBe("# 첫 줄\n# 둘째 줄\n\nled.value(1)\n");
+  });
+  it("I6 파이썬 키워드가 아닌 이름(max, list)은 바꾸지 않는다", () => {
+    const set = (name: string): B => ({ type: "variables_set", fields: { VAR: { id: `var_${name}` } }, inputs: { VALUE: { block: num(1) } } });
+    expect(workspaceJsonToCode(program([set("max"), set("list")], { vars: ["max", "list"] }))).toBe("max = 1\nlist = 1\n");
+  });
+  it("I7 여러 줄 코드 블록은 줄마다 들여쓴다", () => {
+    const code = workspaceJsonToCode(program([forever([{ type: "code_stmt", fields: { CODE: "for k in range(3):\n    print(k)" } }])]));
+    expect(code).toBe("while True:\n    for k in range(3):\n        print(k)\n");
+  });
+  it("I8 꺼진(떨어진) 블록은 코드에 넣지 않는다", () => {
+    const def: B = { type: "procedures_defnoreturn", x: 0, y: 0, fields: { NAME: "f" }, inputs: { STACK: { block: { type: "esp_print", inputs: { VALUE: { block: str("in") } } } } } };
+    const loose: B = { type: "esp_print", x: 0, y: 300, disabledReasons: ["ORPHANED_BLOCK"], inputs: { VALUE: { block: str("loose") } } };
+    const code = workspaceJsonToCode(program([pinWrite("led", 1)], { tops: [def, loose], vars: ["led"] }));
+    expect(code).toContain('print("in")');
+    expect(code).not.toContain("loose");
+  });
+  it("I9d 문자열의 \\r 은 이스케이프한다", () => {
+    expect(workspaceJsonToCode(program([{ type: "esp_print", inputs: { VALUE: { block: str("a\rb") } } }]))).toBe('print("a\\rb")\n');
   });
 });

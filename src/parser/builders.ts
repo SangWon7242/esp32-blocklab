@@ -30,3 +30,14 @@ export function withComment(b: BlockJson, text: string | null): BlockJson {
   if (text) b.icons = { comment: { text, pinned: false, height: 80, width: 160 } };
   return b;
 }
+
+/**
+ * 블록 코멘트 글. 줄 끝 주석만 있으면 그 글 그대로. 문장 위 주석 줄(leading)이 있으면 줄마다 한 줄씩,
+ * 줄 끝 주석은 `|` 를 붙인 마지막 줄. 위 주석이 한 줄뿐이고 줄 끝 주석이 없으면 빈 `|` 줄을 붙여
+ * (한 줄짜리 코멘트는 생성기가 줄 끝 주석으로 쓰므로) 위 주석임을 표시한다. 생성기 splitComment 와 짝.
+ */
+export function commentText(leading: string[], trailing: string | null): string | null {
+  if (!leading.length) return trailing;
+  if (trailing) return [...leading, `|${trailing}`].join("\n");
+  return leading.length === 1 ? `${leading[0]}\n|` : leading.join("\n");
+}

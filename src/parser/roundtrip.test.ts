@@ -46,3 +46,15 @@ describe("최종 리뷰: 왕복에서 사라지던 코드", () => {
     expect(roundTrip(src)).toBe(src);
   });
 });
+
+describe("최종 리뷰 I5: 주석 줄도 왕복", () => {
+  /** 빈 줄을 빼고, 주석 앞 공백(열 맞춤)은 두 칸으로 */
+  const lines = (code: string) => code.split("\n").map((l) => l.trimEnd().replace(/\s+#/, "  #")).filter((l) => l.length > 0);
+
+  it("10-auto-door/extra1_led.py 의 머리말·줄 끝 주석이 순서대로 남는다", () => {
+    const src = readFileSync(join(root, "10-auto-door/extra1_led.py"), "utf8");
+    const r = codeToBlocks(src);
+    if (!r.ok) throw new Error(r.error.message);
+    expect(lines(workspaceJsonToCode(r.json))).toEqual(lines(src));
+  });
+});
