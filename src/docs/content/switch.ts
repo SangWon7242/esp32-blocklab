@@ -55,7 +55,7 @@ export const switchContent: Record<string, BlockContent> = {
     concept: "조이스틱 손잡이의 가로 위치를 0~4095 로 읽어요. 가운데에 두면 중간쯤 값이 나오고, 한쪽 끝까지 밀면 0 이나 4095 에 가까워집니다.",
     example: {
       title: "오른쪽·왼쪽 알아내기",
-      code: `${JOYSTICK_SETUP}\nwhile True:\n    if rocker_x.read() > 3000:\n        print("right")\n    if rocker_x.read() < 1000:\n        print("left")\n    time.sleep(0.2)`,
+      code: `${JOYSTICK_SETUP}\nwhile True:\n    if rocker_x.read() > 3000:\n        print("high")\n    if rocker_x.read() < 1000:\n        print("low")\n    time.sleep(0.2)`,
     },
   },
   dev_joystick_y: {

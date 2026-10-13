@@ -59,7 +59,7 @@ export const ledContent: Record<string, BlockContent> = {
   dev_rgb_set: {
     concept: "빨강·초록·파랑 세기를 0~255 수로 직접 정해요. 셋 다 255 면 흰색, 셋 다 0 이면 꺼집니다. 변수나 계산 블록을 끼우면 색이 조금씩 바뀌게 할 수도 있어요.",
     example: {
-      title: "빨강에서 파랑으로 바뀌기",
+      title: "파랑에서 빨강으로 바뀌기",
       code: `${RGB_SETUP}level = 0\nwhile level <= 255:\n    set_color(level, 0, 255 - level)\n    level = level + 51\n    time.sleep(0.5)`,
     },
   },
