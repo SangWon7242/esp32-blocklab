@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { HashRouter, Link, NavLink, Route, Routes, useLocation } from "react-router";
-import { Blocks, Cpu, Route as RouteIcon, Settings } from "lucide-react";
+import { Blocks, BookOpen, Cpu, Route as RouteIcon, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,11 +14,14 @@ const LabPage = lazy(() => import("./lab/LabPage").then((m) => ({ default: m.Lab
 const TrackPage = lazy(() => import("./track/TrackPage").then((m) => ({ default: m.TrackPage })));
 const ChapterPage = lazy(() => import("./track/ChapterPage").then((m) => ({ default: m.ChapterPage })));
 const StepPage = lazy(() => import("./track/StepPage").then((m) => ({ default: m.StepPage })));
+// 블록 사전은 카탈로그를 만들 때 Blockly 를 쓰므로 열 때 받는다
+const DocsPage = lazy(() => import("./docs/DocsPage").then((m) => ({ default: m.DocsPage })));
 const SettingsPage = lazy(() => import("./settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 
 const navItems = [
   { to: "/lab", label: "자유 코딩", icon: Blocks },
   { to: "/track", label: "트랙", icon: RouteIcon },
+  { to: "/docs", label: "블록 사전", icon: BookOpen },
   { to: "/settings", label: "설정", icon: Settings },
 ] as { to: string; label: string; icon: typeof Blocks; soon?: boolean }[];
 
@@ -34,6 +37,7 @@ function Screens() {
           <Route path="/track" element={<TrackPage />} />
           <Route path="/track/:chapter" element={<ChapterPage />} />
           <Route path="/track/:chapter/:step" element={<StepPage />} />
+          <Route path="/docs" element={<DocsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Suspense>

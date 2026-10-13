@@ -1,16 +1,15 @@
-import type { ReactNode } from "react";
 import { BookOpen, FileCode2, X } from "lucide-react";
 import { Link } from "react-router";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import type { BlockDoc, TitlePart } from "@/docs/catalog";
+import { BlockDocBody, CategoryBadge, TitleChips } from "@/app/docs/BlockDocCard";
+import type { BlockDoc } from "@/docs/catalog";
 import type { BlockDocRequest } from "./blockDocMenu";
 
 type Props = {
@@ -22,34 +21,6 @@ type Props = {
   /** 예시 프로그램을 작업판에 싣는다 (자유 코딩 화면에서만 준다) */
   onOpenExample?: (code: string) => void;
 };
-
-/** 블록 제목: 고정 글과 학생이 바꾸는 칸(칩) */
-function TitleChips({ parts }: { parts: TitlePart[] }) {
-  return (
-    <>
-      {parts.map((p, i) =>
-        p.kind === "slot" ? (
-          <span key={i} className="rounded-full bg-white/80 px-2 text-sm font-normal text-neutral-900">{p.text || " "}</span>
-        ) : (
-          <span key={i}>{p.text}</span>
-        ),
-      )}
-    </>
-  );
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-1.5">
-      <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
-      {children}
-    </section>
-  );
-}
-
-function CodeBlock({ code }: { code: string }) {
-  return <pre className="overflow-x-auto rounded-md bg-muted px-3 py-2 font-mono text-sm whitespace-pre">{code}</pre>;
-}
 
 /** 블록 우클릭 → "이 블록 설명 보기" 팝업: 그 블록이 만드는 코드·뜻·예시 프로그램 */
 export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) {
@@ -63,9 +34,7 @@ export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) 
         >
           <DialogHeader className="gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              {doc && (
-                <Badge className="text-white" style={{ backgroundColor: doc.category.colour }}>{doc.category.name}</Badge>
-              )}
+              {doc && <CategoryBadge doc={doc} />}
             </div>
             <DialogTitle
               className="inline-flex w-fit flex-wrap items-center gap-1.5 rounded-lg px-3 py-1.5 text-base leading-normal font-medium"
@@ -77,31 +46,7 @@ export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) 
           </DialogHeader>
 
           <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4">
-            <Section title="내 블록이 만드는 코드">
-              {request.code.trim() ? (
-                <CodeBlock code={request.code} />
-              ) : (
-                <p className="text-muted-foreground">이 블록만으로는 코드가 생기지 않아요.</p>
-              )}
-            </Section>
-            {doc && (
-              <>
-                <Section title="무슨 뜻인가요">
-                  <p className="leading-relaxed">{doc.concept}</p>
-                </Section>
-                <Section title="예시 프로그램">
-                  <p className="font-medium">{doc.example.title}</p>
-                  <CodeBlock code={doc.example.code} />
-                </Section>
-                {doc.tips && doc.tips.length > 0 && (
-                  <Section title="알아 두기">
-                    <ul className="list-disc space-y-1 pl-5 leading-relaxed">
-                      {doc.tips.map((tip) => <li key={tip}>{tip}</li>)}
-                    </ul>
-                  </Section>
-                )}
-              </>
-            )}
+            <BlockDocBody code={request.code} codeTitle="내 블록이 만드는 코드" doc={doc} />
           </div>
 
           <DialogFooter className="flex-wrap">

@@ -58,3 +58,27 @@ test("자유 코딩에서는 예시를 편집기에 열 수 있다", async ({ pa
   await expect(code).not.toContainText("led = Pin(26, Pin.OUT)");
   await expect(workspaceText(page, "one")).toBeVisible();
 });
+
+test("블록 사전에서 찾아 예시를 편집기에서 연다", async ({ page }) => {
+  await page.goto("/#/docs");
+  const cards = page.getByTestId("block-doc-card");
+  await expect(cards.first()).toBeVisible();
+  await page.getByPlaceholder("블록 이름·코드·설명 검색").fill("깜빡");
+  expect(await cards.count()).toBeGreaterThanOrEqual(1);
+  const blink = page.locator('[data-testid="block-doc-card"][data-type="dev_led_blink"]');
+  await expect(blink).toBeVisible();
+
+  await blink.getByRole("button", { name: "예시 프로그램" }).click();
+  await blink.getByRole("link", { name: "편집기에서 열어 보기" }).click();
+  await expect(page).toHaveURL(/#\/lab\?example=dev_led_blink/);
+
+  await page.getByRole("tab", { name: "코드" }).click();
+  const code = page.getByTestId("code-panel");
+  await expect(code).toContainText("range(");
+  await expect(code).toContainText("import time");
+});
+
+test("?block= 으로 들어오면 그 카드로 스크롤한다", async ({ page }) => {
+  await page.goto("/#/docs?block=flow_wait");
+  await expect(page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]')).toBeInViewport();
+});

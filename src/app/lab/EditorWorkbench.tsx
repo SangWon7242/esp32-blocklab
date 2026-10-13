@@ -62,6 +62,11 @@ export type EditorWorkbenchHandle = {
 export type EditorWorkbenchProps = {
   /** 처음 실을 코드 (마운트할 때 한 번만 읽는다) */
   initialCode: string;
+  /**
+   * 처음 실을 예시 프로그램 (블록 사전의 예시: import 없는 몸통). 있으면 initialCode 대신 "예시를 편집기에 열기"와
+   * 같은 길로 싣는다(작업판이 만드는 코드로 코드 패널을 맞춘다). 블록으로 바꾸지 못하면 initialCode 가 남는다
+   */
+  initialExample?: string;
   /** 코드 대신 처음 실을 블록 JSON (있으면 initialCode 보다 먼저. 설계 조립 작업판) */
   initialBlocks?: WorkspaceJson | null;
   /** 가짜 보드 (?device=fake 또는 설정) */
@@ -87,7 +92,7 @@ export type EditorWorkbenchProps = {
 /** 설계 조립에서 빼는 검사 규칙 */
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
-export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
+export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
   const [state, dispatch] = useReducer(
     editorReducer,
     null,
@@ -170,9 +175,9 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, as
     }
   }, [state.source, state.blocks, refreshMap]);
 
-  // 처음 한 번: 예시 블록을 작업판에 올린다
+  // 처음 한 번: 예시 블록을 작업판에 올린다 (initialExample 은 아래 openExample 이 싣는다)
   useEffect(() => {
-    if (state.blocks) {
+    if (initialExample === undefined && state.blocks) {
       blocklyRef.current?.load(state.blocks);
       refreshMap();
     }
@@ -357,6 +362,12 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, as
       dispatch({ type: "blocksChanged", json: handle.getJson(), code: generated.code, map: generated.map });
     }
     setDocRequest(null);
+  }, []);
+
+  // 처음 한 번: 블록 사전에서 넘어온 예시 프로그램을 싣는다
+  useEffect(() => {
+    if (initialExample !== undefined) openExample(initialExample);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const codeMode = state.source === "code";
