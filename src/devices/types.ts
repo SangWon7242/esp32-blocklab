@@ -84,6 +84,11 @@ export type DeviceSpec = {
   alsoIn?: DeviceCategory[];
   /** 라벨 아래에 다른 장치의 블록을 필드 기본값만 바꿔 넣는다 (예: 조도 센서 밑에 dev_adc_read VAR=light) */
   extraToolbox?: { blockType: string; fields: Record<string, string> }[];
+  /**
+   * 툴박스에서 카테고리 안의 보여 주는 순서 (작은 것이 위). DEVICES 순서는 파서가 맞추는 우선순위라 따로 둔다.
+   * 없으면 순서가 있는 장치들 뒤에 DEVICES 순서대로.
+   */
+  toolboxOrder?: number;
 };
 
 export type ImportRule = { when: RegExp; line: string; rank: number };

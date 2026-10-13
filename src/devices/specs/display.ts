@@ -3,7 +3,7 @@ import { pinNo, validPins } from "./common";
 
 /** OLED (esp_oled_setup). 이름 i2c/oled 고정, show(a, b) 도우미 */
 export const oled: DeviceSpec = {
-  id: "oled", category: "display", label: "OLED",
+  id: "oled", category: "display", label: "OLED", toolboxOrder: 70,
   setup: {
     blockType: "esp_oled_setup", message: "OLED 화면 준비하기 (scl 핀 %1, sda 핀 %2)",
     parts: [pinNo("SCL", 22), pinNo("SDA", 21)],

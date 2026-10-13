@@ -63,7 +63,7 @@ const setup = (type: string, fields: Record<string, unknown> = {}): B => ({ type
 function prerequisites(entry: B): { body: B[]; tops: B[] } {
   const varName = (entry.fields as { VAR?: { name?: string } } | undefined)?.VAR?.name;
   switch (entry.type) {
-    case "esp_pin_write": return { body: [setup("esp_pin_setup", { VAR: { name: "led" } })], tops: [] };
+    case "esp_pin_write": return { body: [setup("esp_pin_setup", { VAR: { name: varName ?? "led" } })], tops: [] };
     case "esp_pin_read": return { body: [setup("esp_pin_setup", { VAR: { name: "echo" }, MODE: "IN", PIN: 12 })], tops: [] };
     case "esp_servo_door": return { body: [setup("esp_servo_setup", { VAR: { name: "servo" } })], tops: [] };
     case "esp_pwm_duty": return { body: [setup("esp_pwm_setup", { VAR: { name: "pwm" } })], tops: [] };

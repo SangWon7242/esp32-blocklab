@@ -1,9 +1,9 @@
 import type { DeviceSpec } from "../types";
-import { adcLines, ORDER, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
+import { adcLines, adcPatternLines, ORDER, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
 
 /** 핀 출력·입력 (esp_pin_setup). 초음파 trig/echo 도 핀이므로 켜기·끄기·값 블록은 그 변수에도 맞는다 */
 export const pinOut: DeviceSpec = {
-  id: "pin_out", category: "pin", label: "핀",
+  id: "pin_out", category: "pin", label: "핀", toolboxOrder: 1,
   alsoIn: ["led"], // LED 는 따로 준비 블록이 없다: 출력 핀 준비·켜기·끄기를 LED 카테고리에도 보여 준다
   setup: {
     blockType: "esp_pin_setup",
@@ -41,7 +41,7 @@ export const pinOut: DeviceSpec = {
 
 /** PWM 핀 (esp_pwm_setup). 세기 블록은 서보 변수에도 쓴다 */
 export const pwm: DeviceSpec = {
-  id: "pwm", category: "pin", label: "PWM 핀",
+  id: "pwm", category: "pin", label: "PWM 핀", toolboxOrder: 3,
   setup: {
     blockType: "esp_pwm_setup", message: "PWM %1 을(를) 핀 %2 에 준비하기 (주파수 %3 Hz)",
     parts: [{ kind: "var", name: "VAR", default: "pwm" }, pinNo("PIN", 2), { kind: "number", name: "FREQ", default: 1000, min: 1 }],
@@ -69,7 +69,7 @@ export const pwm: DeviceSpec = {
 
 /** 풀업 입력 핀 (dev_pin_in_setup). 풀업 줄은 버튼 선언이 먼저 잡고, 그대로(NONE) 줄은 esp_pin_setup 이 잡는다 */
 export const pinIn: DeviceSpec = {
-  id: "pin_in", category: "pin", label: "입력 핀",
+  id: "pin_in", category: "pin", label: "입력 핀", toolboxOrder: 2,
   setup: {
     blockType: "dev_pin_in_setup",
     message: "입력 핀 %1 을(를) %2 준비하고 %3 이름 붙이기",
@@ -89,7 +89,7 @@ export const pinIn: DeviceSpec = {
 
 /** 아날로그 핀 (dev_adc_setup). 0~4095 로 읽는다. 조도·가변저항·소리·불꽃 센서도 이 3줄로 접힌다 */
 export const adc: DeviceSpec = {
-  id: "adc", category: "pin", label: "아날로그 핀",
+  id: "adc", category: "pin", label: "아날로그 핀", toolboxOrder: 4,
   setup: {
     blockType: "dev_adc_setup",
     message: "아날로그 핀 %1 을(를) 준비하고 %2 이름 붙이기",
@@ -98,11 +98,7 @@ export const adc: DeviceSpec = {
     lines: (v) => adcLines(v.VAR, v.PIN),
     kind: "adc",
     pattern: {
-      lines: [
-        new RegExp(String.raw`^${RE_NAME}\s*=\s*ADC\(\s*Pin\(\s*${RE_PIN}\s*\)\s*\)$`),
-        new RegExp(String.raw`^${RE_NAME}\.atten\(\s*ADC\.ATTN_11DB\s*\)$`),
-        new RegExp(String.raw`^${RE_NAME}\.width\(\s*ADC\.WIDTH_12BIT\s*\)$`),
-      ],
+      lines: adcPatternLines(),
       fields: ([a, b, c]) => (a[1] === b[1] && a[1] === c[1] && validPins(a[2]) ? { PIN: a[2], VAR: a[1] } : null),
       vars: ([a]) => [a[1]],
     },

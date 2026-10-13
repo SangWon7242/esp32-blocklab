@@ -3,7 +3,7 @@ import { NO_SETUP_PATTERN, ORDER, pinNo, RE_NAME, RE_PIN, validPins } from "./co
 
 /** 버튼 (dev_button_setup). 풀업 입력 핀 줄을 dev_pin_in_setup 보다 먼저 잡는다 */
 export const button: DeviceSpec = {
-  id: "button", category: "switch", label: "버튼",
+  id: "button", category: "switch", label: "버튼", toolboxOrder: 30,
   setup: {
     blockType: "dev_button_setup",
     message: "버튼을 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -33,7 +33,7 @@ export const button: DeviceSpec = {
 
 /** 틸트 스위치 (dev_tilt_setup). 준비 줄은 esp_pin_setup 이 접는다 */
 export const tilt: DeviceSpec = {
-  id: "tilt", category: "switch", label: "틸트 스위치",
+  id: "tilt", category: "switch", label: "틸트 스위치", toolboxOrder: 31,
   setup: {
     blockType: "dev_tilt_setup",
     message: "틸트 스위치를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -59,7 +59,7 @@ export const tilt: DeviceSpec = {
 
 /** 인체감지 센서 (dev_pir_setup). 준비 줄은 esp_pin_setup, `x.value() == 1` 은 틸트 선언이 먼저 잡는다 */
 export const pir: DeviceSpec = {
-  id: "pir", category: "switch", label: "인체감지(PIR)",
+  id: "pir", category: "switch", label: "인체감지(PIR)", toolboxOrder: 32,
   setup: {
     blockType: "dev_pir_setup",
     message: "인체감지 센서를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -85,7 +85,7 @@ export const pir: DeviceSpec = {
 
 /** 조이스틱 (dev_joystick_setup). 이름 rocker_x/rocker_y/button_z 고정. adc·버튼 선언보다 앞에 둔다 */
 export const joystick: DeviceSpec = {
-  id: "joystick", category: "switch", label: "조이스틱",
+  id: "joystick", category: "switch", label: "조이스틱", toolboxOrder: 33,
   setup: {
     blockType: "dev_joystick_setup",
     message: "조이스틱 준비하기 (X 핀 %1, Y 핀 %2, 버튼 핀 %3)",

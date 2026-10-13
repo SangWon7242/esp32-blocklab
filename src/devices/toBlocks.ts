@@ -67,10 +67,16 @@ function deviceItems(d: DeviceSpec): ToolboxItem[] {
   ];
 }
 
+/** 카테고리 안의 장치를 toolboxOrder 순으로 (같거나 없으면 DEVICES 순서 그대로; 없는 것은 뒤로) */
+const byToolboxOrder = (ds: DeviceSpec[]): DeviceSpec[] =>
+  ds.map((d, i) => ({ d, i }))
+    .sort((a, b) => (a.d.toolboxOrder ?? Infinity) - (b.d.toolboxOrder ?? Infinity) || a.i - b.i)
+    .map((x) => x.d);
+
 /** 하드웨어 카테고리 8개 (DEVICE_CATEGORIES 순). 장치가 없는 카테고리는 빈 채로 둔다 */
 export function deviceToolboxCategories(): ToolboxCategory[] {
   return DEVICE_CATEGORIES.map((c) => ({
     kind: "category", name: c.label, categorystyle: "hardware_category",
-    contents: DEVICES.filter((d) => d.category === c.id || d.alsoIn?.includes(c.id)).flatMap(deviceItems),
+    contents: byToolboxOrder(DEVICES.filter((d) => d.category === c.id || d.alsoIn?.includes(c.id))).flatMap(deviceItems),
   }));
 }

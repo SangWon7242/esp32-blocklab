@@ -4,7 +4,9 @@ import type { ImportRule } from "./types";
 export const IMPORT_RULES: ImportRule[] = [
   { when: /\bssd1306\./, line: "import ssd1306", rank: 1 },
   { when: /\btime\./, line: "import time", rank: 2 },
-  // Task 5~7 이 추가: dht, math, mfrc522, KeyPad, irGetCMD, lcd128_32
+  { when: /\bdht\./, line: "import dht", rank: 3 },
+  { when: /\bmath\./, line: "import math", rank: 3 },
+  // Task 7 이 추가: mfrc522, KeyPad, irGetCMD, lcd128_32
 ];
 
 /** 생성기가 `Name(` 이 보이면 `from machine import …` 로 가져오는 이름 (이 순서로) */

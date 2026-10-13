@@ -22,3 +22,10 @@ export const adcLines = (name: string, pin: string): string[] => [`${name} = ADC
 
 /** 준비 줄을 다른 선언(esp_pin_setup·dev_adc_setup)이 접는 장치의 패턴. 값 패턴은 objPart + objKinds 로 그 변수에 맞춘다 */
 export const NO_SETUP_PATTERN: SetupPattern = { lines: [], fields: () => null, vars: () => [] };
+
+/** 아날로그 핀 준비 3줄의 패턴 정규식 (그룹 1은 이름, 첫 줄 그룹 2는 핀). 이름 셋이 같은지는 fields 가 본다 */
+export const adcPatternLines = (): RegExp[] => [
+  new RegExp(String.raw`^${RE_NAME}\s*=\s*ADC\(\s*Pin\(\s*${RE_PIN}\s*\)\s*\)$`),
+  new RegExp(String.raw`^${RE_NAME}\.atten\(\s*ADC\.ATTN_11DB\s*\)$`),
+  new RegExp(String.raw`^${RE_NAME}\.width\(\s*ADC\.WIDTH_12BIT\s*\)$`),
+];

@@ -44,6 +44,22 @@ describe("장치 레지스트리", () => {
   });
 });
 
+describe("툴박스 순서 (toolboxOrder)", () => {
+  it("카테고리 안의 장치 라벨이 읽기 좋은 순서다 (파서 우선순위와 따로)", () => {
+    const labels = Object.fromEntries(deviceToolboxCategories().map((c) => [c.name, c.contents.flatMap((i) => (i.kind === "label" ? [i.text] : []))]));
+    expect(labels).toEqual({
+      "핀": ["핀", "입력 핀", "PWM 핀", "아날로그 핀", "출력"],
+      "LED": ["핀", "LED", "밝기 LED", "RGB LED", "흐르는 LED"],
+      "버튼·스위치": ["버튼", "틸트 스위치", "인체감지(PIR)", "조이스틱"],
+      "센서": ["조도 센서", "가변저항", "소리 센서", "불꽃 센서", "온도(서미스터)", "온도(LM35)", "초음파 센서", "온습도(DHT11)"],
+      "소리": ["능동 부저", "수동 부저(음)"],
+      "모터": ["서보 모터", "DC 모터", "릴레이"],
+      "화면": ["OLED"],
+      "입력장치": [],
+    });
+  });
+});
+
 describe("import 규칙", () => {
   it("ADC 도 machine 에서 가져온다", () => {
     expect(collectImports("adc = ADC(Pin(36))\n")).toEqual(["from machine import Pin, ADC"]);
