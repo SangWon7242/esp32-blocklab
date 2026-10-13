@@ -25,5 +25,14 @@ Keyestudio KS5020 키트 자료의 `Library.zip` 안 `Library/MicroPython_Librar
 | `keypad.py` | 4×4 키패드 (`dev_keypad_setup`) | 키패드 읽기 (`from keypad import KeyPad`) |
 | `irrecvdata.py` | IR 리모컨 (`dev_ir_setup`) | IR 수신 신호 풀이 (`from irrecvdata import irGetCMD`) |
 
+## 라이선스
+
+- `gfx.py`: 파일 머리말에 MIT License 라고 적혀 있습니다 (Adafruit GFX 를 옮긴 것, Tony DiCola).
+- `ssd1306.py`: 머리말은 "created by Adafruit" 출처만 적고 라이선스 줄은 없습니다. MicroPython 저장소(MIT 라이선스)의
+  SSD1306 드라이버와 같은 파일로 보아 MIT 로 다룹니다.
+- 그 밖의 Keyestudio 파일(`lcd128_32.py`, `lcd128_32_fonts.py`, `mfrc522_i2c.py`, `mfrc522_config.py`, `soft_iic.py`,
+  `keypad.py`, `irrecvdata.py`)에는 라이선스 머리말이 없습니다. 다시 배포해도 되는지 만든 곳(Keyestudio)에 확인하는 중이며,
+  답을 받기 전까지는 수업용으로만 함께 둡니다.
+
 장치 선언(`src/devices/specs/*.ts`)의 `libFiles` 에 적은 이름은 모두 이 폴더에 있어야 합니다 (`src/devices/libfiles.test.ts` 가 확인합니다).
 라이브러리를 바꿀 때는 위 주소의 새 묶음에서 같은 폴더를 다시 옮기고 이 표를 고칩니다.

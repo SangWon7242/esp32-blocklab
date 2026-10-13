@@ -81,13 +81,13 @@ docs/                      설계 문서와 구현 계획
 
 ## 모듈
 
-**`src/blocks` — 블록 정의.** 커스텀 블록(시작·흐름·계산·ESP32·코드)을 JSON 으로 정의하고, 엔트리 색 테마(`entryTheme`)와 카테고리 툴박스(`toolbox`)를 냅니다. 쓰기 전에 `registerBlocks()` 를 한 번 부르면 한국어 문구를 적용하고 블록을 등록합니다(여러 번 불러도 안전). 변수 꾸러미가 수업 코드에 없는 꼴을 내는 `math_change`·`procedures_ifreturn` 은 여기서 뺍니다. `isValidPythonName()`·`PYTHON_KEYWORDS` 로 변수 이름을 검사합니다. 의존: `blockly`, `@blockly/field-multilineinput`. React 는 쓰지 않습니다.
+**`src/blocks` — 블록 정의.** 커스텀 블록(시작·흐름·계산·ESP32·코드)을 JSON 으로 정의하고, 엔트리 색 테마(`entryTheme`)와 카테고리 툴박스(`toolbox`)를 냅니다. 쓰기 전에 `registerBlocks()` 를 한 번 부르면 한국어 문구를 적용하고 블록을 등록합니다(여러 번 불러도 안전). 변수 꾸러미가 수업 코드에 없는 꼴을 내는 `math_change`·`procedures_ifreturn` 은 여기서 뺍니다. `isValidPythonName()`·`PYTHON_KEYWORDS` 로 변수 이름을 검사합니다(키워드와, 레지스트리에서 만든 `PROGRAM_NAMES` — 내장 이름·import 하는 모듈·장치 준비가 고정해서 만드는 변수와 도우미 함수 이름 — 은 받지 않습니다). 장치 글 칸 중 `validate` 가 있는 것(I2C 주소·핀 목록)은 블록 칸에서 맞는 꼴만 받습니다. 의존: `blockly`, `@blockly/field-multilineinput`. React 는 쓰지 않습니다.
 
 **`src/codegen` — 블록 → MicroPython.** `MicroPythonGenerator` 는 Blockly 의 `PythonGenerator` 를 이어받아 수업 저장소 코드 모양(4칸 들여쓰기, import → 준비 줄 → 함수 → 본문)으로 씁니다. 준비 블록은 코드 맨 위로 끌어올리고, 블록 코멘트는 문장 위 `#` 줄과 줄 끝 `#` 주석으로 되돌립니다. 주로 `generateCode(workspace)`(그려진 작업판)와 `workspaceJsonToCode(json)`(헤드리스, 테스트·동기화용)를 씁니다. 의존: `blockly`, `src/blocks`. React 는 쓰지 않습니다.
 
 **`src/parser` — MicroPython → 블록.** `codeToBlocks(code)` 가 `@lezer/python` 으로 코드를 읽어 Blockly 작업판 JSON 을 돌려줍니다(`{ ok, json, unparsed }` 또는 `{ ok: false, error: { line, message } }`). 먼저 전체를 훑어(survey) 변수·장치·함수 표와 도우미 함수가 있는 장치의 접기 여부를 정한 뒤 문장을 블록으로 바꾸고, 블록으로 옮기면 뜻이 바뀌거나 사라질 구문은 `code_stmt`/`code_expr` 로 남겨 `unparsed` 에 적습니다. `normalizeCode()` 는 주석·빈 줄을 뺀 줄 배열로 왕복 비교에 씁니다. 의존: `@lezer/python`, `@lezer/common` (Blockly 는 타입만, React 없음).
 
-**`src/devices` — 장치 레지스트리.** 하드웨어 장치마다 선언(`DeviceSpec`) 하나를 `specs/*.ts` 에 적으면, 그 선언에서 블록 JSON·툴박스 항목(`toBlocks.ts`), 코드 생성기(`toCodegen.ts`), 파서가 코드를 블록으로 되돌리는 패턴(`src/parser/devices.ts` 가 사용), 필요한 import(`imports.ts`)와 보드 라이브러리 목록(`libFilesFor()`, 파일은 `public/lib/`)이 모두 나옵니다. 선언에는 준비 블록(준비 줄·도우미 함수·`kind`·준비 줄 패턴·`libFiles`), 명령·값 블록(메시지·칸·코드 템플릿·`method`/`call`/`lines`/`expr` 패턴)이 들어갑니다. `DEVICES` 의 순서는 같은 줄에 맞는 선언이 여럿일 때의 우선순위이고, 툴박스 안 순서는 `toolboxOrder` 로 따로 정합니다. Blockly 는 생성기 쪽(`toCodegen.ts`)만 씁니다.
+**`src/devices` — 장치 레지스트리.** 하드웨어 장치마다 선언(`DeviceSpec`) 하나를 `specs/*.ts` 에 적으면, 그 선언에서 블록 JSON·툴박스 항목(`toBlocks.ts`), 코드 생성기(`toCodegen.ts`), 파서가 코드를 블록으로 되돌리는 패턴(`src/parser/devices.ts` 가 사용), 필요한 import(`imports.ts`)와 보드 라이브러리 목록(`libFilesFor()`, 파일은 `public/lib/`)이 모두 나옵니다. 선언에는 준비 블록(준비 줄·도우미 함수·`kind`·만드는 이름 `provides`·준비 줄 패턴·`libFiles`), 명령·값 블록(메시지·칸·코드 템플릿·`method`/`call`/`lines`/`expr` 패턴)이 들어갑니다. 계획 2B 검사용으로 핀 칸의 쓰임(`dir`: out·in·adc·bus), 값 범위(`range`: `{ min, max, label }`), 변수 칸 장치의 kind(`varKinds`, 실제 값은 `requiredKinds()`)도 적습니다. 도우미 이름이 사용자 함수와 겹쳐 생성기가 `stop2` 처럼 바꿔 정의하면 그 도우미를 부르는 코드도 바뀐 이름을 씁니다(템플릿은 도우미를 맨 앞에서만 부릅니다). `DEVICES` 의 순서는 같은 줄에 맞는 선언이 여럿일 때의 우선순위이고, 툴박스 안 순서는 `toolboxOrder` 로 따로 정합니다. Blockly 는 생성기 쪽(`toCodegen.ts`)만 씁니다.
 
 장치를 하나 더하는 방법:
 
@@ -95,7 +95,7 @@ docs/                      설계 문서와 구현 계획
 2. `src/devices/registry.ts` 의 `DEVICES` 에 넣는다. 더 일반적인 선언(예: 출력 핀 1줄)과 줄이 겹치면 그보다 앞에 둔다.
 3. 새 모듈을 import 하면 `src/devices/imports.ts` 의 `IMPORT_RULES` 에 규칙을, 보드 라이브러리가 필요하면 `public/lib/` 에 파일을 넣고 `libFiles` 에 적는다.
 4. `specs/<카테고리>.test.ts` 에 생성 코드와 왕복(코드 → 블록 → 같은 코드, unparsed 0) 테스트를 쓴다.
-5. `npm test` — `src/blocks/toolbox-roundtrip.test.ts` 가 툴박스의 새 블록까지 모두 왕복해 본다.
+5. `npm test` — `src/blocks/toolbox-roundtrip.test.ts` 가 툴박스의 새 블록까지 모두 왕복해 보고(다시 만든 코드가 글자까지 같은지), `src/devices/devices.test.ts` 가 메타데이터(`dir`·`provides`·`range`·`requiredKinds`)와 패턴 불변식을 본다.
 
 **`src/components/editor` — 편집기 컴포넌트.** `BlocklyWorkspace` 는 Blockly 를 띄우고 ref 로 `load(json)`·`getJson()`·`getCode()` 를 내놓으며, 사용자가 블록을 바꿀 때마다 `onChange(json, code)` 를 부릅니다(떨어진 블록 끄기, 시작 블록 하나, 변수 이름 창 포함). `CodePanel` 은 CodeMirror 6 코드 패널로 `value`·`readOnly`·`onChange`·`errorLine` 을 받습니다. 의존: React, `blockly`, CodeMirror, `src/blocks`·`src/codegen`.
 

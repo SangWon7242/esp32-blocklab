@@ -105,7 +105,7 @@ function programFor(entry: B): WorkspaceJson {
   return { blocks: { languageVersion: 0, blocks: topBlocks.map((t, i) => ({ x: 0, y: 200 * i, ...t })) } } as unknown as WorkspaceJson;
 }
 
-describe("툴박스의 모든 블록: 블록 → 코드 → 블록", () => {
+describe("툴박스의 모든 블록: 블록 → 코드 → 블록 → 같은 코드", () => {
   const entries = [...staticEntries(), ...dynamicEntries()];
 
   it("정적·변수·함수 꾸러미 블록을 모두 모았다", () => {
@@ -118,7 +118,10 @@ describe("툴박스의 모든 블록: 블록 → 코드 → 블록", () => {
       const code = workspaceJsonToCode(programFor(entry));
       const r = codeToBlocks(code);
       expect(r.ok, code).toBe(true);
-      if (r.ok) expect(r.unparsed, code).toEqual([]);
+      if (!r.ok) return;
+      expect(r.unparsed, code).toEqual([]);
+      // 되돌린 블록으로 다시 만든 코드가 글자까지 같아야 한다 (왕복이 고정점)
+      expect(workspaceJsonToCode(r.json)).toBe(code);
     });
   }
 });
