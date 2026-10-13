@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectImports } from "./imports";
+import { collectImports, hoistImports } from "./imports";
 
 describe("collectImports", () => {
   it("쓰인 것만, 정해진 순서로 낸다", () => {
@@ -11,5 +11,20 @@ describe("collectImports", () => {
   });
   it("아무것도 안 쓰면 빈 배열", () => {
     expect(collectImports("print(1)\n")).toEqual([]);
+  });
+});
+
+describe("본문에 남은 import", () => {
+  it("본문이 이미 machine 에서 가져오면 from machine 줄을 만들지 않는다", () => {
+    expect(collectImports("from machine import Pin, ADC\nadc = ADC(Pin(34))\n")).toEqual([]);
+    expect(collectImports("import utime as time\ntime.sleep(1)\n")).toEqual([]);
+  });
+  it("맨 앞 칸 import 줄을 뽑아 생성한 import 와 정해진 순서로 모은다", () => {
+    expect(hoistImports("import random\nfrom machine import Pin, ADC\nx = 1\n", ["import time"])).toEqual({
+      imports: ["from machine import Pin, ADC", "import time", "import random"],
+      body: "x = 1\n",
+    });
+    // 들여쓴 import 는 그 자리에 둔다
+    expect(hoistImports("def f():\n    import random\n", []).body).toBe("def f():\n    import random\n");
   });
 });

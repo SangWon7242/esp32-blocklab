@@ -7,14 +7,15 @@ import type { BlockJson } from "./types";
 const COMPARE: Record<string, string> = { "<": "LT", ">": "GT", "==": "EQ", "!=": "NEQ", "<=": "LTE", ">=": "GTE" };
 const ARITH: Record<string, string> = { "+": "ADD", "-": "MINUS", "*": "MULTIPLY", "/": "DIVIDE", "//": "FLOORDIV", "%": "MOD" };
 
-export function decodeString(literal: string): string {
+/** 따옴표 안 내용을 푼다. JSON 으로 풀 수 없는 이스케이프(`\x41`, `\a` 등)면 null — 식을 code_expr 로 남긴다 */
+export function decodeString(literal: string): string | null {
   const quote = literal[0];
   const inner = literal.slice(1, -1);
   try {
     if (quote === '"') return JSON.parse(literal) as string;
     return JSON.parse(`"${inner.replace(/\\'/g, "'").replace(/"/g, '\\"')}"`) as string;
   } catch {
-    return inner;
+    return null;
   }
 }
 
@@ -39,6 +40,9 @@ export function memberParts(node: SyntaxNode, ctx: ParseContext): { obj: string;
 
 const isStringy = (node: SyntaxNode, ctx: ParseContext) =>
   node.name === "String" || (node.name === "CallExpression" && ctx.src.slice(callParts(node).callee) === "str");
+
+/** 괄호 없이 쓴 비교식인지 (BinaryExpression 의 연산자가 CompareOp) */
+const isComparison = (node: SyntaxNode) => node.name === "BinaryExpression" && node.firstChild?.nextSibling?.name === "CompareOp";
 
 function fallback(node: SyntaxNode, ctx: ParseContext): BlockJson {
   ctx.markUnparsed(node);
@@ -79,7 +83,10 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
   const text = ctx.src.slice(node);
   switch (node.name) {
     case "Number": return isCanonicalNumber(text) ? num(Number(text)) : fallback(node, ctx);
-    case "String": return isPlainString(text) ? str(decodeString(text)) : fallback(node, ctx);
+    case "String": {
+      const decoded = isPlainString(text) ? decodeString(text) : null;
+      return decoded === null ? fallback(node, ctx) : str(decoded);
+    }
     case "Boolean": return bool(text === "True");
     case "VariableName": return ctx.hasVar(text) ? varGet(ctx.varId(text)) : fallback(node, ctx);
     case "ParenthesizedExpression": {
@@ -98,6 +105,8 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
       if (kids.length !== 3) return fallback(node, ctx);
       const [left, opNode, right] = kids;
       const op = ctx.src.slice(opNode);
+      // 5 < d < 15 는 (5 < d) and (d < 15) 라서 비교 블록 둘로 쌓으면 뜻이 바뀐다 — 식 전체를 코드로
+      if (opNode.name === "CompareOp" && (isComparison(left) || isComparison(right))) return fallback(node, ctx);
       if (opNode.name === "CompareOp" && COMPARE[op]) return block("logic_compare", { OP: COMPARE[op] }, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
       if (opNode.name === "and" || opNode.name === "or") return block("logic_operation", { OP: op.toUpperCase() }, { A: convertExpr(left, ctx, "Boolean"), B: convertExpr(right, ctx, "Boolean") });
       if (opNode.name === "ArithOp" && ARITH[op]) {

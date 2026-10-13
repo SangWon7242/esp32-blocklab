@@ -13,6 +13,8 @@ export class ParseContext {
   readonly servos = new Set<string>();
   readonly functions = new Map<string, FunctionInfo>();
   readonly unparsed: UnparsedItem[] = [];
+  /** 같은 이름이 앞에 이미 있는 맨 바깥 def 의 시작 위치. code_stmt 로 남긴다 */
+  readonly duplicateDefs = new Set<number>();
   ultrasonicFolded = false;
   oledFolded = false;
   echoPin = 12;

@@ -1,6 +1,6 @@
 import * as Blockly from "blockly";
 import { PythonGenerator, pythonGenerator } from "blockly/python";
-import { collectImports } from "./imports";
+import { collectImports, hoistImports } from "./imports";
 
 /**
  * 수업 저장소 코드 모양을 내는 MicroPython 생성기.
@@ -55,15 +55,16 @@ export class MicroPythonGenerator extends PythonGenerator {
     this.isInitialized = false;
     this.nameDB_?.reset();
 
-    const body = code.replace(/\n+$/, "");
+    const functions = [...helpers, ...defs];
+    const generated = collectImports([this.setupLines.join("\n"), ...functions, code].join("\n"));
+    const { imports, body: rest } = hoistImports(code, generated);
+    const body = rest.replace(/\n+$/, "");
     const sections: string[] = [];
     const setup = this.setupLines.map((line, i) => (this.setupComments.has(i) ? `${line}  # ${this.setupComments.get(i)}` : line));
     if (setup.length) sections.push(setup.join("\n"));
-    const functions = [...helpers, ...defs];
     if (functions.length) sections.push(functions.join("\n\n\n"));
     if (body) sections.push(body);
     const text = sections.join(sections.length > 1 && functions.length ? "\n\n\n" : "\n\n");
-    const imports = collectImports([this.setupLines.join("\n"), ...functions, body].join("\n"));
     const out = (imports.length ? imports.join("\n") + "\n\n" : "") + text;
     return out.trim() ? out.replace(/\n*$/, "\n") : "";
   }

@@ -16,7 +16,21 @@ export const RE_FREQ = /^(\w+)\.freq\(\s*(\d+)\s*\)$/;
 export const RE_DUTY = /^(\w+)\.duty_u16\(\s*(\d+)\s*\)$/;
 export const RE_I2C_SETUP = /^i2c\s*=\s*SoftI2C\(\s*scl\s*=\s*Pin\(\s*(\d+)\s*\)\s*,\s*sda\s*=\s*Pin\(\s*(\d+)\s*\)\s*\)$/;
 export const RE_OLED_SETUP = /^oled\s*=\s*ssd1306\.SSD1306_I2C\(\s*128\s*,\s*64\s*,\s*i2c\s*\)$/;
-export const RE_KNOWN_IMPORT = /^(from\s+machine\s+import\s+[\w,\s]+|import\s+time|import\s+ssd1306)$/;
+
+const GENERATED_MACHINE_NAMES = new Set(["Pin", "PWM", "SoftI2C"]);
+
+/**
+ * 생성기가 똑같이 다시 만드는 import 인지. `from machine import` 는 이름이 모두 Pin·PWM·SoftI2C 이고
+ * `as` 가 없을 때만, time·ssd1306 은 `import time` 꼴 그대로일 때만. 나머지는 code_stmt 로 남겨야 사라지지 않는다.
+ */
+export function isKnownImport(text: string): boolean {
+  const from = /^from\s+machine\s+import\s+(.+)$/.exec(text);
+  if (from) return from[1].split(",").every((name) => GENERATED_MACHINE_NAMES.has(name.trim()));
+  return /^import\s+(time|ssd1306)$/.test(text);
+}
+
+/** ESP32 GPIO 번호(0~39). 블록의 핀 칸이 이 범위로 잘라 버리므로 밖의 번호는 준비 블록으로 바꾸지 않는다. */
+export const isValidPin = (text: string | number): boolean => Number(text) >= 0 && Number(text) <= 39;
 
 /** 함수 몸통의 문장들을 주석 없이, 들여쓰기 없이 한 줄씩 */
 export function bodyLines(body: SyntaxNode, ctx: ParseContext): string[] {
@@ -30,14 +44,20 @@ export function isStandardBody(body: SyntaxNode, ctx: ParseContext, standard: st
 
 const SIMPLE_PARAM_TOKENS = new Set(["(", ")", ",", "VariableName"]);
 
-/** simple 은 매개변수가 이름뿐인지(기본값·*args·**kw 없음). 아니면 함수 블록으로 옮길 수 없다. */
+/**
+ * simple 은 함수 블록으로 옮길 수 있는지: 매개변수가 이름뿐이고(기본값·*args·**kw 없음),
+ * 마지막 return 이 값을 둘 이상(`return a, b`) 돌려주지 않는다. 아니면 def 전체가 code_stmt 가 된다.
+ */
 export function functionParts(def: SyntaxNode, ctx: ParseContext): { name: string; params: string[]; body: SyntaxNode | null; simple: boolean } {
   const kids = children(def);
   const nameNode = kids.find((k) => k.name === "VariableName");
   const paramList = kids.find((k) => k.name === "ParamList");
   const body = kids.find((k) => k.name === "Body") ?? null;
   const params = paramList ? children(paramList).filter((p) => p.name === "VariableName").map((p) => ctx.src.slice(p)) : [];
-  const simple = !paramList || children(paramList).every((p) => SIMPLE_PARAM_TOKENS.has(p.name));
+  const stmts = body ? bodyStatements(body) : [];
+  const last = stmts[stmts.length - 1];
+  const tupleReturn = last?.name === "ReturnStatement" && operands(last).length > 1;
+  const simple = (!paramList || children(paramList).every((p) => SIMPLE_PARAM_TOKENS.has(p.name))) && !tupleReturn;
   return { name: nameNode ? ctx.src.slice(nameNode) : "", params, body, simple };
 }
 

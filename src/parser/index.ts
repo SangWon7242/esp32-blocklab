@@ -1,7 +1,7 @@
 import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
-import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody, returnsValue } from "./patterns";
+import { RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, RE_FREQ, RE_DUTY, STANDARD_GET_DISTANCE, STANDARD_SHOW, functionParts, isStandardBody, isValidPin, returnsValue } from "./patterns";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
 import type { BlockJson, ParseResult, WorkspaceJson } from "./types";
@@ -16,38 +16,46 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
       const kids = children(node);
       if (kids[0]?.name === "VariableName" && ctx.src.slice(kids[1]) === "=") ctx.varId(ctx.src.slice(kids[0]));
     }
-    if (node.name === "FunctionDefinition") {
-      const { name, params, body, simple } = functionParts(node, ctx);
-      params.forEach((p) => ctx.varId(p));
-      // 기본값·*args 가 있는 def 는 code_stmt 로 남으므로 함수 표에 올리지 않는다 (호출도 코드 블록이 된다)
-      if (simple) ctx.functions.set(name, { params, returns: returnsValue(body) });
-    }
+    if (node.name === "FunctionDefinition") functionParts(node, ctx).params.forEach((p) => ctx.varId(p));
     for (const c of children(node)) walk(c);
   };
   walk(script);
 
   const top = children(script).filter((n) => n.name !== "Comment");
+  // 함수 블록은 맨 바깥 def 만. 안쪽 def 는 code_stmt 로 남으니 등록하지 않는다.
+  // 같은 이름의 def 가 또 나오면 뒤의 것은 code_stmt 로 남긴다 (블록 정의는 맨 위로 올라가므로 순서가 바뀌면 뜻이 바뀐다).
+  // 기본값·*args·여러 값 return 이 있는 def 도 code_stmt 로 남으므로 함수 표에 올리지 않는다 (호출도 코드 블록이 된다).
+  const seenDefs = new Set<string>();
+  for (const node of top) {
+    if (node.name !== "FunctionDefinition") continue;
+    const { name, params, body, simple } = functionParts(node, ctx);
+    if (seenDefs.has(name)) { ctx.duplicateDefs.add(node.from); continue; }
+    seenDefs.add(name);
+    if (simple) ctx.functions.set(name, { params, returns: returnsValue(body) });
+  }
+
   const texts = top.map((n) => ctx.src.slice(n).trim());
   let hasTrig = false, hasEcho = false, hasI2c = false, hasOled = false, stdDistance = false, stdShow = false;
   top.forEach((node, i) => {
     const pin = RE_PIN_SETUP.exec(texts[i]);
-    if (pin) {
+    if (pin && isValidPin(pin[2])) {
       ctx.pins.add(pin[1]);
       if (pin[1] === "trig" && pin[3] === "OUT") hasTrig = true;
       if (pin[1] === "echo" && pin[3] === "IN") { hasEcho = true; ctx.echoPin = Number(pin[2]); }
     }
     const pwm = RE_PWM_SETUP.exec(texts[i]);
-    if (pwm) {
+    if (pwm && isValidPin(pwm[2])) {
       const freq = RE_FREQ.exec(texts[i + 1] ?? "");
       const duty = RE_DUTY.exec(texts[i + 2] ?? "");
       if (freq?.[1] === pwm[1] && freq[2] === "50" && duty?.[1] === pwm[1] && duty[2] === "1638") ctx.servos.add(pwm[1]);
       else ctx.pwms.add(pwm[1]);
     }
-    if (RE_I2C_SETUP.test(texts[i])) hasI2c = true;
+    const i2c = RE_I2C_SETUP.exec(texts[i]);
+    if (i2c && isValidPin(i2c[1]) && isValidPin(i2c[2])) hasI2c = true;
     if (RE_OLED_SETUP.test(texts[i])) hasOled = true;
     if (node.name === "FunctionDefinition") {
       const { name, params, body, simple } = functionParts(node, ctx);
-      if (!simple) return;
+      if (!simple || ctx.duplicateDefs.has(node.from)) return;
       if (name === "get_distance" && params.length === 0 && body && isStandardBody(body, ctx, STANDARD_GET_DISTANCE)) stdDistance = true;
       if (name === "show" && params.join(",") === "a,b" && body && isStandardBody(body, ctx, STANDARD_SHOW)) stdShow = true;
     }

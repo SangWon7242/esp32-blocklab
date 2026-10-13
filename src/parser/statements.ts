@@ -2,7 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { block, chain, codeStmt, varSet, withComment } from "./builders";
 import type { ParseContext } from "./context";
 import { callBlock, callParts, convertExpr, memberParts } from "./expressions";
-import { RE_DUTY, RE_FREQ, RE_I2C_SETUP, RE_KNOWN_IMPORT, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, functionParts, returnsValue } from "./patterns";
+import { RE_DUTY, RE_FREQ, RE_I2C_SETUP, RE_OLED_SETUP, RE_PIN_SETUP, RE_PWM_SETUP, functionParts, isKnownImport, isValidPin, returnsValue } from "./patterns";
 import { bodyStatements, children, operands } from "./tree";
 import type { BlockJson } from "./types";
 
@@ -42,6 +42,9 @@ export function convertStatements(all: SyntaxNode[], ctx: ParseContext, topLevel
   return { blocks, tops };
 }
 
+/** while/for 의 else: 절. 블록에 자리가 없으므로 문장 전체를 code_stmt 로 남긴다 */
+const hasElseClause = (node: SyntaxNode) => children(node).some((k) => k.name === "else");
+
 const one = (b: BlockJson, consumed = 1): Converted => ({ blocks: [b], tops: [], consumed });
 const none = (consumed = 1): Converted => ({ blocks: [], tops: [], consumed });
 // 복합문 조각은 Body 끝의 줄바꿈까지 담기므로 끝 공백을 뗀다 (code_stmt 생성기가 줄바꿈을 붙인다)
@@ -51,12 +54,12 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
   const text = ctx.src.slice(node).trim();
   switch (node.name) {
     case "ImportStatement":
-      return RE_KNOWN_IMPORT.test(text) ? none() : unknown(node, ctx);
+      return isKnownImport(text) ? none() : unknown(node, ctx);
 
     case "AssignStatement": {
       if (topLevel) {
         const pin = RE_PIN_SETUP.exec(text);
-        if (pin) {
+        if (pin && isValidPin(pin[2])) {
           if (ctx.ultrasonicFolded && pin[1] === "trig") return one(block("esp_ultrasonic_setup", { TRIG: Number(pin[2]), ECHO: ctx.echoPin }));
           if (ctx.ultrasonicFolded && pin[1] === "echo") return none();
           return one(block("esp_pin_setup", { PIN: Number(pin[2]), MODE: pin[3], VAR: { id: ctx.varId(pin[1]) } }));
@@ -65,7 +68,7 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
         if (i2c && ctx.oledFolded) return one(block("esp_oled_setup", { SCL: Number(i2c[1]), SDA: Number(i2c[2]) }));
         if (RE_OLED_SETUP.test(text) && ctx.oledFolded) return none();
         const pwm = RE_PWM_SETUP.exec(text);
-        if (pwm) {
+        if (pwm && isValidPin(pwm[2])) {
           const [name, pinNo] = [pwm[1], Number(pwm[2])];
           const freq = following[0] ? RE_FREQ.exec(ctx.src.slice(following[0]).trim()) : null;
           const duty = following[1] ? RE_DUTY.exec(ctx.src.slice(following[1]).trim()) : null;
@@ -113,6 +116,7 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
     }
 
     case "WhileStatement": {
+      if (hasElseClause(node)) return unknown(node, ctx);
       const cond = operands(node)[0];
       const body = children(node).find((k) => k.name === "Body") ?? null;
       if (!cond) return unknown(node, ctx);
@@ -124,6 +128,7 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
     }
 
     case "ForStatement": {
+      if (hasElseClause(node)) return unknown(node, ctx);
       const ops = operands(node); // [VariableName, iterable]
       const iter = ops[1];
       const body = children(node).find((k) => k.name === "Body") ?? null;
@@ -157,7 +162,7 @@ function convertStatement(node: SyntaxNode, following: SyntaxNode[], ctx: ParseC
 
     case "FunctionDefinition": {
       const { name, params, body, simple } = functionParts(node, ctx);
-      if (!topLevel || !simple) return unknown(node, ctx);
+      if (!topLevel || !simple || ctx.duplicateDefs.has(node.from)) return unknown(node, ctx);
       if ((name === "get_distance" && ctx.ultrasonicFolded) || (name === "show" && ctx.oledFolded)) return none();
       const stmts = body ? bodyStatements(body) : [];
       const last = stmts[stmts.length - 1];

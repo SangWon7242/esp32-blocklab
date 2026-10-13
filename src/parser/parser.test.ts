@@ -219,3 +219,81 @@ describe("뜻이 바뀔 수 있는 구문은 코드 블록으로", () => {
     expect(body(src)[1].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: "f()" } });
   });
 });
+
+describe("최종 리뷰: 뜻이 바뀌거나 사라지던 구문", () => {
+  const lines = (code: string) => parse(code).unparsed.map((u) => u.line);
+
+  it("C1 블록이 다시 만들지 못하는 import 는 code_stmt 로 남긴다", () => {
+    expect(body("from machine import Pin, ADC\n")).toEqual([{ type: "code_stmt", fields: { CODE: "from machine import Pin, ADC" } }]);
+    expect(body("from machine import Pin as P\n")).toEqual([{ type: "code_stmt", fields: { CODE: "from machine import Pin as P" } }]);
+    expect(body("import time as t\nimport random\n").map((b) => b.fields?.CODE)).toEqual(["import time as t", "import random"]);
+    expect(lines("import time as t\nimport random\n")).toEqual([1, 2]);
+    // 블록이 다시 만드는 꼴은 여전히 사라진다
+    expect(body("from machine import Pin, PWM, SoftI2C\nimport time\nimport ssd1306\n")).toEqual([]);
+  });
+
+  it("C2 이어진 비교(5 < d < 15)는 식 전체를 code_expr 로", () => {
+    const b = body("d = 3\nif 5 < d < 15:\n    pass\n");
+    expect(b[1].inputs?.IF0?.block).toEqual({ type: "code_expr", fields: { CODE: "5 < d < 15" } });
+    expect(lines("d = 3\nif 5 < d < 15:\n    pass\n")).toEqual([2]);
+    // 괄호로 묶은 비교는 블록 그대로
+    expect(body("d = 3\nx = (5 < d) < 15\n")[1].inputs?.VALUE?.block?.type).toBe("logic_compare");
+  });
+
+  it("I9a else 가 붙은 while·for 는 통째로 code_stmt", () => {
+    expect(body("while x:\n    pass\nelse:\n    pass\n")).toEqual([{ type: "code_stmt", fields: { CODE: "while x:\n    pass\nelse:\n    pass" } }]);
+    expect(body("for i in range(3):\n    pass\nelse:\n    pass\n")).toEqual([{ type: "code_stmt", fields: { CODE: "for i in range(3):\n    pass\nelse:\n    pass" } }]);
+  });
+
+  it("I9b 여러 값을 돌려주는 def 는 통째로 code_stmt, 함수로 등록하지 않는다", () => {
+    const src = "def f(a, b):\n    return a, b\n\nx = f(1, 2)\n";
+    const b = body(src);
+    expect(b[0]).toMatchObject({ type: "code_stmt", fields: { CODE: "def f(a, b):\n    return a, b" } });
+    expect(b[1].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: "f(1, 2)" } });
+    expect(tops(src)).toHaveLength(0);
+  });
+
+  it("I9c 풀지 못하는 이스케이프가 든 문자열은 code_expr", () => {
+    const src = 'print("\\x41")\n';
+    expect(body(src)[0].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: '"\\x41"' } });
+    expect(lines(src)).toEqual([1]);
+  });
+
+  it("I9e 같은 이름의 두 번째 def 는 code_stmt, 첫 번째만 함수", () => {
+    const src = "def f():\n    pass\n\ndef f():\n    print(1)\n\nf()\n";
+    expect(tops(src).map((t) => t.type)).toEqual(["procedures_defnoreturn"]);
+    const b = body(src);
+    expect(b[0]).toMatchObject({ type: "code_stmt", fields: { CODE: "def f():\n    print(1)" } });
+    expect(b[1].type).toBe("procedures_callnoreturn");
+    expect(lines(src)).toEqual([4]);
+  });
+
+  it("I9f 안쪽 def 는 함수로 등록하지 않고 호출도 코드로", () => {
+    const src = "if True:\n    def g():\n        pass\ng()\n";
+    const b = body(src);
+    expect(b[0].inputs?.DO0?.block).toEqual({ type: "code_stmt", fields: { CODE: "def g():\n    pass" } });
+    expect(b[1]).toEqual({ type: "code_stmt", fields: { CODE: "g()" } });
+    expect(tops(src)).toHaveLength(0);
+  });
+
+  it("I9g 0~39 밖의 핀 번호는 준비 블록으로 바꾸지 않는다", () => {
+    const pin = body("led = Pin(40, Pin.OUT)\nled.value(1)\n");
+    expect(pin[0]).toMatchObject({ type: "variables_set", fields: { VAR: { id: "var_led" } }, inputs: { VALUE: { block: { type: "code_expr", fields: { CODE: "Pin(40, Pin.OUT)" } } } } });
+    expect(pin[1].type).toBe("code_stmt");
+    expect(body("servo = PWM(Pin(44))\nservo.freq(50)\nservo.duty_u16(1638)\n").map((b) => b.type)).not.toContain("esp_servo_setup");
+    expect(body("p = PWM(Pin(44))\np.freq(1000)\n").map((b) => b.type)).not.toContain("esp_pwm_setup");
+    const distance = [
+      "trig = Pin(45, Pin.OUT)", "echo = Pin(12, Pin.IN)",
+      "def get_distance():", "    trig.value(1)", "    time.sleep_us(10)", "    trig.value(0)",
+      "    while not echo.value():", "        pass", "    start = time.ticks_us()",
+      "    while echo.value():", "        pass", "    stop = time.ticks_us()",
+      "    t = time.ticks_diff(stop, start) // 2", "    return int(340 * t // 10000)", "",
+    ].join("\n");
+    expect(body(distance).map((b) => b.type)).not.toContain("esp_ultrasonic_setup");
+    const oled = [
+      "i2c = SoftI2C(scl=Pin(50), sda=Pin(21))", "oled = ssd1306.SSD1306_I2C(128, 64, i2c)",
+      "def show(a, b):", "    oled.fill(0)", "    oled.text(a, 0, 20)", "    oled.text(b, 0, 36)", "    oled.show()", "",
+    ].join("\n");
+    expect(body(oled).map((b) => b.type)).not.toContain("esp_oled_setup");
+  });
+});

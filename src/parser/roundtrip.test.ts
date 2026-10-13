@@ -25,3 +25,24 @@ describe("코드 → 블록 → 코드 왕복", () => {
     });
   }
 });
+
+describe("최종 리뷰: 왕복에서 사라지던 코드", () => {
+  const roundTrip = (src: string) => {
+    const r = codeToBlocks(src);
+    if (!r.ok) throw new Error(r.error.message);
+    return workspaceJsonToCode(r.json);
+  };
+
+  it("C1 모르는 machine import 는 한 번만, 핀 준비보다 위에", () => {
+    const out = roundTrip("from machine import Pin, ADC\nadc = ADC(Pin(34))\n");
+    expect(out.match(/^from machine import .*$/gm)).toEqual(["from machine import Pin, ADC"]);
+    expect(normalizeCode(out)).toEqual(["from machine import Pin, ADC", "adc = ADC(Pin(34))"]);
+    expect(roundTrip("from machine import Pin, ADC\nled = Pin(2, Pin.OUT)\nled.value(1)\n")).toBe("from machine import Pin, ADC\n\nled = Pin(2, Pin.OUT)\n\nled.value(1)\n");
+    expect(normalizeCode(roundTrip("from machine import Pin as P\nimport time as t\nt.sleep(1)\n"))).toEqual(["from machine import Pin as P", "import time as t", "t.sleep(1)"]);
+  });
+
+  it("C2 이어진 비교는 그대로 돌아온다", () => {
+    const src = "d = 3\nif 5 < d < 15:\n    print(d)\n";
+    expect(roundTrip(src)).toBe(src);
+  });
+});
