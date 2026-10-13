@@ -1,0 +1,62 @@
+import { describe, expect, it, beforeAll } from "vitest";
+import * as Blockly from "blockly";
+import { BUILTIN_BLOCK_TYPES, CUSTOM_BLOCK_TYPES, entryTheme, registerBlocks, toolbox } from "./index";
+
+beforeAll(() => {
+  registerBlocks();
+  registerBlocks(); // 두 번 불러도 오류가 없어야 한다
+});
+
+describe("블록 정의", () => {
+  it("커스텀 블록이 모두 등록된다", () => {
+    for (const type of CUSTOM_BLOCK_TYPES) expect(Blockly.Blocks[type], type).toBeDefined();
+  });
+
+  it("헤드리스 작업판에서 모든 블록을 만들 수 있다", () => {
+    const ws = new Blockly.Workspace();
+    for (const type of [...CUSTOM_BLOCK_TYPES, ...BUILTIN_BLOCK_TYPES]) {
+      const block = ws.newBlock(type);
+      expect(block.type).toBe(type);
+    }
+    ws.dispose();
+  });
+
+  it("필드 이름이 약속과 같다", () => {
+    const ws = new Blockly.Workspace();
+    const pin = ws.newBlock("esp_pin_setup");
+    expect(pin.getField("PIN")).toBeTruthy();
+    expect(pin.getField("MODE")).toBeTruthy();
+    expect(pin.getField("VAR")).toBeTruthy();
+    expect(pin.getFieldValue("MODE")).toBe("OUT");
+    const arith = ws.newBlock("calc_arith");
+    expect(arith.getInput("A")).toBeTruthy();
+    expect(arith.getInput("B")).toBeTruthy();
+    expect(arith.getFieldValue("OP")).toBe("ADD");
+    const start = ws.newBlock("start_program");
+    expect(start.getInput("BODY")).toBeTruthy();
+    expect(start.previousConnection).toBeNull();
+    ws.dispose();
+  });
+
+  it("한국어 문구가 엔트리 표현으로 바뀐다", () => {
+    expect(Blockly.Msg.CONTROLS_IF_MSG_THEN).toBe("이라면");
+    expect(Blockly.Msg.CONTROLS_IF_MSG_ELSE).toBe("아니면");
+    expect(Blockly.Msg.VARIABLES_SET).toBe("%1 를 %2 로 정하기");
+    expect(Blockly.Msg.CONTROLS_REPEAT_TITLE).toBe("%1회 반복"); // 로케일이 적용됐다는 표식
+  });
+});
+
+describe("테마와 툴박스", () => {
+  it("엔트리 색을 가진 블록 스타일이 있다", () => {
+    expect(entryTheme.blockStyles.start_blocks.colourPrimary).toBe("#00b400");
+    expect(entryTheme.blockStyles.loop_blocks.colourPrimary).toBe("#19baea");
+    expect(entryTheme.blockStyles.logic_blocks.colourPrimary).toBe("#4562f5");
+    expect(entryTheme.blockStyles.hardware_blocks.colourPrimary).toBe("#00b6b1");
+    expect(entryTheme.blockStyles.code_blocks.colourPrimary).toBe("#8aa3b2");
+  });
+
+  it("카테고리 순서가 엔트리와 같다", () => {
+    const names = (toolbox as { contents: { name: string }[] }).contents.map((c) => c.name);
+    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "함수", "ESP32", "코드"]);
+  });
+});
