@@ -38,6 +38,22 @@ describe("블록 정의", () => {
     ws.dispose();
   });
 
+  it("만약 블록은 흐름 색(loop_blocks)이다", () => {
+    const ws = new Blockly.Workspace();
+    expect(ws.newBlock("controls_if").getStyleName()).toBe("loop_blocks");
+    ws.dispose();
+  });
+
+  it("반복 블록은 조건이 먼저, 모드 선택이 뒤에 온다", () => {
+    const ws = new Blockly.Workspace();
+    const loop = ws.newBlock("controls_whileUntil");
+    expect(loop.getFieldValue("MODE")).toBe("WHILE");
+    expect(loop.getInput("BOOL")).toBeTruthy();
+    expect(loop.getInput("DO")).toBeTruthy();
+    expect(loop.inputList[0].name).toBe("BOOL");
+    ws.dispose();
+  });
+
   it("한국어 문구가 엔트리 표현으로 바뀐다", () => {
     expect(Blockly.Msg.CONTROLS_IF_MSG_THEN).toBe("이라면");
     expect(Blockly.Msg.CONTROLS_IF_MSG_ELSE).toBe("아니면");
@@ -58,5 +74,18 @@ describe("테마와 툴박스", () => {
   it("카테고리 순서가 엔트리와 같다", () => {
     const names = (toolbox as { contents: { name: string }[] }).contents.map((c) => c.name);
     expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "함수", "ESP32", "코드"]);
+  });
+
+  it("툴박스의 모든 블록 type이 정의돼 있다", () => {
+    const types: string[] = [];
+    const walk = (items: unknown[]): void => {
+      for (const item of items as { kind?: string; type?: string; contents?: unknown[] }[]) {
+        if (item.kind === "block" && item.type) types.push(item.type);
+        if (item.contents) walk(item.contents);
+      }
+    };
+    walk((toolbox as { contents: unknown[] }).contents);
+    expect(types.length).toBeGreaterThan(20);
+    for (const type of types) expect(Blockly.Blocks[type], type).toBeDefined();
   });
 });

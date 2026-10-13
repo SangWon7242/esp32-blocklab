@@ -14,7 +14,7 @@ const definitions = [...startBlocks, ...flowBlocks, ...calcBlocks, ...esp32Block
 export const CUSTOM_BLOCK_TYPES: readonly string[] = definitions.map((d) => d.type as string);
 
 export const BUILTIN_BLOCK_TYPES: readonly string[] = [
-  "controls_if", "controls_whileUntil", "logic_compare", "logic_operation", "logic_negate", "logic_boolean",
+  "controls_if", "logic_compare", "logic_operation", "logic_negate", "logic_boolean",
   "math_number", "text", "variables_set", "variables_get",
   "procedures_defnoreturn", "procedures_defreturn", "procedures_callnoreturn", "procedures_callreturn",
 ];
@@ -25,6 +25,17 @@ let registered = false;
 export function registerBlocks(): void {
   if (registered) return;
   applyKoreanMessages();
+  // 내장 controls_whileUntil 을 같은 이름의 엔트리식 정의로 바꾼다 (덮어쓰기 경고 방지)
+  delete Blockly.Blocks["controls_whileUntil"];
   Blockly.defineBlocksWithJsonArray(definitions);
+  // 엔트리는 "만약"도 흐름(하늘색) 블록이다
+  for (const type of ["controls_if", "controls_ifelse"]) {
+    const def = Blockly.Blocks[type];
+    const originalInit = def.init;
+    def.init = function (this: Blockly.Block) {
+      originalInit.call(this);
+      this.setStyle("loop_blocks");
+    };
+  }
   registered = true;
 }

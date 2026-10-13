@@ -9,13 +9,10 @@ export function applyKoreanMessages(): void {
     CONTROLS_IF_MSG_THEN: "이라면",
     CONTROLS_IF_MSG_ELSE: "아니면",
     CONTROLS_IF_MSG_ELSEIF: "아니면 만약",
-    CONTROLS_WHILEUNTIL_OPERATOR_WHILE: "인 동안 반복하기",
-    CONTROLS_WHILEUNTIL_OPERATOR_UNTIL: "이 될 때까지 반복하기",
     LOGIC_NEGATE_TITLE: "%1 이(가) 아니다",
     LOGIC_BOOLEAN_TRUE: "참",
     LOGIC_BOOLEAN_FALSE: "거짓",
     VARIABLES_SET: "%1 를 %2 로 정하기",
-    VARIABLES_GET: "%1 값",
     PROCEDURES_DEFNORETURN_TITLE: "함수 정의하기",
     PROCEDURES_DEFNORETURN_PROCEDURE: "이름",
     PROCEDURES_DEFRETURN_TITLE: "함수 정의하기",
@@ -26,6 +23,5 @@ export function applyKoreanMessages(): void {
     PROCEDURES_CALLNORETURN_TOOLTIP: "정의한 함수를 실행합니다.",
     PROCEDURES_CALLRETURN_TOOLTIP: "정의한 함수를 실행하고 결과값을 돌려줍니다.",
     NEW_VARIABLE: "변수 만들기",
-    TEXT_TEXT_TOOLTIP: "글자",
   });
 }

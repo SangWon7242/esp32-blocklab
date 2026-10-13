@@ -21,6 +21,20 @@ export const flowBlocks: Record<string, unknown>[] = [
     tooltip: "for i in range(n): 으로 정한 횟수만큼 반복합니다.",
   },
   {
+    type: "controls_whileUntil",
+    message0: "%1 %2",
+    args0: [
+      { type: "input_value", name: "BOOL", check: "Boolean" },
+      { type: "field_dropdown", name: "MODE", options: [["인 동안 반복하기", "WHILE"], ["이 될 때까지 반복하기", "UNTIL"]] },
+    ],
+    message1: "%1",
+    args1: [{ type: "input_statement", name: "DO" }],
+    previousStatement: null,
+    nextStatement: null,
+    style: "loop_blocks",
+    tooltip: "조건이 참인 동안(또는 참이 될 때까지) 안의 블록을 반복합니다.",
+  },
+  {
     type: "flow_wait",
     message0: "%1 초 기다리기",
     args0: [{ type: "input_value", name: "SEC", check: "Number" }],
