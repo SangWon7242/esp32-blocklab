@@ -9,8 +9,19 @@ export type Level = "error" | "warning" | "info";
  */
 export type Issue = { id: string /* 규칙 id */; level: Level; blockId?: string; line?: number; ko: string; en: string };
 
-/** 콘솔 한 항목. text 는 영어(여러 줄일 수 있다) */
-export type ConsoleEntry = { level: Level; text: string; line?: number; blockId?: string };
+/**
+ * 콘솔 한 항목. text 는 영어(여러 줄일 수 있다).
+ * source 가 없으면 검사(lint) 항목. "device" 면 보드 쪽 행이고 kind 로 모양을 고른다
+ * (stdout: 보드 출력, stderr: Traceback, system: 연결·실행·저장 안내 — 이것만 한국어).
+ */
+export type ConsoleEntry = {
+  level: Level;
+  text: string;
+  line?: number;
+  blockId?: string;
+  source?: "lint" | "device";
+  kind?: "stdout" | "stderr" | "system";
+};
 
 /** 작업판 JSON 의 블록 (Blockly.serialization 꼴; 파서 JSON 과 같고 살아 있는 작업판 JSON 에는 id 가 있다) */
 export type BlockJson = {

@@ -14,6 +14,9 @@ type Props = {
   children?: ReactNode;
   /** 탭 이름 옆 개수 (0 이면 숨긴다) */
   counts?: Partial<Record<BottomTab, number>>;
+  /** 고른 탭을 밖에서 쥘 때 (보드 출력이 오면 콘솔 탭으로 옮기려고). 없으면 안에서 쥔다 */
+  tab?: BottomTab;
+  onTabChange?(tab: BottomTab): void;
 };
 
 function Count({ n }: { n?: number }) {
@@ -34,10 +37,12 @@ function Empty({ value }: { value: BottomTab }) {
 }
 
 /** 편집기 아래의 접을 수 있는 패널. 문제(검사 결과, 한글)·콘솔(영어 메시지) 탭 */
-export function BottomPanel({ open, onToggle, children, counts }: Props) {
-  const [tab, setTab] = useState<BottomTab>("problems");
+export function BottomPanel({ open, onToggle, children, counts, tab: controlledTab, onTabChange: setControlledTab }: Props) {
+  const [ownTab, setOwnTab] = useState<BottomTab>("problems");
+  const tab = controlledTab ?? ownTab;
   const onTabChange = (value: string) => {
-    setTab(value as BottomTab);
+    if (setControlledTab) setControlledTab(value as BottomTab);
+    else setOwnTab(value as BottomTab);
     // 접힌 채로 탭을 누르면 그 탭을 보려는 것이므로 펼친다
     if (!open) onToggle();
   };

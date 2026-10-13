@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
-  AlertTriangle, Blocks, Code2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, Save, Square, Usb,
+  AlertTriangle, Blocks, Code2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
 } from "lucide-react";
 import { usePanelRef, type PanelSize } from "react-resizable-panels";
+import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,20 +15,16 @@ import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/Blockl
 import { CodePanel } from "@/components/editor/CodePanel";
 import type { LineMap, WorkspaceJson } from "@/codegen";
 import type { ConsoleEntry, Issue } from "@/lint";
-import { countCodeBlocks, editorReducer, initialEditorState, type Source } from "./editorSync";
+import { countCodeBlocks, editorReducer, initialEditorState, type EditorState, type Source } from "./editorSync";
 import { SAMPLE_CODE } from "./sample";
-import { BottomPanel } from "./BottomPanel";
+import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
+import { DeviceBar } from "./DeviceBar";
+import { blockTypesIn } from "./deviceConsole";
+import { useDevice } from "./useDevice";
 import { ProblemsPanel } from "./ProblemsPanel";
 import { blockAtLine, highlightFor, useLint, type WorkspaceSnapshot } from "./useLint";
 import { useIsNarrow } from "./useViewport";
-
-const DEVICE_BUTTONS = [
-  { icon: Usb, label: "보드 연결" },
-  { icon: Play, label: "실행" },
-  { icon: Save, label: "보드에 저장" },
-  { icon: Square, label: "멈춤" },
-];
 
 /** 넓은 화면에서 어느 패널을 펼쳐 두었는지. 좁은 화면에서는 블록·코드 대신 지금 기준(source) 쪽만 보인다 */
 export type Panels = { blocks: boolean; code: boolean; bottom: boolean };
@@ -66,11 +63,15 @@ export function LabPage() {
    */
   const sourceRef = useRef(state.source);
   sourceRef.current = state.source;
+  /** 지금 state (실행·저장 버튼 콜백이 debounce 중인 코드를 반영할 때 읽는다) */
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const narrow = useIsNarrow();
   const narrowRef = useRef(narrow);
   narrowRef.current = narrow;
   const [panels, setPanels] = useState<Panels>(INITIAL_PANELS);
+  const [bottomTab, setBottomTab] = useState<BottomTab>("problems");
   const blocksPanelRef = usePanelRef();
   const codePanelRef = usePanelRef();
   // 좁은 화면에서는 탭처럼 지금 기준 쪽 하나만 보인다. 숨긴 쪽도 마운트는 유지한다(작업판 상태를 지킨다).
@@ -146,8 +147,7 @@ export function LabPage() {
     return { json: handle.getJson(), generated: code, map };
   }, []);
   const lintState = useLint(state, readWorkspace);
-  const { view, issues, focus, setTarget } = lintState;
-  const consoleEntries = lintState.console;
+  const { view, viewCode, issues, focus, setTarget } = lintState;
 
   // 검사 결과를 블록 경고 아이콘·테두리로
   useEffect(() => {
@@ -186,6 +186,38 @@ export function LabPage() {
   }, [reveal, view]);
   const onLineClick = useCallback((line: number) => reveal(blockAtLine(view, line), line), [reveal, view]);
 
+  /**
+   * 보드 Traceback 이 가리킨 줄. 실행 직전에 반영한 코드는 검사(100ms 뒤)가 끝나야 줄 ↔ 블록 지도가 그 코드와 맞으므로
+   * 그 코드로 잰 검사 결과가 나올 때까지 기다렸다가 강조한다. 그사이 코드가 바뀌었으면 줄이 어긋나므로 강조하지 않는다.
+   */
+  const [errorLine, setErrorLine] = useState<{ code: string; line: number } | null>(null);
+  useEffect(() => {
+    if (!errorLine) return;
+    if (state.code !== errorLine.code) {
+      setErrorLine(null);
+      return;
+    }
+    if (viewCode !== errorLine.code) return;
+    setErrorLine(null);
+    reveal(blockAtLine(view, errorLine.line), errorLine.line);
+  }, [errorLine, state.code, view, viewCode, reveal]);
+
+  const [searchParams] = useSearchParams();
+  const device = useDevice({
+    fake: searchParams.get("device") === "fake",
+    getProgram: () => {
+      const current = flushPendingCode();
+      return { code: current.code, blockTypes: blockTypesIn(current.blocks) };
+    },
+    onErrorLine: (code, line) => setErrorLine({ code, line }),
+    showConsole: () => {
+      setPanels((p) => (p.bottom ? p : { ...p, bottom: true }));
+      setBottomTab("console");
+    },
+  });
+  /** 검사 항목(위) 다음에 보드 행(아래) */
+  const consoleEntries = useMemo(() => [...lintState.console, ...device.rows], [lintState.console, device.rows]);
+
   // 작업판에서 블록을 고르면 (어떤 블록이든) 그 블록이 만든 코드 줄을 강조한다. 같은 블록이면 줄 강조를 지키고, 선택을 풀면 지운다
   const onBlockSelect = useCallback((blockId: string | null) => {
     setTarget((t) => (blockId === null ? null : t?.blockId === blockId ? t : { blockId }));
@@ -207,16 +239,23 @@ export function LabPage() {
     }, 300);
   }, []);
 
-  const switchSource = (source: Source) => {
-    if (source === sourceRef.current) return;
-    let current = state;
+  /** debounce 를 기다리는 코드를 바로 반영하고 반영된 state 를 돌려준다 (탭 전환·실행·저장 직전) */
+  const flushPendingCode = useCallback((): EditorState => {
+    let current = stateRef.current;
     if (pendingCodeRef.current !== null) {
       window.clearTimeout(debounceRef.current);
       const flush = { type: "codeChanged", code: pendingCodeRef.current } as const;
       pendingCodeRef.current = null;
       current = editorReducer(current, flush);
+      stateRef.current = current;
       dispatch(flush);
     }
+    return current;
+  }, []);
+
+  const switchSource = (source: Source) => {
+    if (source === sourceRef.current) return;
+    const current = flushPendingCode();
     if (source === "blocks" && current.parseError) {
       // 블록으로 가면 마지막 성공 블록의 코드로 덮인다. 코드 모드에 머물고 오류 줄은 그대로 강조한다.
       // (Radix 가 한 번 누를 때 두 번 부르므로 같은 id 로 토스트를 하나만 띄운다)
@@ -245,20 +284,19 @@ export function LabPage() {
         <span className="hidden truncate text-sm text-muted-foreground lg:inline">
           {codeMode ? "코드를 고치면 블록이 따라옵니다" : "블록을 놓으면 코드가 바로 바뀝니다"}
         </span>
-        <div className="ml-auto flex items-center gap-1">
-          {DEVICE_BUTTONS.map(({ icon: Icon, label }) => (
-            <Tooltip key={label}>
-              {/* 비활성 버튼은 포인터 이벤트를 받지 않으므로 span 이 툴팁을 받는다 */}
-              <TooltipTrigger asChild>
-                <span tabIndex={0} className="inline-flex rounded-md">
-                  <Button variant="outline" size="sm" disabled aria-label={label}>
-                    <Icon className="size-4" /><span className="hidden md:inline">{label}</span>
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>보드 연결은 다음 단계에서 들어옵니다</TooltipContent>
-            </Tooltip>
-          ))}
+        <div className="ml-auto">
+          <DeviceBar
+            status={device.status}
+            canToggleConnection={device.canToggleConnection}
+            canRun={device.canRun}
+            canSave={device.canSave}
+            canStop={device.canStop}
+            onConnect={device.connect}
+            onDisconnect={device.disconnect}
+            onRun={device.run}
+            onSave={device.save}
+            onStop={device.stop}
+          />
         </div>
       </div>
 
@@ -346,9 +384,11 @@ export function LabPage() {
         open={panels.bottom}
         onToggle={() => setPanels((p) => ({ ...p, bottom: !p.bottom }))}
         counts={{ problems: issues.length, console: consoleEntries.length }}
+        tab={bottomTab}
+        onTabChange={setBottomTab}
       >
         <TabsContent value="problems"><ProblemsPanel issues={issues} onSelect={onProblemSelect} /></TabsContent>
-        <TabsContent value="console"><ConsolePanel entries={consoleEntries} onSelect={onConsoleSelect} /></TabsContent>
+        <TabsContent value="console"><ConsolePanel entries={consoleEntries} onSelect={onConsoleSelect} onClear={device.clear} /></TabsContent>
       </BottomPanel>
     </div>
   );

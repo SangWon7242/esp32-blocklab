@@ -132,6 +132,9 @@ describe("pin-conflict", () => {
   it("다른 핀 → 없음", () => {
     expect(only(run(program([pinSetup("p", "led", 26), ultra(13)], { vars: ["led"] })), "pin-conflict")).toEqual([]);
   });
+  it("떨어진(실행되지 않는) 준비 블록과 겹치는 것은 보지 않는다", () => {
+    expect(only(run(program([pinSetup("p", "led", 13)], { tops: [ultra(13)], vars: ["led"] })), "pin-conflict")).toEqual([]);
+  });
 });
 
 describe("loop-without-sleep", () => {

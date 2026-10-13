@@ -343,6 +343,18 @@ test("블록 모드에서 줄 번호를 누르면 그 블록이 파란 테두리
   // 블록 모드에서는 줄 번호를 눌러도 편집기가 포커스를 가져가지 않아 블록 선택이 남는다
   await expect(on).toHaveClass(/\bblocklySelected\b/);
   await expect(host.locator(".lint-focus")).toHaveCount(1);
+  // 선택된 블록이어도 파란 테두리가 이긴다: 블록 테두리와 zelos 선택 빛(blocklyPathSelected) 모두 파랑
+  const strokes = await on.locator(":scope > path.blocklyPath").evaluateAll((els) => els.map((el) => [el.getAttribute("class"), getComputedStyle(el).stroke]));
+  expect(strokes.map(([, s]) => s)).toEqual(["rgb(59, 130, 246)", "rgb(59, 130, 246)"]);
+  // 키보드로 블록을 옮겨 다니는 중(Blockly 가 blocklyKeyboardNavigation 을 달고 활성 블록 테두리를 칠한다)에도 파랑
+  const keyboardStroke = await on.locator(":scope > path.blocklyPath:not(.blocklyPathSelected)").evaluate((el) => {
+    const nav = el.closest(".injectionDiv")!.parentElement!;
+    nav.classList.add("blocklyKeyboardNavigation");
+    const s = getComputedStyle(el).stroke;
+    nav.classList.remove("blocklyKeyboardNavigation");
+    return s;
+  });
+  expect(keyboardStroke).toBe("rgb(59, 130, 246)");
   // 빈 바탕을 누르면 표시도 사라진다
   const bg = (await host.boundingBox())!;
   await page.mouse.click(bg.x + bg.width - 120, bg.y + 40);

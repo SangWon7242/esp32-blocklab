@@ -101,6 +101,8 @@ const LINT_DELAY = 100;
  */
 export function useLint(state: EditorState, readWorkspace: () => WorkspaceSnapshot | null) {
   const [view, setView] = useState<LintView>(EMPTY_VIEW);
+  /** view 를 잰 때의 코드 패널 글 (보드 Traceback 줄을 그 코드의 블록으로 옮길 때 짝이 맞는지 본다) */
+  const [viewCode, setViewCode] = useState<string | null>(null);
   const [target, setTarget] = useState<FocusTarget | null>(null);
   const readRef = useRef(readWorkspace);
   readRef.current = readWorkspace;
@@ -111,6 +113,7 @@ export function useLint(state: EditorState, readWorkspace: () => WorkspaceSnapsh
     const timer = window.setTimeout(() => {
       const s = inputRef.current;
       setView(computeLintView({ snapshot: readRef.current(), source: s.source, code: s.code, parseError: s.parseError }));
+      setViewCode(s.code);
     }, LINT_DELAY);
     return () => window.clearTimeout(timer);
   }, [state.source, state.code, state.map, state.parseError, state.blocks]);
@@ -129,5 +132,5 @@ export function useLint(state: EditorState, readWorkspace: () => WorkspaceSnapsh
 
   const setFocus = useCallback((t: FocusTarget | null) => setTarget(t), []);
 
-  return { view, issues: view.issues, console: view.console, focus: { blockId: target?.blockId, lines: focusLines }, setFocus, setTarget };
+  return { view, viewCode, issues: view.issues, console: view.console, focus: { blockId: target?.blockId, lines: focusLines }, setFocus, setTarget };
 }
