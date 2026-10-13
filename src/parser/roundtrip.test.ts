@@ -41,6 +41,12 @@ describe("최종 리뷰: 왕복에서 사라지던 코드", () => {
     expect(normalizeCode(roundTrip("from machine import Pin as P\nimport time as t\nt.sleep(1)\n"))).toEqual(["from machine import Pin as P", "import time as t", "t.sleep(1)"]);
   });
 
+  it("N1 남긴 from machine 줄이 주지 않는 이름은 따로 가져온다", () => {
+    const out = roundTrip("from machine import Pin\nfrom machine import ADC\nled = Pin(2, Pin.OUT)\nadc = ADC(Pin(34))\n");
+    const imported = (out.match(/^from machine import .*$/gm) ?? []).flatMap((l) => l.replace(/^from machine import /, "").split(",").map((n) => n.trim()));
+    expect(imported.sort()).toEqual(["ADC", "Pin"]);
+  });
+
   it("C2 이어진 비교는 그대로 돌아온다", () => {
     const src = "d = 3\nif 5 < d < 15:\n    print(d)\n";
     expect(roundTrip(src)).toBe(src);

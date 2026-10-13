@@ -9,7 +9,7 @@ import { codeBlocks } from "./definitions/code";
 
 export { entryTheme } from "./theme";
 export { toolbox } from "./toolbox";
-export { isValidPythonName, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
+export { isProgramName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
 
 const definitions = [...startBlocks, ...flowBlocks, ...calcBlocks, ...esp32Blocks, ...codeBlocks];
 

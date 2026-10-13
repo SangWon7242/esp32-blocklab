@@ -298,6 +298,12 @@ describe("최종 리뷰: 주석 줄·이름·여러 줄 코드·떨어진 블록
     expect(code).toContain('print("in")');
     expect(code).not.toContain("loose");
   });
+  it("N1 남긴 from machine 줄에 없는 PWM·SoftI2C 는 생성한 import 로 채운다", () => {
+    const kept: B = { type: "code_stmt", fields: { CODE: "from machine import Pin, ADC" } };
+    const servo: B = { type: "esp_servo_setup", fields: { VAR: { id: "var_servo" }, PIN: 4 } };
+    const code = workspaceJsonToCode(program([kept, servo, { type: "esp_oled_setup", fields: { SCL: 22, SDA: 21 } }], { vars: ["servo"] }));
+    expect(code.match(/^from machine import .*$/gm)).toEqual(["from machine import PWM, SoftI2C", "from machine import Pin, ADC"]);
+  });
   it("I9d 문자열의 \\r 은 이스케이프한다", () => {
     expect(workspaceJsonToCode(program([{ type: "esp_print", inputs: { VALUE: { block: str("a\rb") } } }]))).toBe('print("a\\rb")\n');
   });

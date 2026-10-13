@@ -19,6 +19,11 @@ describe("본문에 남은 import", () => {
     expect(collectImports("from machine import Pin, ADC\nadc = ADC(Pin(34))\n")).toEqual([]);
     expect(collectImports("import utime as time\ntime.sleep(1)\n")).toEqual([]);
   });
+  it("남긴 줄이 주지 않는 이름만 만든다 (as 로 가져온 이름은 주지 않은 것으로)", () => {
+    expect(collectImports("from machine import ADC\nled = Pin(2, Pin.OUT)\n")).toEqual(["from machine import Pin"]);
+    expect(collectImports("from machine import Pin as P\nled = Pin(2, Pin.OUT)\n")).toEqual(["from machine import Pin"]);
+    expect(collectImports("from machine import (Pin, ADC)\nservo = PWM(Pin(4))\n")).toEqual(["from machine import PWM"]);
+  });
   it("맨 앞 칸 import 줄을 뽑아 생성한 import 와 정해진 순서로 모은다", () => {
     expect(hoistImports("import random\nfrom machine import Pin, ADC\nx = 1\n", ["import time"])).toEqual({
       imports: ["from machine import Pin, ADC", "import time", "import random"],
