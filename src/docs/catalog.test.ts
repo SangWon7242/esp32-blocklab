@@ -11,23 +11,10 @@ const CUSTOM_CATEGORY_TYPES = [
 ];
 
 /**
- * 아직 설명을 쓰지 않은 블록 종류 (센서·소리·모터·화면·입력장치: 계획 4 Task 2 가 채우고 이 목록을 비운다).
- * 이 목록의 블록은 내용 검사를 건너뛴다.
+ * 아직 설명을 쓰지 않은 블록 종류. 이 목록의 블록은 내용 검사를 건너뛴다.
+ * 계획 4 Task 2 에서 모든 블록의 설명을 채워 비었다 (새 장치 블록을 넣으면 여기가 아니라 src/docs/content 에 설명을 쓴다).
  */
-const MISSING_CONTENT: readonly string[] = [
-  // 센서
-  "dev_light_setup", "dev_knob_setup", "dev_sound_setup", "dev_flame_setup", "dev_ntc_setup", "dev_ntc_temp", "dev_lm35_setup", "dev_lm35_temp",
-  "esp_ultrasonic_setup", "esp_distance", "dev_dht_setup", "dev_dht_measure", "dev_dht_temp", "dev_dht_hum",
-  // 소리
-  "dev_buzzer_setup", "dev_beeper_setup", "dev_beeper_tone", "dev_beeper_note", "dev_beeper_stop",
-  // 모터
-  "esp_servo_setup", "esp_servo_door", "dev_servo_angle", "dev_motor_setup", "dev_motor_forward", "dev_motor_backward", "dev_motor_stop", "dev_relay_setup",
-  // 화면
-  "esp_oled_setup", "esp_oled_show", "dev_oled_text", "dev_oled_clear", "dev_oled_update", "dev_oled_line", "dev_oled_rect",
-  "dev_lcd_setup", "dev_lcd_text", "dev_lcd_clear", "dev_seg_setup", "dev_seg_digit", "dev_seg_clear",
-  // 입력장치
-  "dev_rfid_setup", "dev_rfid_present", "dev_rfid_uid", "dev_keypad_setup", "dev_keypad_key", "dev_ir_setup", "dev_ir_value",
-];
+const MISSING_CONTENT: readonly string[] = [];
 
 /** 코드 블록의 예시는 바로 그 코드 블록이 되는 코드이다 (블록으로 바꾸지 못한 코드를 담는 블록) */
 const FALLBACK_BLOCKS = new Set(["code_stmt", "code_expr"]);
