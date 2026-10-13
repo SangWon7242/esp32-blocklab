@@ -26,6 +26,22 @@ describe("서보 각도 (dev_servo_angle)", () => {
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
+  it("곱셈 앞 그룹에 괄호 밖 덧셈이 걸리면 각도 블록으로 접지 않는다 (다시 묶여 뜻이 바뀌지 않게)", () => {
+    const c = head + "offset = 10\na = 90\nservo.duty_u16(1638 + offset + a * 6462 // 180)\n";
+    const r = fromCode(c);
+    expect(r.types).not.toContain("dev_servo_angle");
+    expect(r.types[5]).toBe("esp_pwm_duty"); // 식 그대로 계산 블록으로 (1638 + offset) + a * 6462 // 180
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(c);
+  });
+  it("괄호로 싼 덧셈은 피연산자 하나라 접는다 (ANGLE 은 (a + b))", () => {
+    const c = head + "a = 40\nb = 50\nservo.duty_u16(1638 + (a + b) * 6462 // 180)\n";
+    const r = fromCode(c);
+    expect(r.types.slice(5)).toEqual(["dev_servo_angle", "calc_arith", "variables_get", "variables_get"]);
+    expect(r.body[3].inputs?.ANGLE?.block?.fields).toEqual({ OP: "ADD" });
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(c);
+  });
   it("서보가 아닌 PWM 변수의 같은 꼴은 PWM 세기 블록", () => {
     const r = fromCode("from machine import Pin, PWM\n\npwm = PWM(Pin(2))\npwm.freq(1000)\n\npwm.duty_u16(1638 + 90 * 6462 // 180)\n");
     expect(r.types[1]).toBe("esp_pwm_duty");

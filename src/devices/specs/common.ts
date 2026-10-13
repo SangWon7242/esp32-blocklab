@@ -29,3 +29,43 @@ export const adcPatternLines = (): RegExp[] => [
   new RegExp(String.raw`^${RE_NAME}\.atten\(\s*ADC\.ATTN_11DB\s*\)$`),
   new RegExp(String.raw`^${RE_NAME}\.width\(\s*ADC\.WIDTH_12BIT\s*\)$`),
 ];
+
+/**
+ * 식 글을 문자열 밖·괄호 밖(깊이 0)의 글자로 훑는다. 괄호가 맞지 않거나 문자열이 닫히지 않으면 null.
+ * 1줄 lines 패턴의 그룹(`(.+)`)이 식 하나인지 볼 때 쓴다.
+ */
+function topLevelChars(text: string): string | null {
+  const close: Record<string, string> = { ")": "(", "]": "[", "}": "{" };
+  const stack: string[] = [];
+  let quote: string | null = null;
+  let out = "";
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quote) {
+      if (ch === "\\") i++;
+      else if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") quote = ch;
+    else if ("([{".includes(ch)) stack.push(ch);
+    else if (close[ch]) { if (stack.pop() !== close[ch]) return null; }
+    else if (!stack.length) out += ch;
+  }
+  return quote || stack.length ? null : out;
+}
+
+/**
+ * 곱셈 앞에 놓인 그룹이 피연산자 하나인지: 괄호가 맞고, 괄호 밖에 + 나 - 가 없다.
+ * `1638 + offset + a * 6462 // 180` 의 `offset + a` 처럼 덧셈이 그룹에 걸려 든 것을 접으면
+ * `(offset + a) * 6462` 로 다시 묶여 뜻이 바뀌므로 접지 않는다 (서보 각도·LED 밝기).
+ */
+export const isSingleOperand = (text: string): boolean => {
+  const top = topLevelChars(text);
+  return top !== null && !/[+-]/.test(top);
+};
+
+/** 그룹이 함수 인자 하나인지: 괄호가 맞고, 괄호 밖에 쉼표가 없다 (`lcd.Cursor(0, f(a, b))` 를 잘못 나누지 않게) */
+export const isSingleArg = (text: string): boolean => {
+  const top = topLevelChars(text);
+  return top !== null && !top.includes(",");
+};

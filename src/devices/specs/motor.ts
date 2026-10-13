@@ -1,5 +1,5 @@
 import type { DeviceSpec } from "../types";
-import { factor, NO_SETUP_PATTERN, pinNo, validPins } from "./common";
+import { factor, isSingleOperand, NO_SETUP_PATTERN, pinNo, validPins } from "./common";
 
 /** 서보 (esp_servo_setup). PWM 2줄보다 구체적인 3줄이라 레지스트리에서 pwm 보다 앞에 둔다 */
 export const servo: DeviceSpec = {
@@ -33,7 +33,7 @@ export const servo: DeviceSpec = {
       pattern: {
         kind: "lines", objPart: "VAR", objKinds: ["servo"],
         lines: [/^(\w+)\.duty_u16\(1638 \+ (.+) \* 6462 \/\/ 180\)$/],
-        values: ([m]) => ({ VAR: m[1], ANGLE: m[2] }),
+        values: ([m]) => (isSingleOperand(m[2]) ? { VAR: m[1], ANGLE: m[2] } : null),
       },
       range: { ANGLE: [0, 180] },
     },

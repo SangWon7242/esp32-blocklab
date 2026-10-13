@@ -20,6 +20,12 @@ describe("밝기 LED (dev_led_pwm_setup)", () => {
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
+  it("곱셈 앞 그룹에 괄호 밖 덧셈·뺄셈이 걸리면 밝기 블록으로 접지 않는다", () => {
+    const c = "from machine import Pin, PWM\n\nled = PWM(Pin(26))\nled.freq(1000)\n\nled.duty(int(base - a * 1023 / 100))\n";
+    const r = fromCode(c);
+    expect(r.types).not.toContain("dev_led_brightness");
+    expect(r.code).toBe(c);
+  });
   it("밝기 값이 식이면 괄호로 싸서 곱셈 앞에 둔다 (왕복해도 같은 식)", () => {
     const c = toCode([ledPwmSetup, brightness(arith(num(10), "ADD", num(20)))], ["led"]);
     expect(c).toContain("led.duty(int((10 + 20) * 1023 / 100))\n");

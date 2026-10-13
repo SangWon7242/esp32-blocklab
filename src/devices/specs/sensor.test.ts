@@ -112,6 +112,11 @@ describe("LM35 온도 센서 (dev_lm35_setup)", () => {
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
+  it("준비 3줄의 이름이 lm35 가 아니면 접지 않는다 (도우미가 lm35 를 읽으므로)", () => {
+    const r = fromCode(code.replace("lm35 = ADC(Pin(39))\nlm35.atten(ADC.ATTN_11DB)\nlm35.width", "t = ADC(Pin(39))\nt.atten(ADC.ATTN_11DB)\nt.width"));
+    expect(r.types).not.toContain("dev_lm35_setup");
+    expect(r.types[0]).toBe("dev_adc_setup");
+  });
   it("도우미가 표준 꼴이 아니면 접지 않는다", () => {
     const r = fromCode(code.replace("* 330 /", "* 300 /"));
     expect(r.types).not.toContain("dev_lm35_setup");

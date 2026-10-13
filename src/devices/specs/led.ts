@@ -1,5 +1,5 @@
 import type { DeviceSpec } from "../types";
-import { factor, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
+import { factor, isSingleOperand, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
 
 /**
  * 밝기 LED (dev_led_pwm_setup). PWM 2줄과 같은 꼴이지만 freq 가 1000 이고 이름이 led… 일 때만 접는다 (아니면 pwm 선언이 잡는다).
@@ -31,7 +31,7 @@ export const ledPwm: DeviceSpec = {
       pattern: {
         kind: "lines", objPart: "VAR",
         lines: [/^(\w+)\.duty\(int\((.+) \* 1023 \/ 100\)\)$/],
-        values: ([m]) => ({ VAR: m[1], PCT: m[2] }),
+        values: ([m]) => (isSingleOperand(m[2]) ? { VAR: m[1], PCT: m[2] } : null),
       },
       range: { PCT: [0, 100] },
     },
