@@ -20,8 +20,17 @@ export const validPins = (...ns: string[]): boolean => ns.every((n) => Number(n)
  */
 export const ORDER = { FUNCTION_CALL: 2.2, MULTIPLICATIVE: 5, ADDITIVE: 6, RELATIONAL: 11 } as const;
 
-/** 곱셈 안에 끼울 값 코드: 이름·숫자·속성·단순 호출이 아니면 괄호로 싼다 (생성기는 값 입력을 Order.NONE 으로 받는다) */
-export const factor = (code: string): string => (/^[\w.]+$|^[\w.]+\([^()]*\)$/.test(code) ? code : `(${code})`);
+/**
+ * 생성기가 도우미 호출 이름 앞뒤에 붙이는 표시 글자 (유니코드 사용자 영역, MicroPythonGenerator.helperCall).
+ * 생성기의 finish 가 실제로 정의된 도우미 이름으로 바꾸며 지운다. 템플릿이 값 코드를 검사할 때는 이 글자를 빼고 본다.
+ */
+export const HELPER_MARK = "\uE000";
+
+/**
+ * 곱셈 안에 끼울 값 코드: 이름·숫자·속성·단순 호출이 아니면 괄호로 싼다 (생성기는 값 입력을 Order.NONE 으로 받는다).
+ * 도우미 호출(`get_distance()`)은 표시 글자를 달고 오므로 그 글자를 빼고 검사한다.
+ */
+export const factor = (code: string): string => (/^[\w.]+$|^[\w.]+\([^()]*\)$/.test(code.replaceAll(HELPER_MARK, "")) ? code : `(${code})`);
 
 /** 아날로그 핀 준비 3줄 (아날로그 핀·조도·가변저항·소리·불꽃 센서 공용) */
 export const adcLines = (name: string, pin: string): string[] => [`${name} = ADC(Pin(${pin}))`, `${name}.atten(ADC.ATTN_11DB)`, `${name}.width(ADC.WIDTH_12BIT)`];

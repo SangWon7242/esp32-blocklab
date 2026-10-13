@@ -182,3 +182,30 @@ describe("도우미 이름이 사용자 함수와 겹치면 (편집기에서 친
     expect(code).toMatch(/\nstop\(\)\n$/);
   });
 });
+
+describe("도우미 호출을 곱셈에 끼울 때 괄호를 덧붙이지 않는다 (생성기의 도우미 표시가 factor 를 속이지 않게)", () => {
+  it("거리(get_distance()) → 서보 각도", () => {
+    const code = toCode([
+      { type: "esp_ultrasonic_setup", fields: { TRIG: 13, ECHO: 12 } },
+      { type: "esp_servo_setup", fields: { VAR: v("servo"), PIN: 4 } },
+      angle({ type: "esp_distance" }),
+    ], ["servo"]);
+    expect(code).toContain("\nservo.duty_u16(1638 + get_distance() * 6462 // 180)\n");
+    const r = fromCode(code);
+    expect(r.types).toContain("dev_servo_angle");
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(code);
+  });
+  it("서미스터 온도(ntc_temperature()) → LED 밝기", () => {
+    const code = toCode([
+      { type: "dev_ntc_setup", fields: { PIN: 36 } },
+      { type: "dev_led_pwm_setup", fields: { PIN: 26, VAR: v("led") } },
+      { type: "dev_led_brightness", fields: { VAR: v("led") }, inputs: { PCT: { block: { type: "dev_ntc_temp" } } } },
+    ], ["led"]);
+    expect(code).toContain("\nled.duty(int(ntc_temperature() * 1023 / 100))\n");
+    const r = fromCode(code);
+    expect(r.types).toContain("dev_led_brightness");
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(code);
+  });
+});

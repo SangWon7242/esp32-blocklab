@@ -1,6 +1,7 @@
 import * as Blockly from "blockly";
 import { PythonGenerator, pythonGenerator } from "blockly/python";
 import { PYTHON_KEYWORDS } from "@/blocks/names";
+import { HELPER_MARK } from "@/devices/specs/common";
 import { collectImports, hoistImports } from "./imports";
 
 type SplitComment = { above: string[]; trailing: string | null };
@@ -29,8 +30,7 @@ export function splitComment(text: string): SplitComment {
 
 const commentLine = (text: string) => (text ? `# ${text}` : "#");
 
-/** 도우미 호출 표시 글자 (유니코드 사용자 영역). helperCall 이 이름 앞뒤에 붙이고 finish 가 지운다 */
-const HELPER_MARK = "\uE000";
+/** 도우미 호출 표시 (HELPER_MARK 로 싼 이름). helperCall 이 붙이고 finish 가 지운다 */
 const HELPER_CALL = new RegExp(`${HELPER_MARK}(\\w+)${HELPER_MARK}`, "g");
 
 /**

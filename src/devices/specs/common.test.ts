@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSingleArg, isSingleOperand } from "./common";
+import { factor, HELPER_MARK, isSingleArg, isSingleOperand } from "./common";
 
 describe("isSingleOperand (1줄 lines 패턴의 곱셈 앞 그룹)", () => {
   it("이름·숫자·호출·괄호 식·곱셈은 피연산자 하나", () => {
@@ -27,5 +27,14 @@ describe("isSingleArg (함수 인자 하나)", () => {
   });
   it("괄호 밖 쉼표가 있거나 괄호가 맞지 않으면 아니다", () => {
     for (const t of ["0, f(a", "b)", "a, b"]) expect(isSingleArg(t), t).toBe(false);
+  });
+});
+
+describe("factor (곱셈 안에 끼울 값)", () => {
+  it("도우미 표시 글자가 붙은 단순 호출은 괄호 없이, 그 밖의 식은 괄호로", () => {
+    const marked = `${HELPER_MARK}get_distance${HELPER_MARK}()`;
+    expect(factor(marked)).toBe(marked);
+    expect(factor("a + 1")).toBe("(a + 1)");
+    expect(factor(`${marked} + 1`)).toBe(`(${marked} + 1)`);
   });
 });
