@@ -21,10 +21,10 @@ export function App() {
     <HashRouter>
       <TooltipProvider>
         <div className="flex h-screen flex-col">
-          <header className="flex h-12 shrink-0 items-center gap-4 border-b px-4">
-            <Link to="/" className="flex items-center gap-2 font-semibold">
+          <header className="flex h-12 shrink-0 items-center gap-4 overflow-hidden border-b px-4 whitespace-nowrap">
+            <Link to="/" className="flex items-center gap-2 font-semibold" aria-label="ESP32 블록랩">
               <Cpu className="size-5" />
-              ESP32 블록랩
+              <span className="hidden sm:inline">ESP32 블록랩</span>
             </Link>
             <nav className="flex items-center gap-1 text-sm">
               {navItems.map(({ to, label, icon: Icon, soon }) => (
@@ -32,6 +32,8 @@ export function App() {
                   key={to}
                   to={soon ? "#" : to}
                   aria-disabled={soon}
+                  aria-label={label}
+                  title={label}
                   className={({ isActive }) =>
                     cn(
                       "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -41,8 +43,9 @@ export function App() {
                   }
                 >
                   <Icon className="size-4" />
-                  {label}
-                  {soon && <Badge variant="outline">준비 중</Badge>}
+                  {/* 좁은 화면에서는 아이콘만 보인다 */}
+                  <span className="hidden md:inline">{label}</span>
+                  {soon && <Badge variant="outline" className="hidden md:inline-flex">준비 중</Badge>}
                 </NavLink>
               ))}
             </nav>

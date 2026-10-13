@@ -1,16 +1,22 @@
-import { useCallback, useEffect, useReducer, useRef } from "react";
-import { AlertTriangle, Blocks, Code2, Play, Save, Square, Usb } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
+import {
+  AlertTriangle, Blocks, Code2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, Save, Square, Usb,
+} from "lucide-react";
+import { usePanelRef, type PanelSize } from "react-resizable-panels";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
 import type { WorkspaceJson } from "@/codegen";
 import { countCodeBlocks, editorReducer, initialEditorState, type Source } from "./editorSync";
 import { SAMPLE_CODE } from "./sample";
+import { BottomPanel } from "./BottomPanel";
+import { useIsNarrow } from "./useViewport";
 
 const DEVICE_BUTTONS = [
   { icon: Usb, label: "보드 연결" },
@@ -18,6 +24,25 @@ const DEVICE_BUTTONS = [
   { icon: Save, label: "보드에 저장" },
   { icon: Square, label: "멈춤" },
 ];
+
+/** 넓은 화면에서 어느 패널을 펼쳐 두었는지. 좁은 화면에서는 블록·코드 대신 지금 기준(source) 쪽만 보인다 */
+export type Panels = { blocks: boolean; code: boolean; bottom: boolean };
+const INITIAL_PANELS: Panels = { blocks: true, code: true, bottom: false };
+
+type PanelToggleProps = { label: string; icon: typeof PanelLeftClose; onClick(): void };
+
+function PanelToggle({ label, icon: Icon, onClick }: PanelToggleProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-7" aria-label={label} onClick={onClick}>
+          <Icon className="size-4" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function LabPage() {
   const [state, dispatch] = useReducer(editorReducer, SAMPLE_CODE, initialEditorState);
@@ -31,6 +56,41 @@ export function LabPage() {
    */
   const sourceRef = useRef(state.source);
   sourceRef.current = state.source;
+
+  const narrow = useIsNarrow();
+  const narrowRef = useRef(narrow);
+  narrowRef.current = narrow;
+  const [panels, setPanels] = useState<Panels>(INITIAL_PANELS);
+  const blocksPanelRef = usePanelRef();
+  const codePanelRef = usePanelRef();
+  // 좁은 화면에서는 탭처럼 지금 기준 쪽 하나만 보인다. 숨긴 쪽도 마운트는 유지한다(작업판 상태를 지킨다).
+  const showBlocks = narrow ? state.source === "blocks" : panels.blocks;
+  const showCode = narrow ? state.source === "code" : panels.code;
+
+  // 보일 패널을 펼치고 숨길 패널을 접는다. 둘 다 접을 수는 없으므로 펼치기를 먼저 한다.
+  useLayoutEffect(() => {
+    const targets = [
+      { ref: blocksPanelRef, show: showBlocks },
+      { ref: codePanelRef, show: showCode },
+    ];
+    for (const { ref, show } of targets) if (show && ref.current?.isCollapsed()) ref.current.expand();
+    for (const { ref, show } of targets) if (!show && !ref.current?.isCollapsed()) ref.current?.collapse();
+  }, [showBlocks, showCode, blocksPanelRef, codePanelRef]);
+
+  // 넓은 화면에서 손잡이를 끌어 패널을 접거나 펼치면 버튼 상태도 따라간다
+  const syncPanel = useCallback((key: "blocks" | "code", size: PanelSize) => {
+    if (narrowRef.current) return;
+    const open = size.asPercentage > 0;
+    setPanels((p) => (p[key] === open ? p : { ...p, [key]: open }));
+  }, []);
+  const onBlocksResize = useCallback((size: PanelSize) => syncPanel("blocks", size), [syncPanel]);
+  const onCodeResize = useCallback((size: PanelSize) => syncPanel("code", size), [syncPanel]);
+
+  /** 한쪽을 접으면 다른 쪽은 반드시 펼친다 (둘 다 접힌 화면은 없다) */
+  const setSidePanel = (key: "blocks" | "code", open: boolean) => {
+    const other = key === "blocks" ? "code" : "blocks";
+    setPanels((p) => ({ ...p, [key]: open, ...(open ? {} : { [other]: true }) }));
+  };
 
   // 코드가 기준일 때: 파싱 결과가 바뀌면 작업판에 올린다 (보던 자리는 그대로)
   useEffect(() => {
@@ -83,14 +143,14 @@ export function LabPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b px-3">
+      <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
         <Tabs value={state.source} onValueChange={(v) => switchSource(v as Source)}>
           <TabsList>
             <TabsTrigger value="blocks"><Blocks className="size-4" />블록</TabsTrigger>
             <TabsTrigger value="code"><Code2 className="size-4" />코드</TabsTrigger>
           </TabsList>
         </Tabs>
-        <span className="text-sm text-muted-foreground">
+        <span className="hidden truncate text-sm text-muted-foreground lg:inline">
           {codeMode ? "코드를 고치면 블록이 따라옵니다" : "블록을 놓으면 코드가 바로 바뀝니다"}
         </span>
         <div className="ml-auto flex items-center gap-1">
@@ -99,7 +159,9 @@ export function LabPage() {
               {/* 비활성 버튼은 포인터 이벤트를 받지 않으므로 span 이 툴팁을 받는다 */}
               <TooltipTrigger asChild>
                 <span tabIndex={0} className="inline-flex rounded-md">
-                  <Button variant="outline" size="sm" disabled><Icon className="size-4" />{label}</Button>
+                  <Button variant="outline" size="sm" disabled aria-label={label}>
+                    <Icon className="size-4" /><span className="hidden md:inline">{label}</span>
+                  </Button>
                 </span>
               </TooltipTrigger>
               <TooltipContent>보드 연결은 다음 단계에서 들어옵니다</TooltipContent>
@@ -109,39 +171,79 @@ export function LabPage() {
       </div>
 
       <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
-        <ResizablePanel defaultSize="62" minSize="35" className="relative">
-          <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} />
-          {codeMode && (
-            <div className="pointer-events-auto absolute inset-0 flex items-start justify-center bg-background/40 pt-6" data-testid="blocks-overlay">
-              <Badge variant="secondary">코드 편집 중 — 블록은 코드에 따라 갱신됩니다</Badge>
+        <ResizablePanel
+          panelRef={blocksPanelRef}
+          defaultSize="62"
+          minSize="35"
+          collapsible
+          collapsedSize="0"
+          onResize={onBlocksResize}
+          className="flex flex-col"
+        >
+          {/* 접혀도 작업판은 언마운트하지 않고 display:none 으로 숨긴다 */}
+          <div className={cn("flex h-full min-h-0 flex-col", !showBlocks && "hidden")}>
+            {!narrow && (
+              <div className="flex h-9 shrink-0 items-center gap-2 border-b px-3 text-sm">
+                <span className="font-medium">작업판</span>
+                <div className="ml-auto flex items-center">
+                  {!panels.code && <PanelToggle label="코드 패널 펼치기" icon={PanelRightOpen} onClick={() => setSidePanel("code", true)} />}
+                  <PanelToggle label="블록 패널 접기" icon={PanelLeftClose} onClick={() => setSidePanel("blocks", false)} />
+                </div>
+              </div>
+            )}
+            <div className="relative min-h-0 flex-1">
+              <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} />
+              {codeMode && (
+                <div className="pointer-events-auto absolute inset-0 flex items-start justify-center bg-background/40 pt-6" data-testid="blocks-overlay">
+                  <Badge variant="secondary">코드 편집 중 — 블록은 코드에 따라 갱신됩니다</Badge>
+                </div>
+              )}
             </div>
-          )}
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize="38" minSize="25" className="flex flex-col">
-          <div className="flex h-9 shrink-0 items-center gap-2 border-b px-3 text-sm">
-            <span className="font-medium">main.py</span>
-            {unconvertedCount > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="gap-1" data-testid="unconverted-badge"><AlertTriangle className="size-3" />블록으로 바꾸지 못한 줄 {unconvertedCount}개</Badge>
-                </TooltipTrigger>
-                <TooltipContent className="whitespace-pre-line">
-                  {codeMode ? state.unparsed.map((u) => `${u.line}줄: ${u.text}`).join("\n") : "작업판에 코드 블록으로 남아 있어요"}
-                </TooltipContent>
-              </Tooltip>
-            )}
-            {state.parseError && (
-              <Badge variant="destructive" className="gap-1" data-testid="parse-error">
-                <AlertTriangle className="size-3" />{state.parseError.line}줄 {state.parseError.message}
-              </Badge>
-            )}
           </div>
-          <div className="min-h-0 flex-1">
-            <CodePanel value={state.code} readOnly={!codeMode} onChange={onCodeChange} errorLine={state.parseError?.line ?? null} />
+        </ResizablePanel>
+        <ResizableHandle withHandle className={cn(narrow && "hidden")} disabled={narrow} />
+        <ResizablePanel
+          panelRef={codePanelRef}
+          defaultSize="38"
+          minSize="25"
+          collapsible
+          collapsedSize="0"
+          onResize={onCodeResize}
+          className="flex flex-col"
+        >
+          <div className={cn("flex h-full min-h-0 flex-col", !showCode && "hidden")}>
+            <div className="flex h-9 shrink-0 items-center gap-2 overflow-hidden border-b px-3 text-sm whitespace-nowrap">
+              {!narrow && !panels.blocks && <PanelToggle label="블록 패널 펼치기" icon={PanelLeftOpen} onClick={() => setSidePanel("blocks", true)} />}
+              <span className="font-medium">main.py</span>
+              {unconvertedCount > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="outline" className="gap-1" data-testid="unconverted-badge"><AlertTriangle className="size-3" />블록으로 바꾸지 못한 줄 {unconvertedCount}개</Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="whitespace-pre-line">
+                    {codeMode ? state.unparsed.map((u) => `${u.line}줄: ${u.text}`).join("\n") : "작업판에 코드 블록으로 남아 있어요"}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {state.parseError && (
+                <Badge variant="destructive" className="gap-1" data-testid="parse-error">
+                  <AlertTriangle className="size-3" />{state.parseError.line}줄 {state.parseError.message}
+                </Badge>
+              )}
+              {!narrow && (
+                <div className="ml-auto flex items-center">
+                  <PanelToggle label="코드 패널 접기" icon={PanelRightClose} onClick={() => setSidePanel("code", false)} />
+                </div>
+              )}
+            </div>
+            <div className="min-h-0 flex-1">
+              <CodePanel value={state.code} readOnly={!codeMode} onChange={onCodeChange} errorLine={state.parseError?.line ?? null} />
+            </div>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      <BottomPanel open={panels.bottom} onToggle={() => setPanels((p) => ({ ...p, bottom: !p.bottom }))} />
     </div>
   );
 }

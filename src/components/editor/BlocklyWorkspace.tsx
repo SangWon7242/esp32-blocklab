@@ -74,6 +74,9 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     ws.addChangeListener(listener);
 
     const observer = new ResizeObserver(() => {
+      // 숨겨진(display:none) 동안은 크기가 0이다. 그대로 재면 Blockly 가 스크롤을 0 폭 기준으로 잘라
+      // 보던 자리를 잃으므로, 다시 보일 때(크기가 생겨 이 observer 가 다시 불릴 때) 잰다.
+      if (host.clientWidth === 0 || host.clientHeight === 0) return;
       Blockly.svgResize(ws);
       if (needsRevealRef.current && revealProgram(ws)) needsRevealRef.current = false;
     });

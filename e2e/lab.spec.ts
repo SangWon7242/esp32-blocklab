@@ -147,3 +147,57 @@ test("코드 ↔ 블록 전환과 코드 고치기는 작업판의 보던 자리
   expect(Math.abs(after.x - before.x)).toBeLessThan(2);
   expect(Math.abs(after.y - before.y)).toBeLessThan(2);
 });
+
+test("좁은 화면에서는 블록과 코드가 탭으로 바뀐다", async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 700 });
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  await expect(page.getByTestId("code-panel")).toBeHidden();
+  // 빈 바탕을 끌어 작업판을 옮겨 둔다 (숨겼다 보여도 이 자리가 남아야 한다)
+  const program = host.locator("svg.blocklySvg > g.blocklyWorkspace > g.blocklyBlockCanvas > .blocklyDraggable").first();
+  const bg = (await host.boundingBox())!;
+  await page.mouse.move(bg.x + bg.width - 60, bg.y + bg.height - 60);
+  await page.mouse.down();
+  await page.mouse.move(bg.x + bg.width - 60 + 150, bg.y + bg.height - 60 + 40, { steps: 10 });
+  await page.mouse.up();
+  const before = (await program.boundingBox())!;
+
+  await page.getByRole("tab", { name: "코드" }).click();
+  await expect(page.getByTestId("code-panel")).toBeVisible();
+  await expect(host).toBeHidden();
+  // 헤더가 가로 스크롤을 만들지 않는다
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  expect(overflow).toBe(false);
+
+  // 다시 블록으로 오면 작업판이 (숨겨졌던 동안 언마운트되지 않고) 화면 크기에 맞게 다시 그려진다
+  await page.getByRole("tab", { name: "블록" }).click();
+  await expect(host).toBeVisible();
+  await expect(page.getByTestId("code-panel")).toBeHidden();
+  const hostBox = (await host.boundingBox())!;
+  await expect.poll(async () => (await host.locator("svg.blocklySvg").boundingBox())?.width).toBeCloseTo(hostBox.width, 0);
+  const after = (await program.boundingBox())!;
+  expect(Math.abs(after.x - before.x)).toBeLessThan(2);
+  expect(Math.abs(after.y - before.y)).toBeLessThan(2);
+});
+
+test("코드 패널을 접었다 펼 수 있다", async ({ page }) => {
+  await page.goto("/#/lab");
+  await page.getByRole("button", { name: "코드 패널 접기" }).click();
+  await expect(page.getByTestId("code-panel")).toBeHidden();
+  await page.getByRole("button", { name: "코드 패널 펼치기" }).click();
+  await expect(page.getByTestId("code-panel")).toBeVisible();
+
+  // 블록 패널도 접으면 코드 패널이 화면을 다 쓴다
+  await page.getByRole("button", { name: "블록 패널 접기" }).click();
+  await expect(page.getByTestId("blockly-host")).toBeHidden();
+  await page.getByRole("button", { name: "블록 패널 펼치기" }).click();
+  await expect(page.getByTestId("blockly-host")).toBeVisible();
+
+  // 하단 패널은 처음엔 접혀 있고 펼치면 안내가 보인다
+  await expect(page.getByText("아직 메시지가 없어요")).toBeHidden();
+  await page.getByRole("button", { name: "하단 패널 펼치기" }).click();
+  await expect(page.getByText("아직 메시지가 없어요")).toBeVisible();
+  await page.getByRole("button", { name: "하단 패널 접기" }).click();
+  await expect(page.getByText("아직 메시지가 없어요")).toBeHidden();
+});
