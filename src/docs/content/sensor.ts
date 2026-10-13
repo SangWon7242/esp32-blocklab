@@ -55,7 +55,7 @@ export const sensorContent: Record<string, BlockContent> = {
       title: "큰 소리가 나면 출력하기",
       code: `${adcSetup("sound")}\nwhile True:\n    if sound.read() > 2000:\n        print("loud")\n    time.sleep(0.1)`,
     },
-    tips: [ADC_TIP, "소리는 아주 짧게 지나가니 기다리는 시간을 짧게(0.1초쯤) 두고 자주 읽어요.", ADC_BACK_TIP],
+    tips: [ADC_TIP, "조용할 때 값과 소리 낼 때 값을 먼저 출력해 보고, 그 사이 값으로 기준(예시의 2000)을 정해요.", "소리는 아주 짧게 지나가니 기다리는 시간을 짧게(0.1초쯤) 두고 자주 읽어요.", ADC_BACK_TIP],
   },
   dev_flame_setup: {
     concept: "불꽃 센서를 아날로그 핀에 준비하고 이름을 붙여요. 불꽃에서 나오는 적외선의 세기를 0~4095 수로 읽습니다. 코드로는 flame.read() 로 읽어요.",

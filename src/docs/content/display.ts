@@ -82,11 +82,11 @@ export const displayContent: Record<string, BlockContent> = {
     example: { title: "LCD 에 인사 적기", code: `${LCD_SETUP}\nlcd.Cursor(0, 0)\nlcd.Display("hello")` },
     tips: [
       "lcd128_32.py, lcd128_32_fonts.py 라이브러리가 필요해요. 보드에 저장할 때 앱이 알아서 함께 올려 줘요.",
-      "화면이 켜지지 않으면 주소를 0x27 로 바꿔 보세요.",
+      "주소(0x3f)가 모듈과 다르면 화면이 켜지지 않아요. 모듈에 적힌 I2C 주소를 확인해요.",
     ],
   },
   dev_lcd_text: {
-    concept: "LCD 의 정한 줄·칸에 글을 적어요. 커서를 옮기는 lcd.Cursor(줄, 칸) 과 글을 쓰는 lcd.Display(글) 두 줄이 만들어집니다. 줄은 0~3, 칸은 0 부터 왼쪽에서 셉니다.",
+    concept: "LCD 의 정한 줄·칸에 글을 적어요. 커서를 옮기는 lcd.Cursor(줄, 칸) 과 글을 쓰는 lcd.Display(글) 두 줄이 만들어집니다. 줄은 0~3, 칸은 0~17 로 왼쪽에서 셉니다.",
     example: { title: "두 줄 적기", code: `${LCD_SETUP}\nlcd.Cursor(0, 0)\nlcd.Display("hello")\nlcd.Cursor(2, 0)\nlcd.Display("ESP32")` },
     tips: [LCD_TIP, "글은 영문·숫자·기호만 보여요."],
   },

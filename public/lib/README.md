@@ -28,8 +28,8 @@ Keyestudio KS5020 키트 자료의 `Library.zip` 안 `Library/MicroPython_Librar
 ## 라이선스
 
 - `gfx.py`: 파일 머리말에 MIT License 라고 적혀 있습니다 (Adafruit GFX 를 옮긴 것, Tony DiCola).
-- `ssd1306.py`: 머리말은 "created by Adafruit" 출처만 적고 라이선스 줄은 없습니다. MicroPython 저장소(MIT 라이선스)의
-  SSD1306 드라이버와 같은 파일로 보아 MIT 로 다룹니다.
+- `ssd1306.py`: MicroPython 공식 저장소(micropython-lib, MIT 라이선스)의 SSD1306 드라이버입니다(2026-10-14 교체).
+  Keyestudio 판은 framebuf 를 상속하지 않아 `line`/`rect` 가 없었고, 그래서 선·네모 블록이 보드에서 AttributeError 를 냈습니다.
 - 그 밖의 Keyestudio 파일(`lcd128_32.py`, `lcd128_32_fonts.py`, `mfrc522_i2c.py`, `mfrc522_config.py`, `soft_iic.py`,
   `keypad.py`, `irrecvdata.py`)에는 라이선스 머리말이 없습니다. 다시 배포해도 되는지 만든 곳(Keyestudio)에 확인하는 중이며,
   답을 받기 전까지는 수업용으로만 함께 둡니다.

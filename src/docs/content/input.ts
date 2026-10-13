@@ -57,7 +57,7 @@ export const inputContent: Record<string, BlockContent> = {
     tips: ["먼저 키패드 준비 블록이 있어야 해요.", "키를 한 번 누르는 동안 여러 번 읽힐 수 있어요. 반복 안에 잠깐 기다리기를 넣어요."],
   },
   dev_ir_setup: {
-    concept: "적외선(IR) 리모컨 신호를 받는 수신기를 입력 핀에 준비해요. 리모컨 버튼을 누르면 눈에 보이지 않는 빛 신호가 오고, 수신기가 그것을 버튼 값으로 바꿉니다. 이름은 ir 로 정해져 있어요.",
+    concept: "적외선(IR) 리모컨 신호를 받는 수신기를 입력 핀에 준비해요. 리모컨 버튼을 누르면 눈에 보이지 않는 빛 신호가 오고, 수신기가 그것을 '0xff00ff' 같은 글자 값으로 바꿉니다. 이름은 ir 로 정해져 있어요.",
     example: {
       title: "받은 리모컨 값 출력하기",
       code: `${IR_SETUP}\nwhile True:\n    value = ir.ir_read()\n    if value:\n        print(value)\n    time.sleep(0.1)`,
@@ -65,11 +65,11 @@ export const inputContent: Record<string, BlockContent> = {
     tips: ["irrecvdata.py 라이브러리가 필요해요. 보드에 저장할 때 앱이 알아서 함께 올려 줘요.", "리모컨을 수신기 쪽으로 향하게 하고 눌러요."],
   },
   dev_ir_value: {
-    concept: "리모컨에서 받은 버튼 값을 알려 줘요. 받은 신호가 없으면 None(없음)이 나옵니다. 코드로는 ir.ir_read() 이고, 버튼마다 값이 달라서 어느 버튼을 눌렀는지 가려낼 수 있어요. 만약 블록의 조건 칸에 그대로 끼우면 신호를 받았을 때만 참이 돼요.",
+    concept: "리모컨에서 받은 버튼 값을 '0xff00ff' 같은 글자로 알려 줘요. 받은 신호가 없으면 None(없음)이 나옵니다. 코드로는 ir.ir_read() 이고, 버튼마다 값이 달라서 어느 버튼을 눌렀는지 가려낼 수 있어요. 만약 블록의 조건 칸에 그대로 끼우면 신호를 받았을 때만 참이 돼요.",
     example: {
       title: "신호를 받으면 LED 깜빡이기",
       code: `led = Pin(26, Pin.OUT)\n${IR_SETUP}\nwhile True:\n    if ir.ir_read():\n        led.value(1)\n        time.sleep(0.2)\n        led.value(0)\n    time.sleep(0.05)`,
     },
-    tips: ["먼저 IR 수신기 준비 블록이 있어야 해요.", "먼저 버튼마다 어떤 값이 나오는지 출력해 보고, 그 값으로 만약 블록을 만들어요."],
+    tips: ["먼저 IR 수신기 준비 블록이 있어야 해요.", "먼저 버튼마다 어떤 값이 나오는지 출력해 보고, 그 값으로 만약 블록을 만들어요.", "읽을 때마다 0.2초를 기다리고 신호가 끝난 뒤에야 값이 나오므로, 누르고 1초쯤 지나서 값이 보이는 게 정상이에요."],
   },
 };
