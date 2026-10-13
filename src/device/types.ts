@@ -37,6 +37,8 @@ export interface Device {
   run(code: string): Promise<RunResult>;
   saveFile(path: string, text: string): Promise<void>;
   listFiles(): Promise<string[]>;
+  /** 보드 파일 이름 → 크기(바이트). 라이브러리가 옛 판인지(크기가 다른지) 보는 데 쓴다 */
+  fileSizes(): Promise<Record<string, number>>;
   /** Ctrl-C ×2 */
   stop(): Promise<void>;
   softReset(): Promise<void>;

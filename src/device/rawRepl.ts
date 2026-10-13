@@ -74,6 +74,13 @@ export function parsePyStrList(text: string): string[] {
   return names;
 }
 
+/** `{'boot.py': 0, 'ssd1306.py': 4922}` 꼴(MicroPython dict 출력) → 이름 → 크기 */
+export function parsePySizeDict(text: string): Record<string, number> {
+  const sizes: Record<string, number> = {};
+  for (const m of text.matchAll(/'((?:[^'\\]|\\.)*)'\s*:\s*(\d+)/g)) sizes[m[1].replace(/\\(.)/g, "$1")] = Number(m[2]);
+  return sizes;
+}
+
 export class RawRepl {
   mode: ReplMode = "unknown";
   private readonly transport: Transport;
@@ -149,6 +156,13 @@ export class RawRepl {
     return this.withLock(async () => {
       await this.ensureRaw();
       return parsePyStrList(await this.execOrThrow("import os\nprint(os.listdir())"));
+    });
+  }
+
+  fileSizes(): Promise<Record<string, number>> {
+    return this.withLock(async () => {
+      await this.ensureRaw();
+      return parsePySizeDict(await this.execOrThrow("import os\nprint({n: os.stat(n)[6] for n in os.listdir()})"));
     });
   }
 

@@ -203,6 +203,12 @@ describe("RawRepl 파일", () => {
     expect(t.writtenText).toContain("print(os.listdir())");
   });
 
+  it("fileSizes: os.stat 크기 dict 를 이름 → 바이트로", async () => {
+    const { t, repl } = setup([enter, { on: "\x04", reply: "OK{'boot.py': 0, 'ssd1306.py': 4922}\r\n\x04\x04>" }]);
+    expect(await repl.fileSizes()).toEqual({ "boot.py": 0, "ssd1306.py": 4922 });
+    expect(t.writtenText).toContain("os.stat(n)[6]");
+  });
+
   it("listFiles: 빈 목록", async () => {
     const { repl } = setup([enter, { on: "\x04", reply: "OK[]\r\n\x04\x04>" }]);
     expect(await repl.listFiles()).toEqual([]);

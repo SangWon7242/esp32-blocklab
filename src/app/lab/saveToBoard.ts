@@ -14,8 +14,11 @@ async function onBoard<T>(work: () => Promise<T>): Promise<T> {
   }
 }
 
+const utf8Length = (text: string) => new TextEncoder().encode(text).length;
+
 /**
- * 보드에 저장: 쓰인 준비 블록의 라이브러리(public/lib) 중 보드에 없는 것만 올리고 → main.py → 소프트 리셋(main.py 가 바로 돈다).
+ * 보드에 저장: 쓰인 준비 블록의 라이브러리(public/lib) 중 보드에 없거나 크기가 다른(옛 판) 것만 올리고 → main.py → 소프트 리셋(main.py 가 바로 돈다).
+ * 크기 비교는 Keyestudio 판 ssd1306.py(line/rect 없음)가 이미 든 보드에 새 판을 올리기 위한 것이다.
  * 진행은 log 로 한 줄씩 (콘솔 system 행). 실패하면 그 자리에서 멈추고 오류를 던진다.
  */
 export async function saveToBoard(
@@ -26,13 +29,14 @@ export async function saveToBoard(
 ): Promise<void> {
   const libs = libFilesFor(blockTypes);
   if (libs.length > 0) {
-    const present = new Set(await onBoard(() => device.listFiles()));
-    const missing = libs.filter((name) => !present.has(name));
-    if (missing.length > 0) {
-      for (const f of await fetchLibs(missing)) {
-        log(`${f.name} 올리는 중…`);
-        await onBoard(() => device.saveFile(f.name, f.text));
-      }
+    const files = await fetchLibs(libs);
+    const sizes = await onBoard(() => device.fileSizes());
+    for (const f of files) {
+      const onBoardSize = sizes[f.name];
+      if (onBoardSize === undefined) log(`${f.name} 올리는 중…`);
+      else if (onBoardSize !== utf8Length(f.text)) log(`${f.name} 새 판으로 바꾸는 중…`);
+      else continue;
+      await onBoard(() => device.saveFile(f.name, f.text));
     }
   }
   log("main.py 올리는 중…");

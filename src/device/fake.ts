@@ -203,6 +203,12 @@ export class FakeDevice extends DeviceBase implements Device {
     return [...this.files.keys()];
   }
 
+  async fileSizes(): Promise<Record<string, number>> {
+    this.requireConnected();
+    const enc = new TextEncoder();
+    return Object.fromEntries([...this.files].map(([name, text]) => [name, enc.encode(text).length]));
+  }
+
   async stop(): Promise<void> {
     this.stopRequested = true;
   }

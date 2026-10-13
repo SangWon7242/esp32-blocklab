@@ -237,6 +237,10 @@ export class WebSerialDevice extends DeviceBase implements Device {
     return this.requireRepl().listFiles();
   }
 
+  async fileSizes(): Promise<Record<string, number>> {
+    return this.requireRepl().fileSizes();
+  }
+
   async stop(): Promise<void> {
     await this.repl?.interrupt();
   }
