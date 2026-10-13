@@ -14,6 +14,8 @@ export type LintInput = {
   /** 코드 패널에 보이는 글 (코드 모드면 학생이 친 원문) */
   code: string;
   parseError: { line: number; message: string } | null;
+  /** 이 규칙 id 의 문제는 빼고 보여 준다 (설계 조립: 일부러 흩어 둔 블록의 orphan) */
+  ignoreRules?: readonly string[];
 };
 
 /** 검사 결과. 줄 번호는 모두 코드 패널(state.code) 기준 */
@@ -37,14 +39,14 @@ const blockCount = (json: WorkspaceJson | undefined): number => (json?.blocks as
  * - 코드 모드면 재생성 코드 줄을 학생이 친 원문 줄로 옮긴다 (짝이 없으면 줄 번호를 버린다).
  * - 블록이 하나도 없는 빈 작업판은 시작 블록 오류를 내지 않는다.
  */
-export function computeLintView({ snapshot, source, code, parseError }: LintInput): LintView {
+export function computeLintView({ snapshot, source, code, parseError, ignoreRules }: LintInput): LintView {
   if (parseError) {
     const syntax: Issue = { id: "syntax", level: "error", line: parseError.line, ko: parseError.message, en: "SyntaxError: invalid syntax" };
     return { issues: [syntax], console: formatConsole([], parseError), snapshot, toPanel: null, stale: true };
   }
   if (!snapshot || blockCount(snapshot.json) === 0) return { ...EMPTY_VIEW, snapshot };
   const toPanel = source === "code" ? alignLines(snapshot.generated, code) : null;
-  const issues = lint(snapshot.json, snapshot.map).map((issue) => {
+  const issues = lint(snapshot.json, snapshot.map).filter((issue) => !ignoreRules?.includes(issue.id)).map((issue) => {
     if (!toPanel || issue.line === undefined) return issue;
     const { line, ...rest } = issue;
     const moved = toPanel.get(line);
@@ -99,7 +101,7 @@ const LINT_DELAY = 100;
  * 블록·코드가 바뀌면 잠깐(100ms) 기다렸다 살아 있는 작업판을 읽어 검사한다.
  * 강조 대상(focus)은 블록 id 로 들고 있다가 검사 결과가 바뀔 때마다 그 블록의 지금 줄로 다시 잰다.
  */
-export function useLint(state: EditorState, readWorkspace: () => WorkspaceSnapshot | null) {
+export function useLint(state: EditorState, readWorkspace: () => WorkspaceSnapshot | null, ignoreRules?: readonly string[]) {
   const [view, setView] = useState<LintView>(EMPTY_VIEW);
   /** view 를 잰 때의 코드 패널 글 (보드 Traceback 줄을 그 코드의 블록으로 옮길 때 짝이 맞는지 본다) */
   const [viewCode, setViewCode] = useState<string | null>(null);
@@ -108,11 +110,13 @@ export function useLint(state: EditorState, readWorkspace: () => WorkspaceSnapsh
   readRef.current = readWorkspace;
   const inputRef = useRef(state);
   inputRef.current = state;
+  const ignoreRef = useRef(ignoreRules);
+  ignoreRef.current = ignoreRules;
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const s = inputRef.current;
-      setView(computeLintView({ snapshot: readRef.current(), source: s.source, code: s.code, parseError: s.parseError }));
+      setView(computeLintView({ snapshot: readRef.current(), source: s.source, code: s.code, parseError: s.parseError, ignoreRules: ignoreRef.current }));
       setViewCode(s.code);
     }, LINT_DELAY);
     return () => window.clearTimeout(timer);

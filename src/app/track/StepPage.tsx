@@ -162,7 +162,8 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
             <span className="hidden items-center gap-1 text-sm text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
           ) : (
             <>
-              {editor && <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>}
+              {/* 건너뛰기는 선택 단계만 (§8.3). 필수 편집기 단계는 실행·판정을 통과해야 끝난다 */}
+              {editor && step.optional && <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>}
               <Button onClick={() => complete()} disabled={!ready} title={ready ? undefined : "활동을 마치면 누를 수 있어요"}>
                 <Check className="size-4" />완료
               </Button>

@@ -65,6 +65,11 @@ export type EditorWorkbenchProps = {
   fake: boolean;
   /** "보드에 저장" 버튼을 숨긴다 (트랙 단계) */
   hideSave?: boolean;
+  /**
+   * 설계 조립: 블록 모드로 고정하고(코드 탭을 끈다, 코드 패널은 읽기 전용) 일부러 흩어 둔 블록의
+   * "떨어진 블록"(orphan) 경고를 내지 않는다. 판정이 블록 조립만 보게 한다.
+   */
+  assemblyMode?: boolean;
   /** 코드·블록이 바뀔 때 */
   onProgram?(program: EditorProgram): void;
   /** 실행이 끝날 때: 결과와 그 실행의 보드 출력(stdout) */
@@ -76,7 +81,10 @@ export type EditorWorkbenchProps = {
  * 블록·코드 편집기 + 보드 버튼 + 하단 문제/콘솔. 자유 코딩 화면과 트랙 편집기 단계가 함께 쓴다.
  * 부모 높이를 꽉 채운다 (h-full).
  */
-export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
+/** 설계 조립에서 빼는 검사 규칙 */
+const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
+
+export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
   const [state, dispatch] = useReducer(
     editorReducer,
     null,
@@ -175,7 +183,7 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, on
     const { code, map } = handle.getCodeWithMap();
     return { json: handle.getJson(), generated: code, map };
   }, []);
-  const lintState = useLint(state, readWorkspace);
+  const lintState = useLint(state, readWorkspace, assemblyMode ? ASSEMBLY_IGNORED_RULES : undefined);
   const { view, viewCode, issues, focus, setTarget } = lintState;
 
   // 검사 결과를 블록 경고 아이콘·테두리로
@@ -304,6 +312,7 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, on
 
   const switchSource = (source: Source) => {
     if (source === sourceRef.current) return;
+    if (assemblyMode && source === "code") return;
     const current = flushPendingCode();
     if (source === "blocks" && current.parseError) {
       // 블록으로 가면 마지막 성공 블록의 코드로 덮인다. 코드 모드에 머물고 오류 줄은 그대로 강조한다.
@@ -327,11 +336,11 @@ export function EditorWorkbench({ initialCode, initialBlocks, fake, hideSave, on
         <Tabs value={state.source} onValueChange={(v) => switchSource(v as Source)}>
           <TabsList>
             <TabsTrigger value="blocks"><Blocks className="size-4" />블록</TabsTrigger>
-            <TabsTrigger value="code"><Code2 className="size-4" />코드</TabsTrigger>
+            <TabsTrigger value="code" disabled={assemblyMode} title={assemblyMode ? "조립은 블록으로만 해요" : undefined}><Code2 className="size-4" />코드</TabsTrigger>
           </TabsList>
         </Tabs>
         <span className="hidden truncate text-sm text-muted-foreground lg:inline">
-          {codeMode ? "코드를 고치면 블록이 따라옵니다" : "블록을 놓으면 코드가 바로 바뀝니다"}
+          {assemblyMode ? "블록을 이어 붙이면 코드가 바로 바뀝니다" : codeMode ? "코드를 고치면 블록이 따라옵니다" : "블록을 놓으면 코드가 바로 바뀝니다"}
         </span>
         <div className="ml-auto">
           <DeviceBar

@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { CheckCircle2, ListChecks, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { DesignInput } from "@/track/completion";
+import { onEditedProgram, type DesignInput } from "@/track/completion";
 import { DESIGN_FAIL, gradeBlanks, scatterStartBody } from "@/track/design";
 import { judge } from "@/track/judge";
 import { codeToBlocks } from "@/parser";
@@ -48,7 +48,7 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
     const program = editor.current?.getProgram();
     if (!program) return;
     const result = judge([{ codeEquals: { file: step.targetCode }, fail: DESIGN_FAIL }], { code: program.code, blocksJson: program.blocksJson }, chapter.files);
-    update(() => ({ program: { code: program.code, blocksJson: program.blocksJson }, passed: result.pass, failures: result.failures }), { attempt: true });
+    update(() => ({ program: { code: program.code, blocksJson: program.blocksJson }, passed: result.pass, failures: result.failures, judgedCode: program.code }), { attempt: true });
   };
 
   return (
@@ -141,7 +141,8 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
             ref={editor}
             initialCode=""
             initialBlocks={initialBlocks}
-            onProgram={(code, blocksJson) => update(() => ({ program: { code, blocksJson } }))}
+            assemblyMode
+            onProgram={(code, blocksJson) => update((cur) => onEditedProgram(cur, { code, blocksJson }))}
           />
         </section>
       )}

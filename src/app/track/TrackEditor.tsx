@@ -19,6 +19,8 @@ type Props = {
   onProgram(code: string, blocksJson: unknown): void;
   /** 실행 결과와 그 실행의 보드 출력 */
   onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
+  /** 설계 조립: 블록 모드 고정, 떨어진 블록 경고 없음 */
+  assemblyMode?: boolean;
   /** 높이를 줄인다 */
   compact?: boolean;
   ref?: Ref<TrackEditorHandle>;
@@ -28,7 +30,7 @@ type Props = {
  * 트랙 편집기 단계(실행·미션·디버깅)의 편집기. 자유 코딩 화면과 같은 편집기(EditorWorkbench)에
  * "보드에 저장"만 숨기고, 가짜 보드(?device=fake·설정)를 따른다.
  */
-export function TrackEditor({ initialCode, initialBlocks, onProgram, onRunEnd, compact, ref }: Props) {
+export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgram, onRunEnd, compact, ref }: Props) {
   const [searchParams] = useSearchParams();
   const fake = searchParams.get("device") === "fake" || readSettings().fakeBoard;
   const inner = useRef<EditorWorkbenchHandle>(null);
@@ -63,7 +65,7 @@ export function TrackEditor({ initialCode, initialBlocks, onProgram, onRunEnd, c
 
   return (
     <div className={cn("overflow-hidden rounded-lg border", compact ? "h-[420px]" : "h-[min(640px,70vh)] min-h-[440px]")} data-testid="track-editor">
-      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
+      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} assemblyMode={assemblyMode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
     </div>
   );
 }

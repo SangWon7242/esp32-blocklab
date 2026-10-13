@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Link } from "react-router";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { MissionInput } from "@/track/completion";
+import { onEditedProgram, type MissionInput } from "@/track/completion";
 import { judge } from "@/track/judge";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { JudgePanel } from "./JudgePanel";
@@ -26,6 +26,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
       passed: result.pass,
       failures: result.failures,
       failedOnce: cur.failedOnce || !result.pass,
+      judgedCode: program.code,
     }), { attempt: true });
   };
 
@@ -50,7 +51,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
       <TrackEditor
         ref={editor}
         initialCode={initial}
-        onProgram={(code, blocksJson) => update(() => ({ program: { code, blocksJson } }))}
+        onProgram={(code, blocksJson) => update((cur) => onEditedProgram(cur, { code, blocksJson }))}
         onRunEnd={(_, text) => { output.current = text; }}
       />
     </div>

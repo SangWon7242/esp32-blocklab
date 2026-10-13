@@ -133,12 +133,16 @@ test("설정: 내보내기 JSON 에 진행 기록이 들어 있다", async ({ pa
   expect(text).toContain("내보내기 확인용 답");
 });
 
-test("편집기 단계는 건너뛸 수 있고, 교사 모드면 자유 코딩에서 정답 코드를 연다", async ({ page }) => {
-  // 실행·미션·디버깅·설계는 편집기 단계다 (track-editor.spec, track-design-ai.spec). 설계 단계를 건너뛴다
-  await seedDone(page, "10-auto-door", ["problem", "analysis", "predict", "run1", "readcheck1", "mission1", "debug1"]);
+test("선택 편집기 단계만 건너뛸 수 있고, 교사 모드면 자유 코딩에서 정답 코드를 연다", async ({ page }) => {
+  // 필수 편집기 단계(설계)는 건너뛰기가 없다 — 판정을 통과해야 끝난다 (§8.3)
+  await seedDone(page, "10-auto-door", ["problem", "analysis", "predict", "run1", "readcheck1", "mission1", "debug1", "design", "run2", "readcheck2", "mission2"]);
   await page.goto("/#/track/10-auto-door/design");
   await expect(page.getByText("1. 우리말 설계도의 빈칸 채우기")).toBeVisible();
   await expect(page.getByRole("link", { name: /정답 코드 열기/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "건너뛰기" })).toHaveCount(0);
+
+  // 선택 단계(디버깅 ②)는 건너뛸 수 있다
+  await page.goto("/#/track/10-auto-door/debug2");
   await page.getByRole("button", { name: "건너뛰기" }).click();
   await expect(page.getByText("완료한 단계예요")).toBeVisible();
   await expect(page.getByRole("link", { name: "다음" })).toBeVisible();

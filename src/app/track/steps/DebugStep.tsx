@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { debugMessage } from "@/ai/claude";
-import { filled, type DebugInput } from "@/track/completion";
+import { filled, judgeIsStale, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { AiCheck } from "./AiCheck";
@@ -47,6 +47,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
       programs: setAt(cur.programs, current, { code: program.code, blocksJson: program.blocksJson }, null),
       passed: setAt(cur.passed, current, result.pass, false),
       failures: setAt(cur.failures, current, result.failures, null),
+      judgedCodes: setAt(cur.judgedCodes, current, program.code, null),
     }), { attempt: true });
   };
 
@@ -60,7 +61,10 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
             aria-selected={i === current}
             variant={i === current ? "default" : "outline"}
             size="sm"
-            onClick={() => setCurrent(i)}
+            onClick={() => {
+              output.current = "";
+              setCurrent(i);
+            }}
             title={s.title}
           >
             {d.passed?.[i] && <CheckCircle2 className="size-4" />}증상 {i + 1}
@@ -123,7 +127,17 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
             key={current}
             ref={editor}
             initialCode={d.programs?.[current]?.code ?? symptom.code}
-            onProgram={(code, blocksJson) => update((cur) => ({ programs: setAt(cur.programs, current, { code, blocksJson }, null) }))}
+            onProgram={(code, blocksJson) => update((cur) => ({
+              programs: setAt(cur.programs, current, { code, blocksJson }, null),
+              // 판정한 뒤 코드를 바꾸면 그 판정(통과·실패 문장)은 낡았다
+              ...(judgeIsStale(cur.judgedCodes?.[current], code)
+                ? {
+                    passed: setAt(cur.passed, current, false, false),
+                    failures: setAt(cur.failures, current, null, null),
+                    judgedCodes: setAt(cur.judgedCodes, current, null, null),
+                  }
+                : {}),
+            }))}
             onRunEnd={(_, text) => { output.current = text; }}
           />
         </div>

@@ -56,14 +56,39 @@ test("설계 단계: 빈칸 채점 → 번역표 → 흩어진 블록을 이어 
   await expect(page.getByTestId("design-assembly")).toHaveCount(0);
   await button(page, "확인했어요").click();
 
-  // ③ 조립: 흩어진 채로는 판정 실패
+  // ③ 조립: 필수 단계라 건너뛰기 없음, 블록으로만 (코드 탭 꺼짐), 흩어 둔 블록에 "떨어진 블록" 경고 없음
   await expect(page.getByTestId("blockly-host").locator(".blocklyMainBackground")).toBeVisible();
+  await expect(button(page, "건너뛰기")).toHaveCount(0);
+  await expect(page.getByRole("tab", { name: "코드" })).toBeDisabled();
+  await expect(page.getByTestId("bottom-panel").getByRole("tab", { name: /^문제/ })).toHaveText("문제");
   await expect(button(page, "완료")).toBeDisabled();
   await expect(page.getByTestId("code-panel")).not.toContainText("while True:");
   await button(page, "판정").click();
   await expect(page.getByTestId("judge-failures")).toContainText("순서나 값이 설계도와 달라요");
 
   await connectInOrder(page, ["esp_pin_setup", "flow_repeat_forever"]);
+  await expect(page.getByTestId("code-panel")).toContainText("while True:");
+  await button(page, "판정").click();
+  await expect(page.getByText("설계도대로 조립했어요")).toBeVisible();
+  await expect(button(page, "완료")).toBeEnabled();
+
+  // 통과한 뒤 블록을 떼어 내면 판정이 낡아 완료가 다시 꺼진다
+  await page.evaluate(() => {
+    type B = { type: string; unplug(): void };
+    const ws = (window as unknown as { __blocklabWorkspace: { getAllBlocks(ordered: boolean): B[] } }).__blocklabWorkspace;
+    ws.getAllBlocks(false).find((b) => b.type === "flow_repeat_forever")!.unplug();
+  });
+  await expect(page.getByTestId("code-panel")).not.toContainText("while True:");
+  await expect(button(page, "완료")).toBeDisabled({ timeout: 5_000 });
+  await expect(page.getByText("설계도대로 조립했어요")).toHaveCount(0);
+
+  // 떼어 낸 반복 블록을 다시 준비 블록 아래에 잇는다
+  await page.evaluate(() => {
+    type B = { type: string; previousConnection: unknown; nextConnection: { connect(c: unknown): void } };
+    const ws = (window as unknown as { __blocklabWorkspace: { getAllBlocks(ordered: boolean): B[] } }).__blocklabWorkspace;
+    const all = ws.getAllBlocks(false);
+    all.find((b) => b.type === "esp_pin_setup")!.nextConnection.connect(all.find((b) => b.type === "flow_repeat_forever")!.previousConnection);
+  });
   await expect(page.getByTestId("code-panel")).toContainText("while True:");
   await button(page, "판정").click();
   await expect(page.getByText("설계도대로 조립했어요")).toBeVisible();
