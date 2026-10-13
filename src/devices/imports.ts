@@ -6,7 +6,11 @@ export const IMPORT_RULES: ImportRule[] = [
   { when: /\btime\./, line: "import time", rank: 2 },
   { when: /\bdht\./, line: "import dht", rank: 3 },
   { when: /\bmath\./, line: "import math", rank: 3 },
-  // Task 7 이 추가: mfrc522, KeyPad, irGetCMD, lcd128_32
+  { when: /\bmfrc522\(/, line: "from mfrc522_i2c import mfrc522", rank: 3 },
+  { when: /\bKeyPad\(/, line: "from keypad import KeyPad", rank: 3 },
+  { when: /\birGetCMD\(/, line: "from irrecvdata import irGetCMD", rank: 3 },
+  { when: /\blcd128_32\(/, line: "from lcd128_32 import lcd128_32", rank: 3 },
+  { when: /\blcd128_32\(/, line: "import lcd128_32_fonts", rank: 3 },
 ];
 
 /** 생성기가 `Name(` 이 보이면 `from machine import …` 로 가져오는 이름 (이 순서로) */

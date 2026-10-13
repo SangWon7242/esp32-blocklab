@@ -5,7 +5,8 @@ import { button, joystick, pir, tilt } from "./specs/switch";
 import { dcMotor, relay, servo } from "./specs/motor";
 import { dht11, flame, knob, light, lm35, ntc, sound, ultrasonic } from "./specs/sensor";
 import { buzzerActive, buzzerPassive } from "./specs/sound";
-import { oled } from "./specs/display";
+import { lcd, oled, seg7 } from "./specs/display";
+import { ir, keypad, rfid } from "./specs/input";
 import { printer } from "./specs/misc";
 
 export const DEVICE_CATEGORIES: { id: DeviceCategory; label: string }[] = [
@@ -17,11 +18,11 @@ export const DEVICE_CATEGORIES: { id: DeviceCategory; label: string }[] = [
  * 순서가 곧 우선순위: 같은 줄에 맞는 선언이 여럿이면 앞의 것이 접힌다
  * (서보 3줄 > 밝기 LED(freq 1000) > 수동 부저(freq 440, duty 0) > DC 모터 > PWM 2줄, 초음파 > 핀,
  *  조이스틱 > 버튼 > 입력 핀 > 핀, 조이스틱 > 서미스터·LM35(이름 고정 + 도우미) > 아날로그 핀,
- *  틸트 > PIR (같은 `x.value() == 1`), RGB 색 > RGB 세 값). 같은 값·명령 꼴도 앞의 선언이 먼저 맞는다.
+ *  틸트 > PIR (같은 `x.value() == 1`), RGB 색 > RGB 세 값, 7세그먼트(si·rck·sck + 도우미) > 출력 핀). 같은 값·명령 꼴도 앞의 선언이 먼저 맞는다.
  * 툴박스의 카테고리 안 순서는 이것과 따로 각 장치의 toolboxOrder 로 정한다.
  */
 export const DEVICES: DeviceSpec[] = [
-  servo, ultrasonic, oled,
+  servo, ultrasonic, oled, lcd, seg7, rfid, keypad, ir,
   joystick, button, tilt, pir,
   pinIn, dht11, ntc, lm35, adc, light, knob, sound, flame,
   pinOut, ledPwm, led, rgb, flowLed,
@@ -41,3 +42,9 @@ export const findValueByBlock = (type: string): WithDevice<ValueSpec> | undefine
 /** 모든 준비 선언 (DEVICES 우선순위 순) */
 export const setupSpecs = (): WithDevice<SetupSpec>[] => [...setups.values()];
 export const devicesByCategory = (c: DeviceCategory): DeviceSpec[] => DEVICES.filter((d) => d.category === c);
+
+/** 이 블록들 중 준비 블록이 쓰는 보드 라이브러리 파일 (public/lib/ 아래 이름, 중복 없이 DEVICES 순) */
+export function libFilesFor(blockTypes: string[]): string[] {
+  const used = new Set(blockTypes);
+  return [...new Set(setupSpecs().filter((s) => used.has(s.blockType)).flatMap((s) => s.libFiles ?? []))];
+}
