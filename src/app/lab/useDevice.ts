@@ -23,6 +23,8 @@ export type UseDeviceOptions = {
   onErrorLine(code: string, line: number): void;
   /** 보드 행이 생길 일을 시작할 때 (하단 콘솔을 펼친다) */
   showConsole(): void;
+  /** 실행이 끝날 때 (트랙: 실행 단계 완료, outputIncludes 판정용 출력). 멈춤·오류도 알린다 */
+  onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
 };
 
 /** stdout 을 화면에 붙이는 것은 한 프레임에 한 번. 숨은 탭처럼 프레임이 오지 않아도 이만큼 쌓이면 바로 붙인다 */
@@ -41,7 +43,7 @@ export function createDevice(fake: boolean): Device {
  * - 저장: 쓰인 블록의 라이브러리 중 보드에 없는 것만 올리고 → main.py → 소프트 리셋(main.py 가 바로 돈다)
  * - 오류는 토스트 + 콘솔 system 행. 보드를 고르지 않은 것(cancelled)은 조용히 넘어간다.
  */
-export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDeviceOptions) {
+export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd }: UseDeviceOptions) {
   const [device] = useState(() => createDevice(fake));
   const [status, setStatus] = useState<DeviceStatus>(device.status);
   const [consoleState, setConsoleState] = useState<DeviceConsole>(EMPTY_DEVICE_CONSOLE);
@@ -49,8 +51,10 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
   const [task, setTask] = useState<"run" | "save" | null>(null);
   const taskRef = useRef<"run" | "save" | null>(null);
 
-  const optsRef = useRef({ getProgram, onErrorLine, showConsole });
-  optsRef.current = { getProgram, onErrorLine, showConsole };
+  const optsRef = useRef({ getProgram, onErrorLine, showConsole, onRunEnd });
+  optsRef.current = { getProgram, onErrorLine, showConsole, onRunEnd };
+  /** 지금 실행의 stdout (끝날 때 onRunEnd 로 넘긴다) */
+  const runOutput = useRef("");
 
   /**
    * 보드 stdout 은 작은 조각으로 아주 자주 오므로(sleep 없는 print 반복) 조각마다 다시 그리지 않고 모았다가
@@ -86,6 +90,7 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
   useEffect(() => {
     const offStatus = device.onStatus(setStatus);
     const offOutput = device.onOutput((e) => {
+      if (e.kind === "stdout" && taskRef.current === "run") runOutput.current += e.text;
       push(e.kind, e.text);
       // 장치 쪽 안내는 지금은 "보드 연결이 끊겼어요" 뿐이다 (뽑힘)
       if (e.kind === "system") toast.error(e.text);
@@ -151,6 +156,7 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
     try {
       optsRef.current.showConsole();
       push("system", "실행을 시작했어요");
+      runOutput.current = "";
       const result = await device.run(code);
       flushStdout();
       if (result.stopped) push("system", "실행을 멈췄어요");
@@ -159,6 +165,7 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
         pushRow(tracebackRow(result.error));
         if (result.error.line !== null) optsRef.current.onErrorLine(code, result.error.line);
       }
+      optsRef.current.onRunEnd?.({ ok: result.ok && !result.stopped, stopped: result.stopped === true }, runOutput.current);
     } catch (e) {
       report(e);
     } finally {

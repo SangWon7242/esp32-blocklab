@@ -1,0 +1,58 @@
+import { useRef } from "react";
+import { Link } from "react-router";
+import { Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { MissionInput } from "@/track/completion";
+import { judge } from "@/track/judge";
+import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
+import { JudgePanel } from "./JudgePanel";
+import type { StepProps } from "./types";
+import { useStepInput } from "./useStepInput";
+
+/** 미션: 지시문 → 편집기에서 고치기 → 판정 (실패하면 되묻기 문장, 그 뒤에 힌트) */
+export function MissionStep({ step, chapter, input, onInput, teacherMode }: StepProps<"mission">) {
+  const m = input as MissionInput;
+  const update = useStepInput<MissionInput>(input, onInput);
+  const editor = useRef<TrackEditorHandle>(null);
+  /** 마지막 실행의 보드 출력 (outputIncludes 판정용) */
+  const output = useRef("");
+
+  const onJudge = () => {
+    const program = editor.current?.getProgram();
+    if (!program) return;
+    const result = judge(step.rules, { code: program.code, blocksJson: program.blocksJson, output: output.current }, chapter.files);
+    update((cur) => ({
+      program: { code: program.code, blocksJson: program.blocksJson },
+      passed: result.pass,
+      failures: result.failures,
+      failedOnce: cur.failedOnce || !result.pass,
+    }), { attempt: true });
+  };
+
+  const initial = m.program?.code ?? (step.code ? chapter.files[step.code] : undefined) ?? "";
+  return (
+    <div className="space-y-4">
+      <section className="rounded-lg border p-4">
+        <h3 className="font-semibold">미션</h3>
+        <p className="mt-1">{step.instructions}</p>
+        {step.hint && m.failedOnce && (
+          <p className="mt-2 flex items-start gap-1 text-sm text-muted-foreground" data-testid="mission-hint">
+            <Lightbulb className="mt-0.5 size-4 shrink-0" />힌트: {step.hint}
+          </p>
+        )}
+        {teacherMode && step.answerCode && (
+          <Button asChild variant="outline" size="sm" className="mt-3">
+            <Link to={`/lab?code=${chapter.id}/${step.answerCode}`}>정답 코드 열기 ({step.answerCode})</Link>
+          </Button>
+        )}
+      </section>
+      <JudgePanel onJudge={onJudge} failures={m.failures} passed={m.passed} passText="통과했어요. 아래 완료를 누르세요." />
+      <TrackEditor
+        ref={editor}
+        initialCode={initial}
+        onProgram={(code, blocksJson) => update(() => ({ program: { code, blocksJson } }))}
+        onRunEnd={(_, text) => { output.current = text; }}
+      />
+    </div>
+  );
+}

@@ -10,4 +10,6 @@ export type StepProps<T extends StepType> = {
   onInput(next: Record<string, unknown>, opts?: { attempt?: boolean }): void;
   teacherMode: boolean;
   attempts: number;
+  /** 단계를 완료로 기록한다 (extra 는 입력에 합친다). 편집기 단계가 스스로 끝낼 때 (실행 성공) */
+  onComplete(extra?: Record<string, unknown>): void;
 };

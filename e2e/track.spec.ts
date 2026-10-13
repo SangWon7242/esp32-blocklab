@@ -134,15 +134,16 @@ test("설정: 내보내기 JSON 에 진행 기록이 들어 있다", async ({ pa
 });
 
 test("편집기 단계는 건너뛸 수 있고, 자유 코딩에서 같은 코드를 연다", async ({ page }) => {
-  await seedDone(page, "10-auto-door", ["problem", "analysis", "predict"]);
-  await page.goto("/#/track/10-auto-door/run1");
+  // 실행·미션·디버깅은 편집기가 열렸다 (track-editor.spec). 설계 단계는 아직 안내 + 건너뛰기
+  await seedDone(page, "10-auto-door", ["problem", "analysis", "predict", "run1", "readcheck1", "mission1", "debug1"]);
+  await page.goto("/#/track/10-auto-door/design");
   await expect(page.getByText("이 단계는 다음 업데이트에서 열립니다")).toBeVisible();
   await page.getByRole("button", { name: "건너뛰기" }).click();
   await expect(page.getByText("완료한 단계예요")).toBeVisible();
   await expect(page.getByRole("link", { name: "다음" })).toBeVisible();
 
   await page.getByRole("link", { name: "자유 코딩에서 이 코드 열기" }).click();
-  await expect(page).toHaveURL(/#\/lab\?code=10-auto-door\/step1_distance\.py$/);
+  await expect(page).toHaveURL(/#\/lab\?code=10-auto-door\/step2_door\.py$/);
   await expect(page.getByTestId("code-panel")).toContainText("def get_distance():");
 });
 

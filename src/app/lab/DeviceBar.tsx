@@ -20,6 +20,8 @@ type Props = {
   canRun: boolean;
   canSave: boolean;
   canStop: boolean;
+  /** "보드에 저장"을 숨긴다 (트랙 단계) */
+  hideSave?: boolean;
   onConnect(): void;
   onDisconnect(): void;
   onRun(): void;
@@ -78,13 +80,15 @@ export function DeviceBar(props: Props): ReactNode {
         disabled={!props.canRun}
         onClick={props.onRun}
       />
-      <BarButton
-        icon={Save}
-        label="보드에 저장"
-        tip={!connected ? needBoard : busy ? "지금 하는 일이 끝나면 저장할 수 있어요" : "main.py 로 저장해요. 보드를 켤 때마다 실행돼요"}
-        disabled={!props.canSave}
-        onClick={props.onSave}
-      />
+      {!props.hideSave && (
+        <BarButton
+          icon={Save}
+          label="보드에 저장"
+          tip={!connected ? needBoard : busy ? "지금 하는 일이 끝나면 저장할 수 있어요" : "main.py 로 저장해요. 보드를 켤 때마다 실행돼요"}
+          disabled={!props.canSave}
+          onClick={props.onSave}
+        />
+      )}
       <BarButton
         icon={Square}
         label="멈춤"

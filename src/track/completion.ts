@@ -3,7 +3,7 @@ import type { ReadQuestion, Step } from "./schema";
 
 /*
  * 글 입력형 단계의 학생 입력 모양과 "완료" 조건. 화면(src/app/track)은 입력을 StepRecord.input 에 그대로 저장한다.
- * 편집기 단계(run·mission·debug·design)는 아직 화면이 없어 학생이 "건너뛰기"로 끝낸다(계획 3B 에서 교체).
+ * 편집기 단계 중 run·mission·debug 는 편집기에서 실행·판정한 결과로 끝내고, design 은 아직 "건너뛰기"로 끝낸다.
  */
 
 export type ProblemInput = { answers?: string[] };
@@ -31,6 +31,36 @@ export type ReflectInput = {
   prompts?: string[];
 };
 export type EditorInput = { skipped?: boolean };
+
+/** 단계 기록에 저장한 학생 프로그램 (다시 열면 복원) */
+export type SavedProgram = { code: string; blocksJson?: unknown };
+
+export type RunInput = EditorInput & {
+  program?: SavedProgram;
+  /** 보드(가짜 포함)에서 실행이 한 번 끝까지 성공했는지 */
+  ran?: boolean;
+};
+export type MissionInput = EditorInput & {
+  program?: SavedProgram;
+  /** 마지막 판정에서 실패한 규칙의 fail 문장 */
+  failures?: string[];
+  /** 한 번이라도 판정에 실패했는지 (힌트는 그 뒤에만 보인다) */
+  failedOnce?: boolean;
+  /** 마지막 판정 통과 */
+  passed?: boolean;
+};
+export type DebugInput = EditorInput & {
+  /** 증상마다 "왜 이런 증상일까?" 설명 */
+  explanations?: string[];
+  /** 증상마다 설명을 저장했는지 (저장 전에는 편집기가 잠긴다) */
+  saved?: boolean[];
+  /** 증상마다 학생 프로그램 */
+  programs?: (SavedProgram | null)[];
+  /** 증상마다 마지막 판정의 fail 문장 */
+  failures?: (string[] | null)[];
+  /** 증상마다 판정 통과 */
+  passed?: boolean[];
+};
 
 export const EDITOR_STEP_TYPES = ["run", "mission", "debug", "design"] as const;
 export function isEditorStep(step: Step): boolean {
@@ -71,7 +101,7 @@ export function explainableLines(code: string): number[] {
     .flatMap((line, i) => (line.trim() === "" || line.trim().startsWith("#") ? [] : [i + 1]));
 }
 
-/** 완료 버튼을 켤 수 있는지. 편집기 단계는 false (건너뛰기 버튼으로만 끝낸다) */
+/** 완료 버튼을 켤 수 있는지. run 은 실행 성공, mission 은 판정 통과, debug 는 모든 증상 통과. design 은 false (건너뛰기) */
 export function canComplete(step: Step, input: Record<string, unknown>): boolean {
   switch (step.type) {
     case "problem":
@@ -88,6 +118,12 @@ export function canComplete(step: Step, input: Record<string, unknown>): boolean
     }
     case "reflect":
       return step.prompts.every((_, i) => filled((input as ReflectInput).prompts?.[i]));
+    case "run":
+      return (input as RunInput).ran === true;
+    case "mission":
+      return (input as MissionInput).passed === true;
+    case "debug":
+      return step.symptoms.every((_, i) => (input as DebugInput).passed?.[i] === true);
     default:
       return false;
   }

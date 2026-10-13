@@ -15,11 +15,14 @@ import { GuideBody } from "./GuideBody";
 import { saveStepRecord, useProgress } from "./progressState";
 import { STEP_TYPE_GUIDE, STEP_TYPE_LABEL } from "./stepMeta";
 import { Analysis } from "./steps/Analysis";
+import { DebugStep } from "./steps/DebugStep";
 import { EditorStepPlaceholder } from "./steps/EditorStepPlaceholder";
+import { MissionStep } from "./steps/MissionStep";
 import { Predict } from "./steps/Predict";
 import { Problem } from "./steps/Problem";
 import { ReadCheck } from "./steps/ReadCheck";
 import { Reflect } from "./steps/Reflect";
+import { RunStep } from "./steps/RunStep";
 import type { StepProps } from "./steps/types";
 
 export const LOCKED_MESSAGE = "앞 단계를 먼저 끝내 주세요";
@@ -102,7 +105,7 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
     toast.success(extra?.skipped ? "건너뛰었어요. 다음 단계가 열렸어요" : "완료했어요. 다음 단계가 열렸어요", { id: "step-done" });
   };
 
-  const props = { chapter, input, onInput, teacherMode, attempts };
+  const props = { chapter, input, onInput, teacherMode, attempts, onComplete: complete };
   let activity: ReactNode;
   switch (step.type) {
     case "problem": activity = <Problem step={step} {...props} />; break;
@@ -110,10 +113,15 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
     case "predict": activity = <Predict step={step} {...props} />; break;
     case "readcheck": activity = <ReadCheck step={step} {...props} />; break;
     case "reflect": activity = <Reflect step={step} {...props} />; break;
+    case "run": activity = <RunStep step={step} {...props} />; break;
+    case "mission": activity = <MissionStep step={step} {...props} />; break;
+    case "debug": activity = <DebugStep step={step} {...props} />; break;
     default: activity = <EditorStepPlaceholder step={step} chapter={chapter} teacherMode={teacherMode} />;
   }
 
   const ready = canComplete(step, input);
+  /** 설계(조립)만 아직 편집기가 없어 건너뛰기로만 끝낸다 */
+  const skipOnly = editor && step.type === "design";
   const part = chapter.parts.find((p) => p.steps.some((s) => s.id === step.id));
 
   return (
@@ -154,12 +162,15 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
         <div className="ml-auto flex items-center gap-2">
           {done ? (
             <span className="hidden items-center gap-1 text-sm text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
-          ) : editor ? (
-            <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>
           ) : (
-            <Button onClick={() => complete()} disabled={!ready} title={ready ? undefined : "활동을 마치면 누를 수 있어요"}>
-              <Check className="size-4" />완료
-            </Button>
+            <>
+              {editor && <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>}
+              {!skipOnly && (
+                <Button onClick={() => complete()} disabled={!ready} title={ready ? undefined : "활동을 마치면 누를 수 있어요"}>
+                  <Check className="size-4" />완료
+                </Button>
+              )}
+            </>
           )}
           {next ? (
             nextOpen ? (
