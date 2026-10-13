@@ -27,7 +27,7 @@ export const esp32Blocks: Record<string, unknown>[] = [
     type: "esp_pin_read",
     message0: "%1 값",
     args0: [{ type: "field_variable", name: "VAR", variable: "echo" }],
-    output: "Number",
+    output: ["Number", "Boolean"], // while not echo.value(): 처럼 조건에도 쓴다
     style: "hardware_blocks",
     tooltip: "echo.value() — 입력 핀의 값(0 또는 1)",
   },
