@@ -329,3 +329,36 @@ test("코드 모드에서 줄 번호를 눌러도 다음 글자는 코드 편집
   await page.waitForTimeout(300);
   expect(await blocks.count()).toBe(count);
 });
+
+test("블록 모드에서 줄 번호를 누르면 그 블록이 파란 테두리로 표시되고 선택된다", async ({ page }) => {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  const code = page.getByTestId("code-panel");
+  await page.waitForTimeout(300); // 첫 검사(100ms 뒤)가 끝나 줄 ↔ 블록 지도가 생긴 다음에 누른다
+  await code.locator(".cm-lineNumbers .cm-gutterElement", { hasText: /^7$/ }).click();
+  await expect(code.locator(".cm-line").nth(6)).toHaveClass(/\bcm-lint-focus\b/);
+  const on = host.locator("g.esp_pin_write").first();
+  await expect(on).toHaveClass(/\blint-focus\b/);
+  // 블록 모드에서는 줄 번호를 눌러도 편집기가 포커스를 가져가지 않아 블록 선택이 남는다
+  await expect(on).toHaveClass(/\bblocklySelected\b/);
+  await expect(host.locator(".lint-focus")).toHaveCount(1);
+  // 빈 바탕을 누르면 표시도 사라진다
+  const bg = (await host.boundingBox())!;
+  await page.mouse.click(bg.x + bg.width - 120, bg.y + 40);
+  await expect(host.locator(".lint-focus")).toHaveCount(0);
+});
+
+test("코드 모드에서 문제 항목을 누르면 숨은 블록에 표시만 하고 포커스는 작업판 밖에 둔다", async ({ page }) => {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  await replaceCode(page, "led = Pin(34, Pin.OUT)\nled.value(1)\n");
+  await expect(host.locator("g.esp_pin_setup")).toHaveCount(1);
+  const item = page.getByTestId("problem-item").filter({ hasText: "입력만 할 수 있어요" });
+  await expect(item).toHaveCount(1);
+  await item.click();
+  await expect(page.getByTestId("code-panel").locator(".cm-lint-focus")).toHaveText("led = Pin(34, Pin.OUT)");
+  await expect(host.locator("g.esp_pin_setup")).toHaveClass(/\blint-focus\b/);
+  expect(await host.evaluate((el) => el.contains(document.activeElement))).toBe(false);
+});

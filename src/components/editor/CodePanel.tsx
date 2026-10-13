@@ -92,9 +92,10 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
         domEventHandlers: {
           mousedown(view, line, event) {
             onLineClickRef.current?.(view.state.doc.lineAt(line.from).number);
-            // 줄 번호를 눌러도 키보드 포커스는 편집기에 둔다 (다음 글자가 다른 곳으로 가지 않게)
+            // 줄 번호를 눌러도 포커스를 옮기지 않는다. 고칠 수 있는 편집기(코드 모드)면 키보드 포커스를 편집기에 둬
+            // 다음 글자가 다른 곳으로 가지 않게 하고, 읽기 전용(블록 모드)이면 막 고른 블록의 선택·포커스를 지킨다
             event.preventDefault();
-            view.focus();
+            if (!view.state.readOnly) view.focus();
             return true;
           },
         },

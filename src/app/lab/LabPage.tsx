@@ -154,6 +154,11 @@ export function LabPage() {
     blocklyRef.current?.setIssues(issues);
   }, [issues]);
 
+  // 살펴보는 블록에 파란 테두리 (선택·포커스와 따로). 검사마다 다시 맞춰 다시 만들어진 블록에도 단다
+  useEffect(() => {
+    blocklyRef.current?.setFocusBlock(focus.blockId ?? null);
+  }, [focus.blockId, view]);
+
   // 오류가 처음 생기면 하단 패널을 한 번 펼쳐 준다 (그 뒤로는 학생이 접은 대로 둔다)
   const autoOpenedRef = useRef(false);
   useEffect(() => {
