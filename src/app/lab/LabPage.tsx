@@ -207,6 +207,11 @@ export function LabPage() {
     fake: searchParams.get("device") === "fake",
     getProgram: () => {
       const current = flushPendingCode();
+      // 코드 모드 문법 오류: 보드도 SyntaxError 만 낼 것이고 검사가 이미 콘솔에 보여 준다
+      if (current.source === "code" && current.parseError) {
+        toast.error("문법 오류를 고친 뒤에 보드에 올릴 수 있어요", { id: "parse-error-device" });
+        return null;
+      }
       return { code: current.code, blockTypes: blockTypesIn(current.blocks) };
     },
     onErrorLine: (code, line) => setErrorLine({ code, line }),

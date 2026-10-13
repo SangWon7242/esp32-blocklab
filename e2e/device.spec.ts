@@ -31,7 +31,8 @@ async function connect(page: Page) {
 test("가짜 장치: 연결하면 배지가 연결됨, 실행하면 출력이 콘솔에 나온다", async ({ page }) => {
   await openFake(page);
   await connect(page);
-  await replaceCode(page, "print(1)\n");
+  // print 5줄 (가짜 장치는 줄마다 200ms) → "실행 중" 이 1초 동안 보인다
+  await replaceCode(page, "print(1)\nprint(2)\nprint(3)\nprint(4)\nprint(5)\n");
   await button(page, "실행").click();
   // 실행 중에는 실행·저장을 막고 멈춤은 열어 둔다
   await expect(status(page)).toHaveText("실행 중");
@@ -39,6 +40,9 @@ test("가짜 장치: 연결하면 배지가 연결됨, 실행하면 출력이 �
   await expect(button(page, "멈춤")).toBeEnabled();
   await expect(rows(page).filter({ hasText: /^1$/ })).toHaveCount(1);
   await expect(rows(page).filter({ hasText: "실행이 끝났어요" })).toHaveCount(1);
+  // 출력 순서 그대로
+  const device = page.locator('[data-testid="console-entry"][data-kind]');
+  await expect(device).toHaveText(["보드에 연결했어요", "실행을 시작했어요", "1", "2", "3", "4", "5", "실행이 끝났어요"]);
   await expect(status(page)).toHaveText("연결됨");
   await expect(page.getByRole("tab", { name: /콘솔/ })).toHaveAttribute("aria-selected", "true");
 
@@ -92,6 +96,37 @@ test("가짜 장치: 보드에 저장하면 없는 라이브러리를 먼저 올
   await button(page, "보드에 저장").click();
   await expect(rows(page).filter({ hasText: "main.py 저장 완료" })).toHaveCount(1);
   await expect(lib).toHaveCount(0);
+});
+
+test("가짜 장치: 코드 모드에 문법 오류가 있으면 실행·저장하지 않고 안내한다", async ({ page }) => {
+  await openFake(page);
+  await connect(page);
+  await replaceCode(page, "if x\n");
+  await expect(page.getByTestId("parse-error")).toBeVisible();
+  await button(page, "실행").click();
+  await expect(page.getByText("문법 오류를 고친 뒤에 보드에 올릴 수 있어요")).toBeVisible();
+  await button(page, "보드에 저장").click();
+  await expect(rows(page).filter({ hasText: "실행을 시작했어요" })).toHaveCount(0);
+  await expect(rows(page).filter({ hasText: "main.py 올리는 중…" })).toHaveCount(0);
+  await expect(status(page)).toHaveText("연결됨");
+});
+
+test("가짜 장치: 맨 아래를 보고 있을 때만 새 출력으로 따라 내려간다", async ({ page }) => {
+  await openFake(page);
+  await connect(page);
+  await replaceCode(page, Array.from({ length: 12 }, (_, i) => `print(${i})`).join("\n"));
+  await button(page, "실행").click();
+  const done = rows(page).filter({ hasText: "실행이 끝났어요" });
+  await expect(done).toHaveCount(1);
+  await expect(done).toBeInViewport();
+  // 위로 올려 둔 채 다시 실행하면 그 자리에 머문다
+  // 하단 패널의 스크롤 칸 (콘솔 목록 → 콘솔 → 탭 내용 → 스크롤 칸)
+  const scroller = page.getByTestId("console-list").locator("xpath=../../..");
+  expect(await scroller.evaluate((el) => el.scrollHeight > el.clientHeight && el.scrollTop > 0)).toBe(true);
+  await scroller.evaluate((el) => { el.scrollTop = 0; });
+  await button(page, "실행").click();
+  await expect(done).toHaveCount(2);
+  expect(await scroller.evaluate((el) => el.scrollTop)).toBe(0);
 });
 
 test("가짜 장치: 연결을 끊으면 배지가 끊김으로 돌아간다", async ({ page }) => {

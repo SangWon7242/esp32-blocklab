@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { WorkspaceJson } from "@/codegen";
 import {
-  appendDeviceText, blockTypesIn, deviceRow, EMPTY_DEVICE_CONSOLE, MAX_DEVICE_ROWS, tracebackRow, type DeviceConsole,
+  appendDeviceText, blockTypesIn, deviceRow, EMPTY_DEVICE_CONSOLE, MAX_DEVICE_ROWS, MAX_LINE_LENGTH, tracebackRow, type DeviceConsole,
 } from "./deviceConsole";
 
 const texts = (c: DeviceConsole) => c.rows.map((r) => r.text);
@@ -19,9 +19,31 @@ describe("appendDeviceText", () => {
     expect(c.rows.every((r) => r.source === "device" && r.kind === "stdout" && r.level === "info")).toBe(true);
   });
 
-  it("\\r 만 오거나 빈 줄도 줄로 친다 (빈 출력 줄은 남긴다)", () => {
+  it("빈 줄도 줄로 친다 (빈 출력 줄은 남긴다)", () => {
     const c = appendDeviceText(EMPTY_DEVICE_CONSOLE, "stdout", "a\r\n\r\nb\n");
     expect(texts(c)).toEqual(["a", "", "b"]);
+  });
+
+  it("조각 사이에 \\r 과 \\n 이 갈라져 와도 빈 행이 생기지 않는다", () => {
+    const c = appendDeviceText(appendDeviceText(EMPTY_DEVICE_CONSOLE, "stdout", "1\r"), "stdout", "\n2\r\n");
+    expect(texts(c)).toEqual(["1", "2"]);
+  });
+
+  it(`줄바꿈 없이 ${MAX_LINE_LENGTH}글자를 넘으면 행을 끊는다`, () => {
+    let c = appendDeviceText(EMPTY_DEVICE_CONSOLE, "stdout", "a".repeat(MAX_LINE_LENGTH - 10));
+    c = appendDeviceText(c, "stdout", "b".repeat(MAX_LINE_LENGTH + 30));
+    expect(c.rows.map((r) => r.text.length)).toEqual([MAX_LINE_LENGTH, MAX_LINE_LENGTH, 20]);
+    expect(c.open).toBe(true);
+  });
+
+  it("행마다 늘어나기만 하는 id (이어 붙인 행은 id 를 지킨다, 잘려 나가도 다시 쓰지 않는다)", () => {
+    let c = appendDeviceText(EMPTY_DEVICE_CONSOLE, "stdout", "a");
+    c = appendDeviceText(c, "stdout", "b\nc\n");
+    c = appendDeviceText(c, "system", "끝");
+    expect(c.rows.map((r) => [r.id, r.text])).toEqual([[0, "ab"], [1, "c"], [2, "끝"]]);
+    for (let i = 0; i < MAX_DEVICE_ROWS; i++) c = appendDeviceText(c, "stdout", "x\n");
+    expect(c.rows[0].id).toBe(3);
+    expect(c.rows.at(-1)!.id).toBe(MAX_DEVICE_ROWS + 2);
   });
 
   it("system 행은 열린 stdout 줄을 닫고 그 아래에 붙는다", () => {

@@ -21,6 +21,8 @@ export type ConsoleEntry = {
   blockId?: string;
   source?: "lint" | "device";
   kind?: "stdout" | "stderr" | "system";
+  /** 보드 행의 고유 번호 (React key; 콘솔이 오래된 행을 버려도 다시 쓰지 않는다) */
+  id?: number;
 };
 
 /** 작업판 JSON 의 블록 (Blockly.serialization 꼴; 파서 JSON 과 같고 살아 있는 작업판 JSON 에는 id 가 있다) */

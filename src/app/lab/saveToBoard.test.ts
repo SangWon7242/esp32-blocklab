@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { FakeDevice } from "@/device";
+import { DeviceError, FakeDevice } from "@/device";
 import { saveToBoard } from "./saveToBoard";
 
 async function connected() {
@@ -39,5 +39,16 @@ describe("saveToBoard", () => {
     const fetchLibs = vi.fn(async () => { throw new Error("keypad.py 라이브러리를 불러오지 못했어요 (404)"); });
     await expect(saveToBoard(device, { code: "x\n", blockTypes: ["dev_keypad_setup"] }, () => undefined, fetchLibs)).rejects.toThrow("(404)");
     expect(device.files.has("main.py")).toBe(false);
+  });
+
+  it("보드 쪽 저장·목록 실패는 한국어로 감싼다 (장치 오류 문구는 그대로)", async () => {
+    const device = await connected();
+    vi.spyOn(device, "saveFile").mockRejectedValueOnce(new Error("OSError: 28"));
+    await expect(saveToBoard(device, { code: "x\n", blockTypes: [] }, () => undefined)).rejects.toThrow("보드에 저장하지 못했어요: OSError: 28");
+    vi.spyOn(device, "listFiles").mockRejectedValueOnce(new Error("OSError: 5"));
+    await expect(saveToBoard(device, { code: "x\n", blockTypes: ["dev_keypad_setup"] }, () => undefined)).rejects.toThrow("보드에 저장하지 못했어요: OSError: 5");
+    const lost = new DeviceError("disconnected");
+    vi.spyOn(device, "saveFile").mockRejectedValueOnce(lost);
+    await expect(saveToBoard(device, { code: "x\n", blockTypes: [] }, () => undefined)).rejects.toBe(lost);
   });
 });

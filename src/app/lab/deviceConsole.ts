@@ -8,11 +8,15 @@ export const MAX_DEVICE_ROWS = 500;
 export type DeviceKind = "stdout" | "stderr" | "system";
 export type DeviceRow = ConsoleEntry & { source: "device"; kind: DeviceKind };
 
-/** 보드 행과, 마지막 stdout 행이 아직 줄바꿈을 기다리는지(다음 조각을 이어 붙일지) */
-export type DeviceConsole = { rows: DeviceRow[]; open: boolean };
+/** 줄바꿈 없이 이어지는 출력은 이 길이에서 행을 끊는다 (한 행이 끝없이 커지지 않게) */
+export const MAX_LINE_LENGTH = 4000;
 
-export const EMPTY_DEVICE_CONSOLE: DeviceConsole = { rows: [], open: false };
+/** 보드 행, 마지막 stdout 행이 아직 줄바꿈을 기다리는지(다음 조각을 이어 붙일지), 다음 행 id (React key, 늘어나기만 한다) */
+export type DeviceConsole = { rows: DeviceRow[]; open: boolean; nextId: number };
 
+export const EMPTY_DEVICE_CONSOLE: DeviceConsole = { rows: [], open: false, nextId: 0 };
+
+/** id 없는 행 (id 는 콘솔에 붙일 때 단다) */
 export function deviceRow(kind: DeviceKind, text: string): DeviceRow {
   return { source: "device", kind, level: kind === "stderr" ? "error" : "info", text };
 }
@@ -21,33 +25,45 @@ const cap = (rows: DeviceRow[]) => (rows.length > MAX_DEVICE_ROWS ? rows.slice(r
 
 /**
  * 보드 출력을 콘솔 행으로. stdout 은 조각으로 오므로(줄 단위가 아님) 줄로 나누고, 줄바꿈 없이 끝난 꼬리는 열어 두었다가
- * 다음 조각과 이어 붙인다. system·stderr 는 통째로 한 행이고 열린 줄을 닫는다.
+ * 다음 조각과 이어 붙인다. \r 은 버린다 (\r\n 이 두 조각에 갈라져 와도 빈 행이 생기지 않게). system·stderr 는 통째로 한 행이고
+ * 열린 줄을 닫는다.
  */
 export function appendDeviceText(c: DeviceConsole, kind: DeviceKind, text: string): DeviceConsole {
   if (kind !== "stdout") return appendDeviceRow(c, deviceRow(kind, text));
-  const parts = text.replace(/\r\n?/g, "\n").split("\n");
+  const parts = text.replace(/\r/g, "").split("\n");
   const tail = parts.pop()!; // 마지막 줄바꿈 뒤 (비었으면 줄이 끝났다)
   const rows = [...c.rows];
-  let open = c.open;
+  let { open, nextId } = c;
+  /** 열린 행에 이어 붙이고(넘치면 새 행), 끝에 열린 행을 남긴다 */
   const add = (piece: string) => {
     const last = rows.at(-1);
-    if (open && last?.kind === "stdout") rows[rows.length - 1] = { ...last, text: last.text + piece };
-    else rows.push(deviceRow("stdout", piece));
+    if (!(open && last?.kind === "stdout")) {
+      rows.push({ ...deviceRow("stdout", ""), id: nextId++ });
+      open = true;
+    }
+    for (;;) {
+      const cur = rows[rows.length - 1];
+      const room = MAX_LINE_LENGTH - cur.text.length;
+      if (piece.length <= room) {
+        rows[rows.length - 1] = { ...cur, text: cur.text + piece };
+        return;
+      }
+      rows[rows.length - 1] = { ...cur, text: cur.text + piece.slice(0, room) };
+      piece = piece.slice(room);
+      rows.push({ ...deviceRow("stdout", ""), id: nextId++ });
+    }
   };
   for (const line of parts) {
     add(line);
     open = false;
   }
-  if (tail) {
-    add(tail);
-    open = true;
-  }
-  return { rows: cap(rows), open };
+  if (tail) add(tail);
+  return { rows: cap(rows), open, nextId };
 }
 
 /** 다 만든 행 하나를 붙인다 (열린 stdout 줄은 닫힌다) */
 export function appendDeviceRow(c: DeviceConsole, row: DeviceRow): DeviceConsole {
-  return { rows: cap([...c.rows, row]), open: false };
+  return { rows: cap([...c.rows, { ...row, id: c.nextId }]), open: false, nextId: c.nextId + 1 };
 }
 
 /** 보드 Traceback 한 행 (영어 그대로). 보드는 raw REPL 코드를 <stdin> 이라 부르지만 학생에게는 main.py */

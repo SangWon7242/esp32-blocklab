@@ -29,14 +29,40 @@ type Props = {
   onClear?(): void;
 };
 
+/** 맨 아래에서 이만큼 안이면 "맨 아래를 보고 있다"로 친다 */
+const STICK_PX = 40;
+
+/** 세로로 스크롤되는 가장 가까운 조상 (하단 패널의 내용 칸) */
+function scrollParent(el: HTMLElement): HTMLElement | null {
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    const { overflowY } = getComputedStyle(p);
+    if (overflowY === "auto" || overflowY === "scroll") return p;
+  }
+  return null;
+}
+
 /** 하단 "콘솔" 탭: 파이썬 모양의 영어 메시지와 보드 출력 (고정폭 글꼴, 여러 줄 그대로) */
 export function ConsolePanel({ entries, onSelect, onClear }: Props) {
   const endRef = useRef<HTMLDivElement>(null);
   const lastDevice = entries.findLast((e) => e.source === "device");
+  const hasEntries = entries.length > 0;
+  /** 학생이 맨 아래를 보고 있는지 (위로 올려 옛 출력을 읽는 중이면 새 행이 와도 끌어내리지 않는다) */
+  const stickRef = useRef(true);
+
+  useEffect(() => {
+    const end = endRef.current;
+    const scroller = end && scrollParent(end);
+    if (!scroller) return;
+    const onScroll = () => {
+      stickRef.current = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= STICK_PX;
+    };
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", onScroll);
+  }, [hasEntries]);
 
   // 새 보드 행이 오면 맨 아래로 (검사 항목이 바뀌는 것으로는 움직이지 않는다)
   useEffect(() => {
-    if (lastDevice) endRef.current?.scrollIntoView({ block: "nearest" });
+    if (lastDevice && stickRef.current) endRef.current?.scrollIntoView({ block: "nearest" });
   }, [lastDevice]);
 
   if (entries.length === 0) return <p className="px-3 py-2 text-sm text-muted-foreground">아직 메시지가 없어요</p>;
@@ -51,7 +77,7 @@ export function ConsolePanel({ entries, onSelect, onClear }: Props) {
       )}
       <ul className="py-1 font-mono text-xs" data-testid="console-list">
         {entries.map((entry, i) => (
-          <li key={i}>
+          <li key={entry.source === "device" && entry.id !== undefined ? `d${entry.id}` : `l${i}`}>
             <button
               type="button"
               className={cn(

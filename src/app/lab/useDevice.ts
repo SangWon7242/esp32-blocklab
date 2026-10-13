@@ -14,13 +14,19 @@ export type DeviceDisplayStatus = DeviceStatus;
 export type UseDeviceOptions = {
   /** ?device=fake 면 보드 없이 미리 정한 출력을 내는 가짜 장치 */
   fake: boolean;
-  /** 실행·저장 직전에 부른다. 아직 debounce 중인 코드를 먼저 반영하고 그 코드를 돌려준다 */
-  getProgram(): DeviceProgram;
+  /**
+   * 실행·저장 직전에 부른다. 아직 debounce 중인 코드를 먼저 반영하고 그 코드를 돌려준다.
+   * null 이면 보내지 않는다 (코드 모드 문법 오류: 부르는 쪽이 안내한다)
+   */
+  getProgram(): DeviceProgram | null;
   /** 보드 Traceback 이 줄을 가리킬 때. code 는 그 실행에 쓴 코드 (그사이 코드가 바뀌었으면 강조하지 않게) */
   onErrorLine(code: string, line: number): void;
   /** 보드 행이 생길 일을 시작할 때 (하단 콘솔을 펼친다) */
   showConsole(): void;
 };
+
+/** stdout 을 화면에 붙이는 것은 한 프레임에 한 번. 숨은 탭처럼 프레임이 오지 않아도 이만큼 쌓이면 바로 붙인다 */
+const MAX_PENDING_STDOUT = 64 * 1024;
 
 /** 가짜 장치는 print 줄 사이를 잠깐 쉬어 "실행 중" 상태와 멈춤을 볼 수 있게 한다 */
 const FAKE_LINE_DELAY_MS = 200;
@@ -46,8 +52,36 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
   const optsRef = useRef({ getProgram, onErrorLine, showConsole });
   optsRef.current = { getProgram, onErrorLine, showConsole };
 
-  const push = useCallback((kind: DeviceKind, text: string) => setConsoleState((c) => appendDeviceText(c, kind, text)), []);
-  const pushRow = useCallback((row: DeviceRow) => setConsoleState((c) => appendDeviceRow(c, row)), []);
+  /**
+   * 보드 stdout 은 작은 조각으로 아주 자주 오므로(sleep 없는 print 반복) 조각마다 다시 그리지 않고 모았다가
+   * requestAnimationFrame 마다 한 번 붙인다. 다른 행(system·stderr)을 붙이기 전·실행이 끝날 때는 바로 붙여 순서를 지킨다.
+   */
+  const pendingStdout = useRef("");
+  const frameRef = useRef<number | null>(null);
+  const flushStdout = useCallback(() => {
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+    const text = pendingStdout.current;
+    if (!text) return;
+    pendingStdout.current = "";
+    setConsoleState((c) => appendDeviceText(c, "stdout", text));
+  }, []);
+  const push = useCallback((kind: DeviceKind, text: string) => {
+    if (kind === "stdout") {
+      pendingStdout.current += text;
+      if (pendingStdout.current.length >= MAX_PENDING_STDOUT) flushStdout();
+      else if (frameRef.current === null) frameRef.current = requestAnimationFrame(() => { frameRef.current = null; flushStdout(); });
+      return;
+    }
+    flushStdout();
+    setConsoleState((c) => appendDeviceText(c, kind, text));
+  }, [flushStdout]);
+  const pushRow = useCallback((row: DeviceRow) => {
+    flushStdout();
+    setConsoleState((c) => appendDeviceRow(c, row));
+  }, [flushStdout]);
 
   useEffect(() => {
     const offStatus = device.onStatus(setStatus);
@@ -60,6 +94,8 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
     return () => {
       offStatus();
       offOutput();
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
       // 화면을 떠나면 포트를 놓아 준다 (다른 탭·PyCharm 이 쓸 수 있게)
       if (device.status !== "disconnected") void device.disconnect();
     };
@@ -74,13 +110,17 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
     push("system", message);
   }, [device, push]);
 
-  const begin = (t: "run" | "save"): boolean => {
-    if (taskRef.current || device.status !== "connected") return false;
+  /** 실행·저장을 시작할 수 있으면 보낼 프로그램을 돌려주고 task 를 잡는다 */
+  const begin = (t: "run" | "save"): DeviceProgram | null => {
+    if (taskRef.current || device.status !== "connected") return null;
+    const program = optsRef.current.getProgram();
+    if (!program) return null;
     taskRef.current = t;
     setTask(t);
-    return true;
+    return program;
   };
   const end = () => {
+    flushStdout();
     taskRef.current = null;
     setTask(null);
   };
@@ -105,12 +145,14 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
   }, [device, push, report]);
 
   const run = useCallback(async () => {
-    if (!begin("run")) return;
+    const program = begin("run");
+    if (!program) return;
+    const { code } = program;
     try {
-      const { code } = optsRef.current.getProgram();
       optsRef.current.showConsole();
       push("system", "실행을 시작했어요");
       const result = await device.run(code);
+      flushStdout();
       if (result.stopped) push("system", "실행을 멈췄어요");
       else if (result.ok || !result.error) push("system", "실행이 끝났어요");
       else {
@@ -123,12 +165,12 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
       end();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [device, push, pushRow, report]);
+  }, [device, flushStdout, push, pushRow, report]);
 
   const save = useCallback(async () => {
-    if (!begin("save")) return;
+    const program = begin("save");
+    if (!program) return;
     try {
-      const program = optsRef.current.getProgram();
       optsRef.current.showConsole();
       await saveToBoard(device, program, (text) => push("system", text));
       toast.success("보드에 저장했어요");
@@ -148,7 +190,11 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole }: UseDev
     }
   }, [device, report]);
 
-  const clear = useCallback(() => setConsoleState(EMPTY_DEVICE_CONSOLE), []);
+  /** 보드 행을 지운다 (id 는 이어서 늘어나 React key 가 겹치지 않는다) */
+  const clear = useCallback(() => {
+    flushStdout();
+    setConsoleState((c) => ({ ...EMPTY_DEVICE_CONSOLE, nextId: c.nextId }));
+  }, [flushStdout]);
 
   const shown: DeviceDisplayStatus = task === "save" ? "saving" : status;
   const idle = status === "connected" && task === null;
