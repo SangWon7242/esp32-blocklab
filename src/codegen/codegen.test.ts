@@ -225,6 +225,21 @@ describe("식과 우선순위", () => {
     );
     expect(code).toBe("led.value(1)  # 켜기\n");
   });
+  it("여러 줄 코멘트는 한 줄 주석으로 합친다", () => {
+    const code = workspaceJsonToCode(
+      program([{ type: "esp_pin_write", fields: { VAR: { id: "var_led" }, VALUE: "1" }, icons: { comment: { text: "켜기\n그리고 기다리기", pinned: false, height: 80, width: 160 } } }], { vars: ["led"] }),
+    );
+    expect(code).toBe("led.value(1)  # 켜기 그리고 기다리기\n");
+  });
+  it("연산자가 든 코드 식은 계산 안에서 괄호로 감싼다", () => {
+    expect(body(arith("MULTIPLY", { type: "code_expr", fields: { CODE: "a + b" } }, num(3)))).toBe("t = (a + b) * 3");
+  });
+  it("호출 하나인 코드 식은 괄호 없이", () => {
+    expect(body({ type: "code_expr", fields: { CODE: "time.ticks_us()" } })).toBe("import time\n\nt = time.ticks_us()");
+    expect(body(arith("FLOORDIV", { type: "code_expr", fields: { CODE: "time.ticks_diff(stop, start)" } }, num(2)))).toBe(
+      "import time\n\nt = time.ticks_diff(stop, start) // 2",
+    );
+  });
   it("함수 안에 global 선언을 넣지 않고 반환형 함수를 만든다", () => {
     const def: B = {
       type: "procedures_defreturn", x: 0, y: 0, extraState: { params: [] }, fields: { NAME: "twice" },

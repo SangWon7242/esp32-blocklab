@@ -58,7 +58,8 @@ export class MicroPythonGenerator extends PythonGenerator {
   }
 
   override scrub_(block: Blockly.Block, code: string, thisOnly = false): string {
-    const comment = block.getCommentText();
+    // 여러 줄 코멘트는 한 줄로 합친다 (남은 줄이 코드로 읽히지 않도록)
+    const comment = (block.getCommentText() ?? "").replace(/\s*\n\s*/g, " ").trim();
     if (comment && code && !block.outputConnection) {
       const nl = code.indexOf("\n");
       code = nl >= 0 ? `${code.slice(0, nl)}  # ${comment}${code.slice(nl)}` : `${code}  # ${comment}`;

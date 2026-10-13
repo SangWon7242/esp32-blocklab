@@ -120,5 +120,10 @@ export function registerForBlocks(gen: Gen): void {
   f["esp_print2"] = (block, g) => `print(${value(block, g as Gen, "A", Order.NONE, '""')}, ${value(block, g as Gen, "B", Order.NONE, '""')})\n`;
 
   f["code_stmt"] = (block) => `${block.getFieldValue("CODE")}\n`;
-  f["code_expr"] = (block) => [String(block.getFieldValue("CODE")), Order.ATOMIC];
+  // 이름·속성·호출 하나(time.ticks_us(), Pin(26, Pin.OUT))면 호출 우선순위, 그 밖에는 연산자가
+  // 섞였을 수 있으니 NONE 으로 두어 식 안에서 괄호로 감싸게 한다
+  f["code_expr"] = (block) => {
+    const code = String(block.getFieldValue("CODE"));
+    return [code, /^[A-Za-z_][\w.]*(\(.*\))?$/.test(code) ? Order.FUNCTION_CALL : Order.NONE];
+  };
 }
