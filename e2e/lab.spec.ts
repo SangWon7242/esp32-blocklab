@@ -105,17 +105,19 @@ test("작업판에서 블록을 끌어 놓으면 탭을 바꾸지 않아도 코�
 });
 
 test("팔레트를 닫으면 팔레트 스크롤바도 사라진다", async ({ page }) => {
+  // 낮은 창에서는 핀 팔레트가 넘쳐 스크롤바가 필요하다 (넓이는 넓은 화면 배치 그대로)
+  await page.setViewportSize({ width: 1400, height: 520 });
   await page.goto("/#/lab");
   // 글자 span 은 포인터를 받지 않으므로 카테고리 줄(div)을 누른다
   const category = (name: string) => page.locator(".blocklyToolboxCategory").filter({ hasText: new RegExp(`^${name}$`) });
   const flyout = page.locator(".blocklyToolboxFlyout");
   const flyoutBar = page.locator(".blocklyFlyoutScrollbar").first();
-  // ESP32 팔레트는 블록이 많아 스크롤바가 필요하다
-  await category("ESP32").click();
+  await category("핀").click();
   await expect(flyoutBar).toBeVisible();
-  await page.locator(".blocklyMainBackground").click({ position: { x: 600, y: 500 } });
+  await page.locator(".blocklyMainBackground").click({ position: { x: 700, y: 150 } });
   await expect(flyout).toBeHidden();
   await expect(flyoutBar).toBeHidden();
+  await page.setViewportSize({ width: 1400, height: 900 });
   // 흐름 팔레트는 화면에 다 들어가므로 스크롤바를 그리지 않는다
   await category("흐름").click();
   await expect(flyout).toBeVisible();

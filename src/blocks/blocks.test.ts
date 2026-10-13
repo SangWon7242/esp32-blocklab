@@ -74,7 +74,7 @@ describe("테마와 툴박스", () => {
 
   it("카테고리 순서가 엔트리와 같다", () => {
     const names = (toolbox as { contents: { name: string }[] }).contents.map((c) => c.name);
-    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "함수", "ESP32", "코드"]);
+    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드"]);
   });
 
   it("툴박스의 모든 블록 type이 정의돼 있다", () => {

@@ -1,9 +1,9 @@
 import type * as Blockly from "blockly";
 import { Order } from "blockly/python";
 import type { MicroPythonGenerator } from "./generator";
+import { registerDeviceGenerators } from "@/devices/toCodegen";
 
 type Gen = MicroPythonGenerator;
-const varName = (block: Blockly.Block, gen: Gen, field = "VAR") => gen.getVariableName(block.getFieldValue(field));
 const value = (block: Blockly.Block, gen: Gen, name: string, order = Order.NONE, fallback = "0") => gen.valueToCode(block, name, order) || fallback;
 const branch = (block: Blockly.Block, gen: Gen, name: string) => gen.statementToCode(block, name) || gen.PASS;
 
@@ -23,18 +23,6 @@ function binary(block: Blockly.Block, gen: Gen, symbol: string, order: number): 
   const b = value(block, gen, "B", order);
   return [`${a} ${symbol} ${b}`, order];
 }
-
-// provideFunction_ 은 앞쪽 공백 2칸을 INDENT(4칸)로 바꾸므로 여기서는 2칸 단위로 쓴다
-const GET_DISTANCE_BODY = [
-  "trig.value(1)", "time.sleep_us(10)", "trig.value(0)",
-  "while not echo.value():", "  pass",
-  "start = time.ticks_us()",
-  "while echo.value():", "  pass",
-  "stop = time.ticks_us()",
-  "t = time.ticks_diff(stop, start) // 2",
-  "return int(340 * t // 10000)",
-];
-const SHOW_BODY = ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"];
 
 /** 이름·속성 연결(a.b) 이거나, 첫 `(` 가 맨 끝 `)` 와 짝을 이루는 호출 하나인지 */
 function isSimpleCallOrName(text: string): boolean {
@@ -93,45 +81,6 @@ export function registerForBlocks(gen: Gen): void {
   f["procedures_defnoreturn"] = (block, g) => defGenerator(block, g as Gen);
   f["procedures_defreturn"] = (block, g) => defGenerator(block, g as Gen);
 
-  f["esp_pin_setup"] = (block, g) => {
-    (g as Gen).addSetup(`${varName(block, g as Gen)} = Pin(${block.getFieldValue("PIN")}, Pin.${block.getFieldValue("MODE")})`);
-    return "";
-  };
-  f["esp_pin_write"] = (block, g) => `${varName(block, g as Gen)}.value(${block.getFieldValue("VALUE")})\n`;
-  f["esp_pin_read"] = (block, g) => [`${varName(block, g as Gen)}.value()`, Order.FUNCTION_CALL];
-
-  f["esp_pwm_setup"] = (block, g) => {
-    const name = varName(block, g as Gen);
-    (g as Gen).addSetup(`${name} = PWM(Pin(${block.getFieldValue("PIN")}))`, `${name}.freq(${block.getFieldValue("FREQ")})`);
-    return "";
-  };
-  f["esp_servo_setup"] = (block, g) => {
-    const name = varName(block, g as Gen);
-    (g as Gen).addSetup(`${name} = PWM(Pin(${block.getFieldValue("PIN")}))`, `${name}.freq(50)`, `${name}.duty_u16(1638)`);
-    return "";
-  };
-  f["esp_pwm_duty"] = (block, g) => `${varName(block, g as Gen)}.duty_u16(${value(block, g as Gen, "DUTY")})\n`;
-  f["esp_servo_door"] = (block, g) => `${varName(block, g as Gen)}.duty_u16(${block.getFieldValue("ACTION")})\n`;
-
-  f["esp_ultrasonic_setup"] = (block, g) => {
-    const gen = g as Gen;
-    gen.addSetup(`trig = Pin(${block.getFieldValue("TRIG")}, Pin.OUT)`, `echo = Pin(${block.getFieldValue("ECHO")}, Pin.IN)`);
-    gen.provideHelper("get_distance", [`def ${gen.FUNCTION_NAME_PLACEHOLDER_}():`, ...GET_DISTANCE_BODY.map((l) => "  " + l)]);
-    return "";
-  };
-  f["esp_distance"] = () => ["get_distance()", Order.FUNCTION_CALL];
-
-  f["esp_oled_setup"] = (block, g) => {
-    const gen = g as Gen;
-    gen.addSetup(`i2c = SoftI2C(scl=Pin(${block.getFieldValue("SCL")}), sda=Pin(${block.getFieldValue("SDA")}))`, "oled = ssd1306.SSD1306_I2C(128, 64, i2c)");
-    gen.provideHelper("show", [`def ${gen.FUNCTION_NAME_PLACEHOLDER_}(a, b):`, ...SHOW_BODY.map((l) => "  " + l)]);
-    return "";
-  };
-  f["esp_oled_show"] = (block, g) => `show(${value(block, g as Gen, "A", Order.NONE, '""')}, ${value(block, g as Gen, "B", Order.NONE, '""')})\n`;
-
-  f["esp_print"] = (block, g) => `print(${value(block, g as Gen, "VALUE", Order.NONE, '""')})\n`;
-  f["esp_print2"] = (block, g) => `print(${value(block, g as Gen, "A", Order.NONE, '""')}, ${value(block, g as Gen, "B", Order.NONE, '""')})\n`;
-
   f["code_stmt"] = (block) => `${block.getFieldValue("CODE")}\n`;
   // 이름·속성·호출 하나(time.ticks_us(), Pin(26, Pin.OUT))면 호출 우선순위, 그 밖에는 연산자가
   // 섞였을 수 있으니 NONE 으로 두어 식 안에서 괄호로 감싸게 한다
@@ -139,4 +88,7 @@ export function registerForBlocks(gen: Gen): void {
     const code = String(block.getFieldValue("CODE"));
     return [code, isSimpleCallOrName(code) ? Order.FUNCTION_CALL : Order.NONE];
   };
+
+  // 장치 블록(esp_*·dev_*)은 레지스트리 선언에서 만든다
+  registerDeviceGenerators(gen);
 }

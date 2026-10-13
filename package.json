@@ -13,6 +13,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@blockly/field-colour": "^13.3.0",
     "@blockly/field-multilineinput": "^13.3.0",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-python": "^6.2.1",

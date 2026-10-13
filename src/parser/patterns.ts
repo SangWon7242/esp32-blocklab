@@ -2,6 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { bodyStatements, children, operands } from "./tree";
 import { normalizeCode } from "./normalize";
 import type { ParseContext } from "./context";
+import { isGeneratedImport } from "@/devices/imports";
 
 export const STANDARD_GET_DISTANCE = [
   "trig.value(1)", "time.sleep_us(10)", "trig.value(0)", "while not echo.value():", "pass",
@@ -17,16 +18,11 @@ export const RE_DUTY = /^(\w+)\.duty_u16\(\s*(\d+)\s*\)$/;
 export const RE_I2C_SETUP = /^i2c\s*=\s*SoftI2C\(\s*scl\s*=\s*Pin\(\s*(\d+)\s*\)\s*,\s*sda\s*=\s*Pin\(\s*(\d+)\s*\)\s*\)$/;
 export const RE_OLED_SETUP = /^oled\s*=\s*ssd1306\.SSD1306_I2C\(\s*128\s*,\s*64\s*,\s*i2c\s*\)$/;
 
-const GENERATED_MACHINE_NAMES = new Set(["Pin", "PWM", "SoftI2C"]);
-
 /**
- * 생성기가 똑같이 다시 만드는 import 인지. `from machine import` 는 이름이 모두 Pin·PWM·SoftI2C 이고
- * `as` 가 없을 때만, time·ssd1306 은 `import time` 꼴 그대로일 때만. 나머지는 code_stmt 로 남겨야 사라지지 않는다.
+ * 생성기가 똑같이 다시 만드는 import 인지 (레지스트리의 import 규칙). 나머지는 code_stmt 로 남겨야 사라지지 않는다.
  */
 export function isKnownImport(text: string): boolean {
-  const from = /^from\s+machine\s+import\s+(.+)$/.exec(text);
-  if (from) return from[1].split(",").every((name) => GENERATED_MACHINE_NAMES.has(name.trim()));
-  return /^import\s+(time|ssd1306)$/.test(text);
+  return isGeneratedImport(text);
 }
 
 /** ESP32 GPIO 번호(0~39). 블록의 핀 칸이 이 범위로 잘라 버리므로 밖의 번호는 준비 블록으로 바꾸지 않는다. */

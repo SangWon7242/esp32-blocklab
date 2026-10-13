@@ -1,4 +1,5 @@
 import type * as Blockly from "blockly";
+import { deviceToolboxCategories } from "@/devices/toBlocks";
 
 const block = (type: string, extra: Record<string, unknown> = {}) => ({ kind: "block", type, ...extra });
 const num = (n: number) => ({ shadow: { type: "math_number", fields: { NUM: n } } });
@@ -48,29 +49,8 @@ export const toolbox = {
     },
     { kind: "category", name: "변수", categorystyle: "variable_category", custom: "VARIABLE" },
     { kind: "category", name: "함수", categorystyle: "func_category", custom: "PROCEDURE" },
-    {
-      kind: "category",
-      name: "ESP32",
-      categorystyle: "hardware_category",
-      contents: [
-        { kind: "label", text: "핀" },
-        block("esp_pin_setup"),
-        block("esp_pin_write"),
-        block("esp_pin_read"),
-        block("esp_print"),
-        block("esp_print2"),
-        { kind: "label", text: "모터" },
-        block("esp_servo_setup"),
-        block("esp_servo_door"),
-        block("esp_pwm_setup"),
-        block("esp_pwm_duty", { inputs: { DUTY: num(32768) } }),
-        { kind: "label", text: "센서와 화면" },
-        block("esp_ultrasonic_setup"),
-        block("esp_distance"),
-        block("esp_oled_setup"),
-        block("esp_oled_show", { inputs: { A: { shadow: { type: "text", fields: { TEXT: "AUTO DOOR" } } }, B: { shadow: { type: "text", fields: { TEXT: "Come closer" } } } } }),
-      ],
-    },
+    // 하드웨어 카테고리 8개 (핀·LED·버튼·스위치·센서·소리·모터·화면·입력장치)는 장치 레지스트리에서
+    ...deviceToolboxCategories(),
     { kind: "category", name: "코드", categorystyle: "code_category", contents: [block("code_stmt"), block("code_expr")] },
   ],
 } as Blockly.utils.toolbox.ToolboxDefinition;
