@@ -3,6 +3,7 @@ import * as Blockly from "blockly";
 import { entryTheme, registerBlocks, toolbox } from "@/blocks";
 import { generateCode, type WorkspaceJson } from "@/codegen";
 import { cn } from "@/lib/utils";
+import { createNamePrompt } from "./namePrompt";
 
 export type BlocklyHandle = {
   load(json: WorkspaceJson): void;
@@ -52,8 +53,14 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
       grid: { spacing: 24, length: 2, colour: "#e5e7eb", snap: true },
       zoom: { controls: true, wheel: true, startScale: 0.75, minScale: 0.4, maxScale: 1.5 },
       move: { scrollbars: true, drag: true, wheel: false },
+      // 프로그램 시작은 하나뿐 (둘이면 어느 쪽이 실행되는지 알 수 없다)
+      maxInstances: { start_program: 1 },
     });
     wsRef.current = ws;
+    // 시작 블록이나 함수 정의에 붙지 않은 블록은 꺼서 코드에 넣지 않는다
+    ws.addChangeListener(Blockly.Events.disableOrphans);
+    // 변수 만들기·이름 바꾸기 창: 파이썬에서 그대로 쓸 수 있는 이름만 받는다
+    Blockly.dialog.setPrompt(createNamePrompt());
 
     const listener = (e: Blockly.Events.Abstract) => {
       if (loadingRef.current || e.isUiEvent || ws.isDragging()) return;
@@ -69,6 +76,7 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     return () => {
       observer.disconnect();
       ws.removeChangeListener(listener);
+      ws.removeChangeListener(Blockly.Events.disableOrphans);
       ws.dispose();
       wsRef.current = null;
     };

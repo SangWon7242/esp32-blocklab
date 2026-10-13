@@ -40,6 +40,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "switchSource": {
       if (action.source === state.source) return state;
       if (action.source === "blocks") {
+        // 문법 오류가 남은 채로 돌아가면 마지막 성공 블록의 코드로 덮여 방금 친 코드가 사라진다
+        if (state.parseError) return state;
         const code = state.blocks ? workspaceJsonToCode(state.blocks) : state.code;
         return { ...state, source: "blocks", code, parseError: null };
       }

@@ -49,3 +49,57 @@ test("코드를 치자마자 블록 탭으로 가도 마지막 입력이 남는�
   await expect(page.getByText("블록을 놓으면 코드가 바로 바뀝니다")).toBeVisible();
   await expect(code).toContainText('print("fast")');
 });
+
+test("문법 오류가 있으면 블록 탭으로 가지 않고 친 코드를 지킨다", async ({ page }) => {
+  await page.goto("/#/lab");
+  await page.getByRole("tab", { name: "코드" }).click();
+  const code = page.getByTestId("code-panel");
+  await code.locator(".cm-content").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.keyboard.type("\nif d < 15");
+  await expect(page.getByTestId("parse-error")).toBeVisible();
+
+  await page.getByRole("tab", { name: "블록" }).click();
+  await expect(page.getByText("문법 오류를 고친 뒤에 블록으로 돌아갈 수 있어요")).toBeVisible();
+  await expect(page.getByRole("tab", { name: "코드" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("blocks-overlay")).toBeVisible();
+  await expect(code).toContainText("if d < 15");
+  await expect(page.getByTestId("parse-error")).toBeVisible();
+});
+
+test("작업판에서 블록을 끌어 놓으면 탭을 바꾸지 않아도 코드가 바뀐다", async ({ page }) => {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  const code = page.getByTestId("code-panel");
+  await expect(code).toContainText("while True:");
+  await expect(code).not.toContainText("time.sleep_us(10)");
+
+  // 꾸러미가 프로그램 위를 덮으므로 빈 바탕을 끌어 프로그램을 오른쪽으로 옮긴다
+  const bg = (await host.boundingBox())!;
+  await page.mouse.move(bg.x + bg.width - 80, bg.y + bg.height - 80);
+  await page.mouse.down();
+  await page.mouse.move(bg.x + bg.width - 80 + 320, bg.y + bg.height - 80, { steps: 10 });
+  await page.mouse.up();
+
+  await host.locator(".blocklyToolboxCategory", { hasText: "흐름" }).click();
+  const source = host.locator("svg.blocklyFlyout .blocklyDraggable", { hasText: "10마이크로초 기다리기" }).first();
+  const from = (await source.boundingBox())!;
+  // 반복 안 마지막 블록(뒤에 이어진 블록이 없어 글자가 딱 "1초 기다리기")의 아래에 놓는다
+  const last = host.locator("svg.blocklySvg > g.blocklyWorkspace > g.blocklyBlockCanvas .blocklyDraggable").filter({ hasText: /^1초\s기다리기$/ });
+  const to = (await last.boundingBox())!;
+  expect(to.x).toBeGreaterThan(from.x + from.width); // 꾸러미 밖에 놓는다
+
+  await page.mouse.move(from.x + 10, from.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 40, from.y + 20, { steps: 5 });
+  await page.mouse.move(to.x + 10, to.y + to.height + 10, { steps: 20 });
+  await page.mouse.up();
+
+  await expect(code).toContainText("time.sleep_us(10)");
+  await expect(code).toContainText("import time");
+  await expect(page.getByRole("tab", { name: "블록" })).toHaveAttribute("aria-selected", "true");
+  // 반복 안(4칸 들여쓰기)에 들어갔다
+  const text = await code.locator(".cm-content").innerText();
+  expect(text).toMatch(/\n {4}time\.sleep_us\(10\)/);
+});

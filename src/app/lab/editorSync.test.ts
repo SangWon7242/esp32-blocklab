@@ -46,6 +46,16 @@ describe("editorReducer", () => {
     expect(s2.parseError).toBeNull();
   });
 
+  it("문법 오류가 남아 있으면 블록으로 돌아가지 않는다 (친 코드를 지키려고)", () => {
+    const s0 = editorReducer(initialEditorState(LED), { type: "switchSource", source: "code" });
+    const s1 = editorReducer(s0, { type: "codeChanged", code: LED + "if x\n" });
+    expect(s1.parseError).not.toBeNull();
+    const s2 = editorReducer(s1, { type: "switchSource", source: "blocks" });
+    expect(s2).toBe(s1);
+    expect(s2.source).toBe("code");
+    expect(s2.code).toBe(LED + "if x\n");
+  });
+
   it("변환 안 된 조각 수를 센다", () => {
     const s0 = editorReducer(initialEditorState(LED), { type: "switchSource", source: "code" });
     const s1 = editorReducer(s0, { type: "codeChanged", code: "x = time.ticks_us()\n" });

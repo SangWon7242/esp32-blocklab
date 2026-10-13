@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import { AlertTriangle, Blocks, Code2, Play, Save, Square, Usb } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -57,7 +58,6 @@ export function LabPage() {
 
   const switchSource = (source: Source) => {
     if (source === sourceRef.current) return;
-    sourceRef.current = source;
     let current = state;
     if (pendingCodeRef.current !== null) {
       window.clearTimeout(debounceRef.current);
@@ -66,10 +66,14 @@ export function LabPage() {
       current = editorReducer(current, flush);
       dispatch(flush);
     }
-    if (source === "blocks" && blocklyRef.current && current.blocks) {
-      // 코드 모드에서 파싱 실패 상태로 돌아오면 마지막 성공 블록을 기준으로 삼는다
-      blocklyRef.current.load(current.blocks);
+    if (source === "blocks" && current.parseError) {
+      // 블록으로 가면 마지막 성공 블록의 코드로 덮인다. 코드 모드에 머물고 오류 줄은 그대로 강조한다.
+      // (Radix 가 한 번 누를 때 두 번 부르므로 같은 id 로 토스트를 하나만 띄운다)
+      toast.error("문법 오류를 고친 뒤에 블록으로 돌아갈 수 있어요", { id: "parse-error-switch" });
+      return;
     }
+    sourceRef.current = source;
+    if (source === "blocks" && blocklyRef.current && current.blocks) blocklyRef.current.load(current.blocks);
     dispatch({ type: "switchSource", source });
   };
 
