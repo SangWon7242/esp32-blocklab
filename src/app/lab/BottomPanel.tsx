@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -11,7 +12,18 @@ type Props = {
   onToggle(): void;
   /** 탭 내용 (`TabsContent value="problems" | "console"`). 없으면 빈 안내를 보여 준다 */
   children?: ReactNode;
+  /** 탭 이름 옆 개수 (0 이면 숨긴다) */
+  counts?: Partial<Record<BottomTab, number>>;
 };
+
+function Count({ n }: { n?: number }) {
+  if (!n) return null;
+  return (
+    <Badge variant="secondary" className="h-4 min-w-4 px-1 text-[10px] tabular-nums">
+      {n}
+    </Badge>
+  );
+}
 
 function Empty({ value }: { value: BottomTab }) {
   return (
@@ -21,8 +33,8 @@ function Empty({ value }: { value: BottomTab }) {
   );
 }
 
-/** 편집기 아래의 접을 수 있는 패널. 문제·콘솔 탭은 다음 단계(검사 엔진·보드 연결)가 채운다 */
-export function BottomPanel({ open, onToggle, children }: Props) {
+/** 편집기 아래의 접을 수 있는 패널. 문제(검사 결과, 한글)·콘솔(영어 메시지) 탭 */
+export function BottomPanel({ open, onToggle, children, counts }: Props) {
   const [tab, setTab] = useState<BottomTab>("problems");
   const onTabChange = (value: string) => {
     setTab(value as BottomTab);
@@ -39,8 +51,8 @@ export function BottomPanel({ open, onToggle, children }: Props) {
     >
       <div className="flex h-8 shrink-0 items-center gap-2 px-2">
         <TabsList variant="line" className="h-7">
-          <TabsTrigger value="problems" className="px-2 text-xs">문제</TabsTrigger>
-          <TabsTrigger value="console" className="px-2 text-xs">콘솔</TabsTrigger>
+          <TabsTrigger value="problems" className="px-2 text-xs">문제 <Count n={counts?.problems} /></TabsTrigger>
+          <TabsTrigger value="console" className="px-2 text-xs">콘솔 <Count n={counts?.console} /></TabsTrigger>
         </TabsList>
         <Button
           variant="ghost"

@@ -13,8 +13,34 @@ type Props = {
   onChange: (code: string) => void;
   /** 1-based. null 이면 강조 없음 */
   errorLine?: number | null;
+  /** 여러 줄 장식 (1-based). 문제 줄은 수준별 색, focus 는 지금 살펴보는 줄(파란 띠 + 왼쪽 선) */
+  highlightLines?: LineHighlight[];
+  /** 줄 번호를 누르면 그 줄 (1-based) */
+  onLineClick?: (line: number) => void;
   className?: string;
 };
+
+export type HighlightKind = "error" | "warning" | "info" | "focus";
+export type LineHighlight = { line: number; kind: HighlightKind };
+
+const NO_HIGHLIGHTS: LineHighlight[] = [];
+
+const setHighlights = StateEffect.define<LineHighlight[]>();
+const highlightField = StateField.define<DecorationSet>({
+  create: () => Decoration.none,
+  update(deco, tr) {
+    deco = deco.map(tr.changes);
+    for (const e of tr.effects) {
+      if (!e.is(setHighlights)) continue;
+      const ranges = e.value
+        .filter((h) => h.line >= 1 && h.line <= tr.state.doc.lines)
+        .map((h) => Decoration.line({ class: `cm-lint-${h.kind}` }).range(tr.state.doc.line(h.line).from));
+      deco = Decoration.set(ranges, true);
+    }
+    return deco;
+  },
+  provide: (f) => EditorView.decorations.from(f),
+});
 
 const setErrorLine = StateEffect.define<number | null>();
 const errorLineField = StateField.define<DecorationSet>({
@@ -36,15 +62,23 @@ const theme = EditorView.theme({
   "&": { height: "100%", fontSize: "13px" },
   ".cm-scroller": { fontFamily: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace', lineHeight: "1.6" },
   ".cm-error-line": { backgroundColor: "rgba(239, 68, 68, 0.12)" },
+  ".cm-lint-info": { backgroundColor: "rgba(148, 163, 184, 0.12)" },
+  ".cm-lint-warning": { backgroundColor: "rgba(245, 158, 11, 0.12)" },
+  ".cm-lint-error": { backgroundColor: "rgba(239, 68, 68, 0.12)" },
+  // 강조 줄은 문제 줄 색보다 앞선다 (같은 줄에 둘 다 붙을 수 있다)
+  ".cm-line.cm-lint-focus": { backgroundColor: "rgba(59, 130, 246, 0.15)", boxShadow: "inset 3px 0 0 #3b82f6" },
+  ".cm-lineNumbers .cm-gutterElement": { cursor: "pointer" },
   "&.cm-focused": { outline: "none" },
 });
 
-export function CodePanel({ value, readOnly, onChange, errorLine = null, className }: Props) {
+export function CodePanel({ value, readOnly, onChange, errorLine = null, highlightLines = NO_HIGHLIGHTS, onLineClick, className }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyComp = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onLineClickRef = useRef(onLineClick);
+  onLineClickRef.current = onLineClick;
   /** 편집기가 보낸 글. 늦게 돌아온 메아리로 문서를 덮어 막 친 글자를 지우지 않게 한다 */
   const echoRef = useRef(createEchoGuard());
   /** value 를 문서에 넣는 동안은 onChange 를 다시 보내지 않는다 */
@@ -54,10 +88,18 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, classNa
     const host = hostRef.current;
     if (!host) return;
     const extensions: Extension[] = [
-      lineNumbers(), highlightActiveLine(), history(), python(), indentUnit.of("    "),
+      lineNumbers({
+        domEventHandlers: {
+          mousedown(view, line) {
+            onLineClickRef.current?.(view.state.doc.lineAt(line.from).number);
+            return false;
+          },
+        },
+      }),
+      highlightActiveLine(), history(), python(), indentUnit.of("    "),
       syntaxHighlighting(defaultHighlightStyle), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       readOnlyComp.current.of(EditorState.readOnly.of(readOnly)),
-      errorLineField, theme,
+      errorLineField, highlightField, theme,
       EditorView.updateListener.of((u) => {
         if (!u.docChanged || applyingRef.current) return;
         const text = u.state.doc.toString();
@@ -96,6 +138,18 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, classNa
   useEffect(() => {
     viewRef.current?.dispatch({ effects: setErrorLine.of(errorLine) });
   }, [errorLine, value]);
+
+  useEffect(() => {
+    viewRef.current?.dispatch({ effects: setHighlights.of(highlightLines) });
+  }, [highlightLines, value]);
+
+  // 새로 강조한 줄이 화면 밖이면 보이게 스크롤한다
+  const firstFocus = highlightLines.find((h) => h.kind === "focus")?.line ?? null;
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view || firstFocus == null || firstFocus > view.state.doc.lines) return;
+    view.dispatch({ effects: EditorView.scrollIntoView(view.state.doc.line(firstFocus).from, { y: "nearest" }) });
+  }, [firstFocus]);
 
   return <div ref={hostRef} className={cn("h-full w-full overflow-hidden", className)} data-testid="code-panel" />;
 }

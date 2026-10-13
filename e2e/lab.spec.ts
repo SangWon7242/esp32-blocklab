@@ -198,10 +198,98 @@ test("코드 패널을 접었다 펼 수 있다", async ({ page }) => {
   await page.getByRole("button", { name: "블록 패널 펼치기" }).click();
   await expect(page.getByTestId("blockly-host")).toBeVisible();
 
-  // 하단 패널은 처음엔 접혀 있고 펼치면 안내가 보인다
-  await expect(page.getByText("아직 메시지가 없어요")).toBeHidden();
+  // 하단 패널은 처음엔 접혀 있고 펼치면 안내가 보인다 (예시 프로그램에는 문제가 없다)
+  await expect(page.getByText("문제가 없어요")).toBeHidden();
   await page.getByRole("button", { name: "하단 패널 펼치기" }).click();
-  await expect(page.getByText("아직 메시지가 없어요")).toBeVisible();
+  await expect(page.getByText("문제가 없어요")).toBeVisible();
   await page.getByRole("button", { name: "하단 패널 접기" }).click();
-  await expect(page.getByText("아직 메시지가 없어요")).toBeHidden();
+  await expect(page.getByText("문제가 없어요")).toBeHidden();
+});
+
+/** 코드 모드에서 코드를 통째로 바꾼다 */
+async function replaceCode(page: Page, text: string) {
+  await page.getByRole("tab", { name: "코드" }).click();
+  await page.getByTestId("code-panel").locator(".cm-content").click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.type(text);
+}
+
+/** led 를 준비했다가 블록 모드에서 준비 블록을 지워, 준비 없이 led 켜기만 남긴다 */
+async function writeWithoutSetup(page: Page) {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  await replaceCode(page, "led = Pin(26, Pin.OUT)\nled.value(1)\n");
+  await expect(host.locator("g.esp_pin_setup")).toHaveCount(1);
+  await expect(host.locator("g.esp_pin_write")).toHaveCount(1);
+  await page.getByRole("tab", { name: "블록" }).click();
+  await expect(page.getByText("블록을 놓으면 코드가 바로 바뀝니다")).toBeVisible();
+  // 준비 블록의 "핀" 글자를 눌러 고른 뒤 지운다 (아래 블록은 위로 붙는다)
+  await host.locator("g.esp_pin_setup .blocklyText", { hasText: /^핀$/ }).click();
+  await page.keyboard.press("Delete");
+  await expect(host.locator("g.esp_pin_setup")).toHaveCount(0);
+}
+
+test("준비 없이 led 를 켜면 블록에 경고가 뜨고 문제 패널에 한글로 나온다", async ({ page }) => {
+  await writeWithoutSetup(page);
+  const host = page.getByTestId("blockly-host");
+  const write = host.locator("g.esp_pin_write");
+  await expect(write).toHaveClass(/\blint-error\b/);
+  await expect(write.locator(".blocklyIconGroup")).toHaveCount(1);
+  // 오류가 처음 생기면 하단 패널이 저절로 펼쳐진다
+  await expect(page.getByRole("tab", { name: "문제 1" })).toBeVisible();
+  const item = page.getByTestId("problem-item");
+  await expect(item).toHaveCount(1);
+  await expect(item).toContainText("led 를 먼저 준비해 주세요");
+  await expect(item).toContainText("1줄");
+  // 콘솔은 영어
+  await page.getByRole("tab", { name: /콘솔/ }).click();
+  await expect(page.getByTestId("console-entry").first()).toContainText("NameError: name 'led' is not defined");
+});
+
+test("문제 항목을 누르면 코드 줄이 강조된다", async ({ page }) => {
+  await writeWithoutSetup(page);
+  await page.getByTestId("problem-item").first().click();
+  const focus = page.getByTestId("code-panel").locator(".cm-lint-focus");
+  await expect(focus).toHaveCount(1);
+  await expect(focus).toHaveText("led.value(1)");
+  await expect(page.getByTestId("blockly-host").locator("g.esp_pin_write")).toHaveClass(/\bblocklySelected\b/);
+});
+
+test("블록을 선택하면 그 코드 줄이 강조된다", async ({ page }) => {
+  await page.goto("/#/lab");
+  const host = page.getByTestId("blockly-host");
+  await expect(host.locator(".blocklyMainBackground")).toBeVisible();
+  // 첫 "켜기" 블록의 왼쪽 가장자리(입력 칸이 아닌 곳)를 누른다
+  const on = host.locator("g.esp_pin_write").first();
+  const shape = (await on.locator(":scope > path.blocklyPath").boundingBox())!;
+  await page.mouse.click(shape.x + 4, shape.y + 10);
+  await expect(on).toHaveClass(/\bblocklySelected\b/);
+  const code = page.getByTestId("code-panel");
+  const focus = code.locator(".cm-lint-focus");
+  await expect(focus).toHaveCount(1);
+  await expect(focus).toHaveText("    led.value(1)");
+  // 7번째 줄
+  await expect(code.locator(".cm-line").nth(6)).toHaveClass(/\bcm-lint-focus\b/);
+  // 빈 바탕을 누르면 강조가 사라진다
+  const bg = (await host.boundingBox())!;
+  await page.mouse.click(bg.x + bg.width - 120, bg.y + 40);
+  await expect(focus).toHaveCount(0);
+});
+
+test("코드 모드의 콘솔은 영어로 문법 오류를 보여 준다", async ({ page }) => {
+  await page.goto("/#/lab");
+  await page.getByRole("tab", { name: "코드" }).click();
+  await page.getByTestId("code-panel").locator(".cm-content").click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.keyboard.type("if x\n");
+  await expect(page.getByTestId("parse-error")).toBeVisible();
+  await page.getByRole("tab", { name: /콘솔/ }).click();
+  const entry = page.getByTestId("console-entry").first();
+  await expect(entry).toContainText("SyntaxError: invalid syntax");
+  await expect(entry).toContainText('File "main.py", line 11');
+  await entry.click();
+  const focus = page.getByTestId("code-panel").locator(".cm-lint-focus");
+  await expect(focus).toHaveCount(1);
+  await expect(focus).toHaveText("if x");
 });

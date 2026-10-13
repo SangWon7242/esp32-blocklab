@@ -134,3 +134,12 @@
     display: none !important;
   }
 }
+/* 검사 결과를 블록 테두리로: 오류는 빨강, 주의는 노랑 (BlocklyWorkspace.setIssues 가 블록 SVG 루트에 클래스를 단다) */
+.lint-error > .blocklyPath {
+  stroke: #ef4444;
+  stroke-width: 3px;
+}
+.lint-warning > .blocklyPath {
+  stroke: #f59e0b;
+  stroke-width: 3px;
+}

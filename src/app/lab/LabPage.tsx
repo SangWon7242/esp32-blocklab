@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   AlertTriangle, Blocks, Code2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Play, Save, Square, Usb,
 } from "lucide-react";
@@ -7,15 +7,19 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
 import type { LineMap, WorkspaceJson } from "@/codegen";
+import type { ConsoleEntry, Issue } from "@/lint";
 import { countCodeBlocks, editorReducer, initialEditorState, type Source } from "./editorSync";
 import { SAMPLE_CODE } from "./sample";
 import { BottomPanel } from "./BottomPanel";
+import { ConsolePanel } from "./ConsolePanel";
+import { ProblemsPanel } from "./ProblemsPanel";
+import { blockAtLine, highlightFor, useLint, type WorkspaceSnapshot } from "./useLint";
 import { useIsNarrow } from "./useViewport";
 
 const DEVICE_BUTTONS = [
@@ -134,6 +138,53 @@ export function LabPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** 검사가 읽는 살아 있는 작업판 (블록 id 가 화면의 블록과 같다) */
+  const readWorkspace = useCallback((): WorkspaceSnapshot | null => {
+    const handle = blocklyRef.current;
+    if (!handle) return null;
+    const { code, map } = handle.getCodeWithMap();
+    return { json: handle.getJson(), generated: code, map };
+  }, []);
+  const lintState = useLint(state, readWorkspace);
+  const { view, issues, focus, setTarget } = lintState;
+  const consoleEntries = lintState.console;
+
+  // 검사 결과를 블록 경고 아이콘·테두리로
+  useEffect(() => {
+    blocklyRef.current?.setIssues(issues);
+  }, [issues]);
+
+  // 오류가 처음 생기면 하단 패널을 한 번 펼쳐 준다 (그 뒤로는 학생이 접은 대로 둔다)
+  const autoOpenedRef = useRef(false);
+  useEffect(() => {
+    if (autoOpenedRef.current || !issues.some((i) => i.level === "error")) return;
+    autoOpenedRef.current = true;
+    setPanels((p) => (p.bottom ? p : { ...p, bottom: true }));
+  }, [issues]);
+
+  const highlightLines = useMemo(() => highlightFor(issues, focus.lines), [issues, focus.lines]);
+
+  /** 블록을 선택하고(있으면) 그 블록의 코드 줄과 line 을 강조한다 */
+  const reveal = useCallback((blockId: string | undefined, line: number | undefined) => {
+    const selected = blockId ? blocklyRef.current?.selectBlock(blockId) ?? null : null;
+    setTarget({ blockId: selected ?? blockId, line });
+  }, [setTarget]);
+
+  const onProblemSelect = useCallback((issue: Issue) => reveal(issue.blockId, issue.line), [reveal]);
+  const onConsoleSelect = useCallback((entry: ConsoleEntry) => {
+    if (entry.line === undefined && !entry.blockId) return;
+    reveal(entry.blockId ?? (entry.line !== undefined ? blockAtLine(view, entry.line) : undefined), entry.line);
+  }, [reveal, view]);
+  const onLineClick = useCallback((line: number) => reveal(blockAtLine(view, line), line), [reveal, view]);
+
+  // 작업판에서 블록을 고르면 (어떤 블록이든) 그 블록이 만든 코드 줄을 강조한다. 같은 블록이면 줄 강조를 지키고, 선택을 풀면 지운다
+  const onBlockSelect = useCallback((blockId: string | null) => {
+    setTarget((t) => (blockId === null ? null : t?.blockId === blockId ? t : { blockId }));
+  }, [setTarget]);
+  const onWarningOpen = useCallback((blockId: string) => {
+    setTarget((t) => (t?.blockId === blockId ? t : { blockId }));
+  }, [setTarget]);
+
   const onBlocksChange = useCallback((json: WorkspaceJson, code: string, map: LineMap) => {
     dispatch({ type: "blocksChanged", json, code, map });
   }, []);
@@ -224,7 +275,7 @@ export function LabPage() {
               </div>
             )}
             <div className="relative min-h-0 flex-1">
-              <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} />
+              <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} onSelect={onBlockSelect} onWarningOpen={onWarningOpen} />
               {codeMode && (
                 <div className="pointer-events-auto absolute inset-0 flex items-start justify-center bg-background/40 pt-6" data-testid="blocks-overlay">
                   <Badge variant="secondary">코드 편집 중 — 블록은 코드에 따라 갱신됩니다</Badge>
@@ -269,13 +320,27 @@ export function LabPage() {
               )}
             </div>
             <div className="min-h-0 flex-1">
-              <CodePanel value={state.code} readOnly={!codeMode} onChange={onCodeChange} errorLine={state.parseError?.line ?? null} />
+              <CodePanel
+                value={state.code}
+                readOnly={!codeMode}
+                onChange={onCodeChange}
+                errorLine={state.parseError?.line ?? null}
+                highlightLines={highlightLines}
+                onLineClick={onLineClick}
+              />
             </div>
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      <BottomPanel open={panels.bottom} onToggle={() => setPanels((p) => ({ ...p, bottom: !p.bottom }))} />
+      <BottomPanel
+        open={panels.bottom}
+        onToggle={() => setPanels((p) => ({ ...p, bottom: !p.bottom }))}
+        counts={{ problems: issues.length, console: consoleEntries.length }}
+      >
+        <TabsContent value="problems"><ProblemsPanel issues={issues} onSelect={onProblemSelect} /></TabsContent>
+        <TabsContent value="console"><ConsolePanel entries={consoleEntries} onSelect={onConsoleSelect} /></TabsContent>
+      </BottomPanel>
     </div>
   );
 }

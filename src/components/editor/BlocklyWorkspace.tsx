@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import * as Blockly from "blockly";
 import { entryTheme, registerBlocks, toolbox } from "@/blocks";
 import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
+import type { Issue } from "@/lint";
 import { cn } from "@/lib/utils";
 import { createNamePrompt } from "./namePrompt";
 
@@ -16,13 +17,41 @@ export type BlocklyHandle = {
   getCode(): string;
   /** 지금 작업판의 코드와 코드 지도 (블록 id ↔ 줄 번호, id 는 살아 있는 작업판의 것) */
   getCodeWithMap(): { code: string; map: LineMap };
+  /**
+   * 검사 결과를 블록에 단다: 블록마다 경고 아이콘(말풍선에 "<한글> — 코드 N줄"), 오류는 빨간 테두리(lint-error),
+   * 주의는 노란 테두리(lint-warning). 지난번과 달라진 블록만 고치고 사라진 문제는 지운다. 정보 수준은 달지 않는다.
+   */
+  setIssues(issues: Issue[]): void;
+  /** 블록을 선택하고 화면 가운데로. 그림자 블록이면 담은 블록. 실제로 선택한 블록 id (없으면 null) */
+  selectBlock(id: string): string | null;
 };
 
 type Props = {
   /** 사용자가 블록을 바꿀 때마다 (프로그램이 load 한 경우는 제외) */
   onChange: (json: WorkspaceJson, code: string, map: LineMap) => void;
+  /** 블록을 선택하거나(그 id) 선택을 풀 때(null) */
+  onSelect?: (blockId: string | null) => void;
+  /** 블록의 경고 말풍선을 열 때 */
+  onWarningOpen?: (blockId: string) => void;
   className?: string;
 };
+
+/** 검사가 단 경고 아이콘의 id (다른 경고와 섞이지 않게) */
+const LINT_WARNING = "lint";
+type LintMark = { text: string; level: "error" | "warning" };
+
+function setLintClass(block: Blockly.BlockSvg, level: LintMark["level"] | null) {
+  const root = block.getSvgRoot();
+  root.classList.toggle("lint-error", level === "error");
+  root.classList.toggle("lint-warning", level === "warning");
+}
+
+/** 그림자 블록은 아이콘·선택을 담은 블록이 받는다 */
+function realBlock(ws: Blockly.WorkspaceSvg, id: string): Blockly.BlockSvg | null {
+  let block: Blockly.BlockSvg | null = ws.getBlockById(id);
+  while (block?.isShadow()) block = block.getParent();
+  return block;
+}
 
 const REVEAL_MARGIN = 24;
 
@@ -39,7 +68,7 @@ function revealProgram(ws: Blockly.WorkspaceSvg): boolean {
   return true;
 }
 
-export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, className }, ref) {
+export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, onSelect, onWarningOpen, className }, ref) {
   const hostRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<Blockly.WorkspaceSvg | null>(null);
   const loadingRef = useRef(false);
@@ -47,6 +76,12 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
   const needsRevealRef = useRef(false);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+  const onWarningOpenRef = useRef(onWarningOpen);
+  onWarningOpenRef.current = onWarningOpen;
+  /** 지금 검사 경고를 단 블록들 (블록 id → 말풍선 글·수준) */
+  const lintMarksRef = useRef(new Map<string, LintMark>());
 
   useEffect(() => {
     const host = hostRef.current;
@@ -70,6 +105,23 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     Blockly.dialog.setPrompt(createNamePrompt());
 
     const listener = (e: Blockly.Events.Abstract) => {
+      if (e.type === Blockly.Events.SELECTED) {
+        const id = (e as Blockly.Events.Selected).newElementId;
+        if (id && ws.getBlockById(id)) onSelectRef.current?.(id);
+        // 선택이 풀려도 포커스가 작업판 밖(코드·하단 패널)으로 간 것이면 알리지 않는다 — 그쪽에서 막 고른 강조를 지우지 않게
+        else if (host.contains(document.activeElement)) onSelectRef.current?.(null);
+        return;
+      }
+      // 빈 바탕을 누르면 (선택이 이미 풀려 있어 선택 이벤트가 없어도) 강조를 지운다
+      if (e.type === Blockly.Events.CLICK && (e as Blockly.Events.Click).targetType === "workspace") {
+        onSelectRef.current?.(null);
+        return;
+      }
+      if (e.type === Blockly.Events.BUBBLE_OPEN) {
+        const b = e as Blockly.Events.BubbleOpen;
+        if (b.isOpen && b.bubbleType === "warning" && b.blockId) onWarningOpenRef.current?.(b.blockId);
+        return;
+      }
       if (loadingRef.current || e.isUiEvent || ws.isDragging()) return;
       const { code, map } = generateCodeWithMap(ws);
       onChangeRef.current(Blockly.serialization.workspaces.save(ws) as WorkspaceJson, code, map);
@@ -99,6 +151,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
       if (!ws) return;
       const { scrollX, scrollY } = ws;
       loadingRef.current = true;
+      // 새 블록들이므로 (같은 id 로 다시 올려도) 단 경고가 없다
+      lintMarksRef.current.clear();
       try {
         Blockly.Events.disable();
         ws.clear();
@@ -116,6 +170,53 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     getJson: () => Blockly.serialization.workspaces.save(wsRef.current!) as WorkspaceJson,
     getCode: () => (wsRef.current ? generateCode(wsRef.current) : ""),
     getCodeWithMap: () => (wsRef.current ? generateCodeWithMap(wsRef.current) : { code: "", map: emptyLineMap() }),
+    setIssues(issues) {
+      const ws = wsRef.current;
+      if (!ws) return;
+      const next = new Map<string, LintMark>();
+      for (const issue of issues) {
+        if (!issue.blockId || issue.level === "info") continue;
+        const block = realBlock(ws, issue.blockId);
+        if (!block) continue;
+        const line = issue.line !== undefined ? `${issue.ko} — 코드 ${issue.line}줄` : issue.ko;
+        const prev = next.get(block.id);
+        next.set(block.id, {
+          text: prev ? `${prev.text}\n${line}` : line,
+          level: prev?.level === "error" || issue.level === "error" ? "error" : "warning",
+        });
+      }
+      const marks = lintMarksRef.current;
+      // 아이콘을 달고 떼는 일은 작업판 변경이 아니다 (코드를 다시 만들지 않게)
+      Blockly.Events.disable();
+      try {
+        for (const id of marks.keys()) {
+          if (next.has(id)) continue;
+          const block = ws.getBlockById(id);
+          if (block && !block.isDeadOrDying()) {
+            block.setWarningText(null, LINT_WARNING);
+            setLintClass(block, null);
+          }
+        }
+        for (const [id, mark] of next) {
+          const prev = marks.get(id);
+          if (prev?.text === mark.text && prev.level === mark.level) continue;
+          const block = ws.getBlockById(id)!;
+          if (prev?.text !== mark.text) block.setWarningText(mark.text, LINT_WARNING);
+          setLintClass(block, mark.level);
+        }
+      } finally {
+        Blockly.Events.enable();
+      }
+      lintMarksRef.current = next;
+    },
+    selectBlock(id) {
+      const ws = wsRef.current;
+      const block = ws && realBlock(ws, id);
+      if (!ws || !block) return null;
+      Blockly.getFocusManager().focusNode(block);
+      ws.centerOnBlock(block.id, true);
+      return block.id;
+    },
   }));
 
   return <div ref={hostRef} className={cn("h-full w-full", className)} data-testid="blockly-host" />;
