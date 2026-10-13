@@ -48,6 +48,8 @@ export type FlatBlock = {
   topLevel: boolean;
   /** 그림자 블록인지 */
   shadow: boolean;
+  /** 시작 블록·함수 정의 밖에 떨어진 최상위 줄(그 아래 전부 포함)에 있는지. 실행되지 않으므로 orphan 규칙만 본다 */
+  orphan: boolean;
 };
 
 export type LintContext = {

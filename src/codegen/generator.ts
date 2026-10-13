@@ -3,7 +3,7 @@ import { PythonGenerator, pythonGenerator } from "blockly/python";
 import { PYTHON_KEYWORDS } from "@/blocks/names";
 import { HELPER_MARK } from "@/devices/specs/common";
 import { collectImports, hoistImports } from "./imports";
-import { buildLineMap, countLines, isMarksOnly, leadingMarkLength, marksToTags, shiftLineMap, STATEMENT_MARK, stripTags, tagLine, tagLines, type LineMap } from "./linemap";
+import { buildLineMap, countLines, emptyLineMap, isMarksOnly, leadingMarkLength, marksToTags, shiftLineMap, STATEMENT_MARK, stripTags, tagLine, tagLines, type LineMap } from "./linemap";
 
 type SplitComment = { above: string[]; trailing: string | null };
 
@@ -123,7 +123,7 @@ export class MicroPythonGenerator extends PythonGenerator {
     this.withMap = true;
     try {
       const code = this.workspaceToCode(workspace);
-      return { code, map: this.lastMap ?? { blockToLines: {}, lineToBlock: {} } };
+      return { code, map: this.lastMap ?? emptyLineMap() };
     } finally {
       this.withMap = false;
       this.STATEMENT_PREFIX = null;

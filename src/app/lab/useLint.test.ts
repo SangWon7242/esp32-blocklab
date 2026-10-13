@@ -36,6 +36,18 @@ describe("computeLintView", () => {
     expect(blockAtLine(view, issue.line!)).toBe("on");
   });
 
+  it("코드 모드: 주석 줄이 위에 붙은 준비 블록의 문제는 주석 아래 문장 줄 (배지·콘솔·빨간 줄)", () => {
+    const setup = { ...pinSetup("btn_setup", "btn", 34), icons: { comment: { text: "버튼 준비\n|", pinned: false, height: 80, width: 160 } } };
+    const snap = snapshot(program([setup], { vars: ["btn"] }));
+    const source = "from machine import Pin\n\n# 버튼 준비\nbtn = Pin(34, Pin.OUT)\n";
+    const view = computeLintView({ snapshot: snap, source: "code", code: source, parseError: null });
+    const issue = view.issues.find((i) => i.id === "pin-rule")!;
+    expect(issue.level).toBe("error");
+    expect(issue.line).toBe(4);
+    expect(view.console.find((e) => e.blockId === "btn_setup")!.text).toContain("line 4\n");
+    expect(highlightFor(view.issues, [])).toContainEqual({ line: 4, kind: "error" });
+  });
+
   it("코드 모드: 원문에서 짝을 못 찾은 줄은 줄 번호를 버린다", () => {
     const snap = snapshot(noSetup());
     const view = computeLintView({ snapshot: snap, source: "code", code: "print(1)\n", parseError: null });
@@ -53,7 +65,7 @@ describe("computeLintView", () => {
   });
 
   it("블록이 하나도 없는 빈 작업판은 시작 블록 오류를 내지 않는다", () => {
-    const empty: WorkspaceSnapshot = { json: {} as WorkspaceJson, generated: "", map: { blockToLines: {}, lineToBlock: {} } };
+    const empty: WorkspaceSnapshot = { json: {} as WorkspaceJson, generated: "", map: { blockToLines: {}, lineToBlock: {}, blockStart: {} } };
     expect(computeLintView({ snapshot: empty, source: "blocks", code: "", parseError: null }).issues).toEqual([]);
     expect(computeLintView({ snapshot: null, source: "blocks", code: "", parseError: null }).issues).toEqual([]);
   });

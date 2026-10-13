@@ -15,6 +15,11 @@ export type LineMap = {
   blockToLines: Record<string, number[]>;
   /** 줄 번호 → 그 줄을 낸 블록 id (여러 블록이 함께 낸 준비 줄은 먼저 적힌 블록) */
   lineToBlock: Record<number, string>;
+  /**
+   * 블록 id → 그 블록의 첫 문장 줄: 블록 줄 중 `#` 으로 시작하지 않는 첫 줄 (윗줄 주석을 건너뛴다).
+   * 모두 주석 줄이면 첫 줄. 검사 문제의 줄은 이것이다 (주석 줄은 원문 줄과 짝지을 수 없다)
+   */
+  blockStart: Record<string, number>;
 };
 
 /** 표식 글자 (도우미 호출 표시 HELPER_MARK "" 과 다른 사용자 영역 글자) */
@@ -32,7 +37,7 @@ const MARK_LINE = new RegExp(`^( *)${MARK}'(.*)'${MARK}$`);
 /** 코드 맨 앞의 표식 한 줄 (줄바꿈까지) */
 const LEADING_MARK = new RegExp(`^${MARK}'[^\\n]*'${MARK}\\n`);
 
-export const emptyLineMap = (): LineMap => ({ blockToLines: {}, lineToBlock: {} });
+export const emptyLineMap = (): LineMap => ({ blockToLines: {}, lineToBlock: {}, blockStart: {} });
 
 /** 코드 맨 앞의 표식 줄 길이 (없으면 0) */
 export function leadingMarkLength(code: string): number {
@@ -103,10 +108,16 @@ export function buildLineMap(tagged: string): { code: string; map: LineMap } {
     if (at < 0) return line;
     const ids = line.slice(at).split(TAG_CHARS).filter(Boolean);
     const n = i + 1;
+    const text = line.slice(0, at);
+    const statement = !text.trim().startsWith("#");
     if (ids.length) map.lineToBlock[n] = ids[0];
-    for (const id of new Set(ids)) (map.blockToLines[id] ??= []).push(n);
-    return line.slice(0, at);
+    for (const id of new Set(ids)) {
+      (map.blockToLines[id] ??= []).push(n);
+      if (statement && map.blockStart[id] === undefined) map.blockStart[id] = n;
+    }
+    return text;
   });
+  for (const [id, ls] of Object.entries(map.blockToLines)) map.blockStart[id] ??= ls[0];
   return { code: lines.join("\n"), map };
 }
 
@@ -119,7 +130,10 @@ export function shiftLineMap(map: LineMap, delta: number, lastLine: number): Lin
   }
   for (const [id, lines] of Object.entries(map.blockToLines)) {
     const kept = lines.map((n) => n + delta).filter((n) => n >= 1 && n <= lastLine);
-    if (kept.length) out.blockToLines[id] = kept;
+    if (!kept.length) continue;
+    out.blockToLines[id] = kept;
+    const start = (map.blockStart[id] ?? lines[0]) + delta;
+    out.blockStart[id] = kept.includes(start) ? start : kept[0];
   }
   return out;
 }

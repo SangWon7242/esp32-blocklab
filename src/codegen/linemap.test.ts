@@ -80,7 +80,7 @@ describe("linemap 순수 함수", () => {
   it("여러 주인 꼬리표: 줄은 첫 주인, 블록마다 그 줄", () => {
     const { code, map } = buildLineMap([tagLine("i2c = I2C(0)", ["a", "b"]), tagLine("x = 1", ["b"])].join("\n"));
     expect(code).toBe("i2c = I2C(0)\nx = 1");
-    expect(map).toEqual({ lineToBlock: { 1: "a", 2: "b" }, blockToLines: { a: [1], b: [1, 2] } });
+    expect(map).toEqual({ lineToBlock: { 1: "a", 2: "b" }, blockToLines: { a: [1], b: [1, 2] }, blockStart: { a: 1, b: 1 } });
   });
 
   it("id 에 작은따옴표·$ 가 있어도 그대로", () => {
@@ -89,8 +89,9 @@ describe("linemap 순수 함수", () => {
   });
 
   it("shiftLineMap 은 줄을 옮기고 범위 밖은 버린다", () => {
-    const map: LineMap = { lineToBlock: { 1: "a", 2: "b", 3: "b" }, blockToLines: { a: [1], b: [2, 3] } };
-    expect(shiftLineMap(map, -1, 1)).toEqual({ lineToBlock: { 1: "b" }, blockToLines: { b: [1] } });
+    const map: LineMap = { lineToBlock: { 1: "a", 2: "b", 3: "b" }, blockToLines: { a: [1], b: [2, 3] }, blockStart: { a: 1, b: 3 } };
+    expect(shiftLineMap(map, -1, 1)).toEqual({ lineToBlock: { 1: "b" }, blockToLines: { b: [1] }, blockStart: { b: 1 } });
+    expect(shiftLineMap(map, 0, 3).blockStart).toEqual({ a: 1, b: 3 });
   });
 });
 
@@ -186,6 +187,8 @@ describe("코드 지도: 블록 id ↔ 줄", () => {
       "from machine import Pin\nimport time\n\n# 핀 준비\nled = Pin(26, Pin.OUT)  # LED\n\nwhile True:\n    # 켜기 전에\n    # 한 번 더\n    led.value(1)  # 켜기\n    time.sleep(1)  # 쉬기\n",
     );
     expect(map.blockToLines).toEqual({ s: [4, 5], loop: [7], above: [8, 9, 10], trail: [11] });
+    // 블록의 첫 문장 줄은 윗줄 주석을 건너뛴다 (검사 문제의 줄)
+    expect(map.blockStart).toEqual({ s: 5, loop: 7, above: 10, trail: 11 });
   });
 
   it("시작 블록 코멘트(머리말)·내용 없는 시작 블록은 지도에 없다", () => {
@@ -193,8 +196,8 @@ describe("코드 지도: 블록 id ↔ 줄", () => {
     (json.blocks as { blocks: B[] }).blocks[0].icons = comment("첫 줄\n둘째 줄");
     const { code, map } = workspaceJsonToCodeWithMap(json);
     expect(code).toBe("# 첫 줄\n# 둘째 줄\n\nled.value(1)\n");
-    expect(map).toEqual({ lineToBlock: { 4: "on" }, blockToLines: { on: [4] } });
-    expect(workspaceJsonToCodeWithMap(program([]))).toEqual({ code: "", map: { lineToBlock: {}, blockToLines: {} } });
+    expect(map).toEqual({ lineToBlock: { 4: "on" }, blockToLines: { on: [4] }, blockStart: { on: 4 } });
+    expect(workspaceJsonToCodeWithMap(program([]))).toEqual({ code: "", map: { lineToBlock: {}, blockToLines: {}, blockStart: {} } });
   });
 
   it("몸통에 준비 블록만 있으면 pass 줄은 바깥 블록 (표식이 pass 를 없애지 않는다)", () => {

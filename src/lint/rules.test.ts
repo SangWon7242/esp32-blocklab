@@ -11,9 +11,9 @@ const run = (json: ReturnType<typeof program>, map: LineMap | null = null) => li
 const runMapped = (json: ReturnType<typeof program>) => lint(json, workspaceJsonToCodeWithMap(json as WorkspaceJson).map);
 
 describe("no-start", () => {
-  it("시작 블록이 없으면 오류 (1줄)", () => {
+  it("시작 블록이 없으면 오류 (줄 없음)", () => {
     const issues = only(run(program([], { noStart: true, tops: [pinWrite("w", "led")] })), "no-start");
-    expect(issues).toEqual([{ id: "no-start", level: "error", line: 1, ko: "프로그램이 시작되면 블록이 없어요", en: 'Error: no "프로그램이 시작되면" block' }]);
+    expect(issues).toEqual([{ id: "no-start", level: "error", ko: "프로그램이 시작되면 블록이 없어요", en: 'Error: no "프로그램이 시작되면" block' }]);
   });
   it("있으면 없음", () => {
     expect(only(run(program([])), "no-start")).toEqual([]);
@@ -177,6 +177,26 @@ describe("orphan", () => {
     const def = { type: "procedures_defnoreturn", id: "def", fields: { NAME: "f" } };
     expect(only(run(program([], { tops: [def] })), "orphan")).toEqual([]);
   });
+  it("떨어진 준비 블록은 준비한 것으로 치지 않는다 (시작 블록 안의 켜기는 여전히 오류)", () => {
+    const issues = run(program([pinWrite("w", "led")], { tops: [pinSetup("loose", "led", 26)], vars: ["led"] }));
+    expect(only(issues, "device-before-setup").map((i) => i.blockId)).toEqual(["w"]);
+    expect(only(issues, "orphan").map((i) => i.blockId)).toEqual(["loose"]);
+  });
+  it("떨어진 블록은 orphan 규칙만 본다 (빈 칸·핀·범위·반복·변수·코드 블록 규칙은 건너뛴다)", () => {
+    const loose: B[] = [
+      { type: "flow_wait", id: "w" },
+      pinSetup("p", "led", 40),
+      forever("loop", [pinWrite("on", "led")]),
+      { type: "esp_print", id: "pr", inputs: { VALUE: { block: varGet("d", "g") } } },
+      { type: "code_stmt", id: "c", fields: { CODE: "import gc" } },
+      varSet("x", num(1), "set_x"),
+    ];
+    const issues = run(program([{ type: "esp_print", id: "pr2", inputs: { VALUE: { block: varGet("x", "gx") } } }], { tops: loose, vars: ["led", "d", "x"] }));
+    expect(issues.map((i) => [i.id, i.blockId])).toEqual([
+      ["orphan", "w"], ["orphan", "p"], ["orphan", "loop"], ["orphan", "pr"], ["orphan", "c"], ["orphan", "set_x"],
+      ["undefined-variable", "gx"],
+    ]);
+  });
 });
 
 describe("undefined-variable", () => {
@@ -230,8 +250,8 @@ describe("lint: 순서와 줄 번호", () => {
     ]);
   });
   it("줄을 모르는 문제는 같은 수준의 뒤로, 지어낸 id 는 내보내지 않는다", () => {
-    const map: LineMap = { blockToLines: { b: [5] }, lineToBlock: { 5: "b" } };
-    const json = { blocks: { blocks: [{ type: "start_program", id: "start" }, { type: "flow_wait" }, { type: "flow_wait", id: "b" }] } };
+    const map: LineMap = { blockToLines: { b: [5] }, lineToBlock: { 5: "b" }, blockStart: { b: 5 } };
+    const json = { blocks: { blocks: [{ type: "start_program", id: "start", inputs: { BODY: { block: { type: "flow_wait", next: { block: { type: "flow_wait", id: "b" } } } } } }] } };
     const issues = only(lint(json, map), "empty-input");
     expect(issues.map((i) => [i.blockId, i.line])).toEqual([["b", 5], [undefined, undefined]]);
   });
