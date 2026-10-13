@@ -57,6 +57,23 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
   if (ctx.oledFolded) ctx.functions.delete("show");
 }
 
+/** 블록이 실제로 가리키는 변수 id: `{ id }` 꼴 필드 값과 함수 정의의 매개변수 id */
+function usedVariableIds(roots: BlockJson[]): Set<string> {
+  const ids = new Set<string>();
+  const visit = (b: BlockJson | undefined): void => {
+    if (!b) return;
+    for (const v of Object.values(b.fields ?? {})) {
+      if (v && typeof v === "object" && typeof (v as { id?: unknown }).id === "string") ids.add((v as { id: string }).id);
+    }
+    const params = (b.extraState as { params?: unknown } | undefined)?.params;
+    if (Array.isArray(params)) for (const p of params) if (p && typeof p === "object" && typeof p.id === "string") ids.add(p.id);
+    for (const input of Object.values(b.inputs ?? {})) { visit(input.block); visit(input.shadow); }
+    visit(b.next?.block);
+  };
+  roots.forEach(visit);
+  return ids;
+}
+
 export function codeToBlocks(code: string): ParseResult {
   const tree = parser.parse(code);
   const ctx = new ParseContext(code);
@@ -76,8 +93,10 @@ export function codeToBlocks(code: string): ParseResult {
   }
   tops.forEach((t, i) => { t.x = 40; t.y = 40 + 400 * (i + 1); });
 
+  // 접힌 함수 몸통이나 접힌 준비 줄에서만 쓰인 이름은 변수 목록에 남기지 않는다
+  const used = usedVariableIds([...tops, start]);
   const json = {
-    variables: [...ctx.variables.entries()].map(([name, id]) => ({ name, id })),
+    variables: [...ctx.variables.entries()].filter(([, id]) => used.has(id)).map(([name, id]) => ({ name, id })),
     blocks: { languageVersion: 0, blocks: [...tops, start] },
   } as unknown as WorkspaceJson;
   return { ok: true, json, unparsed: ctx.unparsed };

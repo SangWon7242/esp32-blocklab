@@ -49,6 +49,12 @@ describe("설정 패턴", () => {
     expect(b[0].fields).toEqual({ TRIG: 13, ECHO: 12 });
     expect(b[1].inputs?.VALUE?.block?.type).toBe("esp_distance");
     expect(tops(src)).toHaveLength(0);
+    // 접힌 함수 안에서만 쓰인 start·stop·t 와 접힌 핀 trig·echo 는 변수 목록에 남지 않는다
+    expect((parse(src).json.variables as { name: string }[]).map((v) => v.name)).toEqual(["d"]);
+  });
+  it("함수 매개변수는 쓰이지 않아도 변수로 남는다", () => {
+    const r = parse("def wait(t):\n    pass\n");
+    expect((r.json.variables as { name: string }[]).map((v) => v.name)).toEqual(["t"]);
   });
   it("본문이 다른 get_distance 는 사용자 함수로 남는다", () => {
     const src = [
