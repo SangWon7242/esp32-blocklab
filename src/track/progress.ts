@@ -57,10 +57,49 @@ export function parseProgress(text: string): Progress {
   return r.data;
 }
 
+/** 탭이 닫히면 사라지는 저장소 (localStorage 를 쓸 수 없을 때) */
+export class MemoryStorage implements StorageLike {
+  private readonly map = new Map<string, string>();
+  getItem(key: string): string | null {
+    return this.map.get(key) ?? null;
+  }
+  setItem(key: string, value: string): void {
+    this.map.set(key, value);
+  }
+  removeItem(key: string): void {
+    this.map.delete(key);
+  }
+}
+
+/** 브라우저 localStorage. 접근만 해도 SecurityError 가 나는 환경(차단된 쿠키·일부 사생활 모드)이면 undefined */
+function browserStorage(): StorageLike | undefined {
+  try {
+    return globalThis.localStorage ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** 실제로 쓰고 지울 수 있는지 한 번 시험한다 */
+function writable(storage: StorageLike): boolean {
+  const probe = `${STORAGE_KEY}:probe`;
+  try {
+    storage.setItem(probe, "1");
+    storage.removeItem(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export class LocalProgressStore implements ProgressStore {
   private readonly storage: StorageLike;
+  /** false 면 localStorage 를 쓸 수 없어 메모리에만 남는다 (새로 고치면 사라짐) */
+  readonly persistent: boolean;
   constructor(storage?: StorageLike) {
-    this.storage = storage ?? globalThis.localStorage;
+    const candidate = storage ?? browserStorage();
+    this.persistent = candidate !== undefined && writable(candidate);
+    this.storage = this.persistent && candidate ? candidate : new MemoryStorage();
   }
 
   /** 저장된 글이 깨져 있으면 원문을 :corrupt 키에 옮겨 두고 빈 기록으로 시작한다 */

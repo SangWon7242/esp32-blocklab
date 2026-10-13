@@ -1,10 +1,11 @@
 import { lazy, Suspense } from "react";
-import { HashRouter, Link, NavLink, Route, Routes } from "react-router";
+import { HashRouter, Link, NavLink, Route, Routes, useLocation } from "react-router";
 import { Blocks, Cpu, Route as RouteIcon, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { HomePage } from "./pages/HomePage";
 
 // 편집기(Blockly·CodeMirror)는 무거우므로 자유 코딩 화면을 열 때 따로 받는다
@@ -20,6 +21,25 @@ const navItems = [
   { to: "/track", label: "트랙", icon: RouteIcon },
   { to: "/settings", label: "설정", icon: Settings },
 ] as { to: string; label: string; icon: typeof Blocks; soon?: boolean }[];
+
+/** 화면 영역. 주소가 바뀌면 오류 경계를 새로 만들어 다른 화면으로는 갈 수 있게 한다 */
+function Screens() {
+  const { pathname } = useLocation();
+  return (
+    <ErrorBoundary key={pathname}>
+      <Suspense fallback={<div className="p-8 text-muted-foreground">불러오는 중…</div>}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/lab" element={<LabPage />} />
+          <Route path="/track" element={<TrackPage />} />
+          <Route path="/track/:chapter" element={<ChapterPage />} />
+          <Route path="/track/:chapter/:step" element={<StepPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
 
 export function App() {
   return (
@@ -56,16 +76,7 @@ export function App() {
             </nav>
           </header>
           <main className="min-h-0 flex-1">
-            <Suspense fallback={<div className="p-8 text-muted-foreground">불러오는 중…</div>}>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/lab" element={<LabPage />} />
-                <Route path="/track" element={<TrackPage />} />
-                <Route path="/track/:chapter" element={<ChapterPage />} />
-                <Route path="/track/:chapter/:step" element={<StepPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-              </Routes>
-            </Suspense>
+            <Screens />
           </main>
         </div>
         <Toaster />

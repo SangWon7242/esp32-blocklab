@@ -41,6 +41,7 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
 
   const check = () => onInput({ ...rc, answers, results: gradeReadCheck(step.questions, answers) }, { attempt: true });
   const allRight = step.questions.every((_, i) => results[i] === true);
+  const allAnswered = step.questions.every((_, i) => (answers[i] ?? "").trim() !== "");
 
   return (
     <div className="space-y-5">
@@ -97,9 +98,11 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
         })}
       </ol>
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={check} disabled={allRight}>확인</Button>
+        <Button onClick={check} disabled={allRight || !allAnswered}>확인</Button>
         {allRight ? (
           <span className="text-sm text-primary">모두 맞았어요. 아래 완료를 누르세요.</span>
+        ) : !allAnswered ? (
+          <span className="text-sm text-muted-foreground">모든 문항에 답하면 확인할 수 있어요</span>
         ) : attempts > 0 ? (
           <span className="text-sm text-muted-foreground">확인 {attempts}번</span>
         ) : null}

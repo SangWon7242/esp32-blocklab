@@ -65,3 +65,38 @@ describe("LocalProgressStore", () => {
     expect(storage.getItem(`${STORAGE_KEY}:corrupt`)).toBe("{broken");
   });
 });
+
+describe("LocalProgressStore — localStorage 를 쓸 수 없을 때", () => {
+  const throwing: StorageLike = {
+    getItem() { throw new Error("SecurityError"); },
+    setItem() { throw new Error("SecurityError"); },
+    removeItem() { throw new Error("SecurityError"); },
+  };
+  const record = { status: "done" as const, input: {}, attempts: 0, updatedAt: "2026-10-14T00:00:00.000Z" };
+
+  it("쓰기가 막힌 저장소면 메모리로 바꿔 계속 동작한다", async () => {
+    const store = new LocalProgressStore(throwing);
+    expect(store.persistent).toBe(false);
+    expect(await store.load()).toEqual(emptyProgress());
+    await store.saveStep("c", "s", record);
+    expect((await store.load()).chapters.c.s.status).toBe("done");
+  });
+
+  it("localStorage 에 접근만 해도 throw 하면 메모리로 시작한다", async () => {
+    const desc = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+    Object.defineProperty(globalThis, "localStorage", { configurable: true, get() { throw new Error("SecurityError"); } });
+    try {
+      const store = new LocalProgressStore();
+      expect(store.persistent).toBe(false);
+      await store.saveStep("c", "s", record);
+      expect(JSON.parse(await store.exportJson()).chapters.c.s.status).toBe("done");
+    } finally {
+      if (desc) Object.defineProperty(globalThis, "localStorage", desc);
+      else delete (globalThis as { localStorage?: unknown }).localStorage;
+    }
+  });
+
+  it("쓸 수 있는 저장소면 그대로 쓴다", () => {
+    expect(new LocalProgressStore(new MapStorage()).persistent).toBe(true);
+  });
+});

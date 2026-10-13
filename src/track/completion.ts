@@ -16,6 +16,8 @@ export type AnalysisInput = {
   revealed?: boolean;
   /** 예시 답 항목마다 "내 답에도 있다" 체크 ("know:0" → true) */
   matched?: Record<string, boolean>;
+  /** 겹치는 항목이 없어도 "대조했어요"를 눌렀는지 */
+  compared?: boolean;
 };
 export type ReadCheckInput = {
   /** 문항마다 학생 답 (숫자·선택지 번호·줄 번호를 글로) */
@@ -39,6 +41,11 @@ export const filled = (s: unknown): boolean => typeof s === "string" && s.trim()
 
 export function analysisFilled(input: AnalysisInput): boolean {
   return filled(input.know) && filled(input.decide) && filled(input.act);
+}
+
+/** 예시 답과 대조했는지: 체크가 하나라도 있거나 "대조했어요"를 눌렀다 */
+export function analysisCompared(input: AnalysisInput): boolean {
+  return input.compared === true || Object.values(input.matched ?? {}).some(Boolean);
 }
 
 /** 학생이 적은 글을 문항 답 숫자로. 비었거나 숫자가 아니면 null */
@@ -73,7 +80,7 @@ export function canComplete(step: Step, input: Record<string, unknown>): boolean
       return step.blanks.every((_, i) => filled((input as PredictInput).answers?.[i]));
     case "analysis": {
       const a = input as AnalysisInput;
-      return analysisFilled(a) && a.revealed === true;
+      return analysisFilled(a) && a.revealed === true && analysisCompared(a);
     }
     case "readcheck": {
       const results = (input as ReadCheckInput).results ?? [];

@@ -24,10 +24,14 @@ describe("canComplete", () => {
     expect(canComplete(predict, { answers: ["1"] })).toBe(false);
     expect(canComplete(predict, { answers: ["1", "2"] })).toBe(true);
   });
-  it("analysis: 세 칸을 쓰고 예시 답을 펼쳐 대조해야 한다", () => {
-    expect(canComplete(analysis, { know: "a", decide: "b", act: "c" })).toBe(false);
-    expect(canComplete(analysis, { know: "a", decide: "", act: "c", revealed: true })).toBe(false);
-    expect(canComplete(analysis, { know: "a", decide: "b", act: "c", revealed: true })).toBe(true);
+  it("analysis: 세 칸을 쓰고 예시 답을 펼쳐 대조(체크 하나 이상 또는 대조했어요)해야 한다", () => {
+    const three = { know: "a", decide: "b", act: "c" };
+    expect(canComplete(analysis, three)).toBe(false);
+    expect(canComplete(analysis, { ...three, decide: "", revealed: true, compared: true })).toBe(false);
+    expect(canComplete(analysis, { ...three, revealed: true })).toBe(false);
+    expect(canComplete(analysis, { ...three, revealed: true, matched: { "know:0": false } })).toBe(false);
+    expect(canComplete(analysis, { ...three, revealed: true, matched: { "know:0": true } })).toBe(true);
+    expect(canComplete(analysis, { ...three, revealed: true, compared: true })).toBe(true);
   });
   it("readcheck: 마지막 확인에서 모든 문항이 맞아야 한다", () => {
     expect(canComplete(readcheck, {})).toBe(false);

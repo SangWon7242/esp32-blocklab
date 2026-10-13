@@ -1,9 +1,9 @@
-import { Eye } from "lucide-react";
+import { Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { analysisFilled, type AnalysisInput } from "@/track/completion";
+import { analysisCompared, analysisFilled, type AnalysisInput } from "@/track/completion";
 import type { StepProps } from "./types";
 
 const BOXES = [
@@ -37,7 +37,7 @@ export function Analysis({ step, input, onInput, teacherMode }: StepProps<"analy
         ))}
       </div>
 
-      {!a.revealed && (
+      {!a.revealed && !teacherMode && (
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" disabled={!filled} onClick={() => onInput({ ...a, revealed: true })}>
             <Eye className="size-4" />예시 답 보기
@@ -73,7 +73,20 @@ export function Analysis({ step, input, onInput, teacherMode }: StepProps<"analy
               </div>
             ))}
           </div>
-          <p className="mt-3 text-sm">{total}개 중 {matchedCount}개가 내 답에도 있어요.</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+            <span>{total}개 중 {matchedCount}개가 내 답에도 있어요.</span>
+            {a.revealed && analysisCompared(a) ? (
+              <span className="flex items-center gap-1 text-primary"><Check className="size-4" />대조를 마쳤어요. 아래 완료를 누르세요.</span>
+            ) : (
+              <>
+                {/* 겹치는 항목이 하나도 없을 때도 대조를 마칠 수 있게 (교사 모드에선 예시 답 보기 버튼 대신) */}
+                <Button size="sm" variant="secondary" disabled={!filled} onClick={() => onInput({ ...a, revealed: true, compared: true })}>
+                  <Check className="size-4" />대조했어요
+                </Button>
+                {!filled && <span className="text-muted-foreground">세 칸을 모두 쓴 뒤에 대조할 수 있어요</span>}
+              </>
+            )}
+          </div>
         </section>
       )}
     </div>

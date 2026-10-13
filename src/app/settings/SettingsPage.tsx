@@ -23,15 +23,21 @@ function downloadText(name: string, text: string) {
   URL.revokeObjectURL(url);
 }
 
+const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
 /** #/settings — 교사 모드·가짜 보드·진행 기록 내보내기/불러오기/초기화 */
 export function SettingsPage() {
   const settings = useSettings();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const exportProgress = async () => {
-    const text = await progressStore.exportJson();
-    const date = new Date().toISOString().slice(0, 10);
-    downloadText(`esp32-blocklab-기록-${date}.json`, text);
+    try {
+      const text = await progressStore.exportJson();
+      const date = new Date().toISOString().slice(0, 10);
+      downloadText(`esp32-blocklab-기록-${date}.json`, text);
+    } catch (e) {
+      toast.error(`내보내지 못했어요: ${message(e)}`);
+    }
   };
 
   const importProgress = async (file: File | undefined) => {
@@ -41,23 +47,31 @@ export function SettingsPage() {
       await reloadProgress();
       toast.success("진행 기록을 불러왔어요");
     } catch (e) {
-      toast.error(`불러오지 못했어요: ${e instanceof Error ? e.message : String(e)}`);
+      toast.error(`불러오지 못했어요: ${message(e)}`);
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }
   };
 
   const resetProgress = async () => {
-    await progressStore.clear();
-    await reloadProgress();
-    toast.success("진행 기록을 지웠어요");
+    try {
+      await progressStore.clear();
+      await reloadProgress();
+      toast.success("진행 기록을 지웠어요");
+    } catch (e) {
+      toast.error(`지우지 못했어요: ${message(e)}`);
+    }
   };
 
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-2xl space-y-4 p-4 sm:p-8">
         <h1 className="text-2xl font-bold">설정</h1>
-        <p className="text-sm text-muted-foreground">이 설정과 진행 기록은 이 브라우저에만 저장됩니다.</p>
+        <p className="text-sm text-muted-foreground">
+          {progressStore.persistent
+            ? "이 설정과 진행 기록은 이 브라우저에만 저장됩니다."
+            : "이 브라우저는 저장이 막혀 있어 설정과 진행 기록이 새로 고치면 사라집니다. 내보내기로 파일에 남겨 두세요."}
+        </p>
 
         <Card>
           <CardHeader>
