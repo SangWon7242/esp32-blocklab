@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { DeviceError, FakeDevice } from "@/device";
-import { saveToBoard } from "./saveToBoard";
+import { saveToBoard, syncLibs } from "./saveToBoard";
 
 async function connected() {
   const device = new FakeDevice();
@@ -32,6 +32,16 @@ describe("saveToBoard", () => {
     await saveToBoard(device, { code: "x\n", blockTypes: ["esp_oled_setup"] }, (t) => log.push(t), fetchLibs);
     expect(device.files.get("ssd1306.py")).toBe("# ssd1306.py");
     expect(log[0]).toBe("ssd1306.py 새 판으로 바꾸는 중…");
+  });
+
+  it("syncLibs: 코드 모드에서 손으로 적은 import 도 라이브러리를 올린다 (main.py 는 건드리지 않음)", async () => {
+    const device = await connected();
+    const fetchLibs = vi.fn(async (names: string[]) => names.map((name) => ({ name, text: `# ${name}` })));
+    const log: string[] = [];
+    await syncLibs(device, { code: "import ssd1306\nprint(1)\n", blockTypes: ["code_stmt"] }, (t) => log.push(t), fetchLibs);
+    expect(device.files.get("ssd1306.py")).toBe("# ssd1306.py");
+    expect(device.files.has("main.py")).toBe(false);
+    expect(log).toEqual(["ssd1306.py 올리는 중…"]);
   });
 
   it("라이브러리가 필요 없으면 보드 파일 목록도 읽지 않는다", async () => {

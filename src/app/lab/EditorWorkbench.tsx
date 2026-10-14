@@ -57,6 +57,8 @@ export type EditorProgram = { code: string; blocksJson: WorkspaceJson | null };
 export type EditorWorkbenchHandle = {
   /** debounce 중인 코드까지 반영한 지금 프로그램 */
   getProgram(): EditorProgram;
+  /** 예시 프로그램(코드)을 블록·코드 패널·검사에 함께 싣는다 (?example= 이 화면 안에서 바뀔 때) */
+  openExample(code: string): void;
 };
 
 export type EditorWorkbenchProps = {
@@ -93,6 +95,8 @@ export type EditorWorkbenchProps = {
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
 export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
+  /** 핸들의 openExample 이 최신 openExample 을 부르게 (useImperativeHandle 의존성에 넣지 않으려고) */
+  const openExampleRef = useRef<(code: string) => void>(() => undefined);
   const [state, dispatch] = useReducer(
     editorReducer,
     null,
@@ -316,6 +320,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
       const current = flushPendingCode();
       return { code: current.code, blocksJson: current.blocks };
     },
+    openExample: (code: string) => openExampleRef.current(code),
   }), [flushPendingCode]);
 
   const switchSource = (source: Source) => {
@@ -363,6 +368,8 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
     }
     setDocRequest(null);
   }, []);
+
+  openExampleRef.current = openExample;
 
   // 처음 한 번: 블록 사전에서 넘어온 예시 프로그램을 싣는다
   useEffect(() => {

@@ -93,3 +93,20 @@ export function libFilesFor(blockTypes: string[]): string[] {
   const used = new Set(blockTypes);
   return [...new Set(setupSpecs().filter((s) => used.has(s.blockType)).flatMap((s) => s.libFiles ?? []))];
 }
+
+/**
+ * 프로그램이 필요로 하는 라이브러리: 쓰인 준비 블록의 것 + 코드가 직접 `import`/`from … import` 하는 모듈의 것.
+ * 코드 모드에서 손으로 `import ssd1306` 을 적은 경우도 잡는다. 한 모듈을 가져오면 그 장치의 묶음(mfrc522_i2c → config·soft_iic)을 모두 올린다.
+ */
+export function libFilesForProgram({ code, blockTypes }: { code: string; blockTypes: string[] }): string[] {
+  const files = new Set(libFilesFor(blockTypes));
+  for (const spec of setupSpecs()) {
+    const libs = spec.libFiles ?? [];
+    const imported = libs.some((f) => {
+      const mod = f.replace(/\.py$/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp(String.raw`^\s*(?:import\s+(?:[\w.]+\s*,\s*)*${mod}\b|from\s+${mod}\s+import\b)`, "m").test(code);
+    });
+    if (imported) for (const f of libs) files.add(f);
+  }
+  return [...files];
+}

@@ -34,7 +34,7 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   const [searchParams] = useSearchParams();
   const fake = searchParams.get("device") === "fake" || readSettings().fakeBoard;
   const inner = useRef<EditorWorkbenchHandle>(null);
-  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram() }), []);
+  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), openExample: (code: string) => inner.current?.openExample(code) }), []);
 
   const onProgramRef = useRef(onProgram);
   onProgramRef.current = onProgram;

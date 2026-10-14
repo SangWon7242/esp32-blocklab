@@ -93,3 +93,17 @@ test("?block= 으로 들어오면 그 카드로 스크롤한다", async ({ page 
   await expect(card).toBeInViewport();
   await expect(card).toBeFocused();
 });
+
+test("이미 자유 코딩에 있을 때 주소만 ?example= 으로 바뀌어도 예시가 실린다", async ({ page }) => {
+  await page.goto("/#/lab");
+  await expect(page.getByTestId("blockly-host").locator(".blocklyMainBackground")).toBeVisible();
+  await page.getByRole("tab", { name: "코드" }).click();
+  const code = page.getByTestId("code-panel");
+  await expect(code).toContainText("led = Pin(26");
+  // 화면을 다시 읽지 않고 해시만 바꾼다 (블록 사전 탭에서 링크를 누른 것과 같은 꼴)
+  await page.evaluate(() => { location.hash = "#/lab?example=flow_wait_ms"; });
+  await expect(code).toContainText("time.sleep_ms(");
+  // 샘플(1초 깜빡이기)은 사라지고 예시(sleep_ms)가 실렸다
+  await expect(code).not.toContainText("time.sleep(1)");
+  await expect(page).not.toHaveURL(/example=/);
+});

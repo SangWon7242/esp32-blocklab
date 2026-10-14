@@ -136,3 +136,18 @@ test("가짜 장치: 연결을 끊으면 배지가 끊김으로 돌아간다", a
   await expect(status(page)).toHaveText("끊김");
   await expect(button(page, "보드에 저장")).toBeDisabled();
 });
+
+test("가짜 장치: 실행 전에도 코드가 import 하는 라이브러리를 먼저 올린다", async ({ page }) => {
+  await openFake(page);
+  await connect(page);
+  // 코드 모드에서 손으로 적은 import 도 라이브러리 필요로 본다 (블록 종류가 아니라 import 줄로)
+  await replaceCode(page, "import ssd1306\nprint(1)\n");
+  await button(page, "실행").click();
+  await expect(rows(page).filter({ hasText: "ssd1306.py 올리는 중…" })).toHaveCount(1);
+  await expect(rows(page).filter({ hasText: "실행을 시작했어요" })).toHaveCount(1);
+  await expect(status(page)).toHaveText("연결됨");
+  // 두 번째 실행은 같은 판이 이미 있으니 올리지 않는다
+  await button(page, "실행").click();
+  await expect(rows(page).filter({ hasText: "실행을 시작했어요" })).toHaveCount(2);
+  await expect(rows(page).filter({ hasText: "ssd1306.py 올리는 중…" })).toHaveCount(1);
+});

@@ -4,7 +4,7 @@ import { DeviceError, FakeDevice, WebSerialDevice, type Device, type DeviceStatu
 import {
   appendDeviceRow, appendDeviceText, EMPTY_DEVICE_CONSOLE, tracebackRow, type DeviceConsole, type DeviceKind, type DeviceRow,
 } from "./deviceConsole";
-import { saveToBoard, type DeviceProgram } from "./saveToBoard";
+import { saveToBoard, syncLibs, type DeviceProgram } from "./saveToBoard";
 
 export type { DeviceProgram };
 
@@ -155,6 +155,8 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
     const { code } = program;
     try {
       optsRef.current.showConsole();
+      // 실행은 main.py 를 쓰지 않지만 라이브러리는 있어야 import 가 된다 (없거나 옛 판이면 먼저 올린다)
+      await syncLibs(device, program, (text) => push("system", text));
       push("system", "실행을 시작했어요");
       runOutput.current = "";
       const result = await device.run(code);
