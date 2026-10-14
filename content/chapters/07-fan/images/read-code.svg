@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="frd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="frd-title">코드 읽기: 줄 번호가 붙은 코드 창을 돋보기로 보며 기다리는 시간 세기, 두 핀의 값 비교하기, 줄 번호 누르기</title>
+  <rect x="40" y="28" width="380" height="306" rx="12" fill="var(--card)"/>
+  <path d="M40 58 H420"/>
+  <circle cx="62" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="80" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="98" cy="43" r="5" fill="var(--muted)"/>
+  <g font-size="12" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55">
+    <text x="74" y="86">1</text>
+    <text x="74" y="104">2</text>
+    <text x="74" y="122">3</text>
+    <text x="74" y="140">4</text>
+    <text x="74" y="158">5</text>
+    <text x="74" y="176">6</text>
+    <text x="74" y="194">7</text>
+    <text x="74" y="212">8</text>
+    <text x="74" y="230">9</text>
+    <text x="74" y="248">10</text>
+    <text x="74" y="266">11</text>
+    <text x="74" y="284">12</text>
+    <text x="74" y="302">13</text>
+    <text x="74" y="320">14</text>
+  </g>
+  <g fill="currentColor" stroke="none" opacity="0.28">
+    <rect x="90" y="78" width="150" height="8" rx="4"/>
+    <rect x="90" y="96" width="90" height="8" rx="4"/>
+    <rect x="90" y="132" width="200" height="8" rx="4"/>
+    <rect x="90" y="150" width="200" height="8" rx="4"/>
+    <rect x="90" y="186" width="110" height="8" rx="4"/>
+    <rect x="112" y="204" width="130" height="8" rx="4"/>
+    <rect x="112" y="222" width="130" height="8" rx="4"/>
+    <rect x="90" y="258" width="120" height="8" rx="4"/>
+    <rect x="112" y="276" width="130" height="8" rx="4"/>
+    <rect x="112" y="294" width="130" height="8" rx="4"/>
+  </g>
+  <circle cx="330" cy="200" r="38" fill="var(--muted)" fill-opacity="0.5" stroke-width="3"/>
+  <path d="M357 227 L388 258" stroke-width="7"/>
+  <circle cx="458" cy="110" r="13" fill="#4562f5" stroke="none"/>
+  <text x="458" y="115" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">1</text>
+  <text x="480" y="111" font-size="16" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">시간 세기</text>
+  <text x="480" y="133" font-size="13" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">몇 초 동안 기다릴까?</text>
+  <circle cx="458" cy="190" r="13" fill="#4562f5" stroke="none"/>
+  <text x="458" y="195" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">2</text>
+  <text x="480" y="191" font-size="16" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">두 핀 비교하기</text>
+  <text x="480" y="213" font-size="13" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">함수마다 무엇이 다를까?</text>
+  <circle cx="458" cy="270" r="13" fill="#4562f5" stroke="none"/>
+  <text x="458" y="275" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">3</text>
+  <text x="480" y="271" font-size="16" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">줄 번호 누르기</text>
+  <text x="480" y="293" font-size="13" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">줄 앞의 회색 숫자</text>
+</svg>

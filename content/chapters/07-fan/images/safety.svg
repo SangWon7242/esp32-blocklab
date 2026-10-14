@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fs-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fs-title">선풍기 안전 약속: 전원을 뺀 채 배선을 먼저 끝내고, 팬 날개는 배선이 끝난 뒤에 끼우고, 그다음 전원을 켜요. 도는 날개에 손가락과 머리카락이 닿지 않게 거리를 두어요</title>
+  <text x="320" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none">선풍기 안전 약속</text>
+  <!-- 첫째 판: 순서 -->
+  <rect x="24" y="54" width="290" height="286" rx="12" fill="var(--card)"/>
+  <text x="169" y="82" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">팬 날개는 배선이 끝난 뒤에</text>
+  <g stroke="none">
+    <circle cx="56" cy="124" r="14" fill="#4562f5"/>
+    <circle cx="56" cy="204" r="14" fill="#4562f5"/>
+    <circle cx="56" cy="284" r="14" fill="#4562f5"/>
+  </g>
+  <g fill="#ffffff" stroke="none" font-size="15" font-weight="700" text-anchor="middle">
+    <text x="56" y="129">1</text>
+    <text x="56" y="209">2</text>
+    <text x="56" y="289">3</text>
+  </g>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="700">
+    <text x="80" y="120">전원을 뺀 채 선 4가닥 잇기</text>
+    <text x="80" y="200">팬 날개 끼우기</text>
+    <text x="80" y="280">그다음 USB · 배터리 꽂기</text>
+  </g>
+  <g fill="currentColor" stroke="none" font-size="12" fill-opacity="0.75">
+    <text x="80" y="140">USB 와 배터리 홀더는 빼 두어요</text>
+    <text x="80" y="220">축 끝까지 꾹 눌러 끼워요</text>
+    <text x="80" y="300">날개 앞을 비우고 켜요</text>
+  </g>
+  <!-- 순서 화살표 -->
+  <path d="M56 146 V180 M50 172 L56 181 L62 172" stroke-opacity="0.6"/>
+  <path d="M56 226 V260 M50 252 L56 261 L62 252" stroke-opacity="0.6"/>
+  <!-- 둘째 판: 거리 두기 -->
+  <rect x="326" y="54" width="290" height="286" rx="12" fill="var(--card)"/>
+  <text x="471" y="82" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">손 · 머리카락 조심</text>
+  <!-- 조심 원 -->
+  <circle cx="440" cy="196" r="84" stroke="#e03131" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <!-- 팬 날개 -->
+  <g fill="#00b6b1" fill-opacity="0.35">
+    <ellipse cx="440" cy="166" rx="13" ry="30"/>
+    <ellipse cx="440" cy="166" rx="13" ry="30" transform="rotate(120 440 196)"/>
+    <ellipse cx="440" cy="166" rx="13" ry="30" transform="rotate(240 440 196)"/>
+  </g>
+  <circle cx="440" cy="196" r="7" fill="var(--card)"/>
+  <!-- 손 -->
+  <g fill="var(--muted)" stroke-width="2">
+    <rect x="550" y="186" width="44" height="54" rx="12"/>
+    <rect x="528" y="190" width="30" height="11" rx="5.5"/>
+    <rect x="524" y="204" width="34" height="11" rx="5.5"/>
+    <rect x="526" y="218" width="32" height="11" rx="5.5"/>
+    <rect x="532" y="232" width="26" height="10" rx="5"/>
+  </g>
+  <!-- 머리카락 -->
+  <g stroke-width="2.5" stroke="#8d5524">
+    <path d="M560 102 C 540 110, 548 124, 528 134"/>
+    <path d="M570 104 C 552 116, 560 130, 538 142"/>
+    <path d="M580 108 C 564 122, 572 136, 550 148"/>
+  </g>
+  <!-- 금지 표시 -->
+  <path d="M512 160 L524 172 M524 160 L512 172" stroke="#e03131" stroke-width="3"/>
+  <text x="471" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">빨간 점선 안으로 손을 넣지 않아요</text>
+  <text x="471" y="326" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">긴 머리는 묶고, 날개 앞에 얼굴을 대지 않아요</text>
+</svg>

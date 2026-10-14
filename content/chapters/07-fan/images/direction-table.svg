@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fd-title">두 핀 값의 조합 표: IN+ 가 1, IN− 가 0 이면 앞으로, IN+ 가 0, IN− 가 1 이면 뒤로, 둘 다 0 이면 정지</title>
+  <text x="320" y="38" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">두 핀 값의 조합 → 모터가 하는 일</text>
+  <!-- 표 틀 -->
+  <rect x="40" y="56" width="560" height="284" rx="10" fill="var(--card)"/>
+  <rect x="40" y="56" width="560" height="58" rx="10" fill="var(--muted)"/>
+  <path d="M40 114 H600 M40 189 H600 M40 264 H600" />
+  <path d="M190 56 V340 M320 56 V340 M450 56 V340" stroke-opacity="0.5"/>
+  <!-- 머리 -->
+  <g fill="currentColor" stroke="none" text-anchor="middle" font-weight="700">
+    <text x="115" y="91" font-size="15">함수 이름</text>
+    <text x="255" y="83" font-size="15">IN+</text>
+    <text x="255" y="102" font-size="12" font-weight="400" fill-opacity="0.75">13번 · motor1a</text>
+    <text x="385" y="83" font-size="15">IN−</text>
+    <text x="385" y="102" font-size="12" font-weight="400" fill-opacity="0.75">12번 · motor1b</text>
+    <text x="525" y="91" font-size="15">모터</text>
+  </g>
+  <!-- 함수 이름 -->
+  <g fill="currentColor" stroke="none" text-anchor="middle" font-size="15" font-weight="700">
+    <text x="115" y="157">forward()</text>
+    <text x="115" y="232">backward()</text>
+    <text x="115" y="307">stop()</text>
+  </g>
+  <!-- 값: 1 은 색 원, 0 은 빈 원 -->
+  <circle cx="255" cy="151" r="20" fill="#00b6b1" stroke="none"/>
+  <circle cx="385" cy="151" r="20" fill="var(--muted)"/>
+  <circle cx="255" cy="226" r="20" fill="var(--muted)"/>
+  <circle cx="385" cy="226" r="20" fill="#00b6b1" stroke="none"/>
+  <circle cx="255" cy="301" r="20" fill="var(--muted)"/>
+  <circle cx="385" cy="301" r="20" fill="var(--muted)"/>
+  <g stroke="none" text-anchor="middle" font-size="20" font-weight="700">
+    <text x="255" y="158" fill="#ffffff">1</text>
+    <text x="385" y="158" fill="currentColor">0</text>
+    <text x="255" y="233" fill="currentColor">0</text>
+    <text x="385" y="233" fill="#ffffff">1</text>
+    <text x="255" y="308" fill="currentColor">0</text>
+    <text x="385" y="308" fill="currentColor">0</text>
+  </g>
+  <!-- 모터: 앞으로 (시계 방향 화살표) -->
+  <path d="M471 143.5 A 15 15 0 1 1 476.5 164" stroke-width="3"/>
+  <path d="M468.7 159.5 L478.75 160.1 L474.25 167.9 Z" fill="currentColor" stroke-width="1.5"/>
+  <text x="514" y="157" font-size="16" font-weight="700" fill="currentColor" stroke="none">앞으로</text>
+  <!-- 모터: 뒤로 (반대 방향 화살표) -->
+  <path d="M497 218.5 A 15 15 0 1 0 491.5 239" stroke-width="3" stroke="#f4af18"/>
+  <path d="M499.3 234.5 L489.25 235.1 L493.75 242.9 Z" fill="#f4af18" stroke="#f4af18" stroke-width="1.5"/>
+  <text x="514" y="232" font-size="16" font-weight="700" fill="currentColor" stroke="none">뒤로</text>
+  <!-- 모터: 정지 -->
+  <circle cx="484" cy="301" r="15" stroke-width="3"/>
+  <path d="M478 295 V307 M490 295 V307" stroke-width="3"/>
+  <text x="514" y="307" font-size="16" font-weight="700" fill="currentColor" stroke="none">정지</text>
+</svg>

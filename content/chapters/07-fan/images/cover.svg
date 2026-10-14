@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fc-title">책상 위 작은 선풍기: 노트북과 USB 선으로 이은 ESP32 보드, 보드 외부 전원 단자에 꽂은 AA 건전지 6개 배터리 홀더, 선 네 가닥으로 이은 130 모터 모듈과 그 축에 끼운 팬 날개가 바람을 일으키는 장면</title>
+  <!-- 제목 -->
+  <text x="36" y="62" font-size="24" font-weight="700" fill="currentColor" stroke="none">작은 선풍기</text>
+  <text x="36" y="92" font-size="15" fill="currentColor" fill-opacity="0.75" stroke="none">두 핀으로 앞으로 · 뒤로 · 정지</text>
+  <!-- 책상 -->
+  <path d="M20 300 H620" stroke-width="3"/>
+  <path d="M52 300 V350 M588 300 V350"/>
+  <!-- 노트북: 화면에 블록 -->
+  <rect x="34" y="178" width="150" height="96" rx="8" fill="var(--card)"/>
+  <rect x="50" y="194" width="70" height="18" rx="5" fill="#00b400" stroke="none"/>
+  <rect x="62" y="218" width="104" height="18" rx="5" fill="#ae4500" stroke="none"/>
+  <rect x="62" y="242" width="80" height="18" rx="5" fill="#f4af18" stroke="none"/>
+  <path d="M18 298 L32 274 H186 L200 298 Z" fill="var(--muted)"/>
+  <!-- USB 선: 노트북 → 보드 -->
+  <path d="M196 284 C 230 284, 236 232, 270 232 C 290 232, 296 258, 306 262" stroke-width="3"/>
+  <!-- 배터리 홀더 (AA 6개) -->
+  <rect x="196" y="272" width="96" height="28" rx="4" fill="var(--muted)"/>
+  <g fill="var(--card)" stroke-width="1.5">
+    <rect x="201" y="277" width="13" height="18" rx="3"/>
+    <rect x="216" y="277" width="13" height="18" rx="3"/>
+    <rect x="231" y="277" width="13" height="18" rx="3"/>
+    <rect x="246" y="277" width="13" height="18" rx="3"/>
+    <rect x="261" y="277" width="13" height="18" rx="3"/>
+    <rect x="276" y="277" width="13" height="18" rx="3"/>
+  </g>
+  <text x="244" y="322" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">AA × 6</text>
+  <!-- 배터리 선 → 외부 전원 단자 -->
+  <path d="M292 282 C 300 282, 300 290, 306 290" stroke="#e03131" stroke-width="3"/>
+  <path d="M292 292 C 298 292, 300 294, 306 294" stroke="#1e1e1e" stroke-width="3"/>
+  <!-- ESP32 보드 -->
+  <rect x="306" y="252" width="110" height="48" rx="6" fill="#00b6b1" fill-opacity="0.25"/>
+  <rect x="300" y="256" width="12" height="12" rx="2" fill="var(--card)"/>
+  <rect x="300" y="284" width="12" height="12" rx="2" fill="var(--muted)"/>
+  <rect x="338" y="262" width="40" height="28" rx="3" fill="var(--card)"/>
+  <text x="358" y="281" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <!-- 선 네 가닥: 보드 → 모터 모듈 -->
+  <path d="M410 258 C 434 258, 440 268, 462 268" stroke="#1e1e1e" stroke-width="3"/>
+  <path d="M410 264 C 436 264, 442 274, 462 274" stroke="#e03131" stroke-width="3"/>
+  <path d="M410 270 C 438 270, 444 280, 462 280" stroke="#f59f00" stroke-width="3"/>
+  <path d="M410 276 C 440 276, 446 286, 462 286" stroke="#2f9e44" stroke-width="3"/>
+  <!-- 130 모터 모듈 (작은 보드) -->
+  <rect x="462" y="258" width="92" height="42" rx="5" fill="#1d4ed8"/>
+  <text x="508" y="285" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff" stroke="none">130 모터</text>
+  <!-- 모터 몸통과 축 -->
+  <rect x="490" y="212" width="36" height="46" rx="8" fill="var(--muted)"/>
+  <path d="M508 212 V176" stroke-width="4"/>
+  <!-- 팬 날개 -->
+  <g fill="#00b6b1" fill-opacity="0.35" stroke-width="2">
+    <ellipse cx="508" cy="126" rx="17" ry="46"/>
+    <ellipse cx="508" cy="126" rx="17" ry="46" transform="rotate(120 508 172)"/>
+    <ellipse cx="508" cy="126" rx="17" ry="46" transform="rotate(240 508 172)"/>
+  </g>
+  <circle cx="508" cy="172" r="10" fill="var(--card)"/>
+  <!-- 도는 모양 -->
+  <path d="M434 136 A 80 80 0 0 1 488 96" stroke-width="2" stroke-dasharray="4 6" stroke-opacity="0.6"/>
+  <path d="M582 208 A 80 80 0 0 1 528 248" stroke-width="2" stroke-dasharray="4 6" stroke-opacity="0.6"/>
+  <!-- 바람 -->
+  <g stroke-width="2.5" stroke-opacity="0.55">
+    <path d="M598 120 C 610 112, 620 122, 630 114"/>
+    <path d="M596 150 C 608 142, 618 152, 630 144"/>
+    <path d="M598 180 C 610 172, 620 182, 630 174"/>
+  </g>
+</svg>

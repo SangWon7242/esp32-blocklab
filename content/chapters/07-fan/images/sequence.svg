@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fq-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fq-title">test() 한 묶음: 앞으로 5초, 정지 2초, 뒤로 5초, 정지 2초. 묶음이 끝나면 처음으로 돌아가는데, 몇 번 되풀이할지는 묶음 밖에서 정해요</title>
+  <text x="60" y="44" font-size="18" font-weight="700" fill="currentColor" stroke="none">test() 한 묶음</text>
+  <text x="60" y="68" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">칸의 길이 = 그 동작을 하는 시간</text>
+  <!-- 되돌아가는 화살표 -->
+  <path d="M564 150 V108 H60 V142" stroke-width="2.5" stroke-dasharray="6 6"/>
+  <path d="M52 132 L60 144 L68 132" stroke-width="2.5"/>
+  <rect x="222" y="94" width="196" height="28" rx="14" fill="var(--card)"/>
+  <text x="320" y="113" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">다시 처음부터 — 몇 번?</text>
+  <!-- 묶음 칸 -->
+  <rect x="60" y="150" width="180" height="70" rx="6" fill="#00b6b1" fill-opacity="0.3"/>
+  <rect x="240" y="150" width="72" height="70" rx="6" fill="var(--muted)"/>
+  <rect x="312" y="150" width="180" height="70" rx="6" fill="#f4af18" fill-opacity="0.3"/>
+  <rect x="492" y="150" width="72" height="70" rx="6" fill="var(--muted)"/>
+  <g fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="150" y="182" font-size="17" font-weight="700">앞으로</text>
+    <text x="150" y="204" font-size="14">5초</text>
+    <text x="276" y="182" font-size="15" font-weight="700">정지</text>
+    <text x="276" y="204" font-size="14">2초</text>
+    <text x="402" y="182" font-size="17" font-weight="700">뒤로</text>
+    <text x="402" y="204" font-size="14">5초</text>
+    <text x="528" y="182" font-size="15" font-weight="700">정지</text>
+    <text x="528" y="204" font-size="14">2초</text>
+  </g>
+  <!-- 함수 이름 -->
+  <g fill="currentColor" stroke="none" text-anchor="middle" font-size="13" fill-opacity="0.8">
+    <text x="150" y="244">forward()</text>
+    <text x="276" y="244">stop()</text>
+    <text x="402" y="244">backward()</text>
+    <text x="528" y="244">stop()</text>
+  </g>
+  <!-- 아래 설명 -->
+  <rect x="60" y="272" width="504" height="56" rx="10" fill="var(--card)"/>
+  <text x="312" y="297" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">묶음 안은 "무엇을 할지", 묶음 밖은 "몇 번 할지"</text>
+  <text x="312" y="317" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">되풀이 횟수를 정하는 줄은 test() 를 부르는 곳에 있어요</text>
+</svg>

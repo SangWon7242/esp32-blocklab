@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fw-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fw-title">작은 선풍기 배선도: 130 모터 모듈의 G 는 ESP32 GND, V 는 5V, IN+ 는 13번(motor1a), IN− 는 12번(motor1b) 에 M-F 듀폰선으로 잇고, AA 건전지 6개 배터리 홀더는 보드의 외부 전원 단자에 꽂아요. 팬 날개는 배선이 모두 끝난 뒤에 끼워요</title>
+  <!-- 짝 정리 -->
+  <text x="200" y="40" font-size="15" font-weight="700" fill="currentColor" stroke="none">모듈 핀 → 보드 핀</text>
+  <text x="200" y="64" font-size="13" fill="currentColor" fill-opacity="0.8" stroke="none">G → GND · V → 5V · IN+ → 13 · IN− → 12</text>
+  <!-- ESP32 보드 -->
+  <rect x="40" y="30" width="120" height="300" rx="10" fill="var(--card)"/>
+  <rect x="58" y="44" width="74" height="70" rx="4" fill="var(--muted)"/>
+  <path d="M66 56 h10 v-6 h10 v6 h10 v-6 h10 v6 h10" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="95" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <rect x="78" y="324" width="34" height="16" rx="3" fill="var(--muted)"/>
+  <text x="95" y="318" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">USB</text>
+  <path d="M150 128h0 M150 236h0 M150 248h0" stroke-width="5" stroke-opacity="0.3"/>
+  <!-- 보드 핀 -->
+  <circle cx="150" cy="140" r="4.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <text x="140" y="145" text-anchor="end" font-size="14" font-weight="700" fill="currentColor" stroke="none">GND</text>
+  <circle cx="150" cy="164" r="4.5" fill="#e03131" stroke-width="1.5"/>
+  <text x="140" y="169" text-anchor="end" font-size="14" font-weight="700" fill="currentColor" stroke="none">5V</text>
+  <circle cx="150" cy="188" r="4.5" fill="#f59f00" stroke-width="1.5"/>
+  <text x="140" y="193" text-anchor="end" font-size="14" font-weight="700" fill="currentColor" stroke="none">13</text>
+  <circle cx="150" cy="212" r="4.5" fill="#2f9e44" stroke-width="1.5"/>
+  <text x="140" y="217" text-anchor="end" font-size="14" font-weight="700" fill="currentColor" stroke="none">12</text>
+  <!-- 외부 전원 단자 -->
+  <rect x="140" y="268" width="30" height="26" rx="4" fill="var(--muted)"/>
+  <circle cx="155" cy="281" r="5" fill="var(--card)"/>
+  <text x="132" y="278" text-anchor="end" font-size="12" font-weight="700" fill="currentColor" stroke="none">외부</text>
+  <text x="132" y="293" text-anchor="end" font-size="12" font-weight="700" fill="currentColor" stroke="none">전원</text>
+  <!-- 선 네 가닥 (테두리 + 색) -->
+  <path d="M150 140 H392" stroke-width="6"/>
+  <path d="M150 140 H392" stroke="#1e1e1e" stroke-width="3.5"/>
+  <path d="M150 164 H392" stroke-width="6"/>
+  <path d="M150 164 H392" stroke="#e03131" stroke-width="3.5"/>
+  <path d="M150 188 H392" stroke-width="6"/>
+  <path d="M150 188 H392" stroke="#f59f00" stroke-width="3.5"/>
+  <path d="M150 212 H392" stroke-width="6"/>
+  <path d="M150 212 H392" stroke="#2f9e44" stroke-width="3.5"/>
+  <rect x="236" y="180" width="72" height="16" rx="8" fill="var(--card)" stroke-width="1.5"/>
+  <rect x="236" y="204" width="72" height="16" rx="8" fill="var(--card)" stroke-width="1.5"/>
+  <g fill="currentColor" stroke="none" font-size="12" font-weight="700" text-anchor="middle">
+    <text x="272" y="192.5">motor1a</text>
+    <text x="272" y="216.5">motor1b</text>
+  </g>
+  <!-- 130 모터 모듈 (작은 보드) -->
+  <rect x="392" y="110" width="156" height="132" rx="8" fill="#1d4ed8"/>
+  <rect x="396" y="130" width="14" height="92" rx="3" fill="#0b1b4d" stroke="none"/>
+  <g fill="#ffffff" stroke="none">
+    <circle cx="403" cy="140" r="3.5"/>
+    <circle cx="403" cy="164" r="3.5"/>
+    <circle cx="403" cy="188" r="3.5"/>
+    <circle cx="403" cy="212" r="3.5"/>
+  </g>
+  <g font-size="13" font-weight="700" fill="#ffffff" stroke="none" text-anchor="start">
+    <text x="416" y="145">G</text>
+    <text x="416" y="169">V</text>
+    <text x="416" y="193">IN+</text>
+    <text x="416" y="217">IN−</text>
+  </g>
+  <!-- 모터 몸통 -->
+  <rect x="462" y="136" width="72" height="80" rx="12" fill="var(--muted)"/>
+  <path d="M474 150 V202 M522 150 V202" stroke-opacity="0.5"/>
+  <path d="M534 176 H574" stroke-width="4"/>
+  <!-- 팬 날개 자리 (마지막에 끼우기) -->
+  <g stroke-dasharray="5 5" stroke-opacity="0.7">
+    <ellipse cx="582" cy="140" rx="9" ry="32"/>
+    <ellipse cx="582" cy="212" rx="9" ry="32"/>
+  </g>
+  <circle cx="578" cy="176" r="6" fill="var(--card)"/>
+  <text x="470" y="262" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">130 모터 모듈</text>
+  <text x="598" y="96" text-anchor="end" font-size="12" fill="#e03131" stroke="none">팬 날개는 마지막에</text>
+  <!-- 배터리 홀더 (AA 6개) -->
+  <path d="M170 276 C 196 276, 200 290, 224 290" stroke-width="6"/>
+  <path d="M170 276 C 196 276, 200 290, 224 290" stroke="#e03131" stroke-width="3.5"/>
+  <path d="M170 286 C 192 286, 200 302, 224 302" stroke-width="6"/>
+  <path d="M170 286 C 192 286, 200 302, 224 302" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="224" y="276" width="198" height="42" rx="6" fill="var(--muted)"/>
+  <g fill="var(--card)" stroke-width="1.5">
+    <rect x="232" y="284" width="26" height="26" rx="4"/>
+    <rect x="263" y="284" width="26" height="26" rx="4"/>
+    <rect x="294" y="284" width="26" height="26" rx="4"/>
+    <rect x="325" y="284" width="26" height="26" rx="4"/>
+    <rect x="356" y="284" width="26" height="26" rx="4"/>
+    <rect x="387" y="284" width="26" height="26" rx="4"/>
+  </g>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="middle" fill-opacity="0.7">
+    <text x="245" y="301">AA</text>
+    <text x="276" y="301">AA</text>
+    <text x="307" y="301">AA</text>
+    <text x="338" y="301">AA</text>
+    <text x="369" y="301">AA</text>
+    <text x="400" y="301">AA</text>
+  </g>
+  <text x="323" y="340" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">배터리 홀더 (AA 6개) → 외부 전원 단자</text>
+</svg>
