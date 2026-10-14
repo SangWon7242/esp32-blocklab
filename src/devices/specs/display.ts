@@ -3,17 +3,20 @@ import { I2C_ADDR, isSingleArg, pinNo, validPins } from "./common";
 
 const numIn = (name: string, shadow: number): Part => ({ kind: "value", name, check: "Number", shadow });
 
-/** OLED (esp_oled_setup). 이름 i2c/oled 고정, show(a, b) 도우미. 글·선·사각형은 oled 의 메서드를 그대로 부른다 */
+/**
+ * OLED (esp_oled_setup). 이름 i2c/oled 고정. 글·선·사각형은 oled 의 메서드를 그대로 부른다.
+ * show(a, b) 도우미는 준비가 아니라 "두 줄 보여주기"(esp_oled_show) 블록의 선택 도우미: 그 블록을 쓸 때만 정의되고,
+ * 준비 두 줄은 도우미 없이도 접힌다.
+ */
 export const oled: DeviceSpec = {
   id: "oled", category: "display", label: "OLED", toolboxOrder: 70, colour: "#1d4ed8",
   setup: {
     blockType: "esp_oled_setup", message: "OLED 화면 준비하기 (scl 핀 %1, sda 핀 %2)",
     parts: [pinNo("SCL", 22, "bus"), pinNo("SDA", 21, "bus")],
-    tooltip: "i2c 와 oled 를 만들고 두 줄을 띄우는 show(a, b) 함수를 준비합니다.",
+    tooltip: "i2c 와 oled 를 만들어 OLED 화면을 준비합니다.",
     lines: (v) => [`i2c = SoftI2C(scl=Pin(${v.SCL}), sda=Pin(${v.SDA}))`, "oled = ssd1306.SSD1306_I2C(128, 64, i2c)"],
-    helpers: [{ name: "show", params: "a, b", body: ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"] }],
     kind: "oled",
-    provides: () => ["i2c", "oled", "show"],
+    provides: () => ["i2c", "oled"],
     pattern: {
       lines: [
         /^i2c\s*=\s*SoftI2C\(\s*scl\s*=\s*Pin\(\s*(\d+)\s*\)\s*,\s*sda\s*=\s*Pin\(\s*(\d+)\s*\)\s*\)$/,
@@ -27,8 +30,9 @@ export const oled: DeviceSpec = {
     {
       blockType: "esp_oled_show", message: "화면에 %1 와(과) %2 보여주기",
       parts: [{ kind: "value", name: "A", shadow: "AUTO DOOR" }, { kind: "value", name: "B", shadow: "Come closer" }],
-      tooltip: "show(첫째 줄, 둘째 줄)",
+      tooltip: "show(첫째 줄, 둘째 줄) — 이 블록을 쓰면 화면을 지우고 두 줄을 띄우는 show(a, b) 함수가 함께 만들어집니다.",
       code: (v) => `show(${v.A}, ${v.B})`,
+      helper: { name: "show", params: "a, b", body: ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"] },
       pattern: { kind: "call", name: "show", args: [null, null] },
     },
     {
@@ -63,6 +67,13 @@ export const oled: DeviceSpec = {
       tooltip: "oled.rect(x, y, 너비, 높이, 1) — 테두리만 있는 사각형을 그립니다.",
       code: (v) => `oled.rect(${v.X}, ${v.Y}, ${v.W}, ${v.H}, 1)`,
       pattern: { kind: "method", name: "rect", args: [null, null, null, null, ["1"]], objName: "oled" },
+    },
+    {
+      blockType: "dev_oled_fill_rect", message: "OLED 에 채운 네모 (x %1, y %2, 너비 %3, 높이 %4)",
+      parts: [numIn("X", 0), numIn("Y", 0), numIn("W", 20), numIn("H", 20)],
+      tooltip: "oled.fill_rect(x, y, 너비, 높이, 1) — 속까지 하얗게 채운 사각형을 그립니다.",
+      code: (v) => `oled.fill_rect(${v.X}, ${v.Y}, ${v.W}, ${v.H}, 1)`,
+      pattern: { kind: "method", name: "fill_rect", args: [null, null, null, null, ["1"]], objName: "oled" },
     },
   ],
   values: [],

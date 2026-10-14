@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "@lezer/common";
-import { DEVICES, setupSpecs, setupVars } from "@/devices/registry";
+import { DEVICES, setupsOf, setupSpecs, setupVars } from "@/devices/registry";
 import type { DeviceSpec, HelperSpec, Part, SetupSpec, Values } from "@/devices/types";
 import { block } from "./builders";
 import type { ParseContext } from "./context";
@@ -42,12 +42,26 @@ export function setupLinesAt(spec: SetupSpec, texts: string[], i: number): { fie
   return fields ? { fields, vars: setupVars(spec, fields, ms) } : null;
 }
 
-/** 최상위 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. 도우미가 있는 선언은 ctx.folded 에 그 장치가 있을 때만 */
-export function matchSetupAt(texts: string[], i: number, ctx: ParseContext): SetupMatch | null {
+/**
+ * 제자리 준비(inPlace)의 변수 칸 중 준비가 만드는 이름이 아닌 것(PINVAR)은 이미 값이 정해진 학생 변수여야 한다
+ * (for 반복 변수·대입한 이름. 장치 변수는 아니다). 모르는 이름이면 그 줄은 코드로 남는다.
+ */
+function inPlaceVarsKnown(spec: SetupSpec, fields: Values, ctx: ParseContext): boolean {
+  const provided = new Set(spec.provides(fields));
+  return spec.parts.every((p) => p.kind !== "var" || provided.has(fields[p.name]) || (ctx.hasVar(fields[p.name]) && !ctx.devices.has(fields[p.name])));
+}
+
+/**
+ * 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. 도우미가 있는 선언은 ctx.folded 에 그 장치가 있을 때만.
+ * inPlaceOnly 면(몸통 안) 제자리 준비만 본다. 제자리 준비는 변수 칸 이름이 아는 변수일 때만 맞는다.
+ */
+export function matchSetupAt(texts: string[], i: number, ctx: ParseContext, inPlaceOnly = false): SetupMatch | null {
   for (const spec of setupSpecs()) {
+    if (inPlaceOnly && !spec.inPlace) continue;
     if (spec.helpers?.length && !ctx.folded.has(spec.device.id)) continue;
     const hit = setupLinesAt(spec, texts, i);
-    if (hit) return { spec, ...hit, consumed: spec.pattern.lines.length };
+    if (!hit || (spec.inPlace && !inPlaceVarsKnown(spec, hit.fields, ctx))) continue;
+    return { spec, ...hit, consumed: spec.pattern.lines.length };
   }
   return null;
 }
@@ -61,9 +75,9 @@ export function isStandardHelper(h: HelperSpec, def: { params: string[]; body: S
   return !!def && !!def.body && def.params.join(",") === paramList(h.params) && isStandardBody(def.body, ctx, standardBody(h));
 }
 
-/** 접힌 장치의 도우미 이름인지 (그 def 는 블록을 만들지 않는다) */
+/** 접힌 장치의 도우미 이름이거나 접힌 선택 도우미인지 (그 def 는 블록을 만들지 않는다) */
 export function isFoldedHelper(name: string, ctx: ParseContext): boolean {
-  return DEVICES.some((d) => ctx.folded.has(d.id) && d.setup?.helpers?.some((h) => h.name === name));
+  return ctx.foldedActionHelpers.has(name) || DEVICES.some((d) => ctx.folded.has(d.id) && setupsOf(d).some((s) => s.helpers?.some((h) => h.name === name)));
 }
 
 /** 변수 이름이 이 장치 패턴이 받는 kind 로 등록돼 있는지 */
@@ -158,6 +172,9 @@ export function matchCall(expr: SyntaxNode, ctx: ParseContext, which: "actions" 
     }
     if (p.kind === "call") {
       if (plainName !== p.name || args.length !== p.args.length || !devicePresent(d, ctx)) continue;
+      // 선택 도우미를 부르는 명령은 그 도우미 def 가 표준 본문으로 접혔을 때만 (아니면 학생 함수 호출이다)
+      const helper = "helper" in spec ? spec.helper : undefined;
+      if (helper && !ctx.foldedActionHelpers.has(helper.name)) continue;
       const bound = bindArgs(spec.parts, p.args, args, ctx);
       if (!bound) continue;
       return buildBlock(spec.blockType, spec.parts, bound.vals, ctx, line, bound.nodes);

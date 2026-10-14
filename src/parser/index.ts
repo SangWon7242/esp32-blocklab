@@ -1,8 +1,9 @@
 import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
-import { setupSpecs } from "@/devices/registry";
+import { actionHelpersOf, DEVICES, setupSpecs } from "@/devices/registry";
 import { functionParts, returnsValue } from "./patterns";
+import { callParts } from "./expressions";
 import { isStandardHelper, matchSetupAt, setupLinesAt } from "./devices";
 import { escapeCommentLine, withComment } from "./builders";
 import { convertStatements } from "./statements";
@@ -73,6 +74,39 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
     lost.forEach((id) => candidates.delete(id));
   }
   for (const spec of setupSpecs()) if (ctx.folded.has(spec.device.id)) for (const h of spec.helpers ?? []) ctx.functions.delete(h.name);
+
+  // 제자리 준비(esp_pin_setup_var)는 몸통 안에도 있으므로 모든 문장을 보며 그 줄이 만드는 이름을 장치 변수로 등록한다
+  // (반복 안의 led = Pin(pin, Pin.OUT) 뒤 led.value(1) 이 핀 켜기 블록이 되게)
+  const calls = new Map<string, number[]>();
+  const visit = (node: SyntaxNode) => {
+    if (node.name === "AssignStatement") {
+      const m = matchSetupAt([ctx.src.slice(node).trim()], 0, ctx, true);
+      if (m) ctx.registerDevice(m.vars, m.spec.device.id, m.spec.kind);
+    }
+    // 명령으로 부른 이름과 인자 수 (선택 도우미가 쓰였는지 본다)
+    if (node.name === "ExpressionStatement" && node.firstChild?.name === "CallExpression") {
+      const { callee, args, plain } = callParts(node.firstChild);
+      if (plain && callee.name === "VariableName") {
+        const name = ctx.src.slice(callee);
+        calls.set(name, [...(calls.get(name) ?? []), args.length]);
+      }
+    }
+    for (const c of children(node)) visit(c);
+  };
+  visit(script);
+
+  // 선택 도우미(esp_oled_show 의 show): 장치가 준비돼 있고, 표준 본문의 최상위 def 가 있고, 그 명령으로 부르는 곳이 있을 때만 접는다.
+  // 부르는 곳 없이 def 만 있으면 생성기가 다시 만들지 않으므로 함수 블록으로 남긴다
+  const present = new Set([...ctx.devices.values()].map((v) => v.deviceId));
+  for (const d of DEVICES) {
+    if (!present.has(d.id)) continue;
+    for (const h of actionHelpersOf(d)) {
+      const arity = h.params.split(",").map((p) => p.trim()).filter(Boolean).length;
+      if (!isStandardHelper(h, defs.get(h.name), ctx) || !calls.get(h.name)?.includes(arity)) continue;
+      ctx.foldedActionHelpers.add(h.name);
+      ctx.functions.delete(h.name);
+    }
+  }
 }
 
 /** 앞에 코드 없이 주석만 있는 줄들 (위치 순). `#` 와 그 뒤 공백 하나, 끝 공백을 뗀 글 */

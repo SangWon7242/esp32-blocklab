@@ -18,6 +18,24 @@ export const pinOut: DeviceSpec = {
       fields: ([m]) => (validPins(m[2]) ? { VAR: m[1], PIN: m[2], MODE: m[3] } : null),
     },
   },
+  extraSetups: [
+    {
+      // 핀 번호가 변수인 준비 (4장 흐르는 불빛: for pin in pins: 안에서 led = Pin(pin, Pin.OUT)).
+      // 맨 위로 올리지 않고 블록 자리에 쓴다. 핀 번호는 실행할 때 정해지므로 검사의 핀 규칙은 보지 않는다 (pin 칸이 없다)
+      blockType: "esp_pin_setup_var",
+      message: "변수 %1 번 핀을 %2 으로 준비하고 %3 이름 붙이기",
+      parts: [{ kind: "var", name: "PINVAR", default: "pin" }, { kind: "dropdown", name: "MODE", options: [["출력", "OUT"], ["입력", "IN"]] }, { kind: "var", name: "VAR", default: "led" }],
+      tooltip: "led = Pin(pin, Pin.OUT) — 변수에 든 번호의 핀에 이름을 붙입니다. 반복 안에서 핀을 하나씩 바꿔 가며 준비할 때 씁니다.",
+      lines: (v) => [`${v.VAR} = Pin(${v.PINVAR}, Pin.${v.MODE})`],
+      inPlace: true,
+      kind: "pin",
+      provides: (v) => [v.VAR],
+      pattern: {
+        lines: [new RegExp(String.raw`^${RE_NAME}\s*=\s*Pin\(\s*([A-Za-z_]\w*)\s*,\s*Pin\.(OUT|IN)\s*\)$`)],
+        fields: ([m]) => ({ VAR: m[1], PINVAR: m[2], MODE: m[3] }),
+      },
+    },
+  ],
   actions: [
     {
       blockType: "esp_pin_write", message: "%1 %2",

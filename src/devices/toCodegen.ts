@@ -1,8 +1,8 @@
 import type * as Blockly from "blockly";
 import { Order } from "blockly/python";
 import type { MicroPythonGenerator } from "@/codegen/generator";
-import { DEVICES } from "./registry";
-import type { Part, Values } from "./types";
+import { actionHelpersOf, DEVICES, setupsOf } from "./registry";
+import type { HelperSpec, Part, Values } from "./types";
 
 /** 블록의 필드·입력을 코드 템플릿 값으로. 변수 필드는 파이썬 이름, 값 입력은 생성 코드(빈 칸은 check 유무에 따라 0 또는 "") */
 function readValues(block: Blockly.Block, gen: MicroPythonGenerator, parts: Part[]): Values {
@@ -31,27 +31,35 @@ function markHelperCalls(line: string, helpers: string[], gen: MicroPythonGenera
   return helpers.reduce((l, name) => l.replace(new RegExp(String.raw`(?<![\w.])${name}\(`, "g"), `${gen.helperCall(name)}(`), line);
 }
 
+/** 도우미 함수 정의 줄. provideFunction_ 은 앞쪽 공백 2칸을 INDENT(4칸)로 바꾸므로 도우미 본문은 2칸 단위로 적는다 */
+function provide(G: MicroPythonGenerator, h: HelperSpec, helpers: string[], blockId: string): void {
+  G.provideHelper(h.name, [`def ${G.FUNCTION_NAME_PLACEHOLDER_}(${h.params}):`, ...h.body.map((l) => "  " + markHelperCalls(l, helpers, G))]);
+  // 코드 지도 장부: 도우미 함수 줄은 그것을 준비한(준비 블록) 또는 부른(선택 도우미의 명령 블록) 블록 것
+  G.noteHelperOwner(h.name, blockId);
+}
+
 /** 레지스트리의 모든 장치 블록 생성기를 등록한다 */
 export function registerDeviceGenerators(gen: MicroPythonGenerator): void {
   for (const d of DEVICES) {
-    const helpers = (d.setup?.helpers ?? []).map((h) => h.name);
-    if (d.setup) {
-      const s = d.setup;
+    // 이 장치의 도우미 이름: 준비 블록 도우미 + 명령 블록의 선택 도우미 (호출 표시를 붙일 이름들)
+    const helpers = [...setupsOf(d).flatMap((s) => s.helpers ?? []), ...actionHelpersOf(d)].map((h) => h.name);
+    for (const s of setupsOf(d)) {
       gen.forBlock[s.blockType] = (block, g) => {
         const G = g as MicroPythonGenerator;
+        const lines = s.lines(readValues(block, G, s.parts));
+        // 제자리 준비(반복 안의 `led = Pin(pin, Pin.OUT)`)는 보통 명령처럼 블록 자리에 쓴다
+        if (s.inPlace) return `${lines.join("\n")}\n`;
         // 코드 지도 장부: 준비 줄과 도우미 함수는 끌어올려지므로 표식 대신 이 블록 id 를 적어 둔다
-        G.noteSetupBlock(block.id, G.addSetup(...s.lines(readValues(block, G, s.parts))));
-        // provideFunction_ 은 앞쪽 공백 2칸을 INDENT(4칸)로 바꾸므로 도우미 본문은 2칸 단위로 적는다
-        for (const h of s.helpers ?? []) {
-          G.provideHelper(h.name, [`def ${G.FUNCTION_NAME_PLACEHOLDER_}(${h.params}):`, ...h.body.map((l) => "  " + markHelperCalls(l, helpers, G))]);
-          G.noteHelperOwner(h.name, block.id);
-        }
+        G.noteSetupBlock(block.id, G.addSetup(...lines));
+        for (const h of s.helpers ?? []) provide(G, h, helpers, block.id);
         return "";
       };
     }
     for (const a of d.actions) {
       gen.forBlock[a.blockType] = (block, g) => {
         const G = g as MicroPythonGenerator;
+        // 선택 도우미는 이 블록이 쓰일 때만 정의한다 (같은 이름은 provideFunction_ 이 한 번만 넣는다)
+        if (a.helper) provide(G, a.helper, helpers, block.id);
         return `${markLeadingHelper(a.code(readValues(block, G, a.parts)), helpers, G)}\n`;
       };
     }

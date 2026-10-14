@@ -70,6 +70,8 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
     case "esp_pwm_duty": return { body: [setup("esp_pwm_setup", { VAR: { name: "pwm" } })], tops: [] };
     case "esp_distance": return { body: [setup("esp_ultrasonic_setup")], tops: [] };
     case "esp_oled_show": return { body: [setup("esp_oled_setup")], tops: [] };
+    // 변수 핀 준비의 핀 번호 칸은 값이 정해진 변수여야 블록으로 돌아온다
+    case "esp_pin_setup_var": return { body: [{ type: "variables_set", fields: { VAR: { name: "pin" } }, inputs: { VALUE: { block: { type: "math_number", fields: { NUM: 26 } } } } }], tops: [] };
     case "variables_get":
     case "var_change": return { body: [{ type: "variables_set", fields: { VAR: { name: varName ?? "x" } } }], tops: [] };
     case "list_create":

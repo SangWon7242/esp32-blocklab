@@ -1,4 +1,4 @@
-import { DEVICES, DEVICE_CATEGORIES } from "./registry";
+import { DEVICES, DEVICE_CATEGORIES, setupsOf } from "./registry";
 import type { DeviceSpec, Part } from "./types";
 
 /** 정의되지 않은 키를 뺀다 (블록 JSON 을 손으로 쓴 것과 같게) */
@@ -31,7 +31,7 @@ export function deviceBlockDefinitions(): Record<string, unknown>[] {
   const out: Record<string, unknown>[] = [];
   for (const d of DEVICES) {
     const stmt = { previousStatement: null, nextStatement: null, colour: d.colour };
-    if (d.setup) out.push({ type: d.setup.blockType, message0: d.setup.message, ...args(d.setup.parts), ...stmt, tooltip: d.setup.tooltip });
+    for (const s of setupsOf(d)) out.push({ type: s.blockType, message0: s.message, ...args(s.parts), ...stmt, tooltip: s.tooltip });
     for (const a of d.actions) out.push({ type: a.blockType, message0: a.message, ...args(a.parts), ...inline(a.parts), ...stmt, tooltip: a.tooltip });
     for (const v of d.values) out.push({ type: v.blockType, message0: v.message, ...args(v.parts), ...inline(v.parts), output: v.output, colour: d.colour, tooltip: v.tooltip });
   }
@@ -43,7 +43,7 @@ export function deviceBlockDefinitions(): Record<string, unknown>[] {
  * field_input JSON 은 검사 함수를 실을 수 없으므로 src/blocks/index.ts 가 블록 init 에서 칸에 단다.
  */
 export function textFieldValidators(): { blockType: string; field: string; pattern: RegExp }[] {
-  return DEVICES.flatMap((d) => [...(d.setup ? [d.setup] : []), ...d.actions, ...d.values]).flatMap((s) =>
+  return DEVICES.flatMap((d) => [...setupsOf(d), ...d.actions, ...d.values]).flatMap((s) =>
     s.parts.flatMap((p) => (p.kind === "text" && p.validate ? [{ blockType: s.blockType, field: p.name, pattern: p.validate }] : [])),
   );
 }
@@ -52,7 +52,7 @@ export type ToolboxItem = { kind: "label"; text: string } | { kind: "block"; typ
 /** icon: 카테고리 열 아이콘 id (src/blocks/icons.ts, 장치 카테고리 id 와 같다) */
 export type ToolboxCategory = { kind: "category"; name: string; categorystyle: string; icon: string; contents: ToolboxItem[] };
 
-const allParts = new Map(DEVICES.flatMap((d) => [...(d.setup ? [d.setup] : []), ...d.actions, ...d.values]).map((s) => [s.blockType, s.parts]));
+const allParts = new Map(DEVICES.flatMap((d) => [...setupsOf(d), ...d.actions, ...d.values]).map((s) => [s.blockType, s.parts]));
 
 /** 툴박스 항목: 값 입력에는 shadow 로 기본값을 끼운다. fields 를 주면 그 필드 기본값만 바꾼다 (변수 필드는 이름으로) */
 function entry(blockType: string, fields: Record<string, string> = {}): ToolboxItem {
@@ -74,7 +74,7 @@ function entry(blockType: string, fields: Record<string, string> = {}): ToolboxI
 function deviceItems(d: DeviceSpec): ToolboxItem[] {
   return [
     { kind: "label", text: d.label },
-    ...(d.setup ? [entry(d.setup.blockType)] : []),
+    ...setupsOf(d).map((s) => entry(s.blockType)),
     ...d.actions.map((a) => entry(a.blockType)),
     ...d.values.map((v) => entry(v.blockType)),
     ...(d.extraToolbox ?? []).map((x) => entry(x.blockType, x.fields)),

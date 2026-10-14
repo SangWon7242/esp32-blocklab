@@ -12,6 +12,17 @@ export const pinContent: Record<string, BlockContent> = {
     },
     tips: ["34~39번 핀은 입력 전용이라 출력으로 쓸 수 없어요.", "붙인 이름은 켜기·끄기 블록의 이름 칸에서 골라요."],
   },
+  esp_pin_setup_var: {
+    concept: "변수에 든 번호의 핀을 출력이나 입력으로 준비하고 이름을 붙여요. 리스트에 모은 핀 번호를 하나씩 꺼내며 반복할 때, 반복 안에서 지금 번호의 핀을 준비하는 데 씁니다. 코드로는 led = Pin(pin, Pin.OUT) 이고, 맨 위로 모이지 않고 블록을 놓은 자리에 그대로 들어가요.",
+    example: {
+      title: "다섯 LED 를 차례로 켰다 끄기",
+      code: "pins = [18, 5, 14, 17, 26]\nfor pin in pins:\n    led = Pin(pin, Pin.OUT)\n    led.value(1)\n    time.sleep(0.2)\n    led.value(0)",
+    },
+    tips: [
+      "핀 번호 칸에는 반복 변수처럼 이미 값이 정해진 변수를 골라요.",
+      "번호가 하나로 정해져 있으면 숫자를 적는 핀 준비 블록이 더 알아보기 쉬워요.",
+    ],
+  },
   esp_pin_write: {
     concept: "출력 핀을 켜거나 꺼요. 켜기는 led.value(1), 끄기는 led.value(0) 입니다. 1 이면 핀에서 3.3V 전기가 나가고, 0 이면 끊겨요.",
     example: { title: "LED 를 2초 켰다가 끄기", code: "led = Pin(26, Pin.OUT)\nled.value(1)\ntime.sleep(2)\nled.value(0)" },

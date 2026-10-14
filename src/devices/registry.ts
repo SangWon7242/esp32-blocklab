@@ -1,4 +1,4 @@
-import type { ActionSpec, DeviceCategory, DeviceSpec, Part, SetupSpec, ValueSpec, Values } from "./types";
+import type { ActionSpec, DeviceCategory, DeviceSpec, HelperSpec, Part, SetupSpec, ValueSpec, Values } from "./types";
 import { adc, pinIn, pinOut, pwm } from "./specs/pin";
 import { flowLed, led, ledPwm, rgb } from "./specs/led";
 import { button, joystick, pir, tilt } from "./specs/switch";
@@ -30,9 +30,14 @@ export const DEVICES: DeviceSpec[] = [
   pwm, printer,
 ];
 
+/** 장치의 준비 블록들: setup 다음에 extraSetups (툴박스 순서) */
+export const setupsOf = (d: DeviceSpec): SetupSpec[] => [...(d.setup ? [d.setup] : []), ...(d.extraSetups ?? [])];
+/** 장치의 명령 블록이 쓰는 선택 도우미 (ActionSpec.helper) */
+export const actionHelpersOf = (d: DeviceSpec): HelperSpec[] => d.actions.flatMap((a) => (a.helper ? [a.helper] : []));
+
 type WithDevice<T> = T & { device: DeviceSpec };
 const byType = <T extends { blockType: string }>(items: T[]) => new Map(items.map((i) => [i.blockType, i]));
-const setups = byType(DEVICES.flatMap((d): WithDevice<SetupSpec>[] => (d.setup ? [{ ...d.setup, device: d }] : [])));
+const setups = byType(DEVICES.flatMap((d): WithDevice<SetupSpec>[] => setupsOf(d).map((s) => ({ ...s, device: d }))));
 const actions = byType(DEVICES.flatMap((d) => d.actions.map((a): WithDevice<ActionSpec> => ({ ...a, device: d }))));
 const values = byType(DEVICES.flatMap((d) => d.values.map((v): WithDevice<ValueSpec> => ({ ...v, device: d }))));
 
@@ -74,7 +79,7 @@ export function setupVars(spec: SetupSpec, fields: Values, ms: RegExpExecArray[]
 }
 
 /**
- * 준비 블록이 고정해서 만드는 이름 (도우미 함수 이름 + VAR 칸이 아닌 고정 변수 이름). 학생 변수·함수가 이 이름을
+ * 준비 블록이 고정해서 만드는 이름 (도우미 함수 이름 + VAR 칸이 아닌 고정 변수 이름) + 명령 블록의 선택 도우미 이름. 학생 변수·함수가 이 이름을
  * 덮으면 생성 코드가 깨지므로 src/blocks/names.ts 가 막는다.
  */
 export function fixedSetupNames(): string[] {
@@ -85,6 +90,7 @@ export function fixedSetupNames(): string[] {
     for (const n of s.provides(v)) if (!varValues.has(n)) out.add(n);
     for (const h of s.helpers ?? []) out.add(h.name);
   }
+  for (const d of DEVICES) for (const h of actionHelpersOf(d)) out.add(h.name);
   return [...out];
 }
 

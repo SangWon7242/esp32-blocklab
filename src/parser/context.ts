@@ -13,6 +13,8 @@ export class ParseContext {
   readonly devices = new Map<string, { deviceId: string; kind: string }>();
   /** 도우미 함수까지 표준 본문으로 확인되어 접힌 장치 id. 그 장치의 call 패턴과 def 생략이 켜진다 */
   readonly folded = new Set<string>();
+  /** 명령 블록의 선택 도우미(ActionSpec.helper) 중 표준 본문으로 확인되어 접힌 이름. 그 명령의 call 패턴과 def 생략이 켜진다 */
+  readonly foldedActionHelpers = new Set<string>();
   readonly functions = new Map<string, FunctionInfo>();
   readonly unparsed: UnparsedItem[] = [];
   /** 같은 이름이 앞에 이미 있는 맨 바깥 def 의 시작 위치. code_stmt 로 남긴다 */

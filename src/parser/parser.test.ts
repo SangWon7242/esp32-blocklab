@@ -185,9 +185,9 @@ describe("뜻이 바뀔 수 있는 구문은 코드 블록으로", () => {
     expect(lines(expr)).toEqual([4]);
   });
 
-  it("(c) 건너뛰는 수(step)가 있는 range 와 여러 반복 변수 for 는 code_stmt", () => {
-    const src = "for j in range(0, 10, 2):\n    pass\n";
-    expect(body(src)).toEqual([{ type: "code_stmt", fields: { CODE: "for j in range(0, 10, 2):\n    pass" } }]);
+  it("(c) 이름 붙인 인자가 있는 range 와 여러 반복 변수 for 는 code_stmt (걸음 있는 range 는 걸음 반복 블록)", () => {
+    const src = "for j in range(0, 10, step=2):\n    pass\n";
+    expect(body(src)).toEqual([{ type: "code_stmt", fields: { CODE: "for j in range(0, 10, step=2):\n    pass" } }]);
     expect(lines(src)).toEqual([1]);
     const pairs = "for a, b in pairs:\n    pass\n";
     expect(body(pairs)).toEqual([{ type: "code_stmt", fields: { CODE: "for a, b in pairs:\n    pass" } }]);

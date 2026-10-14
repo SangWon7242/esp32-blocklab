@@ -2,7 +2,7 @@ import { issueAt, realBlocks } from "../walk";
 import type { FlatBlock, LintContext, Rule } from "../types";
 
 /** 몸통(DO)에 멈추기·건너뛰기를 담을 수 있는 반복 블록 */
-const LOOPS = new Set(["flow_repeat_forever", "flow_repeat_n", "controls_whileUntil", "flow_for_each", "flow_for_range"]);
+const LOOPS = new Set(["flow_repeat_forever", "flow_repeat_n", "controls_whileUntil", "flow_for_each", "flow_for_range", "flow_for_range_step"]);
 /** 함수 몸통에서 멈춘다: 함수를 반복 안에서 불러도 def 안의 break 는 SyntaxError */
 const DEFS = new Set(["procedures_defnoreturn", "procedures_defreturn"]);
 
@@ -29,7 +29,7 @@ export const breakOutsideLoop: Rule = (ctx) =>
   });
 
 /** 반복 변수를 학생이 고르는 반복 (VAR 칸) */
-const VAR_LOOPS = new Set(["flow_for_each", "flow_for_range"]);
+const VAR_LOOPS = new Set(["flow_for_each", "flow_for_range", "flow_for_range_step"]);
 
 /** 바깥 반복 중 반복 변수가 i 인 것 (함수 몸통에서 멈춘다: def 안의 i 는 따로) */
 function outerLoopUsingI(ctx: LintContext, b: FlatBlock): FlatBlock | undefined {

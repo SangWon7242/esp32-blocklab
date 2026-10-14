@@ -65,6 +65,17 @@ export const coreContent: Record<string, BlockContent> = {
       "반복 변수가 i 이고 range(3) 처럼 수가 하나면 '번 반복하기' 블록이 돼요.",
     ],
   },
+  flow_for_range_step: {
+    concept: "변수를 시작 수부터 정한 걸음만큼씩 바꾸며 안의 블록을 반복해요. 코드로는 for num in range(9, -1, -1): 이고, 걸음이 -1 이면 9, 8, 7 … 0 처럼 하나씩 줄어듭니다. 끝 수 -1 은 들어가지 않아요.",
+    example: {
+      title: "9부터 0까지 거꾸로 세기",
+      code: "for num in range(9, -1, -1):\n    print(num)\n    time.sleep(1)",
+    },
+    tips: [
+      "걸음이 2 면 0, 2, 4 … 처럼 건너뛰며 세요.",
+      "걸음이 음수면 시작 수가 끝 수보다 커야 반복이 돌아요.",
+    ],
+  },
   flow_for_each: {
     concept: "리스트의 항목을 앞에서부터 하나씩 꺼내 변수에 넣으며 반복해요. 코드로는 for name in names: 이고, 항목 수만큼 돕니다. 리스트 대신 글자를 넣으면 한 글자씩 꺼내며 반복해요.",
     example: { title: "모은 이름에게 한 명씩 인사하기", code: 'names = ["mina", "jun", "sora"]\nfor name in names:\n    print("hi " + name)\n    time.sleep(1)' },
@@ -334,6 +345,14 @@ export const coreContent: Record<string, BlockContent> = {
       "없는 번호에 값을 넣으면 IndexError 오류가 나요. 새 항목은 추가하기 블록으로 붙여요.",
     ],
   },
+  list_reversed: {
+    concept: "리스트의 항목을 뒤에서부터 차례로 꺼내요. 코드로는 reversed(pins) 이고, 각 항목 반복에 끼우면 맨 뒤 항목부터 거꾸로 돕니다. 원래 리스트의 순서는 바뀌지 않아요.",
+    example: {
+      title: "핀 번호를 뒤에서부터 찍기",
+      code: "pins = [18, 5, 14, 17, 26]\nfor pin in reversed(pins):\n    print(pin)",
+    },
+    tips: ["거꾸로 꺼낸 것은 반복에 바로 쓰는 값이에요. 길이를 재거나 번째 항목을 찾을 때는 원래 리스트를 써요."],
+  },
   list_index: {
     concept: "리스트에서 어떤 값이 몇 번째에 있는지 찾아 알려 줘요. 코드로는 names.index(\"sora\") 이고, 같은 값이 여럿이면 맨 앞의 번호를 알려 줍니다. 결과 번호도 0부터 세요.",
     example: { title: "친구가 줄의 몇 번째에 섰는지 찾기", code: 'names = ["mina", "jun", "sora"]\nprint(names.index("sora"))' },
@@ -368,7 +387,7 @@ export const coreContent: Record<string, BlockContent> = {
   // 코드
   code_stmt: {
     concept: "블록으로 바꾸지 못한 파이썬 코드를 그대로 담아요. 코드를 블록으로 불러올 때 블록이 모르는 꼴이 있으면 이 블록이 생깁니다. 한 줄도, 여러 줄도 담을 수 있어요.",
-    example: { title: "2씩 건너뛰며 세는 반복은 코드 블록이 돼요", code: "for n in range(0, 10, 2):\n    print(n)" },
+    example: { title: "오류를 잡는 try 문은 코드 블록이 돼요", code: "try:\n    print(10 // 0)\nexcept ZeroDivisionError:\n    print(\"0 으로 나눌 수 없어요\")" },
     tips: ["안의 글을 고치면 그대로 코드가 돼요. 들여쓰기를 잘 맞춰 주세요."],
   },
   code_expr: {

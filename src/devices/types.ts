@@ -61,6 +61,12 @@ export type SetupSpec = {
   /** 준비 줄. 변수 필드 값은 이미 파이썬 이름으로 바뀌어 온다 */
   lines: (v: Values) => string[];
   helpers?: HelperSpec[];
+  /**
+   * 준비 줄을 코드 맨 위로 끌어올리지 않고 블록이 놓인 자리에 쓴다 (esp_pin_setup_var: 반복 안에서 핀 번호 변수로
+   * `led = Pin(pin, Pin.OUT)`). 파서는 이 준비를 어느 깊이에서든 한 줄로 맞추고, 그 줄이 만드는 이름을 장치 변수로 등록한다.
+   * 패턴은 한 줄이어야 하고, provides 에 들지 않는 변수 칸(PINVAR)은 이미 값이 정해진 학생 변수여야 맞는다.
+   */
+  inPlace?: boolean;
   /** 이 장치 변수들의 종류. 메서드 패턴이 objKind 로 맞춘다 */
   kind: string;
   /**
@@ -90,6 +96,12 @@ export type ActionSpec = {
    * (예: dev_led_blink → ["pin"]). 실제로 쓰는 값은 registry.ts requiredKinds(spec).
    */
   varKinds?: string[];
+  /**
+   * 이 명령이 부르는 선택 도우미 (예: esp_oled_show → show(a, b)). 생성기는 이 블록이 쓰일 때만 도우미 함수를 정의하고,
+   * 파서는 같은 이름·매개변수·표준 본문의 최상위 def 를 이 블록이 쓰일 때(그 장치가 준비돼 있고 호출이 있을 때)만 접는다.
+   * 준비 블록의 helpers 와 달리 장치 준비가 접히는 데는 필요 없다.
+   */
+  helper?: HelperSpec;
 };
 
 export type ValueSpec = Omit<ActionSpec, "code"> & {
@@ -111,6 +123,11 @@ export type DeviceSpec = {
   colour: string;
   /** print 처럼 준비가 필요 없는 묶음은 생략 */
   setup?: SetupSpec;
+  /**
+   * 같은 장치의 다른 준비 블록 (예: 출력 핀의 esp_pin_setup_var). 툴박스에서 setup 바로 뒤에 오고, 장치 색·kind 를 함께 쓴다.
+   * 레지스트리·파서·검사는 setup 과 똑같이 다룬다 (registry.ts setupsOf).
+   */
+  extraSetups?: SetupSpec[];
   actions: ActionSpec[];
   values: ValueSpec[];
   /** 이 카테고리들에도 같은 항목을 보여 준다 (예: 핀 출력 블록을 LED 카테고리에도) */

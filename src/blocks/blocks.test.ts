@@ -178,6 +178,7 @@ describe("계획 6 변수·리스트·흐름 블록", () => {
       ["list_index", ["V"], "Number", "items"],
       ["flow_for_each", ["LIST", "DO"], null, "item"],
       ["flow_for_range", ["FROM", "TO", "DO"], null, "n"],
+      ["flow_for_range_step", ["FROM", "TO", "STEP", "DO"], null, "n"],
     ];
     for (const [type, inputs, output, varName] of spec) {
       const b = w.newBlock(type);
@@ -206,9 +207,9 @@ describe("계획 6 변수·리스트·흐름 블록", () => {
   it("스타일: 리스트 블록은 list_blocks(리스트 카테고리 색), 만큼 바꾸기는 변수, 새 반복은 흐름", () => {
     const w = ws();
     expect(entryTheme.blockStyles.list_blocks.colourPrimary).toBe(CATEGORY_COLORS.list.primary);
-    for (const type of ["list_create", "list_append", "list_index"]) expect(w.newBlock(type).getStyleName(), type).toBe("list_blocks");
+    for (const type of ["list_create", "list_append", "list_index", "list_reversed"]) expect(w.newBlock(type).getStyleName(), type).toBe("list_blocks");
     expect(w.newBlock("var_change").getStyleName()).toBe("variable_blocks");
-    for (const type of ["flow_for_each", "flow_for_range", "flow_break", "flow_continue"]) expect(w.newBlock(type).getStyleName(), type).toBe("loop_blocks");
+    for (const type of ["flow_for_each", "flow_for_range", "flow_for_range_step", "flow_break", "flow_continue"]) expect(w.newBlock(type).getStyleName(), type).toBe("loop_blocks");
     w.dispose();
   });
 
@@ -220,7 +221,7 @@ describe("계획 6 변수·리스트·흐름 블록", () => {
     expect(cats[at].icon).toBe("list");
     expect(cats[at].contents!.map((b) => b.type)).toEqual([
       "list_create", "list_create_from", "list_append", "list_insert", "list_remove_at", "list_remove_value", "list_clear", "list_set",
-      "calc_item", "calc_len", "list_index", "judge_contains", "flow_for_each",
+      "calc_item", "calc_len", "list_index", "list_reversed", "judge_contains", "flow_for_each",
     ]);
     const flow = cats.find((c) => c.name === "흐름")!.contents!.map((b) => b.type);
     expect(flow).toEqual(expect.arrayContaining(["flow_for_range", "flow_for_each", "flow_break", "flow_continue", "flow_repeat_n"]));

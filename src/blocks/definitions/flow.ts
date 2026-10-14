@@ -37,6 +37,23 @@ export const flowBlocks: Record<string, unknown>[] = [
     tooltip: "for 변수 in range(시작, 끝): 변수를 시작 수부터 1씩 늘리며 반복합니다. 끝 수는 들어가지 않습니다.",
   },
   {
+    type: "flow_for_range_step",
+    message0: "%1 을(를) %2 부터 %3 전까지 %4 씩 바꾸며 반복",
+    args0: [
+      { type: "field_variable", name: "VAR", variable: "n" },
+      { type: "input_value", name: "FROM", check: "Number" },
+      { type: "input_value", name: "TO", check: "Number" },
+      { type: "input_value", name: "STEP", check: "Number" },
+    ],
+    message1: "%1",
+    args1: [{ type: "input_statement", name: "DO" }],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    style: "loop_blocks",
+    tooltip: "for 변수 in range(시작, 끝, 걸음): 변수를 시작 수부터 걸음만큼씩 바꾸며 반복합니다. 걸음이 음수면 줄어들고, 끝 수는 들어가지 않습니다.",
+  },
+  {
     type: "flow_for_each",
     message0: "%1 의 각 항목을 %2 에 넣으며 반복",
     args0: [

@@ -255,6 +255,7 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
           return block("calc_minmax", { OP: name.toUpperCase() }, { A: convertExpr(args[0], ctx, "Number"), B: convertExpr(args[1], ctx, "Number") });
         }
         if (name === "len" && args.length === 1) return block("calc_len", undefined, { X: convertExpr(args[0], ctx) });
+        if (name === "reversed" && args.length === 1) return block("list_reversed", undefined, { X: convertExpr(args[0], ctx) });
         const fn = ctx.functions.get(name);
         if (fn && fn.returns && args.length === fn.params.length) return callBlock("procedures_callreturn", name, fn.params, args, ctx);
         return fallback(node, ctx);

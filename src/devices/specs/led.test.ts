@@ -71,7 +71,7 @@ describe("LED (dev_led_blink)", () => {
   it("툴박스: 핀 준비 블록이 LED 카테고리에도 나온다 (pinOut.alsoIn)", () => {
     const cats = deviceToolboxCategories();
     const types = (name: string) => cats.find((c) => c.name === name)!.contents.flatMap((i) => (i.kind === "block" ? [i.type] : []));
-    expect(types("LED").slice(0, 3)).toEqual(["esp_pin_setup", "esp_pin_write", "esp_pin_read"]);
+    expect(types("LED").slice(0, 4)).toEqual(["esp_pin_setup", "esp_pin_setup_var", "esp_pin_write", "esp_pin_read"]);
     expect(types("LED")).toEqual(expect.arrayContaining(["dev_led_pwm_setup", "dev_led_brightness", "dev_pwm_duty10", "dev_led_blink", "dev_rgb_setup", "dev_flow_setup"]));
     expect(types("핀")).toContain("esp_pin_setup");
   });

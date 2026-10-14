@@ -1,6 +1,9 @@
 import type { BlockContent } from "../types";
 
-const OLED_SETUP = [
+const OLED_SETUP = "i2c = SoftI2C(scl=Pin(22), sda=Pin(21))\noled = ssd1306.SSD1306_I2C(128, 64, i2c)\n";
+
+/** 두 줄 보여주기 블록을 쓰는 예시: 그 블록이 함께 만드는 show(a, b) 함수까지 */
+const OLED_SHOW_SETUP = [
   "i2c = SoftI2C(scl=Pin(22), sda=Pin(21))", "oled = ssd1306.SSD1306_I2C(128, 64, i2c)",
   "", "",
   "def show(a, b):", "    oled.fill(0)", "    oled.text(a, 0, 20)", "    oled.text(b, 0, 36)", "    oled.show()",
@@ -34,15 +37,15 @@ const SEG_TIP = "먼저 7세그먼트 준비 블록이 있어야 해요.";
 /** 화면 카테고리 블록 설명 (src/devices/specs/display.ts) */
 export const displayContent: Record<string, BlockContent> = {
   esp_oled_setup: {
-    concept: "128×64 점으로 된 OLED 화면을 I2C(scl·sda 두 선) 로 준비해요. 화면을 다루는 oled 와, 두 줄의 글을 한 번에 띄우는 show(a, b) 함수가 함께 만들어집니다. 이름은 i2c, oled 로 정해져 있어요.",
-    example: { title: "두 줄 인사 띄우기", code: `${OLED_SETUP}show("Hello", "ESP32")` },
+    concept: "128×64 점으로 된 OLED 화면을 I2C(scl·sda 두 선) 로 준비해요. 화면을 다루는 oled 가 만들어지고, 이름은 i2c, oled 로 정해져 있어요. 그 뒤 적기·그리기 블록으로 버퍼에 그리고 내보내기로 화면에 보여요.",
+    example: { title: "인사 한 줄 띄우기", code: `${OLED_SETUP}oled.fill(0)\noled.text("Hello", 0, 0)\noled.show()` },
     tips: ["화면을 쓰려면 ssd1306.py 라이브러리가 보드에 있어야 해요. 보드에 저장할 때 앱이 알아서 함께 올려 줘요."],
   },
   esp_oled_show: {
-    concept: "OLED 화면을 지우고 두 줄의 글을 가운데쯤에 띄워요. 코드로는 show(\"AUTO DOOR\", \"Come closer\") 이고, 지우기·적기·내보내기를 한 번에 해 줍니다.",
+    concept: "OLED 화면을 지우고 두 줄의 글을 가운데쯤에 띄워요. 코드로는 show(\"AUTO DOOR\", \"Come closer\") 이고, 지우기·적기·내보내기를 한 번에 해 줍니다. 이 블록을 쓰면 그 일을 하는 show(a, b) 함수가 코드에 함께 만들어져요.",
     example: {
       title: "버튼을 누르면 글 바꾸기",
-      code: `${OLED_SETUP}button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile True:\n    if button.value() == 0:\n        show("Button", "pressed")\n    else:\n        show("AUTO DOOR", "Come closer")\n    time.sleep(0.1)`,
+      code: `${OLED_SHOW_SETUP}button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile True:\n    if button.value() == 0:\n        show("Button", "pressed")\n    else:\n        show("AUTO DOOR", "Come closer")\n    time.sleep(0.1)`,
     },
     tips: [OLED_TIP, "글은 영문·숫자·기호만 보여요. 한 줄에 16글자쯤 들어가요."],
   },
@@ -75,6 +78,11 @@ export const displayContent: Record<string, BlockContent> = {
   dev_oled_rect: {
     concept: "OLED 에 테두리만 있는 사각형을 그려요. (x, y) 는 왼쪽 위 모서리이고, 너비와 높이는 점의 개수입니다. 코드로는 oled.rect(0, 0, 40, 20, 1) 이에요.",
     example: { title: "글 둘레에 상자 그리기", code: `${OLED_SETUP}oled.fill(0)\noled.rect(0, 0, 60, 20, 1)\noled.text("BOX", 6, 6)\noled.show()` },
+    tips: [OLED_TIP, BUFFER_TIP],
+  },
+  dev_oled_fill_rect: {
+    concept: "OLED 에 속까지 하얗게 채운 사각형을 그려요. (x, y) 는 왼쪽 위 모서리이고, 너비와 높이는 점의 개수입니다. 코드로는 oled.fill_rect(70, 30, 20, 20, 1) 이에요.",
+    example: { title: "빈 네모와 채운 네모 나란히 그리기", code: `${OLED_SETUP}oled.fill(0)\noled.rect(10, 30, 20, 20, 1)\noled.fill_rect(40, 30, 20, 20, 1)\noled.show()` },
     tips: [OLED_TIP, BUFFER_TIP],
   },
   dev_lcd_setup: {

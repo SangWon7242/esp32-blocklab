@@ -263,8 +263,8 @@ describe("흐름 추가 블록 왕복", () => {
     roundTrip([withBody("flow_repeat_forever", undefined, {}, [blk("flow_break", undefined)])], "while True:\n    break\n", ["flow_break"]);
   });
 
-  it("반례: range 의 step · 여러 반복 변수 · else 절은 code_stmt", () => {
-    for (const src of ["for x in range(0, 10, 2):\n    print(x)\n", "for a, b in items:\n    print(a)\n", `${HEAD}for item in items:\n    print(item)\nelse:\n    print(0)\n`]) {
+  it("반례: 여러 반복 변수 · else 절 · 인자 4개 range 는 code_stmt", () => {
+    for (const src of ["for x in range(0, 10, 2, 1):\n    print(x)\n", "for a, b in items:\n    print(a)\n", `${HEAD}for item in items:\n    print(item)\nelse:\n    print(0)\n`]) {
       expect(types(parse(src).json), src).toContain("code_stmt");
       expect(codeToCode(src), src).toBe(src);
     }

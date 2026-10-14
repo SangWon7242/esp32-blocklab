@@ -10,7 +10,7 @@ export const PYTHON_KEYWORDS: readonly string[] = [
 
 /** 생성 코드가 쓰는 파이썬 내장 이름과 machine 모듈 이름 */
 const BUILTIN_NAMES: readonly string[] = [
-  "print", "str", "int", "range", "len", "float", "bool", "list", "dict", "input", "abs", "min", "max", "sum", "round",
+  "print", "str", "int", "range", "reversed", "len", "float", "bool", "list", "dict", "input", "abs", "min", "max", "sum", "round",
   "machine",
 ];
 

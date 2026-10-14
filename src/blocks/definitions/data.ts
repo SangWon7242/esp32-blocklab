@@ -88,4 +88,13 @@ export const dataBlocks: Record<string, unknown>[] = [
     style: "list_blocks",
     tooltip: "리스트.index(값). 값이 처음 나오는 번호입니다. 첫 항목은 0 번이고, 없으면 오류가 납니다.",
   },
+  {
+    type: "list_reversed",
+    message0: "%1 을(를) 거꾸로",
+    args0: [{ type: "input_value", name: "X" }],
+    inputsInline: true,
+    output: null,
+    style: "list_blocks",
+    tooltip: "reversed(리스트). 리스트의 항목을 뒤에서부터 차례로 꺼냅니다. 각 항목 반복에 끼워 거꾸로 돌 때 씁니다.",
+  },
 ];

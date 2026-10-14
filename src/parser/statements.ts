@@ -70,9 +70,9 @@ export function convertStatements(all: SyntaxNode[], ctx: ParseContext, topLevel
   return { blocks, tops };
 }
 
-/** 레지스트리 패턴: 최상위 준비 줄 묶음, 그다음 여러 줄 명령 */
+/** 레지스트리 패턴: 준비 줄 묶음(몸통 안에서는 제자리 준비만), 그다음 여러 줄 명령 */
 function convertDevice(nodes: SyntaxNode[], texts: string[], i: number, ctx: ParseContext, topLevel: boolean): Converted | null {
-  const setup = topLevel ? matchSetupAt(texts, i, ctx) : null;
+  const setup = matchSetupAt(texts, i, ctx, !topLevel);
   if (setup) return one(setupBlock(setup.spec, setup.fields, ctx), setup.consumed);
   const action = matchActionLines(nodes, texts, i, ctx);
   return action ? one(action.block, action.consumed) : null;
@@ -241,7 +241,11 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
         if (args.length === 1 && target === "i") return one(block("flow_repeat_n", undefined, { TIMES: convertExpr(args[0], ctx, "Number"), DO: convertBody(body, ctx) }));
         if (args.length === 1) return one(block("flow_for_range", VAR, { FROM: num(0), TO: convertExpr(args[0], ctx, "Number"), DO: convertBody(body, ctx) }));
         if (args.length === 2) return one(block("flow_for_range", VAR, { FROM: convertExpr(args[0], ctx, "Number"), TO: convertExpr(args[1], ctx, "Number"), DO: convertBody(body, ctx) }));
-        // range(a, b, step) 은 블록에 자리가 없다
+        // range(a, b, 걸음) → 걸음 반복 (걸음이 음수인 range(9, -1, -1) 도)
+        if (args.length === 3) {
+          const [FROM, TO, STEP] = args.map((a) => convertExpr(a, ctx, "Number"));
+          return one(block("flow_for_range_step", VAR, { FROM, TO, STEP, DO: convertBody(body, ctx) }));
+        }
         return unknown(node, ctx);
       }
       return one(block("flow_for_each", VAR, { LIST: convertExpr(iter, ctx), DO: convertBody(body, ctx) }));

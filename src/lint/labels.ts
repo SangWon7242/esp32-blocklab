@@ -6,6 +6,7 @@ const BUILTIN_LABELS: Record<string, string> = {
   flow_repeat_forever: "계속 반복하기",
   flow_repeat_n: "… 번 반복하기",
   flow_for_range: "… 을(를) … 부터 … 전까지 바꾸며 반복",
+  flow_for_range_step: "… 을(를) … 부터 … 전까지 … 씩 바꾸며 반복",
   flow_for_each: "… 의 각 항목을 … 에 넣으며 반복",
   flow_break: "반복 멈추고 나가기",
   flow_continue: "다음 반복으로 건너뛰기",
@@ -45,6 +46,7 @@ const BUILTIN_LABELS: Record<string, string> = {
   list_clear: "… 비우기",
   list_set: "… 의 … 번째 항목을 … 로 정하기 (0부터)",
   list_index: "… 에서 … 의 위치 (0부터)",
+  list_reversed: "… 을(를) 거꾸로",
   procedures_defnoreturn: "함수 정의하기",
   procedures_defreturn: "함수 정의하기 (돌려주기 …)",
   procedures_callnoreturn: "함수 실행하기",
@@ -70,6 +72,7 @@ const BUILTIN_REQUIRED: Record<string, string[]> = {
   flow_wait_us: ["US"],
   flow_repeat_n: ["TIMES"],
   flow_for_range: ["FROM", "TO"],
+  flow_for_range_step: ["FROM", "TO", "STEP"],
   flow_for_each: ["LIST"],
   controls_whileUntil: ["BOOL"],
   logic_compare: ["A", "B"],
@@ -95,6 +98,7 @@ const BUILTIN_REQUIRED: Record<string, string[]> = {
   list_remove_value: ["V"],
   list_set: ["I", "V"],
   list_index: ["V"],
+  list_reversed: ["X"],
   procedures_defreturn: ["RETURN"],
 };
 

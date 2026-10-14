@@ -29,6 +29,7 @@ export const toolbox = {
         // 팔레트가 넘쳐 아래가 가려지므로 글자 표시로 아래에 반복 블록이 더 있다고 알린다
         { kind: "label", text: "반복 더 보기" },
         block("flow_for_range", { inputs: { FROM: num(0), TO: num(5) } }),
+        block("flow_for_range_step", { inputs: { FROM: num(10), TO: num(0), STEP: num(-2) } }),
         block("flow_for_each", { inputs: { LIST: items() } }),
         block("flow_break"),
         block("flow_continue"),
@@ -87,6 +88,7 @@ export const toolbox = {
         block("calc_item", { inputs: { X: items(), INDEX: num(0) } }),
         block("calc_len", { inputs: { X: items() } }),
         block("list_index", { inputs: { V: num(3) } }),
+        block("list_reversed", { inputs: { X: items() } }),
         block("judge_contains", { inputs: { CONTAINER: items(), ITEM: num(3) } }),
         block("flow_for_each", { inputs: { LIST: items() } }),
       ],

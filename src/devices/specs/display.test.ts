@@ -10,26 +10,24 @@ const withInputs = (type: string, inputs: Record<string, B>, fields?: Record<str
   type, ...(fields ? { fields } : {}), inputs: Object.fromEntries(Object.entries(inputs).map(([k, b]) => [k, { block: b }])),
 });
 
-describe("OLED 확장 (oled.text·fill·show·line·rect)", () => {
-  const code = [
+describe("OLED 확장 (oled.text·fill·show·line·rect·fill_rect)", () => {
+  const head = [
     "from machine import Pin, SoftI2C",
     "import ssd1306",
     "",
     "i2c = SoftI2C(scl=Pin(22), sda=Pin(21))",
     "oled = ssd1306.SSD1306_I2C(128, 64, i2c)",
     "",
-    "",
-    "def show(a, b):",
-    "    oled.fill(0)",
-    "    oled.text(a, 0, 20)",
-    "    oled.text(b, 0, 36)",
-    "    oled.show()",
-    "",
-    "",
+  ];
+  const showDef = ["", "def show(a, b):", "    oled.fill(0)", "    oled.text(a, 0, 20)", "    oled.text(b, 0, 36)", "    oled.show()", "", ""];
+  // 두 줄 보여주기 블록이 없으면 show 도우미도 없다 (준비 두 줄만)
+  const code = [
+    ...head,
     "oled.fill(0)",
     'oled.text("hello", 0, 0)',
     "oled.line(0, 0, 127, 63, 1)",
     "oled.rect(0, 0, 40, 20, 1)",
+    "oled.fill_rect(70, 30, 20, 20, 1)",
     "oled.show()",
     "",
   ].join("\n");
@@ -39,10 +37,11 @@ describe("OLED 확장 (oled.text·fill·show·line·rect)", () => {
     withInputs("dev_oled_text", { TEXT: text("hello"), X: num(0), Y: num(0) }),
     withInputs("dev_oled_line", { X1: num(0), Y1: num(0), X2: num(127), Y2: num(63) }),
     withInputs("dev_oled_rect", { X: num(0), Y: num(0), W: num(40), H: num(20) }),
+    withInputs("dev_oled_fill_rect", { X: num(70), Y: num(30), W: num(20), H: num(20) }),
     { type: "dev_oled_update" },
   ];
 
-  it("지우기·글·선·사각형·내보내기 코드", () => {
+  it("지우기·글·선·사각형·채운 네모·내보내기 코드 (show 도우미 없이)", () => {
     expect(toCode(blocks)).toBe(code);
   });
   it("왕복: 같은 블록들, unparsed 0", () => {
@@ -53,12 +52,51 @@ describe("OLED 확장 (oled.text·fill·show·line·rect)", () => {
       "dev_oled_text", "text", "math_number", "math_number",
       "dev_oled_line", "math_number", "math_number", "math_number", "math_number",
       "dev_oled_rect", "math_number", "math_number", "math_number", "math_number",
+      "dev_oled_fill_rect", "math_number", "math_number", "math_number", "math_number",
       "dev_oled_update",
     ]);
     const { next: _next, ...textBlock } = r.body[2];
     expect(textBlock).toEqual(withInputs("dev_oled_text", { TEXT: text("hello"), X: num(0), Y: num(0) }));
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
+  });
+  it("채운 네모의 마지막 인자가 1 이 아니면(검게 채우기) 블록으로 접지 않는다", () => {
+    const r = fromCode(code.replace("oled.fill_rect(70, 30, 20, 20, 1)", "oled.fill_rect(70, 30, 20, 20, 0)"));
+    expect(r.types).not.toContain("dev_oled_fill_rect");
+    expect(r.code).toContain("oled.fill_rect(70, 30, 20, 20, 0)\n");
+  });
+  it("도우미 없는 준비 + fill·text·show 만 있는 코드도 블록으로 (unparsed 0)", () => {
+    const src = [...head, "oled.fill(0)", 'oled.text("Hello", 0, 0)', "oled.show()", ""].join("\n");
+    const r = fromCode(src);
+    expect(r.types).toEqual(["esp_oled_setup", "dev_oled_clear", "dev_oled_text", "text", "math_number", "math_number", "dev_oled_update"]);
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(src);
+  });
+  it("두 줄 보여주기 블록을 쓰면 그때만 show 도우미가 정의되고, 왕복하면 def 는 접힌다", () => {
+    const show = withInputs("esp_oled_show", { A: text("AUTO DOOR"), B: text("Come closer") });
+    const src = [...head, ...showDef, 'show("AUTO DOOR", "Come closer")', ""].join("\n");
+    expect(toCode([blocks[0], show])).toBe(src);
+    const r = fromCode(src);
+    expect(r.tops).toEqual(["start_program"]);
+    expect(r.types).toEqual(["esp_oled_setup", "esp_oled_show", "text", "text"]);
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(src);
+    // 두 번 써도 도우미는 한 번
+    expect(toCode([blocks[0], show, show]).match(/def show/g)).toHaveLength(1);
+  });
+  it("show 를 부르지 않는 표준 def show 는 접지 않고 함수 블록으로 남긴다 (사라지지 않게)", () => {
+    const src = [...head, ...showDef, "oled.show()", ""].join("\n");
+    const r = fromCode(src);
+    expect(r.tops).toContain("procedures_defnoreturn");
+    expect(r.code).toBe(src);
+  });
+  it("본문이 다른 def show 는 학생 함수: 호출도 함수 실행 블록", () => {
+    const src = [...head, "", "def show(a, b):", "    oled.fill(0)", "    oled.text(a, 0, 0)", "    oled.show()", "", "", 'show("a", "b")', ""].join("\n");
+    const r = fromCode(src);
+    expect(r.tops).toContain("procedures_defnoreturn");
+    expect(r.types).toContain("procedures_callnoreturn");
+    expect(r.types).not.toContain("esp_oled_show");
+    expect(r.code).toBe(src);
   });
   it("선의 마지막 인자가 1 이 아니면(지우는 선) 블록으로 접지 않는다", () => {
     const r = fromCode(code.replace("oled.line(0, 0, 127, 63, 1)", "oled.line(0, 0, 127, 63, 0)"));

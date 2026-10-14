@@ -89,6 +89,11 @@ export function registerForBlocks(gen: Gen): void {
     const args = from === "0" ? value(block, gen, "TO") : `${from}, ${value(block, gen, "TO")}`;
     return `for ${varName(block, gen)} in range(${args}):\n${branch(block, gen, "DO")}`;
   };
+  f["flow_for_range_step"] = (block, g) => {
+    const gen = g as Gen;
+    const args = ["FROM", "TO", "STEP"].map((name) => value(block, gen, name, Order.NONE, name === "STEP" ? "1" : "0")).join(", ");
+    return `for ${varName(block, gen)} in range(${args}):\n${branch(block, gen, "DO")}`;
+  };
   f["flow_for_each"] = (block, g) => {
     const gen = g as Gen;
     return `for ${varName(block, gen)} in ${value(block, gen, "LIST", Order.NONE, "[]")}:\n${branch(block, gen, "DO")}`;
@@ -146,6 +151,7 @@ export function registerForBlocks(gen: Gen): void {
   f["list_remove_value"] = (block, g) => `${varName(block, g as Gen)}.remove(${value(block, g as Gen, "V")})\n`;
   f["list_clear"] = (block, g) => `${varName(block, g as Gen)}.clear()\n`;
   f["list_set"] = (block, g) => `${varName(block, g as Gen)}[${value(block, g as Gen, "I")}] = ${value(block, g as Gen, "V")}\n`;
+  f["list_reversed"] = (block, g) => [`reversed(${value(block, g as Gen, "X", Order.NONE, "[]")})`, Order.FUNCTION_CALL];
   f["list_index"] = (block, g) => [`${varName(block, g as Gen)}.index(${value(block, g as Gen, "V")})`, Order.FUNCTION_CALL];
 
   // 내장 text 는 작은따옴표를 쓰므로 큰따옴표로 바꾼다
