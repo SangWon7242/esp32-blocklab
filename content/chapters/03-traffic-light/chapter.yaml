@@ -11,11 +11,19 @@ materials:
   - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
   - { name: "LED 3개 (빨강·노랑·초록)", note: 긴 다리가 + }
   - { name: 220Ω 저항 3개, note: "LED 마다 하나씩. 빨강-빨강-갈색 띠" }
-  - { name: 점퍼선, note: "7개 (신호선 3, LED → − 줄 3, − 줄 → GND 1)" }
+  - { name: 점퍼선(M-M), note: "7개 (신호선 3, LED → − 줄 3, − 줄 → GND 1)" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "13번 → 220Ω → 빨강 LED 긴 다리, 14번 → 220Ω → 노랑 LED 긴 다리, 16번 → 220Ω → 초록 LED 긴 다리. 세 LED 의 짧은 다리(−)는 모두 브레드보드 − 줄 → GND"
+principle:
+  image: images/sequence-timeline.svg
+  body: |
+    LED 세 개는 각자 **다른 핀**에 이어져 있어요(13 · 14 · 16). 그래서 코드에서도 핀마다 출력 핀으로 준비하고 **다른 이름**을 붙여요: `led_red` · `led_yellow` · `led_green`.
+
+    이름을 부르면 그 핀 하나만 HIGH(켜짐)나 LOW(꺼짐)로 바뀌고, 나머지 두 LED는 그대로예요. 보드는 코드를 **위에서부터 한 줄씩 차례로** 하고, `time.sleep(초)` 동안은 불을 그대로 둔 채 기다려요.
+
+    그래서 "켜기 → 기다리기 → 끄기"를 어떤 순서로 적느냐가 곧 신호등의 순서와 시간이 돼요.
 goals:
   content: LED 세 개에 각각 이름을 붙여 켜는 순서와 시간을 정하고, 되풀이되는 부분을 for 반복문으로 묶는다
   thinking: 신호등이 하는 일을 시간 순서대로 쪼개고, 같은 줄이 되풀이되는 곳을 찾아 "몇 번" 으로 바꿔 생각한다
@@ -99,6 +107,15 @@ parts:
           - "핀 번호와 색이 맞는지 확인하기: 13 빨강 · 14 노랑 · 16 초록"
           - "**보드 연결** → **실행** 누르고 불이 바뀌는 순서 보기"
         code: step1_traffic_light.py
+        expected: 코드를 실행하면 빨간불이 5초 켜졌다 꺼지고, 노란불이 세 번 깜빡인 뒤, 초록불이 5초 켜졌다 꺼져요. 이 순서가 계속 되풀이돼요.
+        codeNotes:
+          - { line: 4, note: "13번 핀을 출력 핀으로 준비하고 이름을 `led_red` 로 붙여요" }
+          - { line: 5, note: "14번 핀은 `led_yellow`, 다음 줄의 16번 핀은 `led_green` 이에요" }
+          - { line: 8, note: "아래 들여 쓴 줄들을 끝없이 되풀이해요" }
+          - { line: 9, note: "빨간불만 켜요. 다른 두 LED는 꺼진 그대로예요" }
+          - { line: 10, note: "5초 동안 빨간불을 켜 둔 채 기다려요" }
+          - { line: 13, note: "노란불을 켜고 0.5초, 끄고 0.5초: 이 4줄이 한 번 깜빡임이에요" }
+          - { line: 26, note: "초록불을 켜고 5초 기다린 뒤 꺼요. 그다음 `while` 처음(빨간불)으로 돌아가요" }
 
       - id: readcheck
         type: readcheck
@@ -119,6 +136,14 @@ parts:
           - { kind: number, q: "노란불은 한 바퀴에 모두 몇 번 깜빡이나요?", answer: 3 }
           - { kind: choice, q: "노란 LED가 꽂힌 핀은 몇 번인가요?", options: ["13번", "14번", "16번"], answer: 1 }
           - { kind: line, q: "노란불이 마지막으로 꺼지는 줄의 줄 번호를 클릭하세요", answer: 23 }
+        codeNotes:
+          - { line: 1, note: "보드의 핀을 다루는 `Pin` 기능을 가져와요" }
+          - { line: 2, note: "기다리기(`time.sleep`)에 쓰는 시간 기능을 가져와요" }
+          - { line: 4, note: "LED마다 핀을 하나씩 출력으로 준비하고 이름을 붙여요 (4~6번 줄)" }
+          - { line: 8, note: "아래 들여 쓴 줄들을 끝없이 되풀이해요" }
+          - { line: 9, note: "`이름.value(1)` 은 그 LED만 켜요" }
+          - { line: 11, note: "`이름.value(0)` 은 그 LED만 꺼요" }
+          - { line: 12, note: "`#` 뒤의 글은 사람이 읽는 설명(주석)이에요. 보드는 이 줄을 건너뛰어요" }
 
       - id: mission
         type: mission

@@ -7,7 +7,6 @@ pwm.freq(10000)
 for i in range(1023):
     pwm.duty(i)
     time.sleep_ms(1)
-
 for i in range(1023):
     pwm.duty(1023 - i)
     time.sleep_ms(1)

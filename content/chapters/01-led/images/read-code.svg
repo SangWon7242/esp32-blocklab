@@ -39,6 +39,6 @@
     <text x="488" y="190" font-size="16" font-weight="700">끄는 줄 찾기</text>
     <text x="488" y="212" font-size="14" opacity="0.75">value( ) 안을 봐요</text>
     <text x="488" y="260" font-size="16" font-weight="700">줄 번호 누르기</text>
-    <text x="488" y="282" font-size="14" opacity="0.75">왼쪽 회색 숫자</text>
+    <text x="488" y="282" font-size="14" opacity="0.75">줄 앞 회색 숫자</text>
   </g>
 </svg>

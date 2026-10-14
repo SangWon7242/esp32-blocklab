@@ -11,7 +11,7 @@ materials:
   - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
   - { name: LED, note: 긴 다리가 + }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
-  - { name: 점퍼선, note: "3개 (26번 선 1, GND 선 2)" }
+  - { name: 점퍼선(M-M), note: "3개 (26번 선 1, GND 선 2)" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-led.svg
@@ -21,11 +21,12 @@ principle:
   body: |
     LED는 전기가 지나갈 때 빛을 내는 작은 부품이에요. 전기는 **긴 다리(+)로 들어가 짧은 다리(−)로 나올 때만** 흘러서, 거꾸로 꽂으면 불이 들어오지 않아요.
 
-    불이 켜지려면 전기가 한 바퀴 돌아야 해요: 보드의 26번 핀 → 저항 → LED → GND(전기가 돌아가는 곳).
+    불이 켜지려면 전기가 한 바퀴 돌아야 해요: 보드의 26번 핀 → 저항 → LED → GND(전기가 돌아가는 곳). **220Ω 저항**은 전기가 너무 많이 흘러 LED가 상하지 않도록 흐름을 줄여 줘요.
 
-    - 핀이 **HIGH**(3.3V)이면 전기가 흘러 불이 켜져요
-    - 핀이 **LOW**(0V)이면 전기가 흐르지 않아 불이 꺼져요
-    - **220Ω 저항**은 전기가 너무 많이 흘러 LED가 상하지 않도록 흐름을 줄여 줘요
+    26번 핀은 **디지털 출력** 핀으로 써요. 디지털 출력은 두 가지 중 하나만 내보내요.
+
+    - **HIGH**(1, 3.3V): 전기가 흘러 불이 켜져요
+    - **LOW**(0, 0V): 전기가 흐르지 않아 불이 꺼져요
 parts:
   - id: part1
     title: LED 켜고 깜빡이기
@@ -128,7 +129,14 @@ parts:
           - { kind: number, q: "LED가 한 번 켜져 있는 시간은 몇 초인가요?", answer: 1 }
           - { kind: choice, q: "LED를 끄는 줄은 어느 것인가요?", options: ["led.value(1)", "led.value(0)"], answer: 1 }
           # 계획에는 7로 적혀 있으나 step4_blink_loop.py 의 첫 time.sleep(1) 은 8번째 줄이다
-          - { kind: line, q: "1초 기다리는 첫 줄의 왼쪽 줄 번호를 클릭하세요", answer: 8 }
+          - { kind: line, q: "1초 기다리는 첫 줄의 줄 번호를 클릭하세요", answer: 8 }
+        codeNotes:
+          - { line: 1, note: "보드의 핀을 다루는 `Pin` 기능을 가져와요" }
+          - { line: 2, note: "기다리기(`time.sleep`)에 쓰는 시간 기능을 가져와요" }
+          - { line: 4, note: "26번 핀을 내보내는(출력) 핀으로 정하고 이름을 `led`로 붙여요" }
+          - { line: 6, note: "`while True:` 아래 들여 쓴 줄들을 끝없이 되풀이해요" }
+          - { line: 7, note: "`led`에 1(HIGH)을 보내 LED를 켜요" }
+          - { line: 10, note: "괄호 안 숫자만큼(초) 기다려요. 그동안 LED는 바로 위 줄의 상태 그대로예요" }
 
       - id: mission
         type: mission

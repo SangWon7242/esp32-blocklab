@@ -7,9 +7,9 @@
   <circle cx="88" cy="56" r="5" fill="var(--muted)"/>
   <circle cx="106" cy="56" r="5" fill="var(--muted)"/>
   <g font-size="13" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55">
-    <text x="88" y="102">32</text><text x="88" y="123">33</text><text x="88" y="144">34</text><text x="88" y="165">35</text>
-    <text x="88" y="186">36</text><text x="88" y="207">37</text><text x="88" y="228">38</text><text x="88" y="249">39</text>
-    <text x="88" y="270">40</text><text x="88" y="291">41</text><text x="88" y="312">42</text>
+    <text x="88" y="102">18</text><text x="88" y="123">19</text><text x="88" y="144">20</text><text x="88" y="165">21</text>
+    <text x="88" y="186">22</text><text x="88" y="207">23</text><text x="88" y="228">24</text><text x="88" y="249">25</text>
+    <text x="88" y="270">26</text><text x="88" y="291">27</text><text x="88" y="312">28</text>
   </g>
   <g fill="currentColor" stroke="none" opacity="0.28">
     <rect x="102" y="91" width="96" height="9" rx="4.5"/>
