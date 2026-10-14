@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="wd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="wd-title">자동문 전체 배선도: 초음파 센서 Trig 13번·Echo 12번, 서보 모터 신호선 4번, OLED 화면 SDA 21번·SCL 22번. 5V 와 GND 는 세 부품이 함께 쓴다</title>
+  <!-- ESP32 보드 -->
+  <rect x="250" y="40" width="140" height="250" rx="12" fill="var(--card)"/>
+  <rect x="296" y="280" width="48" height="20" rx="3" fill="var(--muted)"/>
+  <text x="320" y="74" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <g font-size="15" font-weight="700" fill="currentColor" stroke="none">
+    <text x="262" y="155">21</text>
+    <text x="262" y="195">22</text>
+    <text x="378" y="115" text-anchor="end">13</text>
+    <text x="378" y="155" text-anchor="end">12</text>
+    <text x="378" y="235" text-anchor="end">4</text>
+  </g>
+  <!-- OLED -->
+  <rect x="34" y="112" width="148" height="110" rx="8" fill="var(--card)"/>
+  <rect x="46" y="124" width="104" height="70" rx="3" fill="#1d4ed8"/>
+  <text x="98" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">AUTO DOOR</text>
+  <text x="98" y="176" text-anchor="middle" font-size="12" fill="#ffffff" stroke="none">Come closer</text>
+  <text x="108" y="246" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">OLED 화면</text>
+  <path d="M182 150 H250 M182 190 H250" stroke="#1d4ed8" stroke-width="4"/>
+  <g font-size="15" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="216" y="142">SDA</text>
+    <text x="216" y="182">SCL</text>
+  </g>
+  <!-- 초음파 센서 -->
+  <rect x="470" y="78" width="136" height="104" rx="8" fill="#5b9a1a"/>
+  <circle cx="562" cy="104" r="18" fill="var(--card)"/>
+  <circle cx="562" cy="156" r="18" fill="var(--card)"/>
+  <path d="M390 110 H470" stroke="#5b9a1a" stroke-width="4"/>
+  <path d="M390 150 H470" stroke="#00b6b1" stroke-width="4"/>
+  <g font-size="15" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="430" y="102">Trig</text>
+    <text x="430" y="142">Echo</text>
+  </g>
+  <text x="538" y="200" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">초음파 센서</text>
+  <!-- 서보 -->
+  <rect x="470" y="214" width="92" height="56" rx="6" fill="#c92a2a"/>
+  <circle cx="500" cy="242" r="11" fill="var(--card)"/>
+  <path d="M500 242 L590 226" stroke-width="7"/>
+  <path d="M390 230 H470" stroke="#c92a2a" stroke-width="4"/>
+  <text x="430" y="222" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">신호</text>
+  <text x="516" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">서보 모터 = 문</text>
+  <g fill="currentColor" stroke="none">
+    <circle cx="250" cy="150" r="5"/><circle cx="250" cy="190" r="5"/>
+    <circle cx="390" cy="110" r="5"/><circle cx="390" cy="150" r="5"/><circle cx="390" cy="230" r="5"/>
+  </g>
+  <!-- 전원 공용 -->
+  <rect x="150" y="314" width="340" height="34" rx="17" fill="var(--muted)" stroke="none"/>
+  <text x="320" y="336" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">5V · GND 는 세 부품이 함께 써요</text>
+</svg>

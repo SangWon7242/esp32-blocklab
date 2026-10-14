@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="th-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="th-title">거리 기준선 그림: 센서에서 15 cm 보다 가까우면 문이 열리고, 15 cm 이상 멀면 문이 닫혀 있다</title>
+  <defs>
+    <marker id="th-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 센서 -->
+  <rect x="30" y="140" width="40" height="70" rx="6" fill="#5b9a1a"/>
+  <circle cx="50" cy="160" r="9" fill="var(--card)"/>
+  <circle cx="50" cy="190" r="9" fill="var(--card)"/>
+  <text x="50" y="232" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">센서</text>
+  <!-- 가까운 구역 -->
+  <rect x="80" y="112" width="188" height="124" fill="#5b9a1a" fill-opacity="0.16" stroke="none"/>
+  <text x="174" y="164" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">가까우면</text>
+  <text x="174" y="192" text-anchor="middle" font-size="16" fill="currentColor" stroke="none">문 열림</text>
+  <!-- 먼 구역 -->
+  <rect x="268" y="112" width="312" height="124" fill="var(--muted)" stroke="none"/>
+  <text x="424" y="164" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">멀면</text>
+  <text x="424" y="192" text-anchor="middle" font-size="16" fill="currentColor" stroke="none">문 닫힘</text>
+  <!-- 기준선 -->
+  <path d="M268 96 V256" stroke="#c92a2a" stroke-width="3" stroke-dasharray="8 6"/>
+  <text x="268" y="84" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">if d &lt; 15:</text>
+  <!-- 거리 눈금 -->
+  <path d="M80 256 H586" stroke-width="2.5"/>
+  <path d="M80 248 V264 M205 250 V262 M330 250 V262 M455 250 V262 M580 250 V262"/>
+  <g font-size="15" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="80" y="282">0</text>
+    <text x="205" y="282">10</text>
+    <text x="330" y="282">20</text>
+    <text x="455" y="282">30</text>
+    <text x="580" y="282">40 cm</text>
+  </g>
+  <text x="268" y="282" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">15</text>
+  <!-- 다가가기 -->
+  <path d="M540 312 H300" marker-end="url(#th-arrow)"/>
+  <text x="560" y="317" font-size="15" fill="currentColor" stroke="none">사람</text>
+  <text x="320" y="346" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">기준 숫자는 내가 정해요. 10 이면? 30 이면?</text>
+</svg>

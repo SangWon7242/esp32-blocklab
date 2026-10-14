@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="wu-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="wu-title">초음파 센서 배선도: 센서 VCC 는 보드 5V, Trig 는 13번, Echo 는 12번, GND 는 GND 에 연결</title>
+  <!-- ESP32 보드 -->
+  <rect x="40" y="40" width="200" height="270" rx="12" fill="var(--card)"/>
+  <rect x="116" y="300" width="48" height="22" rx="3" fill="var(--muted)"/>
+  <text x="140" y="76" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <g font-size="15" font-weight="700" fill="currentColor" stroke="none" text-anchor="end">
+    <text x="226" y="125">5V</text>
+    <text x="226" y="165">13</text>
+    <text x="226" y="205">12</text>
+    <text x="226" y="245">GND</text>
+  </g>
+  <!-- 선 -->
+  <path d="M240 120 H440" stroke="#c92a2a" stroke-width="4"/>
+  <path d="M240 160 H440" stroke="#5b9a1a" stroke-width="4"/>
+  <path d="M240 200 H440" stroke="#00b6b1" stroke-width="4"/>
+  <path d="M240 240 H440" stroke-width="4"/>
+  <g fill="currentColor" stroke="none">
+    <circle cx="240" cy="120" r="5"/><circle cx="240" cy="160" r="5"/><circle cx="240" cy="200" r="5"/><circle cx="240" cy="240" r="5"/>
+    <circle cx="440" cy="120" r="5"/><circle cx="440" cy="160" r="5"/><circle cx="440" cy="200" r="5"/><circle cx="440" cy="240" r="5"/>
+  </g>
+  <g font-size="15" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="340" y="112">전원 5V</text>
+    <text x="340" y="152">쏘기 → 13번</text>
+    <text x="340" y="192">듣기 → 12번</text>
+    <text x="340" y="232">GND</text>
+  </g>
+  <!-- HC-SR04 -->
+  <rect x="440" y="84" width="168" height="192" rx="10" fill="#5b9a1a"/>
+  <g font-size="15" font-weight="700" fill="#ffffff" stroke="none">
+    <text x="452" y="125">VCC</text>
+    <text x="452" y="165">Trig</text>
+    <text x="452" y="205">Echo</text>
+    <text x="452" y="245">GND</text>
+  </g>
+  <circle cx="560" cy="136" r="30" fill="var(--card)"/>
+  <circle cx="560" cy="224" r="30" fill="var(--card)"/>
+  <circle cx="560" cy="136" r="12"/>
+  <circle cx="560" cy="224" r="12"/>
+  <text x="524" y="300" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">HC-SR04 초음파 센서</text>
+  <text x="600" y="342" text-anchor="end" font-size="15" font-weight="700" fill="currentColor" stroke="none">USB 를 뺀 채 꽂아요 · GND 먼저!</text>
+</svg>

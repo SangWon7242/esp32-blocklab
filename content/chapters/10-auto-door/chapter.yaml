@@ -1,7 +1,19 @@
-# 챕터 10 · 다가가면 열리는 자동문 — 교사용 지도안(110분)·슬라이드 그대로. 형식 설명은 src/track/README.md
+# 챕터 10 · 다가가면 열리는 자동문 — 교사용 지도안(110분)·학생용 트랙 진행표의 표현 그대로. 형식 설명은 src/track/README.md
 id: 10-auto-door
 order: 10
 title: 다가가면 열리는 자동문
+summary: |
+  백화점 입구에 다가가면 손을 대지 않아도 문이 스르륵 열려요. 오늘은 **초음파 센서**로 거리를 재고, 가까우면 **서보 모터(문)** 를 열고 **OLED 화면**에 알려 주는 자동문을 만들어요.
+  1부에서 센서로 거리 재기를 익히고, 2부에서 문과 화면을 붙여요. 코드는 복사해도 되지만, **복사한 코드를 설명할 수 없으면 다음으로 넘어가지 않아요.**
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 마이크로 USB 선으로 PC 와 연결 }
+  - { name: HC-SR04 초음파 센서, note: "M-F 점퍼선 4가닥. USB 를 뺀 채, GND 부터 꽂기" }
+  - { name: 서보 모터, note: "문 역할. 신호선은 4번 핀" }
+  - { name: OLED 0.96" (SSD1306), note: "SDA 21 · SCL 22. 보드에 ssd1306.py 를 먼저 올려 두기" }
+  - { name: 점퍼선, note: "M-F(초음파 센서) · F-F(서보·화면)" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring: { image: images/wiring-door.svg, caption: "초음파 Trig → 13 · Echo → 12, 서보 신호 → 4, OLED SDA → 21 · SCL → 22. 5V·GND 는 세 부품이 함께 써요" }
 goals:
   content: 초음파로 잰 거리를 if 로 판단해 서보(문)와 OLED(화면)를 함께 제어한다
   thinking: 문제를 세 덩어리로 분해하고, 실행 결과를 미리 예측하고, 증상에서 원인을 역추적한다
@@ -17,15 +29,37 @@ parts:
         type: problem
         title: 문제 만나기 — 백화점 문은 어떻게 알까?
         minutes: 4
+        scene: { image: images/cover.svg, caption: "문에는 눈이 없어요. 그런데 어떻게 사람이 온 걸 알까요?" }
+        body: |
+          백화점 입구로 걸어가면 손을 대지 않아도 문이 스르륵 열려요. 그런데 문에는 눈이 없죠. 문은 **무엇으로** 사람이 왔다는 걸 알까요?
+
+          아직 코드도 부품도 없어요. 오른쪽 세 질문에 **내 생각을 한두 문장**으로 적어 보세요. 정답은 없고, 틀려도 괜찮아요.
+        todo:
+          - 세 질문에 내 생각을 한두 문장씩 적기
+          - 숫자를 묻는 질문에는 **숫자와 그 이유**를 함께 적기
+          - 다 적으면 **완료** 누르기
         questions:
-          - 문은 무엇을 '보고' 사람이 왔다고 판단할까요?
-          - 얼마나 가까이 가야 열려야 할까요? 그 숫자는 누가 정하죠?
-          - 사람이 지나간 뒤에 문은 언제 닫혀야 할까요?
+          - 문은 무엇을 '보고' 사람이 왔다고 판단할까요? 눈이 없다면 무엇으로 보죠?
+          - 몇 cm 까지 가까이 가야 열려야 할까요? 그 숫자는 누가, 무엇을 생각해서 정하죠?
+          - 사람이 지나간 뒤에 문은 언제 닫혀야 할까요? 몇 초쯤 열어 두면 좋을까요?
 
       - id: analysis
         type: analysis
         title: 조건 분석 — 세 칸 보드
         minutes: 6
+        scene: { image: images/three-boxes.svg, caption: "알아야 할 것 · 정해야 할 것 · 해야 할 것" }
+        body: |
+          자동문이 하는 일을 **세 덩어리**로 나눠 봐요. 부품 이름은 몰라도 괜찮아요. "무엇을" 알고, 정하고, 해야 하는지만 적어요.
+
+          - **알아야 할 것**: 문이 바깥에서 알아내야 하는 것
+          - **정해야 할 것**: 사람(우리)이 미리 정해 줘야 하는 숫자
+          - **해야 할 것**: 문이 실제로 하는 행동
+
+          "거리"만 알면 정말 충분할까요? 또 알아야 할 게 있는지도 생각해 봐요.
+        todo:
+          - 세 칸에 각각 하나 이상 적기
+          - 예시 답을 열어 내 답에도 있는 항목에 체크하기
+          - 빠진 것이 있으면 내 칸에 덧붙이기
         answer:
           know: ["앞에 무언가 있는지", "그것이 몇 cm 떨어져 있는지"]
           decide: ["몇 cm부터 열 것인지", "몇 초 동안 열어 둘 것인지"]
@@ -35,6 +69,15 @@ parts:
         type: predict
         title: 예측하기 — 실행 전 3문항
         minutes: 4
+        scene: { image: images/ultrasonic-principle.svg, caption: "trig 가 소리를 쏘고, 벽에 부딪혀 돌아온 메아리를 echo 가 들어요" }
+        body: |
+          초음파 센서는 박쥐처럼 **소리를 쏘고, 벽에 부딪혀 돌아오는 메아리**를 들어요. 소리가 갔다 오는 데 걸린 시간의 **절반**에 소리 빠르기를 곱하면 거리가 나와요.
+
+          아직 실행하지 마세요. `step1_distance.py` 를 돌리면 창에 어떤 숫자가 찍힐지 **먼저 예측**해 적어요. 왜 그렇게 생각했는지 근거도 한 문장 떠올려 보세요. 틀린 예측도 좋은 예측이에요.
+        todo:
+          - 그림을 보고 센서가 거리를 재는 방법을 내 말로 말해 보기
+          - 세 경우의 숫자를 cm 로 예측해 적기
+          - 예측마다 근거를 한 문장씩 생각해 두기
         code: step1_distance.py
         blanks:
           - q: 센서 앞 1m 쯤 떨어진 벽을 향하면? (cm)
@@ -45,23 +88,50 @@ parts:
         type: run
         title: 복사 · 실행 — 거리 재기
         minutes: 5
+        scene: { image: images/wiring-ultrasonic.svg, caption: "VCC → 5V, Trig → 13, Echo → 12, GND → GND" }
+        body: |
+          이제 센서를 보드에 연결하고 코드를 실행해요. **USB 를 뺀 상태에서** 선 4개를 꽂고, 꼭 필요하면 **GND 를 가장 먼저** 꽂아요. 다 꽂으면 짝에게 "검사관"이 되어 달라고 해요.
+
+          실행한 뒤에는 손을 센서 앞에서 앞뒤로 움직여 보세요. 창에 찍히는 숫자가 따라 바뀌나요? 아까 적은 예측과 비교해 봐요.
+        todo:
+          - USB 를 뺀 채 VCC · Trig · Echo · GND 4선 연결하기
+          - "**보드 연결** → **실행** 누르기"
+          - 손을 움직이며 숫자를 보고, 예측과 비교하기
         code: step1_distance.py
 
       - id: readcheck1
         type: readcheck
         title: 읽기 체크 ①
         minutes: 5
+        scene: { image: images/wiring-ultrasonic.svg, caption: "코드의 핀 번호와 실제 선을 짝지어 읽어 봐요" }
+        body: |
+          방금 실행한 `step1_distance.py` 를 **위에서 아래로 손가락으로 짚으며** 읽어요. 복사한 코드를 "이게 무슨 뜻인지" 말할 수 없으면 다음으로 넘어가지 않는 게 오늘의 약속이에요.
+
+          답을 **공책에 먼저 적은 뒤** 확인을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - "`trig` · `echo` 줄과 `get_distance` 함수를 한 줄씩 읽기"
+          - 세 문항에 답하고 **확인** 누르기
+          - 틀린 문항은 그 줄을 다시 읽고 고치기
         code: step1_distance.py
         questions:
-          - { kind: choice, q: "소리를 쏘는 핀은 둘 중 어느 것?", options: ["trig", "echo"], answer: 0, hint: "trig 는 trigger(방아쇠)" }
-          - { kind: number, q: "시간을 적어 두는 줄은 몇 개?", answer: 2 }
-          - { kind: number, q: "t // 2 를 지우면 숫자가 몇 배가 될까요?", answer: 2 }
+          - { kind: choice, q: "소리를 쏘는 핀은 둘 중 어느 것인가요? (몇 번 핀인지도 코드에서 찾아보세요)", options: ["trig", "echo"], answer: 0, hint: "trig 는 trigger(방아쇠)" }
+          - { kind: number, q: "get_distance 함수 안에서 시간을 적어 두는 줄은 몇 개인가요?", answer: 2 }
+          - { kind: number, q: "t = t // 2 줄을 지우면 찍히는 숫자는 지금의 몇 배가 될까요?", answer: 2 }
 
       - id: mission1
         type: mission
         title: 연습 미션 — if 로 판단하기
         minutes: 7
-        instructions: 15cm보다 가까워지면 창에 '가까워요!' 라고 찍어 주세요
+        scene: { image: images/threshold.svg, caption: "기준선 15 cm: 이보다 가까울 때만 다르게 행동해요" }
+        body: |
+          지금 코드는 거리를 숫자로 찍기만 해요. 이제 컴퓨터가 **판단**하게 해 봐요: 15cm 보다 가까우면 창에 `가까워요!` 도 함께 찍는 거예요. 아직 문도 화면도 없이 `print` 로만 연습해요.
+
+          잰 거리를 `d` 라는 이름에 담아 두면 판단하기 쉬워요. `print` 를 `if` 안에 넣는 것과 밖에 두는 건 뭐가 다를까요? 정답 파일은 먼저 보지 마세요.
+        todo:
+          - 잰 거리를 `d` 에 담기
+          - 15cm 보다 가까울 때 `가까워요!` 를 찍는 두 줄 추가하기
+          - "**판정** 누르고, 실행해서 손을 15cm 안에 넣어 보기"
+        instructions: 15cm보다 가까워지면 창에 '가까워요!' 라고 찍어 주세요. 거리 숫자는 계속 찍고, 가까울 때만 한 줄을 더 찍어요
         code: step1_distance.py
         hint: "if d < 15: 아래 줄은 한 칸 더 들여쓰기"
         rules:
@@ -75,22 +145,31 @@ parts:
         type: debug
         title: 디버깅 미션 ①
         minutes: 6
+        scene: { image: images/debug-flow.svg, caption: "증상을 보고 어디부터 볼지 먼저 정해요" }
+        body: |
+          고장 난 코드 세 개가 있어요. 바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 숫자 문제면 배선부터, 에러가 뜨면 빨간 글씨의 줄 번호부터 봐요.
+
+          셋 중 **에러 메시지가 뜨는 것**은 어느 것일까요? 나머지 둘은 왜 에러 없이 이상하게만 굴까요? 최소 4분은 혼자 해 봐요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
         symptoms:
           - title: 숫자가 계속 0만 나와요
             code: "trig = Pin(12, Pin.OUT)\necho = Pin(13, Pin.IN)"
-            question: 어디가 바뀌었나요?
+            question: 숫자 문제는 배선부터 봐요. 소리를 쏘는 선과 듣는 선이 실제로 몇 번에 꽂혀 있는지, 코드의 번호와 짝지어 보세요. 어디가 바뀌었나요?
             rules:
               - codeMatches: 'trig = Pin\(13'
                 fail: 쏘는 선과 듣는 선, 어느 쪽이 13번이죠?
-          - title: IndentationError 가 떠요
+          - title: 빨간 글씨로 IndentationError 가 떠요
             code: "if d < 15:\nprint(\"가까워요!\")"
-            question: 무엇이 빠졌나요?
+            question: 빨간 글씨가 몇 번째 줄이라고 하나요? 그 줄이 if 안에 있으려면 무엇이 빠졌나요?
             rules:
               - codeMatches: "    print"
                 fail: 에러가 몇 번째 줄이라고 하나요?
-          - title: 10초에 한 번만 재요
+          - title: 에러는 없는데 10초에 한 번만 재요
             code: "trig.value(1)\ntime.sleep(10)\ntrig.value(0)"
-            question: 무엇이 잘못됐나요?
+            question: 소리는 아주 잠깐만 쏘아야 해요. 기다리는 시간을 정하는 줄에서 무엇이 잘못됐나요?
             rules:
               - codeMatches: 'sleep_us\(10\)'
                 fail: _us 가 붙고 안 붙고가 뭘 바꿀까요?
@@ -102,6 +181,15 @@ parts:
         type: design
         title: 설계 — 우리말로 먼저 쓰기
         minutes: 5
+        scene: { image: images/servo-door.svg, caption: "서보 숫자 하나로 문을 닫고 열어요" }
+        body: |
+          2부에서는 진짜 문(서보 모터)을 달아요. 코드를 쓰기 전에 **우리말로 먼저** 설계해요. 영어와 코드는 아직 금지!
+
+          1부의 "가까우면 알려 주기"를 떠올려 보세요. 이번에는 알려 주는 대신 **문을 열었다가, 기다렸다가, 닫으면** 돼요. 정답은 하나가 아니에요. 빈칸을 채운 뒤 번역표를 보며 블록을 순서대로 조립해요.
+        todo:
+          - 우리말 설계도의 빈칸 채우기
+          - 번역표에서 "연다"·"닫는다"가 어떤 코드인지 확인하기
+          - 블록을 설계도 순서대로 조립하고 **판정**
         pseudocode:
           - text: 계속 반복한다
           - text: 거리를 __
@@ -128,23 +216,49 @@ parts:
         type: run
         title: 복사 · 실행 — 완성 코드
         minutes: 4
+        scene: { image: images/wiring-door.svg, caption: "서보 신호 → 4, OLED SDA → 21 · SCL → 22. 핀이 겹치지 않는지 확인!" }
+        body: |
+          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로** 꽂고, 5V·GND 는 세 부품이 함께 나눠 써요. 핀 번호가 겹치지 않는지 짝과 확인해요.
+
+          완성 코드 `step3_auto_door.py` 를 실행하고 손을 센서 앞 15cm 안으로 넣어 보세요. 화면이 `DOOR OPEN` 으로 바뀌고, 문이 열렸다가 잠시 뒤 닫히나요? 화면이 아예 안 켜지면 보드에 `ssd1306.py` 가 있는지 확인해요.
+        todo:
+          - USB 를 뺀 채 서보(4번) · OLED(21 · 22번) 연결하기
+          - "**실행** 누르고 손을 15cm 안에 넣어 보기"
+          - 화면 글씨가 바뀌고 문이 열렸다 닫히는지 보기
         code: step3_auto_door.py
 
       - id: readcheck2
         type: readcheck
         title: 읽기 체크 ②
         minutes: 4
+        scene: { image: images/threshold.svg, caption: "if d < 15: 안쪽 줄들은 가까울 때만 실행돼요" }
+        body: |
+          이번에는 완성 코드의 **들여쓰기 구조**를 읽어요. 어떤 줄이 `if` 안에 있고 어떤 줄이 밖에 있는지, 손가락으로 짚어 가며 세어 보세요.
+
+          답을 공책에 먼저 적은 뒤 확인을 눌러요. 1부 연습 미션 코드와 비교하면 바뀐 줄은 몇 줄인지도 생각해 봐요.
+        todo:
+          - "`while True:` 아래를 손가락으로 짚으며 읽기"
+          - 세 문항에 답하고 **확인** 누르기
         code: step3_auto_door.py
         questions:
-          - { kind: number, q: "문이 열려 있는 시간은 몇 초?", answer: 3 }
-          - { kind: number, q: "show() 는 한 바퀴에 몇 번 불리나요?", answer: 3, hint: "열릴 때·닫힐 때·대기 화면" }
-          - { kind: number, q: "if d < 15: 안에 들어 있는 줄은 몇 줄?", answer: 7 }
+          - { kind: number, q: "문이 열려 있는 시간은 몇 초인가요? (어느 줄을 보면 알 수 있는지도 찾아보세요)", answer: 3 }
+          - { kind: number, q: "문이 한 번 열렸다 닫히는 동안 show() 는 몇 번 불리나요?", answer: 3, hint: "열릴 때·닫힐 때·대기 화면" }
+          - { kind: number, q: "if d < 15: 안에 들어 있는(한 칸 더 들여 쓴) 줄은 몇 줄인가요?", answer: 7 }
 
       - id: mission2
         type: mission
         title: 미션 — 화면에 거리 표시
         minutes: 3
-        instructions: 대기 화면에도 지금 거리를 보여 주세요(한 줄 추가)
+        scene: { image: images/oled-screen.svg, caption: "대기 화면 둘째 줄에 지금 거리를" }
+        body: |
+          지금 대기 화면에는 `AUTO DOOR` 와 `Come closer` 만 떠 있어서, 센서가 거리를 얼마로 재고 있는지 알 수 없어요. 문 앞에 선 사람이 지금 거리를 볼 수 있게 해 봐요.
+
+          코드 **1줄**만 추가하면 돼요. 화면에는 글자만 들어가요. 숫자 `d` 를 그대로 넣을 수 있을까요?
+        todo:
+          - 거리를 잰 바로 다음 줄에 대기 화면을 보여 주는 줄 추가하기
+          - "**판정** 누르기"
+          - 실행해서 손을 움직이면 화면 숫자가 바뀌는지 보기
+        instructions: 대기 화면에도 지금 거리를 보여 주세요(한 줄 추가). 첫째 줄은 AUTO DOOR, 둘째 줄은 거리 뒤에 " cm" 를 붙여서 (예 23 cm)
         code: step3_auto_door.py
         rules:
           - codeMatches: 'show\("AUTO DOOR", str\(d\) \+ " cm"\)'
@@ -155,10 +269,18 @@ parts:
         type: debug
         title: 디버깅 미션 ②
         optional: true
+        scene: { image: images/debug-flow.svg, caption: "화면 문제면 oled 줄부터" }
+        body: |
+          먼저 끝낸 사람을 위한 디버깅이에요. 화면 문제는 `oled` 줄부터 봐요.
+
+          `oled.text(...)` 로 글씨를 적었는데 화면은 그대로예요. 공책에 적어 두는 것과 친구에게 **보여 주는 것**은 같은 일일까요?
+        todo:
+          - 왜 이런 증상일지 내 생각 적고 저장
+          - 빠진 줄을 찾아 넣고 **판정**
         symptoms:
-          - title: 화면 글씨가 안 바뀌어요
+          - title: 에러는 없는데 화면 글씨가 안 바뀌어요
             code: "oled.text(a, 0, 20)\noled.text(b, 0, 36)"
-            question: 적어 두는 것과 보여 주는 것은 같나요?
+            question: 적어 두는 것과 보여 주는 것은 같나요? 완성 코드의 show 함수와 비교하면 무엇이 빠졌나요?
             rules:
               - codeMatches: 'oled.show\(\)'
                 fail: 적어 두는 것과 보여 주는 것은 같나요?
@@ -167,7 +289,18 @@ parts:
         type: mission
         title: 추가 미션 — 문이 열리면 LED도 켜기
         optional: true
-        instructions: 문이 열리면 LED도 같이 켜기
+        scene: { image: images/servo-door.svg, caption: "문을 여는 줄 옆에 LED 켜기, 닫는 줄 옆에 LED 끄기" }
+        body: |
+          진짜 자동문에는 "열리는 중" 표시등이 달려 있기도 해요. 문이 열리면 **LED 도 같이 켜고**, 문이 닫히면 끄도록 고쳐 보세요.
+
+          LED 는 `26`번 핀에 연결해요: 26번 → 220Ω 저항 → LED 긴 다리, 짧은 다리 → GND.
+
+          더 해 보기: 사람이 25cm 밖으로 나갈 때까지 문을 열어 두려면 어떻게 바꿔야 할까요? 15cm 바로 근처에 서 있으면 문이 왜 덜덜 떨릴까요?
+        todo:
+          - LED 를 26번 핀에 연결하기
+          - LED 핀을 만들고, 열 때 켜고 닫을 때 끄기
+          - "**판정** 누르기"
+        instructions: 문이 열리면 LED도 같이 켜고, 문이 닫히면 꺼 주세요 (LED 는 26번 핀)
         code: step3_auto_door.py
         rules:
           - useBlock: ["esp_pin_write"]
@@ -180,6 +313,15 @@ parts:
         type: reflect
         title: 성찰 — 오늘 한 생각 쓰기
         minutes: 5
+        scene: { image: images/cover.svg, caption: "오늘 만든 자동문, 학교 어디에 달면 좋을까요?" }
+        body: |
+          마지막으로 오늘 한 생각을 정리해요. 먼저 완성 코드의 줄마다 "이 줄은 ___" 을 채우고, 아래 네 질문에 답해요.
+
+          기록 틀: **막힌 곳 → 내가 해 본 것 → 결국 원인은 → 다음엔 여기부터 본다**. 다 쓰면 짝이나 선생님에게 1분 동안 설명해 보세요.
+        todo:
+          - 줄마다 "이 줄은 ___" 채우기
+          - 네 질문에 답하기
+          - 짝에게 1분 동안 설명하기
         lineExplain: step3_auto_door.py
         prompts:
           - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?

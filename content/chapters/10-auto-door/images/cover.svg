@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cv-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cv-title">백화점 자동문 앞으로 사람이 걸어가고, 문 위의 초음파 센서가 소리를 쏘아 사람을 알아채 문이 양옆으로 열리는 장면</title>
+  <!-- 바닥 -->
+  <path d="M20 320 H620"/>
+  <!-- 건물 -->
+  <rect x="230" y="40" width="380" height="280" rx="4" fill="var(--card)"/>
+  <rect x="230" y="40" width="380" height="40" rx="4" fill="var(--muted)"/>
+  <text x="420" y="67" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">백화점</text>
+  <!-- 문틀과 안쪽 -->
+  <rect x="320" y="124" width="200" height="196" fill="var(--muted)"/>
+  <!-- 양옆으로 열리는 유리문 -->
+  <rect x="282" y="126" width="92" height="194" rx="2" fill="var(--background)"/>
+  <rect x="466" y="126" width="92" height="194" rx="2" fill="var(--background)"/>
+  <path d="M362 210 V250 M478 210 V250" stroke-width="3"/>
+  <path d="M352 180 H300 M312 170 L300 180 L312 190" stroke-width="2.5"/>
+  <path d="M488 180 H540 M528 170 L540 180 L528 190" stroke-width="2.5"/>
+  <!-- 초음파 센서 -->
+  <rect x="395" y="94" width="50" height="20" rx="4" fill="#5b9a1a"/>
+  <circle cx="408" cy="104" r="5" fill="var(--card)"/>
+  <circle cx="432" cy="104" r="5" fill="var(--card)"/>
+  <text x="454" y="110" font-size="15" font-weight="600" fill="currentColor" stroke="none">초음파 센서</text>
+  <!-- 소리 퍼짐 -->
+  <g stroke="#5b9a1a" stroke-width="3">
+    <path d="M414.8 143.5 A30 30 0 0 1 390.5 119.2"/>
+    <path d="M410.4 168.2 A55 55 0 0 1 365.8 123.6"/>
+    <path d="M406.1 192.8 A80 80 0 0 1 341.2 127.9"/>
+  </g>
+  <!-- 걸어오는 사람 -->
+  <circle cx="132" cy="186" r="16" fill="var(--card)"/>
+  <path d="M132 202 V262 M132 220 L112 246 M132 220 L154 240 M132 262 L114 314 M132 262 L152 312" stroke-width="3"/>
+  <!-- 다가가는 화살표 -->
+  <path d="M86 338 H196 M184 330 L196 338 L184 346"/>
+  <text x="74" y="343" text-anchor="end" font-size="15" fill="currentColor" stroke="none">다가가요</text>
+  <text x="600" y="346" text-anchor="end" font-size="16" font-weight="700" fill="currentColor" stroke="none">가까이 오면 문이 열려요</text>
+</svg>

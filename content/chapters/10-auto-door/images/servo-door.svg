@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sd-title">위에서 본 서보 문: duty_u16(1638) 이면 서보 팔이 문을 닫아 두고, duty_u16(8100) 이면 팔이 돌아 문을 연다</title>
+  <defs>
+    <marker id="sd-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#c92a2a" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 닫힘 -->
+  <path d="M30 196 H72 M266 196 H292" stroke-width="5"/>
+  <rect x="72" y="166" width="56" height="60" rx="6" fill="#c92a2a"/>
+  <rect x="100" y="188" width="164" height="16" rx="3" fill="var(--muted)"/>
+  <circle cx="100" cy="196" r="10" fill="var(--card)"/>
+  <text x="160" y="258" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">닫힘</text>
+  <text x="160" y="284" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">servo.duty_u16(1638)</text>
+  <!-- 가운데 화살표 -->
+  <path d="M302 120 H338 M328 112 L338 120 L328 128" stroke-width="2.5"/>
+  <!-- 열림 -->
+  <path d="M350 196 H392 M586 196 H612" stroke-width="5"/>
+  <rect x="420" y="188" width="164" height="16" rx="3" stroke-dasharray="6 6" opacity="0.5"/>
+  <path d="M573 183 A154 154 0 0 0 433 43" stroke="#c92a2a" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#sd-arrow)"/>
+  <rect x="412" y="34" width="16" height="164" rx="3" fill="var(--muted)"/>
+  <rect x="392" y="166" width="56" height="60" rx="6" fill="#c92a2a"/>
+  <circle cx="420" cy="196" r="10" fill="var(--card)"/>
+  <text x="530" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">팔이 돌아요</text>
+  <text x="480" y="258" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">열림</text>
+  <text x="480" y="284" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">servo.duty_u16(8100)</text>
+  <text x="320" y="334" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">숫자를 바꾸면 서보 팔이 돌아 문을 밀어요 (위에서 본 그림)</text>
+</svg>

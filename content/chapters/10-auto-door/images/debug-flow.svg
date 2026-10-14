@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="df-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="df-title">막혔을 때 어디부터 볼까: 에러가 뜨면 빨간 글씨의 줄 번호부터, 숫자가 이상하면 배선부터, 화면이 안 바뀌면 oled 줄부터, 문이 이상하면 servo 줄부터</title>
+  <defs>
+    <marker id="df-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <rect x="32" y="16" width="576" height="44" rx="10" fill="var(--muted)" stroke="none"/>
+  <text x="320" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">에러가 떴다면? 빨간 글씨의 줄 번호부터 봐요</text>
+  <g font-size="15" fill="currentColor" stroke="none" text-anchor="middle" opacity="0.75">
+    <text x="152" y="88">증상</text>
+    <text x="482" y="88">어디부터 볼까</text>
+  </g>
+  <!-- 1. 숫자 -->
+  <rect x="32" y="100" width="240" height="60" rx="10" fill="var(--card)"/>
+  <text x="152" y="126" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">숫자가 0 이거나</text>
+  <text x="152" y="148" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">들쭉날쭉해요</text>
+  <path d="M282 130 H348" marker-end="url(#df-arrow)"/>
+  <rect x="358" y="100" width="250" height="60" rx="10" fill="var(--card)" stroke="#5b9a1a" stroke-width="3"/>
+  <text x="482" y="126" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">배선부터</text>
+  <text x="482" y="148" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">Trig 13 · Echo 12 · 5V</text>
+  <!-- 2. 화면 -->
+  <rect x="32" y="180" width="240" height="60" rx="10" fill="var(--card)"/>
+  <text x="152" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">화면 글씨가</text>
+  <text x="152" y="228" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">안 켜지거나 안 바뀌어요</text>
+  <path d="M282 210 H348" marker-end="url(#df-arrow)"/>
+  <rect x="358" y="180" width="250" height="60" rx="10" fill="var(--card)" stroke="#1d4ed8" stroke-width="3"/>
+  <text x="482" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">oled 줄부터</text>
+  <text x="482" y="228" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">적어 둔 걸 보여 줬나요?</text>
+  <!-- 3. 문 -->
+  <rect x="32" y="260" width="240" height="60" rx="10" fill="var(--card)"/>
+  <text x="152" y="286" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">문이 안 열리거나</text>
+  <text x="152" y="308" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">안 닫혀요</text>
+  <path d="M282 290 H348" marker-end="url(#df-arrow)"/>
+  <rect x="358" y="260" width="250" height="60" rx="10" fill="var(--card)" stroke="#c92a2a" stroke-width="3"/>
+  <text x="482" y="286" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">servo 줄부터</text>
+  <text x="482" y="308" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">duty_u16 숫자 두 개 비교</text>
+  <text x="320" y="348" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">2분 혼자 해 보고, 그래도 안 되면 선생님을 불러요</text>
+</svg>
