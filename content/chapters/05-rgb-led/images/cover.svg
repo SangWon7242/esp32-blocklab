@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>책상 위 ESP32 보드에 이은 RGB LED 하나가 빨강·초록·파랑 빛을 섞어 빛나고, 그 위로 일곱 가지 색이 차례로 돌아가는 장면</title>
+  <!-- 책상 -->
+  <path d="M24 284 H616" stroke-width="3"/>
+  <path d="M56 284 V346 M584 284 V346"/>
+  <!-- 노트북: 화면에 블록 -->
+  <rect x="52" y="140" width="176" height="112" rx="8" fill="var(--card)"/>
+  <rect x="70" y="160" width="84" height="20" rx="5" fill="#00b400" stroke="none"/>
+  <rect x="84" y="186" width="124" height="20" rx="5" fill="#9ba624" stroke="none"/>
+  <rect x="84" y="212" width="92" height="20" rx="5" fill="#f4af18" stroke="none"/>
+  <path d="M32 282 L50 252 H230 L248 282 Z" fill="var(--muted)"/>
+  <!-- USB 선 -->
+  <path d="M244 270 C 264 270, 270 262, 284 262" stroke-width="3"/>
+  <!-- ESP32 보드 -->
+  <rect x="284" y="242" width="112" height="40" rx="6" fill="#00b6b1" fill-opacity="0.25"/>
+  <rect x="278" y="256" width="10" height="14" rx="2" fill="var(--card)"/>
+  <rect x="318" y="249" width="40" height="26" rx="3" fill="var(--card)"/>
+  <!-- 선 세 가닥 + GND -->
+  <path d="M388 250 C 410 250, 420 262, 448 262" stroke="#f59f00" stroke-width="3"/>
+  <path d="M388 258 C 412 258, 430 266, 470 264" stroke="#2f9e44" stroke-width="3"/>
+  <path d="M388 266 C 414 268, 440 270, 486 266" stroke="#1971c2" stroke-width="3"/>
+  <path d="M388 274 C 420 278, 450 276, 462 270" stroke-width="3"/>
+  <!-- 브레드보드 -->
+  <rect x="430" y="262" width="96" height="20" rx="4" fill="var(--muted)"/>
+  <!-- 섞이는 빛 -->
+  <circle cx="462" cy="186" r="46" fill="#ff2d2d" fill-opacity="0.22" stroke="none"/>
+  <circle cx="496" cy="186" r="46" fill="#22c55e" fill-opacity="0.22" stroke="none"/>
+  <circle cx="479" cy="214" r="46" fill="#2f6bff" fill-opacity="0.22" stroke="none"/>
+  <!-- RGB LED (다리 4개) -->
+  <path d="M466 262 V232 M474 262 V226 M484 262 V232 M492 262 V232" stroke-width="2.5"/>
+  <path d="M462 232 H496 V226 H462 Z" fill="var(--card)" stroke-width="1.5"/>
+  <path d="M464 226 V206 A15 15 0 0 1 494 206 V226 Z" fill="var(--card)" stroke-width="1.5"/>
+  <circle cx="473" cy="212" r="4" fill="#ff2d2d" stroke="none"/>
+  <circle cx="485" cy="212" r="4" fill="#22c55e" stroke="none"/>
+  <circle cx="479" cy="221" r="4" fill="#2f6bff" stroke="none"/>
+  <!-- 차례로 바뀌는 일곱 색 -->
+  <path d="M330 118 C 380 52, 580 52, 628 118" stroke-width="1.5" stroke-dasharray="3 6" stroke-opacity="0.6"/>
+  <g stroke-width="1.5">
+    <circle cx="344" cy="104" r="15" fill="#ff2d2d"/>
+    <circle cx="388" cy="76" r="15" fill="#22c55e"/>
+    <circle cx="436" cy="62" r="15" fill="#2f6bff"/>
+    <circle cx="484" cy="58" r="15" fill="#ffe600"/>
+    <circle cx="532" cy="62" r="15" fill="#e040fb"/>
+    <circle cx="578" cy="76" r="15" fill="#22e1ff"/>
+    <circle cx="612" cy="104" r="15" fill="#ffffff"/>
+  </g>
+  <!-- 제목 -->
+  <text x="52" y="72" font-size="22" font-weight="700" fill="currentColor" stroke="none">LED 하나, 여러 색</text>
+  <text x="52" y="100" font-size="15" fill="currentColor" fill-opacity="0.75" stroke="none">빨강 · 초록 · 파랑 세기를 섞어요</text>
+</svg>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>빛 섞기: 빨강(255, 0, 0)·초록(0, 255, 0)·파랑(0, 0, 255) 세 빛이 겹치면 노랑(255, 255, 0)·하늘(0, 255, 255)·보라(255, 0, 255)·흰색(255, 255, 255). 주황은 빨강과 노랑 사이 어디쯤일까 묻는 띠</title>
+  <defs>
+    <clipPath id="cm-clip-r"><circle cx="138" cy="146" r="80"/></clipPath>
+    <clipPath id="cm-clip-g"><circle cx="234" cy="146" r="80"/></clipPath>
+    <linearGradient id="cm-ry" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff2d2d"/>
+      <stop offset="1" stop-color="#ffe600"/>
+    </linearGradient>
+  </defs>
+  <!-- 어두운 판: 빛은 어두운 곳에서 섞여요 (밝음·어두움 화면 모두 같은 판) -->
+  <rect x="14" y="14" width="344" height="332" rx="16" fill="#1b1b1f" stroke="none"/>
+  <text x="186" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" stroke="none">빛을 겹치면 새 색이 돼요</text>
+  <!-- 세 빛 -->
+  <circle cx="138" cy="146" r="80" fill="#ff2d2d" stroke="none"/>
+  <circle cx="234" cy="146" r="80" fill="#22c55e" stroke="none"/>
+  <circle cx="186" cy="228" r="80" fill="#2f6bff" stroke="none"/>
+  <!-- 두 빛이 겹친 곳 -->
+  <circle cx="234" cy="146" r="80" fill="#ffe600" stroke="none" clip-path="url(#cm-clip-r)"/>
+  <circle cx="186" cy="228" r="80" fill="#e040fb" stroke="none" clip-path="url(#cm-clip-r)"/>
+  <circle cx="186" cy="228" r="80" fill="#22e1ff" stroke="none" clip-path="url(#cm-clip-g)"/>
+  <!-- 셋이 겹친 곳 -->
+  <g clip-path="url(#cm-clip-r)">
+    <circle cx="186" cy="228" r="80" fill="#ffffff" stroke="none" clip-path="url(#cm-clip-g)"/>
+  </g>
+  <g stroke="none" text-anchor="middle" font-weight="700">
+    <text x="102" y="122" font-size="15" fill="#ffffff">빨강</text>
+    <text x="102" y="139" font-size="11" fill="#ffffff">255, 0, 0</text>
+    <text x="270" y="122" font-size="15" fill="#ffffff">초록</text>
+    <text x="270" y="139" font-size="11" fill="#ffffff">0, 255, 0</text>
+    <text x="186" y="284" font-size="15" fill="#ffffff">파랑</text>
+    <text x="186" y="301" font-size="11" fill="#ffffff">0, 0, 255</text>
+    <text x="186" y="104" font-size="14" fill="#1b1b1f">노랑</text>
+    <text x="186" y="120" font-size="10" fill="#1b1b1f">255, 255, 0</text>
+    <text x="132" y="216" font-size="14" fill="#ffffff">보라</text>
+    <text x="132" y="232" font-size="10" fill="#ffffff">255, 0, 255</text>
+    <text x="240" y="216" font-size="14" fill="#1b1b1f">하늘</text>
+    <text x="240" y="232" font-size="10" fill="#1b1b1f">0, 255, 255</text>
+    <text x="186" y="168" font-size="14" fill="#1b1b1f">흰색</text>
+    <text x="186" y="184" font-size="10" fill="#1b1b1f">255, 255, 255</text>
+  </g>
+  <text x="186" y="334" text-anchor="middle" font-size="12" fill="#ffffff" fill-opacity="0.8" stroke="none">숫자 순서: 빨강, 초록, 파랑 (0~255)</text>
+  <!-- 주황은 어디쯤? -->
+  <text x="500" y="70" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">주황은 어디쯤일까요?</text>
+  <text x="500" y="96" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">빨강과 노랑 사이에 있는 색</text>
+  <rect x="392" y="150" width="216" height="40" rx="8" fill="url(#cm-ry)" stroke-width="1.5"/>
+  <path d="M500 120 V144" stroke-width="2"/>
+  <path d="M494 138 L500 146 L506 138" stroke-width="2"/>
+  <rect x="482" y="104" width="36" height="22" rx="11" fill="var(--card)" stroke-width="1.5"/>
+  <text x="500" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">?</text>
+  <g stroke="none" fill="currentColor" font-size="12" font-weight="600">
+    <text x="392" y="210">빨강</text>
+    <text x="392" y="226" font-weight="400">255, 0, 0</text>
+    <text x="608" y="210" text-anchor="end">노랑</text>
+    <text x="608" y="226" text-anchor="end" font-weight="400">255, 255, 0</text>
+  </g>
+  <rect x="392" y="252" width="216" height="64" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="500" y="278" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">두 색에서 다른 숫자는 하나뿐!</text>
+  <text x="500" y="302" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">주황 = 255, ?, 0</text>
+</svg>

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>코드 읽기: 줄 번호가 붙은 코드 창을 돋보기로 보며 색 세어 보기, 세 숫자가 어느 빛인지 읽기, 줄 번호 누르기</title>
+  <!-- 코드 창 -->
+  <rect x="48" y="40" width="380" height="284" rx="12" fill="var(--card)"/>
+  <path d="M48 72 H428"/>
+  <circle cx="70" cy="56" r="5" fill="var(--muted)"/>
+  <circle cx="88" cy="56" r="5" fill="var(--muted)"/>
+  <circle cx="106" cy="56" r="5" fill="var(--muted)"/>
+  <g font-size="13" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55">
+    <text x="88" y="102">32</text><text x="88" y="123">33</text><text x="88" y="144">34</text><text x="88" y="165">35</text>
+    <text x="88" y="186">36</text><text x="88" y="207">37</text><text x="88" y="228">38</text><text x="88" y="249">39</text>
+    <text x="88" y="270">40</text><text x="88" y="291">41</text><text x="88" y="312">42</text>
+  </g>
+  <g fill="currentColor" stroke="none" opacity="0.28">
+    <rect x="102" y="91" width="96" height="9" rx="4.5"/>
+    <rect x="126" y="133" width="110" height="9" rx="4.5"/>
+    <rect x="126" y="175" width="110" height="9" rx="4.5"/>
+    <rect x="126" y="217" width="110" height="9" rx="4.5"/>
+    <rect x="126" y="259" width="110" height="9" rx="4.5"/>
+    <rect x="126" y="301" width="110" height="9" rx="4.5"/>
+  </g>
+  <!-- set_color( , , ) 줄: 괄호 안 세 칸 -->
+  <g stroke-width="1.5">
+    <rect x="126" y="111" width="74" height="13" rx="4" fill="currentColor" fill-opacity="0.22" stroke="none"/>
+    <rect x="206" y="111" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="236" y="111" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="266" y="111" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="126" y="153" width="74" height="13" rx="4" fill="currentColor" fill-opacity="0.22" stroke="none"/>
+    <rect x="206" y="153" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="236" y="153" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="266" y="153" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="126" y="195" width="74" height="13" rx="4" fill="currentColor" fill-opacity="0.22" stroke="none"/>
+    <rect x="206" y="195" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="236" y="195" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="266" y="195" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="126" y="237" width="74" height="13" rx="4" fill="currentColor" fill-opacity="0.22" stroke="none"/>
+    <rect x="206" y="237" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="236" y="237" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="266" y="237" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="126" y="279" width="74" height="13" rx="4" fill="currentColor" fill-opacity="0.22" stroke="none"/>
+    <rect x="206" y="279" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="236" y="279" width="26" height="13" rx="3" fill="var(--muted)"/>
+    <rect x="266" y="279" width="26" height="13" rx="3" fill="var(--muted)"/>
+  </g>
+  <!-- 돋보기 -->
+  <circle cx="350" cy="170" r="38" fill="var(--muted)" fill-opacity="0.5" stroke-width="3"/>
+  <path d="M377 197 L408 228" stroke-width="7"/>
+  <!-- 세 가지 할 일 -->
+  <g stroke="none">
+    <circle cx="466" cy="120" r="13" fill="#4562f5"/>
+    <circle cx="466" cy="190" r="13" fill="#4562f5"/>
+    <circle cx="466" cy="260" r="13" fill="#4562f5"/>
+  </g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">
+    <text x="466" y="125">1</text><text x="466" y="195">2</text><text x="466" y="265">3</text>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <text x="488" y="120" font-size="16" font-weight="700">색 세어 보기</text>
+    <text x="488" y="142" font-size="14" opacity="0.75">반복 안에 몇 가지?</text>
+    <text x="488" y="190" font-size="16" font-weight="700">세 숫자 읽기</text>
+    <text x="488" y="212" font-size="14" opacity="0.75">몇 번째가 어느 빛?</text>
+    <text x="488" y="260" font-size="16" font-weight="700">줄 번호 누르기</text>
+    <text x="488" y="282" font-size="14" opacity="0.75">코드 칸의 회색 숫자</text>
+  </g>
+</svg>

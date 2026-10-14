@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>숫자 범위 바꾸기: set_color 에 쓰는 색 세기 0~255 를 보드가 핀으로 보내는 PWM 세기 0~1023 으로. 0은 0, 128은 512쯤, 255는 1023. 약 4배</title>
+  <defs>
+    <linearGradient id="mp-glow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f4af18" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#f4af18" stop-opacity="0.9"/>
+    </linearGradient>
+    <marker id="mp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <!-- 위: 0~255 -->
+  <text x="320" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">내가 정하는 색 세기 (0~255)</text>
+  <text x="320" y="64" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">set_color(빨강, 초록, 파랑) 의 숫자</text>
+  <rect x="80" y="80" width="480" height="20" rx="6" fill="url(#mp-glow)" stroke-width="1.5"/>
+  <path d="M80 100 V110 M200 100 V108 M320 100 V110 M440 100 V108 M560 100 V110" stroke-width="1.5"/>
+  <g stroke="none" fill="currentColor" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="80" y="128">0</text>
+    <text x="320" y="128">128</text>
+    <text x="560" y="128">255</text>
+  </g>
+  <!-- 가운데: 바꿔 주는 함수 -->
+  <path d="M80 136 V226" stroke-width="1.5" stroke-dasharray="4 5" marker-end="url(#mp-arrow)"/>
+  <path d="M320 136 V226" stroke-width="1.5" stroke-dasharray="4 5" marker-end="url(#mp-arrow)"/>
+  <path d="M560 136 V226" stroke-width="1.5" stroke-dasharray="4 5" marker-end="url(#mp-arrow)"/>
+  <rect x="352" y="160" width="190" height="44" rx="10" fill="var(--card)" stroke="#4562f5" stroke-width="2"/>
+  <text x="447" y="178" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">interval_mapping()</text>
+  <text x="447" y="196" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">숫자 범위를 바꿔 줘요 (약 4배)</text>
+  <!-- 아래: 0~1023 -->
+  <rect x="80" y="236" width="480" height="20" rx="6" fill="url(#mp-glow)" stroke-width="1.5"/>
+  <path d="M80 256 V266 M200 256 V264 M320 256 V266 M440 256 V264 M560 256 V266" stroke-width="1.5"/>
+  <g stroke="none" fill="currentColor" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="80" y="284">0</text>
+    <text x="320" y="284">512쯤</text>
+    <text x="560" y="284">1023</text>
+  </g>
+  <text x="320" y="318" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">보드가 핀으로 보내는 PWM 세기 (0~1023)</text>
+  <text x="320" y="338" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">red.duty( ) · green.duty( ) · blue.duty( ) 에 들어가는 숫자</text>
+  <g stroke="none" fill="currentColor" font-size="12" fill-opacity="0.7">
+    <text x="88" y="152" text-anchor="start">꺼짐</text>
+    <text x="552" y="152" text-anchor="end">가장 밝게</text>
+  </g>
+</svg>

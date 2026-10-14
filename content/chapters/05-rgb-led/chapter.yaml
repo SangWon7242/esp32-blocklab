@@ -1,0 +1,261 @@
+# 챕터 5 · RGB LED — 수업 코드 저장소 05_RGB_LED. 형식 설명은 src/track/README.md
+id: 05-rgb-led
+order: 5
+title: RGB LED
+summary: |
+  다리가 4개인 **RGB LED** 하나에는 빨강·초록·파랑 세 개의 작은 불이 들어 있어요. 세 불의 세기를 **0~255** 숫자로 정해 섞으면 노랑, 하늘색, 보라, 흰색까지 만들 수 있어요.
+  `set_color(빨강, 초록, 파랑)` 한 줄로 색을 정하고, 그 숫자가 보드의 PWM 세기(0~1023)로 바뀌어 핀으로 나가는 길을 따라가 봐요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
+  - { name: RGB LED, note: "다리 4개. 가장 긴 다리가 GND(공통 음극). 순서는 빨강 · GND · 초록 · 파랑" }
+  - { name: 220Ω 저항, note: "3개. 빨강-빨강-갈색 띠. 빨강·초록·파랑 다리에 하나씩" }
+  - { name: 점퍼선, note: "5개 (27·25·26번 선 3, GND 선 2)" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "RGB LED 다리를 d 칸 14·16·18·20번 줄에(빨강 · GND · 초록 · 파랑). 빨강·초록·파랑 줄마다 220Ω 저항이 가운데 홈을 건너고, 27번 → 14번 줄, 25번 → 18번 줄, 26번 → 20번 줄. 가장 긴 다리(16번 줄)는 − 줄을 거쳐 GND"
+goals:
+  content: 빨강·초록·파랑 세 빛의 세기(0~255)를 PWM 세기(0~1023)로 바꿔 보내 RGB LED 하나로 여러 색을 만든다
+  thinking: 색을 세 숫자로 나누어 생각하고, 숫자를 바꾸기 전에 어떤 색이 나올지 예측한다
+successCriteria:
+  - set_color(255, 0, 0) 의 세 숫자가 각각 어느 빛의 세기인지 말할 수 있다
+  - 0~255 숫자가 왜 0~1023 으로 바뀌어야 하는지 내 말로 설명할 수 있다
+  - 원하는 색(주황)을 만들 세 숫자를 스스로 찾고, 그렇게 정한 이유를 말할 수 있다
+parts:
+  - id: part1
+    title: 빛 세 가지로 색 만들기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — LED 하나로 여러 색을?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: LED는 하나인데 빨강, 초록, 파랑, 노랑, 보라, 하늘, 흰색이 차례로 켜져요
+        body: |
+          지금까지 쓴 LED는 한 가지 색만 냈어요. 그런데 오늘 쓸 **RGB LED**는 하나만 꽂았는데도 일곱 가지 색으로 바뀌어요. 다리도 2개가 아니라 **4개**예요.
+
+          코드를 보기 전에, 다리 4개가 각각 무슨 일을 할지, 색은 어떻게 섞일지 내 생각부터 적어 봐요. 틀려도 괜찮아요.
+        todo:
+          - 준비물(ESP32 보드, 브레드보드, RGB LED, 저항 3개, 점퍼선, USB 선)을 책상에 꺼내 놓기
+          - RGB LED 다리 4개 중 가장 긴 다리를 찾아 보기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+        questions:
+          - RGB LED는 다리가 4개예요. 가장 긴 다리 하나가 GND라면, 나머지 세 다리는 각각 무엇을 맡을까요?
+          - 빨강·초록·파랑 세 가지 빛만으로 노랑이나 흰색 같은 다른 색을 어떻게 만들 수 있을까요?
+          - 색마다 "얼마나 세게" 켤지 정해야 한다면, 그 세기를 무엇으로 나타내면 좋을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "원하는 색으로 켜기"를 보드에게 시키려면 일을 잘게 나눠야 해요. 보드는 "주황색"이라는 말을 모르고, **숫자**만 알아들어요.
+
+          활동 칸의 세 칸에 각각 한 가지 이상 적어 보세요. 색 하나를 만들려면 숫자가 몇 개 필요할지도 생각해 봐요.
+        todo:
+          - "**알아야 할 것**: 보드가 시작 전에 알고 있어야 할 사실 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 숫자 적기"
+          - "**해야 할 것**: 보드가 실제로 바꾸는 일 적기"
+        answer:
+          know: ["빨강·초록·파랑 다리가 몇 번 핀에 이어져 있는지 (27·25·26)", "보드의 PWM 세기는 0~1023 이라는 것"]
+          decide: ["어떤 색을 만들지 (세 빛의 세기, 각각 0~255)", "한 색을 몇 초 동안 보여 줄지"]
+          act: ["세 핀의 세기를 한꺼번에 바꾸기", "색을 차례로 바꾸기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기
+        minutes: 4
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: 빨강 다리는 27번, 초록 다리는 25번, 파랑 다리는 26번 핀으로 이어져요. 코드 4~6번 줄의 숫자와 짝지어 봐요
+        body: |
+          활동 칸의 코드는 아직 실행하지 않아요. `set_color(255, 0, 0)` 의 세 숫자는 차례대로 **빨강 · 초록 · 파랑**의 세기예요. 0이면 꺼짐, 255면 가장 세게 켜져요.
+
+          `while True:` 아래 줄들을 위에서부터 읽으며 LED가 어떤 색으로 바뀔지 상상해 보세요. 두 빛을 함께 켜면 무슨 색이 될지는 아직 몰라도 괜찮아요. 내 생각을 먼저 적어요.
+        todo:
+          - 코드 4~6번 줄에서 세 핀 번호 찾기
+          - "`while True:` 아래 `set_color` 줄의 세 숫자를 한 줄씩 읽기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_rgb_colors.py
+        blanks:
+          - q: 실행하면 LED가 맨 처음 켜지는 색은 무엇일까요?
+          - q: set_color(255, 255, 0) 처럼 빨강과 초록을 함께 켜면 어떤 색으로 보일까요?
+          - q: 세 숫자를 모두 255 로 하면 어떤 색이 될까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 일곱 가지 색
+        minutes: 8
+        scene:
+          image: images/breadboard-basics.svg
+          caption: "브레드보드 읽는 법: 같은 번호의 다섯 칸(a~e, f~j)은 이어져 있고, 가운데 홈 건너편은 안 이어져요"
+        body: |
+          이제 예측을 확인할 차례예요. **USB를 뺀 채로** 아래 **부품과 배선**의 배선도를 보고 꽂아요. RGB LED의 **가장 긴 다리**가 GND 쪽(− 줄)으로 가야 해요. 빨강·초록·파랑 다리에는 저항을 **하나씩** 달아요.
+
+          코드는 숫자 0~255 를 `interval_mapping()` 으로 0~1023 으로 바꿔서 핀에 보내요. 실행한 뒤 색이 1초마다 바뀌는지 보고, 내 예측과 같았는지 확인하세요.
+        todo:
+          - "**부품과 배선**의 배선도대로 RGB LED·저항 3개·선 꽂기 (가장 긴 다리는 − 줄 쪽)"
+          - 위쪽 **보드 연결**을 누르고 USB로 이은 보드 고르기
+          - "**실행**을 누르고 색이 바뀌는 순서를 공책에 적기"
+        code: step1_rgb_colors.py
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          눈으로 본 색 순서를 이제 코드로 확인해요. `while True:` 아래 들여 쓴 줄들이 끝없이 되풀이돼요.
+
+          `set_color(...)` 괄호 안의 세 숫자가 각각 어느 빛인지 떠올리며 한 줄씩 읽고, 세 문제에 답한 뒤 **확인**을 누르세요.
+        todo:
+          - "`while True:` 아래 `set_color` 줄을 손가락으로 짚으며 세기"
+          - 세 숫자 중 몇 번째가 어느 빛인지 다시 보기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_rgb_colors.py
+        questions:
+          - { kind: number, q: "while True 안에서 LED가 보여 주는 색은 모두 몇 가지인가요?", answer: 7 }
+          - { kind: choice, q: "set_color(0, 255, 0) 에서 255 는 어느 빛의 세기인가요?", options: ["빨강", "초록", "파랑"], answer: 1, hint: "26번 줄 def set_color(...) 괄호 안의 이름 순서를 보세요" }
+          - { kind: line, q: "빨강·초록·파랑 세 빛을 모두 가장 세게 켜는 줄의 줄 번호를 클릭하세요", answer: 45 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 주황색 만들기
+        minutes: 7
+        scene:
+          image: images/colour-mixing.svg
+          caption: 주황은 빨강과 노랑 사이의 색이에요. 두 색의 세 숫자를 나란히 놓고 비교해 봐요
+        body: |
+          일곱 가지 색 중에 **주황**은 없었어요. 이번에는 LED를 주황색 하나로만 켜 두도록 바꿔 봐요.
+
+          빨강은 `(255, 0, 0)`, 노랑은 `(255, 255, 0)` 이에요. 두 색에서 **다른 숫자는 어느 것**인가요? 주황이 둘 사이에 있다면, 그 숫자는 어디쯤이어야 할까요? 숫자를 바꿔 실행해 보고, LED 색을 눈으로 확인한 뒤 **판정**을 눌러요.
+        todo:
+          - 빨강과 노랑의 세 숫자 중 다른 하나 찾기
+          - 반복 안에 `set_color` 한 줄과 1초 기다리기 한 줄만 남기기
+          - 숫자를 바꿔 실행하고 주황으로 보이는지 확인한 뒤 **판정** 누르기
+        instructions: LED가 주황색 하나로만 켜져 있도록 바꾸세요. 반복 안에는 주황으로 정하는 줄과 1초 기다리는 줄만 남겨요
+        hint: 빨강(255, 0, 0)과 노랑(255, 255, 0) 사이예요. 빨강과 파랑 숫자는 그대로 두고, 남은 하나를 중간쯤으로 바꿔 보세요
+        code: step1_rgb_colors.py
+        rules:
+          - codeMatches: '^ +set_color\(\s*255\s*,\s*([5-9]\d|1\d\d|200)\s*,\s*0\s*\)'
+            fail: 주황은 빨강과 노랑 사이예요. 두 색에서 다른 숫자는 어느 것이고, 그 숫자를 어디쯤으로 정했나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*\n +set_color\([\s\S]*\n +set_color\()'
+            fail: LED가 주황 말고 다른 색으로도 바뀌지 않나요? 반복 안에서 색을 정하는 줄이 몇 개인지 세어 보세요
+          - codeMatches: '^ +time\.sleep\(1\)$'
+            fail: 주황을 켠 다음 몇 초 기다리나요? 기다리는 줄이 남아 있는지 보세요
+        answerCode: mission_orange.py
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        minutes: 7
+        scene:
+          image: images/mapping.svg
+          caption: 0~255 색 세기는 보드에 보내기 전에 0~1023 PWM 세기로 바뀌어요
+        body: |
+          이번에는 **빨강 → 노랑 → 초록**을 1초씩 되풀이하는 신호등 같은 불빛을 설계해요. 코드부터 쓰지 말고 **우리말로 순서**를 먼저 적어요.
+
+          블록으로 만들 때는 **RGB LED 준비하기** 블록 하나가 세 핀을 PWM으로 만들고, 0~255 를 0~1023 으로 바꿔 주는 `set_color` 까지 함께 준비해요. 빈칸을 채운 뒤 번역표를 보고 섞인 블록을 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 우리말 한 줄이 어떤 코드가 되는지 짝 지어 보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: RGB LED를 27·25·26번 핀에 준비한다
+          - text: 계속 반복한다
+          - text: "빨강으로 정한다 (빨강 255, 초록 0, 파랑 0)"
+          - text: __초 기다린다
+            blank: { answer: 1 }
+          - text: "노랑으로 정한다 (빨강 255, 초록 __, 파랑 0)"
+            blank: { answer: 255 }
+          - text: 1초 기다린다
+          - text: "초록으로 정한다 (빨강 __, 초록 255, 파랑 0)"
+            blank: { answer: 0 }
+          - text: 1초 기다린다
+        translation:
+          - ["RGB LED 준비", "red·green·blue = PWM(...) 와 def set_color"]
+          - ["색을 정한다", "set_color(빨강, 초록, 파랑)"]
+          - ["기다린다", "time.sleep(초)"]
+          - ["계속 반복", "while True:"]
+        targetCode: design_rgb.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 이 RGB LED는 8장 출입통제에서 다시 만나요. 문이 열릴 때 어떤 색이 좋을까요?
+        body: |
+          오늘 빛 세 가지로 여러 색을 만들었어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요. 색이 생각과 다르게 나왔다면, 배선과 숫자 중 어디부터 봤는지 떠올려 보세요.
+
+          먼저 주황 코드의 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸(막힌 곳 · 해 본 것 · 원인 · 다음엔)을 모두 채우기
+        lineExplain: mission_orange.py
+        prompts:
+          - 막힌 곳
+          - 내가 해 본 것
+          - 결국 원인은
+          - 다음엔 여기부터 본다
+
+      - id: extra1
+        type: mission
+        title: 추가 미션 1 — 내가 좋아하는 색 3가지
+        optional: true
+        minutes: 6
+        scene:
+          image: images/colour-mixing.svg
+          caption: 내가 고른 색도 빨강·초록·파랑 세 숫자로 나타낼 수 있어요
+        body: |
+          그림판의 **색 편집**을 열면 고른 색의 빨강·초록·파랑(R·G·B) 값이 0~255 숫자로 나와요. 내가 좋아하는 색 세 가지의 숫자를 찾아 적어 봐요.
+
+          그 세 색을 1초씩 차례로 보여 주도록 바꿔 보세요. 화면에서 본 색과 LED 색이 조금 다르게 보인다면, 왜 그럴까요?
+        todo:
+          - 그림판 색 편집에서 좋아하는 색 3가지의 R·G·B 숫자 찾아 적기
+          - 반복 안을 색 3가지 × 1초로 바꾸기
+          - 실행해서 색을 확인하고 **판정** 누르기
+        instructions: 내가 좋아하는 색 세 가지를 1초씩 차례로 계속 보여 주세요
+        code: step1_rgb_colors.py
+        rules:
+          - codeMatches: '(?:\n +set_color\([^\n]*\n +time\.sleep\(1\)){3}'
+            fail: 색을 정하는 줄 다음에 1초 기다리는 줄이 짝지어 세 번 있나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*(?:\n +set_color\([\s\S]*){4})'
+            fail: 보여 주는 색이 세 가지보다 많지 않나요? 반복 안의 색 줄을 세어 보세요
+        answerCode: extra1_my_colors.py
+
+      - id: extra2
+        type: mission
+        title: 추가 미션 2 — 무지개 7색
+        optional: true
+        minutes: 8
+        scene:
+          image: images/cover.svg
+          caption: 빨강 → 주황 → 노랑 → 초록 → 파랑 → 남색 → 보라를 0.5초씩
+        body: |
+          무지개 일곱 색을 0.5초씩 순서대로 보여 줘요. `set_color` 줄을 일곱 번 쓸 수도 있지만, 색을 **목록**에 담아 두고 하나씩 꺼내 쓰면 훨씬 짧아져요.
+
+          목록에서 꺼낸 색 하나에는 숫자가 세 개 들어 있어요. 몇 번째 칸이 빨강·초록·파랑일까요? 남색과 보라는 어떤 숫자로 만들지도 정해 봐요.
+        todo:
+          - 무지개 일곱 색의 세 숫자를 목록 하나에 담기
+          - "`for` 로 목록에서 색을 하나씩 꺼내 `set_color` 에 넣기"
+          - 0.5초씩 보여 주고 **판정** 누르기
+        instructions: 무지개 일곱 색을 목록에 담아 두고, 하나씩 꺼내 0.5초씩 차례로 계속 보여 주세요
+        code: step1_rgb_colors.py
+        rules:
+          - codeMatches: '^ +for \w+ in \w+:'
+            fail: 일곱 색을 한 줄씩 다 쓰지 않고, 목록에서 하나씩 꺼내 쓰고 있나요?
+          - codeMatches: 'set_color\(\s*(\w+)\[0\]\s*,\s*\1\[1\]\s*,\s*\1\[2\]\s*\)'
+            fail: 꺼낸 색 하나에 든 숫자 세 개를 set_color 에 차례로 넣었나요? 몇 번째 칸이 빨강인가요?
+          - codeMatches: 'time\.sleep\(0\.5\)'
+            fail: 한 색을 몇 초씩 보여 주기로 했나요?
+        answerCode: extra2_rainbow.py
