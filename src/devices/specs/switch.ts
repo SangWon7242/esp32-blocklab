@@ -33,7 +33,7 @@ export const button: DeviceSpec = {
 
 /** 틸트 스위치 (dev_tilt_setup). 준비 줄은 esp_pin_setup 이 접는다 */
 export const tilt: DeviceSpec = {
-  id: "tilt", category: "switch", label: "틸트 스위치", toolboxOrder: 31, colour: "#7c20c2",
+  id: "tilt", category: "switch", label: "틸트 스위치", toolboxOrder: 31, colour: "#9340de",
   setup: {
     blockType: "dev_tilt_setup",
     message: "틸트 스위치를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -60,7 +60,7 @@ export const tilt: DeviceSpec = {
 
 /** 인체감지 센서 (dev_pir_setup). 준비 줄은 esp_pin_setup, `x.value() == 1` 은 틸트 선언이 먼저 잡는다 */
 export const pir: DeviceSpec = {
-  id: "pir", category: "switch", label: "인체감지(PIR)", toolboxOrder: 32, colour: "#403fda",
+  id: "pir", category: "switch", label: "인체감지(PIR)", toolboxOrder: 32, colour: "#7c20c2",
   setup: {
     blockType: "dev_pir_setup",
     message: "인체감지 센서를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -87,7 +87,7 @@ export const pir: DeviceSpec = {
 
 /** 조이스틱 (dev_joystick_setup). 이름 rocker_x/rocker_y/button_z 고정. adc·버튼 선언보다 앞에 둔다 */
 export const joystick: DeviceSpec = {
-  id: "joystick", category: "switch", label: "조이스틱", toolboxOrder: 33, colour: "#aa33c6",
+  id: "joystick", category: "switch", label: "조이스틱", toolboxOrder: 33, colour: "#591ec4",
   setup: {
     blockType: "dev_joystick_setup",
     message: "조이스틱 준비하기 (X 핀 %1, Y 핀 %2, 버튼 핀 %3)",

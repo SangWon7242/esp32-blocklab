@@ -32,7 +32,7 @@ const toneCode = (name: string, hz: string, sec: string) => [`${name}.freq(${hz}
  * 레지스트리에서 pwm 보다 앞에 둔다.
  */
 export const buzzerPassive: DeviceSpec = {
-  id: "buzzer_passive", category: "sound", label: "수동 부저(음)", toolboxOrder: 51, colour: "#e14861",
+  id: "buzzer_passive", category: "sound", label: "수동 부저(음)", toolboxOrder: 51, colour: "#f95e70",
   setup: {
     blockType: "dev_beeper_setup",
     message: "소리 나는 부저를 핀 %1 에 준비하고 %2 이름 붙이기",

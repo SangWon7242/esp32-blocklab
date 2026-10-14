@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { iconColourOn } from "../src/lib/contrast";
 
 const CATEGORIES = ["시작", "흐름", "판단", "계산", "변수", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드"];
 /** src/blocks/colors.ts 의 CATEGORY_COLORS.led·flow */
@@ -7,6 +8,13 @@ const FLOW_COLOUR = "rgb(25, 186, 234)";
 const WHITE = "rgb(255, 255, 255)";
 /** src/lib/contrast.ts 의 DARK_TEXT (#171717): 밝은 카테고리 색 위 글자 */
 const DARK = "rgb(23, 23, 23)";
+/** "#rrggbb" → getComputedStyle 꼴 "rgb(r, g, b)" */
+const rgb = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgb(${n >> 16}, ${(n >> 8) & 0xff}, ${n & 0xff})`;
+};
+/** 고르지 않은 LED 타일 아이콘: LED 노랑은 흰 열 위에서 3:1 이 안 되어 어둡게 칠한다 */
+const LED_ICON = rgb(iconColourOn("#ffd500"));
 
 test("처음 열면 작업판에는 시작 블록만 있고 코드는 비어 있다", async ({ page }) => {
   await page.goto("/#/lab");
@@ -35,9 +43,12 @@ test("카테고리 열: 15개 타일에 아이콘, 고른 타일은 카테고리
   const bg = (name: string) => row(name).evaluate((el) => getComputedStyle(el).backgroundColor);
   const fg = (name: string) => row(name).evaluate((el) => getComputedStyle(el).color);
 
-  // 고르기 전: 흰 열 위의 진회색 글자, 아이콘은 카테고리 색
+  // 고르기 전: 흰 열 위의 진회색 글자, 아이콘은 카테고리 색(흰 바탕에서 3:1 이 안 되면 어둡게: LED 노랑)
   expect(await bg("LED")).not.toBe(LED_COLOUR);
-  await expect(row("LED").locator(".entryCategoryIcon")).toHaveCSS("color", LED_COLOUR);
+  expect(LED_ICON).not.toBe(LED_COLOUR);
+  await expect(row("LED").locator(".entryCategoryIcon")).toHaveCSS("color", LED_ICON);
+  // 판단 파랑은 이미 3:1 이 넘어 카테고리 색 그대로
+  await expect(row("판단").locator(".entryCategoryIcon")).toHaveCSS("color", "rgb(69, 98, 245)");
 
   await row("LED").click();
   await expect(page.locator(".blocklyToolboxFlyout")).toBeVisible();
@@ -52,7 +63,7 @@ test("카테고리 열: 15개 타일에 아이콘, 고른 타일은 카테고리
   // 앞서 고른 LED 타일은 흰 바탕으로 돌아온다 (배경을 칠하지 않아 열의 흰색이 보인다)
   await expect(row("LED")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   expect(await fg("LED")).not.toBe(WHITE);
-  await expect(row("LED").locator(".entryCategoryIcon")).toHaveCSS("color", LED_COLOUR);
+  await expect(row("LED").locator(".entryCategoryIcon")).toHaveCSS("color", LED_ICON);
   await expect(toolbox).toHaveCSS("background-color", WHITE);
 
   // 어두운 카테고리 색(판단 #4562f5) 위에는 흰 글자·아이콘

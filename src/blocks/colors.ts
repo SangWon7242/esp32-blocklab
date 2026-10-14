@@ -60,8 +60,9 @@ export const CATEGORY_COLORS: Record<CategoryId, CategoryColour> = {
 export const CATEGORY_IDS = Object.keys(CATEGORY_COLORS) as CategoryId[];
 
 /* ---------- 장치별 블록 색 ----------
- * 같은 카테고리 안 장치 블록은 카테고리 색을 가운데 두고 색상(hue)을 고르게 벌린다. HSL 로 hue 를 돌리면 같은 L 이라도
- * 노랑→빨강처럼 눈에 보이는 밝기가 크게 바뀌므로, 지각 균일 색 공간 OKLCH(L 밝기·C 채도·H 색상)에서 돌린다.
+ * 같은 카테고리 안 장치 블록은 카테고리 색 둘레(색상·밝기)에서 서로, 그리고 다른 카테고리 색과 눈에 띄게 떨어진 색을 고른다.
+ * HSL 로 hue 를 돌리면 같은 L 이라도 노랑→빨강처럼 눈에 보이는 밝기가 크게 바뀌므로, 지각 균일 색 공간
+ * OKLCH(L 밝기·C 채도·H 색상)에서 후보를 만들고 거리는 OKLab ΔE 로 잰다.
  */
 
 export type Oklch = { l: number; c: number; h: number };
@@ -144,35 +145,80 @@ export const hueDistance = (a: number, b: number) => {
   return d > 180 ? 360 - d : d;
 };
 
-/** spreadHues: 장치 사이 색상 간격은 16° 까지, 카테고리 색에서 가장 먼 장치도 ±30° 안 */
-export const SPREAD_STEP = 16;
+/** spreadHues: 장치 색은 카테고리 색에서 색상(hue) ±30° 안 (장치가 6개 이상이면 ±45°) */
 export const SPREAD_HALF = 30;
+export const SPREAD_HALF_WIDE = 45;
+/** spreadHues: 카테고리 색에서 밝기(OKLCH L) 를 ±0.1 까지 옮겨 본다 (글자 대비를 맞춘 뒤에도 ±0.12 안) */
+export const SPREAD_LIGHTNESS = 0.1;
+export const SPREAD_LIGHTNESS_LIMIT = 0.12;
+/** spreadHues: 이만큼(OKLab ΔE) 떨어지면 충분하다고 보고, 그중 카테고리 색에 가장 가까운 색을 고른다 */
+export const SPREAD_TARGET = 0.07;
 /** 블록 사전 제목 알약 글자 대비 (WCAG AA 보통 글자) */
 export const MIN_TEXT_CONTRAST = 4.5;
-/** spreadHues: 카테고리 색에서 벗어난 장치의 밝기 차 (한 단계씩 번갈아 어둡게·밝게) */
-export const SPREAD_LIGHTNESS = 0.04;
+
+/** 후보 색 격자: 색상 3° · 밝기 0.02 간격 */
+const HUE_GRID = 3;
+const LIGHTNESS_GRID = 0.02;
+
+/** 카테고리 색 base 계열의 후보 색 (색상 ±half, 밝기 ±SPREAD_LIGHTNESS, 채도는 base 의 70% 이상, 알약 글자 대비 4.5:1) */
+function familyCandidates(base: string, half: number): string[] {
+  const { l, c, h } = oklch(base);
+  const out: string[] = [];
+  for (let dh = -half; dh <= half + 1e-9; dh += HUE_GRID)
+    for (let dl = -SPREAD_LIGHTNESS; dl <= SPREAD_LIGHTNESS + 1e-9; dl += LIGHTNESS_GRID) {
+      const hue = (h + dh + 360) % 360;
+      let li = l + dl;
+      let hex = fromOklch({ l: li, c, h: hue });
+      // 흰 글자도 진한 글자도 4.5:1 이 안 되면 흰 글자 쪽은 어둡게, 진한 글자 쪽은 밝게 (0.005 씩, 많아야 0.1)
+      const step = textColourOn(hex) === LIGHT_TEXT ? -0.005 : 0.005;
+      for (let t = 0; t < 20 && textContrastOn(hex) < MIN_TEXT_CONTRAST; t++) hex = fromOklch({ l: (li += step), c, h: hue });
+      const x = oklch(hex);
+      if (textContrastOn(hex) < MIN_TEXT_CONTRAST || Math.abs(x.l - l) > SPREAD_LIGHTNESS_LIMIT || x.c < c * 0.7) continue;
+      if (!out.includes(hex)) out.push(hex);
+    }
+  return out;
+}
 
 /**
- * 카테고리 색 base 에서 n 가지 색. 첫째는 base 그대로(카테고리 대표 장치 = 카테고리 타일 색), 그다음부터 OKLCH 색상을
- * +d, -d, +2d, -2d … 로 벌린다(d 는 16° 이하, 가장 먼 것도 ±30° 안). 밝기는 단계 k(=1,1,2,2,…)가 홀수면 -0.04,
- * 짝수면 +0.04 라 색상 차가 작은 이웃도 밝기로 갈린다. 채도는 그대로(sRGB 밖이면 fromOklch 가 맞춘다).
- * 밝기가 어중간해 흰 글자도 진한 글자도 4.5:1 이 안 되면(블록 사전 제목 알약) 가까운 쪽으로 밝기를 조금 옮긴다.
- * 장치 색은 이 결과를 카테고리 안 툴박스 순서대로 src/devices/specs/*.ts 에 적어 둔다.
+ * 카테고리 색 base 에서 n 가지 장치 색. 첫째는 base 그대로(카테고리 대표 장치 = 카테고리 타일 색), 그다음부터는 하나씩
+ * 후보(familyCandidates) 가운데 이미 고른 색·avoid 의 색 모두와 가장 먼 색을 고른다. 다만 SPREAD_TARGET 만큼 떨어진
+ * 후보가 여럿이면 그중 base 에 가장 가까운 색(카테고리 색 계열이 덜 흐려지게). 후보 순서가 정해져 있어 결과도 늘 같다.
+ * avoid 에는 다른 카테고리 색과 앞 카테고리의 장치 색을 넣는다(deviceColourPlan). 장치 색은 이 결과를 카테고리 안
+ * 툴박스 순서대로 src/devices/specs/*.ts 에 적어 둔다.
  */
-export function spreadHues(base: string, n: number): string[] {
-  if (n <= 1) return [base];
-  const { l, c, h } = oklch(base);
-  const d = Math.min(SPREAD_STEP, SPREAD_HALF / Math.ceil((n - 1) / 2));
-  return Array.from({ length: n }, (_, i) => {
-    if (i === 0) return base.toLowerCase();
-    const k = Math.ceil(i / 2);
-    const offset = (i % 2 ? 1 : -1) * k * d;
-    const hue = (h + offset + 360) % 360;
-    let li = l + (k % 2 ? -SPREAD_LIGHTNESS : SPREAD_LIGHTNESS);
-    let hex = fromOklch({ l: li, c, h: hue });
-    // 흰 글자 쪽이면 어둡게, 진한 글자 쪽이면 밝게 (0.005 씩, 많아야 0.1)
-    const step = textColourOn(hex) === LIGHT_TEXT ? -0.005 : 0.005;
-    for (let t = 0; t < 20 && textContrastOn(hex) < MIN_TEXT_CONTRAST; t++) hex = fromOklch({ l: (li += step), c, h: hue });
-    return hex;
-  });
+export function spreadHues(base: string, n: number, avoid: readonly string[] = []): string[] {
+  if (n <= 0) return [];
+  const first = base.toLowerCase();
+  const out = [first];
+  if (n === 1) return out;
+  const others = avoid.map((a) => a.toLowerCase()).filter((a) => a !== first);
+  const candidates = familyCandidates(first, n > 5 ? SPREAD_HALF_WIDE : SPREAD_HALF);
+  while (out.length < n) {
+    let best = "";
+    let bestScore = -Infinity;
+    for (const c of candidates) {
+      if (out.includes(c)) continue;
+      const nearest = Math.min(...out.map((o) => colourDistance(c, o)), ...others.map((a) => colourDistance(c, a)));
+      const score = Math.min(nearest, SPREAD_TARGET) - 0.01 * colourDistance(c, first);
+      if (score > bestScore + 1e-9) [best, bestScore] = [c, score];
+    }
+    out.push(best);
+  }
+  return out;
+}
+
+/**
+ * 하드웨어 카테고리 순서대로(counts 순서) 장치 색을 정한다. 각 카테고리는 모든 카테고리 색과 앞 카테고리에서 정한 장치 색을
+ * 피한다 (예: 아날로그 핀 ↔ 흐름, PWM 핀 ↔ 온습도, 인체감지 ↔ OLED). 그래서 앞 카테고리에 장치를 더하면 뒤 카테고리 색도 바뀔 수 있다
+ */
+export function deviceColourPlan(counts: readonly (readonly [CategoryId, number])[]): Partial<Record<CategoryId, string[]>> {
+  const categoryColours = Object.values(CATEGORY_COLORS).map((c) => c.primary);
+  const plan: Partial<Record<CategoryId, string[]>> = {};
+  const taken: string[] = [];
+  for (const [id, n] of counts) {
+    const colours = spreadHues(CATEGORY_COLORS[id].primary, n, [...categoryColours, ...taken]);
+    plan[id] = colours;
+    taken.push(...colours);
+  }
+  return plan;
 }

@@ -45,7 +45,7 @@ const KEYPAD_PINS = ["R1", "R2", "R3", "R4", "C1", "C2", "C3", "C4"];
 
 /** 4×4 키패드 (dev_keypad_setup). Keyestudio keypad 라이브러리. 이름 keypad 고정 */
 export const keypad: DeviceSpec = {
-  id: "keypad", category: "input", label: "키패드", toolboxOrder: 81, colour: "#766430",
+  id: "keypad", category: "input", label: "키패드", toolboxOrder: 81, colour: "#67622d",
   setup: {
     blockType: "dev_keypad_setup", message: "4×4 키패드 준비하기 (행 핀 %1 %2 %3 %4, 열 핀 %5 %6 %7 %8)",
     // 라이브러리가 행 핀을 출력으로, 열 핀을 풀다운 입력으로 쓴다
@@ -80,7 +80,7 @@ export const keypad: DeviceSpec = {
 
 /** IR 리모컨 수신기 (dev_ir_setup). Keyestudio irrecvdata 라이브러리. 이름 ir 고정 */
 export const ir: DeviceSpec = {
-  id: "ir", category: "input", label: "IR 리모컨", toolboxOrder: 82, colour: "#865b39",
+  id: "ir", category: "input", label: "IR 리모컨", toolboxOrder: 82, colour: "#a9755e",
   setup: {
     blockType: "dev_ir_setup", message: "IR 수신기를 핀 %1 에 준비하기",
     parts: [pinNo("PIN", 5, "in")],

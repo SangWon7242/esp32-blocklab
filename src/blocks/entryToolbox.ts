@@ -1,12 +1,12 @@
 import * as Blockly from "blockly";
-import { textColourOn } from "@/lib/contrast";
+import { iconColourOn, textColourOn } from "@/lib/contrast";
 import { categoryIconSvg } from "./icons";
 
 /** 고르지 않은 타일의 이름 글자색 (진회색) */
 const IDLE_TEXT = "#374151";
 
 /**
- * 엔트리식 카테고리 타일: 아이콘(카테고리 색) 위, 이름 아래로 세로로 쌓고, 고르면 타일 전체를 카테고리 색으로
+ * 엔트리식 카테고리 타일: 아이콘(카테고리 색, 흰 바탕에서 3:1 이 안 되면 어둡게) 위, 이름 아래로 세로로 쌓고, 고르면 타일 전체를 카테고리 색으로
  * 채우고 아이콘·이름을 그 색 위에서 잘 읽히는 색(어두운 색 위 흰색, LED 노랑·계산·흐름·핀처럼 밝은 색 위 진한 색)으로. 왼쪽 색 띠(Blockly 기본)는 그리지 않는다. 모양은 src/index.css 의 .entryCategory*.
  * 카테고리 정의의 icon 키(src/blocks/icons.ts 의 id)가 없거나 모르는 id 면 아이콘 없이 이름만.
  */
@@ -57,11 +57,12 @@ export class EntryToolboxCategory extends Blockly.ToolboxCategory {
   private paint_(): void {
     const row = this.rowDiv_;
     if (!row) return;
-    const colour = this.colour_ || "#57e";
+    const colour = this.colour_ || "#5577ee";
     const selectedText = textColourOn(colour);
     row.style.backgroundColor = this.selected_ ? colour : "";
     row.style.color = this.selected_ ? selectedText : IDLE_TEXT;
-    if (this.iconDom_ instanceof HTMLElement) this.iconDom_.style.color = this.selected_ ? selectedText : colour;
+    // 고르지 않은 타일의 아이콘은 흰 열 위에서 3:1 이 되도록 (LED 노랑·계산·흐름처럼 밝은 색은 어둡게)
+    if (this.iconDom_ instanceof HTMLElement) this.iconDom_.style.color = this.selected_ ? selectedText : iconColourOn(colour);
   }
 }
 

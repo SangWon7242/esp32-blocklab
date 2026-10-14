@@ -116,7 +116,11 @@ describe("블록 사전 카탈로그", () => {
   });
 
   it("BlockDoc.colour 는 블록 자체의 색 (hex): 스타일 블록은 테마 색, 장치 블록은 장치 색", () => {
-    for (const d of getCatalog().flatMap((c) => c.blocks)) expect(d.colour, d.type).toMatch(/^#[0-9a-f]{6}$/);
+    for (const d of getCatalog().flatMap((c) => c.blocks)) {
+      expect(d.colour, d.type).toMatch(/^#[0-9a-f]{6}$/);
+      // 테마에 없는 스타일은 headless getColour() 의 검정으로 떨어진다
+      expect(d.colour, d.type).not.toBe("#000000");
+    }
     expect(findDoc("flow_wait")!.colour).toBe("#19baea");
     expect(findDoc("math_number")!.colour).toBe("#f4af18");
     expect(findDoc("esp_pin_setup")!.colour).toBe(pinOut.colour);

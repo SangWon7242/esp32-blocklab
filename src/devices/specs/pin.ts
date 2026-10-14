@@ -41,7 +41,7 @@ export const pinOut: DeviceSpec = {
 
 /** PWM 핀 (esp_pwm_setup). 세기 블록은 서보 변수에도 쓴다 */
 export const pwm: DeviceSpec = {
-  id: "pwm", category: "pin", label: "PWM 핀", toolboxOrder: 3, colour: "#12aa90",
+  id: "pwm", category: "pin", label: "PWM 핀", toolboxOrder: 3, colour: "#4ccaaa",
   setup: {
     blockType: "esp_pwm_setup", message: "PWM %1 을(를) 핀 %2 에 준비하기 (주파수 %3 Hz)",
     parts: [{ kind: "var", name: "VAR", default: "pwm" }, pinNo("PIN", 2, "out"), { kind: "number", name: "FREQ", default: 1000, min: 1 }],
@@ -83,7 +83,7 @@ export const pwm: DeviceSpec = {
  * 그대로(NONE) 줄은 esp_pin_setup 이 잡는다. 그래서 자기 준비 패턴은 없다.
  */
 export const pinIn: DeviceSpec = {
-  id: "pin_in", category: "pin", label: "입력 핀", toolboxOrder: 2, colour: "#00a6b5",
+  id: "pin_in", category: "pin", label: "입력 핀", toolboxOrder: 2, colour: "#0ea486",
   setup: {
     blockType: "dev_pin_in_setup",
     message: "입력 핀 %1 을(를) %2 준비하고 %3 이름 붙이기",
@@ -103,7 +103,7 @@ export const pinIn: DeviceSpec = {
 const ADC_KINDS = ["adc", "light", "knob", "sound", "flame"];
 
 export const adc: DeviceSpec = {
-  id: "adc", category: "pin", label: "아날로그 핀", toolboxOrder: 4, colour: "#3abce1",
+  id: "adc", category: "pin", label: "아날로그 핀", toolboxOrder: 4, colour: "#009eb1",
   setup: {
     blockType: "dev_adc_setup",
     message: "아날로그 핀 %1 을(를) 준비하고 %2 이름 붙이기",

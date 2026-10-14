@@ -2,7 +2,7 @@ import type { DeviceSpec } from "../types";
 
 /** print: 장치는 아니지만 같은 틀로 핀 카테고리 맨 아래("출력")에 둔다. 준비 블록 없음 */
 export const printer: DeviceSpec = {
-  id: "print", category: "pin", label: "출력", toolboxOrder: 5, colour: "#5bc393",
+  id: "print", category: "pin", label: "출력", toolboxOrder: 5, colour: "#43d4e1",
   actions: [
     {
       blockType: "esp_print", message: "%1 출력하기",

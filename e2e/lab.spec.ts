@@ -331,7 +331,7 @@ test("코드 모드에서 줄 번호를 눌러도 다음 글자는 코드 편집
   expect(await blocks.count()).toBe(count);
 });
 
-test("블록 모드에서 줄 번호를 누르면 그 블록이 파란 테두리로 표시되고 선택된다", async ({ page }) => {
+test("블록 모드에서 줄 번호를 누르면 그 블록이 파란 표시로 보이고 선택된다", async ({ page }) => {
   await openSample(page);
   const host = page.getByTestId("blockly-host");
   await expect(host.locator(".blocklyMainBackground")).toBeVisible();
@@ -344,18 +344,28 @@ test("블록 모드에서 줄 번호를 누르면 그 블록이 파란 테두리
   // 블록 모드에서는 줄 번호를 눌러도 편집기가 포커스를 가져가지 않아 블록 선택이 남는다
   await expect(on).toHaveClass(/\bblocklySelected\b/);
   await expect(host.locator(".lint-focus")).toHaveCount(1);
-  // 선택된 블록이어도 파란 테두리가 이긴다: 블록 테두리와 zelos 선택 빛(blocklyPathSelected) 모두 파랑
-  const strokes = await on.locator(":scope > path.blocklyPath").evaluateAll((els) => els.map((el) => [el.getAttribute("class"), getComputedStyle(el).stroke]));
-  expect(strokes.map(([, s]) => s)).toEqual(["rgb(59, 130, 246)", "rgb(59, 130, 246)"]);
-  // 키보드로 블록을 옮겨 다니는 중(Blockly 가 blocklyKeyboardNavigation 을 달고 활성 블록 테두리를 칠한다)에도 파랑
-  const keyboardStroke = await on.locator(":scope > path.blocklyPath:not(.blocklyPathSelected)").evaluate((el) => {
+  // 선택된 블록이어도 파란 표시가 이긴다: 블록 테두리는 흰 선 + 바깥 파란 띠(filter), zelos 선택 빛(blocklyPathSelected)은 숨김
+  const marks = await on.locator(":scope > path.blocklyPath").evaluateAll((els) =>
+    els.map((el) => {
+      const s = getComputedStyle(el);
+      return { selected: el.classList.contains("blocklyPathSelected"), stroke: s.stroke, filter: s.filter, display: s.display };
+    }),
+  );
+  const main = marks.find((m) => !m.selected)!;
+  expect(main.stroke).toBe("rgb(255, 255, 255)");
+  expect(main.filter).toContain("rgb(37, 99, 235)");
+  expect(marks.filter((m) => m.selected).map((m) => m.display)).toEqual(["none"]);
+  // 키보드로 블록을 옮겨 다니는 중(Blockly 가 blocklyKeyboardNavigation 을 달고 활성 블록 테두리를 칠한다)에도 같은 표시
+  const keyboardMark = await on.locator(":scope > path.blocklyPath:not(.blocklyPathSelected)").evaluate((el) => {
     const nav = el.closest(".injectionDiv")!.parentElement!;
     nav.classList.add("blocklyKeyboardNavigation");
-    const s = getComputedStyle(el).stroke;
+    const s = getComputedStyle(el);
+    const mark = [s.stroke, s.filter];
     nav.classList.remove("blocklyKeyboardNavigation");
-    return s;
+    return mark;
   });
-  expect(keyboardStroke).toBe("rgb(59, 130, 246)");
+  expect(keyboardMark[0]).toBe("rgb(255, 255, 255)");
+  expect(keyboardMark[1]).toContain("rgb(37, 99, 235)");
   // 빈 바탕을 누르면 표시도 사라진다
   const bg = (await host.boundingBox())!;
   await page.mouse.click(bg.x + bg.width - 120, bg.y + 40);

@@ -36,5 +36,31 @@ export function textColourOn(background: string): string {
   return contrast(l, DARK_LUMINANCE) > contrast(l, 1) ? DARK_TEXT : LIGHT_TEXT;
 }
 
+/** 두 색의 WCAG 대비 (1~21). 하나라도 읽지 못하면 1 */
+export function contrastRatio(a: string, b: string): number {
+  const [x, y] = [relativeLuminance(a), relativeLuminance(b)];
+  return x === null || y === null ? 1 : contrast(x, y);
+}
+
+/** WCAG 비텍스트 대비 (아이콘·테두리) */
+export const MIN_ICON_CONTRAST = 3;
+
+/**
+ * 바탕색(기본 흰색) 위 아이콘 색: colour 가 바탕과 min:1 이 안 되면 검정 쪽으로 조금씩(5%) 섞어 min:1 이 될 때까지 어둡게.
+ * 색을 읽지 못하면 그대로
+ */
+export function iconColourOn(colour: string, background = "#ffffff", min = MIN_ICON_CONTRAST): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(colour.trim());
+  if (!m || relativeLuminance(background) === null) return colour;
+  const n = parseInt(m[1], 16);
+  const rgb = [n >> 16, (n >> 8) & 0xff, n & 0xff];
+  const hex = (amount: number) => `#${rgb.map((c) => Math.round(c * (1 - amount)).toString(16).padStart(2, "0")).join("")}`;
+  for (let amount = 0; amount < 1; amount += 0.05) {
+    const out = hex(amount);
+    if (contrastRatio(out, background) >= min) return amount === 0 ? colour : out;
+  }
+  return "#000000";
+}
+
 /** 카테고리 색 알약·배지의 style (바탕색 + 읽히는 글자색) */
 export const categoryColourStyle = (colour: string) => ({ backgroundColor: colour, color: textColourOn(colour) });

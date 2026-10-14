@@ -70,7 +70,7 @@ export const oled: DeviceSpec = {
 
 /** LCD 128×32 (dev_lcd_setup). 이름 lcd 고정. Keyestudio lcd128_32 라이브러리: lcd128_32(sda, scl, 버스, 주소) */
 export const lcd: DeviceSpec = {
-  id: "lcd", category: "display", label: "LCD 128×32", toolboxOrder: 71, colour: "#4931c7",
+  id: "lcd", category: "display", label: "LCD 128×32", toolboxOrder: 71, colour: "#0058af",
   setup: {
     blockType: "dev_lcd_setup", message: "LCD 128×32 준비하기 (sda 핀 %1, scl 핀 %2, 주소 %3)",
     parts: [pinNo("SDA", 21, "bus"), pinNo("SCL", 22, "bus"), { kind: "text", name: "ADDR", default: "0x3f", validate: I2C_ADDR }],
@@ -119,7 +119,7 @@ const SEGCODE = ["0x3f", "0x06", "0x5b", "0x4f", "0x66", "0x6d", "0x7d", "0x07",
  * si·rck·sck 줄은 출력 핀 1줄과 같은 꼴이라 레지스트리에서 pinOut 보다 앞에 둔다 (도우미가 표준이 아니면 출력 핀 셋으로 떨어진다).
  */
 export const seg7: DeviceSpec = {
-  id: "seg7", category: "display", label: "7세그먼트", toolboxOrder: 72, colour: "#005794",
+  id: "seg7", category: "display", label: "7세그먼트", toolboxOrder: 72, colour: "#0832bc",
   setup: {
     blockType: "dev_seg_setup", message: "7세그먼트 준비하기 (SI 핀 %1, RCK 핀 %2, SCK 핀 %3)",
     parts: [pinNo("SI", 5, "out"), pinNo("RCK", 23, "out"), pinNo("SCK", 18, "out")],
