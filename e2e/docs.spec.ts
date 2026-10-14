@@ -95,11 +95,94 @@ test("블록 사전에서 찾아 예시를 편집기에서 연다", async ({ pag
   await expect(code).toContainText("import time");
 });
 
-test("?block= 으로 들어오면 그 카드로 스크롤한다", async ({ page }) => {
+/** 넓은 화면 왼쪽 카테고리 목록의 버튼 */
+const categoryButton = (page: Page, name: string) =>
+  page.locator("aside").getByRole("navigation", { name: "블록 카테고리" }).getByRole("button", { name: new RegExp(`^${name}`) });
+
+test("?block= 으로 들어오면 그 블록의 카테고리를 열고 카드로 스크롤한다", async ({ page }) => {
   await page.goto("/#/docs?block=flow_wait");
   const card = page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]');
   await expect(card).toBeInViewport();
   await expect(card).toBeFocused();
+  // 흐름 카테고리 한 페이지만 (다른 카테고리 카드는 없다)
+  const sections = page.getByTestId("doc-category");
+  await expect(sections).toHaveCount(1);
+  await expect(sections).toHaveAttribute("data-category", "flow");
+  await expect(sections.getByRole("heading", { level: 2, name: "흐름" })).toBeVisible();
+  await expect(categoryButton(page, "흐름")).toHaveAttribute("aria-current", "page");
+  // ?block 이 ?cat 보다 먼저
+  await page.goto("/#/docs?cat=sensor&block=flow_wait");
+  await expect(sections).toHaveAttribute("data-category", "flow");
+  await expect(card).toBeInViewport();
+});
+
+test("블록 사전은 카테고리마다 한 페이지이고 뒤로 가기로 앞 카테고리로 돌아간다", async ({ page }) => {
+  await page.goto("/#/docs");
+  const sections = page.getByTestId("doc-category");
+  // 주소에 카테고리가 없으면 첫 카테고리(시작)
+  await expect(sections).toHaveCount(1);
+  await expect(sections).toHaveAttribute("data-category", "start");
+  await expect(categoryButton(page, "시작")).toHaveAttribute("aria-current", "page");
+
+  await categoryButton(page, "흐름").click();
+  await expect(page).toHaveURL(/cat=flow/);
+  await expect(sections).toHaveAttribute("data-category", "flow");
+
+  const sensor = categoryButton(page, "센서");
+  await sensor.click();
+  await expect(page).toHaveURL(/cat=sensor/);
+  await expect(sections).toHaveCount(1);
+  await expect(sections).toHaveAttribute("data-category", "sensor");
+  await expect(sections.getByRole("heading", { level: 2, name: "센서" })).toBeVisible();
+  // 센서 카드만: 모든 카드가 센서 칸 안에 있고, 흐름 카드는 없다
+  const cards = page.getByTestId("block-doc-card");
+  const n = await cards.count();
+  expect(n).toBeGreaterThan(0);
+  await expect(sections.getByTestId("block-doc-card")).toHaveCount(n);
+  await expect(page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]')).toHaveCount(0);
+  // 고른 버튼은 카테고리 색으로 채운다 (버튼 개수 표시는 그대로)
+  await expect(sensor).toHaveAttribute("aria-current", "page");
+  expect(await sensor.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe("rgba(0, 0, 0, 0)");
+  await expect(sensor).toContainText(String(n));
+
+  await page.goBack();
+  await expect(page).toHaveURL(/cat=flow/);
+  await expect(sections).toHaveAttribute("data-category", "flow");
+  await expect(categoryButton(page, "흐름")).toHaveAttribute("aria-current", "page");
+});
+
+test("검색 중에는 모든 카테고리에서 찾고, 지우면 그 카테고리로 돌아간다", async ({ page }) => {
+  await page.goto("/#/docs?cat=flow");
+  const sections = page.getByTestId("doc-category");
+  await expect(sections).toHaveAttribute("data-category", "flow");
+  const search = page.getByPlaceholder("블록 이름·코드·설명 검색");
+  await search.fill("깜빡");
+  // ?cat 을 무시하고 흐름 밖(LED)의 결과도 카테고리별 묶음으로
+  await expect(page.locator('[data-testid="block-doc-card"][data-type="dev_led_blink"]')).toBeVisible();
+  await expect(sections.filter({ has: page.locator('[data-type="dev_led_blink"]') })).toHaveAttribute("data-category", "led");
+  // 검색 중에는 고른 카테고리 표시가 없다
+  await expect(categoryButton(page, "흐름")).not.toHaveAttribute("aria-current", "page");
+  const count = await page.getByTestId("block-doc-card").count();
+  await expect(page.getByTestId("doc-count")).toHaveText(`${count}개`);
+  await search.fill("");
+  await expect(sections).toHaveCount(1);
+  await expect(sections).toHaveAttribute("data-category", "flow");
+});
+
+test("좁은 화면: 카테고리 칩 줄만 가로로 넘기고 페이지는 가로로 넘치지 않는다", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/#/docs?cat=sensor");
+  // 넓은 화면의 왼쪽 목록은 숨겨져 있어 보이는 카테고리 목록은 칩 줄 하나
+  const chips = page.getByRole("navigation", { name: "블록 카테고리" });
+  await expect(chips).toBeVisible();
+  const chip = chips.locator('[data-category="sensor"]');
+  await expect(chip).toHaveAttribute("aria-current", "page");
+  await expect(chip).toBeInViewport();
+  expect(await chips.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await chips.locator('[data-category="flow"]').click();
+  await expect(page).toHaveURL(/cat=flow/);
+  await expect(page.getByTestId("doc-category")).toHaveAttribute("data-category", "flow");
 });
 
 test("블록 사전 카드의 제목은 팔레트와 같은 블록 그림이다", async ({ page }) => {
