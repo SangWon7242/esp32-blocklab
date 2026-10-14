@@ -8,12 +8,13 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 마이크로 USB 선으로 PC 와 연결 }
-  - { name: HC-SR04 초음파 센서, note: "M-F 점퍼선 4가닥. USB 를 뺀 채, GND 부터 꽂기" }
-  - { name: 서보 모터, note: "문 역할. 신호선은 4번 핀" }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
+  - { name: HC-SR04 초음파 센서, note: "핀 4개를 브레드보드에 꽂기. USB 를 뺀 채, GND 선부터" }
+  - { name: 서보 모터, note: "문 역할. 갈색 − 줄, 빨강 + 줄, 주황 신호선은 4번 핀" }
   - { name: OLED 0.96" (SSD1306), note: "SDA 21 · SCL 22. 보드에 ssd1306.py 를 먼저 올려 두기" }
-  - { name: 점퍼선, note: "M-F(초음파 센서) · F-F(서보·화면)" }
+  - { name: 점퍼선, note: "M-F(보드 ↔ 브레드보드) · M-M(브레드보드 안, 서보 플러그)" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
-wiring: { image: images/wiring-door.svg, caption: "초음파 Trig → 13 · Echo → 12, 서보 신호 → 4, OLED SDA → 21 · SCL → 22. 5V·GND 는 세 부품이 함께 써요" }
+wiring: { image: images/wiring-door.svg, caption: "브레드보드 위쪽 + 줄(5V)·− 줄(GND)을 세 부품이 함께 써요. 초음파 Trig → 13 · Echo → 12, 서보 주황 → 4, OLED SDA → 21 · SCL → 22 · VCC → 3V3" }
 goals:
   content: 초음파로 잰 거리를 if 로 판단해 서보(문)와 OLED(화면)를 함께 제어한다
   thinking: 문제를 세 덩어리로 분해하고, 실행 결과를 미리 예측하고, 증상에서 원인을 역추적한다
@@ -88,13 +89,15 @@ parts:
         type: run
         title: 복사 · 실행 — 거리 재기
         minutes: 5
-        scene: { image: images/wiring-ultrasonic.svg, caption: "VCC → 5V, Trig → 13, Echo → 12, GND → GND" }
+        scene: { image: images/breadboard-basics.svg, caption: "브레드보드 읽는 법: 같은 번호의 다섯 칸은 이어지고, 가운데 홈 건너편은 안 이어져요. + 줄·− 줄은 끝까지 이어져요" }
         body: |
-          이제 센서를 보드에 연결하고 코드를 실행해요. **USB 를 뺀 상태에서** 선 4개를 꽂고, 꼭 필요하면 **GND 를 가장 먼저** 꽂아요. 다 꽂으면 짝에게 "검사관"이 되어 달라고 해요.
+          이제 센서를 **브레드보드**에 꽂고 보드와 이어요. 센서 핀 4개가 꽂힌 줄마다 선을 하나씩: VCC 줄 → + 줄(5V), GND 줄 → − 줄, Trig 줄 → 13번, Echo 줄 → 12번. 배선도는 아래 **부품과 배선**(초음파 센서 부분)과 다음 단계 그림에 있어요.
+
+          **USB 를 뺀 상태에서** 꽂고, **GND 선을 가장 먼저** 꽂아요. 다 꽂으면 짝에게 "검사관"이 되어 달라고 해요.
 
           실행한 뒤에는 손을 센서 앞에서 앞뒤로 움직여 보세요. 창에 찍히는 숫자가 따라 바뀌나요? 아까 적은 예측과 비교해 봐요.
         todo:
-          - USB 를 뺀 채 VCC · Trig · Echo · GND 4선 연결하기
+          - USB 를 뺀 채 센서를 브레드보드에 꽂고 VCC · Trig · Echo · GND 4선 연결하기
           - "**보드 연결** → **실행** 누르기"
           - 손을 움직이며 숫자를 보고, 예측과 비교하기
         code: step1_distance.py
@@ -216,13 +219,13 @@ parts:
         type: run
         title: 복사 · 실행 — 완성 코드
         minutes: 4
-        scene: { image: images/wiring-door.svg, caption: "서보 신호 → 4, OLED SDA → 21 · SCL → 22. 핀이 겹치지 않는지 확인!" }
+        scene: { image: images/wiring-door.svg, caption: "서보 주황 → 4, OLED SDA → 21 · SCL → 22 · VCC → 3V3. GND 는 모두 브레드보드 − 줄로. 핀이 겹치지 않는지 확인!" }
         body: |
-          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로** 꽂고, 5V·GND 는 세 부품이 함께 나눠 써요. 핀 번호가 겹치지 않는지 짝과 확인해요.
+          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로** 브레드보드에 꽂고, 브레드보드의 + 줄(5V)·− 줄(GND)을 세 부품이 함께 나눠 써요(OLED 의 VCC 만 3V3). 핀 번호가 겹치지 않는지 짝과 확인해요.
 
           완성 코드 `step3_auto_door.py` 를 실행하고 손을 센서 앞 15cm 안으로 넣어 보세요. 화면이 `DOOR OPEN` 으로 바뀌고, 문이 열렸다가 잠시 뒤 닫히나요? 화면이 아예 안 켜지면 보드에 `ssd1306.py` 가 있는지 확인해요.
         todo:
-          - USB 를 뺀 채 서보(4번) · OLED(21 · 22번) 연결하기
+          - USB 를 뺀 채 서보(4번) · OLED(21 · 22번)를 브레드보드에 연결하기
           - "**실행** 누르고 손을 15cm 안에 넣어 보기"
           - 화면 글씨가 바뀌고 문이 열렸다 닫히는지 보기
         code: step3_auto_door.py
@@ -293,7 +296,7 @@ parts:
         body: |
           진짜 자동문에는 "열리는 중" 표시등이 달려 있기도 해요. 문이 열리면 **LED 도 같이 켜고**, 문이 닫히면 끄도록 고쳐 보세요.
 
-          LED 는 `26`번 핀에 연결해요: 26번 → 220Ω 저항 → LED 긴 다리, 짧은 다리 → GND.
+          LED 는 `26`번 핀에 연결해요: 26번 → 220Ω 저항 → LED 긴 다리, 짧은 다리 → 브레드보드 − 줄(GND). 챕터 1 배선과 같아요.
 
           더 해 보기: 사람이 25cm 밖으로 나갈 때까지 문을 열어 두려면 어떻게 바꿔야 할까요? 15cm 바로 근처에 서 있으면 문이 왜 덜덜 떨릴까요?
         todo:
