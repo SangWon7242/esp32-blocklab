@@ -177,6 +177,38 @@ describe("loop-without-sleep", () => {
   });
 });
 
+describe("break-outside-loop", () => {
+  const brk = (id: string): B => ({ type: "flow_break", id });
+  const cont = (id: string): B => ({ type: "flow_continue", id });
+  const cond = { block: { type: "logic_boolean", id: "tb", fields: { BOOL: "TRUE" } } };
+  const ifThen = (id: string, body: B): B => ({ type: "controls_if", id, inputs: { IF0: cond, DO0: { block: body } } });
+  it("반복 밖의 멈추기·건너뛰기 → 오류", () => {
+    const issues = only(run(program([brk("b"), ifThen("if", cont("c"))])), "break-outside-loop");
+    expect(issues.map((i) => [i.blockId, i.level, i.ko, i.en])).toEqual([
+      ["b", "error", "반복 안에서만 쓸 수 있어요", "SyntaxError: 'break' outside loop"],
+      ["c", "error", "반복 안에서만 쓸 수 있어요", "SyntaxError: 'continue' outside loop"],
+    ]);
+  });
+  it("반복 몸통 안(만약 안쪽, 다음 블록 포함)이면 없음 — 반복 블록 다섯 가지 모두", () => {
+    const loops: B[] = [
+      forever("l1", [wait("w", 1), ifThen("if1", brk("b1"))]),
+      { type: "flow_repeat_n", id: "l2", inputs: { TIMES: shadowNum(3), DO: { block: cont("c2") } } },
+      { type: "controls_whileUntil", id: "l3", fields: { MODE: "WHILE" }, inputs: { BOOL: cond, DO: { block: { ...wait("w3", 1), next: { block: brk("b3") } } } } },
+      { type: "flow_for_each", id: "l4", fields: { VAR: { id: "var_x" } }, inputs: { LIST: { block: varGet("xs") }, DO: { block: cont("c4") } } },
+      { type: "flow_for_range", id: "l5", fields: { VAR: { id: "var_i" } }, inputs: { FROM: shadowNum(0), TO: shadowNum(3), DO: { block: brk("b5") } } },
+    ];
+    expect(only(run(program(loops, { vars: ["x", "xs", "i"] })), "break-outside-loop")).toEqual([]);
+  });
+  it("반복 안에서 부르는 함수의 몸통도 반복 밖이다", () => {
+    const def = { type: "procedures_defnoreturn", id: "def", fields: { NAME: "f" }, inputs: { STACK: { block: brk("b") } } };
+    const call = { type: "procedures_callnoreturn", id: "call", extraState: { name: "f" } };
+    expect(only(run(program([forever("loop", [call, wait("w", 1)])], { tops: [def] })), "break-outside-loop").map((i) => i.blockId)).toEqual(["b"]);
+  });
+  it("떨어진 블록은 보지 않는다 (orphan 만)", () => {
+    expect(only(run(program([], { tops: [brk("loose")] })), "break-outside-loop")).toEqual([]);
+  });
+});
+
 describe("orphan", () => {
   it("시작 블록 밖 최상위 명령 → 주의 (줄 머리에 한 번)", () => {
     const loose = { ...pinWrite("o", "led"), next: { block: pinWrite("o2", "led") } };

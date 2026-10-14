@@ -27,7 +27,7 @@ const BUILTIN_LABELS: Record<string, string> = {
   calc_str: "… 을(를) 글자로",
   calc_int: "… 을(를) 정수로",
   calc_random: "… 부터 … 사이의 무작위 정수",
-  calc_round: "… 반올림/내림/올림/절댓값/제곱근",
+  calc_round: "… 반올림(내림·올림·절댓값·제곱근)",
   calc_minmax: "… 와(과) … 중 큰 수/작은 수",
   calc_len: "… 의 길이",
   calc_item: "… 의 … 번째 항목 (0부터)",

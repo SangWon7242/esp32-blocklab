@@ -67,7 +67,7 @@ export const calcBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "round(X), math.floor(X), math.ceil(X), abs(X), math.sqrt(X)",
+    tooltip: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구합니다. 코드로는 round(X), math.floor(X), math.ceil(X), abs(X), math.sqrt(X) 입니다.",
   },
   {
     type: "calc_minmax",

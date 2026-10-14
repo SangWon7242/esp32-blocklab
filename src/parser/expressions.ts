@@ -69,6 +69,54 @@ function betweenParts(left: SyntaxNode, op: string, right: SyntaxNode, ctx: Pars
   return [inner[0], inner[2], right];
 }
 
+/** and·or·not 식을 편 토큰: 연산자 이름이거나 그 밖의 식 노드(괄호 식은 한 덩어리) */
+type LogicToken = "and" | "or" | "not" | SyntaxNode;
+
+/**
+ * and·or·not 으로 이은 식을 원문 순서대로 편다. lezer 는 `not` 이 오른쪽의 and·or 전체를 삼키게 읽으므로
+ * (`not a and b` → not(a and b), `a and not b or c` → a and not(b or c)) 트리를 그대로 쓰면 뜻이 바뀐다.
+ */
+function logicTokens(node: SyntaxNode, out: LogicToken[] = []): LogicToken[] {
+  const kids = children(node);
+  if (node.name === "BinaryExpression" && kids.length === 3 && (kids[1].name === "and" || kids[1].name === "or")) {
+    logicTokens(kids[0], out);
+    out.push(kids[1].name);
+    logicTokens(kids[2], out);
+  } else if (node.name === "UnaryExpression" && kids[0]?.name === "not" && kids[1]) {
+    out.push("not");
+    logicTokens(kids[1], out);
+  } else out.push(node);
+  return out;
+}
+
+/** cond 가 식 전체를 뒤집는 `not X` 인지 (`not a and b` 는 (not a) and b 라서 아니다) */
+export function isWholeNot(cond: SyntaxNode): boolean {
+  const tokens = logicTokens(cond);
+  return tokens[0] === "not" && !tokens.includes("and") && !tokens.includes("or");
+}
+
+/** 편 토큰을 파이썬 우선순위(or < and < not, 왼쪽부터 묶음)로 다시 묶어 판단 블록으로 */
+function logicBlock(node: SyntaxNode, ctx: ParseContext): BlockJson {
+  const tokens = logicTokens(node);
+  let i = 0;
+  const atom = (): BlockJson => {
+    if (tokens[i] === "not") {
+      i++;
+      return block("logic_negate", undefined, { BOOL: atom() });
+    }
+    return convertExpr(tokens[i++] as SyntaxNode, ctx, "Boolean");
+  };
+  const chain = (op: "and" | "or", next: () => BlockJson) => (): BlockJson => {
+    let left = next();
+    while (tokens[i] === op) {
+      i++;
+      left = block("logic_operation", { OP: op.toUpperCase() }, { A: left, B: next() });
+    }
+    return left;
+  };
+  return chain("or", chain("and", atom))();
+}
+
 function fallback(node: SyntaxNode, ctx: ParseContext): BlockJson {
   ctx.markUnparsed(node);
   return codeExpr(ctx.src.slice(node));
@@ -144,7 +192,7 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
     case "UnaryExpression": {
       const kids = children(node);
       const op = ctx.src.slice(kids[0]);
-      if (op === "not" && kids[1]) return block("logic_negate", undefined, { BOOL: convertExpr(kids[1], ctx, "Boolean") });
+      if (op === "not" && kids[1]) return logicBlock(node, ctx);
       if (op === "-" && kids[1]?.name === "Number" && isCanonicalNumber(ctx.src.slice(kids[1]))) return num(-Number(ctx.src.slice(kids[1])));
       return fallback(node, ctx);
     }
@@ -171,7 +219,7 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
       if (COMPARE_TOKENS.has(opNode.name) && (isComparison(left) || isComparison(right))) return fallback(node, ctx);
       if (opNode.name === "in") return block("judge_contains", undefined, { CONTAINER: convertExpr(right, ctx), ITEM: convertExpr(left, ctx) });
       if (opNode.name === "CompareOp" && COMPARE[op]) return block("logic_compare", { OP: COMPARE[op] }, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
-      if (opNode.name === "and" || opNode.name === "or") return block("logic_operation", { OP: op.toUpperCase() }, { A: convertExpr(left, ctx, "Boolean"), B: convertExpr(right, ctx, "Boolean") });
+      if (opNode.name === "and" || opNode.name === "or") return logicBlock(node, ctx);
       if (opNode.name === "ArithOp" && ARITH[op]) {
         if (op === "+" && (isStringy(left, ctx) || isStringy(right, ctx))) return block("calc_concat", undefined, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
         return block("calc_arith", { OP: ARITH[op] }, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
@@ -213,7 +261,15 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
       // x[i] 만 "n번째 항목" 블록으로. x[1:3]·x[:]·x[a, b] 는 코드로 (속성 a.b 는 장치 값이 먼저 본다)
       const kids = children(node);
       if (kids.length === 4 && kids[1].name === "[" && kids[3].name === "]" && kids[2].name !== ":" && kids[2].name !== ",") {
-        return block("calc_item", undefined, { X: convertExpr(kids[0], ctx), INDEX: convertExpr(kids[2], ctx, "Number") });
+        // 번호가 숫자 칸에 못 끼우면(d["k"] 사전 찾기) "0부터 n번째" 로 보이지 않게 식 전체를 코드로
+        const mark = ctx.unparsed.length;
+        const X = convertExpr(kids[0], ctx);
+        const index = convertAllOrNull([kids[2]], ctx, "Number");
+        if (!index) {
+          ctx.unparsed.length = mark;
+          return fallback(node, ctx);
+        }
+        return block("calc_item", undefined, { X, INDEX: index[0] });
       }
       return fallback(node, ctx);
     }

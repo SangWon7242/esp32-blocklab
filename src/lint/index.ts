@@ -11,13 +11,14 @@ import { loopWithoutSleep } from "./rules/loopWithoutSleep";
 import { orphan } from "./rules/orphan";
 import { undefinedVariable } from "./rules/undefinedVariable";
 import { rawCode } from "./rules/rawCode";
+import { breakOutsideLoop } from "./rules/breakOutsideLoop";
 
 export type { ConsoleEntry, Issue, Level, LintWorkspaceJson } from "./types";
 export { blockLabel } from "./labels";
 export { formatConsole } from "./format";
 export { alignLines } from "./align";
 
-export const RULES: Rule[] = [noStart, emptyInput, deviceBeforeSetup, pinRule, valueRange, pinConflict, loopWithoutSleep, orphan, undefinedVariable, rawCode];
+export const RULES: Rule[] = [noStart, emptyInput, deviceBeforeSetup, pinRule, valueRange, pinConflict, loopWithoutSleep, breakOutsideLoop, orphan, undefinedVariable, rawCode];
 
 const LEVEL_RANK: Record<Level, number> = { error: 0, warning: 1, info: 2 };
 

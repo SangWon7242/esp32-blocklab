@@ -23,10 +23,11 @@ const ROUND: Record<string, string> = { ROUND: "round", FLOOR: "math.floor", CEI
  * 우선순위만 괄호로 감싼다.)
  */
 function binary(block: Blockly.Block, gen: Gen, symbol: string, order: number): [string, number] {
-  // ** 는 오른쪽부터 묶는다 (2 ** 3 ** 2 == 2 ** (3 ** 2)): 왼쪽에 같은 우선순위가 오면 괄호, 오른쪽은 괄호 없이
+  // ** 는 오른쪽부터 묶는다 (2 ** 3 ** 2 == 2 ** (3 ** 2)): 왼쪽에 같은 우선순위가 오면 괄호, 오른쪽은 괄호 없이.
+  // 오른쪽 칸은 부호(-1, UNARY_SIGN)도 괄호 없이 받는다 (a ** -1). 곱셈·덧셈 이하만 괄호
   const right = order === Order.EXPONENTIATION;
   const a = value(block, gen, "A", right ? order : order + 1);
-  const b = value(block, gen, "B", right ? order + 1 : order);
+  const b = value(block, gen, "B", right ? Order.MULTIPLICATIVE : order);
   return [`${a} ${symbol} ${b}`, order];
 }
 
@@ -36,18 +37,40 @@ const relational = (block: Blockly.Block, gen: Gen, ...names: string[]) => names
 /** 블록의 변수 칸(VAR)이 가리키는 변수의 코드 이름 */
 const varName = (block: Blockly.Block, gen: Gen) => gen.getVariableName(block.getFieldValue("VAR"));
 
-/** 이름·속성 연결(a.b) 이거나, 첫 `(` 가 맨 끝 `)` 와 짝을 이루는 호출 하나인지 */
-function isSimpleCallOrName(text: string): boolean {
-  if (/^[A-Za-z_][\w.]*$/.test(text)) return true;
-  const head = /^[A-Za-z_][\w.]*\(/.exec(text);
-  if (!head) return false;
-  let depth = 0;
-  for (let i = head[0].length - 1; i < text.length; i++) {
-    if (text[i] === "(") depth++;
-    else if (text[i] === ")" && --depth === 0) return i === text.length - 1;
+const CLOSE: Record<string, string> = { "(": ")", "[": "]", "{": "}" };
+
+/**
+ * text[open] 의 여는 괄호가 맨 끝 글자에서 닫히는지. 따옴표 안(세 따옴표 포함)의 괄호는 세지 않는다.
+ * 모르는 꼴이면 false (괄호를 한 번 더 치는 쪽이 안전하다).
+ */
+function closesAtEnd(text: string, open: number): boolean {
+  const stack: string[] = [];
+  for (let i = open; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"' || c === "'") {
+      const quote = text.startsWith(c.repeat(3), i) ? c.repeat(3) : c;
+      let j = i + quote.length;
+      while (j < text.length && !text.startsWith(quote, j)) j += text[j] === "\\" ? 2 : 1;
+      if (j >= text.length) return false;
+      i = j + quote.length - 1;
+    } else if (CLOSE[c]) stack.push(CLOSE[c]);
+    else if (c === ")" || c === "]" || c === "}") {
+      if (stack.pop() !== c) return false;
+      if (stack.length === 0) return i === text.length - 1;
+    }
   }
   return false;
 }
+
+/** 이름·속성 연결(a.b), 첫 `(` 가 맨 끝 `)` 와 짝을 이루는 호출 하나 */
+function isSimpleCallOrName(text: string): boolean {
+  if (/^[A-Za-z_][\w.]*$/.test(text)) return true;
+  const head = /^[A-Za-z_][\w.]*\(/.exec(text);
+  return !!head && closesAtEnd(text, head[0].length - 1);
+}
+
+/** 짝이 맞는 괄호 한 덩어리: 리스트·튜플·딕트·집합 글자([1, 2]·(1, 2)·{"a": 1}) 나 괄호로 감싼 식 */
+const isBracketed = (text: string) => /^[[({]/.test(text) && closesAtEnd(text, 0);
 
 export function registerForBlocks(gen: Gen): void {
   const f = gen.forBlock;
@@ -145,10 +168,11 @@ export function registerForBlocks(gen: Gen): void {
   f["procedures_defreturn"] = (block, g) => defGenerator(block, g as Gen);
 
   f["code_stmt"] = (block) => `${block.getFieldValue("CODE")}\n`;
-  // 이름·속성·호출 하나(time.ticks_us(), Pin(26, Pin.OUT))면 호출 우선순위, 그 밖에는 연산자가
-  // 섞였을 수 있으니 NONE 으로 두어 식 안에서 괄호로 감싸게 한다
+  // 괄호 한 덩어리([1, 2]·(a + b))는 더 감쌀 필요가 없다(ATOMIC). 이름·속성·호출 하나(time.ticks_us(), Pin(26, Pin.OUT))면
+  // 호출 우선순위, 그 밖에는 연산자가 섞였을 수 있으니 NONE 으로 두어 식 안에서 괄호로 감싸게 한다
   f["code_expr"] = (block) => {
     const code = String(block.getFieldValue("CODE"));
+    if (isBracketed(code)) return [code, Order.ATOMIC];
     return [code, isSimpleCallOrName(code) ? Order.FUNCTION_CALL : Order.NONE];
   };
 

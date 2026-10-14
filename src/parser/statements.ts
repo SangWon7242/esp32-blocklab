@@ -2,7 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { block, chain, codeStmt, commentText, num, varSet, withComment } from "./builders";
 import type { ParseContext } from "./context";
 import { isFoldedHelper, matchActionLines, matchCall, matchSetupAt, setupBlock } from "./devices";
-import { callBlock, callParts, convertExpr, isListVariable, memberParts } from "./expressions";
+import { callBlock, callParts, convertExpr, isListVariable, isWholeNot, memberParts } from "./expressions";
 import { functionParts, isKnownImport, returnsValue } from "./patterns";
 import { bodyStatements, children, operands } from "./tree";
 import type { BlockJson } from "./types";
@@ -196,7 +196,8 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
       const DO = convertBody(body, ctx);
       if (cond.name === "Boolean" && ctx.src.slice(cond) === "True") return one(block("flow_repeat_forever", undefined, { DO }));
       const kids = children(cond);
-      if (cond.name === "UnaryExpression" && ctx.src.slice(kids[0]) === "not" && kids[1]) return one(block("controls_whileUntil", { MODE: "UNTIL" }, { BOOL: convertExpr(kids[1], ctx, "Boolean"), DO }));
+      // while not X: 만 "~할 때까지" (while not a and b: 는 (not a) and b 라서 아니다)
+      if (cond.name === "UnaryExpression" && isWholeNot(cond) && kids[1]) return one(block("controls_whileUntil", { MODE: "UNTIL" }, { BOOL: convertExpr(kids[1], ctx, "Boolean"), DO }));
       return one(block("controls_whileUntil", { MODE: "WHILE" }, { BOOL: convertExpr(cond, ctx, "Boolean"), DO }));
     }
 

@@ -119,6 +119,9 @@ describe("계산 블록 왕복", () => {
     roundTrip(pow(blk("calc_arith", { OP: "ADD" }, { A: v("a"), B: v("b") }), num(2)), "(a + b) ** 2");
     roundTrip(blk("calc_arith", { OP: "MULTIPLY" }, { A: num(2), B: pow(v("a"), num(2)) }), "2 * a ** 2");
     roundTrip(pow(v("a"), blk("calc_arith", { OP: "MULTIPLY" }, { A: num(2), B: v("b") })), "a ** (2 * b)");
+    // 오른쪽 칸의 음수는 괄호 없이 (덧셈은 여전히 괄호)
+    roundTrip(pow(v("a"), num(-1)), "a ** -1");
+    roundTrip(pow(v("a"), blk("calc_arith", { OP: "ADD" }, { A: v("b"), B: num(1) })), "a ** (b + 1)");
   });
   it("calc_random → random.randint(A, B) + import random", () => {
     roundTrip(blk("calc_random", undefined, { A: num(1), B: num(6) }), "random.randint(1, 6)", ["import random"]);
@@ -221,5 +224,66 @@ describe("조건 칸에서", () => {
     expect(lastValue(src)).toEqual({ type: "code_expr", fields: { CODE: '"a" <= c <= "z"' } });
     expect(parse(src).unparsed).toHaveLength(1);
     expect(codeToCode(src)).toBe(src);
+  });
+});
+
+describe("리뷰 반영: 괄호와 우선순위", () => {
+  /** 원문 → 블록 → 같은 원문 */
+  const same = (src: string) => expect(codeToCode(src)).toBe(src);
+  const code = (expr: B) => workspaceJsonToCode(program(expr)).slice(HEAD.length);
+
+  it("리스트·튜플·딕트 글자(code_expr)는 괄호를 더 치지 않는다", () => {
+    same("choice = 2\nif choice in [1, 2, 3]:\n    print(choice)\n");
+    same(`${HEAD}x = a in (1, 2)\n`);
+    same(`${HEAD}x = [1, 2][0]\n`);
+    same(`${HEAD}x = {"k": 1}["k"]\n`);
+    expect(types(parse(`${HEAD}x = a in [1, 2]\n`).json)).toContain("judge_contains");
+  });
+  it("연산자가 섞인 code_expr 는 계속 괄호로 감싼다", () => {
+    const expr = (text: string): B => ({ type: "code_expr", fields: { CODE: text } });
+    expect(code(blk("calc_arith", { OP: "MULTIPLY" }, { A: expr("a + b"), B: num(2) }))).toBe("x = (a + b) * 2\n");
+    expect(code(blk("calc_item", undefined, { X: expr("[1, 2] + [3]"), INDEX: num(0) }))).toBe("x = ([1, 2] + [3])[0]\n");
+    expect(code(blk("calc_item", undefined, { X: expr("(a) + (b)"), INDEX: num(0) }))).toBe("x = ((a) + (b))[0]\n");
+    expect(code(blk("calc_item", undefined, { X: expr('["]"] + x'), INDEX: num(0) }))).toBe('x = (["]"] + x)[0]\n');
+    expect(code(blk("calc_item", undefined, { X: expr('[")"]'), INDEX: num(0) }))).toBe('x = [")"][0]\n');
+  });
+  it("not 은 바로 뒤 한 덩어리만 뒤집는다 (and·or 를 삼키지 않는다)", () => {
+    const value = lastValue(`${HEAD}x = not a and b\n`);
+    expect(value.type).toBe("logic_operation");
+    expect(value.inputs?.A?.block?.type).toBe("logic_negate");
+    same(`${HEAD}x = not a and b\n`);
+    same(`${HEAD}x = not (a and b)\n`);
+    same(`${HEAD}x = a and not b or a\n`);
+    same(`${HEAD}x = not a or b and a\n`);
+    same(`${HEAD}x = not a < 3 and a > 1\n`);
+    // not x in xs 는 x not in xs 로 쓴다 (뜻은 같다)
+    expect(codeToCode(`${HEAD}x = not "e" in word and "i" in word\n`)).toBe(`${HEAD}x = "e" not in word and "i" in word\n`);
+  });
+  it("while not a and b: 는 ~할 때까지가 아니다", () => {
+    const src = `${HEAD}while not a and b:\n    a = a + 1\n`;
+    const loop = JSON.stringify(parse(src).json);
+    expect(loop).toContain('"MODE":"WHILE"');
+    same(src);
+    same(`${HEAD}while not (a and b):\n    a = a + 1\n`);
+  });
+  it("사전 찾기 d[\"k\"] 는 n번째 항목이 아니라 식 전체 code_expr", () => {
+    const src = 'd = {"k": 1}\nx = d["k"]\n';
+    expect(lastValue(src)).toEqual({ type: "code_expr", fields: { CODE: 'd["k"]' } });
+    same(src);
+  });
+  it("in·사이인가 를 and·not·비교와 섞어도 같은 글자", () => {
+    same(`${HEAD}x = "e" in word and "i" in word\n`);
+    same(`${HEAD}x = not 0 <= a <= 100\n`);
+    same(`${HEAD}x = (0 <= a <= 5) == True\n`);
+    expect(types(parse(`${HEAD}x = (0 <= a <= 5) == True\n`).json)).toContain("judge_between");
+  });
+  it("from math import sqrt 는 code_stmt 로 남고, import math 는 한 줄", () => {
+    const from = "from math import sqrt\n\nx = sqrt(2)\n";
+    expect(types(parse(from).json)).toContain("code_stmt");
+    same(from);
+    expect(codeToCode(from).match(/import/g)).toHaveLength(1);
+    const plain = "import math\n\nx = math.floor(2.5)\n";
+    same(plain);
+    expect(codeToCode(plain).match(/^import math$/gm)).toHaveLength(1);
   });
 });
