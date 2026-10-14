@@ -11,11 +11,19 @@ materials:
   - { name: 130 모터 모듈, note: "작은 보드에 모터가 붙어 있어요. 핀 4개: G · V · IN+ · IN−" }
   - { name: 팬 날개, note: 배선이 모두 끝난 뒤에 모터 축에 끼워요 }
   - { name: 배터리 홀더 (AA 6개), note: 건전지 6개는 따로 준비. 보드의 외부 전원 단자에 꽂아요 }
-  - { name: M-F 듀폰선, note: "4가닥 (GND · 5V · 13번 · 12번). 브레드보드 없이 바로 이어요" }
+  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선 4가닥 (GND · 5V · 13번 · 12번). 브레드보드 없이 바로 이어요" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-motor.svg
   caption: "모터 모듈 G → GND, V → 5V, IN+ → 13번(motor1a), IN− → 12번(motor1b). AA 6개를 넣은 배터리 홀더는 보드의 외부 전원 단자에 꽂아요. 팬 날개는 배선이 끝난 뒤에 끼워요"
+principle:
+  image: images/direction-table.svg
+  body: |
+    130 모터 모듈에는 모터를 돌려 주는 도우미 칩(HR1124S)이 들어 있어요. 모터는 전기를 많이(200mA까지) 써서 ESP32 핀이 직접 돌릴 수 없고, 핀은 칩에게 **어느 쪽으로 돌지** 신호만 보내요.
+
+    - 모터는 두 끝에 전압을 걸면 돌고, 전압의 방향을 바꾸면 도는 방향도 바뀌어요
+    - IN+ 1 · IN− 0 이면 앞으로, IN+ 0 · IN− 1 이면 뒤로, 둘 다 0 이면 멈춰요
+    - 0과 1 대신 **PWM** 으로 세기(0~1023)를 보내면 빠르기도 바꿀 수 있어요
 goals:
   content: 두 핀(13 · 12번)의 값 조합으로 130 모터를 앞으로 · 뒤로 · 정지시키고, 자주 쓰는 동작에 이름(함수)을 붙여 부른다
   thinking: 되풀이되는 동작 묶음을 찾아 이름을 붙이고, "무엇을 할지"와 "몇 번 할지"를 나누어 생각한다
@@ -105,6 +113,16 @@ parts:
           - 팬 날개 끼우고, 배터리 홀더를 외부 전원 단자에 꽂기
           - "**보드 연결** → **실행** 누르고, 날개 앞을 비운 채 몇 초 도는지 세기"
         code: step1_direction.py
+        expected: 코드를 실행하면 팬이 3초 동안 앞으로 돌다가 멈추고, 프로그램이 끝나요.
+        codeNotes:
+          - { line: 4, note: "13번 핀(IN+)을 내보내는 핀으로 정하고 `motor1a` 라고 이름 붙여요" }
+          - { line: 5, note: "12번 핀(IN−)을 내보내는 핀으로 정하고 `motor1b` 라고 이름 붙여요" }
+          - { line: 8, note: "`def forward():` 로 \"앞으로\" 라는 이름의 동작 묶음을 만들어요. 만들기만 하고 아직 실행하지는 않아요" }
+          - { line: 9, note: "IN+ 에 1, 다음 줄에서 IN− 에 0 을 보내면 앞으로 돌아요" }
+          - { line: 13, note: "`backward()` 는 두 값을 서로 바꿔 보내서 뒤로 돌아요" }
+          - { line: 18, note: "`stop()` 은 두 핀에 모두 0 을 보내 멈춰요" }
+          - { line: 23, note: "`forward()` 처럼 이름을 부르면 그때 묶음 안의 두 줄이 실행돼요" }
+          - { line: 24, note: "`time.sleep(3)`: 3초 동안 앞으로 도는 상태 그대로 기다려요" }
 
       - id: readcheck
         type: readcheck
@@ -122,6 +140,13 @@ parts:
           - 맨 아래에서 몇 초 기다리는지 찾기
           - 세 문제에 답하고 **확인** 누르기
         code: step1_direction.py
+        codeNotes:
+          - { line: 4, note: "13번 핀(IN+)을 내보내는 핀으로 정하고 `motor1a` 라고 이름 붙여요" }
+          - { line: 5, note: "12번 핀(IN−)을 내보내는 핀으로 정하고 `motor1b` 라고 이름 붙여요" }
+          - { line: 8, note: "`def forward():` 로 \"앞으로\" 라는 이름의 동작 묶음을 만들어요" }
+          - { line: 9, note: "`motor1a.value(1)`: IN+ 쪽에 1(HIGH)을 보내요" }
+          - { line: 18, note: "`stop()` 은 두 핀에 모두 0 을 보내 멈춰요" }
+          - { line: 23, note: "맨 아래에서 이름을 부를 때 비로소 묶음 안의 줄이 실행돼요" }
         questions:
           - { kind: number, q: "실행하면 모터가 앞으로 도는 시간은 몇 초인가요?", answer: 3 }
           - { kind: choice, q: "backward() 는 forward() 와 무엇이 다른가요?", options: ["두 핀의 값을 서로 바꿨다", "두 핀에 모두 1을 보낸다", "다른 핀 번호를 쓴다"], answer: 0, hint: "각 함수 안의 motor1a, motor1b 값을 차례로 읽어 보세요" }
@@ -143,6 +168,15 @@ parts:
           - 앞으로 · 뒤로가 몇 번 되풀이되는지 손가락으로 세기
           - 다 끝난 뒤 선풍기가 어떤 상태인지 보기
         code: step2_sequence.py
+        expected: 코드를 실행하면 앞으로 5초 → 정지 2초 → 뒤로 5초 → 정지 2초를 한 묶음으로 다섯 번 되풀이한 뒤, 팬이 멈춘 채로 끝나요.
+        codeNotes:
+          - { line: 23, note: "`def test():` 로 앞으로 → 정지 → 뒤로 → 정지를 한 묶음으로 담아요" }
+          - { line: 24, note: "함수 안에서 다른 함수 `forward()` 를 불러도 돼요" }
+          - { line: 25, note: "`time.sleep(5)`: 앞으로 도는 상태로 5초 기다려요" }
+          - { line: 26, note: "`stop()` 으로 멈추고, 다음 줄에서 2초 쉬어요" }
+          - { line: 28, note: "`backward()` 로 뒤로 돌아요" }
+          - { line: 34, note: "`for i in range(5):` 아래 줄을 다섯 번 되풀이해요" }
+          - { line: 35, note: "`test()` 를 부를 때마다 묶음 안의 24~31번 줄이 차례로 실행돼요" }
 
       - id: readcheck2
         type: readcheck
@@ -160,6 +194,12 @@ parts:
           - "`test()` 의 마지막 두 줄이 무엇인지 보기"
           - 세 문제에 답하고 **확인** 누르기
         code: step2_sequence.py
+        codeNotes:
+          - { line: 8, note: "`forward()`: IN+ 1 · IN− 0 으로 앞으로" }
+          - { line: 13, note: "`backward()`: IN+ 0 · IN− 1 로 뒤로" }
+          - { line: 18, note: "`stop()`: 둘 다 0 으로 정지" }
+          - { line: 23, note: "`test()` 안은 \"무엇을 할지\"를 맡아요" }
+          - { line: 35, note: "`test()` 를 부르면 묶음 안의 줄이 위에서부터 차례로 실행돼요" }
         questions:
           - { kind: number, q: "test() 를 한 번 부르면 모두 몇 초가 걸리나요?", answer: 14, hint: "기다리는 줄 네 개의 숫자를 더해요" }
           - { kind: choice, q: "다섯 번이 모두 끝나면 선풍기는 어떻게 되나요?", options: ["멈춘 채로 프로그램이 끝나요", "앞으로 계속 돌아요", "뒤로 계속 돌아요"], answer: 0, hint: "test() 가 마지막에 부르는 함수를 보세요" }
@@ -224,7 +264,7 @@ parts:
 
           IN− 는 0으로 고정해서 한 방향으로만 돌게 하고, IN+ 의 세기를 **약한 바람**과 **센 바람** 두 가지로 바꿔 가며 계속 되풀이해 봐요.
         todo:
-          - "13번 핀을 PWM 으로 준비하기 (`PWM(Pin(13), 1000)`)"
+          - "13번 핀을 PWM 으로 준비하기 (`motor1a = PWM(Pin(13))` 다음 줄에 `motor1a.freq(1000)`)"
           - IN− 는 0으로 고정하고, 세기 두 가지를 3초씩 번갈아 보내기
           - 실행해서 바람 세기가 바뀌는지 보고 **판정** 누르기
         instructions: IN+ 를 PWM 으로 바꿔, 약한 바람과 센 바람을 번갈아 계속 내도록 해 주세요 (IN− 는 0으로 고정)
