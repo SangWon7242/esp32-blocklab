@@ -57,6 +57,7 @@ export const toolbox = {
         block("math_number", { fields: { NUM: 0 } }),
         block("text", { fields: { TEXT: "안녕" } }),
         block("calc_arith", { inputs: { A: num(1), B: num(1) } }),
+        block("calc_paren"),
         block("calc_random", { inputs: { A: num(1), B: num(6) } }),
         block("calc_round", { inputs: { X: num(3.7) } }),
         block("calc_minmax", { inputs: { A: num(3), B: num(7) } }),

@@ -51,8 +51,14 @@ export function memberParts(node: SyntaxNode, ctx: ParseContext): { obj: string;
  */
 export const isListVariable = (name: string, ctx: ParseContext): boolean => !ctx.devices.has(name) && !isProgramName(name);
 
-const isStringy = (node: SyntaxNode, ctx: ParseContext) =>
-  node.name === "String" || (node.name === "CallExpression" && ctx.src.slice(callParts(node).callee) === "str");
+/** 글자 식인지: 문자열, str(…), 또는 그것을 괄호로 감싼 것 (`("a") + b` 도 합치기) */
+const isStringy = (node: SyntaxNode, ctx: ParseContext): boolean => {
+  if (node.name === "ParenthesizedExpression") {
+    const kids = children(node);
+    return kids.length === 3 && isStringy(kids[1], ctx);
+  }
+  return node.name === "String" || (node.name === "CallExpression" && ctx.src.slice(callParts(node).callee) === "str");
+};
 
 /** 비교 연산자 노드 이름: <·== 들은 CompareOp, in·is 는 제 이름, not in 은 not 토큰 뒤에 in */
 const COMPARE_TOKENS = new Set(["CompareOp", "in", "is", "not"]);
@@ -136,8 +142,16 @@ const OUTPUT_TYPES: Record<string, readonly string[]> = {
   // calc_item 은 output null (리스트·글자의 항목은 어떤 값이든) 이라 여기에 넣지 않는다
 };
 
-/** 값 블록의 출력 형식. 형식이 없는 블록(variables_get·code_expr·procedures_callreturn, output null 인 장치 값)은 어디든 끼운다 */
-function outputTypes(type: string): readonly string[] | undefined {
+/**
+ * 값 블록의 출력 형식. 형식이 없는 블록(variables_get·code_expr·procedures_callreturn, output null 인 장치 값)은 어디든 끼운다.
+ * 괄호(calc_paren)는 형식이 없지만 안의 블록 형식으로 본다 (`if (x > 1):` 의 괄호는 판단, `time.sleep(("a"))` 는 코드로)
+ */
+function outputTypes(b: BlockJson): readonly string[] | undefined {
+  if (b.type === "calc_paren") {
+    const inner = b.inputs?.X?.block;
+    return inner ? outputTypes(inner) : undefined;
+  }
+  const type = b.type;
   if (OUTPUT_TYPES[type]) return OUTPUT_TYPES[type];
   const output = findValueByBlock(type)?.output;
   if (output === undefined || output === null) return undefined;
@@ -157,7 +171,7 @@ const isPlainString = (text: string) => /^["']/.test(text) && !text.startsWith('
 export function convertExpr(node: SyntaxNode, ctx: ParseContext, expect?: Check): BlockJson {
   const mark = ctx.unparsed.length;
   const out = convertAny(node, ctx);
-  const types = outputTypes(out.type);
+  const types = outputTypes(out);
   if (!expect || !types || types.includes(expect)) return out;
   ctx.unparsed.length = mark; // 버린 하위 블록이 남긴 표시를 지우고 식 전체를 한 번만 표시
   return fallback(node, ctx);
@@ -167,7 +181,7 @@ export function convertExpr(node: SyntaxNode, ctx: ParseContext, expect?: Check)
 export function convertAllOrNull(nodes: SyntaxNode[], ctx: ParseContext, expect: Check): BlockJson[] | null {
   const mark = ctx.unparsed.length;
   const out = nodes.map((n) => convertAny(n, ctx));
-  if (out.every((b) => { const types = outputTypes(b.type); return !types || types.includes(expect); })) return out;
+  if (out.every((b) => { const types = outputTypes(b); return !types || types.includes(expect); })) return out;
   ctx.unparsed.length = mark;
   return null;
 }
@@ -186,8 +200,10 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
     case "Boolean": return bool(text === "True");
     case "VariableName": return ctx.hasVar(text) ? varGet(ctx.varId(text)) : fallback(node, ctx);
     case "ParenthesizedExpression": {
-      const inner = operands(node)[0];
-      return inner ? convertExpr(inner, ctx) : fallback(node, ctx);
+      // 학생이 적은 괄호는 괄호 블록으로 남긴다 (안이 code_expr 여도 감싸서 글자가 그대로). 튜플 (1, 2)·빈 () 는 코드로
+      const kids = children(node);
+      if (kids.length !== 3 || kids[0].name !== "(" || kids[2].name !== ")") return fallback(node, ctx);
+      return block("calc_paren", undefined, { X: convertExpr(kids[1], ctx) });
     }
     case "UnaryExpression": {
       const kids = children(node);

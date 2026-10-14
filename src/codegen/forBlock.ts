@@ -100,6 +100,8 @@ export function registerForBlocks(gen: Gen): void {
     const [symbol, order] = ARITH[block.getFieldValue("OP")] ?? ARITH.ADD;
     return binary(block, g as Gen, symbol, order);
   };
+  // 학생이 적은 괄호: 안은 괄호 없이, 바깥 연산자는 이 괄호를 한 덩어리(ATOMIC)로 보아 괄호를 더 치지 않는다
+  f["calc_paren"] = (block, g) => [`(${value(block, g as Gen, "X")})`, Order.ATOMIC];
   f["calc_concat"] = (block, g) => binary(block, g as Gen, "+", Order.ADDITIVE);
   f["calc_random"] = (block, g) => [`random.randint(${value(block, g as Gen, "A")}, ${value(block, g as Gen, "B")})`, Order.FUNCTION_CALL];
   f["calc_round"] = (block, g) => [`${ROUND[block.getFieldValue("OP")] ?? "round"}(${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];

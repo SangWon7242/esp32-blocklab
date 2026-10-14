@@ -17,6 +17,15 @@ export const calcBlocks: Record<string, unknown>[] = [
     tooltip: "// 는 나눈 몫(정수), % 는 나머지, ^ 는 거듭제곱(**)입니다.",
   },
   {
+    type: "calc_paren",
+    message0: "( %1 )",
+    args0: [{ type: "input_value", name: "X" }],
+    inputsInline: true,
+    output: null,
+    style: "math_blocks",
+    tooltip: "괄호: 안의 값을 먼저 계산해요. 코드에 괄호가 그대로 남아요",
+  },
+  {
     type: "calc_concat",
     message0: "%1 와(과) %2 합치기",
     args0: [{ type: "input_value", name: "A" }, { type: "input_value", name: "B" }],

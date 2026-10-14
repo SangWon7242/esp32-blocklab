@@ -124,6 +124,10 @@ describe("value-range", () => {
     const withVar = angle({ block: varGet("x"), ...shadowNum(200) });
     expect(only(run(program([servo, varSet("x", num(1)), withVar], { vars: ["servo", "x"] })), "value-range")).toEqual([]);
   });
+  it("괄호 블록 (200) 안의 숫자도 본다", () => {
+    const paren = { block: { type: "calc_paren", id: "pr", inputs: { X: { block: num(200) } } } };
+    expect(only(run(program([servo, angle(paren)], { vars: ["servo"] })), "value-range")).toHaveLength(1);
+  });
   it("조사: 횟수는 / 빨강은", () => {
     const blink = { type: "dev_led_blink", id: "b", fields: { VAR: { id: "var_led" } }, inputs: { SEC: shadowNum(0.5), TIMES: shadowNum(0) } };
     expect(only(run(program([pinSetup("p", "led", 26), blink], { vars: ["led"] })), "value-range").map((i) => i.ko)).toEqual(["횟수는 1~1000 사이여야 해요"]);

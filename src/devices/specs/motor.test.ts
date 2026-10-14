@@ -43,6 +43,14 @@ describe("서보 각도 (dev_servo_angle)", () => {
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(c);
   });
+  it("템플릿이 붙이는 괄호는 괄호 블록이 되지 않고, 학생이 더 적은 괄호는 괄호 블록으로 남는다", () => {
+    const c = head + "a = 40\nservo.duty_u16(1638 + (a) * 6462 // 180)\nservo.duty_u16(1638 + ((a + 5)) * 6462 // 180)\n";
+    const r = fromCode(c);
+    // 템플릿 괄호 하나를 떼고 남은 괄호: (a) → 괄호 하나, ((a + 5)) → 괄호 둘 (다시 코드로 쓰면 같은 글자)
+    expect(r.types.slice(3)).toEqual(["dev_servo_angle", "calc_paren", "variables_get", "dev_servo_angle", "calc_paren", "calc_paren", "calc_arith", "variables_get", "math_number"]);
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(c);
+  });
   it("서보가 아닌 PWM 변수의 같은 꼴은 PWM 세기 블록", () => {
     const r = fromCode("from machine import Pin, PWM\n\npwm = PWM(Pin(2))\npwm.freq(1000)\n\npwm.duty_u16(1638 + 90 * 6462 // 180)\n");
     expect(r.types[1]).toBe("esp_pwm_duty");

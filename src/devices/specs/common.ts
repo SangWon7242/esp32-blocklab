@@ -27,10 +27,27 @@ export const ORDER = { FUNCTION_CALL: 2.2, MULTIPLICATIVE: 5, ADDITIVE: 6, RELAT
 export const HELPER_MARK = "\uE000";
 
 /**
- * 곱셈 안에 끼울 값 코드: 이름·숫자·속성·단순 호출이 아니면 괄호로 싼다 (생성기는 값 입력을 Order.NONE 으로 받는다).
- * 도우미 호출(`get_distance()`)은 표시 글자를 달고 오므로 그 글자를 빼고 검사한다.
+ * 곱셈 안에 끼울 값 코드: 이름·숫자·속성·단순 호출·괄호 한 덩어리(괄호 블록 `(a + b)`)가 아니면 괄호로 싼다
+ * (생성기는 값 입력을 Order.NONE 으로 받는다). 도우미 호출(`get_distance()`)은 표시 글자를 달고 오므로 그 글자를 빼고 검사한다.
  */
-export const factor = (code: string): string => (/^[\w.]+$|^[\w.]+\([^()]*\)$/.test(code.replaceAll(HELPER_MARK, "")) ? code : `(${code})`);
+export const factor = (code: string): string => {
+  const plain = code.replaceAll(HELPER_MARK, "");
+  if (/^[\w.]+$|^[\w.]+\([^()]*\)$/.test(plain) || isParenGroup(plain)) return code;
+  return `(${code})`;
+};
+
+/** `(…)` 하나로 감싼 글인지 (`(a) + (b)` 는 아니다) */
+const isParenGroup = (text: string): boolean => text.startsWith("(") && text.endsWith(")") && topLevelChars(text) === "";
+
+/**
+ * factor 의 반대: 1줄 lines 패턴이 잡은 값 글에서 factor 가 붙였을 괄호를 뗀다. 떼고 다시 factor 하면 같은 글일 때만
+ * (`(a + b)` → `a + b`). 학생이 더 적은 괄호(`(a)`, `((a + b))`)는 남아 괄호 블록이 된다.
+ */
+export const unfactor = (text: string): string => {
+  if (!isParenGroup(text)) return text;
+  const inner = text.slice(1, -1);
+  return factor(inner) === text ? inner : text;
+};
 
 /** 아날로그 핀 준비 3줄 (아날로그 핀·조도·가변저항·소리·불꽃 센서 공용) */
 export const adcLines = (name: string, pin: string): string[] => [`${name} = ADC(Pin(${pin}))`, `${name}.atten(ADC.ATTN_11DB)`, `${name}.width(ADC.WIDTH_12BIT)`];

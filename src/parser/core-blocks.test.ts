@@ -287,3 +287,80 @@ describe("리뷰 반영: 괄호와 우선순위", () => {
     expect(codeToCode(plain).match(/^import math$/gm)).toHaveLength(1);
   });
 });
+
+describe("괄호 블록: 학생이 적은 괄호를 그대로 남긴다", () => {
+  /** 원문 → 블록 → 같은 원문, 표시(unparsed) 없음, code_expr 없음 */
+  const keep = (src: string) => {
+    const r = parse(src);
+    expect(workspaceJsonToCode(r.json), src).toBe(src);
+    expect(r.unparsed, src).toEqual([]);
+    expect(types(r.json), src).not.toContain("code_expr");
+    return types(r.json);
+  };
+  const count = (list: string[], type: string) => list.filter((t) => t === type).length;
+  const code = (expr: B) => workspaceJsonToCode(program(expr)).slice(HEAD.length);
+  const paren = (x: B) => blk("calc_paren", undefined, { X: x });
+
+  it("블록 → 코드: 괄호 블록은 ( ) 하나만, 바깥 연산자가 괄호를 더 치지 않는다", () => {
+    const add = blk("calc_arith", { OP: "ADD" }, { A: v("a"), B: v("b") });
+    expect(code(blk("calc_arith", { OP: "MULTIPLY" }, { A: paren(add), B: v("b") }))).toBe("x = (a + b) * b\n");
+    expect(code(paren(v("a")))).toBe("x = (a)\n");
+    expect(code(paren(paren(v("a"))))).toBe("x = ((a))\n");
+    expect(code(blk("logic_negate", undefined, { BOOL: paren(blk("logic_operation", { OP: "AND" }, { A: v("a"), B: v("b") })) }))).toBe("x = not (a and b)\n");
+    // 빈 괄호 블록은 (0)
+    expect(code(blk("calc_paren", undefined))).toBe("x = (0)\n");
+    roundTrip(blk("calc_arith", { OP: "MULTIPLY" }, { A: paren(add), B: v("b") }), "(a + b) * b");
+  });
+  it("계산·판단 식의 괄호", () => {
+    expect(keep(`${HEAD}x = (a + b) * b\n`)).toContain("calc_paren");
+    const v1 = lastValue(`${HEAD}x = (a + b) * b\n`);
+    expect(v1.type).toBe("calc_arith");
+    expect(v1.inputs?.A?.block?.type).toBe("calc_paren");
+    expect(v1.inputs?.A?.block?.inputs?.X?.block?.type).toBe("calc_arith");
+    keep(`${HEAD}x = not (a and b)\n`);
+    expect(keep(`${HEAD}x = (0 <= a <= 5) == True\n`)).toEqual(expect.arrayContaining(["calc_paren", "judge_between"]));
+    keep(`${HEAD}x = 2 ** (3 ** 2)\n`);
+    keep(`${HEAD}x = (2 ** 3) ** 2\n`);
+    expect(count(keep(`${HEAD}x = (a and b) or a\n`), "calc_paren")).toBe(1);
+    keep(`${HEAD}x = a and (b and a)\n`);
+    expect(keep(`${HEAD}x = (not a) and b\n`)).toEqual(expect.arrayContaining(["calc_paren", "logic_negate"]));
+    expect(count(keep(`${HEAD}x = (a) + (b)\n`), "calc_paren")).toBe(2);
+    expect(count(keep(`${HEAD}x = ((a))\n`), "calc_paren")).toBe(2);
+    keep(`${HEAD}x = (a)\n`);
+    keep(`${HEAD}x = (-5)\n`);
+  });
+  it("안이 블록이 안 되는 식이어도 괄호 블록으로 감싸 글자가 그대로", () => {
+    const src = `${HEAD}x = (a if b else a)\n`;
+    const value = lastValue(src);
+    expect(value).toEqual({ type: "calc_paren", inputs: { X: { block: { type: "code_expr", fields: { CODE: "a if b else a" } } } } });
+    expect(codeToCode(src)).toBe(src);
+  });
+  it("튜플 (1, 2) 와 빈 () 는 괄호 블록이 아니다", () => {
+    expect(lastValue(`${HEAD}x = (1, 2)\n`).type).toBe("code_expr");
+    expect(lastValue(`${HEAD}x = ()\n`).type).toBe("code_expr");
+  });
+  it("명령 칸·조건 칸·반복할 것의 괄호", () => {
+    expect(keep("print((1 + 2) * 3)\n")).toContain("calc_paren");
+    keep("y = 1\nx = (y)\n");
+    expect(keep("import time\n\na = 1\nb = 2\ntime.sleep((a + b))\n")).toEqual(expect.arrayContaining(["flow_wait", "calc_paren", "calc_arith"]));
+    expect(keep("x = 3\nif (x > 1):\n    print(x)\n")).toEqual(expect.arrayContaining(["controls_if", "calc_paren", "logic_compare"]));
+    keep(`${HEAD}if (a and b):\n    print(a)\n`);
+    expect(keep(`${HEAD}while (a):\n    a = a - 1\n`)).toContain("controls_whileUntil");
+    expect(keep("items = [1, 2]\nfor n in (items):\n    print(n)\n")).toEqual(expect.arrayContaining(["flow_for_each", "calc_paren"]));
+  });
+  it("while not (a and b): 는 괄호를 남긴 ~할 때까지", () => {
+    const src = `${HEAD}while not (a and b):\n    a = a + 1\n`;
+    expect(JSON.stringify(parse(src).json)).toContain('"MODE":"UNTIL"');
+    expect(keep(src)).toContain("calc_paren");
+  });
+  it("형식 검사는 괄호 안을 본다: 숫자 칸에 괄호 친 글자는 식 전체를 코드로", () => {
+    const src = 'import time\n\ntime.sleep(("a"))\n';
+    const r = parse(src);
+    expect(types(r.json)).toEqual(expect.arrayContaining(["flow_wait", "code_expr"]));
+    expect(types(r.json)).not.toContain("calc_paren");
+    expect(workspaceJsonToCode(r.json)).toBe(src);
+  });
+  it("괄호 친 글자를 더해도 합치기 블록", () => {
+    expect(keep(`${HEAD}x = ("a") + word\n`)).toContain("calc_concat");
+  });
+});
