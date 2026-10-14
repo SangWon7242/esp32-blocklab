@@ -13,12 +13,21 @@ materials:
   - { name: IC 카드 또는 열쇠고리 태그, note: 카드마다 번호가 달라요 }
   - { name: 서보 모터, note: "문 역할. 주황 신호선 → 4 · 빨강 → 5V · 갈색 → GND" }
   - { name: 브레드보드, note: "+ 줄(5V)·− 줄(GND)을 RFID 와 서보가 함께 쓰고, 미션 LED 도 여기에 꽂아요" }
-  - { name: 점퍼선, note: "F-F 듀폰선(모듈 ↔ 보드) 여러 가닥, 브레드보드에 꽂을 때는 M-F" }
+  - { name: F-F 듀폰선, note: "양쪽 끝이 구멍인 선. RFID SDA · SCL 처럼 모듈 핀과 보드 핀을 바로 이을 때" }
+  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 5V · GND 와 모듈 G · V 를 브레드보드 + 줄 · − 줄에 꽂을 때" }
   - { name: (미션) 빨강 LED 1개 · 220Ω 저항 1개, note: "26번 → 저항 → LED 긴 다리, 짧은 다리 → − 줄" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-rfid-servo.svg
   caption: "RFID SDA → 21 · SCL → 22 · G → − 줄 · V → + 줄. 서보 주황 → 4 · 빨강 → + 줄 · 갈색 → − 줄. + 줄은 ESP32 5V, − 줄은 GND. (미션) 26번 → 220Ω → LED 긴 다리, 짧은 다리 → − 줄"
+principle:
+  image: images/uid-compare.svg
+  body: |
+    RFID 리더는 눈에 보이지 않는 **자기장**을 만들어요. 카드 안에는 건전지가 없지만, 리더 가까이 오면 그 자기장에서 전기를 얻어 깨어나고 자기 **번호(UID)** 를 리더에게 보내요.
+
+    - 카드 번호는 0~255 사이의 숫자 **4개**로 되어 있고, 카드마다 달라요
+    - 리더는 SCL(22번) · SDA(21번) 두 선으로 보드에 번호를 전해요. `0x28` 은 리더의 이름표(주소)예요
+    - 출입문은 읽은 번호를 **등록해 둔 번호**와 비교해서, 같을 때만 서보를 돌려 문을 열어요
 goals:
   content: RFID 로 읽은 카드 번호를 등록 목록과 if·in 으로 비교해, 그 결과에 따라 서보(문)와 LED 를 제어한다
   thinking: 큰 장치를 부품별로 나눠 따로 시험한 뒤 합치고, "같은가"를 판단하는 기준(목록)을 사람이 정한다
@@ -80,7 +89,7 @@ parts:
         body: |
           RFID 리더는 카드가 가까이 오면 카드 안의 **번호(UID)** 를 읽어요. 보드와는 **선 두 개**(SCL·SDA)로 이야기하고, `0x28` 이라는 이름표로 "너한테 하는 말이야"를 구분해요.
 
-          아직 실행하지 마세요. `step1_read_uid.py` 를 돌리고 카드를 대면 창에 무엇이 찍힐지 **먼저 예측**해 적어요. `if` 가 두 번 겹쳐 있는 것도 눈여겨보세요.
+          아직 실행하지 마세요. `step1_read_uid.py` 를 돌리고 카드를 대면 창에 무엇이 찍힐지 **먼저 예측**해 적어요. `card_present()` 는 "카드가 왔고 번호까지 읽었는지", `card_uid()` 는 "읽은 번호"를 알려 주는 함수예요.
         todo:
           - 그림을 보고 SCL·SDA 가 각각 몇 번 핀인지 코드에서 찾기
           - 세 빈칸에 내 예측 쓰기
@@ -111,6 +120,15 @@ parts:
           - "**보드 연결** → **실행** 누르고 카드를 대 보기"
           - 찍힌 내 카드 번호를 공책에 적고, 예측과 비교하기
         code: step1_read_uid.py
+        expected: 코드를 실행하고 카드를 리더에 대면 창에 `Card UID:` 와 함께 `[180, 180, 170, 219]` 처럼 숫자 4개가 든 번호가 찍혀요. 카드마다 숫자가 달라요.
+        codeNotes:
+          - { line: 1, note: "RFID 라이브러리(`mfrc522_i2c.py`)에서 `mfrc522` 를 가져와요" }
+          - { line: 3, note: "SCL 22번 · SDA 21번 · 이름표 0x28 로 리더를 준비하고 `rc522` 라고 이름 붙여요" }
+          - { line: 4, note: "`PCD_Init()`: 리더를 켜고 카드를 읽을 준비를 해요" }
+          - { line: 8, note: "새 카드가 왔고(`and`) 번호까지 읽었을 때만 참을 돌려줘요" }
+          - { line: 12, note: "읽은 번호 4개를 목록으로 꺼내 돌려줘요" }
+          - { line: 16, note: "`if card_present():` 카드가 닿았을 때만 아래 두 줄을 실행해요" }
+          - { line: 18, note: "`print(card_uid())`: 읽은 번호를 창에 찍어요" }
 
       - id: readcheck1
         type: readcheck
@@ -124,14 +142,20 @@ parts:
 
           답을 **공책에 먼저 적은 뒤** 확인을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
         todo:
-          - "`scl` · `sda` 줄과 `while True:` 아래를 한 줄씩 읽기"
+          - "`rc522 = mfrc522(...)` 줄과 `while True:` 아래를 한 줄씩 읽기"
           - 세 문제에 답하고 **확인** 누르기
           - 틀린 문항은 그 줄을 다시 읽고 고치기
         code: step1_read_uid.py
+        codeNotes:
+          - { line: 1, note: "RFID 라이브러리(`mfrc522_i2c.py`)에서 `mfrc522` 를 가져와요" }
+          - { line: 4, note: "`PCD_Init()`: 리더를 켜고 카드를 읽을 준비를 해요" }
+          - { line: 12, note: "읽은 번호 4개를 목록으로 꺼내 돌려줘요" }
+          - { line: 15, note: "`while True:` 아래를 끝없이 되풀이하며 카드가 오는지 계속 봐요" }
+          - { line: 16, note: "`if card_present():` 카드가 닿았을 때만 아래 줄들을 실행해요" }
         questions:
-          - { kind: number, q: "RFID 의 데이터선(SDA)은 몇 번 핀에 이어야 하나요? 코드에서 찾아보세요", answer: 21 }
-          - { kind: number, q: "카드 번호가 찍히려면 if 를 몇 번 통과해야 하나요?", answer: 2, hint: "카드가 왔는지, 번호를 읽었는지" }
-          - { kind: line, q: "카드 번호를 창에 보여 주는 줄의 줄 번호를 클릭하세요", answer: 17 }
+          - { kind: number, q: "RFID 의 데이터선(SDA)은 몇 번 핀에 이어야 하나요? 코드에서 찾아보세요", answer: 21, hint: "괄호 안 순서는 (SCL 핀, SDA 핀, 이름표)예요" }
+          - { kind: number, q: "card_present() 가 참이 되려면 and 로 묶은 확인 몇 가지를 모두 통과해야 하나요?", answer: 2, hint: "카드가 왔는지, 번호를 읽었는지" }
+          - { kind: line, q: "카드 번호를 창에 보여 주는 줄의 줄 번호를 클릭하세요", answer: 18 }
 
       - id: run2
         type: run
@@ -149,6 +173,13 @@ parts:
           - "**실행** 누르고 팔이 2초마다 움직이는지 보기"
           - 닫힌 자리에서 팔이 문을 막도록 혼을 다시 끼우기
         code: step2_servo_test.py
+        expected: 코드를 실행하면 서보 팔이 2초마다 닫힌 자리와 열린 자리를 번갈아 오가요.
+        codeNotes:
+          - { line: 4, note: "4번 핀을 PWM(신호의 길이를 조절하는) 핀으로 만들고 `servo` 라고 이름 붙여요" }
+          - { line: 5, note: "`freq(50)`: 서보는 1초에 50번(20ms 마다) 신호를 받아요" }
+          - { line: 8, note: "`duty_u16(1638)`: 한 번의 신호 중 0.5ms 만 켜서 0도 쪽, 닫힌 자리로 가요" }
+          - { line: 9, note: "2초 동안 그 자리에 머물러요" }
+          - { line: 10, note: "`duty_u16(8100)`: 약 2.5ms 를 켜서 180도 쪽, 열린 자리로 가요" }
 
   - id: part2
     title: 2부 · 출입 통제 완성
@@ -169,6 +200,16 @@ parts:
           - "**실행** 누르고 내 카드 → 짝의 카드 순서로 대 보기"
           - 어느 카드에서 문이 열리고 닫히는지 보기
         code: step3_access_control.py
+        expected: 코드를 실행하고 내 카드를 대면 창에 번호가 찍히고 서보가 열린 자리로 가요. 등록하지 않은 카드를 대면 서보가 닫힌 자리로 가요.
+        codeNotes:
+          - { line: 5, note: "4번 핀의 서보를 준비해요 (다음 줄: 1초에 50번 신호)" }
+          - { line: 7, note: "RFID 리더를 준비해요 (SCL 22번, SDA 21번, 이름표 0x28)" }
+          - { line: 19, note: "`uid1`: 들여보낼 내 카드 번호 4개를 목록으로 적어 둬요" }
+          - { line: 20, note: "처음에는 문을 닫아 둬요" }
+          - { line: 24, note: "`uid = card_uid()`: 읽은 번호를 `uid` 에 담아요" }
+          - { line: 26, note: "`==`: 읽은 번호와 등록한 번호의 숫자 4개가 모두 같은지 비교해요" }
+          - { line: 27, note: "같으면 문을 열어요" }
+          - { line: 30, note: "다르면 문을 닫아요" }
 
       - id: readcheck2
         type: readcheck
@@ -185,6 +226,13 @@ parts:
           - "`if uid == uid1:` 과 `else:` 아래 줄을 짚으며 읽기"
           - 세 문제에 답하고 **확인** 누르기
         code: step3_access_control.py
+        codeNotes:
+          - { line: 5, note: "4번 핀의 서보를 준비해요 (다음 줄: 1초에 50번 신호)" }
+          - { line: 7, note: "RFID 리더를 준비해요 (SCL 22번, SDA 21번, 이름표 0x28)" }
+          - { line: 19, note: "`uid1`: 들여보낼 내 카드 번호 4개를 목록으로 적어 둬요" }
+          - { line: 23, note: "카드가 닿았을 때만 아래 줄들을 실행해요" }
+          - { line: 24, note: "`uid = card_uid()`: 읽은 번호를 `uid` 에 담아요" }
+          - { line: 25, note: "읽은 번호를 창에 찍어 확인해요" }
         questions:
           - { kind: line, q: "읽은 카드 번호와 등록한 번호를 비교하는 줄의 줄 번호를 클릭하세요", answer: 26 }
           - { kind: choice, q: "등록하지 않은 카드를 대면 서보는 어느 자리로 가나요?", options: ["열린 자리 (8100)", "닫힌 자리 (1638)", "어느 쪽으로도 신호를 보내지 않는다"], answer: 1 }
@@ -202,12 +250,11 @@ parts:
 
           대신 **들여보낼 카드 목록** `allowed` 를 만들고, `in` 으로 "목록 안에 있니?"를 물어봐요. 목록 안의 한 칸이 카드 **한 장의 번호(숫자 넷)** 예요. 카드가 한 장이어도 시험할 수 있어요: 목록의 숫자 하나를 일부러 틀리게 바꾸면 내 카드로도 안 열려야 해요.
         todo:
-          - "`uid1` 줄을 카드 목록 `allowed` 로 바꾸고, 비교를 `in` 으로 바꾸기"
-          - "준비 줄 정리: `rc522 = mfrc522(22, 21, 0x28)` 한 줄로, 버전 확인 줄은 지우기"
+          - "`uid1` 줄을 카드 목록 `allowed` 로 바꾸기"
+          - 비교를 `==` 에서 `in` 으로 바꾸기
           - 실행해서 내 카드로 열리는지 보고 **판정** 누르기
         instructions: |
-          카드 한 장(uid1)과 == 로 비교하던 것을, 들여보낼 카드 목록 allowed 와 in 으로 바꿔 주세요. 목록에는 지금은 내 카드 한 장만 넣어요 (번호는 내 카드 번호여도 괜찮아요).
-          준비 줄도 정리해요: addr · scl · sda 세 줄 대신 rc522 = mfrc522(22, 21, 0x28) 처럼 숫자를 바로 넣고, 확인이 끝난 버전 확인 줄(ShowReaderDetails)은 지워요
+          카드 한 장(uid1)과 == 로 비교하던 것을, 들여보낼 카드 목록 allowed 와 in 으로 바꿔 주세요. 목록에는 지금은 내 카드 한 장만 넣어요 (번호는 내 카드 번호여도 괜찮아요). 다른 줄은 그대로 둬요
         hint: 목록 안에 목록이에요. 카드 한 장이 [숫자, 숫자, 숫자, 숫자] 라면, 카드들의 목록은 그 바깥을 [ ] 로 한 번 더 감싸요
         code: step3_access_control.py
         rules:
@@ -216,7 +263,7 @@ parts:
           - codeMatches: 'if uid in allowed:'
             fail: 읽은 번호가 목록 "안에" 있는지 묻는 비교로 바꿨나요?
           - codeEquals: { file: mission_allowed_list.py, tolerance: 255 }
-            fail: 남은 곳이 있어요. uid1 줄은 지웠나요? 준비 줄(addr · scl · sda, 버전 확인)도 정리했나요?
+            fail: 남은 곳이 있어요. uid1 줄은 지웠나요? 비교하는 줄 말고 다른 줄은 그대로 두었나요?
         answerCode: mission_allowed_list.py
 
       - id: mission2
@@ -267,13 +314,28 @@ parts:
           - 세 증상을 모두 고치기
         symptoms:
           - title: 카드를 대도 창에 아무것도 안 찍혀요
-            code: "scl = 21\nsda = 22\nrc522 = mfrc522(scl, sda, addr)"
-            question: 선 두 개가 실제로 몇 번 핀에 꽂혀 있는지, 코드의 번호와 짝지어 보세요. 신호선(SCL)과 데이터선(SDA) 중 무엇이 바뀌었나요?
+            code: |
+              from mfrc522_i2c import mfrc522
+
+              rc522 = mfrc522(21, 22, 0x28)
+              rc522.PCD_Init()
+
+
+              def card_present():
+                  return rc522.PICC_IsNewCardPresent() and rc522.PICC_ReadCardSerial()
+
+
+              def card_uid():
+                  return rc522.uid.uidByte[0:rc522.uid.size]
+
+
+              while True:
+                  if card_present():
+                      print(card_uid())
+            question: 선 두 개가 실제로 몇 번 핀에 꽂혀 있는지, 코드의 번호와 짝지어 보세요. 괄호 안 순서는 (SCL 핀, SDA 핀, 이름표)예요. 신호선(SCL)과 데이터선(SDA) 중 무엇이 바뀌었나요?
             rules:
-              - codeMatches: '^scl = 22'
-                fail: SCL 선은 보드의 몇 번 핀에 꽂았나요?
-              - codeMatches: '^sda = 21'
-                fail: SDA 선은 보드의 몇 번 핀에 꽂았나요?
+              - codeMatches: '^rc522 = mfrc522\(22, 21, 0x28\)'
+                fail: SCL 선과 SDA 선은 보드의 몇 번 핀에 꽂았나요? 괄호 안의 첫째 숫자가 SCL, 둘째 숫자가 SDA 예요
           - title: "실행하자마자 빨간 글씨로 ImportError: no module named 'mfrc522' 가 떠요"
             code: "from mfrc522 import mfrc522"
             question: 보드에 올라간 RFID 설명서(라이브러리) 파일의 이름은 무엇이었나요? import 줄의 이름과 같은가요? 라이브러리 파일 3개가 한 세트라는 것도 떠올려 보세요
@@ -281,8 +343,17 @@ parts:
               - codeMatches: '^from mfrc522_i2c import mfrc522'
                 fail: 파일 이름 mfrc522_i2c.py 와 import 줄의 이름이 같나요?
           - title: 번호는 찍히는데, 내 카드를 대도 문이 안 열려요
-            code: "allowed = [180, 180, 170, 219]\nif uid in allowed:\n    servoPin.duty_u16(8100)"
-            question: "uid 는 숫자 넷이 든 목록 하나예요. 지금 allowed 안의 한 칸 한 칸은 무엇인가요? 그중에 [180, 180, 170, 219] 와 똑같은 칸이 있나요?"
+            code: |
+              from machine import Pin, PWM
+
+              servoPin = PWM(Pin(4))
+              servoPin.freq(50)
+
+              allowed = [180, 180, 170, 219]
+              uid = [180, 180, 170, 219]  # 리더가 읽은 내 카드 번호
+              if uid in allowed:
+                  servoPin.duty_u16(8100)
+            question: "uid 는 숫자 넷이 든 목록 하나예요(여기서는 리더가 읽었다고 치고 적어 두었어요). 지금 allowed 안의 한 칸 한 칸은 무엇인가요? 그중에 [180, 180, 170, 219] 와 똑같은 칸이 있나요?"
             rules:
               - codeMatches: '^allowed = \[\[\d+, \d+, \d+, \d+\]'
                 fail: allowed 의 한 칸이 카드 한 장(숫자 넷)이 되었나요?
