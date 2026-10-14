@@ -20,12 +20,12 @@ const num = (n: number) => ({ shadow: { type: "math_number", fields: { NUM: n } 
 /**
  * 변수·함수 꾸러미(custom 카테고리)의 블록. 꾸러미는 작업판에서 그때그때 만들어지므로 고정 목록으로 둔다.
  * 호출 블록은 같은 작업판에 그 함수 정의(before)를 먼저 둔다. registerBlocks 가 꾸러미에서 뺀 블록
- * (math_change·procedures_ifreturn)은 정의가 없어 건너뛴다.
+ * (procedures_ifreturn)은 정의가 없어 건너뛴다. 변수 꾸러미의 만큼 바꾸기는 내장 math_change 대신 var_change (variableFlyout).
  */
 const CUSTOM_ITEMS: Record<string, { item: BlockItem; before?: BlockItem }[]> = {
   VARIABLE: [
     { item: { kind: "block", type: "variables_set", fields: { VAR: { name: "count" } }, inputs: { VALUE: num(0) } } },
-    { item: { kind: "block", type: "math_change", fields: { VAR: { name: "count" } }, inputs: { DELTA: num(1) } } },
+    { item: { kind: "block", type: "var_change", fields: { VAR: { name: "count" } }, inputs: { DELTA: num(1) } } },
     { item: { kind: "block", type: "variables_get", fields: { VAR: { name: "count" } } } },
   ],
   PROCEDURE: [

@@ -52,6 +52,24 @@ export const coreContent: Record<string, BlockContent> = {
     example: { title: "10마이크로초 펄스 보내기", code: "trig = Pin(13, Pin.OUT)\ntrig.value(1)\ntime.sleep_us(10)\ntrig.value(0)" },
   },
 
+  // TODO(plan6 task3): 아래 flow_for_range·flow_for_each·flow_break·flow_continue 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
+  flow_for_range: {
+    concept: "변수를 시작 수부터 1씩 늘리며 안의 블록을 반복해요. 코드로는 for x in range(0, 5): 이고, 끝 수(5)는 들어가지 않습니다. 그래서 x 는 0, 1, 2, 3, 4 가 돼요.",
+    example: { title: "1부터 5까지 출력하기", code: "for x in range(1, 6):\n    print(x)" },
+  },
+  flow_for_each: {
+    concept: "리스트의 항목을 앞에서부터 하나씩 변수에 넣으며 반복해요. 코드로는 for item in items: 입니다. 글자를 넣으면 한 글자씩 반복해요.",
+    example: { title: "리스트의 항목 하나씩 출력하기", code: "items = [3, 5, 7]\nfor item in items:\n    print(item)" },
+  },
+  flow_break: {
+    concept: "지금 도는 반복을 바로 끝내요. 코드로는 break 입니다. 반복 다음 블록부터 이어서 실행됩니다.",
+    example: { title: "5 가 되면 반복 멈추기", code: "for x in range(0, 10):\n    if x == 5:\n        break\n    print(x)" },
+  },
+  flow_continue: {
+    concept: "이번 반복의 남은 블록을 건너뛰고 다음 반복으로 가요. 코드로는 continue 입니다. 반복을 끝내지는 않아요.",
+    example: { title: "3 만 빼고 출력하기", code: "for x in range(0, 6):\n    if x == 3:\n        continue\n    print(x)" },
+  },
+
   // 판단
   logic_compare: {
     concept: "두 값을 비교해서 참이나 거짓을 만들어요. =, ≠, <, ≤, >, ≥ 중에서 고를 수 있고 코드로는 ==, !=, <, <=, >, >= 입니다. 만약 블록이나 반복 블록의 조건 칸에 끼워 씁니다.",
@@ -145,6 +163,50 @@ export const coreContent: Record<string, BlockContent> = {
     example: { title: "변수 값으로 계산하기", code: "speed = 3\nprint(speed * 2)" },
   },
 
+  // TODO(plan6 task3): 아래 var_change·list_* 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
+  var_change: {
+    concept: "변수의 값에 수를 더해 바꿔요. 코드로는 count += 1 이고 count = count + 1 과 같습니다. 음수를 넣으면 줄어들어요.",
+    example: { title: "1초마다 하나씩 세기", code: "count = 0\nwhile True:\n    count += 1\n    print(count)\n    time.sleep(1)" },
+  },
+
+  // 리스트
+  list_create: {
+    concept: "항목이 하나도 없는 빈 리스트를 만들어요. 코드로는 items = [] 입니다. 나중에 추가하기 블록으로 항목을 넣어요.",
+    example: { title: "빈 리스트에 값 넣기", code: "items = []\nitems.append(3)\nprint(items)" },
+  },
+  list_create_from: {
+    concept: "쉼표로 나눈 항목으로 리스트를 만들어요. 코드로는 items = [1, 2, 3] 입니다. 글자 항목은 \"red\" 처럼 따옴표로 감싸요.",
+    example: { title: "숫자 세 개로 리스트 만들기", code: "items = [1, 2, 3]\nprint(items)" },
+  },
+  list_append: {
+    concept: "리스트 맨 끝에 항목을 하나 붙여요. 코드로는 items.append(4) 입니다. 센서 값을 하나씩 모을 때 씁니다.",
+    example: { title: "끝에 항목 붙이기", code: "items = [1, 2, 3]\nitems.append(4)\nprint(items)" },
+  },
+  list_insert: {
+    concept: "리스트의 정한 자리에 항목을 끼워 넣어요. 코드로는 items.insert(0, 5) 이고 번호는 0부터 셉니다. 뒤의 항목은 한 칸씩 밀려요.",
+    example: { title: "맨 앞에 끼워 넣기", code: "items = [1, 2, 3]\nitems.insert(0, 5)\nprint(items)" },
+  },
+  list_remove_at: {
+    concept: "리스트에서 몇 번째 항목을 지워요. 코드로는 items.pop(0) 이고 번호는 0부터 셉니다. 그래서 0 은 첫 항목이에요.",
+    example: { title: "첫 항목 지우기", code: "items = [1, 2, 3]\nitems.pop(0)\nprint(items)" },
+  },
+  list_remove_value: {
+    concept: "리스트에서 어떤 값을 찾아 지워요. 코드로는 items.remove(3) 이고, 같은 값이 여럿이면 앞의 하나만 지웁니다. 없는 값을 지우면 오류가 나요.",
+    example: { title: "값 3 지우기", code: "items = [1, 2, 3]\nitems.remove(3)\nprint(items)" },
+  },
+  list_clear: {
+    concept: "리스트의 항목을 모두 지워 빈 리스트로 만들어요. 코드로는 items.clear() 입니다. 리스트 변수는 그대로 남아요.",
+    example: { title: "리스트 비우기", code: "items = [1, 2, 3]\nitems.clear()\nprint(items)" },
+  },
+  list_set: {
+    concept: "리스트의 몇 번째 항목을 새 값으로 바꿔요. 코드로는 items[0] = 10 이고 번호는 0부터 셉니다. 없는 번호를 쓰면 오류가 나요.",
+    example: { title: "첫 항목 바꾸기", code: "items = [1, 2, 3]\nitems[0] = 10\nprint(items)" },
+  },
+  list_index: {
+    concept: "리스트에서 어떤 값이 몇 번째에 있는지 알려 줘요. 코드로는 items.index(3) 이고 번호는 0부터 셉니다. 없는 값을 찾으면 오류가 나요.",
+    example: { title: "값 3 의 위치 찾기", code: "items = [1, 2, 3]\nprint(items.index(3))" },
+  },
+
   // 함수
   procedures_defnoreturn: {
     concept: "여러 블록을 하나로 묶고 이름을 붙여 함수로 만들어요. 코드로는 def 이름(): 이고, 정의만 해서는 실행되지 않으며 함수 호출 블록으로 불러야 실행됩니다. 같은 일을 여러 번 할 때 코드가 짧아져요.",
@@ -170,7 +232,7 @@ export const coreContent: Record<string, BlockContent> = {
   // 코드
   code_stmt: {
     concept: "블록으로 바꾸지 못한 파이썬 코드를 그대로 담아요. 코드를 블록으로 불러올 때 블록이 모르는 꼴이 있으면 이 블록이 생깁니다. 한 줄도, 여러 줄도 담을 수 있어요.",
-    example: { title: "목록을 도는 반복은 코드 블록이 돼요", code: "for n in [1, 2, 3]:\n    print(n)" },
+    example: { title: "2씩 건너뛰며 세는 반복은 코드 블록이 돼요", code: "for n in range(0, 10, 2):\n    print(n)" },
     tips: ["안의 글을 고치면 그대로 코드가 돼요. 들여쓰기를 잘 맞춰 주세요."],
   },
   code_expr: {

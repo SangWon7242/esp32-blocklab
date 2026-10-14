@@ -185,10 +185,12 @@ describe("뜻이 바뀔 수 있는 구문은 코드 블록으로", () => {
     expect(lines(expr)).toEqual([4]);
   });
 
-  it("(c) 반복 변수가 i 가 아닌 for 는 code_stmt", () => {
-    const src = "for j in range(3):\n    pass\n";
-    expect(body(src)).toEqual([{ type: "code_stmt", fields: { CODE: "for j in range(3):\n    pass" } }]);
+  it("(c) 건너뛰는 수(step)가 있는 range 와 여러 반복 변수 for 는 code_stmt", () => {
+    const src = "for j in range(0, 10, 2):\n    pass\n";
+    expect(body(src)).toEqual([{ type: "code_stmt", fields: { CODE: "for j in range(0, 10, 2):\n    pass" } }]);
     expect(lines(src)).toEqual([1]);
+    const pairs = "for a, b in pairs:\n    pass\n";
+    expect(body(pairs)).toEqual([{ type: "code_stmt", fields: { CODE: "for a, b in pairs:\n    pass" } }]);
   });
 
   it("(d) 쓴 그대로 돌아오지 않는 숫자는 code_expr", () => {

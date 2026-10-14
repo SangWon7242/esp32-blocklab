@@ -119,8 +119,8 @@ test("팔레트를 닫으면 팔레트 스크롤바도 사라진다", async ({ p
   await expect(flyout).toBeHidden();
   await expect(flyoutBar).toBeHidden();
   await page.setViewportSize({ width: 1400, height: 900 });
-  // 흐름 팔레트는 화면에 다 들어가므로 스크롤바를 그리지 않는다
-  await category("흐름").click();
+  // 판단 팔레트는 화면에 다 들어가므로 스크롤바를 그리지 않는다 (흐름은 계획 6 에서 반복 블록이 늘어 넘친다)
+  await category("판단").click();
   await expect(flyout).toBeVisible();
   await expect(flyoutBar).toBeHidden();
 });

@@ -24,7 +24,7 @@ describe("textColourOn", () => {
     }
   });
 
-  it("카테고리 열 15개 색(고른 타일·블록 사전 배지)에서 고른 글자색의 대비가 4.5:1 이상", () => {
+  it("카테고리 열 16개 색(고른 타일·블록 사전 배지)에서 고른 글자색의 대비가 4.5:1 이상", () => {
     for (const [id, c] of Object.entries(CATEGORY_COLORS)) {
       expect(ratio(c.primary, textColourOn(c.primary)), `${id} ${c.primary}`).toBeGreaterThanOrEqual(4.5);
     }
@@ -46,7 +46,7 @@ describe("textColourOn", () => {
 });
 
 describe("iconColourOn (고르지 않은 카테고리 타일 아이콘)", () => {
-  it("카테고리 열 15개 색의 아이콘이 흰 열 위에서 3:1 이상", () => {
+  it("카테고리 열 16개 색의 아이콘이 흰 열 위에서 3:1 이상", () => {
     for (const [id, c] of Object.entries(CATEGORY_COLORS)) {
       const icon = iconColourOn(c.primary);
       expect(contrastRatio(icon, "#ffffff"), `${id} ${c.primary} -> ${icon}`).toBeGreaterThanOrEqual(MIN_ICON_CONTRAST);

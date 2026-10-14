@@ -18,12 +18,13 @@ export const entryTheme = Blockly.Theme.defineTheme("entry", {
     text_blocks: style(ENTRY_COLORS.CALC),
     variable_blocks: style(ENTRY_COLORS.VARIABLE),
     variable_dynamic_blocks: style(ENTRY_COLORS.VARIABLE),
+    list_blocks: style(CATEGORY_COLORS.list),
     procedure_blocks: style(ENTRY_COLORS.FUNC),
     // 장치 블록은 이 스타일을 쓰지 않고 장치마다의 colour 를 쓴다 (src/devices/toBlocks.ts). 예전 저장본·확장용으로 남긴다
     hardware_blocks: style(ENTRY_COLORS.HARDWARE),
     code_blocks: style(ENTRY_COLORS.CODE),
   },
-  // 카테고리마다 <id>_category (start_category … input_category, code_category) — 카테고리 열 타일 색
+  // 카테고리마다 <id>_category (start_category … list_category … input_category, code_category) — 카테고리 열 타일 색
   categoryStyles: Object.fromEntries(CATEGORY_IDS.map((id) => [`${id}_category`, { colour: CATEGORY_COLORS[id].primary }])),
   componentStyles: {
     workspaceBackgroundColour: "#f6f7f9",

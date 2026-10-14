@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import * as Blockly from "blockly";
-import { entryTheme, registerBlocks, registerEntryToolbox, toolbox } from "@/blocks";
+import { entryTheme, registerBlocks, registerEntryToolbox, registerVariableFlyout, toolbox } from "@/blocks";
 import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
 import type { Issue } from "@/lint";
 import { cn } from "@/lib/utils";
@@ -119,6 +119,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
       maxInstances: { start_program: 1 },
     });
     wsRef.current = ws;
+    // 변수 꾸러미에 "만큼 바꾸기" 를 정하기 블록 뒤에 끼운다 (Blockly 기본 꾸러미를 감싼다)
+    registerVariableFlyout(ws);
     // 개발 서버에서만: e2e 가 블록을 끌어 잇는 대신 프로그램으로 잇는다 (설계 조립)
     if (import.meta.env.DEV) (window as unknown as { __blocklabWorkspace?: Blockly.WorkspaceSvg }).__blocklabWorkspace = ws;
     // 시작 블록이나 함수 정의에 붙지 않은 블록은 꺼서 코드에 넣지 않는다

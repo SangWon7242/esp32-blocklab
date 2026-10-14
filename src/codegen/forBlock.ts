@@ -33,6 +33,9 @@ function binary(block: Blockly.Block, gen: Gen, symbol: string, order: number): 
 /** LOW <= A <= HIGH, ITEM in CONTAINER 처럼 비교 연산자로 잇는 식의 칸들. 비교식이 칸에 들어오면 괄호로 감싼다 */
 const relational = (block: Blockly.Block, gen: Gen, ...names: string[]) => names.map((name) => value(block, gen, name, Order.RELATIONAL));
 
+/** 블록의 변수 칸(VAR)이 가리키는 변수의 코드 이름 */
+const varName = (block: Blockly.Block, gen: Gen) => gen.getVariableName(block.getFieldValue("VAR"));
+
 /** 이름·속성 연결(a.b) 이거나, 첫 `(` 가 맨 끝 `)` 와 짝을 이루는 호출 하나인지 */
 function isSimpleCallOrName(text: string): boolean {
   if (/^[A-Za-z_][\w.]*$/.test(text)) return true;
@@ -56,6 +59,16 @@ export function registerForBlocks(gen: Gen): void {
 
   f["flow_repeat_forever"] = (block, g) => `while True:\n${branch(block, g as Gen, "DO")}`;
   f["flow_repeat_n"] = (block, g) => `for i in range(${value(block, g as Gen, "TIMES")}):\n${branch(block, g as Gen, "DO")}`;
+  f["flow_for_range"] = (block, g) => {
+    const gen = g as Gen;
+    return `for ${varName(block, gen)} in range(${value(block, gen, "FROM")}, ${value(block, gen, "TO")}):\n${branch(block, gen, "DO")}`;
+  };
+  f["flow_for_each"] = (block, g) => {
+    const gen = g as Gen;
+    return `for ${varName(block, gen)} in ${value(block, gen, "LIST", Order.NONE, "[]")}:\n${branch(block, gen, "DO")}`;
+  };
+  f["flow_break"] = () => "break\n";
+  f["flow_continue"] = () => "continue\n";
   f["flow_wait"] = (block, g) => `time.sleep(${value(block, g as Gen, "SEC")})\n`;
   f["flow_wait_ms"] = (block, g) => `time.sleep_ms(${value(block, g as Gen, "MS")})\n`;
   f["flow_wait_us"] = (block, g) => `time.sleep_us(${value(block, g as Gen, "US")})\n`;
@@ -92,6 +105,20 @@ export function registerForBlocks(gen: Gen): void {
   };
   f["calc_str"] = (block, g) => [`str(${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
   f["calc_int"] = (block, g) => [`int(${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
+
+  // 변수 만큼 바꾸기
+  f["var_change"] = (block, g) => `${varName(block, g as Gen)} += ${value(block, g as Gen, "DELTA")}\n`;
+
+  // 리스트 (VAR 는 리스트 변수 칸)
+  f["list_create"] = (block, g) => `${varName(block, g as Gen)} = []\n`;
+  f["list_create_from"] = (block, g) => `${varName(block, g as Gen)} = [${String(block.getFieldValue("ITEMS") ?? "").trim()}]\n`;
+  f["list_append"] = (block, g) => `${varName(block, g as Gen)}.append(${value(block, g as Gen, "V")})\n`;
+  f["list_insert"] = (block, g) => `${varName(block, g as Gen)}.insert(${value(block, g as Gen, "I")}, ${value(block, g as Gen, "V")})\n`;
+  f["list_remove_at"] = (block, g) => `${varName(block, g as Gen)}.pop(${value(block, g as Gen, "I")})\n`;
+  f["list_remove_value"] = (block, g) => `${varName(block, g as Gen)}.remove(${value(block, g as Gen, "V")})\n`;
+  f["list_clear"] = (block, g) => `${varName(block, g as Gen)}.clear()\n`;
+  f["list_set"] = (block, g) => `${varName(block, g as Gen)}[${value(block, g as Gen, "I")}] = ${value(block, g as Gen, "V")}\n`;
+  f["list_index"] = (block, g) => [`${varName(block, g as Gen)}.index(${value(block, g as Gen, "V")})`, Order.FUNCTION_CALL];
 
   // 내장 text 는 작은따옴표를 쓰므로 큰따옴표로 바꾼다
   f["text"] = (block) => {

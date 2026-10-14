@@ -1,5 +1,5 @@
 import {
-  Box, Calculator, Check, Code, createElement, Fan, Flag, Keyboard, Lightbulb, Monitor, Pin, Radar, Repeat,
+  Box, Calculator, Check, Code, createElement, Fan, Flag, Keyboard, Lightbulb, List, Monitor, Pin, Radar, Repeat,
   SquareFunction, ToggleLeft, Volume2, type IconNode,
 } from "lucide";
 import type { CategoryId } from "./colors";
@@ -11,6 +11,7 @@ const CATEGORY_ICON_NODES: Record<CategoryId, IconNode> = {
   judge: Check,
   calc: Calculator,
   variable: Box,
+  list: List,
   func: SquareFunction,
   pin: Pin,
   led: Lightbulb,

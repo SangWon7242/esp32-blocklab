@@ -23,6 +23,11 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
       if (kids[0]?.name === "VariableName" && ctx.src.slice(kids[1]) === "=") ctx.varId(ctx.src.slice(kids[0]));
     }
     if (node.name === "FunctionDefinition") functionParts(node, ctx).params.forEach((p) => ctx.varId(p));
+    // for 반복 변수 (for item in items: / for x in range(…):) 도 값이 정해지는 이름
+    if (node.name === "ForStatement") {
+      const kids = children(node);
+      if (kids[0]?.name === "for" && kids[1]?.name === "VariableName" && kids[2]?.name === "in") ctx.varId(ctx.src.slice(kids[1]));
+    }
     for (const c of children(node)) walk(c);
   };
   walk(script);

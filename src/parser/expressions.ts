@@ -2,6 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { block, bool, codeExpr, num, str, varGet } from "./builders";
 import type { ParseContext } from "./context";
 import { findValueByBlock } from "@/devices/registry";
+import { isProgramName } from "@/blocks/names";
 import { matchCall, matchExpr } from "./devices";
 import { children, operands } from "./tree";
 import type { BlockJson } from "./types";
@@ -44,6 +45,12 @@ export function memberParts(node: SyntaxNode, ctx: ParseContext): { obj: string;
   return { obj: ctx.src.slice(kids[0]), prop: ctx.src.slice(kids[2]) };
 }
 
+/**
+ * 리스트 블록(append·index …)으로 읽을 변수 이름인지: 장치 변수(ctx.devices)도, 프로그램이 쓰는 이름(time·machine·oled 같은
+ * 모듈·고정 장치 이름)도 아니다. 장치 변수의 메서드는 장치 패턴이 먼저 본다
+ */
+export const isListVariable = (name: string, ctx: ParseContext): boolean => !ctx.devices.has(name) && !isProgramName(name);
+
 const isStringy = (node: SyntaxNode, ctx: ParseContext) =>
   node.name === "String" || (node.name === "CallExpression" && ctx.src.slice(callParts(node).callee) === "str");
 
@@ -77,6 +84,7 @@ const OUTPUT_TYPES: Record<string, readonly string[]> = {
   logic_compare: ["Boolean"], logic_operation: ["Boolean"], logic_negate: ["Boolean"], logic_boolean: ["Boolean"],
   judge_between: ["Boolean"], judge_contains: ["Boolean"],
   calc_random: ["Number"], calc_round: ["Number"], calc_minmax: ["Number"], calc_len: ["Number"], calc_ticks: ["Number"],
+  list_index: ["Number"],
   // calc_item 은 output null (리스트·글자의 항목은 어떤 값이든) 이라 여기에 넣지 않는다
 };
 
@@ -195,6 +203,10 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
         return block("calc_round", { OP: ROUND_MATH[member.prop] }, { X: convertExpr(args[0], ctx, "Number") });
       }
       if (member?.obj === "time" && member.prop === "ticks_ms" && args.length === 0) return block("calc_ticks");
+      // items.index(3) → 리스트에서 위치
+      if (member && member.prop === "index" && args.length === 1 && isListVariable(member.obj, ctx)) {
+        return block("list_index", { VAR: { id: ctx.varId(member.obj) } }, { V: convertExpr(args[0], ctx) });
+      }
       return fallback(node, ctx);
     }
     case "MemberExpression": {

@@ -12,9 +12,9 @@ export const ENTRY_COLORS = {
   CODE: { primary: "#8aa3b2", secondary: "#b8c7d1", tertiary: "#728997" },
 } as const;
 
-/** 카테고리 열의 15개 카테고리 (하드웨어 8개는 장치 카테고리 id 와 같다) */
+/** 카테고리 열의 16개 카테고리 (하드웨어 8개는 장치 카테고리 id 와 같다) */
 export type CategoryId =
-  | "start" | "flow" | "judge" | "calc" | "variable" | "func"
+  | "start" | "flow" | "judge" | "calc" | "variable" | "list" | "func"
   | "pin" | "led" | "switch" | "sensor" | "sound" | "motor" | "display" | "input"
   | "code";
 
@@ -35,7 +35,7 @@ export function shadesOf(primary: string): CategoryColour {
 }
 
 /**
- * 카테고리 색 (카테고리 열 타일·블록 사전 칩). 엔트리 6개 + 코드는 ENTRY_COLORS 그대로, 하드웨어 8개는 카테고리마다
+ * 카테고리 색 (카테고리 열 타일·블록 사전 칩). 엔트리 6개 + 코드는 ENTRY_COLORS 그대로, 리스트와 하드웨어 8개는 카테고리마다
  * 다르게. 같은 계열은 명도를 벌린다: 시작(밝은 초록)·센서(어두운 올리브), 판단(밝은 파랑)·화면(짙은 파랑),
  * 계산(호박색)·LED(레몬색), 함수(주황)·모터(짙은 빨강)
  */
@@ -45,6 +45,8 @@ export const CATEGORY_COLORS: Record<CategoryId, CategoryColour> = {
   judge: ENTRY_COLORS.JUDGE,
   calc: ENTRY_COLORS.CALC,
   variable: ENTRY_COLORS.VARIABLE,
+  // 리스트(보라): 변수(분홍 자주)·버튼·스위치(청보라) 사이. 장치 색과 ΔE 0.07 이상 떨어지고 흰 글자 4.5:1 이상
+  list: shadesOf("#9c27b0"),
   func: ENTRY_COLORS.FUNC,
   pin: ENTRY_COLORS.HARDWARE,
   led: shadesOf("#c99c00"),

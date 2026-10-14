@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as Blockly from "blockly";
 import { workspaceJsonToCode, type WorkspaceJson } from "@/codegen";
 import { codeToBlocks } from "@/parser";
-import { registerBlocks, toolbox } from "./index";
+import { registerBlocks, toolbox, variableFlyout } from "./index";
 import { findActionByBlock, findValueByBlock } from "@/devices/registry";
 
 type B = Record<string, unknown> & { type: string };
@@ -28,13 +28,11 @@ function staticEntries(): B[] {
 
 /**
  * 변수·함수 꾸러미(custom: VARIABLE / PROCEDURE)가 내놓는 블록. 버튼 콜백을 등록하는
- * flyoutCategory 는 그려진 작업판이 필요하므로, 같은 목록을 만드는 jsonFlyoutCategoryBlocks 와
- * 버튼만 무시하는 대리 작업판으로 꺼낸다.
+ * flyoutCategory 는 그려진 작업판이 필요하므로, 버튼만 무시하는 대리 작업판으로 꺼낸다.
+ * 변수 꾸러미는 작업판이 쓰는 variableFlyout (정하기 · 만큼 바꾸기 · 변수 값).
  */
 function dynamicEntries(): B[] {
   const ws = new Blockly.Workspace();
-  ws.getVariableMap().createVariable("x");
-  const vars = Blockly.Variables.jsonFlyoutCategoryBlocks(ws, ws.getVariableMap().getVariablesOfType(""), true) as unknown as B[];
   Blockly.serialization.workspaces.load(
     {
       blocks: {
@@ -47,7 +45,10 @@ function dynamicEntries(): B[] {
     },
     ws,
   );
+  // load 가 작업판(변수 포함)을 비우므로 변수는 그 뒤에 만든다
+  ws.getVariableMap().createVariable("x");
   const fake = Object.assign(Object.create(ws), { registerButtonCallback() {} }) as Blockly.WorkspaceSvg;
+  const vars = (variableFlyout(fake) as unknown as Record<string, unknown>[]).filter((i) => i.kind === "block") as B[];
   const procs = (Blockly.Procedures.flyoutCategory(fake) as unknown as Record<string, unknown>[]).filter((i) => i.kind === "block") as B[];
   ws.dispose();
   return [...vars, ...procs].map(({ kind: _kind, gap: _gap, ...rest }) => rest as B);
@@ -69,14 +70,30 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
     case "esp_pwm_duty": return { body: [setup("esp_pwm_setup", { VAR: { name: "pwm" } })], tops: [] };
     case "esp_distance": return { body: [setup("esp_ultrasonic_setup")], tops: [] };
     case "esp_oled_show": return { body: [setup("esp_oled_setup")], tops: [] };
-    case "variables_get": return { body: [{ type: "variables_set", fields: { VAR: { name: varName ?? "x" } } }], tops: [] };
+    case "variables_get":
+    case "var_change": return { body: [{ type: "variables_set", fields: { VAR: { name: varName ?? "x" } } }], tops: [] };
+    case "list_create":
+    case "list_create_from": return { body: [], tops: [] };
     case "procedures_callnoreturn":
     case "procedures_callreturn": {
       const name = (entry.extraState as { name: string }).name;
       return { body: [], tops: [defOf[name]] };
     }
-    default: return { body: deviceSetup(entry.type, varName), tops: [] };
+    default:
+      // 리스트 블록(변수 칸 items)·리스트 변수를 끼운 블록(n번째 항목·길이·들어 있는가·각 항목 반복)은 그 리스트를 먼저 만든다
+      if (entry.type.startsWith("list_") || readsVariable(entry, "items")) return { body: [listOf("items")], tops: [] };
+      return { body: deviceSetup(entry.type, varName), tops: [] };
   }
+}
+
+const listOf = (name: string): B => ({ type: "list_create_from", fields: { VAR: { name }, ITEMS: "1, 2, 3" } });
+
+/** 블록의 입력 아래 어딘가에 그 이름의 variables_get 이 있는지 */
+function readsVariable(node: unknown, name: string): boolean {
+  if (!node || typeof node !== "object") return false;
+  const o = node as Record<string, unknown>;
+  if (o.type === "variables_get" && (o.fields as { VAR?: { name?: string } } | undefined)?.VAR?.name === name) return true;
+  return Object.values(o).some((v) => readsVariable(v, name));
 }
 
 /** 장치 명령·값 블록: 그 장치의 준비 블록 (변수 칸은 같은 이름으로). 준비가 없는 LED 는 출력 핀 준비 */
@@ -110,7 +127,7 @@ describe("툴박스의 모든 블록: 블록 → 코드 → 블록 → 같은 �
 
   it("정적·변수·함수 꾸러미 블록을 모두 모았다", () => {
     const types = new Set(entries.map((e) => e.type));
-    for (const t of ["start_program", "code_stmt", "esp_oled_show", "variables_set", "variables_get", "procedures_defnoreturn", "procedures_callreturn"]) expect(types, t).toContain(t);
+    for (const t of ["start_program", "code_stmt", "esp_oled_show", "variables_set", "var_change", "variables_get", "procedures_defnoreturn", "procedures_callreturn", "list_append", "flow_for_each"]) expect(types, t).toContain(t);
   });
 
   for (const entry of entries) {

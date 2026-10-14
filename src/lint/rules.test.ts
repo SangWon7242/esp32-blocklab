@@ -225,6 +225,43 @@ describe("undefined-variable", () => {
     const json = program([adc, varSet("d", num(1)), print("p3", varGet("d")), print("p4", varGet("light")), repeat], { tops: [def], vars: ["t", "light", "d", "i"] });
     expect(only(run(json), "undefined-variable")).toEqual([]);
   });
+  const listVar = (name: string) => ({ VAR: { id: `var_${name}` } });
+  it("정의 안 된 리스트에 추가·바꾸기·위치 → 주의 (리스트 블록과 만큼 바꾸기도 변수를 읽는다)", () => {
+    const append = { type: "list_append", id: "ap", fields: listVar("items"), inputs: { V: shadowNum(4) } };
+    const change = { type: "var_change", id: "ch", fields: listVar("count"), inputs: { DELTA: shadowNum(1) } };
+    const index = { type: "list_index", id: "ix", fields: listVar("items"), inputs: { V: shadowNum(3) } };
+    const issues = only(run(program([append, change, print("p", index)], { vars: ["items", "count"] })), "undefined-variable");
+    expect(issues.map((i) => [i.blockId, i.ko])).toEqual([
+      ["ap", "items 는 아직 값을 정하지 않았어요"],
+      ["ch", "count 는 아직 값을 정하지 않았어요"],
+      ["ix", "items 는 아직 값을 정하지 않았어요"],
+    ]);
+  });
+  it("리스트 만들기 · 각 항목 반복의 변수 · 범위 반복의 변수 → 정의로 본다", () => {
+    const create = { type: "list_create", id: "c", fields: listVar("items") };
+    const append = { type: "list_append", id: "ap", fields: listVar("items"), inputs: { V: shadowNum(4) } };
+    const each = { type: "flow_for_each", id: "fe", fields: listVar("item"), inputs: { LIST: { block: varGet("items") }, DO: { block: print("p1", varGet("item")) } } };
+    const range = { type: "flow_for_range", id: "fr", fields: listVar("x"), inputs: { FROM: shadowNum(0), TO: shadowNum(3), DO: { block: print("p2", varGet("x")) } } };
+    const from = { type: "list_create_from", id: "cf", fields: { ...listVar("nums"), ITEMS: "1, 2" } };
+    const set = { type: "list_set", id: "ls", fields: listVar("nums"), inputs: { I: shadowNum(0), V: shadowNum(5) } };
+    const json = program([create, append, each, range, from, set], { vars: ["items", "item", "x", "nums"] });
+    expect(only(run(json), "undefined-variable")).toEqual([]);
+  });
+  it("새 블록의 빈 칸도 찾는다", () => {
+    const blocks: B[] = [
+      { type: "var_change", id: "e1", fields: listVar("count") },
+      { type: "list_append", id: "e2", fields: listVar("items") },
+      { type: "list_insert", id: "e3", fields: listVar("items"), inputs: { I: shadowNum(0) } },
+      { type: "list_set", id: "e4", fields: listVar("items"), inputs: { V: shadowNum(0) } },
+      { type: "flow_for_each", id: "e5", fields: listVar("item") },
+      { type: "flow_for_range", id: "e6", fields: listVar("x"), inputs: { FROM: shadowNum(0) } },
+      { type: "list_clear", id: "ok", fields: listVar("items") },
+    ];
+    const issues = only(run(program([varSet("count", num(0)), { type: "list_create", id: "c", fields: listVar("items") }, ...blocks], { vars: ["count", "items", "item", "x"] })), "empty-input");
+    expect(issues.map((i) => i.blockId)).toEqual(["e1", "e2", "e3", "e4", "e5", "e6"]);
+    expect(blockLabel("list_insert")).toBe("… 의 … 번째에 … 끼워 넣기 (0부터)");
+    expect(blockLabel("flow_break")).toBe("반복 멈추고 나가기");
+  });
   it("값 블록의 줄은 담은 명령 블록의 줄", () => {
     const issues = only(runMapped(program([print("p", varGet("d", "g"))], { vars: ["d"] })), "undefined-variable");
     expect(issues.map((i) => [i.blockId, i.line])).toEqual([["g", 1]]);

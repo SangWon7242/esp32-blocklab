@@ -4,6 +4,8 @@ import { deviceToolboxCategories } from "@/devices/toBlocks";
 const block = (type: string, extra: Record<string, unknown> = {}) => ({ kind: "block", type, ...extra });
 const num = (n: number) => ({ shadow: { type: "math_number", fields: { NUM: n } } });
 const text = (t: string) => ({ shadow: { type: "text", fields: { TEXT: t } } });
+/** 리스트 변수 items 를 읽는 블록 (그림자가 아니라 진짜 변수 블록: 다른 변수로 바꿔 끼울 수 있다) */
+const items = () => ({ block: { type: "variables_get", fields: { VAR: { name: "items" } } } });
 
 export const toolbox = {
   kind: "categoryToolbox",
@@ -23,6 +25,11 @@ export const toolbox = {
         block("flow_wait", { inputs: { SEC: num(1) } }),
         block("flow_wait_ms", { inputs: { MS: num(500) } }),
         block("flow_wait_us", { inputs: { US: num(10) } }),
+        // 계획 6: 범위·각 항목 반복, 멈추기·건너뛰기 (자주 쓰는 반복·기다리기가 팔레트 위에 그대로 보이게 뒤에 둔다)
+        block("flow_for_range", { inputs: { FROM: num(0), TO: num(5) } }),
+        block("flow_for_each", { inputs: { LIST: items() } }),
+        block("flow_break"),
+        block("flow_continue"),
       ],
     },
     {
@@ -60,6 +67,27 @@ export const toolbox = {
       ],
     },
     { kind: "category", name: "변수", categorystyle: "variable_category", icon: "variable", custom: "VARIABLE" },
+    {
+      kind: "category",
+      name: "리스트",
+      categorystyle: "list_category",
+      icon: "list",
+      contents: [
+        block("list_create"),
+        block("list_create_from"),
+        block("list_append", { inputs: { V: num(4) } }),
+        block("list_insert", { inputs: { I: num(0), V: num(5) } }),
+        block("list_remove_at", { inputs: { I: num(0) } }),
+        block("list_remove_value", { inputs: { V: num(3) } }),
+        block("list_clear"),
+        block("list_set", { inputs: { I: num(0), V: num(10) } }),
+        block("calc_item", { inputs: { X: items(), INDEX: num(0) } }),
+        block("calc_len", { inputs: { X: items() } }),
+        block("list_index", { inputs: { V: num(3) } }),
+        block("judge_contains", { inputs: { CONTAINER: items(), ITEM: num(3) } }),
+        block("flow_for_each", { inputs: { LIST: items() } }),
+      ],
+    },
     { kind: "category", name: "함수", categorystyle: "func_category", icon: "func", custom: "PROCEDURE" },
     // 하드웨어 카테고리 8개 (핀·LED·버튼·스위치·센서·소리·모터·화면·입력장치)는 장치 레지스트리에서 (icon·categorystyle 은 장치 카테고리 id)
     ...deviceToolboxCategories(),

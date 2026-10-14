@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeAll } from "vitest";
 import * as Blockly from "blockly";
 import { FieldMultilineInput } from "@blockly/field-multilineinput";
-import { BUILTIN_BLOCK_TYPES, CUSTOM_BLOCK_TYPES, entryTheme, registerBlocks, toolbox } from "./index";
+import { BUILTIN_BLOCK_TYPES, CUSTOM_BLOCK_TYPES, entryTheme, registerBlocks, registerVariableFlyout, toolbox, variableFlyout } from "./index";
 import { CATEGORY_COLORS, CATEGORY_IDS, type CategoryId } from "./colors";
 import { DEVICES } from "@/devices/registry";
 
@@ -90,7 +90,7 @@ describe("테마와 툴박스", () => {
     ws.dispose();
   });
 
-  it("카테고리마다 자기 색 스타일과 아이콘 id 가 있고, 15개 색은 모두 다르다", () => {
+  it("카테고리마다 자기 색 스타일과 아이콘 id 가 있고, 16개 색은 모두 다르다", () => {
     const cats = (toolbox as { contents: { name: string; categorystyle: string; icon?: string }[] }).contents;
     expect(cats.map((c) => c.icon)).toEqual(CATEGORY_IDS);
     for (const c of cats) {
@@ -98,12 +98,12 @@ describe("테마와 툴박스", () => {
       expect(entryTheme.categoryStyles[c.categorystyle]?.colour, c.name).toBe(CATEGORY_COLORS[c.icon as CategoryId].primary);
     }
     const primaries = CATEGORY_IDS.map((id) => CATEGORY_COLORS[id].primary.toLowerCase());
-    expect(new Set(primaries).size).toBe(15);
+    expect(new Set(primaries).size).toBe(16);
   });
 
   it("카테고리 순서가 엔트리와 같다", () => {
     const names = (toolbox as { contents: { name: string }[] }).contents.map((c) => c.name);
-    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드"]);
+    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드"]);
   });
 
   it("툴박스의 모든 블록 type이 정의돼 있다", () => {
@@ -158,12 +158,108 @@ describe("계획 6 판단·계산 블록", () => {
   });
 });
 
+describe("계획 6 변수·리스트·흐름 블록", () => {
+  const ws = () => new Blockly.Workspace();
+  /** 버튼 콜백만 무시하는 대리 작업판 (flyoutCategory 는 그려진 작업판의 registerButtonCallback 을 부른다) */
+  const fakeSvg = (w: Blockly.Workspace) => Object.assign(Object.create(w), { registerButtonCallback() {} }) as Blockly.WorkspaceSvg;
+
+  it("칸 이름·변수 칸 기본 이름·출력 형식이 약속과 같다", () => {
+    const w = ws();
+    const spec: [string, string[], string | null, string][] = [
+      ["var_change", ["DELTA"], null, "count"],
+      ["list_create", [], null, "items"],
+      ["list_create_from", [], null, "items"],
+      ["list_append", ["V"], null, "items"],
+      ["list_insert", ["I", "V"], null, "items"],
+      ["list_remove_at", ["I"], null, "items"],
+      ["list_remove_value", ["V"], null, "items"],
+      ["list_clear", [], null, "items"],
+      ["list_set", ["I", "V"], null, "items"],
+      ["list_index", ["V"], "Number", "items"],
+      ["flow_for_each", ["LIST", "DO"], null, "item"],
+      ["flow_for_range", ["FROM", "TO", "DO"], null, "i"],
+    ];
+    for (const [type, inputs, output, varName] of spec) {
+      const b = w.newBlock(type);
+      expect(b.inputList.filter((i) => i.connection).map((i) => i.name), type).toEqual(inputs);
+      expect(b.outputConnection?.getCheck() ?? null, type).toEqual(output === null ? null : [output]);
+      expect((b.getField("VAR") as Blockly.FieldVariable).getVariable()?.getName(), type).toBe(varName);
+    }
+    expect(w.newBlock("list_create_from").getFieldValue("ITEMS")).toBe("1, 2, 3");
+    for (const type of ["flow_break", "flow_continue"]) {
+      const b = w.newBlock(type);
+      expect(b.previousConnection && b.nextConnection, type).toBeTruthy();
+      expect(b.inputList.filter((i) => i.connection), type).toEqual([]);
+    }
+    w.dispose();
+  });
+
+  it("번째·위치 블록 문구에 (0부터) 가 있다", () => {
+    const w = ws();
+    for (const type of ["list_insert", "list_remove_at", "list_set", "list_index"]) {
+      const b = w.newBlock(type);
+      expect(b.inputList.flatMap((i) => i.fieldRow.map((f) => f.getText())).join(" "), type).toContain("(0부터)");
+    }
+    w.dispose();
+  });
+
+  it("스타일: 리스트 블록은 list_blocks(리스트 카테고리 색), 만큼 바꾸기는 변수, 새 반복은 흐름", () => {
+    const w = ws();
+    expect(entryTheme.blockStyles.list_blocks.colourPrimary).toBe(CATEGORY_COLORS.list.primary);
+    for (const type of ["list_create", "list_append", "list_index"]) expect(w.newBlock(type).getStyleName(), type).toBe("list_blocks");
+    expect(w.newBlock("var_change").getStyleName()).toBe("variable_blocks");
+    for (const type of ["flow_for_each", "flow_for_range", "flow_break", "flow_continue"]) expect(w.newBlock(type).getStyleName(), type).toBe("loop_blocks");
+    w.dispose();
+  });
+
+  it("툴박스: 리스트 카테고리는 변수와 함수 사이, 리스트 블록과 공용 블록(항목·길이·들어 있는가·각 항목 반복)", () => {
+    const cats = (toolbox as { contents: { name: string; icon?: string; contents?: { type?: string }[] }[] }).contents;
+    const at = cats.findIndex((c) => c.name === "리스트");
+    expect(cats[at - 1].name).toBe("변수");
+    expect(cats[at + 1].name).toBe("함수");
+    expect(cats[at].icon).toBe("list");
+    expect(cats[at].contents!.map((b) => b.type)).toEqual([
+      "list_create", "list_create_from", "list_append", "list_insert", "list_remove_at", "list_remove_value", "list_clear", "list_set",
+      "calc_item", "calc_len", "list_index", "judge_contains", "flow_for_each",
+    ]);
+    const flow = cats.find((c) => c.name === "흐름")!.contents!.map((b) => b.type);
+    expect(flow).toEqual(expect.arrayContaining(["flow_for_range", "flow_for_each", "flow_break", "flow_continue", "flow_repeat_n"]));
+  });
+
+  it("변수 꾸러미: 변수가 있으면 버튼 → 정하기 → 만큼 바꾸기(같은 변수, 숫자 1) → 변수 값들", () => {
+    const w = ws();
+    w.getVariableMap().createVariable("a");
+    w.getVariableMap().createVariable("b");
+    const items = variableFlyout(fakeSvg(w)) as { kind: string; type?: string; fields?: { VAR?: { name?: string } }; inputs?: unknown; callbackkey?: string }[];
+    expect(items.map((i) => i.type ?? i.kind)).toEqual(["button", "variables_set", "var_change", "variables_get", "variables_get"]);
+    expect(items[0].callbackkey).toBe("CREATE_VARIABLE");
+    // 정하기·바꾸기는 가장 최근에 만든 변수
+    expect(items[1].fields?.VAR?.name).toBe("b");
+    expect(items[2].fields?.VAR?.name).toBe("b");
+    expect(items[2].inputs).toEqual({ DELTA: { shadow: { type: "math_number", fields: { NUM: 1 } } } });
+    w.dispose();
+  });
+
+  it("registerVariableFlyout 은 작업판의 VARIABLE 꾸러미 콜백을 variableFlyout 으로 바꾼다", () => {
+    const calls: [string, unknown][] = [];
+    registerVariableFlyout({ registerToolboxCategoryCallback: (key: string, fn: unknown) => calls.push([key, fn]) } as unknown as Blockly.WorkspaceSvg);
+    expect(calls).toEqual([["VARIABLE", variableFlyout]]);
+  });
+
+  it("변수 꾸러미: 변수가 없으면 변수 만들기 버튼만", () => {
+    const w = ws();
+    const items = variableFlyout(fakeSvg(w)) as { kind: string }[];
+    expect(items.map((i) => i.kind)).toEqual(["button"]);
+    w.dispose();
+  });
+});
+
 describe("최종 리뷰", () => {
   it("C3 변수 꾸러미가 깨진 코드를 내는 math_change·procedures_ifreturn 을 내놓지 않는다", () => {
     expect(Blockly.Blocks.math_change).toBeUndefined();
     expect(Blockly.Blocks.procedures_ifreturn).toBeUndefined();
   });
-  it("C3 변수 꾸러미에는 변수 만들기·정하기·값만 있다", () => {
+  it("C3 Blockly 기본 변수 목록에는 정하기·값만 있다 (만큼 바꾸기는 variableFlyout 이 var_change 로 끼운다)", () => {
     const ws = new Blockly.Workspace();
     ws.getVariableMap().createVariable("x");
     // flyoutCategory 가 버튼 뒤에 붙이는 블록 목록 (math_change 를 넣을지 묻는 includeChangeBlocks = true 그대로)

@@ -8,7 +8,7 @@ import { knob, light } from "@/devices/specs/sensor";
 
 /** 변수·함수 꾸러미(custom 카테고리)에 나오는 내장 블록 */
 const CUSTOM_CATEGORY_TYPES = [
-  "variables_get", "variables_set", "math_change",
+  "variables_get", "variables_set", "var_change", "math_change",
   "procedures_defnoreturn", "procedures_defreturn", "procedures_callnoreturn", "procedures_callreturn", "procedures_ifreturn",
 ];
 
@@ -150,7 +150,7 @@ describe("블록 사전 카탈로그", () => {
 
   it("카테고리 순서가 툴박스 순서와 같다", () => {
     expect(getCatalog().map((c) => c.name)).toEqual([
-      "시작", "흐름", "판단", "계산", "변수", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드",
+      "시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드",
     ]);
     expect(getCatalog().map((c) => c.name)).toEqual(categories.map((c) => c.name));
   });
