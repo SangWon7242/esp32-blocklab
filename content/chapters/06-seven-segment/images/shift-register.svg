@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sgr-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sgr-title">74HC595 가 일하는 순서: 1. SI 에 0 또는 1 을 올려 둔다. 2. SCK 를 한 번 올리면 칸들이 한 칸씩 밀리며 그 값이 들어간다. 이것을 8번 되풀이하면 여덟 칸이 찬다. 3. RCK 를 올리면 여덟 칸이 한꺼번에 Q0~Q7 로 나가 튜브의 막대를 켠다</title>
+
+<text x="24.0" y="30.0" font-size="14" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">보낼 숫자 3 = 0100 1111 (앞 자리부터 하나씩)</text>
+<rect x="110" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="121.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">0</text>
+<rect x="136" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="147.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<rect x="162" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="173.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">0</text>
+<rect x="188" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="199.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">0</text>
+<rect x="214" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="225.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<rect x="240" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="251.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<rect x="266" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="277.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<rect x="292" y="44" width="22" height="26" rx="4" fill="var(--muted)" stroke-width="1.5"/>
+<text x="303.0" y="62.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<text x="214.0" y="88.0" font-size="12" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.7">맨 앞 0 이 가장 먼저 들어가요</text>
+<path d="M104 57 H52 V118" stroke-width="2"/><path d="M46 111 L52 119 L58 111" stroke-width="2"/>
+<circle cx="52" cy="146" r="22" fill="#f59f00" fill-opacity="0.2" stroke="#f59f00" stroke-width="2.5"/><text x="52.0" y="151.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">SI</text>
+<circle cx="372" cy="57" r="11" fill="#4562f5" stroke="none"/><text x="372.0" y="62.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">1</text>
+<text x="390.0" y="54.0" font-size="13" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">SI 에 값 하나를</text>
+<text x="390.0" y="72.0" font-size="13" text-anchor="start" fill="currentColor" stroke="none">올려 둔다 (5번 핀)</text>
+<path d="M76 146 H93" stroke-width="2"/><path d="M86 140 L94 146 L86 152" stroke-width="2"/>
+<text x="96.0" y="110.0" font-size="12" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">밀어 넣는 칸</text>
+<rect x="96" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="119.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<text x="119.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q0</text>
+<rect x="142" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="165.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<text x="165.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q1</text>
+<rect x="188" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="211.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<text x="211.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q2</text>
+<rect x="234" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="257.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<text x="257.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q3</text>
+<rect x="280" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="303.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">0</text>
+<text x="303.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q4</text>
+<rect x="326" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="349.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">0</text>
+<text x="349.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q5</text>
+<rect x="372" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="395.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+<text x="395.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q6</text>
+<rect x="418" y="124" width="46" height="44" fill="var(--card)" stroke-width="1.5"/>
+<text x="441.0" y="153.0" font-size="18" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">0</text>
+<text x="441.0" y="184.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q7</text>
+<path d="M196 106 H460" stroke="#2f9e44" stroke-width="2.5"/><path d="M452 100 L461 106 L452 112" stroke="#2f9e44" stroke-width="2.5"/>
+<circle cx="490" cy="146" r="11" fill="#4562f5" stroke="none"/><text x="490.0" y="151.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">2</text>
+<text x="506.0" y="142.0" font-size="13" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">SCK 한 번 =</text>
+<text x="506.0" y="160.0" font-size="13" text-anchor="start" fill="currentColor" stroke="none">한 칸씩 밀기</text>
+<text x="86.0" y="224.0" font-size="13" font-weight="700" text-anchor="end" fill="#2f9e44" stroke="none">SCK</text>
+<path d="M96 228 H110 V212 H132 V228 H156 V212 H178 V228 H202 V212 H224 V228 H248 V212 H270 V228 H294 V212 H316 V228 H340 V212 H362 V228 H386 V212 H408 V228 H432 V212 H454 V228 H464" stroke="#2f9e44" stroke-width="2.5"/>
+<text x="280.0" y="250.0" font-size="13" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.75">8번 올렸다 내리면 여덟 칸이 다 차요</text>
+<path d="M96 272 H464" stroke="#1971c2" stroke-width="2.5" stroke-dasharray="7 5"/>
+<text x="86.0" y="276.0" font-size="13" font-weight="700" text-anchor="end" fill="#1971c2" stroke="none">RCK</text>
+<path d="M119.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M114.0 294 L119.0 301 L124.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M165.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M160.0 294 L165.0 301 L170.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M211.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M206.0 294 L211.0 301 L216.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M257.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M252.0 294 L257.0 301 L262.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M303.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M298.0 294 L303.0 301 L308.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M349.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M344.0 294 L349.0 301 L354.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M395.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M390.0 294 L395.0 301 L400.0 294" stroke="#1971c2" stroke-width="2"/>
+<path d="M441.0 278 V300" stroke="#1971c2" stroke-width="2"/><path d="M436.0 294 L441.0 301 L446.0 294" stroke="#1971c2" stroke-width="2"/>
+<rect x="102" y="306" width="34" height="26" rx="13" fill="#fa5252" fill-opacity="0.85" stroke-width="1.5"/>
+<text x="119.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">a</text>
+<rect x="148" y="306" width="34" height="26" rx="13" fill="#fa5252" fill-opacity="0.85" stroke-width="1.5"/>
+<text x="165.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">b</text>
+<rect x="194" y="306" width="34" height="26" rx="13" fill="#fa5252" fill-opacity="0.85" stroke-width="1.5"/>
+<text x="211.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">c</text>
+<rect x="240" y="306" width="34" height="26" rx="13" fill="#fa5252" fill-opacity="0.85" stroke-width="1.5"/>
+<text x="257.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">d</text>
+<rect x="286" y="306" width="34" height="26" rx="13" fill="var(--muted)" stroke-width="1.5"/>
+<text x="303.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">e</text>
+<rect x="332" y="306" width="34" height="26" rx="13" fill="var(--muted)" stroke-width="1.5"/>
+<text x="349.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">f</text>
+<rect x="378" y="306" width="34" height="26" rx="13" fill="#fa5252" fill-opacity="0.85" stroke-width="1.5"/>
+<text x="395.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">g</text>
+<rect x="424" y="306" width="34" height="26" rx="13" fill="var(--muted)" stroke-width="1.5"/>
+<text x="441.0" y="324.0" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">dp</text>
+<circle cx="490" cy="286" r="11" fill="#4562f5" stroke="none"/><text x="490.0" y="291.0" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">3</text>
+<text x="506.0" y="282.0" font-size="13" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">RCK 한 번 =</text>
+<text x="506.0" y="300.0" font-size="13" text-anchor="start" fill="currentColor" stroke="none">한꺼번에 내보내기</text>
+<text x="506.0" y="322.0" font-size="13" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">→ 튜브 막대</text>
+</svg>

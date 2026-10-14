@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sgc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sgc-title">7세그먼트: 디지털 튜브 하나에 숫자 3 이 켜져 있다. 9부터 0까지 거꾸로 세는 중이고, ESP32 의 핀 3개(SI·SCK·RCK)가 74HC595 칩을 거쳐 막대 8개를 켠다</title>
+
+<text x="40.0" y="52.0" font-size="26" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">7세그먼트</text>
+<text x="40.0" y="78.0" font-size="15" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">막대 8개로 숫자 하나를 띄워요 — 9부터 0까지 거꾸로</text>
+<rect x="70" y="104" width="170" height="226" rx="12" fill="#212529"/>
+<rect x="58" y="96" width="194" height="242" rx="16" fill="#fa5252" fill-opacity="0.08" stroke="none"/>
+<path d="M112.8 132.0 L120.8 124.0 L179.2 124.0 L187.2 132.0 L179.2 140.0 L120.8 140.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M112.8 216.0 L120.8 208.0 L179.2 208.0 L187.2 216.0 L179.2 224.0 L120.8 224.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M112.8 300.0 L120.8 292.0 L179.2 292.0 L187.2 300.0 L179.2 308.0 L120.8 308.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M108.0 136.8 L116.0 144.8 L116.0 203.2 L108.0 211.2 L100.0 203.2 L100.0 144.8 Z" fill="#868e96" fill-opacity="0.22" stroke="none"/>
+<path d="M192.0 136.8 L200.0 144.8 L200.0 203.2 L192.0 211.2 L184.0 203.2 L184.0 144.8 Z" fill="#fa5252" stroke="none"/>
+<path d="M108.0 220.8 L116.0 228.8 L116.0 287.2 L108.0 295.2 L100.0 287.2 L100.0 228.8 Z" fill="#868e96" fill-opacity="0.22" stroke="none"/>
+<path d="M192.0 220.8 L200.0 228.8 L200.0 287.2 L192.0 295.2 L184.0 287.2 L184.0 228.8 Z" fill="#fa5252" stroke="none"/>
+<circle cx="212.8" cy="300.0" r="8.8" fill="#868e96" fill-opacity="0.22" stroke="none"/>
+<text x="300.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">9</text>
+<text x="332.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">8</text>
+<text x="364.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">7</text>
+<text x="396.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">6</text>
+<text x="428.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">5</text>
+<text x="460.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">4</text>
+<rect x="478" y="113" width="28" height="36" rx="6" fill="#fa5252" fill-opacity="0.15" stroke="#fa5252" stroke-width="1.5"/>
+<text x="492.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="#fa5252" stroke="none">3</text>
+<text x="524.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.35">2</text>
+<text x="556.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.35">1</text>
+<text x="588.0" y="139.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.35">0</text>
+<path d="M290 162 H600" stroke-width="2" stroke-opacity="0.5"/><path d="M592 156 L601 162 L592 168" stroke-width="2" stroke-opacity="0.5"/>
+<text x="445.0" y="184.0" font-size="13" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.7">오늘의 미션: 9부터 0까지 거꾸로 세기</text>
+<rect x="420" y="228" width="150" height="60" rx="6" fill="#343a40"/>
+<path d="M420 250 A8 8 0 0 1 420 266" fill="var(--muted)" stroke="#ced4da" stroke-width="1.5"/>
+<text x="495.0" y="263.0" font-size="15" font-weight="700" text-anchor="middle" fill="#f8f9fa" stroke="none">74HC595</text>
+<path d="M318 238 H418" stroke-width="6"/><path d="M318 238 H418" stroke="#f59f00" stroke-width="3.5"/>
+<text x="310.0" y="242.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">SI</text>
+<path d="M318 258 H418" stroke-width="6"/><path d="M318 258 H418" stroke="#2f9e44" stroke-width="3.5"/>
+<text x="310.0" y="262.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">SCK</text>
+<path d="M318 278 H418" stroke-width="6"/><path d="M318 278 H418" stroke="#1971c2" stroke-width="3.5"/>
+<text x="310.0" y="282.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">RCK</text>
+<text x="495.0" y="318.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">핀 3개 → 막대 8개</text>
+</svg>

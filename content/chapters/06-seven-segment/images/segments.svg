@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sgs-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sgs-title">7세그먼트 막대 이름: 맨 위 a 부터 시계 방향으로 a·b·c·d·e·f, 가운데 g, 점 dp. 숫자 3 은 a·b·c·d·g 다섯 막대가 켜진다. 여덟 칸 dp g f e d c b a 를 0과 1로 적으면 0 1 0 0 1 1 1 1, 16진수로 0x4f</title>
+
+<rect x="56" y="36" width="216" height="270" rx="14" fill="#212529"/>
+<path d="M102.0 64.0 L112.0 54.0 L188.0 54.0 L198.0 64.0 L188.0 74.0 L112.0 74.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M102.0 166.0 L112.0 156.0 L188.0 156.0 L198.0 166.0 L188.0 176.0 L112.0 176.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M102.0 268.0 L112.0 258.0 L188.0 258.0 L198.0 268.0 L188.0 278.0 L112.0 278.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M96.0 70.0 L106.0 80.0 L106.0 150.0 L96.0 160.0 L86.0 150.0 L86.0 80.0 Z" fill="#868e96" fill-opacity="0.22" stroke="none"/>
+<path d="M204.0 70.0 L214.0 80.0 L214.0 150.0 L204.0 160.0 L194.0 150.0 L194.0 80.0 Z" fill="#fa5252" stroke="none"/>
+<path d="M96.0 172.0 L106.0 182.0 L106.0 252.0 L96.0 262.0 L86.0 252.0 L86.0 182.0 Z" fill="#868e96" fill-opacity="0.22" stroke="none"/>
+<path d="M204.0 172.0 L214.0 182.0 L214.0 252.0 L204.0 262.0 L194.0 252.0 L194.0 182.0 Z" fill="#fa5252" stroke="none"/>
+<circle cx="230.0" cy="268.0" r="11.0" fill="#868e96" fill-opacity="0.22" stroke="none"/>
+<circle cx="150.0" cy="64.0" r="10" fill="#ffffff" stroke="none"/>
+<text x="150.0" y="68.5" font-size="13" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="none">a</text>
+<circle cx="204.0" cy="115.0" r="10" fill="#ffffff" stroke="none"/>
+<text x="204.0" y="119.5" font-size="13" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="none">b</text>
+<circle cx="204.0" cy="217.0" r="10" fill="#ffffff" stroke="none"/>
+<text x="204.0" y="221.5" font-size="13" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="none">c</text>
+<circle cx="150.0" cy="268.0" r="10" fill="#ffffff" stroke="none"/>
+<text x="150.0" y="272.5" font-size="13" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="none">d</text>
+<circle cx="96.0" cy="217.0" r="10" fill="#495057" stroke="none"/>
+<text x="96.0" y="221.5" font-size="13" font-weight="700" text-anchor="middle" fill="#f8f9fa" stroke="none">e</text>
+<circle cx="96.0" cy="115.0" r="10" fill="#495057" stroke="none"/>
+<text x="96.0" y="119.5" font-size="13" font-weight="700" text-anchor="middle" fill="#f8f9fa" stroke="none">f</text>
+<circle cx="150.0" cy="166.0" r="10" fill="#ffffff" stroke="none"/>
+<text x="150.0" y="170.5" font-size="13" font-weight="700" text-anchor="middle" fill="#c92a2a" stroke="none">g</text>
+<circle cx="254.0" cy="282.0" r="12" fill="#495057" stroke="none"/><text x="254.0" y="286.5" font-size="11" font-weight="700" text-anchor="middle" fill="#f8f9fa" stroke="none">dp</text>
+<path d="M236.0 273.0 L244.0 277.0" stroke="#adb5bd" stroke-width="1.5"/>
+<text x="164.0" y="334.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">숫자 3: a · b · c · d · g 켜기</text>
+<text x="316.0" y="92.0" font-size="15" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">여덟 칸을 0과 1로 적기</text>
+<text x="334.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q7</text>
+<rect x="316" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="334.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">dp</text>
+<rect x="316" y="154" width="36" height="40" fill="var(--muted)" stroke-width="1.5"/>
+<text x="334.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.55">0</text>
+<text x="370.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q6</text>
+<rect x="352" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="370.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">g</text>
+<rect x="352" y="154" width="36" height="40" fill="#fa5252" fill-opacity="0.18" stroke-width="1.5"/>
+<text x="370.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="#e03131" stroke="none">1</text>
+<text x="406.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q5</text>
+<rect x="388" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="406.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">f</text>
+<rect x="388" y="154" width="36" height="40" fill="var(--muted)" stroke-width="1.5"/>
+<text x="406.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.55">0</text>
+<text x="442.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q4</text>
+<rect x="424" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="442.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">e</text>
+<rect x="424" y="154" width="36" height="40" fill="var(--muted)" stroke-width="1.5"/>
+<text x="442.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.55">0</text>
+<text x="478.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q3</text>
+<rect x="460" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="478.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">d</text>
+<rect x="460" y="154" width="36" height="40" fill="#fa5252" fill-opacity="0.18" stroke-width="1.5"/>
+<text x="478.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="#e03131" stroke="none">1</text>
+<text x="514.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q2</text>
+<rect x="496" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="514.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">c</text>
+<rect x="496" y="154" width="36" height="40" fill="#fa5252" fill-opacity="0.18" stroke-width="1.5"/>
+<text x="514.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="#e03131" stroke="none">1</text>
+<text x="550.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q1</text>
+<rect x="532" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="550.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">b</text>
+<rect x="532" y="154" width="36" height="40" fill="#fa5252" fill-opacity="0.18" stroke-width="1.5"/>
+<text x="550.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="#e03131" stroke="none">1</text>
+<text x="586.0" y="114.0" font-size="11" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.6">Q0</text>
+<rect x="568" y="120" width="36" height="34" fill="var(--card)" stroke-width="1.5"/>
+<text x="586.0" y="143.0" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">a</text>
+<rect x="568" y="154" width="36" height="40" fill="#fa5252" fill-opacity="0.18" stroke-width="1.5"/>
+<text x="586.0" y="182.0" font-size="20" font-weight="700" text-anchor="middle" fill="#e03131" stroke="none">1</text>
+<text x="316.0" y="224.0" font-size="13" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">1 = 켜기, 0 = 끄기</text>
+<text x="316.0" y="256.0" font-size="14" text-anchor="start" fill="currentColor" stroke="none">0100 1111 을 16진수로 줄이면</text>
+<rect x="357.2" y="272.0" width="57.7" height="28" rx="14.0" fill="var(--card)" stroke-width="1.5"/><text x="386.0" y="290.5" font-size="16" font-weight="600" style="font-feature-settings: 'calt' 0" text-anchor="middle" fill="currentColor" stroke="none">0x4f</text>
+<text x="446.0" y="292.0" font-size="15" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">→ SEGCODE[3]</text>
+</svg>

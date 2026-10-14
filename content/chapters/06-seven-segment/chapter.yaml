@@ -1,0 +1,266 @@
+# 챕터 6 · 7세그먼트 — 수업 저장소 06_7세그먼트. 형식 설명은 src/track/README.md
+id: 06-seven-segment
+order: 6
+title: 7세그먼트
+subtitle: 1자리 디지털 튜브
+summary: |
+  막대 LED **8개**(a~g 와 점 dp)로 만든 작은 화면에 0부터 9까지 숫자를 띄워요. 막대마다 선을 따로 이으면 ESP32 핀이 8개나 필요하지만, 도우미 칩 **74HC595** 를 쓰면 **핀 3개**면 돼요.
+  어느 막대를 켤지 **0과 1 여덟 개**로 적고, 그 여덟 칸을 칩에 한 칸씩 밀어 넣은 뒤 한꺼번에 내보내요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
+  - { name: 74HC595N 칩, note: "다리 16개. 반달 모양 홈이 있는 쪽이 앞. 가운데 홈을 건너 꽂아요" }
+  - { name: 1자리 디지털 튜브, note: "공통 음극(COM 이 −). 다리 10개. 점(dp)이 아래쪽에 오게 꽂아요" }
+  - { name: 220Ω 저항 8개, note: "Q0~Q7 에 하나씩. 빨강-빨강-갈색 띠" }
+  - { name: 점퍼선, note: "여러 가닥 (신호 3, 5V·GND, 칩과 튜브의 + · − 연결)" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "74HC595 는 가운데 홈을 건너 꽂고 반달 홈은 ESP32 쪽으로. 5번 → SI, 18번 → SCK, 23번 → RCK. 칩 VCC·MR → + 줄(5V), 칩 OE·GND → − 줄(GND). Q0~Q7 → 220Ω 저항 하나씩 → 튜브 a~g·dp (Q0→a … Q6→g, Q7→dp). 튜브 COM → − 줄"
+goals:
+  content: 74HC595 를 써서 핀 3개로 막대 8개를 켜고, 막대 코드 목록(SEGCODE)에서 숫자를 골라 0~9 를 보여 준다
+  thinking: 숫자의 모양을 켜기(1)·끄기(0) 여덟 칸으로 바꿔 생각하고, 순서(0→9, 9→0)를 range 로 다룬다
+successCriteria:
+  - 숫자 하나의 모양을 a~g·dp 여덟 칸의 0과 1로 적을 수 있다
+  - SI · SCK · RCK 세 핀이 각각 무슨 일을 하는지 내 말로 설명할 수 있다
+  - range 의 숫자를 바꿔 9부터 0까지 거꾸로 세게 만들고, 그렇게 바꾼 이유를 말할 수 있다
+parts:
+  - id: part1
+    title: 숫자 띄우기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 막대 8개를 핀 3개로?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 오늘의 목표 — 디지털 튜브 하나에 숫자를 띄우고, 9부터 0까지 거꾸로 세기
+        body: |
+          디지털 튜브의 숫자는 막대 LED **7개**와 점 **1개**, 모두 8개로 그려져요. 지금까지는 LED 하나에 핀 하나를 썼어요. 그러면 막대 8개에는 핀이 몇 개 필요할까요?
+
+          오늘은 **74HC595** 라는 도우미 칩이 나와요. 이 칩을 쓰면 핀 3개로 8개를 켤 수 있대요. 어떻게 가능할지, 코드를 보기 전에 내 생각부터 적어 봐요. 정답은 없고, 틀려도 괜찮아요.
+        todo:
+          - 준비물(74HC595N 칩, 디지털 튜브, 저항 8개, 브레드보드, 점퍼선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 숫자를 묻는 질문에는 **숫자와 그 이유**를 함께 쓰기
+        questions:
+          - 막대 8개를 1장처럼 하나씩 핀에 이으면 ESP32 핀이 몇 개 필요할까요? 그러면 무엇이 불편할까요?
+          - 숫자 3 을 만들려면 8개 막대 중 어느 것을 켜고 어느 것을 꺼야 할까요? 그림을 그려 봐도 좋아요.
+          - 선 하나로 켜기·끄기를 여덟 번 보낸다면, 칩은 그 여덟 개를 어떻게 기억했다가 한꺼번에 켤 수 있을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "숫자 띄우기"를 보드에게 시키려면 일을 잘게 나눠야 해요. 보드는 숫자 **3** 을 모르고, 어느 막대를 켤지 0과 1만 알아들어요.
+
+          활동 칸의 세 칸에 각각 한 가지 이상 적어 보세요. 숫자마다 켤 막대를 **누가, 언제** 정해 두어야 할까요? 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 보드가 시작 전에 알고 있어야 할 사실 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 모양이나 숫자 적기"
+          - "**해야 할 것**: 보드가 실제로 하는 일 적기"
+        answer:
+          know: ["SI · SCK · RCK 가 몇 번 핀에 이어져 있는지 (5 · 18 · 23)", "튜브의 막대 a~g·dp 가 칩의 Q0~Q7 에 차례로 이어져 있다는 것"]
+          decide: ["숫자 0~9 마다 켤 막대 (0과 1 여덟 칸 = SEGCODE 목록)", "숫자를 바꾸는 간격", "보여 줄 숫자의 순서"]
+          act: ["여덟 칸을 칩에 한 칸씩 밀어 넣기", "다 넣으면 한꺼번에 내보내기", "다음 숫자로 바꾸며 계속 되풀이하기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 한 칸씩 밀어 넣기
+        minutes: 6
+        scene:
+          image: images/shift-register.svg
+          caption: "① SI 에 0 또는 1 을 올려 두고 ② SCK 로 한 칸씩 밀어 넣기를 8번, ③ RCK 로 여덟 칸을 한꺼번에 내보내요"
+        body: |
+          아직 실행하지 않아요. `SEGCODE` 는 숫자 0~9 의 막대 모양을 담은 **목록**이에요. `0x3f` 같은 값은 0과 1 여덟 칸을 짧게 적은 것이에요(16진수).
+
+          `hc595_shift(dat)` 는 그림처럼 여덟 칸을 하나씩 밀어 넣고 마지막에 내보내요. 코드 끝의 `while True:` 부분을 따라가며 빈칸에 내 예측을 적어요. `time.sleep_ms(500)` 의 **ms** 는 1000분의 1초예요.
+        todo:
+          - 그림에서 SI · SCK · RCK 가 하는 일을 순서대로 짚어 보기
+          - "`for num in range(10):` 이 num 에 어떤 숫자들을 차례로 넣는지 따라가기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_digits_0_9.py
+        blanks:
+          - q: 실행하면 튜브에 가장 먼저 보이는 숫자는 무엇일까요?
+          - q: 숫자 하나가 튜브에 머무는 시간은 몇 초일까요?
+            unit: 초
+          - q: 9 가 보인 다음에는 어떤 일이 일어날까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 0부터 9까지
+        minutes: 10
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "칩은 가운데 홈을 건너, 반달 홈은 ESP32 쪽. 5번 → SI, 18번 → SCK, 23번 → RCK. Q0~Q7 은 저항을 하나씩 거쳐 튜브 a~dp 로"
+        body: |
+          이번 배선은 선이 많아요. **USB 를 뺀 채로** 배선도와 연결표를 한 줄씩 짚으며 꽂아요. 74HC595N 의 **반달 모양 홈**이 배선도와 같은 쪽을 보는지, 튜브의 **점(dp)이 아래쪽**에 오는지 먼저 확인해요.
+
+          - 5번 → SI, 18번 → SCK, 23번 → RCK
+          - Q0~Q7 → 220Ω 저항 하나씩 → 튜브 a~dp
+          - 칩 VCC·MR → + 줄(5V), 칩 OE·GND 와 튜브 COM → − 줄(GND)
+
+          실행해서 숫자가 바뀌는 빠르기와 순서가 내 예측과 같은지 보세요.
+        todo:
+          - 반달 홈 방향, 저항 8개, 튜브 COM → GND 를 체크하며 꽂기
+          - "**보드 연결** → **실행** 누르기"
+          - 숫자가 이상하게 보이면 어느 막대가 틀렸는지 적고 그 막대의 선 다시 보기
+        code: step1_digits_0_9.py
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          `hc595_shift()` 안의 `for bit in range(7, -1, -1):` 는 7 에서 시작해 하나씩 **줄어들며** 세요. 어디서 멈출까요? `SEGCODE[num]` 은 목록의 num 번 칸이고, 목록은 **0번 칸부터** 세요.
+
+          손가락으로 한 줄씩 짚으며 읽고, 답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - "`range(7, -1, -1)` 이 몇 번 도는지 세기"
+          - SEGCODE 목록에서 0번 칸부터 세어 보기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_digits_0_9.py
+        questions:
+          - { kind: number, q: "hc595_shift() 를 한 번 부르면 sck.on() 은 몇 번 실행되나요?", answer: 8, hint: "range(7, -1, -1) 이 bit 에 차례로 넣는 숫자를 모두 적어 보세요" }
+          - { kind: choice, q: "숫자 7 을 보여 줄 때 칩으로 보내는 코드는 무엇인가요?", options: ["0x7f", "0x07", "0x6f"], answer: 1, hint: "목록은 0번 칸부터 세요" }
+          - { kind: line, q: "SI 에 올려 둔 값을 칩 안으로 한 칸 밀어 넣는 줄을 클릭하세요", answer: 19 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 거꾸로 세어 보기
+        minutes: 6
+        scene:
+          image: images/segments.svg
+          caption: "숫자 3 은 a · b · c · d · g 를 켜요. 여덟 칸으로 적으면 0100 1111 = 0x4f = SEGCODE[3]"
+        body: |
+          지금은 0 → 9 순서로 세요. 이것을 **9 → 0** 순서로 거꾸로 세게 바꿔 봐요. 로켓 발사 전 카운트다운처럼요.
+
+          바꿀 곳은 한 줄이에요. `range()` 에는 숫자를 **세 개**까지 넣을 수 있어요: 시작, 끝, 걸음. 코드 안에 거꾸로 세는 `range` 가 이미 하나 있지 않나요? 블록이든 코드든 편한 쪽에서 고치고, 실행해서 확인한 뒤 **판정**을 눌러요.
+        todo:
+          - "`hc595_shift()` 안에서 거꾸로 세는 `range` 를 찾아 읽기"
+          - 숫자를 고르는 `for num in range(...)` 줄을 9부터 0까지 세도록 바꾸기
+          - 실행해서 9 → 0 으로 바뀌는지 보고 **판정** 누르기
+        instructions: 0부터 9가 아니라 9부터 0까지 거꾸로 세어 주세요. 다른 줄은 그대로 두어요
+        hint: range(시작, 끝, 걸음) 에서 끝 숫자는 세지 않아요. 0 까지 보이려면 끝은 몇이어야 할까요? 하나씩 줄어들려면 걸음은요?
+        code: step1_digits_0_9.py
+        rules:
+          - codeEquals: { file: mission_countdown.py }
+            fail: 지금 range 는 몇에서 시작해서 몇에서 멈추나요? 0 도 보이려면 끝 숫자는 무엇이어야 할까요? 거꾸로 가려면 걸음은요?
+        answerCode: mission_countdown.py
+
+      - id: extra1
+        type: mission
+        title: 추가 미션 ① — 점(dp)도 켜기
+        optional: true
+        minutes: 4
+        scene:
+          image: images/segments.svg
+          caption: 여덟 칸 중 맨 앞 칸(Q7)이 점 dp 예요. 그 칸만 1 인 코드는 1000 0000 = 0x80
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 숫자와 함께 **점(dp)** 도 켜지게 해 봐요. 점은 여덟 번째 칸, 코드로는 `0x80` 이에요.
+
+          숫자 코드와 점 코드를 합치면 켜진 칸이 모두 켜져야 해요. 두 코드를 합치는 기호 `|` 를 써 보세요. 어느 줄의 무엇에 붙이면 될까요?
+        todo:
+          - 숫자 코드를 보내는 줄 찾기
+          - 그 코드에 `| 0x80` 을 합치기
+          - 실행해서 점이 함께 켜지는지 보고 **판정** 누르기
+        instructions: 0부터 9까지 셀 때 숫자마다 점(dp)도 함께 켜지게 해 주세요 (점 코드는 0x80)
+        hint: "`|` 는 두 코드 중 한쪽이라도 1 인 칸을 모두 켜요. SEGCODE[num] 과 0x80 을 합치면?"
+        code: step1_digits_0_9.py
+        rules:
+          - codeEquals: { file: extra1_with_dot.py }
+            fail: 칩으로 보내는 코드에 점 칸이 들어 있나요? 숫자 코드와 점 코드를 무엇으로 합쳤나요? 다른 줄은 그대로인가요?
+        answerCode: extra1_with_dot.py
+
+      - id: extra2
+        type: mission
+        title: 추가 미션 ② — 내가 고른 숫자만
+        optional: true
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 0~9 를 모두 보여 주는 대신, 내가 고른 숫자 세 개만 되풀이하려면?
+        body: |
+          이번에는 0~9 전부가 아니라 **내가 고른 숫자 세 개**만 계속 되풀이해요. 예를 들어 3, 1, 4 처럼요.
+
+          4장에서 핀 번호를 목록에 담고 `for` 로 하나씩 꺼냈던 것을 떠올려 보세요. 숫자도 목록에 담을 수 있을까요? 그러면 `range(10)` 자리에는 무엇이 들어가야 할까요?
+        todo:
+          - "고른 숫자 세 개(0~9)를 목록에 담기 (예: `mynum = [3, 1, 4]`)"
+          - "`for num in ...` 이 그 목록에서 하나씩 꺼내게 바꾸기"
+          - 실행해서 세 숫자만 되풀이되는지 보고 **판정** 누르기
+        instructions: 내가 고른 숫자 세 개(0~9)를 목록에 담고, 그 숫자들만 0.5초 간격으로 되풀이해 보여 주세요
+        code: step1_digits_0_9.py
+        rules:
+          - codeMatches: '^\w+\s*=\s*\[\s*\d\s*,\s*\d\s*,\s*\d\s*\]\s*$'
+            fail: 고른 숫자 세 개를 담은 목록이 있나요? 목록 안의 숫자는 모두 0~9 한 자리인가요?
+          - codeMatches: '^\s*for \w+ in (?!range\b)\w+\s*:'
+            fail: for 가 아직 range 에서 숫자를 꺼내고 있지 않나요? 내 목록에서 꺼내게 하려면?
+          - codeMatches: 'hc595_shift\(SEGCODE\[\w+\]\)'
+            fail: 꺼낸 숫자의 막대 코드를 칩으로 보내는 줄이 남아 있나요?
+        answerCode: extra2_my_numbers.py
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        minutes: 6
+        scene:
+          image: images/segments.svg
+          caption: 숫자를 보여 주고, 기다리고, 다음 숫자로 — 이 순서를 우리말로 먼저 써요
+        body: |
+          이번에는 **로켓 발사 카운트다운**을 설계해요. 3, 2, 1 을 1초씩 보여 주고, 0 에서는 **점까지 켜서** 2초 동안 "발사!"를 알린 뒤 모든 막대를 꺼요.
+
+          블록 중 **7세그먼트 준비하기** 는 세 핀과 SEGCODE 목록, 숫자 하나를 보여 주는 `show_digit(숫자, 점)` 을 한꺼번에 만들어 줘요. 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "점까지 켜서 보여 준다"가 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 7세그먼트를 준비한다 (SI __ 번, RCK 23번, SCK 18번)
+            blank: { answer: 5 }
+          - text: 숫자 __ 을 보여 주고 1초 기다린다
+            blank: { answer: 3 }
+          - text: 숫자 2 를 보여 주고 1초 기다린다
+          - text: 숫자 1 을 보여 주고 __ 초 기다린다
+            blank: { answer: 1 }
+          - text: 숫자 0 을 보여 주고 점(dp)은 __ (켜기 또는 끄기)
+            blank: { answer: 켜기(켠다) }
+          - text: __ 초 기다린다
+            blank: { answer: 2 }
+          - text: 모든 막대를 끈다
+        translation:
+          - ["7세그먼트를 준비한다", "si = Pin(5, Pin.OUT) … SEGCODE = [...]"]
+          - ["숫자 3 을 보여 준다 (점은 끄기)", "show_digit(3, False)"]
+          - ["점까지 켜서 0 을 보여 준다", "show_digit(0, True)"]
+          - ["1초 기다린다", "time.sleep(1)"]
+          - ["모든 막대를 끈다", "hc595_shift(0)"]
+        targetCode: design_seg7.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        scene:
+          image: images/shift-register.svg
+          caption: 핀 3개로 막대 8개를 켠 비밀 — 한 칸씩 밀어 넣고, 한꺼번에 내보내기
+        body: |
+          오늘은 숫자의 모양을 0과 1 여덟 칸으로 바꾸고, 그 여덟 칸을 핀 3개로 보냈어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          먼저 코드 줄마다 "이 줄은 ___"을 내 말로 채우고, 아래 네 칸에 오늘 있었던 일을 솔직하게 적어요. 다 쓰면 짝에게 1분 동안 설명해 보세요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 설명하기
+        lineExplain: step1_digits_0_9.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳(배선이나 코드)은 어디였고, 어떻게 풀었나요?
+          - SI · SCK · RCK 세 핀이 하는 일을 친구에게 설명하듯 한 문장씩 써 보세요.
+          - 숫자 2 를 0과 1 여덟 칸(dp g f e d c b a)으로 적으면 어떻게 될까요? 왜 그렇게 생각하나요?
+          - "다음엔 여기부터 본다: 한 줄로"
