@@ -7,8 +7,10 @@ export const BLOCK_DOC_MENU_ID = "block_doc";
 
 export type BlockDocRequest = {
   type: string;
-  /** 우클릭한 블록의 지금 값으로 읽은 제목 */
+  /** 우클릭한 블록의 지금 값으로 읽은 제목 (팝업 제목의 화면 읽기용 글) */
   title: TitlePart[];
+  /** 우클릭한 블록의 JSON (지금 값·끼운 값 블록 포함, 아래로 이어진 블록·안에 넣은 명령 블록은 뺀다). 팝업의 블록 그림 */
+  state: BlockState;
   /** 그 블록 하나가 만드는 코드 (지금 값으로) */
   code: string;
   blockId: string;
@@ -27,6 +29,34 @@ function realBlock(block: Blockly.Block): Blockly.Block {
 }
 
 type BlockState = Blockly.serialization.blocks.State;
+
+/** 그림에 쓰지 않는 상태(꺼짐·접힘)를 안쪽 블록까지 지운다: 시작 블록에 붙지 않아 꺼진 블록도 원래 색으로 그린다 */
+function clearDisplayState(state: BlockState | undefined): void {
+  if (!state) return;
+  delete (state as BlockState & { disabledReasons?: string[] }).disabledReasons;
+  delete state.enabled;
+  delete state.collapsed;
+  for (const input of Object.values(state.inputs ?? {})) {
+    clearDisplayState(input.block);
+    clearDisplayState(input.shadow);
+  }
+}
+
+/**
+ * 팝업에 그릴 블록 JSON: 그 블록과 값 칸에 끼운 블록(그림자 숫자·변수 등)은 지금 값 그대로, 반복·만약의 안에 넣은
+ * 명령 블록은 뺀다 (몸통이 길면 그림이 화면을 덮는다). 좌표·꺼짐·접힘은 넣지 않는다
+ */
+export function blockStateOf(block: Blockly.Block): BlockState {
+  const state = Blockly.serialization.blocks.save(block, { addNextBlocks: false, addCoordinates: false }) ?? { type: block.type };
+  for (const input of block.inputList) {
+    if (input.type !== Blockly.inputs.inputTypes.STATEMENT) continue;
+    const saved = state.inputs?.[input.name];
+    if (saved?.block) delete saved.block;
+    if (saved && !saved.shadow) delete state.inputs![input.name];
+  }
+  clearDisplayState(state);
+  return state;
+}
 
 /** 직렬화 JSON 에서 id 블록을 찾아 그 블록과 안쪽 블록을 모두 켠다 (찾으면 true) */
 function enableSubtree(state: BlockState | undefined, id: string, inside = false): boolean {
@@ -91,6 +121,7 @@ export function registerBlockDocMenu(onOpen: (req: BlockDocRequest) => void): vo
       onOpenRef?.({
         type: block.type,
         title: titleOfBlock(block),
+        state: blockStateOf(block),
         code: codeOfBlock(block),
         blockId: block.id,
         fromFlyout: block.workspace.isFlyout,

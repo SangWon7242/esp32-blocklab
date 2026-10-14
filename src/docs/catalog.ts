@@ -7,9 +7,9 @@ import { entryTheme, registerBlocks, toolbox } from "@/blocks";
 import { blockSnippet } from "@/codegen";
 import { DEVICE_CATEGORIES } from "@/devices/registry";
 import { CONTENT } from "./content";
-import type { BlockContent, BlockDoc, DocCategory, TitlePart } from "./types";
+import type { BlockContent, BlockDoc, BlockState, DocCategory, TitlePart } from "./types";
 
-export type { BlockContent, BlockDoc, DocCategory, TitlePart } from "./types";
+export type { BlockContent, BlockDoc, BlockState, DocCategory, TitlePart } from "./types";
 
 /** 툴박스 블록 항목 (Blockly.serialization.blocks.append 가 받는 꼴) */
 type BlockItem = { kind: "block"; type: string; fields?: Record<string, unknown>; inputs?: Record<string, unknown>; extraState?: unknown };
@@ -83,7 +83,11 @@ function slotText(block: Blockly.Block | null): string {
     .join(" ");
 }
 
-type Built = { title: TitlePart[]; code: string; tooltip: string; colour: string };
+type Built = { title: TitlePart[]; code: string; tooltip: string; colour: string; preset: BlockState };
+
+/** 툴박스 항목 → 블록 JSON (빈 칸은 뺀다). 깊은 복사라 Blockly 가 고쳐도 툴박스는 그대로다 */
+const stateOf = (i: BlockItem): BlockState =>
+  JSON.parse(JSON.stringify({ type: i.type, fields: i.fields, inputs: i.inputs, extraState: i.extraState })) as BlockState;
 
 /**
  * 블록이 작업판에 그려지는 색. 테마 스타일을 쓰는 블록(흐름·판단…)은 헤드리스 작업판이 스타일을 칠하지 않으므로
@@ -101,10 +105,12 @@ function buildBlock(item: BlockItem, before?: BlockItem): Built {
   // 버리는 작업판이라 이벤트를 쌓지 않는다 (나중에 비동기로 도는 이벤트가 이미 지운 작업판을 찾지 않게)
   Blockly.Events.disable();
   try {
-    const state = (i: BlockItem) => ({ type: i.type, fields: i.fields, inputs: i.inputs, extraState: i.extraState }) as Blockly.serialization.blocks.State;
-    if (before) Blockly.serialization.blocks.append(state(before), ws);
-    const block = Blockly.serialization.blocks.append(state(item), ws);
-    return { title: titleOfBlock(block), code: blockSnippet(block), tooltip: Blockly.Tooltip.getTooltipOfObject(block), colour: blockColour(block) };
+    if (before) Blockly.serialization.blocks.append(stateOf(before), ws);
+    const block = Blockly.serialization.blocks.append(stateOf(item), ws);
+    return {
+      title: titleOfBlock(block), code: blockSnippet(block), tooltip: Blockly.Tooltip.getTooltipOfObject(block),
+      colour: blockColour(block), preset: stateOf(item),
+    };
   } finally {
     ws.dispose();
     Blockly.Events.enable();
@@ -136,7 +142,10 @@ function buildCatalog(): DocCategory[] {
       if (seen) {
         // 같은 종류의 다른 모양 (만약-아니면, 다른 장치 이름의 읽기 블록). 같은 모양(다른 카테고리에 또 보여 주는 것)은 넣지 않는다
         const known = [seen.title, ...(seen.variants ?? [])];
-        if (!known.some((t) => sameTitle(t, built.title))) seen.variants = [...(seen.variants ?? []), built.title];
+        if (!known.some((t) => sameTitle(t, built.title))) {
+          seen.variants = [...(seen.variants ?? []), built.title];
+          seen.variantPresets = [...(seen.variantPresets ?? []), built.preset];
+        }
         continue;
       }
       const doc: BlockDoc = { type: item.type, category, ...built, ...(CONTENT[item.type] ?? fallbackContent(built.tooltip)) };

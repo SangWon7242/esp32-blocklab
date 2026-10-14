@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ChevronDown, FileCode2 } from "lucide-react";
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
@@ -8,45 +8,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { categoryColourStyle } from "@/lib/contrast";
 import { cn } from "@/lib/utils";
 import type { BlockDoc, TitlePart } from "@/docs/catalog";
+import { BlockImage } from "./BlockImage";
 
 /** 제목을 한 줄 글로 (aria-label 등) */
 export const titleText = (parts: TitlePart[]) => parts.map((p) => p.text).filter((t) => t.trim()).join(" ");
-
-/** 블록 제목: 고정 글과 학생이 바꾸는 칸(칩) */
-export function TitleChips({ parts }: { parts: TitlePart[] }) {
-  return (
-    <>
-      {parts.map((p, i) =>
-        p.kind === "slot" ? (
-          <span key={i} className="rounded-full bg-white/80 px-2 text-sm font-normal text-neutral-900">{p.text || " "}</span>
-        ) : (
-          <span key={i}>{p.text}</span>
-        ),
-      )}
-    </>
-  );
-}
-
-type TitlePillProps = Omit<ComponentProps<"div">, "children"> & {
-  parts: TitlePart[];
-  /** 블록 색 (바탕, BlockDoc.colour). 글자색은 이 색의 밝기로 고른다 */
-  colour: string;
-  /** 제목 알약을 그릴 요소 (사전 카드는 h3, 설명 팝업은 h2) */
-  as?: "div" | "h2" | "h3";
-};
-
-/** 블록 모양을 닮은 제목 알약 (블록 색 바탕). 사전 카드·설명 팝업 제목이 함께 쓴다 */
-export function TitlePill({ parts, colour, as: Tag = "div", className, style, ...rest }: TitlePillProps) {
-  return (
-    <Tag
-      {...rest}
-      className={cn("inline-flex w-fit max-w-full flex-wrap items-center gap-1.5 rounded-lg px-3 py-1.5 text-base leading-normal font-medium", className)}
-      style={{ ...categoryColourStyle(colour), ...style }}
-    >
-      <TitleChips parts={parts} />
-    </Tag>
-  );
-}
 
 export function CategoryBadge({ doc }: { doc: BlockDoc }) {
   return <Badge style={categoryColourStyle(doc.category.colour)}>{doc.category.name}</Badge>;
@@ -147,17 +112,21 @@ export function BlockDocCard({ doc, highlighted }: { doc: BlockDoc; highlighted?
       className={cn("outline-none transition-shadow duration-500", highlighted && "ring-2 ring-primary")}
     >
       <CardHeader className="flex flex-col gap-2">
+        {/* 제목은 글(화면 읽기·찾기용, 보이지 않음)과 팔레트와 똑같은 블록 그림 */}
+        <h3 className="sr-only">{titleText(doc.title)}</h3>
         <div className="flex flex-wrap items-center gap-2">
-          <TitlePill as="h3" parts={doc.title} colour={doc.colour} />
+          <BlockImage state={doc.preset} />
           <CategoryBadge doc={doc} />
         </div>
-        {doc.variants && doc.variants.length > 0 && (
-          // 툴박스의 다른 자리(다른 장치 카테고리·다른 모양)에 나오는 같은 블록의 이름
-          <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        {doc.variantPresets && doc.variantPresets.length > 0 && (
+          // 툴박스의 다른 자리(다른 장치 카테고리·다른 모양)에 나오는 같은 블록
+          <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
             <span>이런 이름으로도 나와요:</span>
-            {doc.variants.map((parts, i) => (
-              <TitlePill key={i} parts={parts} colour={doc.colour} className="px-2 py-0.5 text-sm" />
-            ))}
+            <div className="flex flex-wrap items-center gap-2">
+              {doc.variantPresets.map((preset, i) => (
+                <BlockImage key={i} state={preset} scale={0.65} label={titleText(doc.variants?.[i] ?? [])} />
+              ))}
+            </div>
           </div>
         )}
       </CardHeader>

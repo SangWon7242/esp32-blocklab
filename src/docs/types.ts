@@ -1,4 +1,8 @@
-/** 블록 사전의 자료 꼴. React·Blockly 에 기대지 않는다 */
+/** 블록 사전의 자료 꼴. React 에 기대지 않고, Blockly 는 직렬화 JSON 의 꼴(타입)만 빌린다 */
+import type { serialization } from "blockly";
+
+/** 블록 하나의 직렬화 JSON (Blockly.serialization.blocks.append 가 받는 꼴: 그림자·필드 값 포함) */
+export type BlockState = serialization.blocks.State;
 
 /** 블록 제목 한 조각: 고정 글(text) 또는 학생이 바꾸는 칸(slot: 필드 값·값 칸 그림자 값, 빈 값 칸은 "") */
 export type TitlePart = { kind: "text"; text: string } | { kind: "slot"; text: string };
@@ -21,8 +25,12 @@ export type BlockDoc = {
   title: TitlePart[];
   /** 툴박스 항목 그대로 만든 블록 하나의 코드 (값 블록이면 식) */
   code: string;
-  /** 같은 종류가 툴박스에 여러 번 있을 때 나머지 항목의 제목 */
+  /** 툴박스 항목 그대로의 블록 JSON. 사전의 블록 그림을 팔레트와 똑같이 그릴 때 쓴다 */
+  preset: BlockState;
+  /** 같은 종류가 툴박스에 여러 번 있을 때 나머지 항목의 제목 (검색용) */
   variants?: TitlePart[][];
+  /** variants 와 같은 순서의 그 항목 블록 JSON (변형 그림) */
+  variantPresets?: BlockState[];
   tooltip: string;
 } & BlockContent;
 

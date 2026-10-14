@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import * as Blockly from "blockly";
 import { registerBlocks } from "@/blocks";
-import { BLOCK_DOC_MENU_ID, codeOfBlock, registerBlockDocMenu } from "./blockDocMenu";
+import { BLOCK_DOC_MENU_ID, blockStateOf, codeOfBlock, registerBlockDocMenu } from "./blockDocMenu";
 
 beforeAll(() => {
   registerBlocks();
@@ -91,6 +91,50 @@ describe("블록 설명 메뉴", () => {
       expect(codeOfBlock(block)).toContain("time.sleep(3)");
       // 원래 블록은 그대로 꺼져 있다
       expect(block.isEnabled()).toBe(false);
+    } finally {
+      ws.dispose();
+    }
+  });
+
+  it("요청에 우클릭한 블록의 JSON(지금 값)이 담긴다", () => {
+    const onOpen = vi.fn();
+    registerBlockDocMenu(onOpen);
+    const item = Blockly.ContextMenuRegistry.registry.getItem(BLOCK_DOC_MENU_ID) as ActionItem;
+    const ws = new Blockly.Workspace();
+    try {
+      const block = waitBlock(ws, 4);
+      block.setDisabledReason(true, "orphaned_block");
+      item.callback({ block: block as Blockly.BlockSvg }, new Event("contextmenu"), new Event("click"), new Blockly.utils.Coordinate(0, 0));
+      const state = onOpen.mock.calls[0][0].state;
+      expect(state.type).toBe("flow_wait");
+      expect(state.inputs.SEC.shadow.fields.NUM).toBe(4);
+      // 꺼짐·좌표는 그림에 쓰지 않는다
+      expect(state.disabledReasons).toBeUndefined();
+      expect(state.x).toBeUndefined();
+    } finally {
+      ws.dispose();
+    }
+  });
+
+  it("blockStateOf: 아래로 이어진 블록과 안에 넣은 명령 블록은 빼고 값 칸은 남긴다", () => {
+    const ws = new Blockly.Workspace();
+    try {
+      const loop = Blockly.serialization.blocks.append(
+        {
+          type: "flow_repeat_n",
+          inputs: {
+            TIMES: { shadow: { type: "math_number", fields: { NUM: 7 } } },
+            DO: { block: { type: "flow_wait", inputs: { SEC: { shadow: { type: "math_number", fields: { NUM: 1 } } } } } },
+          },
+          next: { block: { type: "flow_wait", inputs: { SEC: { shadow: { type: "math_number", fields: { NUM: 2 } } } } } },
+        },
+        ws,
+      );
+      const state = blockStateOf(loop);
+      expect(state.type).toBe("flow_repeat_n");
+      expect(state.inputs?.TIMES?.shadow?.fields?.NUM).toBe(7);
+      expect(state.inputs?.DO).toBeUndefined();
+      expect(state.next).toBeUndefined();
     } finally {
       ws.dispose();
     }

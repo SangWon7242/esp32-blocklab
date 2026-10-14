@@ -17,6 +17,12 @@ test("블록을 우클릭해 이 블록 설명 보기를 연다", async ({ page 
 
   const dialog = page.getByTestId("block-doc-dialog");
   await expect(dialog).toBeVisible();
+  // 제목은 우클릭한 블록을 지금 값 그대로 그린 그림 (편집기와 같은 렌더러)
+  const picture = dialog.locator("svg.blocklySvg");
+  await expect(picture).toHaveCount(1);
+  await expect(picture.locator(".blocklyText", { hasText: "초 기다리기" })).toBeVisible();
+  await expect(picture.locator(".blocklyText", { hasText: /^1$/ })).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: "1 초 기다리기" })).toBeAttached();
   await expect(dialog).toContainText("time.sleep(1)");
   await expect(dialog).toContainText("내 블록이 만드는 코드");
   await expect(dialog).toContainText("무슨 뜻인가요");
@@ -41,6 +47,7 @@ test("팔레트 블록도 설명을 볼 수 있다", async ({ page }) => {
   await docMenuItem(page).click();
   const dialog = page.getByTestId("block-doc-dialog");
   await expect(dialog).toContainText("time.sleep_ms(500)");
+  await expect(dialog.locator("svg.blocklySvg .blocklyText", { hasText: "밀리초 기다리기" })).toBeVisible();
   // 팔레트 블록은 학생이 놓은 블록이 아니다
   await expect(dialog).toContainText("이 블록이 만드는 코드");
   await page.keyboard.press("Escape");
@@ -93,6 +100,27 @@ test("?block= 으로 들어오면 그 카드로 스크롤한다", async ({ page 
   const card = page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]');
   await expect(card).toBeInViewport();
   await expect(card).toBeFocused();
+});
+
+test("블록 사전 카드의 제목은 팔레트와 같은 블록 그림이다", async ({ page }) => {
+  await page.goto("/#/docs?block=flow_wait");
+  const card = page.locator('[data-testid="block-doc-card"][data-type="flow_wait"]');
+  // 편집기와 같은 렌더러·테마로 그린 SVG: 블록 글자와 그림자 값이 Blockly 글자(.blocklyText)로 들어 있다
+  const picture = card.locator("svg.blocklySvg");
+  await expect(picture).toHaveCount(1);
+  await expect(picture.locator(".blocklyText", { hasText: "초 기다리기" })).toBeVisible();
+  await expect(picture.locator(".blocklyText", { hasText: /^1$/ })).toBeVisible();
+  // 블록 색과 흰 글자 (Blockly CSS 가 복제한 그림에도 먹는다)
+  await expect(picture.locator("path.blocklyPath").first()).toHaveAttribute("fill", "#19baea");
+  await expect(picture.locator(".blocklyText", { hasText: "초 기다리기" })).toHaveCSS("fill", "rgb(255, 255, 255)");
+  // 화면 읽기용 제목 글
+  await expect(card.getByRole("heading", { name: "1 초 기다리기" })).toBeAttached();
+  // 다른 모양으로도 나오는 블록은 그 모양도 그림으로
+  const ifCard = page.locator('[data-testid="block-doc-card"][data-type="controls_if"]');
+  await ifCard.scrollIntoViewIfNeeded();
+  await expect(ifCard.getByText("이런 이름으로도 나와요:")).toBeVisible();
+  await expect(ifCard.locator("svg.blocklySvg")).toHaveCount(2);
+  await expect(ifCard.locator("svg.blocklySvg").nth(1).locator(".blocklyText", { hasText: "아니면" })).toBeVisible();
 });
 
 test("이미 자유 코딩에 있을 때 주소만 ?example= 으로 바뀌어도 예시가 실린다", async ({ page }) => {

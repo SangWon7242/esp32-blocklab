@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import * as Blockly from "blockly";
 import { registerBlocks, toolbox } from "@/blocks";
 import { codeToBlocks } from "@/parser";
-import { findDoc, getCatalog, searchDocs } from "./catalog";
+import { findDoc, getCatalog, searchDocs, titleOfBlock } from "./catalog";
 import { adc, pinOut } from "@/devices/specs/pin";
 import { knob, light } from "@/devices/specs/sensor";
 
@@ -153,6 +153,48 @@ describe("블록 사전 카탈로그", () => {
       "시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드",
     ]);
     expect(getCatalog().map((c) => c.name)).toEqual(categories.map((c) => c.name));
+  });
+
+  it("모든 블록에 툴박스 항목 그대로의 블록 JSON(preset)이 있고, 그것으로 같은 블록이 만들어진다", () => {
+    const toolboxItems = categories.flatMap((c) => (c.contents ?? []).filter((i) => i.kind === "block")) as (ToolboxNode & {
+      fields?: unknown; inputs?: unknown;
+    })[];
+    for (const d of getCatalog().flatMap((c) => c.blocks)) {
+      expect(d.preset.type, d.type).toBe(d.type);
+      // 툴박스 항목(처음 나온 것)의 필드·그림자 값이 그대로 들어 있다
+      const item = toolboxItems.find((i) => i.type === d.type);
+      if (item) {
+        expect(d.preset.fields, d.type).toEqual(item.fields);
+        expect(d.preset.inputs, d.type).toEqual(item.inputs);
+      }
+      // 그 JSON 으로 다시 만든 블록의 제목이 카드 제목과 같다 (그림과 글이 같은 블록)
+      const ws = new Blockly.Workspace();
+      try {
+        if (d.type === "procedures_callnoreturn" || d.type === "procedures_callreturn") {
+          const def = d.type === "procedures_callnoreturn" ? "procedures_defnoreturn" : "procedures_defreturn";
+          Blockly.serialization.blocks.append({ type: def, fields: { NAME: "my_func" } }, ws);
+        }
+        const block = Blockly.serialization.blocks.append(structuredClone(d.preset), ws);
+        expect(titleOfBlock(block), d.type).toEqual(d.title);
+      } finally {
+        ws.dispose();
+      }
+    }
+  });
+
+  it("변형마다 그 블록 JSON(variantPresets)이 같은 순서로 있다", () => {
+    for (const d of getCatalog().flatMap((c) => c.blocks)) {
+      expect(d.variantPresets?.length ?? 0, d.type).toBe(d.variants?.length ?? 0);
+      for (const p of d.variantPresets ?? []) expect(p.type, d.type).toBe(d.type);
+    }
+    expect(findDoc("controls_if")!.variantPresets![0].extraState).toBeTruthy();
+  });
+
+  it("preset 은 매번 같은 JSON 이다 (카탈로그를 다시 읽어도)", () => {
+    const a = JSON.stringify(getCatalog().flatMap((c) => c.blocks.map((b) => b.preset)));
+    const b = JSON.stringify(getCatalog().flatMap((c) => c.blocks.map((b) => b.preset)));
+    expect(a).toBe(b);
+    expect(findDoc("flow_wait")!.preset).toEqual({ type: "flow_wait", inputs: { SEC: { shadow: { type: "math_number", fields: { NUM: 1 } } } } });
   });
 
   it("카탈로그는 한 번 만들어 둔다", () => {

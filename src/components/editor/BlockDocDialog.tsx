@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { BlockDocBody, CategoryBadge, TitlePill } from "@/app/docs/BlockDocCard";
+import { BlockDocBody, CategoryBadge, titleText } from "@/app/docs/BlockDocCard";
+import { BlockImage } from "@/app/docs/BlockImage";
 import type { BlockDoc } from "@/docs/catalog";
 import type { BlockDocRequest } from "./blockDocMenu";
 
@@ -33,14 +34,9 @@ export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) 
         >
           <DialogHeader className="gap-3">
             {doc && <CategoryBadge doc={doc} />}
-            {doc ? (
-              // 제목은 우클릭한 블록의 지금 값으로 (아래 코드와 같은 값)
-              <DialogTitle asChild className="leading-normal">
-                <TitlePill as="h2" parts={request.title} colour={doc.colour} />
-              </DialogTitle>
-            ) : (
-              <DialogTitle>블록 설명</DialogTitle>
-            )}
+            {/* 제목 글은 화면 읽기용(보이지 않음), 보이는 제목은 우클릭한 블록을 지금 값 그대로 그린 그림 (아래 코드와 같은 값) */}
+            <DialogTitle className="sr-only">{doc ? titleText(request.title) : "블록 설명"}</DialogTitle>
+            <BlockImage state={request.state} />
             <DialogDescription className="sr-only">이 블록이 만드는 코드와 뜻, 예시 프로그램</DialogDescription>
           </DialogHeader>
 
