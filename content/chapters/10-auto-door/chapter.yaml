@@ -12,9 +12,18 @@ materials:
   - { name: HC-SR04 초음파 센서, note: "핀 4개를 브레드보드에 꽂기. USB 를 뺀 채, GND 선부터" }
   - { name: 서보 모터, note: "문 역할. 갈색 − 줄, 빨강 + 줄, 주황 신호선은 4번 핀" }
   - { name: OLED 0.96" (SSD1306), note: "SDA 21 · SCL 22. 보드에 ssd1306.py 를 먼저 올려 두기" }
-  - { name: 점퍼선, note: "M-F(보드 ↔ 브레드보드) · M-M(브레드보드 안, 서보 플러그)" }
+  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 핀(5V · GND · 3V3 · 22 · 21 · 13 · 12 · 4) → 브레드보드" }
+  - { name: 점퍼선(M-M), note: "양쪽 끝이 핀인 선. 브레드보드 안에서 + 줄 · − 줄로 잇거나 서보 플러그를 꽂을 때" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring: { image: images/wiring-door.svg, caption: "브레드보드 위쪽 + 줄(5V)·− 줄(GND)을 세 부품이 함께 써요. 초음파 Trig → 13 · Echo → 12, 서보 주황 → 4, OLED SDA → 21 · SCL → 22 · VCC → 3V3" }
+principle:
+  image: images/ultrasonic-principle.svg
+  body: |
+    초음파 센서는 사람 귀에 들리지 않는 높은 소리(40kHz)를 쏘고, 물체에 부딪혀 돌아오는 **메아리**를 들어요. 박쥐가 길을 찾는 방법과 같아요.
+
+    - **Trig** 핀에 10마이크로초 동안 1(HIGH)을 주면 센서가 소리를 쏘아요
+    - **Echo** 핀은 소리가 갔다가 돌아올 때까지 1 로 켜져 있어요. 그 시간이 **왕복 시간**이에요
+    - 소리는 1초에 약 340m 를 가요. 왕복 시간의 **절반**에 소리 빠르기를 곱하면 물체까지의 거리가 나와요 (거리 = 340 × 시간 ÷ 2)
 goals:
   content: 초음파로 잰 거리를 if 로 판단해 서보(문)와 OLED(화면)를 함께 제어한다
   thinking: 문제를 세 덩어리로 분해하고, 실행 결과를 미리 예측하고, 증상에서 원인을 역추적한다
@@ -101,6 +110,16 @@ parts:
           - "**보드 연결** → **실행** 누르기"
           - 손을 움직이며 숫자를 보고, 예측과 비교하기
         code: step1_distance.py
+        expected: 코드를 실행하면 2초 뒤부터 창에 `23 cm` 처럼 센서 앞 물체까지의 거리가 0.5초마다 한 줄씩 찍히고, 손을 가까이 대면 숫자가 작아져요.
+        codeNotes:
+          - { line: 4, note: "13번 핀(Trig)을 내보내는 핀으로 정하고 `trig` 라고 이름 붙여요" }
+          - { line: 5, note: "12번 핀(Echo)을 받아들이는(입력) 핀으로 정하고 `echo` 라고 이름 붙여요" }
+          - { line: 9, note: "Trig 에 1 을 주고 10마이크로초 뒤 0 으로 돌리면 센서가 소리를 쏘아요" }
+          - { line: 14, note: "Echo 가 1 이 된 순간의 시각(마이크로초)을 `start` 에 적어 둬요" }
+          - { line: 17, note: "Echo 가 0 으로 돌아온 순간의 시각을 `stop` 에 적어 둬요" }
+          - { line: 18, note: "`ticks_diff` 로 두 시각의 차이(왕복 시간)를 구하고 `// 2` 로 절반만 남겨요" }
+          - { line: 19, note: "소리 빠르기 340m/s 를 곱하고 단위를 바꿔 cm 로 돌려줘요" }
+          - { line: 25, note: "거리를 재서 숫자와 `cm` 를 창에 찍어요" }
 
       - id: readcheck1
         type: readcheck
@@ -116,10 +135,16 @@ parts:
           - 세 문항에 답하고 **확인** 누르기
           - 틀린 문항은 그 줄을 다시 읽고 고치기
         code: step1_distance.py
+        codeNotes:
+          - { line: 8, note: "`def get_distance():` 거리를 재서 cm 로 알려 주는 함수를 만들어요" }
+          - { line: 12, note: "`while not echo.value(): pass` Echo 가 1 이 될 때까지 아무것도 안 하고 기다려요" }
+          - { line: 19, note: "소리 빠르기 340m/s 를 곱하고 단위를 바꿔 cm 로 돌려줘요" }
+          - { line: 22, note: "센서가 깨어날 시간 2초를 기다려요" }
+          - { line: 25, note: "거리를 재서 숫자와 `cm` 를 창에 찍어요" }
         questions:
           - { kind: choice, q: "소리를 쏘는 핀은 둘 중 어느 것인가요? (몇 번 핀인지도 코드에서 찾아보세요)", options: ["trig", "echo"], answer: 0, hint: "trig 는 trigger(방아쇠)" }
           - { kind: number, q: "get_distance 함수 안에서 시간을 적어 두는 줄은 몇 개인가요?", answer: 2 }
-          - { kind: number, q: "t = t // 2 줄을 지우면 찍히는 숫자는 지금의 몇 배가 될까요?", answer: 2 }
+          - { kind: number, q: "t = time.ticks_diff(stop, start) // 2 줄에서 // 2 를 지우면 찍히는 숫자는 지금의 몇 배가 될까요?", answer: 2 }
 
       - id: mission1
         type: mission
@@ -171,7 +196,15 @@ parts:
               - codeMatches: "    print"
                 fail: 에러가 몇 번째 줄이라고 하나요?
           - title: 에러는 없는데 10초에 한 번만 재요
-            code: "trig.value(1)\ntime.sleep(10)\ntrig.value(0)"
+            code: |
+              from machine import Pin
+              import time
+
+              trig = Pin(13, Pin.OUT)
+
+              trig.value(1)
+              time.sleep(10)
+              trig.value(0)
             question: 소리는 아주 잠깐만 쏘아야 해요. 기다리는 시간을 정하는 줄에서 무엇이 잘못됐나요?
             rules:
               - codeMatches: 'sleep_us\(10\)'
@@ -229,6 +262,16 @@ parts:
           - "**실행** 누르고 손을 15cm 안에 넣어 보기"
           - 화면 글씨가 바뀌고 문이 열렸다 닫히는지 보기
         code: step3_auto_door.py
+        expected: 코드를 실행하면 화면에 `AUTO DOOR` / `Come closer` 가 떠요. 손을 센서 앞 15cm 안에 넣으면 화면이 `DOOR OPEN` 과 거리로 바뀌며 문(서보)이 열리고, 잠시 뒤 `DOOR CLOSE` / `Bye~` 와 함께 닫힌 다음 대기 화면으로 돌아가요.
+        codeNotes:
+          - { line: 8, note: "4번 핀의 서보를 문으로 써요 (50Hz, 처음엔 닫기)" }
+          - { line: 12, note: "OLED 화면이 쓸 두 선(SCL 22번, SDA 21번)을 정해요" }
+          - { line: 16, note: "`def get_distance():` 1부에서 만든 거리 재는 함수 그대로예요" }
+          - { line: 30, note: "`def show(a, b):` 화면을 지우고 두 줄을 띄우는 함수예요" }
+          - { line: 38, note: "처음 대기 화면을 띄워요" }
+          - { line: 41, note: "거리를 재서 `d` 에 담아요" }
+          - { line: 42, note: "`if d < 15:` 15cm 보다 가까울 때만 아래 들여 쓴 줄들을 실행해요" }
+          - { line: 44, note: "`duty_u16(8100)`: 문을 열어요" }
 
       - id: readcheck2
         type: readcheck
@@ -243,6 +286,13 @@ parts:
           - "`while True:` 아래를 손가락으로 짚으며 읽기"
           - 세 문항에 답하고 **확인** 누르기
         code: step3_auto_door.py
+        codeNotes:
+          - { line: 5, note: "13번 핀(Trig)은 소리를 쏘는 핀이에요" }
+          - { line: 8, note: "4번 핀의 서보를 문으로 써요 (50Hz, 처음엔 닫기)" }
+          - { line: 12, note: "OLED 화면이 쓸 두 선(SCL 22번, SDA 21번)을 정해요" }
+          - { line: 16, note: "`def get_distance():` 1부에서 만든 거리 재는 함수 그대로예요" }
+          - { line: 30, note: "`def show(a, b):` 화면을 지우고 두 줄을 띄우는 함수예요" }
+          - { line: 41, note: "거리를 재서 `d` 에 담아요" }
         questions:
           - { kind: number, q: "문이 열려 있는 시간은 몇 초인가요? (어느 줄을 보면 알 수 있는지도 찾아보세요)", answer: 3 }
           - { kind: number, q: "문이 한 번 열렸다 닫히는 동안 show() 는 몇 번 불리나요?", answer: 3, hint: "열릴 때·닫힐 때·대기 화면" }
@@ -282,7 +332,21 @@ parts:
           - 빠진 줄을 찾아 넣고 **판정**
         symptoms:
           - title: 에러는 없는데 화면 글씨가 안 바뀌어요
-            code: "oled.text(a, 0, 20)\noled.text(b, 0, 36)"
+            code: |
+              from machine import Pin, SoftI2C
+              import ssd1306
+
+              i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
+              oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+              def show(a, b):
+                  oled.fill(0)
+                  oled.text(a, 0, 20)
+                  oled.text(b, 0, 36)
+
+
+              show("AUTO DOOR", "Come closer")
             question: 적어 두는 것과 보여 주는 것은 같나요? 완성 코드의 show 함수와 비교하면 무엇이 빠졌나요?
             rules:
               - codeMatches: 'oled.show\(\)'

@@ -15,8 +15,7 @@ def get_distance():                       # 거리를 재서 알려 주는 함�
     while echo.value():                   # 메아리가 돌아올 때까지
         pass                              # 또 기다리기
     stop = time.ticks_us()                # 돌아온 시간 적어 두기
-    t = time.ticks_diff(stop, start)      # 두 시간의 차이 = 다녀온 시간
-    t = t // 2                            # 왕복이니까 절반만 (가는 시간)
+    t = time.ticks_diff(stop, start) // 2  # 다녀온 시간의 절반 = 가는 시간
     return int(340 * t // 10000)          # 소리 속도를 곱해 cm 로 바꾸기
 
 
