@@ -1,0 +1,353 @@
+# 챕터 9 · OLED 출입 화면 — 수업 저장소 09_OLED출입화면. 형식 설명은 src/track/README.md
+# 미션 판정의 codeEquals 는 tolerance 255: 학생마다 카드 번호(0~255 숫자 넷)가 달라도 통과하게. 카운트다운의 숫자는 따로 규칙으로 본다
+id: 09-oled-access
+order: 9
+title: OLED 출입 화면
+summary: |
+  8장의 출입문은 문이 열리는지 닫히는지만 보고 알 수 있었어요. 오늘은 문 옆에 작은 **OLED 화면**을 달아, 카드를 대면 "들어오세요" 인지 "모르는 카드" 인지를 **글자로** 알려 줘요.
+  1부에서 화면에 글자와 도형을 그리는 법을 익히고, 2부에서 8장의 출입 통제 코드에 화면을 더해 완성해요. 복사한 코드를 설명할 수 없으면 다음으로 넘어가지 않아요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: Micro USB 선으로 노트북과 연결 }
+  - { name: OLED 화면 (128×64), note: "I2C 방식. 핀 4개: GND → − 줄 · VCC → + 줄 · SCL → 22 · SDA → 21" }
+  - { name: RFID RC522 모듈, note: "OLED 와 같은 선을 나눠 써요: SCL → 22 · SDA → 21 · G → − 줄 · V → + 줄" }
+  - { name: IC 카드 또는 열쇠고리 태그, note: 8장에서 적어 둔 내 카드 번호도 챙기기 }
+  - { name: 서보 모터, note: "8장과 같아요. 주황 신호선 → 4 · 빨강 → + 줄 · 갈색 → − 줄" }
+  - { name: 브레드보드, note: "+ 줄(5V)·− 줄(GND)을 셋이 함께 쓰고, SCL·SDA 도 세로줄 하나씩에 모아 꽂아요" }
+  - { name: 점퍼선, note: "F-F 듀폰선(모듈 ↔ 보드) 여러 가닥, 브레드보드에 꽂을 때는 M-F" }
+  - { name: USB 선, note: 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-oled-rfid.svg
+  caption: "OLED SCL 과 RFID SCL 은 같은 세로줄 → 22번, OLED SDA 와 RFID SDA 는 같은 세로줄 → 21번. OLED VCC · RFID V · 서보 빨강 → + 줄(5V), OLED GND · RFID G · 서보 갈색 → − 줄(GND). 서보 주황 → 4번"
+goals:
+  content: OLED 화면에 글자와 도형을 좌표로 그리고, RFID 판단 결과(통과·거부)를 show 함수로 화면에 알려 준다
+  thinking: 두 장치가 선 두 개를 나눠 쓸 때 주소로 구분된다는 것을 이해하고, "적어 두기"와 "보여 주기"를 나눠 생각한다
+successCriteria:
+  - oled.text 로 적은 글자가 oled.show() 를 불러야 화면에 나타나는 까닭을 말할 수 있다
+  - (x, y) 좌표에서 x 와 y 가 각각 어느 쪽으로 커지는지 말하고, 원하는 자리에 글자를 적을 수 있다
+  - 화면이 안 켜질 때 전원 · 주소 · 라이브러리 순서로 확인할 수 있다
+parts:
+  - id: part1
+    title: 1부 · 화면에 글자와 도형 그리기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 문이 말을 할 수 있다면?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 같은 문인데 카드에 따라 화면에 다른 글자가 떠요. 화면이 없으면 무엇이 불편할까요?
+        body: |
+          8장의 출입문은 카드를 대면 열리거나 그대로 있었어요. 그런데 문이 안 열렸을 때, **카드가 등록이 안 된 건지 고장 난 건지** 어떻게 알 수 있을까요?
+
+          아직 코드도 부품도 없어요. 활동 칸의 세 질문에 **내 생각을 한두 문장**으로 적어 보세요. 정답은 없고, 틀려도 괜찮아요.
+        todo:
+          - 준비물(OLED 화면, RFID 모듈, 카드, 서보, 선)을 책상에 꺼내 놓기
+          - 세 질문에 내 생각을 한두 문장씩 적기
+          - 다 적으면 **완료** 누르기
+        questions:
+          - 출입문에 작은 화면이 있다면 어떤 말을 보여 주면 좋을까요? 카드를 대기 전, 통과했을 때, 거부됐을 때로 나눠 생각해 봐요
+          - 화면은 글자를 "어디에" 쓸지 어떻게 알까요? 공책에 글을 쓸 때와 비교해 보세요
+          - RFID 와 화면이 둘 다 보드와 이야기해야 해요. 선이 모자라면 어떻게 할 수 있을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          화면이 달린 출입문이 하는 일을 **세 덩어리**로 나눠 봐요. 8장에서 한 일(카드 읽기, 목록과 비교, 문 열기)에 **화면에 보여 주기**가 더해졌어요.
+
+          화면에 무엇을 보여 줄지는 **누가 정해야** 할까요? 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 문이 바깥에서 알아내야 하는 것 적기"
+          - "**정해야 할 것**: 사람(우리)이 미리 정해 둬야 하는 것 적기"
+          - "**해야 할 것**: 문과 화면이 실제로 하는 행동 적기"
+        answer:
+          know: ["카드가 리더에 닿았는지", "그 카드의 번호(UID)", "번호가 등록 목록에 있는지"]
+          decide: ["들여보낼 카드 번호 목록", "화면에 띄울 말(대기 · 통과 · 거부)", "글자를 적을 자리(x, y)", "결과를 몇 초 보여 줄지"]
+          act: ["대기 화면 띄우기", "카드 번호를 읽고 목록과 비교하기", "결과를 화면에 띄우고 문을 열거나 닫아 두기", "잠시 뒤 대기 화면으로 돌아가기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 글자는 화면 어디에 뜰까?
+        minutes: 5
+        scene:
+          image: images/oled-grid.svg
+          caption: "화면은 가로 128칸 · 세로 64칸의 점이에요. (0, 0)은 맨 위 구석이고, y 는 아래로 갈수록 커져요"
+        body: |
+          OLED 화면은 아주 작은 점 **128 × 64개**로 되어 있어요. `oled.text("글", x, y)` 는 (x, y) 자리부터 글자를 적어요. 글자 한 자는 점 8 × 8 크기예요.
+
+          아직 실행하지 마세요. `step1_oled_text.py` 를 읽고 화면에 무엇이 어떻게 보일지 **먼저 예측**해 적어요. 마지막 줄 `oled.show()` 가 왜 따로 있는지도 눈여겨보세요.
+        todo:
+          - 그림을 보고 x 와 y 가 각각 어느 쪽으로 커지는지 확인하기
+          - 세 빈칸에 내 예측 쓰기
+          - 예측마다 근거를 한 문장씩 생각해 두기
+        code: step1_oled_text.py
+        blanks:
+          - q: 화면에 글자가 몇 줄 보일까요?
+            unit: 줄
+          - q: "\"Ready\" 는 화면의 위 · 가운데 · 아래 중 어디쯤 보일까요? 왜 그렇게 생각하나요?"
+          - q: 마지막 줄 oled.show() 를 지우고 실행하면 화면은 어떻게 될까요?
+
+      - id: run1
+        type: run
+        title: 복사 · 실행 — 화면에 글자 띄우기
+        minutes: 8
+        scene:
+          image: images/wiring-oled-rfid.svg
+          caption: "지금은 OLED 4선만 새로 꽂아요: GND → − 줄 · VCC → + 줄 · SCL → 22번 줄 · SDA → 21번 줄"
+        body: |
+          **USB 를 뺀 채로** OLED 를 연결해요. GND → − 줄, VCC → + 줄(5V), SCL → 22번, SDA → 21번. 8장의 RFID·서보 배선이 남아 있으면 그대로 두고, SCL·SDA 는 RFID 와 **같은 세로줄**에 꽂아요.
+
+          화면도 혼자서는 그림을 못 그려서 **라이브러리 파일**이 보드에 있어야 해요. 오늘 쓰는 건 모두 5개(RFID 3개 + `ssd1306.py` + `gfx.py`)예요. **보드에 저장**이나 **실행**을 누르면 블록랩이 코드의 import 줄을 보고 필요한 파일을 함께 올려 줘요.
+
+          실행해서 화면에 글자가 뜨면 예측과 비교해 보세요. 화면이 까맣다면 먼저 **전원(VCC · GND)** 부터 확인해요.
+        todo:
+          - USB 를 뺀 채 OLED 4선(GND · VCC · SCL · SDA) 연결하기
+          - "**보드 연결** → **실행** 누르고 화면 보기"
+          - 세 줄이 어디에 떴는지 예측과 비교하기
+        code: step1_oled_text.py
+
+      - id: readcheck1
+        type: readcheck
+        title: 읽기 체크 ①
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          방금 실행한 `step1_oled_text.py` 를 **위에서 아래로 손가락으로 짚으며** 읽어요. 복사한 코드를 "이게 무슨 뜻인지" 말할 수 없으면 다음으로 넘어가지 않는 게 오늘의 약속이에요.
+
+          답을 **공책에 먼저 적은 뒤** 확인을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - "`oled.text` 세 줄과 마지막 줄을 한 줄씩 읽기"
+          - 세 문제에 답하고 **확인** 누르기
+          - 틀린 문항은 그 줄을 다시 읽고 고치기
+        code: step1_oled_text.py
+        questions:
+          - { kind: choice, q: "oled.text(...) 줄이 하는 일은 무엇인가요?", options: ["화면에 바로 글자를 띄운다", "화면에 띄울 글자를 적어 둔다", "화면을 까맣게 지운다"], answer: 1, hint: "줄 끝의 설명을 읽어 보세요" }
+          - { kind: number, q: "\"Smart Door\" 는 화면 맨 위에서 몇 칸 아래(y)에 적히나요?", answer: 20 }
+          - { kind: line, q: "적어 둔 글자들이 화면에 나타나는 줄의 줄 번호를 클릭하세요", answer: 12 }
+
+      - id: run2
+        type: run
+        title: 복사 · 실행 — 선 · 네모 · 동그라미 그리기
+        minutes: 6
+        scene:
+          image: images/oled-grid.svg
+          caption: "도형도 글자처럼 (x, y) 자리에서 시작해요. 네모는 시작 자리와 가로 · 세로 길이로 그려요"
+        body: |
+          화면에는 글자 말고 **도형**도 그릴 수 있어요. `step2_oled_shapes.py` 는 도형 도우미 `gfx` 를 준비해서 선, 네모 테두리, 꽉 채운 네모, 동그라미를 한 번에 그려요. 배선은 그대로예요.
+
+          실행하기 전에 줄 끝의 설명을 읽고, 네 도형이 화면 어디쯤 생길지 손가락으로 짚어 봐요. 그다음 숫자 하나를 바꿔 다시 실행하고 무엇이 달라졌는지 보세요.
+        todo:
+          - "**실행** 누르고 도형 네 개가 어디에 생기는지 보기"
+          - "`graphics.circle` 의 반지름(10)을 20 으로 바꿔 다시 실행하기"
+          - 달라진 점을 공책에 한 줄 적기
+        code: step2_oled_shapes.py
+
+  - id: part2
+    title: 2부 · 출입 결과를 화면에
+    steps:
+      - id: run3
+        type: run
+        title: 복사 · 실행 — 출입 결과를 화면에 띄우기
+        minutes: 8
+        scene:
+          image: images/i2c-shared.svg
+          caption: "OLED 와 RFID 는 SCL(22번) · SDA(21번) 두 선을 나눠 써요. 주소 0x3C 는 화면, 0x28 은 리더라서 서로 헷갈리지 않아요"
+        body: |
+          이제 8장의 출입 통제 코드에 화면을 더해요. `step3_access_display.py` 에는 두 줄 안내를 띄우는 **함수** `show(a, b)` 가 있어요. `show("DENIED", "Unknown card")` 처럼 부르면 지우기 → 첫 줄 → 둘째 줄 → 보여 주기를 한 번에 해 줘요.
+
+          USB 를 뺀 채 RFID 와 서보가 모두 꽂혀 있는지 확인해요. 실행하기 전에 `allowed` 의 네 숫자를 **8장에서 적은 내 카드 번호**로 바꾸고, 내 카드와 짝의 카드를 번갈아 대 보세요.
+        todo:
+          - 배선도를 보고 OLED · RFID · 서보가 모두 꽂혀 있는지 확인하기
+          - "`allowed` 의 숫자 네 개를 내 카드 번호로 바꾸기"
+          - "**실행** 누르고 두 카드를 대며 화면 글자가 어떻게 바뀌는지 보기"
+        code: step3_access_display.py
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 ②
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: "show 함수를 만드는 곳과 부르는 곳을 손가락으로 오가며 읽어 봐요"
+        body: |
+          이번에는 `show` 함수를 **만드는 곳**(`def show(a, b):`)과 **부르는 곳**을 오가며 읽어요. 부를 때 넣은 글자가 함수 안의 `a`, `b` 자리에 들어가요.
+
+          답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - "`def show(a, b):` 아래 네 줄을 짚으며 읽기"
+          - "`show(...)` 를 부르는 줄을 모두 찾아보기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step3_access_display.py
+        questions:
+          - { kind: choice, q: "show(\"DENIED\", \"Unknown card\") 를 부르면 함수 안의 a 에는 무엇이 들어가나요?", options: ["\"DENIED\"", "\"Unknown card\"", "0"], answer: 0, hint: "부를 때 넣은 순서와 def 줄의 순서를 맞춰 보세요" }
+          - { kind: number, q: "결과 화면(ACCESS OK 또는 DENIED)은 몇 초 동안 보이다가 대기 화면으로 돌아가나요?", answer: 3 }
+          - { kind: line, q: "카드를 대기 전, 맨 처음 대기 화면을 띄우는 줄의 줄 번호를 클릭하세요", answer: 26 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 닫히기까지 남은 시간 보여 주기
+        minutes: 9
+        scene:
+          image: images/cover.svg
+          caption: 문이 열려 있는 동안 화면의 숫자가 3 → 2 → 1 로 줄어들면, 언제 닫히는지 알 수 있어요
+        body: |
+          지금은 문이 열린 뒤 그냥 3초를 기다려요. 지나가는 사람은 문이 **언제 닫힐지** 모르죠. 열려 있는 3초 동안 화면에 **3 · 2 · 1** 을 보여 주면 어떨까요?
+
+          `time.sleep(3)` 한 번은 1초씩 세 번 기다리는 것과 같아요. 숫자를 하나 보여 주고 1초 기다리기를 **세 번 반복**하려면 무엇을 쓰면 될까요? 숫자 `t` 를 글자와 이으려면 `str(t)` 로 글자로 바꿔야 해요.
+        todo:
+          - 등록된 카드일 때 문을 열고, 3 → 2 → 1 을 보여 주며 1초씩 기다린 뒤 문 닫기
+          - 모르는 카드일 때는 DENIED 를 띄우고 3초 기다리기
+          - 실행해서 내 카드로 숫자가 줄어드는지 보고 **판정** 누르기
+        instructions: |
+          문이 열려 있는 3초 동안 화면에 3 · 2 · 1 카운트다운을 보여 주세요.
+          등록된 카드일 때: 문을 열고(servo.duty_u16(8100)), for t in range(3, 0, -1): 반복 안에서 show("OPEN", "Close: " + str(t)) 와 1초 기다리기를 하고, 반복이 끝나면 문을 닫아요(servo.duty_u16(1638)). ACCESS OK 줄은 지워요.
+          모르는 카드일 때: show("DENIED", "Unknown card") 다음에 3초 기다려요. 문은 이미 닫혀 있으니 닫는 줄은 지워요.
+          맨 아래 time.sleep(3) 줄은 지우고, 대기 화면으로 돌아가는 마지막 show 줄은 그대로 둬요
+        hint: "range(3, 0, -1) 은 3 에서 시작해 1 씩 줄어들고, 0 이 되기 전에 멈춰요. 그래서 t 는 3, 2, 1 이 돼요"
+        code: step3_access_display.py
+        rules:
+          - codeMatches: 'for t in range\(3, 0, -1\):'
+            fail: 3 → 2 → 1 로 거꾸로 세는 반복이 있나요? range 에 시작 · 끝 · 몇씩 바뀌는지 세 숫자를 넣어 봐요
+          - codeMatches: 'show\("OPEN", "Close: "\s*\+\s*str\(t\)\)'
+            fail: '반복 안에서 남은 시간을 화면에 보여 주나요? 숫자 t 를 "Close: " 뒤에 붙이려면 무엇으로 바꿔야 할까요?'
+          - codeMatches: 'str\(t\)\)\n\s+time\.sleep\(1\)'
+            fail: 숫자 하나를 보여 준 뒤 얼마나 기다려야 세 번 합쳐 3초가 될까요?
+          - codeEquals: { file: mission_countdown.py, tolerance: 255 }
+            fail: 남은 곳이 있어요. 반복이 끝난 뒤 문을 닫나요? 모르는 카드일 때 3초 기다리나요? 맨 아래 time.sleep(3) 줄은 어떻게 했나요?
+        answerCode: mission_countdown.py
+
+      - id: debug
+        type: debug
+        title: 디버깅 미션 — 화면이 안 켜져요
+        minutes: 7
+        scene:
+          image: images/i2c-shared.svg
+          caption: "화면이 안 켜지면 전원(VCC · GND)부터, 그다음 이름표(주소), 그다음 라이브러리 순서로 봐요"
+        body: |
+          고장 난 코드 세 개가 있어요. 바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 화면이 까말 때는 **전원 → 주소 → 라이브러리** 순서로 보는 게 오늘의 약속이에요. 전원 선이 맞는데도 이상하면 그때 코드를 봐요.
+
+          셋 중 **빨간 글씨가 뜨는 것**은 어느 것일까요? 나머지 둘은 왜 에러 없이 이상하게만 굴까요? 최소 4분은 혼자 해 봐요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: 화면이 까만 채로예요. 빨간 글씨도 안 떠요
+            code: "oled.fill(0)\noled.text(\"Hello, ESP32!\", 0, 0)\noled.text(\"Smart Door\", 0, 20)\noled.text(\"Ready\", 0, 40)"
+            question: 전원 선(VCC · GND)은 맞게 꽂았는데도 까맣다면, 적어 둔 글자를 화면에 "내보내는" 줄이 있나요? oled.text 는 무엇을 하는 줄이었나요?
+            rules:
+              - codeMatches: 'oled\.text\("Ready", 0, 40\)\noled\.show\(\)'
+                fail: 다 적은 뒤에 화면에 나타나게 하는 줄이 있나요? 그 줄은 적는 줄들보다 앞일까요, 뒤일까요?
+          - title: 화면에 "Tag your card..." 는 뜨는데, 카드를 대도 아무 일도 없어요
+            code: "rc522 = mfrc522(22, 21, 0x3C)\nrc522.PCD_Init()"
+            question: 두 장치는 같은 선을 쓰고 이름표(주소)로 구분돼요. 0x3C 는 누구의 이름표였나요? 그림에서 RFID 의 이름표를 찾아보세요
+            rules:
+              - codeMatches: '^rc522 = mfrc522\(22, 21, 0x28\)'
+                fail: RFID 를 부르는 이름표(주소)가 RFID 의 것인가요? 그림의 두 이름표를 다시 비교해 보세요
+          - title: "실행하자마자 빨간 글씨로 ImportError: no module named 'oled' 가 떠요"
+            code: "import oled\n\ni2c = SoftI2C(scl=Pin(22), sda=Pin(21))\noled = ssd1306.SSD1306_I2C(128, 64, i2c)"
+            question: 보드에 올라가는 라이브러리 5개 중 화면용 파일의 이름은 무엇이었나요? 아래 줄에서 SSD1306_I2C 앞에 붙은 이름과 import 줄의 이름이 같나요?
+            rules:
+              - codeMatches: '^import ssd1306$'
+                fail: 화면 설명서(라이브러리) 파일 이름과 import 줄의 이름이 같나요? 아래 줄에서 점(.) 앞에 쓴 이름을 보세요
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        minutes: 6
+        scene:
+          image: images/oled-grid.svg
+          caption: 테두리 네모, 가운데 제목, 가로선, 안내 문구 — 화면을 꾸밀 자리를 좌표로 먼저 정해요
+        body: |
+          출입문을 켰을 때 처음 보이는 **시작 화면**을 설계해요. 인사를 2초 보여 준 뒤, 화면 가장자리에 **테두리 네모**를 두르고 제목 · 가로선 · 안내 문구를 그려요. 코드를 쓰기 전에 **우리말로 먼저!**
+
+          블록 **OLED 화면 준비하기** 는 `show(a, b)` 함수도 함께 만들어 줘요. 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "테두리 네모"가 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: OLED 화면을 준비한다 (SCL 22번, SDA 21번)
+          - text: 두 줄 안내 "SMART DOOR" 와 "Hello!" 를 띄운다
+          - text: __ 초 기다린다
+            blank: { answer: "2" }
+          - text: 화면을 __
+            blank: { answer: 지운다 }
+          - text: 화면 가장자리를 따라 (0, 0) 에서 가로 128 · 세로 64 인 __ 를 그린다
+            blank: { answer: 네모(테두리) }
+          - text: (24, 12) 자리에 "SMART DOOR" 를 적는다
+          - text: y 가 __ 인 자리에 가로선을 긋는다
+            blank: { answer: "30" }
+          - text: (12, 44) 자리에 "Tag your card" 를 적는다
+          - text: 적어 둔 것을 화면에 __
+            blank: { answer: 내보낸다(보여 준다) }
+        translation:
+          - ["두 줄 안내 띄우기", "show(\"첫 줄\", \"둘째 줄\")"]
+          - ["화면 지우기", "oled.fill(0)"]
+          - ["테두리 네모", "oled.rect(x, y, 가로, 세로, 1)"]
+          - ["글자 적어 두기", "oled.text(\"글\", x, y)"]
+          - ["선 긋기", "oled.line(x1, y1, x2, y2, 1)"]
+          - ["화면에 내보내기", "oled.show()"]
+          - ["기다린다", "time.sleep(초)"]
+        targetCode: design_oled.py
+
+      - id: extra
+        type: mission
+        title: 추가 미션 — 몇 번째 출입인지 세기
+        optional: true
+        minutes: 7
+        scene:
+          image: images/cover.svg
+          caption: 문이 열릴 때마다 화면의 번호가 1, 2, 3 … 으로 늘어나요
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 문이 **몇 번 열렸는지** 세어서 화면에 함께 보여 줘요. 등록된 카드를 댈 때마다 `No. 1`, `No. 2`, … 처럼 번호가 늘어나야 해요.
+
+          보드는 몇 번 열렸는지 저절로 기억하지 못해요. **세어 둘 이름** `count` 를 하나 만들고(처음엔 `0`), 문을 열 때마다 1 씩 더하면 어떨까요?
+        todo:
+          - "`allowed` 줄 바로 아래에 `count = 0` 만들기"
+          - 등록된 카드면 count 에 1 을 더하고, 화면에 OPEN 과 번호 보여 주기
+          - 실행해서 내 카드를 두세 번 대 보고 **판정** 누르기
+        instructions: |
+          문이 열린 횟수를 세어 화면에 함께 보여 주세요. allowed 줄 바로 아래에 count = 0 을 두고,
+          등록된 카드일 때 맨 먼저 count = count + 1 로 하나 더한 뒤, ACCESS OK 줄 대신 show("OPEN", "No. " + str(count)) 를 띄워요. 나머지 줄은 그대로 둬요
+        hint: "count = count + 1 은 지금 count 에 1 을 더한 값을 다시 count 에 적어 두라는 뜻이에요"
+        code: step3_access_display.py
+        rules:
+          - codeMatches: '^count = 0'
+            fail: 열린 횟수를 세어 둘 이름을 처음에 무엇으로 정해 두었나요?
+          - codeMatches: 'count = count \+ 1'
+            fail: 문이 열릴 때마다 count 가 하나씩 늘어나나요?
+          - codeMatches: 'show\("OPEN", "No\. "\s*\+\s*str\(count\)\)'
+            fail: 화면에 번호를 보여 주나요? 숫자 count 를 "No. " 뒤에 붙이려면 무엇으로 바꿔야 할까요?
+          - codeEquals: { file: extra1_count.py, tolerance: 255 }
+            fail: 남은 곳이 있어요. count 에 1 을 더하는 줄은 화면에 보여 주는 줄보다 앞에 있나요? ACCESS OK 줄은 지웠나요?
+        answerCode: extra1_count.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 우리 반 출입문 화면에는 어떤 말을 띄우고 싶나요?
+        body: |
+          마지막으로 오늘 한 생각을 정리해요. 먼저 완성 코드의 줄마다 "이 줄은 ___" 을 채우고, 아래 네 질문에 답해요.
+
+          기록 틀: **막힌 곳 → 내가 해 본 것 → 결국 원인은 → 다음엔 여기부터 본다**. 다 쓰면 짝에게 1분 동안 설명해 보세요.
+        todo:
+          - 줄마다 "이 줄은 ___" 채우기 (할 수 있는 만큼)
+          - 네 질문에 답하기
+          - 짝에게 1분 동안 설명하기
+        lineExplain: step3_access_display.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - oled.text 와 oled.show() 를 왜 따로 나눠 두었을까요? 한 줄씩 바로 보여 주면 무엇이 불편할까요?
+          - OLED 와 RFID 가 같은 선 두 개를 나눠 쓸 수 있는 까닭을 짝에게 설명하듯 적어 보세요
+          - "다음엔 여기부터 본다: 한 줄로"

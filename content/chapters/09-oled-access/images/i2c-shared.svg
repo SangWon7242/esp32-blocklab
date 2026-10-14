@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ic-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ic-title">I2C 두 선 나눠 쓰기: ESP32 에서 나온 SCL(22번)·SDA(21번) 두 선에 OLED 화면과 RFID 리더가 함께 매달려 있다. ESP32 가 주소 0x3C 를 부르면 OLED 가, 0x28 을 부르면 RFID 가 대답한다</title>
+  <!-- ESP32 -->
+  <rect x="24" y="96" width="120" height="150" rx="10" fill="var(--card)"/>
+  <text x="84" y="164" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="84" y="186" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" opacity="0.75">부르는 쪽</text>
+  <!-- 두 선 -->
+  <path d="M144 132 H612" stroke="#1971c2" stroke-width="5"/>
+  <path d="M144 212 H612" stroke="#7048e8" stroke-width="5"/>
+  <g font-size="14" font-weight="700" stroke="none">
+    <text x="154" y="122" fill="#1971c2">SCL · 22번 (박자 선)</text>
+    <text x="154" y="202" fill="#7048e8">SDA · 21번 (글자 선)</text>
+  </g>
+  <!-- OLED -->
+  <path d="M342 132 V262 M362 212 V262" stroke-width="3"/>
+  <circle cx="342" cy="132" r="5" fill="#1971c2" stroke="none"/>
+  <circle cx="362" cy="212" r="5" fill="#7048e8" stroke="none"/>
+  <rect x="296" y="262" width="112" height="70" rx="8" fill="#1d4ed8"/>
+  <rect x="306" y="270" width="92" height="30" rx="3" fill="#0b1b4d" stroke="none"/>
+  <text x="352" y="291" text-anchor="middle" font-size="14" font-weight="700" fill="#7dd3fc" stroke="none">OLED</text>
+  <text x="352" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" stroke="none">0x3C</text>
+  <!-- RFID -->
+  <path d="M502 132 V262 M522 212 V262" stroke-width="3"/>
+  <circle cx="502" cy="132" r="5" fill="#1971c2" stroke="none"/>
+  <circle cx="522" cy="212" r="5" fill="#7048e8" stroke="none"/>
+  <rect x="456" y="262" width="112" height="70" rx="8" fill="#1c7ed6"/>
+  <text x="512" y="291" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">RFID</text>
+  <text x="512" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" stroke="none">0x28</text>
+  <!-- 부르는 말 -->
+  <rect x="160" y="24" width="150" height="58" rx="10" fill="var(--card)"/>
+  <text x="235" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">"0x3C, 이 글자 받아!"</text>
+  <text x="235" y="70" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" opacity="0.75">→ OLED 만 대답</text>
+  <rect x="318" y="24" width="150" height="58" rx="10" fill="var(--card)"/>
+  <text x="393" y="48" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">"0x28, 카드 있어?"</text>
+  <text x="393" y="70" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" opacity="0.75">→ RFID 만 대답</text>
+  <text x="84" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">선은 둘,</text>
+  <text x="84" y="312" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">주소로 구분</text>
+</svg>

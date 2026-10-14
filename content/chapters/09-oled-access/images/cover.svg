@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="oc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="oc-title">출입문 두 장면: 등록된 카드를 대면 문 옆 작은 화면에 OK 가 뜨고 문이 열리고, 모르는 카드를 대면 화면에 NO 가 뜨고 문은 닫힌 채로 있다</title>
+  <path d="M20 316 H620"/>
+  <!-- 장면 1: OK -->
+  <rect x="48" y="60" width="180" height="256" rx="4" fill="var(--card)"/>
+  <rect x="68" y="84" width="140" height="232" fill="var(--muted)"/>
+  <path d="M68 84 L128 104 V306 L68 316 Z" fill="var(--background)" stroke-width="2.5"/>
+  <path d="M116 200 V224" stroke-width="3"/>
+  <rect x="244" y="120" width="72" height="54" rx="6" fill="var(--card)"/>
+  <rect x="252" y="128" width="56" height="38" rx="3" fill="#0b1b4d" stroke="none"/>
+  <text x="280" y="155" text-anchor="middle" font-size="20" font-weight="700" fill="#51cf66" stroke="none">OK</text>
+  <rect x="256" y="196" width="48" height="48" rx="6" fill="#1c7ed6"/>
+  <path d="M270 208 a14 14 0 0 1 20 0 M265 202 a21 21 0 0 1 30 0" stroke="#ffffff" stroke-width="2"/>
+  <rect x="266" y="220" width="40" height="26" rx="4" fill="var(--card)" transform="rotate(-12 286 233)"/>
+  <text x="280" y="290" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">등록된 카드</text>
+  <!-- 장면 2: NO -->
+  <rect x="352" y="60" width="180" height="256" rx="4" fill="var(--card)"/>
+  <rect x="372" y="84" width="140" height="232" fill="var(--background)" stroke-width="2.5"/>
+  <path d="M492 200 V224" stroke-width="3"/>
+  <rect x="548" y="120" width="72" height="54" rx="6" fill="var(--card)"/>
+  <rect x="556" y="128" width="56" height="38" rx="3" fill="#0b1b4d" stroke="none"/>
+  <text x="584" y="155" text-anchor="middle" font-size="20" font-weight="700" fill="#ff8787" stroke="none">NO</text>
+  <rect x="560" y="196" width="48" height="48" rx="6" fill="#1c7ed6"/>
+  <path d="M574 208 a14 14 0 0 1 20 0 M569 202 a21 21 0 0 1 30 0" stroke="#ffffff" stroke-width="2"/>
+  <rect x="570" y="220" width="40" height="26" rx="4" fill="var(--muted)" transform="rotate(-12 590 233)"/>
+  <text x="584" y="290" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">모르는 카드</text>
+  <text x="320" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none">문 옆 작은 화면이 결과를 알려 줘요</text>
+  <text x="138" y="344" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">문이 열려요</text>
+  <text x="442" y="344" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">문은 닫힌 채로</text>
+</svg>
