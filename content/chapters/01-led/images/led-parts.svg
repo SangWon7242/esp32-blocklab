@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>LED 다리: 긴 다리가 + 쪽(저항을 거쳐 26번 핀), 짧은 다리가 − 쪽(GND)</title>
+  <!-- LED 몸통 -->
+  <path d="M188 168 V104 A42 42 0 0 1 272 104 V168 Z" fill="#c99c00" fill-opacity="0.85"/>
+  <path d="M176 168 H284 V184 H176 Z" fill="#c99c00" fill-opacity="0.85"/>
+  <!-- 다리 -->
+  <path d="M208 186 V300" stroke-width="5"/>
+  <path d="M252 186 V244" stroke-width="5"/>
+  <circle cx="208" cy="322" r="16" stroke="#c92a2a" stroke-width="3" fill="var(--card)"/>
+  <path d="M200 322 H216 M208 314 V330" stroke="#c92a2a" stroke-width="3"/>
+  <circle cx="252" cy="266" r="16" stroke-width="3" fill="var(--card)"/>
+  <path d="M244 266 H260" stroke-width="3"/>
+  <g fill="currentColor" stroke="none">
+    <text x="182" y="290" text-anchor="end" font-size="16" font-weight="700">긴 다리</text>
+    <text x="182" y="312" text-anchor="end" font-size="15">+ 쪽</text>
+    <text x="280" y="240" font-size="16" font-weight="700">짧은 다리</text>
+    <text x="280" y="262" font-size="15">− 쪽</text>
+  </g>
+  <!-- 오른쪽: 어디로 가나 -->
+  <rect x="392" y="72" width="224" height="204" rx="14" fill="var(--muted)"/>
+  <g fill="currentColor" stroke="none">
+    <text x="412" y="104" font-size="15" opacity="0.75">어디에 꽂을까?</text>
+    <text x="412" y="146" font-size="16" font-weight="700">긴 다리 +</text>
+    <text x="412" y="172" font-size="16">→ 저항 → 26번 핀</text>
+    <text x="412" y="222" font-size="16" font-weight="700">짧은 다리 −</text>
+    <text x="412" y="248" font-size="16">→ GND</text>
+  </g>
+  <path d="M404 128 V178" stroke="#c92a2a" stroke-width="4"/>
+  <path d="M404 204 V254" stroke-width="4"/>
+  <text x="504" y="312" text-anchor="middle" font-size="15" fill="currentColor" stroke="none" opacity="0.75">거꾸로 꽂으면 불이 안 들어와요</text>
+</svg>

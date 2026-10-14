@@ -2,6 +2,19 @@
 id: 01-led
 order: 1
 title: LED 켜기
+summary: |
+  ESP32 보드의 **26번 핀**에 LED 하나를 꽂고, 파이썬 코드 몇 줄로 불을 켜고, 끄고, 깜빡이게 해 봐요.
+  "켜기 → 기다리기 → 끄기"를 순서대로 적으면 보드가 그대로 따라 한다는 것을 직접 확인해요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: LED, note: 긴 다리가 + }
+  - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
+  - { name: 점퍼선, note: 2~3개 }
+  - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
+wiring:
+  image: images/wiring-led.svg
+  caption: "LED 긴 다리(+) → 220Ω 저항 → 26번 핀, 짧은 다리(−) → GND"
 parts:
   - id: part1
     title: LED 켜고 깜빡이기
@@ -9,13 +22,35 @@ parts:
       - id: problem
         type: problem
         title: 문제 만나기 — LED는 어떻게 켜질까?
+        scene:
+          image: images/cover.svg
+          caption: 오늘의 목표 — 노트북에서 코드를 실행해 책상 위 LED 불 켜기
+        body: |
+          책상 위에 ESP32 보드와 LED 하나가 있어요. 스위치도 없는데, 노트북에서 코드를 실행하면 LED에 불이 들어와요.
+
+          불이 켜지려면 전기가 LED를 지나 한 바퀴 돌아야 해요. 그 전기를 **보내는 쪽**은 누구이고, 어떻게 "보내라"고 시킬 수 있을까요? 코드를 보기 전에 내 생각부터 적어 봐요.
+        todo:
+          - 준비물(ESP32 보드, LED, 저항, 점퍼선, USB 선)을 책상에 꺼내 놓기
+          - 아래 **부품과 배선**을 열어 LED 다리가 어디로 이어지는지 보기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
         questions:
-          - 전기가 흐르면 켜지는데, 흐르게 하는 건 무엇일까요?
-          - 보드의 핀은 몇 번을 쓸까요? 왜 그 번호일까요?
+          - LED의 긴 다리는 저항을 거쳐 몇 번 핀에 이어져 있나요? 그 번호가 코드 어디에 보일 것 같나요?
+          - 스위치를 누르는 사람이 없는데 LED에 전기가 흐르게 하는 건 무엇일까요? 보드는 그 핀으로 무엇을 보내야 할까요?
 
       - id: analysis
         type: analysis
         title: 조건 분석 — 세 칸 보드
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "LED 켜기"를 보드에게 시키려면 일을 잘게 나눠야 해요. 보드는 눈치가 없어서, 하나하나 알려 주지 않으면 아무것도 못 하거든요.
+
+          오른쪽 세 칸에 각각 한 가지 이상 적어 보세요. 세 칸을 다 쓰면 **예시 답 보기**가 열리고, 내 답과 비교할 수 있어요.
+        todo:
+          - "**알아야 할 것**: 보드가 시작 전에 알고 있어야 할 사실 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 선택이나 숫자 적기"
+          - "**해야 할 것**: 보드가 실제로 바꾸는 일 적기"
         answer:
           know: ["어느 핀에 LED가 있는지"]
           decide: ["켤지 끌지", "얼마나 오래 켜 둘지"]
@@ -24,30 +59,74 @@ parts:
       - id: predict
         type: predict
         title: 예측하기
+        scene:
+          image: images/led-parts.svg
+          caption: 긴 다리(+)는 저항을 거쳐 26번 핀으로, 짧은 다리(−)는 GND로 이어져요
+        body: |
+          오른쪽 코드는 아직 실행하지 않아요. `led = Pin(26, Pin.OUT)`은 "26번 핀을 내보내는(출력) 핀으로 쓰고, 이름은 led로 부른다"는 뜻이에요.
+
+          마지막 줄 `led.value(1)`이 26번 핀으로 무엇을 보낼지 상상해 보고, LED가 어떻게 될지 미리 적어요. 틀려도 괜찮아요. 다음 단계에서 직접 확인해요.
+        todo:
+          - 코드 5줄을 위에서부터 한 줄씩 소리 내어 읽기
+          - 빈칸 두 개에 내 예측 쓰기 (켜진다? 꺼진다? 아무 일도 없다?)
         code: step1_led_on.py
         blanks:
-          - q: 실행하면 LED는?
-          - q: value(0)으로 바꾸면?
+          - q: 실행하면 26번 핀에 꽂힌 LED는 어떻게 될까요?
+          - q: 마지막 줄을 led.value(0)으로 바꾸면 LED는 어떻게 될까요?
 
       - id: run
         type: run
         title: 복사 · 실행 — LED 켜기
+        scene:
+          image: images/wiring-led.svg
+          caption: "실행 전에 확인: 긴 다리 → 220Ω 저항 → 26번 핀, 짧은 다리 → GND"
+        body: |
+          이제 예측을 직접 확인할 차례예요. 보드를 USB 선으로 노트북에 꽂고, LED와 저항이 그림처럼 꽂혀 있는지 먼저 살펴요.
+
+          코드를 실행한 뒤 LED를 보세요. 내 예측과 같았나요? 다르다면 어디가 달랐는지 기억해 두세요.
+        todo:
+          - LED 긴 다리가 저항 쪽(26번), 짧은 다리가 GND 쪽인지 확인하기
+          - 위쪽 **보드 연결**을 누르고 USB로 이은 보드 고르기
+          - "**실행**을 누르고 LED에 불이 들어오는지 보기"
         code: step1_led_on.py
 
       - id: readcheck
         type: readcheck
         title: 읽기 체크
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 오른쪽 코드 안에 있어요
+        body: |
+          이번 코드는 LED를 **계속** 깜빡이게 해요. 눈으로 보기만 해서는 몇 초씩인지 정확히 알기 어렵지만, 코드를 읽으면 숫자로 알 수 있어요.
+
+          `while True:` 아래 들여 쓴 4줄이 끝없이 되풀이돼요. 한 줄씩 읽으면서 세 문제에 답하고 **확인**을 누르세요.
+        todo:
+          - "`time.sleep(...)` 괄호 안의 숫자 찾기"
+          - "`led.value(1)` 줄과 `led.value(0)` 줄이 무엇이 다른지 보기"
+          - 세 문제에 답하고 **확인** 누르기
         code: step4_blink_loop.py
         questions:
-          - { kind: number, q: "켜져 있는 시간은 몇 초?", answer: 1 }
-          - { kind: choice, q: "끄는 줄은?", options: ["led.value(1)", "led.value(0)"], answer: 1 }
+          - { kind: number, q: "LED가 한 번 켜져 있는 시간은 몇 초인가요?", answer: 1 }
+          - { kind: choice, q: "LED를 끄는 줄은 어느 것인가요?", options: ["led.value(1)", "led.value(0)"], answer: 1 }
           # 계획에는 7로 적혀 있으나 step4_blink_loop.py 의 첫 time.sleep(1) 은 8번째 줄이다
-          - { kind: line, q: "1초 기다리는 첫 줄을 클릭", answer: 8 }
+          - { kind: line, q: "1초 기다리는 첫 줄의 왼쪽 줄 번호를 클릭하세요", answer: 8 }
 
       - id: mission
         type: mission
         title: 미션 — 천천히 깜빡이기
-        instructions: 2초 켜고 1초 끄게 바꾸세요
+        scene:
+          image: images/blink-timeline.svg
+          caption: 지금 코드는 켜짐 1초 → 꺼짐 1초를 계속 되풀이해요
+        body: |
+          지금 LED는 1초 켜지고 1초 꺼져요. 켜진 시간과 꺼진 시간을 다르게 하면 느낌이 달라져요. 켜져 있는 시간을 늘려 **천천히** 깜빡이게 만들어 봐요.
+
+          코드를 고친 뒤 실행해서 LED가 켜져 있는 동안 "하나, 둘" 세어 보세요. 맞는 것 같으면 **판정**을 눌러요.
+        todo:
+          - 위 그림의 켜짐 칸과 꺼짐 칸이 블록(코드)에서 각각 어디인지 찾기
+          - 숫자를 바꾸고 실행해서 켜짐 2초, 꺼짐 1초인지 세어 보기
+          - "**판정** 누르기"
+        instructions: LED가 2초 동안 켜져 있다가 1초 동안 꺼지기를 계속 되풀이하도록 코드를 바꾸세요
+        hint: 바꿀 곳은 "초 기다리기"(time.sleep) 두 군데예요. 둘 중 어느 쪽이 LED가 켜진 채로 기다리는 곳일까요? 바로 위가 켜기인지 끄기인지 보세요
         code: step4_blink_loop.py
         rules:
           - codeEquals: { file: mission1_slow_blink.py }
@@ -56,6 +135,17 @@ parts:
       - id: design
         type: design
         title: 설계 — 우리말로 먼저 쓰기
+        scene:
+          image: images/blink-timeline.svg
+          caption: 이 깜빡임(켜짐 1초, 꺼짐 1초, 계속)을 우리말 순서로 먼저 써요
+        body: |
+          프로그래머는 코드를 바로 쓰지 않고, 먼저 **우리말로 순서**를 적어요. 순서만 맞으면 코드로 옮기는 건 쉬워요.
+
+          위 그림처럼 1초 켜고 1초 끄기를 계속 되풀이하려면 어떤 순서여야 할까요? 설계도의 빈칸을 채우고, 번역표를 보고, 섞인 블록을 그 순서대로 이어 붙여 보세요.
+        todo:
+          - 우리말 설계도의 빈칸(몇 초?)을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 우리말 한 줄이 어떤 코드가 되는지 짝 지어 보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
         pseudocode:
           - text: 계속 반복한다
           - text: LED를 켠다
@@ -73,6 +163,16 @@ parts:
       - id: reflect
         type: reflect
         title: 성찰 — 오늘 한 생각 쓰기
+        scene:
+          image: images/sos.svg
+          caption: 다음 도전 — 켜기·기다리기·끄기만으로 SOS 신호를 만들 수 있을까요?
+        body: |
+          오늘 LED를 켜고, 끄고, 깜빡이게 했어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요. 그때 무엇을 해 봤는지가 다음 시간의 나를 도와줘요.
+
+          먼저 코드 줄마다 "이 줄은 ___"을 내 말로 채우고, 아래 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸(막힌 곳 · 해 본 것 · 원인 · 다음엔)을 모두 채우기
         lineExplain: step4_blink_loop.py
         prompts:
           - 막힌 곳

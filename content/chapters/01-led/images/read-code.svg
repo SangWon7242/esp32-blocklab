@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>코드 읽기: 줄 번호가 붙은 코드 창을 돋보기로 보며 숫자 찾기, 끄는 줄 찾기, 줄 번호 누르기</title>
+  <!-- 코드 창 -->
+  <rect x="48" y="40" width="380" height="284" rx="12" fill="var(--card)"/>
+  <path d="M48 72 H428"/>
+  <circle cx="70" cy="56" r="5" fill="var(--muted)"/>
+  <circle cx="88" cy="56" r="5" fill="var(--muted)"/>
+  <circle cx="106" cy="56" r="5" fill="var(--muted)"/>
+  <g font-size="13" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55">
+    <text x="84" y="102">1</text><text x="84" y="123">2</text><text x="84" y="144">3</text><text x="84" y="165">4</text>
+    <text x="84" y="186">5</text><text x="84" y="207">6</text><text x="84" y="228">7</text><text x="84" y="249">8</text>
+    <text x="84" y="270">9</text><text x="84" y="291">10</text><text x="84" y="312">11</text>
+  </g>
+  <g fill="currentColor" stroke="none" opacity="0.28">
+    <rect x="100" y="91" width="200" height="9" rx="4.5"/>
+    <rect x="100" y="112" width="150" height="9" rx="4.5"/>
+    <rect x="100" y="154" width="190" height="9" rx="4.5"/>
+    <rect x="100" y="196" width="110" height="9" rx="4.5"/>
+    <rect x="124" y="217" width="120" height="9" rx="4.5"/>
+    <rect x="124" y="238" width="130" height="9" rx="4.5"/>
+    <rect x="124" y="280" width="120" height="9" rx="4.5"/>
+    <rect x="124" y="301" width="130" height="9" rx="4.5"/>
+  </g>
+  <!-- 돋보기 -->
+  <circle cx="340" cy="170" r="38" fill="var(--muted)" fill-opacity="0.5" stroke-width="3"/>
+  <path d="M367 197 L398 228" stroke-width="7"/>
+  <!-- 세 가지 할 일 -->
+  <g stroke="none">
+    <circle cx="466" cy="120" r="13" fill="#4562f5"/>
+    <circle cx="466" cy="190" r="13" fill="#4562f5"/>
+    <circle cx="466" cy="260" r="13" fill="#4562f5"/>
+  </g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">
+    <text x="466" y="125">1</text><text x="466" y="195">2</text><text x="466" y="265">3</text>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <text x="488" y="120" font-size="16" font-weight="700">숫자 찾기</text>
+    <text x="488" y="142" font-size="14" opacity="0.75">몇 초 기다릴까?</text>
+    <text x="488" y="190" font-size="16" font-weight="700">끄는 줄 찾기</text>
+    <text x="488" y="212" font-size="14" opacity="0.75">value( ) 안을 봐요</text>
+    <text x="488" y="260" font-size="16" font-weight="700">줄 번호 누르기</text>
+    <text x="488" y="282" font-size="14" opacity="0.75">왼쪽 회색 숫자</text>
+  </g>
+</svg>

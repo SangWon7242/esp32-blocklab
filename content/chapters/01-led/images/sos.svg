@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>SOS 빛 신호: 짧게 3번, 길게 3번, 짧게 3번 켜기</title>
+  <text x="320" y="52" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">SOS — 빛으로 "도와주세요"</text>
+  <g font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="111" y="112">S</text>
+    <text x="309" y="112">O</text>
+    <text x="507" y="112">S</text>
+  </g>
+  <!-- 바닥선(꺼짐) -->
+  <path d="M44 176 H600" opacity="0.5"/>
+  <!-- 켜짐 막대 -->
+  <g fill="#c99c00">
+    <rect x="56" y="128" width="22" height="48" rx="4"/>
+    <rect x="100" y="128" width="22" height="48" rx="4"/>
+    <rect x="144" y="128" width="22" height="48" rx="4"/>
+    <rect x="188" y="128" width="66" height="48" rx="4"/>
+    <rect x="276" y="128" width="66" height="48" rx="4"/>
+    <rect x="364" y="128" width="66" height="48" rx="4"/>
+    <rect x="452" y="128" width="22" height="48" rx="4"/>
+    <rect x="496" y="128" width="22" height="48" rx="4"/>
+    <rect x="540" y="128" width="22" height="48" rx="4"/>
+  </g>
+  <path d="M56 192 V198 H166 V192 M188 192 V198 H430 V192 M452 192 V198 H562 V192" opacity="0.6"/>
+  <g font-size="15" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="111" y="222">짧게 3번</text>
+    <text x="309" y="222">길게 3번</text>
+    <text x="507" y="222">짧게 3번</text>
+  </g>
+  <!-- 범례 -->
+  <rect x="120" y="270" width="22" height="22" rx="4" fill="#c99c00"/>
+  <text x="152" y="286" font-size="14" fill="currentColor" stroke="none">짧게 = 0.2초 켜기</text>
+  <rect x="330" y="270" width="66" height="22" rx="4" fill="#c99c00"/>
+  <text x="406" y="286" font-size="14" fill="currentColor" stroke="none">길게 = 0.6초 켜기</text>
+  <text x="320" y="330" text-anchor="middle" font-size="14" fill="currentColor" stroke="none" opacity="0.75">켤 때마다 0.2초 쉬고, 한 번 다 보내면 1초 쉬어요</text>
+</svg>
