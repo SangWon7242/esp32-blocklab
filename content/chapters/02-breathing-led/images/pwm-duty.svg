@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>PWM 듀티 파형: 1초에 10000번 켰다 껐다 하는데, 켜진 칸이 짧으면(duty 작게) LED가 어둡고, 켜진 칸이 길면(duty 크게) LED가 밝다</title>
+  <text x="320" y="36" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">PWM: 1초에 10000번 켰다 껐다 하기</text>
+  <!-- 1줄: duty 작게 -->
+  <g fill="currentColor" stroke="none">
+    <text x="24" y="122" font-size="16" font-weight="700">duty 작게</text>
+    <text x="24" y="143" font-size="13" opacity="0.75">켜진 칸이 짧아요</text>
+  </g>
+  <path d="M150 150 H470" stroke-opacity="0.25"/>
+  <path d="M150 150 V104 H164 V150 H230 V104 H244 V150 H310 V104 H324 V150 H390 V104 H404 V150 H470" stroke="#c99c00" stroke-width="3"/>
+  <rect x="150" y="104" width="14" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <rect x="230" y="104" width="14" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <rect x="310" y="104" width="14" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <rect x="390" y="104" width="14" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="middle" opacity="0.75">
+    <text x="157" y="96">켜짐</text>
+    <text x="197" y="168">꺼짐</text>
+  </g>
+  <path d="M484 127 H520 M512 121 L520 127 L512 133"/>
+  <rect x="540" y="146" width="40" height="7" rx="2" fill="var(--muted)"/>
+  <path d="M548 146 V122 A12 12 0 0 1 572 122 V146 Z" fill="#c99c00" fill-opacity="0.2"/>
+  <text x="560" y="176" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">어둡게</text>
+  <!-- 가운데 나눔 -->
+  <path d="M24 204 H616" stroke-dasharray="4 6" stroke-opacity="0.35"/>
+  <!-- 2줄: duty 크게 -->
+  <g fill="currentColor" stroke="none">
+    <text x="24" y="264" font-size="16" font-weight="700">duty 크게</text>
+    <text x="24" y="285" font-size="13" opacity="0.75">켜진 칸이 길어요</text>
+  </g>
+  <path d="M150 292 H470" stroke-opacity="0.25"/>
+  <path d="M150 292 V246 H216 V292 H230 V246 H296 V292 H310 V246 H376 V292 H390 V246 H456 V292 H470" stroke="#c99c00" stroke-width="3"/>
+  <rect x="150" y="246" width="66" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <rect x="230" y="246" width="66" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <rect x="310" y="246" width="66" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <rect x="390" y="246" width="66" height="46" fill="#c99c00" fill-opacity="0.25" stroke="none"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="middle" opacity="0.75">
+    <text x="183" y="238">켜짐</text>
+    <text x="223" y="310">꺼짐</text>
+  </g>
+  <path d="M484 269 H520 M512 263 L520 269 L512 275"/>
+  <circle cx="560" cy="262" r="30" fill="#c99c00" fill-opacity="0.2" stroke="none"/>
+  <rect x="540" y="288" width="40" height="7" rx="2" fill="var(--muted)"/>
+  <path d="M548 288 V264 A12 12 0 0 1 572 264 V288 Z" fill="#c99c00"/>
+  <path d="M560 222 V230 M532 236 L538 242 M588 236 L582 242" stroke="#c99c00" stroke-width="3"/>
+  <text x="560" y="318" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">밝게</text>
+  <!-- 알아 두기 -->
+  <text x="320" y="346" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">duty 는 0 ~ 1023 · 0 은 꺼짐 · 1023 은 가장 밝게</text>
+</svg>

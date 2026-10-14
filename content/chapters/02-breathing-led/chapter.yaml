@@ -1,0 +1,254 @@
+# 챕터 2 · 숨쉬는 LED — 수업 저장소 02_숨쉬는LED 의 README·code 그대로. 형식 설명은 src/track/README.md
+id: 02-breathing-led
+order: 2
+title: 숨쉬는 LED
+summary: |
+  1장에서는 LED를 켜거나 끄는 것만 할 수 있었어요. 이번에는 **PWM** 으로 밝기를 0부터 1023까지 숫자로 정하고, `for` 반복문으로 그 숫자를 조금씩 바꿔 LED가 **숨을 쉬듯** 서서히 밝아졌다 어두워지게 만들어요.
+  배선은 1장과 똑같아요. 달라지는 것은 코드뿐이에요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 1장 배선을 그대로 써요 }
+  - { name: 빨강 LED, note: 긴 다리가 + }
+  - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
+  - { name: 점퍼선, note: "3개 (26번 선 1, GND 선 2)" }
+  - { name: USB 선, note: 마이크로 USB. 충전 전용 말고 데이터가 되는 선 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "1장과 같은 배선: 26번 핀 → 7번 줄 → 220Ω 저항 → 12번 줄의 LED 긴 다리(+). 짧은 다리(−)는 13번 줄 → 브레드보드 − 줄 → GND. 이번에는 26번으로 0과 1 대신 PWM 신호가 나가요"
+goals:
+  content: PWM 의 duty 값을 for 반복문으로 조금씩 바꿔 LED 밝기를 0부터 1023까지 서서히 조절한다
+  thinking: 켜기·끄기 두 가지뿐인 핀으로 '중간 밝기'를 만드는 방법을 추론하고, 숫자 하나를 바꿨을 때 결과가 어떻게 달라질지 미리 예측한다
+successCriteria:
+  - duty 가 0, 512, 1023 일 때 LED 밝기가 어떤지 말할 수 있다
+  - 두 개의 for 가 각각 무엇을 하는지 내 말로 설명할 수 있다
+  - 숨쉬는 빠르기를 바꾸려면 어느 숫자를 고쳐야 하는지 안다
+parts:
+  - id: part1
+    title: 서서히 밝아졌다 어두워지기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 반쯤 밝게는 어떻게?
+        scene:
+          image: images/cover.svg
+          caption: 오늘의 목표 — LED가 숨을 쉬듯 서서히 밝아졌다 어두워지기
+        body: |
+          1장에서 LED는 `1`(켜기)이나 `0`(끄기) 둘 중 하나였어요. 그런데 오늘은 LED가 **서서히** 밝아졌다가 **서서히** 어두워져요. 마치 숨을 쉬는 것처럼요.
+
+          핀이 할 수 있는 일은 여전히 켜기와 끄기뿐이에요. 그런데 어떻게 "반쯤 밝게"가 될 수 있을까요? 코드를 보기 전에 내 생각부터 적어 봐요. 틀려도 괜찮아요.
+        todo:
+          - 1장 배선(LED·저항·선)이 브레드보드에 그대로 꽂혀 있는지 확인하기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 다 적으면 **완료** 누르기
+        questions:
+          - 1장에서는 LED를 켜거나 끄는 것만 할 수 있었어요. "반쯤 밝게"는 어떻게 만들 수 있을까요?
+          - 눈으로 따라갈 수 없을 만큼 아주 빠르게 켰다 껐다를 되풀이하면, 우리 눈에는 LED가 어떻게 보일까요?
+          - 서서히 밝아지게 하려면 밝기를 정하는 숫자를 어떻게 바꿔 가야 할까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "숨쉬는 LED"를 보드에게 시키려면 일을 잘게 나눠야 해요. 보드는 "서서히"라는 말을 몰라요. **얼마씩, 얼마나 자주** 바꿀지 숫자로 알려 줘야 해요.
+
+          활동 칸의 세 칸에 각각 한 가지 이상 적어 보세요. 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 보드가 시작 전에 알고 있어야 할 사실 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 숫자 적기 (빠르기는 누가 정하죠?)"
+          - "**해야 할 것**: 보드가 실제로 되풀이하는 일 적기"
+        answer:
+          know: ["LED가 몇 번 핀에 있는지 (26번)", "밝기 숫자(duty)가 어디부터 어디까지인지 (0~1023)"]
+          decide: ["밝기를 한 번에 얼마씩 바꿀지", "한 번 바꿀 때마다 얼마나 기다릴지"]
+          act: ["밝기를 조금씩 올리기", "밝기를 조금씩 내리기", "이것을 끝없이 되풀이하기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 실행 전 3문항
+        scene:
+          image: images/pwm-duty.svg
+          caption: PWM 은 1초에 10000번 켰다 껐다 해요. 켜진 칸이 짧으면 어둡게, 길면 밝게 보여요
+        body: |
+          그림처럼 **PWM** 은 핀을 1초에 10000번이나 켰다 껐다 해요. 너무 빨라서 눈에는 깜빡임이 안 보이고, 켜진 시간이 얼마나 긴지에 따라 밝기만 달라 보여요. 그 길이를 정하는 숫자가 `duty` 예요.
+
+          활동 칸의 코드는 아직 실행하지 않아요. `for` 가 두 번 나오는데, 각각 `duty` 를 어떻게 바꾸는지 읽고 결과를 미리 적어 봐요.
+        todo:
+          - 코드를 위에서부터 한 줄씩 소리 내어 읽기
+          - 두 `for` 줄에서 무엇이 다른지 찾아보기
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_breathing.py
+        blanks:
+          - q: 실행하면 LED는 어떻게 보일까요? (깜빡깜빡? 서서히? 그대로?)
+          - q: duty 가 0 일 때와 1023 일 때 LED 밝기는 각각 어떨까요?
+          - q: 밝아졌다 어두워지는 숨 한 번에 대략 몇 초 걸릴까요?
+            unit: 초
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 숨쉬는 LED
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "1장과 같은 배선: 26번 → 저항 → LED 긴 다리(+), 짧은 다리(−) → − 줄 → GND"
+        body: |
+          배선은 1장과 **똑같아요.** 브레드보드에 LED와 저항이 그대로 꽂혀 있다면 다시 꽂을 필요가 없어요. 빠졌다면 그림을 보고 다시 꽂아요.
+
+          코드를 실행하고 LED를 가만히 지켜보세요. 숨 한 번이 몇 초쯤 걸리는지 "하나, 둘" 세어 보고, 아까 적은 예측과 비교해 봐요.
+
+          멈추고 싶으면 **정지**를 눌러요. 그때 `except` 아래 줄이 PWM 을 정리해요.
+        todo:
+          - LED 긴 다리가 저항 쪽(26번), 짧은 다리가 − 줄(GND) 쪽인지 확인하기
+          - "**보드 연결** → **실행** 누르기"
+          - 숨 한 번이 몇 초인지 세어 보고, 예측과 비교하기
+        code: step1_breathing.py
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          눈으로 본 "서서히"를 이제 숫자로 읽어 봐요. `while True:` 안에 `for` 가 두 개 있고, 각 `for` 안의 두 줄이 되풀이돼요.
+
+          줄마다 손가락으로 짚으며 읽고, 답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - "`range(0, 1023)` 이 i 를 어디부터 어디까지 바꾸는지 읽기"
+          - 두 `pwm.duty(...)` 줄의 괄호 안이 어떻게 다른지 보기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_breathing.py
+        questions:
+          - { kind: number, q: "밝아지는 첫 번째 for 는 세기(duty)를 모두 몇 번 정하나요?", answer: 1023, hint: "i 는 0부터 시작해요. 줄 끝 설명(주석)에 끝 숫자가 적혀 있어요" }
+          - { kind: choice, q: "LED를 점점 어두워지게 만드는 줄은 어느 것인가요?", options: ["pwm.duty(i)", "pwm.duty(1023 - i)"], answer: 1, hint: "i 가 0, 1, 2 … 로 커질 때 괄호 안 숫자는 커지나요, 작아지나요?" }
+          - { kind: line, q: "프로그램을 멈출 때 PWM 을 정리하는 줄의 번호를 클릭하세요", answer: 16 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 더 천천히 숨쉬기
+        scene:
+          image: images/breathing-curve.svg
+          caption: 숨 한 번 = 밝아지는 for + 어두워지는 for. 한 칸마다 기다리는 시간이 길어지면 그래프는 어떻게 될까요?
+        body: |
+          지금 LED는 숨을 꽤 빨리 쉬어요. **숫자만 바꿔서** 더 천천히 숨쉬게 만들어 봐요.
+
+          세기를 한 칸 바꿀 때마다 잠깐 기다리는 줄이 있어요. 그 기다림이 길어지면 숨 한 번은 어떻게 될까요? 밝아질 때와 어두워질 때가 같은 빠르기가 되도록 해요.
+        todo:
+          - 기다리는 시간을 정하는 숫자가 코드 어디에 있는지 모두 찾기
+          - 숫자를 바꾸고 실행해서 숨 한 번이 몇 초인지 다시 세어 보기
+          - "**판정** 누르기"
+        instructions: 세기를 한 칸 바꿀 때마다 기다리는 시간을 1밀리초에서 3밀리초로 늘려, LED가 더 천천히 숨쉬게 하세요 (밝아질 때와 어두워질 때 모두)
+        hint: 밀리초(ms)를 기다리는 줄을 찾아보세요. 몇 군데에 있나요? 한 곳만 바꾸면 숨이 어떻게 될까요?
+        code: step1_breathing.py
+        rules:
+          - codeMatches: '^\s+pwm\.duty\(i\)\n\s+time\.sleep_ms\(3\)$'
+            fail: 점점 밝아지는 쪽은 한 칸마다 몇 밀리초 기다리나요? 더 천천히 하려면 그 숫자를 어떻게 해야 할까요?
+          - codeMatches: '^\s+pwm\.duty\(1023\s*-\s*i\)\n\s+time\.sleep_ms\(3\)$'
+            fail: 어두워지는 쪽도 밝아지는 쪽과 같은 빠르기인가요?
+          - codeMatches: 'range\(0,\s*1023\)[\s\S]*range\(0,\s*1023\)'
+            fail: 숨 한 번에 세기를 몇 칸 바꾸는지(range)는 그대로인가요? 이번에 바꿀 것은 기다리는 시간뿐이에요
+        answerCode: mission_slower.py
+
+      - id: extra1
+        type: mission
+        title: 추가 미션 1 — 가장 밝을 때 잠깐 멈추기
+        optional: true
+        scene:
+          image: images/breathing-curve.svg
+          caption: 그래프 꼭대기(가장 밝을 때)에서 1초 머물려면, 멈추는 줄은 어디에 있어야 할까요?
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 숨을 깊게 들이쉬고 잠깐 참았다가 내쉬는 것처럼, LED가 **가장 밝아진 뒤 1초 머물렀다가** 어두워지게 해 봐요.
+
+          가장 밝은 순간은 어느 `for` 가 끝난 때일까요? 멈추는 줄은 `for` 안에 있어야 할까요, 밖에 있어야 할까요?
+        todo:
+          - 가장 밝아지는 순간이 코드의 어디쯤인지 찾기
+          - 1초 기다리는 줄 하나를 넣고 실행해 보기
+          - "**판정** 누르기"
+        instructions: 가장 밝아진 뒤 1초 동안 멈춰 있다가 어두워지게 하세요
+        hint: "`time.sleep_ms(...)` 는 밀리초, `time.sleep(...)` 는 초 단위예요. 들여쓰기 칸 수가 그 줄이 어느 반복 안에 있는지를 정해요"
+        code: step1_breathing.py
+        rules:
+          - codeMatches: 'time\.sleep\(1\)'
+            fail: 1초 기다리는 줄이 있나요? sleep_ms 와 sleep 은 무엇이 다를까요?
+          - codeMatches: '^\s+time\.sleep_ms\(\d+\)\n {8}time\.sleep\(1\)\n {8}for '
+            fail: 멈추는 줄이 첫 번째 for 가 모두 끝난 뒤, 두 번째 for 가 시작되기 전에 있나요? 들여쓰기 칸 수를 두 for 줄과 비교해 보세요
+        answerCode: extra1_hold_at_bright.py
+
+      - id: extra2
+        type: mission
+        title: 추가 미션 2 — 절반 밝기로 고정
+        optional: true
+        scene:
+          image: images/pwm-duty.svg
+          caption: 켜진 칸과 꺼진 칸이 딱 반반이면 밝기는 어떨까요?
+        body: |
+          이번에는 반대로, 밝기가 **변하지 않고** 딱 절반 밝기로 켜져 있게 해 봐요.
+
+          duty 는 0부터 1023까지예요. 절반은 어떤 숫자일까요? 그리고 밝기가 변하지 않는다면, 세기를 계속 바꾸는 반복이 아직 필요할까요?
+        todo:
+          - 절반 밝기의 duty 숫자를 정하기
+          - 필요 없는 줄을 지우고 세기를 한 번만 정하기
+          - 실행해서 밝기가 그대로인지 보고 **판정** 누르기
+        instructions: 밝기가 변하지 않고 딱 절반 밝기로 켜져 있게 하세요
+        hint: 0과 1023의 한가운데 숫자를 계산해 보세요. 세기를 한 번만 정하면 PWM 은 그 밝기를 계속 지켜요
+        code: step1_breathing.py
+        rules:
+          - codeMatches: '^\s*pwm\.duty\(512\)$'
+            fail: 절반 밝기는 0과 1023 사이 어디쯤일까요? 그 숫자로 세기를 정하는 줄이 있나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*\bfor\b)'
+            fail: 밝기가 변하지 않으려면, 세기를 계속 바꾸는 반복이 필요할까요?
+        answerCode: extra2_half_brightness.py
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        scene:
+          image: images/breathing-curve.svg
+          caption: 숨 한 번(밝아지기 → 어두워지기)을 우리말 순서로 먼저 써요
+        body: |
+          코드를 쓰기 전에 **우리말로 순서**를 먼저 적어요. 이번에는 숨 **한 번**만 설계해요. 그림의 "첫 번째 for"와 "두 번째 for"가 설계도에서 어디인지 짝지어 보세요.
+
+          블록에서는 PWM 준비가 `pwm = PWM(Pin(26))` 과 `pwm.freq(10000)` 두 줄로 보여요. 코드의 `PWM(Pin(26, Pin.OUT), 10000)` 한 줄과 같은 뜻이에요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 우리말 한 줄이 어떤 코드가 되는지 짝지어 보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: PWM 을 26번 핀에 준비하고, 1초에 __번 켰다 껐다 하게 한다
+            blank: { answer: 10000 }
+          - text: i 를 0부터 1022까지 하나씩 키우며 되풀이한다
+          - text: "  ↳ 세기를 i 로 정한다"
+          - text: "  ↳ __밀리초 기다린다"
+            blank: { answer: 1 }
+          - text: i 를 0부터 1022까지 다시 하나씩 키우며 되풀이한다
+          - text: "  ↳ 세기를 __ − i 로 정한다"
+            blank: { answer: 1023 }
+          - text: "  ↳ 1밀리초 기다린다"
+        translation:
+          - ["PWM 준비 (1초에 10000번)", "pwm = PWM(Pin(26)) · pwm.freq(10000)"]
+          - ["i 를 0부터 1022까지 되풀이", "for i in range(0, 1023):"]
+          - ["세기를 정한다", "pwm.duty(세기)"]
+          - ["밀리초 기다린다", "time.sleep_ms(밀리초)"]
+        targetCode: design_breathing.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        scene:
+          image: images/cover.svg
+          caption: 켜기·끄기만 하던 핀으로 밝기를 조절했어요. 이 방법을 또 어디에 쓸 수 있을까요?
+        body: |
+          오늘은 켜기와 끄기를 아주 빠르게 되풀이해서 "중간 밝기"를 만들었어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          먼저 코드 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요. 다 쓰면 짝에게 1분 동안 설명해 보세요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 설명하기
+        lineExplain: step1_breathing.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - pwm.duty(1023 - i) 가 왜 점점 어두워지게 하는지 내 말로 설명해 보세요
+          - sleep_ms 숫자를 바꿨을 때 무엇이 달라졌나요? 내 예측과 같았나요?
+          - "다음엔 여기부터 본다: 한 줄로"

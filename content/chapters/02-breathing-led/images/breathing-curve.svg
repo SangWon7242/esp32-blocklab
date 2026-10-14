@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>숨쉬는 LED 밝기 그래프: 시간이 지나며 duty 가 0 에서 1023 쪽으로 커져 점점 밝아지고, 다시 0 쪽으로 작아져 점점 어두워지기를 계속 되풀이한다</title>
+  <text x="320" y="34" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">밝기(duty)가 시간에 따라 바뀌는 모습</text>
+  <!-- 축 -->
+  <path d="M96 76 V292 H608"/>
+  <path d="M90 84 L96 76 L102 84 M600 286 L608 292 L600 298"/>
+  <path d="M96 96 H596" stroke-dasharray="4 6" stroke-opacity="0.35"/>
+  <g fill="currentColor" stroke="none" text-anchor="end">
+    <text x="86" y="101" font-size="14" font-weight="700">1023</text>
+    <text x="86" y="118" font-size="12" opacity="0.7">가장 밝게</text>
+    <text x="86" y="297" font-size="14" font-weight="700">0</text>
+    <text x="86" y="314" font-size="12" opacity="0.7">꺼짐</text>
+  </g>
+  <text x="604" y="318" text-anchor="end" font-size="13" fill="currentColor" stroke="none" opacity="0.75">시간 →</text>
+  <!-- 숨 한 번: 올라가기 / 내려가기, 그리고 되풀이 -->
+  <path d="M100 290 L250 98" stroke="#c99c00" stroke-width="4"/>
+  <path d="M250 98 L400 290" stroke="#4562f5" stroke-width="4"/>
+  <path d="M400 290 L550 98 L580 136" stroke="#c99c00" stroke-width="3" stroke-dasharray="6 7" stroke-opacity="0.7"/>
+  <!-- 꼭짓점 LED -->
+  <circle cx="250" cy="70" r="22" fill="#c99c00" fill-opacity="0.22" stroke="none"/>
+  <path d="M242 78 V66 A8 8 0 0 1 258 66 V78 Z" fill="#c99c00" stroke-width="1.5"/>
+  <!-- 이름표 -->
+  <rect x="102" y="116" width="96" height="44" rx="10" fill="var(--card)" stroke="#c99c00" stroke-width="1.5"/>
+  <text x="150" y="135" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">첫 번째 for</text>
+  <text x="150" y="152" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">점점 밝게</text>
+  <rect x="304" y="116" width="96" height="44" rx="10" fill="var(--card)" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="352" y="135" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">두 번째 for</text>
+  <text x="352" y="152" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">점점 어둡게</text>
+  <rect x="462" y="236" width="140" height="46" rx="10" fill="var(--card)" stroke-dasharray="4 5"/>
+  <text x="532" y="256" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">while True</text>
+  <text x="532" y="274" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">처음부터 다시</text>
+  <!-- 숨 한 번 표시 -->
+  <path d="M100 336 V328 H400 V336" stroke-opacity="0.6"/>
+  <text x="250" y="352" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">숨 한 번</text>
+</svg>

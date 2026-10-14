@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>책상 위 ESP32 보드에 이은 LED가 숨을 쉬듯 서서히 밝아졌다 어두워지기를 되풀이하고, 학생이 그 모습을 바라보는 장면</title>
+  <!-- 책상 -->
+  <path d="M24 264 H616" stroke-width="3"/>
+  <path d="M56 264 V340 M584 264 V340"/>
+  <!-- 노트북: 화면에 블록 -->
+  <rect x="70" y="116" width="176" height="116" rx="8" fill="var(--card)"/>
+  <rect x="88" y="136" width="84" height="20" rx="5" fill="#00b400" stroke="none"/>
+  <rect x="102" y="162" width="118" height="20" rx="5" fill="#00b6b1" stroke="none"/>
+  <rect x="116" y="188" width="104" height="20" rx="5" fill="#c99c00" stroke="none"/>
+  <path d="M50 262 L68 232 H248 L266 262 Z" fill="var(--muted)"/>
+  <!-- USB 선 -->
+  <path d="M262 250 C 284 250, 286 240, 300 240" stroke-width="3"/>
+  <!-- ESP32 보드 -->
+  <rect x="300" y="220" width="112" height="40" rx="6" fill="#00b6b1" fill-opacity="0.25"/>
+  <rect x="294" y="234" width="10" height="14" rx="2" fill="var(--card)"/>
+  <rect x="334" y="227" width="40" height="26" rx="3" fill="var(--card)"/>
+  <path d="M386 226 V232 M396 226 V232 M386 248 V254 M396 248 V254"/>
+  <!-- 선: 보드 → LED -->
+  <path d="M404 232 C 424 232, 428 244, 440 244" stroke="#f59f00" stroke-width="3"/>
+  <path d="M404 250 C 420 252, 456 256, 470 250" stroke-width="3"/>
+  <!-- 브레드보드와 LED (은은하게 켜짐) -->
+  <circle cx="455" cy="222" r="40" fill="#c99c00" fill-opacity="0.1" stroke="none"/>
+  <circle cx="455" cy="222" r="26" fill="#c99c00" fill-opacity="0.18" stroke="none"/>
+  <rect x="424" y="242" width="62" height="18" rx="4" fill="var(--muted)"/>
+  <path d="M445 242 V224 A10 10 0 0 1 465 224 V242 Z" fill="#c99c00"/>
+  <!-- 숨쉬는 물결: 어둡게 → 밝게 → 어둡게 → 밝게 -->
+  <path d="M280 160 C 302 160, 310 112, 332 112 C 354 112, 362 160, 384 160 C 406 160, 414 112, 436 112" stroke="#c99c00" stroke-width="3" stroke-dasharray="2 7"/>
+  <circle cx="280" cy="160" r="7" fill="#c99c00" fill-opacity="0.15"/>
+  <circle cx="332" cy="112" r="16" fill="#c99c00" fill-opacity="0.2" stroke="none"/>
+  <circle cx="332" cy="112" r="7" fill="#c99c00"/>
+  <circle cx="384" cy="160" r="7" fill="#c99c00" fill-opacity="0.15"/>
+  <circle cx="436" cy="112" r="7" fill="#c99c00" fill-opacity="0.7"/>
+  <!-- 학생 -->
+  <path d="M506 264 C 506 204, 626 204, 626 264" fill="var(--muted)"/>
+  <circle cx="566" cy="184" r="30" fill="var(--card)"/>
+  <path d="M537 180 C 540 146, 592 144, 596 180" stroke-width="3"/>
+  <circle cx="552" cy="186" r="3" fill="currentColor" stroke="none"/>
+  <path d="M546 200 Q 553 206 561 200"/>
+  <!-- 말풍선 -->
+  <rect x="466" y="84" width="150" height="44" rx="18" fill="var(--card)"/>
+  <path d="M532 128 L540 140 L548 128" fill="var(--card)"/>
+  <path d="M533 127 H547" stroke="var(--card)" stroke-width="3"/>
+  <text x="541" y="112" text-anchor="middle" font-size="16" font-weight="600" fill="currentColor" stroke="none">숨 쉬는 것 같아</text>
+</svg>
