@@ -1,11 +1,14 @@
 # 트랙 콘텐츠 형식 (chapter.yaml)
 
-챕터 하나는 폴더 하나다: `content/chapters/<id>/chapter.yaml` + 같은 폴더의 `.py` 파일들.
+챕터 하나는 폴더 하나다: `content/chapters/<id>/chapter.yaml` + 같은 폴더의 `.py` 파일들 + `images/*.svg` 그림.
 `npm test`가 모든 YAML을 `src/track/schema.ts`(zod)로 검사한다. 키 오타, 없는 파일, 겹치는 id, 틀린 정규식,
 범위 밖 답은 테스트에서 걸린다.
 
 코드를 가리키는 키(`code`, `targetCode`, `lineExplain`, `answerCode`, `codeEquals.file`)는 **같은 폴더의 파일 이름**만 쓴다
 (`code: step1_distance.py`). 예외: `debug`의 증상 `code`는 파일 이름이 아니라 **고장 난 코드 조각 그대로**다.
+
+그림을 가리키는 키(`cover`, `materials[].image`, `wiring.image`, `scene.image`)는 **챕터 폴더 기준 `images/<이름>.svg`** 만 쓴다
+(`image: images/wiring-led.svg`, 영문·숫자·`_`·`.`·`-` 이름). 없는 그림, 다른 모양(`.png`, 하위 폴더, `../`)은 테스트에서 걸린다.
 
 ## 챕터
 
@@ -14,6 +17,12 @@ id: 10-auto-door          # 폴더 이름과 같아야 함
 order: 10                 # 목록 순서
 title: 다가가면 열리는 자동문
 subtitle: ...             # 선택
+summary: ...              # 선택. 챕터 화면·목록 카드의 한두 문장 소개 (markdown)
+cover: images/cover.svg   # 선택. 표지 그림
+materials:                # 선택. 준비물(부품) 칩
+  - { name: ESP32 보드, image: images/part-esp32.svg }
+  - { name: 220Ω 저항, note: 빨강-빨강-갈색 }      # image·note 는 선택
+wiring: { image: images/wiring-led.svg, caption: "LED 긴 다리 → 저항 → 26번" }   # 선택. 배선도
 goals: { content: ..., thinking: ... }   # 선택
 successCriteria: [...]    # 선택
 parts:
@@ -30,8 +39,41 @@ parts:
 | `type` | 아래 8가지 + `debug` |
 | `title` | 단계 제목 |
 | `minutes` | 선택. 기준 시간(분) |
-| `body` | 선택. 왼쪽 안내 칸 markdown |
+| `scene` | 선택. `{ image, caption? }` — 안내 칸 맨 위 장면 그림과 그 아래 설명 |
+| `body` | 선택. 왼쪽 안내 칸 글 (아래 "안내 글 markdown"). 없으면 유형별 기본 안내 |
+| `todo` | 선택. "지금 할 일" 1~4개 (markdown 한 줄씩). 체크 표시는 장식이고 완료 조건은 유형별 규칙 그대로 |
 | `optional` | 선택. `true`면 건너뛸 수 있고, 마치지 않아도 다음 단계가 열린다 |
+
+안내 칸 순서: 단계 배지·제목 → `scene` 그림 → `body` → "지금 할 일"(`todo`) → 접힘 "부품과 배선"(챕터 `materials`·`wiring`) → 시간·완료.
+넓은 화면에서는 안내 칸을 접어 활동을 전폭으로 쓸 수 있다(이 브라우저에 기억).
+
+### 안내 글 markdown
+
+`body`·`todo`·`summary` 는 라이브러리 없는 가벼운 markdown(`src/app/track/guideMarkdown.ts`)으로 그린다.
+
+- 빈 줄 = 문단 나눔. 문단 안 줄바꿈은 그대로 보인다
+- `- 항목` (또는 `* 항목`) = 글머리 목록, `1. 항목` = 번호 목록. 들여 쓴 다음 줄은 앞 항목에 이어 붙는다
+- `**굵게**`, `` `코드` `` (코드 안의 `**` 는 그대로). 제목(`#`)·링크·그림 문법은 없다
+
+YAML 에서 여러 줄 글은 `|` 블록으로 쓴다:
+
+```yaml
+body: |
+  LED 는 **긴 다리**가 + 예요.
+
+  - 긴 다리 → 저항 → `26`번 핀
+  - 짧은 다리 → GND
+todo: [보드를 USB 로 연결하기, "`26`번 핀에 LED 꽂기"]
+```
+
+### 그림 (SVG)
+
+- 파일: `content/chapters/<id>/images/<이름>.svg`. 빌드 때 `src/track/images.ts` 가 `import.meta.glob(..., { query: "?raw" })` 로 원문을 묶고, 화면(`src/app/track/Illustration.tsx`)이 **인라인 SVG** 로 그린다.
+- `viewBox` 만 두고 `width`/`height` 는 빼도 된다(화면이 폭에 맞추고 높이는 비율대로). 장면 `0 0 640 360`, 부품은 정사각.
+- 선은 `stroke="currentColor"`(글자색을 따라 다크 모드 대응), 면 색은 `var(--primary)`·`var(--muted)` 같은 CSS 변수나 카테고리 색 소수만.
+- `<svg role="img">` + 첫 자식 `<title>설명</title>`. 글자는 `<text>` 에 한국어, `font-family="inherit"`.
+- `<script>`, `on*=` 처리기, `javascript:` 주소 금지(테스트가 검사하고, 화면도 한 번 더 거른다).
+- 한 화면에 여러 그림이 같이 그려지므로 `id`(그라데이션·`marker` 등)는 파일마다 겹치지 않게 접두어를 붙인다(`led-arrow`).
 
 ## 유형별 키
 

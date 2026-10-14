@@ -1,10 +1,15 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, SkipForward } from "lucide-react";
+import {
+  ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, Clock, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { canComplete, isEditorStep } from "@/track/completion";
 import { getChapter, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates } from "@/track/gating";
@@ -12,6 +17,9 @@ import type { StepRecord } from "@/track/progress";
 import type { Step } from "@/track/schema";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
+import { useGuideCollapsed } from "./guidePanel";
+import { Illustration } from "./Illustration";
+import { MaterialChips } from "./Materials";
 import { saveStepRecord, useProgress } from "./progressState";
 import { STEP_TYPE_GUIDE, STEP_TYPE_LABEL } from "./stepMeta";
 import { Analysis } from "./steps/Analysis";
@@ -87,6 +95,7 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
   const next = steps[index + 1];
   const nextOpen = next && states[next.id] !== "locked";
   const doneCount = steps.filter((s) => states[s.id] === "done").length;
+  const [guideCollapsed, setGuideCollapsed] = useGuideCollapsed();
 
   const save = (nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") =>
     void saveStepRecord(chapter.id, step.id, { status, input: nextInput, attempts: nextAttempts, updatedAt: new Date().toISOString() });
@@ -128,25 +137,40 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
         <Button variant="ghost" size="sm" asChild>
           <Link to={`/track/${chapter.id}`}><ArrowLeft className="size-4" /><span className="hidden sm:inline">{chapter.title}</span><span className="sm:hidden">단계 목록</span></Link>
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden lg:inline-flex"
+          onClick={() => setGuideCollapsed(!guideCollapsed)}
+          aria-controls="step-guide"
+          aria-expanded={!guideCollapsed}
+          aria-label={guideCollapsed ? "안내 칸 펼치기" : "안내 칸 접기"}
+          title={guideCollapsed ? "안내 칸 펼치기" : "안내 칸 접기"}
+          data-testid="guide-toggle"
+        >
+          {guideCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+        </Button>
+        {/* 안내 칸을 접으면 제목을 위 줄에 남긴다 */}
+        {guideCollapsed && <span className="hidden min-w-0 truncate text-sm font-medium lg:block">{step.title}</span>}
         <div className="ml-auto flex w-40 items-center gap-2 text-sm text-muted-foreground sm:w-64">
           <Progress value={(doneCount / steps.length) * 100} className="h-2" aria-label="챕터 진행률" />
           <span className="shrink-0" data-testid="step-position">{index + 1} / {steps.length}</span>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:overflow-hidden">
-        <aside className="border-b p-4 sm:p-6 lg:overflow-y-auto lg:border-r lg:border-b-0">
-          {part && <p className="text-xs text-muted-foreground">{part.title}</p>}
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{STEP_TYPE_LABEL[step.type]}</Badge>
-            {step.optional && <Badge variant="outline">선택</Badge>}
-            {step.minutes && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="size-3" />{step.minutes}분</span>}
-            {done && <span className="flex items-center gap-1 text-xs text-primary"><CheckCircle2 className="size-3" />완료함</span>}
-          </div>
-          <h1 className="mt-3 text-xl font-bold">{step.title}</h1>
-          <div className="mt-4">
-            <GuideBody text={step.body ?? STEP_TYPE_GUIDE[step.type]} />
-          </div>
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto lg:grid lg:overflow-hidden",
+          guideCollapsed ? "lg:grid-cols-1" : "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]",
+        )}
+      >
+        <aside
+          id="step-guide"
+          aria-label="안내"
+          data-testid="step-guide"
+          className={cn("border-b p-4 sm:p-6 lg:overflow-y-auto lg:border-r lg:border-b-0", guideCollapsed && "lg:hidden")}
+        >
+          <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} />
         </aside>
         <section className="p-4 sm:p-6 lg:overflow-y-auto" aria-label="활동">{activity}</section>
       </div>
@@ -181,5 +205,82 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
         </div>
       </div>
     </div>
+  );
+}
+
+/** 왼쪽 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → (접힘) 부품과 배선 → 시간·완료 */
+function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean }) {
+  const hasKit = Boolean(chapter.materials?.length || chapter.wiring);
+  return (
+    <>
+      {partTitle && <p className="text-xs text-muted-foreground">{partTitle}</p>}
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        <Badge variant="secondary">{STEP_TYPE_LABEL[step.type]}</Badge>
+        {step.optional && <Badge variant="outline">선택</Badge>}
+      </div>
+      <h1 className="mt-3 text-xl font-bold">{step.title}</h1>
+
+      {step.scene && (
+        <Illustration
+          chapterId={chapter.id}
+          image={step.scene.image}
+          caption={step.scene.caption}
+          className="mt-4 rounded-lg border bg-muted/30 p-3"
+        />
+      )}
+
+      <GuideBody text={step.body ?? STEP_TYPE_GUIDE[step.type]} className="mt-4" />
+
+      {step.todo && (
+        <Card size="sm" className="mt-4" data-testid="step-todo">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold"><ListChecks className="size-4 text-primary" />지금 할 일</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {step.todo.map((t) => (
+                <li key={t} className="flex items-start gap-2">
+                  {/* 체크 표시는 장식: 완료 조건은 유형별 규칙 그대로 */}
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border",
+                      done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40",
+                    )}
+                  >
+                    {done && <Check className="size-3" />}
+                  </span>
+                  <GuideBody text={t} className="space-y-0" />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {hasKit && (
+        <Collapsible className="mt-4 rounded-lg border" data-testid="step-kit">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="group w-full justify-start rounded-lg">
+              <Cable className="size-4" />부품과 배선
+              <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-180" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-4 px-3 pt-1 pb-3">
+            {chapter.materials && <MaterialChips chapterId={chapter.id} materials={chapter.materials} />}
+            {chapter.wiring && (
+              <Illustration chapterId={chapter.id} image={chapter.wiring.image} caption={chapter.wiring.caption} className="rounded-md bg-muted/30 p-2" />
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
+      {(step.minutes || done) && (
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          {step.minutes && <span className="flex items-center gap-1"><Clock className="size-3" />{step.minutes}분</span>}
+          {done && <span className="flex items-center gap-1 text-primary"><CheckCircle2 className="size-3" />완료함</span>}
+        </div>
+      )}
+    </>
   );
 }

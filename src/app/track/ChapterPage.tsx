@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import { getChapter } from "@/track/content";
 import { allSteps, stepStates, type StepState } from "@/track/gating";
 import { useSettings } from "../settings/settings";
+import { GuideBody } from "./GuideBody";
+import { Illustration } from "./Illustration";
+import { MaterialChips } from "./Materials";
 import { useProgress } from "./progressState";
 import { STEP_TYPE_LABEL } from "./stepMeta";
 
@@ -38,11 +41,19 @@ export function ChapterPage() {
         <p className="mt-2 text-sm text-muted-foreground">챕터 {chapter.order}</p>
         <h1 className="text-2xl font-bold">{chapter.title}</h1>
         {chapter.subtitle && <p className="mt-1 text-muted-foreground">{chapter.subtitle}</p>}
+        {chapter.cover && <Illustration chapterId={chapter.id} image={chapter.cover} className="mt-4 rounded-xl border bg-muted/30 p-4" />}
+        {chapter.summary && <GuideBody text={chapter.summary} className="mt-4" />}
         {chapter.goals && (
           <dl className="mt-4 grid gap-1 text-sm">
             <div><dt className="inline font-medium">내용 목표 </dt><dd className="inline text-muted-foreground">{chapter.goals.content}</dd></div>
             <div><dt className="inline font-medium">생각 목표 </dt><dd className="inline text-muted-foreground">{chapter.goals.thinking}</dd></div>
           </dl>
+        )}
+        {chapter.materials && (
+          <section className="mt-4" aria-label="준비물">
+            <h2 className="mb-2 text-sm font-medium">준비물</h2>
+            <MaterialChips chapterId={chapter.id} materials={chapter.materials} />
+          </section>
         )}
         <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
           <Progress value={(done / steps.length) * 100} className="h-2" aria-label="진행률" />

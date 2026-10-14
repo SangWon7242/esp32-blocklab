@@ -1,6 +1,7 @@
 import { parse } from "yaml";
 import { ChapterSchema, type Chapter, type Rule } from "./schema";
 import { allSteps } from "./gating";
+import { chapterImageRefs } from "./images";
 
 /** 검사를 마친 챕터 + 같은 폴더의 코드 파일 (이름 → 글) */
 export type LoadedChapter = Chapter & { files: Record<string, string> };
@@ -40,11 +41,30 @@ export function codeRefs(chapter: Chapter): string[] {
   return refs;
 }
 
+/** 챕터가 가리키는 그림 ("images/x.svg", 중복 없이, 나온 순서대로): 표지·부품·배선·단계 장면 */
+export function imageRefs(chapter: Chapter): string[] {
+  const refs: string[] = [];
+  const add = (f: string | undefined) => {
+    if (f && !refs.includes(f)) refs.push(f);
+  };
+  add(chapter.cover);
+  chapter.materials?.forEach((m) => add(m.image));
+  add(chapter.wiring?.image);
+  for (const s of allSteps(chapter)) add(s.scene?.image);
+  return refs;
+}
+
 /**
  * YAML 글과 같은 폴더의 코드 파일로 챕터를 만든다 (순수 함수 — 테스트는 fs 로 읽어 넘긴다).
- * dir 은 폴더 이름(챕터 id 와 같아야 함). 형식·참조가 틀리면 어디가 틀렸는지 담아 throw.
+ * dir 은 폴더 이름(챕터 id 와 같아야 함). images 를 주면(폴더의 "images/x.svg" 이름들) 그림 참조도 검사한다.
+ * 형식·참조가 틀리면 어디가 틀렸는지 담아 throw.
  */
-export function parseChapter(yamlText: string, files: Readonly<Record<string, string>>, dir: string): LoadedChapter {
+export function parseChapter(
+  yamlText: string,
+  files: Readonly<Record<string, string>>,
+  dir: string,
+  images?: readonly string[],
+): LoadedChapter {
   const where = `content/chapters/${dir}/chapter.yaml`;
   const result = ChapterSchema.safeParse(parse(yamlText));
   if (!result.success) {
@@ -61,6 +81,7 @@ export function parseChapter(yamlText: string, files: Readonly<Record<string, st
     seen.add(id);
   }
   for (const ref of codeRefs(chapter)) if (!(ref in files)) errors.push(`코드 파일 ${ref} 이 폴더에 없습니다`);
+  if (images) for (const ref of imageRefs(chapter)) if (!images.includes(ref)) errors.push(`그림 ${ref} 이 폴더에 없습니다`);
 
   for (const s of allSteps(chapter)) {
     if (s.type !== "readcheck") continue;
@@ -96,7 +117,7 @@ export function loadChapters(): LoadedChapter[] {
   cache = Object.entries(yamls)
     .map(([path, text]) => {
       const [dir] = split(path);
-      return parseChapter(text, filesByDir[dir] ?? {}, dir);
+      return parseChapter(text, filesByDir[dir] ?? {}, dir, chapterImageRefs(dir));
     })
     .sort((a, b) => a.order - b.order);
   return cache;

@@ -8,6 +8,13 @@ import { z } from "zod";
 /** 같은 폴더의 .py 파일 이름 (예: step1_distance.py) */
 export const FileRef = z.string().regex(/^[\w.-]+\.py$/, "같은 폴더의 .py 파일 이름이어야 합니다");
 
+/** 같은 폴더 images/ 의 .svg 파일 (예: images/wiring-led.svg) */
+export const ImageRef = z.string().regex(/^images\/[\w.-]+\.svg$/, "images/<이름>.svg 꼴이어야 합니다");
+
+/** 그림 하나 + 그 아래 설명 (선택) */
+export const FigureSchema = z.object({ image: ImageRef, caption: z.string().min(1).optional() }).strict();
+export type Figure = z.infer<typeof FigureSchema>;
+
 const fail = z.string().min(1);
 
 const regex = z.string().min(1).refine((s) => {
@@ -34,8 +41,12 @@ const base = {
   id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "단계 id 는 영어 소문자·숫자·- 만"),
   title: z.string().min(1),
   minutes: z.number().positive().optional(),
-  /** 왼쪽 안내 칸에 보일 markdown */
+  /** 왼쪽 안내 칸에 보일 장면 그림 (body 위) */
+  scene: FigureSchema.optional(),
+  /** 왼쪽 안내 칸에 보일 markdown (문단·**굵게**·- 목록·1. 번호·`코드`) */
   body: z.string().optional(),
+  /** "지금 할 일" 카드: 지금 할 일 1~4개 (체크 표시는 장식, 완료 조건은 유형별 규칙 그대로) */
+  todo: z.array(z.string().min(1)).min(1).max(4).optional(),
   /** 건너뛸 수 있는 단계 (관문에서 다음 단계를 막지 않는다) */
   optional: z.boolean().optional(),
 };
@@ -147,6 +158,14 @@ export const ChapterSchema = z.object({
   order: z.number().int(),
   title: z.string().min(1),
   subtitle: z.string().optional(),
+  /** 챕터 화면·목록 카드의 한두 문장 소개 */
+  summary: z.string().min(1).optional(),
+  /** 표지 그림 */
+  cover: ImageRef.optional(),
+  /** 준비물(부품). image 는 작은 부품 그림 */
+  materials: z.array(z.object({ name: z.string().min(1), image: ImageRef.optional(), note: z.string().min(1).optional() }).strict()).min(1).optional(),
+  /** 배선도 */
+  wiring: FigureSchema.optional(),
   goals: z.object({ content: z.string().min(1), thinking: z.string().min(1) }).strict().optional(),
   successCriteria: z.array(z.string().min(1)).optional(),
   parts: z.array(PartSchema).min(1),

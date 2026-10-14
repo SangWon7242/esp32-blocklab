@@ -1,10 +1,11 @@
 /// <reference types="node" />
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { registerBlocks } from "@/blocks";
 import { codeToBlocks } from "@/parser";
-import { codeRefs, loadChapters, parseChapter } from "./content";
+import { codeRefs, imageRefs, loadChapters, parseChapter } from "./content";
+import { allChapterImages, chapterImage, sanitizeSvg, unsafeSvgReason } from "./images";
 import { allSteps } from "./gating";
 import { judge } from "./judge";
 import type { LoadedChapter } from "./content";
@@ -14,15 +15,23 @@ const root = join(process.cwd(), "content/chapters");
 function readDir(dir: string) {
   const files: Record<string, string> = {};
   for (const f of readdirSync(join(root, dir)).filter((f) => f.endsWith(".py"))) files[f] = readFileSync(join(root, dir, f), "utf8");
-  return { yaml: readFileSync(join(root, dir, "chapter.yaml"), "utf8"), files };
+  return { yaml: readFileSync(join(root, dir, "chapter.yaml"), "utf8"), files, images: readImages(dir) };
 }
+
+/** 폴더의 그림 이름들 ("images/x.svg") */
+function readImages(dir: string): string[] {
+  const d = join(root, dir, "images");
+  return existsSync(d) ? readdirSync(d).filter((f) => f.endsWith(".svg")).map((f) => `images/${f}`) : [];
+}
+
+const chapterDirs = () => readdirSync(root).filter((d) => existsSync(join(root, d, "chapter.yaml")));
 
 const chapters: Record<string, LoadedChapter> = {};
 beforeAll(() => {
   registerBlocks();
   for (const dir of ["01-led", "10-auto-door"]) {
-    const { yaml, files } = readDir(dir);
-    chapters[dir] = parseChapter(yaml, files, dir);
+    const { yaml, files, images } = readDir(dir);
+    chapters[dir] = parseChapter(yaml, files, dir, images);
   }
 });
 
@@ -88,6 +97,24 @@ describe("챕터 YAML", () => {
     }
   });
 
+  it("참조한 그림이 모두 images/ 폴더에 있고 import.meta.glob 으로도 읽힌다", () => {
+    for (const ch of loadChapters()) {
+      for (const ref of imageRefs(ch)) {
+        expect(existsSync(join(root, ch.id, ref)), `${ch.id}/${ref}`).toBe(true);
+        expect(chapterImage(ch.id, ref), `${ch.id}/${ref}`).toMatch(/<svg\b/);
+      }
+    }
+  });
+
+  it("모든 그림 파일에 script·on* 처리기·javascript: 가 없다", () => {
+    for (const dir of chapterDirs()) {
+      for (const ref of readImages(dir)) {
+        expect(unsafeSvgReason(readFileSync(join(root, dir, ref), "utf8")), `${dir}/${ref}`).toBeNull();
+      }
+    }
+    for (const [path, svg] of Object.entries(allChapterImages())) expect(unsafeSvgReason(svg), path).toBeNull();
+  });
+
   it("loadChapters 는 import.meta.glob 으로 같은 두 챕터를 order 순으로 읽는다", () => {
     const loaded = loadChapters();
     expect(loaded.map((c) => c.id)).toEqual(["01-led", "10-auto-door"]);
@@ -115,6 +142,55 @@ describe("parseChapter 는 잘못된 YAML 을 거부한다", () => {
     expect(() => parseChapter(base('      - { id: m, type: mission, title: m, instructions: i, rules: [{ codeMatches: "(", fail: f }] }\n'), files, "x")).toThrow();
     expect(() => parseChapter(base('      - { id: c, type: readcheck, title: c, code: a.py, questions: [{ kind: choice, q: q, options: [a, b], answer: 2 }] }\n'), files, "x")).toThrow();
     expect(() => parseChapter(base('      - { id: c, type: readcheck, title: c, code: a.py, questions: [{ kind: line, q: q, answer: 5 }] }\n'), files, "x")).toThrow(/줄/);
+  });
+});
+
+describe("그림·할 일·부품 키", () => {
+  const files = { "a.py": "print(1)\n" };
+  const chapter = (head: string, step = "{ id: r, type: run, title: r, code: a.py }") =>
+    `id: x\norder: 1\ntitle: x\n${head}parts:\n  - id: p\n    title: p\n    steps:\n      - ${step}\n`;
+  const full = chapter(
+    "summary: 요약\ncover: images/cover.svg\nmaterials:\n  - { name: LED, image: images/led.svg, note: 긴 다리가 + }\n  - { name: 점퍼선 }\nwiring: { image: images/wiring.svg, caption: 26번 핀 }\n",
+    "{ id: r, type: run, title: r, code: a.py, scene: { image: images/scene.svg, caption: 교실 }, todo: [보드 연결, 실행] }",
+  );
+
+  it("새 키를 받아들이고 imageRefs 가 표지·부품·배선·장면 순으로 모은다", () => {
+    const ch = parseChapter(full, files, "x");
+    expect(ch.summary).toBe("요약");
+    expect(allSteps(ch)[0].todo).toEqual(["보드 연결", "실행"]);
+    expect(imageRefs(ch)).toEqual(["images/cover.svg", "images/led.svg", "images/wiring.svg", "images/scene.svg"]);
+  });
+
+  it("images 를 주면 없는 그림을 잡는다", () => {
+    expect(() => parseChapter(full, files, "x", ["images/cover.svg", "images/led.svg", "images/wiring.svg"])).toThrow(/images\/scene\.svg/);
+    expect(() => parseChapter(full, files, "x", ["images/cover.svg", "images/led.svg", "images/wiring.svg", "images/scene.svg"])).not.toThrow();
+  });
+
+  it("그림 경로 모양, 할 일 개수, 모르는 키", () => {
+    expect(() => parseChapter(chapter("cover: cover.svg\n"), files, "x")).toThrow(/images/);
+    expect(() => parseChapter(chapter("cover: images/../a.svg\n"), files, "x")).toThrow();
+    expect(() => parseChapter(chapter("cover: images/a.png\n"), files, "x")).toThrow();
+    expect(() => parseChapter(chapter("", "{ id: r, type: run, title: r, code: a.py, todo: [a, b, c, d, e] }"), files, "x")).toThrow();
+    expect(() => parseChapter(chapter("", "{ id: r, type: run, title: r, code: a.py, todo: [] }"), files, "x")).toThrow();
+    expect(() => parseChapter(chapter("", "{ id: r, type: run, title: r, code: a.py, scene: { img: images/a.svg } }"), files, "x")).toThrow();
+    expect(() => parseChapter(chapter("materials:\n  - { name: LED, img: images/a.svg }\n"), files, "x")).toThrow();
+  });
+});
+
+describe("그림 원문 거르기", () => {
+  it("script·on* 처리기·javascript: 주소·XML 선언을 뺀다", () => {
+    const dirty = `<?xml version="1.0"?>\n<svg viewBox="0 0 10 10" onload="alert(1)"><script>alert(2)</script><a href="javascript:x()"><rect onclick='y()' width="1"/></a></svg>`;
+    const clean = sanitizeSvg(dirty);
+    expect(clean).toBe(`<svg viewBox="0 0 10 10"><a><rect width="1"/></a></svg>`);
+    expect(unsafeSvgReason(clean)).toBeNull();
+    expect(unsafeSvgReason(dirty)).not.toBeNull();
+  });
+
+  it("모르는 이름·모양이 틀린 참조는 undefined", () => {
+    expect(chapterImage("01-led", "images/없는그림.svg")).toBeUndefined();
+    expect(chapterImage("01-led", "../x.svg")).toBeUndefined();
+    expect(chapterImage("../x", "images/a.svg")).toBeUndefined();
+    expect(chapterImage("01-led", undefined)).toBeUndefined();
   });
 });
 

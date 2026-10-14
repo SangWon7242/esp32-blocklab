@@ -1,11 +1,27 @@
-/** 단계 안내 글. markdown 라이브러리 없이 빈 줄로 문단을 나누고, 줄바꿈은 그대로 둔다 */
-export function GuideBody({ text }: { text: string }) {
-  const paragraphs = text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+import { cn } from "@/lib/utils";
+import { parseGuide, type Inline } from "./guideMarkdown";
+
+function Inlines({ inlines }: { inlines: Inline[] }) {
+  return inlines.map((x, i) =>
+    x.kind === "bold" ? <strong key={i} className="font-semibold">{x.text}</strong>
+    : x.kind === "code" ? <code key={i} className="rounded bg-muted px-1 py-0.5 font-mono text-[0.85em]">{x.text}</code>
+    : x.text,
+  );
+}
+
+/** 단계 안내 글: 가벼운 markdown(문단·**굵게**·- 목록·1. 번호·`코드`). 문법은 guideMarkdown.ts */
+export function GuideBody({ text, className }: { text: string; className?: string }) {
   return (
-    <div className="space-y-3 text-sm leading-relaxed">
-      {paragraphs.map((p, i) => (
-        <p key={i} className="whitespace-pre-line">{p}</p>
-      ))}
+    <div className={cn("space-y-3 text-sm leading-relaxed", className)}>
+      {parseGuide(text).map((b, i) =>
+        b.kind === "p" ? (
+          <p key={i} className="whitespace-pre-line"><Inlines inlines={b.inlines} /></p>
+        ) : b.kind === "ul" ? (
+          <ul key={i} className="list-disc space-y-1 pl-5">{b.items.map((it, j) => <li key={j}><Inlines inlines={it} /></li>)}</ul>
+        ) : (
+          <ol key={i} start={b.start} className="list-decimal space-y-1 pl-5">{b.items.map((it, j) => <li key={j}><Inlines inlines={it} /></li>)}</ol>
+        ),
+      )}
     </div>
   );
 }
