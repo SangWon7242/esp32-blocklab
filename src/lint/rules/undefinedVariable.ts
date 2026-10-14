@@ -1,4 +1,5 @@
 import { findSetupByBlock } from "@/devices/registry";
+import { definedNames } from "../codeNames";
 import { issueAt, realBlocks } from "../walk";
 import type { Rule } from "../types";
 
@@ -13,7 +14,8 @@ const READS_VAR = new Set([
 
 /**
  * 값을 정한 적 없는 변수 읽기. 정한 것으로 치는 것: 어디든 그 변수의 variables_set·리스트 만들기, for 반복 변수
- * (각 항목 반복·범위 반복), 함수 매개변수, 준비 블록의 변수 칸, n번 반복이 있을 때의 i. 읽는 것: 변수 값 블록,
+ * (각 항목 반복·범위 반복), 함수 매개변수, 준비 블록의 변수 칸, n번 반복이 있을 때의 i, 코드 블록(code_stmt) 원문이
+ * 정하는 이름(`a, b = 0, 0`·`x = y = 0`·for·with … as·global·import, codeNames.ts). 읽는 것: 변수 값 블록,
  * 만큼 바꾸기, 리스트 블록(추가·끼우기·지우기·비우기·정하기·위치). 변수는 이름으로 맞춘다 (파이썬도 이름으로 찾는다).
  */
 export const undefinedVariable: Rule = (ctx) => {
@@ -23,6 +25,7 @@ export const undefinedVariable: Rule = (ctx) => {
   for (const b of blocks) {
     if (DEFINES_VAR.has(b.type)) add(ctx.varName(b.fields.VAR));
     else if (b.type === "flow_repeat_n") add("i");
+    else if (b.type === "code_stmt") definedNames(String(b.fields.CODE ?? "")).forEach(add);
     else if (b.type === "procedures_defnoreturn" || b.type === "procedures_defreturn") {
       const params = (b.extraState as { params?: unknown } | undefined)?.params;
       if (Array.isArray(params)) for (const p of params) add(ctx.varName(p));

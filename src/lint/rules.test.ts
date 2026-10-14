@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { workspaceJsonToCodeWithMap, type WorkspaceJson } from "@/codegen";
 import type { LineMap } from "@/codegen/linemap";
+import { codeToBlocks } from "@/parser";
 import { blockLabel, lint } from "./index";
 import type { Issue } from "./types";
 import { forever, num, pinSetup, pinWrite, program, shadowNum, str, varGet, varSet, wait, type B } from "./testkit";
@@ -322,6 +323,53 @@ describe("undefined-variable", () => {
     expect(issues.map((i) => i.blockId)).toEqual(["e1", "e2", "e3", "e4", "e5", "e6"]);
     expect(blockLabel("list_insert")).toBe("… 의 … 번째에 … 끼워 넣기 (0부터)");
     expect(blockLabel("flow_break")).toBe("반복 멈추고 나가기");
+  });
+  describe("코드 블록(code_stmt) 안에서 정한 이름도 정의로 본다", () => {
+    const code = (id: string, text: string): B => ({ type: "code_stmt", id, fields: { CODE: text } });
+    const change = (name: string, id = `ch_${name}`): B => ({ type: "var_change", id, fields: listVar(name), inputs: { DELTA: shadowNum(1) } });
+    const append = (name: string, id = `ap_${name}`): B => ({ type: "list_append", id, fields: listVar(name), inputs: { V: shadowNum(2) } });
+    /** 코드 블록 하나 뒤에 이름들을 읽는 블록을 두고, 주의가 붙은 이름 */
+    const warned = (text: string, reads: B[], vars: string[]) =>
+      only(run(program([code("c", text), ...reads], { vars })), "undefined-variable").map((i) => i.ko.split(" ")[0]);
+    it("a, b = 0, 0 / (a, b) = … / x = y = 0 / n: int = 3", () => {
+      expect(warned("a, b = 0, 0", [change("a"), change("b")], ["a", "b"])).toEqual([]);
+      expect(warned("(a, b) = 1, 2", [change("a"), change("b")], ["a", "b"])).toEqual([]);
+      expect(warned("x = y = 0", [print("p1", varGet("x")), print("p2", varGet("y"))], ["x", "y"])).toEqual([]);
+      expect(warned("n: int = 3", [change("n")], ["n"])).toEqual([]);
+    });
+    it("try 안의 대입, 여러 줄 코드의 모든 줄", () => {
+      expect(warned("try:\n    items = [1]\nexcept OSError:\n    pass", [append("items")], ["items"])).toEqual([]);
+      expect(warned("if ok:\n    total = 0\nelse:\n    count = 1", [change("total"), change("count")], ["total", "count"])).toEqual([]);
+    });
+    it("for 반복 변수(여러 개도), with … as, except … as, global, import", () => {
+      expect(warned("for k, v in d.items():\n    pass", [print("p1", varGet("k")), print("p2", varGet("v"))], ["k", "v"])).toEqual([]);
+      expect(warned('with open("a.txt") as f:\n    pass', [print("p", varGet("f"))], ["f"])).toEqual([]);
+      expect(warned("try:\n    pass\nexcept Exception as e:\n    pass", [print("p", varGet("e"))], ["e"])).toEqual([]);
+      expect(warned("global n, m", [change("n"), change("m")], ["n", "m"])).toEqual([]);
+      expect(warned("import gc, os.path\nimport ujson as json\nfrom math import pi, tau as t", ["gc", "os", "json", "pi", "t"].map((n) => print(`p_${n}`, varGet(n))), ["gc", "os", "json", "pi", "t"])).toEqual([]);
+      expect(warned("from machine import (Pin,\n    ADC)", [print("p", varGet("ADC"))], ["ADC"])).toEqual([]);
+    });
+    it("코드 → 블록 → 검사: 리뷰에서 본 세 가지는 주의 없음", () => {
+      for (const src of ["a, b = 0, 0\na += 1\n", "try:\n    items = [1]\nexcept OSError:\n    pass\nitems.append(2)\n", "x = y = 0\nprint(x)\n"]) {
+        const r = codeToBlocks(src);
+        if (!r.ok) throw new Error(r.error.message);
+        expect(only(lint(r.json as Parameters<typeof lint>[0], null), "undefined-variable"), src).toEqual([]);
+      }
+      const r = codeToBlocks("print(a)\na += 1\n");
+      if (!r.ok) throw new Error(r.error.message);
+      expect(only(lint(r.json as Parameters<typeof lint>[0], null), "undefined-variable")).toHaveLength(1);
+    });
+    it("읽기만 하는 코드는 정의가 아니다: print(a), a += 1, a == 1, 이름 붙인 인자, 문자열·주석 안", () => {
+      expect(warned("print(a)", [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned("a += 1", [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned("if a == 1:\n    pass", [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned("oled = make(128, 64,\n    addr=60)", [change("addr")], ["addr"])).toEqual(["addr"]);
+      expect(warned("f(a=1)", [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned('print("a = 1")', [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned("# a = 1\nprint(2)", [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned('s = """\na = 1\n"""', [change("a")], ["a"])).toEqual(["a"]);
+      expect(warned("[a for a in xs]", [change("a")], ["a"])).toEqual(["a"]);
+    });
   });
   it("값 블록의 줄은 담은 명령 블록의 줄", () => {
     const issues = only(runMapped(program([print("p", varGet("d", "g"))], { vars: ["d"] })), "undefined-variable");
