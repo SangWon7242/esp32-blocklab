@@ -84,7 +84,10 @@ export function registerForBlocks(gen: Gen): void {
   f["flow_repeat_n"] = (block, g) => `for i in range(${value(block, g as Gen, "TIMES")}):\n${branch(block, g as Gen, "DO")}`;
   f["flow_for_range"] = (block, g) => {
     const gen = g as Gen;
-    return `for ${varName(block, gen)} in range(${value(block, gen, "FROM")}, ${value(block, gen, "TO")}):\n${branch(block, gen, "DO")}`;
+    const from = value(block, gen, "FROM");
+    // 시작이 0 이면 파이썬답게 range(n) 로 (선생님 코드 `for num in range(10):` 이 글자 그대로 돌아온다)
+    const args = from === "0" ? value(block, gen, "TO") : `${from}, ${value(block, gen, "TO")}`;
+    return `for ${varName(block, gen)} in range(${args}):\n${branch(block, gen, "DO")}`;
   };
   f["flow_for_each"] = (block, g) => {
     const gen = g as Gen;

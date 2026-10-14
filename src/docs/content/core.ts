@@ -61,7 +61,7 @@ export const coreContent: Record<string, BlockContent> = {
     },
     tips: [
       "끝 수는 들어가지 않아요. 1부터 5까지 돌리려면 range(1, 6) 처럼 끝 수를 하나 크게 적어요.",
-      "코드에 range(5) 처럼 수를 하나만 쓰면 블록으로 바꿀 때 range(0, 5) 로 적혀요. 뜻은 같아요.",
+      "시작이 0 이면 코드에 range(5) 처럼 수를 하나만 적어요. range(0, 5) 와 뜻이 같아요.",
       "반복 변수가 i 이고 range(3) 처럼 수가 하나면 '번 반복하기' 블록이 돼요.",
     ],
   },

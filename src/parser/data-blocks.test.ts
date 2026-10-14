@@ -236,12 +236,14 @@ describe("흐름 추가 블록 왕복", () => {
     expect(body("for i in range(2, 5):\n    print(i)\n")[0].type).toBe("flow_for_range");
   });
 
-  it("for x in range(3) (i 가 아닌 변수) → 범위 반복 FROM 0, 코드는 range(0, 3) 으로", () => {
+  it("for x in range(3) (i 가 아닌 변수) → 범위 반복 FROM 0, 코드는 range(3) 그대로", () => {
     const [loop] = body("for x in range(3):\n    print(x)\n");
     expect(loop.type).toBe("flow_for_range");
     expect(loop.inputs?.FROM?.block).toEqual(num(0));
     expect(loop.inputs?.TO?.block).toEqual(num(3));
-    expect(codeToCode("for x in range(3):\n    print(x)\n")).toBe("for x in range(0, 3):\n    print(x)\n");
+    expect(codeToCode("for x in range(3):\n    print(x)\n")).toBe("for x in range(3):\n    print(x)\n");
+    // 시작이 0 이 아니면 두 인자 그대로
+    expect(codeToCode("for x in range(2, 5):\n    print(x)\n")).toBe("for x in range(2, 5):\n    print(x)\n");
   });
 
   it("for i in range(3) 은 여전히 n번 반복", () => {
@@ -255,7 +257,7 @@ describe("흐름 추가 블록 왕복", () => {
     const eq = (a: B, b: B) => blk("logic_compare", { OP: "EQ" }, { A: a, B: b });
     roundTrip(
       [withBody("flow_for_range", VAR("x"), { FROM: num(0), TO: num(10) }, [ifThen(eq(v("x"), num(3)), [blk("flow_continue", undefined)]), ifThen(eq(v("x"), num(5)), [blk("flow_break", undefined)]), print(v("x"))])],
-      "for x in range(0, 10):\n    if x == 3:\n        continue\n    if x == 5:\n        break\n    print(x)\n",
+      "for x in range(10):\n    if x == 3:\n        continue\n    if x == 5:\n        break\n    print(x)\n",
       ["flow_break", "flow_continue"],
     );
     roundTrip([withBody("flow_repeat_forever", undefined, {}, [blk("flow_break", undefined)])], "while True:\n    break\n", ["flow_break"]);

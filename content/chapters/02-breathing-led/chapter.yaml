@@ -115,7 +115,7 @@ parts:
 
           줄마다 손가락으로 짚으며 읽고, 답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
         todo:
-          - "`range(0, 1023)` 이 i 를 어디부터 어디까지 바꾸는지 읽기"
+          - "`range(1023)` 이 i 를 어디부터 어디까지 바꾸는지 읽기"
           - 두 `pwm.duty(...)` 줄의 괄호 안이 어떻게 다른지 보기
           - 세 문제에 답하고 **확인** 누르기
         code: step1_breathing.py
@@ -146,7 +146,7 @@ parts:
             fail: 점점 밝아지는 쪽은 한 칸마다 몇 밀리초 기다리나요? 더 천천히 하려면 그 숫자를 어떻게 해야 할까요?
           - codeMatches: '^\s+pwm\.duty\(1023\s*-\s*i\)\n\s+time\.sleep_ms\(3\)$'
             fail: 어두워지는 쪽도 밝아지는 쪽과 같은 빠르기인가요?
-          - codeMatches: 'range\(0,\s*1023\)[\s\S]*range\(0,\s*1023\)'
+          - codeMatches: 'range\((?:0,\s*)?1023\)[\s\S]*range\((?:0,\s*)?1023\)'
             fail: 숨 한 번에 세기를 몇 칸 바꾸는지(range)는 그대로인가요? 이번에 바꿀 것은 기다리는 시간뿐이에요
         answerCode: mission_slower.py
 
@@ -227,7 +227,7 @@ parts:
           - text: "  ↳ 1밀리초 기다린다"
         translation:
           - ["PWM 준비 (1초에 10000번)", "pwm = PWM(Pin(26)) · pwm.freq(10000)"]
-          - ["i 를 0부터 1022까지 되풀이", "for i in range(0, 1023):"]
+          - ["i 를 0부터 1022까지 되풀이", "for i in range(1023):"]
           - ["세기를 정한다", "pwm.duty(세기)"]
           - ["밀리초 기다린다", "time.sleep_ms(밀리초)"]
         targetCode: design_breathing.py
