@@ -144,6 +144,13 @@ describe("pin-conflict", () => {
   it("다른 핀 → 없음", () => {
     expect(only(run(program([pinSetup("p", "led", 26), ultra(13)], { vars: ["led"] })), "pin-conflict")).toEqual([]);
   });
+  it("I2C 처럼 같은 버스 선(SCL↔SCL, SDA↔SDA)을 나눠 쓰는 두 장치는 주의하지 않는다 (9장 OLED+RFID)", () => {
+    const oled = { type: "esp_oled_setup", id: "o", fields: { SCL: 22, SDA: 21 } };
+    const rfid = { type: "dev_rfid_setup", id: "r", fields: { SCL: 22, SDA: 21, ADDR: "0x28" } };
+    expect(only(run(program([oled, rfid], { vars: [] })), "pin-conflict")).toEqual([]);
+    // 버스 선이라도 다른 역할의 핀(출력)과 겹치면 여전히 주의
+    expect(only(run(program([oled, pinSetup("p", "led", 22)], { vars: ["led"] })), "pin-conflict")).toHaveLength(1);
+  });
   it("떨어진(실행되지 않는) 준비 블록과 겹치는 것은 보지 않는다", () => {
     expect(only(run(program([pinSetup("p", "led", 13)], { tops: [ultra(13)], vars: ["led"] })), "pin-conflict")).toEqual([]);
   });

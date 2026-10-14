@@ -9,13 +9,13 @@ const root = join(__dirname, "../../content/chapters");
 const files = readdirSync(root).flatMap((dir) => readdirSync(join(root, dir)).filter((f) => f.endsWith(".py")).map((f) => join(dir, f)));
 
 /** 글자 그대로 왕복해야 하는 챕터(블록 꼴에 맞춰 쓴 파일). 나머지 챕터의 선생님 원본은 함수 위치·import 순서가 달라 표준 꼴 안정성만 본다 */
-const EXACT_CHAPTERS = ["01-led", "10-auto-door"];
+const EXACT_CHAPTERS: string[] = []; // 비어 있으면 모든 챕터가 글자 그대로 왕복해야 한다 (계획 10)
 
 describe("코드 → 블록 → 코드 왕복", () => {
   it("수업 파일이 14개 이상 있다", () => expect(files.length).toBeGreaterThanOrEqual(14));
 
   for (const file of files) {
-    const exact = EXACT_CHAPTERS.some((c) => file.startsWith(c + "/"));
+    const exact = EXACT_CHAPTERS.length === 0 || EXACT_CHAPTERS.some((c) => file.startsWith(c + "/"));
     it(`${file}${exact ? "" : " (표준 꼴 안정)"}`, () => {
       const src = readFileSync(join(root, file), "utf8");
       const r = codeToBlocks(src);
@@ -24,9 +24,7 @@ describe("코드 → 블록 → 코드 왕복", () => {
       const out = workspaceJsonToCode(r.json);
       if (exact) {
         expect(normalizeCode(out)).toEqual(normalizeCode(src));
-        // step1_distance 는 두 줄짜리 get_distance 라서 time.ticks_* 식 3개가 코드 식으로 남는다
-        const allowed = file.endsWith("step1_distance.py") ? 3 : 0;
-        expect(r.unparsed.length, JSON.stringify(r.unparsed)).toBeLessThanOrEqual(allowed);
+        expect(r.unparsed.length, JSON.stringify(r.unparsed)).toBe(0);
       } else {
         // 두 번째 왕복은 첫 번째와 같아야 한다 (판정의 canonicalLines 가 이 성질에 기댄다)
         const again = codeToBlocks(out);
