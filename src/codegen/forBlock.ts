@@ -11,7 +11,11 @@ const ARITH: Record<string, [string, number]> = {
   ADD: ["+", Order.ADDITIVE], MINUS: ["-", Order.ADDITIVE],
   MULTIPLY: ["*", Order.MULTIPLICATIVE], DIVIDE: ["/", Order.MULTIPLICATIVE],
   FLOORDIV: ["//", Order.MULTIPLICATIVE], MOD: ["%", Order.MULTIPLICATIVE],
+  POW: ["**", Order.EXPONENTIATION],
 };
+
+/** calc_round 의 OP → 함수 이름 (math.* 는 import math 규칙이 붙는다) */
+const ROUND: Record<string, string> = { ROUND: "round", FLOOR: "math.floor", CEIL: "math.ceil", ABS: "abs", SQRT: "math.sqrt" };
 
 /**
  * 왼쪽은 같은 우선순위에 괄호를 치지 않도록 order + 1, 오른쪽은 그대로.
@@ -19,10 +23,15 @@ const ARITH: Record<string, [string, number]> = {
  * 우선순위만 괄호로 감싼다.)
  */
 function binary(block: Blockly.Block, gen: Gen, symbol: string, order: number): [string, number] {
-  const a = value(block, gen, "A", order + 1);
-  const b = value(block, gen, "B", order);
+  // ** 는 오른쪽부터 묶는다 (2 ** 3 ** 2 == 2 ** (3 ** 2)): 왼쪽에 같은 우선순위가 오면 괄호, 오른쪽은 괄호 없이
+  const right = order === Order.EXPONENTIATION;
+  const a = value(block, gen, "A", right ? order : order + 1);
+  const b = value(block, gen, "B", right ? order + 1 : order);
   return [`${a} ${symbol} ${b}`, order];
 }
+
+/** LOW <= A <= HIGH, ITEM in CONTAINER 처럼 비교 연산자로 잇는 식의 칸들. 비교식이 칸에 들어오면 괄호로 감싼다 */
+const relational = (block: Blockly.Block, gen: Gen, ...names: string[]) => names.map((name) => value(block, gen, name, Order.RELATIONAL));
 
 /** 이름·속성 연결(a.b) 이거나, 첫 `(` 가 맨 끝 `)` 와 짝을 이루는 호출 하나인지 */
 function isSimpleCallOrName(text: string): boolean {
@@ -56,6 +65,31 @@ export function registerForBlocks(gen: Gen): void {
     return binary(block, g as Gen, symbol, order);
   };
   f["calc_concat"] = (block, g) => binary(block, g as Gen, "+", Order.ADDITIVE);
+  f["calc_random"] = (block, g) => [`random.randint(${value(block, g as Gen, "A")}, ${value(block, g as Gen, "B")})`, Order.FUNCTION_CALL];
+  f["calc_round"] = (block, g) => [`${ROUND[block.getFieldValue("OP")] ?? "round"}(${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
+  f["calc_minmax"] = (block, g) => [`${block.getFieldValue("OP") === "MIN" ? "min" : "max"}(${value(block, g as Gen, "A")}, ${value(block, g as Gen, "B")})`, Order.FUNCTION_CALL];
+  f["calc_len"] = (block, g) => [`len(${value(block, g as Gen, "X", Order.NONE, '""')})`, Order.FUNCTION_CALL];
+  f["calc_item"] = (block, g) => [`${value(block, g as Gen, "X", Order.MEMBER, '""')}[${value(block, g as Gen, "INDEX")}]`, Order.MEMBER];
+  f["calc_ticks"] = () => ["time.ticks_ms()", Order.FUNCTION_CALL];
+
+  f["judge_between"] = (block, g) => {
+    const [a, low, high] = relational(block, g as Gen, "A", "LOW", "HIGH");
+    return [`${low} <= ${a} <= ${high}`, Order.RELATIONAL];
+  };
+  f["judge_contains"] = (block, g) => {
+    const [container, item] = relational(block, g as Gen, "CONTAINER", "ITEM");
+    return [`${item} in ${container}`, Order.RELATIONAL];
+  };
+  // "들어 있는가" 를 뒤집으면 not x in xs 가 아니라 파이썬다운 x not in xs 로 쓴다 (파서가 x not in xs 를 이 모양으로 읽는다)
+  const builtinNegate = f["logic_negate"];
+  f["logic_negate"] = (block, g) => {
+    const inner = block.getInputTargetBlock("BOOL");
+    if (inner?.type === "judge_contains" && inner.isEnabled()) {
+      const [container, item] = relational(inner, g as Gen, "CONTAINER", "ITEM");
+      return [`${item} not in ${container}`, Order.RELATIONAL];
+    }
+    return builtinNegate.call(f, block, g);
+  };
   f["calc_str"] = (block, g) => [`str(${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
   f["calc_int"] = (block, g) => [`int(${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
 

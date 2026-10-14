@@ -3,6 +3,7 @@ import { deviceToolboxCategories } from "@/devices/toBlocks";
 
 const block = (type: string, extra: Record<string, unknown> = {}) => ({ kind: "block", type, ...extra });
 const num = (n: number) => ({ shadow: { type: "math_number", fields: { NUM: n } } });
+const text = (t: string) => ({ shadow: { type: "text", fields: { TEXT: t } } });
 
 export const toolbox = {
   kind: "categoryToolbox",
@@ -34,6 +35,8 @@ export const toolbox = {
         block("logic_operation"),
         block("logic_negate"),
         block("logic_boolean"),
+        block("judge_between", { inputs: { A: num(10), LOW: num(0), HIGH: num(100) } }),
+        block("judge_contains", { inputs: { CONTAINER: text("hello"), ITEM: text("e") } }),
       ],
     },
     {
@@ -45,9 +48,15 @@ export const toolbox = {
         block("math_number", { fields: { NUM: 0 } }),
         block("text", { fields: { TEXT: "안녕" } }),
         block("calc_arith", { inputs: { A: num(1), B: num(1) } }),
-        block("calc_concat", { inputs: { A: { shadow: { type: "text", fields: { TEXT: "" } } }, B: { shadow: { type: "text", fields: { TEXT: " cm" } } } } }),
+        block("calc_random", { inputs: { A: num(1), B: num(6) } }),
+        block("calc_round", { inputs: { X: num(3.7) } }),
+        block("calc_minmax", { inputs: { A: num(3), B: num(7) } }),
+        block("calc_concat", { inputs: { A: text(""), B: text(" cm") } }),
         block("calc_str"),
         block("calc_int"),
+        block("calc_len", { inputs: { X: text("hello") } }),
+        block("calc_item", { inputs: { X: text("hello"), INDEX: num(0) } }),
+        block("calc_ticks"),
       ],
     },
     { kind: "category", name: "변수", categorystyle: "variable_category", icon: "variable", custom: "VARIABLE" },

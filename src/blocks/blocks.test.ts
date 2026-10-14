@@ -120,6 +120,44 @@ describe("테마와 툴박스", () => {
   });
 });
 
+describe("계획 6 판단·계산 블록", () => {
+  const ws = () => new Blockly.Workspace();
+  it("칸 이름과 출력 형식이 약속과 같다", () => {
+    const w = ws();
+    const spec: [string, string[], string | null][] = [
+      ["judge_between", ["A", "LOW", "HIGH"], "Boolean"],
+      ["judge_contains", ["CONTAINER", "ITEM"], "Boolean"],
+      ["calc_random", ["A", "B"], "Number"],
+      ["calc_round", ["X"], "Number"],
+      ["calc_minmax", ["A", "B"], "Number"],
+      ["calc_len", ["X"], "Number"],
+      ["calc_item", ["X", "INDEX"], null],
+      ["calc_ticks", [], "Number"],
+    ];
+    for (const [type, inputs, output] of spec) {
+      const b = w.newBlock(type);
+      expect(b.inputList.filter((i) => i.connection).map((i) => i.name), type).toEqual(inputs);
+      expect(b.outputConnection?.getCheck() ?? null, type).toEqual(output === null ? null : [output]);
+    }
+    expect(w.newBlock("calc_round").getFieldValue("OP")).toBe("ROUND");
+    expect(w.newBlock("calc_minmax").getFieldValue("OP")).toBe("MAX");
+    w.dispose();
+  });
+  it("계산 블록에 ^(POW) 가 있다", () => {
+    const op = ws().newBlock("calc_arith").getField("OP") as Blockly.FieldDropdown;
+    expect(op.getOptions(false).map((o) => o[1])).toContain("POW");
+  });
+  it("n번째 항목 문구에 (0부터) 가 있다", () => {
+    const b = ws().newBlock("calc_item");
+    expect(b.inputList.flatMap((i) => i.fieldRow.map((f) => f.getText())).join(" ")).toContain("(0부터)");
+  });
+  it("툴박스 판단·계산 카테고리에 새 블록이 있다", () => {
+    const cat = (name: string) => (toolbox as { contents: { name: string; contents?: { type?: string }[] }[] }).contents.find((c) => c.name === name)!.contents!.map((b) => b.type);
+    expect(cat("판단")).toEqual(expect.arrayContaining(["judge_between", "judge_contains"]));
+    expect(cat("계산")).toEqual(expect.arrayContaining(["calc_random", "calc_round", "calc_minmax", "calc_len", "calc_item", "calc_ticks"]));
+  });
+});
+
 describe("최종 리뷰", () => {
   it("C3 변수 꾸러미가 깨진 코드를 내는 math_change·procedures_ifreturn 을 내놓지 않는다", () => {
     expect(Blockly.Blocks.math_change).toBeUndefined();

@@ -71,6 +71,16 @@ export const coreContent: Record<string, BlockContent> = {
     example: { title: "상태를 변수에 담기", code: 'light_on = True\nif light_on:\n    print("on")' },
   },
 
+  // TODO(plan6 task3): 아래 judge_* 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
+  judge_between: {
+    concept: "값이 두 수 사이에 있는지 따져요. 코드로는 10 <= d <= 30 처럼 쓰고, 두 끝 값도 사이에 들어갑니다. 거리나 온도가 알맞은 범위인지 볼 때 씁니다.",
+    example: { title: "거리가 10부터 30 사이면 출력하기", code: 'd = 25\nif 10 <= d <= 30:\n    print("near")' },
+  },
+  judge_contains: {
+    concept: "글자나 리스트 안에 어떤 값이 들어 있는지 따져요. 코드로는 \"e\" in word 처럼 in 을 씁니다. 아니다 블록으로 감싸면 not in 이 돼요.",
+    example: { title: "글자에 e 가 있으면 출력하기", code: 'word = "hello"\nif "e" in word:\n    print("found")' },
+  },
+
   // 계산
   math_number: {
     concept: "숫자 하나를 나타내요. 정수(3)도, 소수(0.5)도, 음수(-1)도 쓸 수 있습니다. 기다리는 시간, 반복 횟수, 비교할 기준값처럼 숫자가 필요한 칸에 끼워요.",
@@ -97,6 +107,31 @@ export const coreContent: Record<string, BlockContent> = {
   calc_int: {
     concept: "값을 정수로 바꾸고 소수점 아래는 버려요. 코드로는 int(값) 이라서 int(3.7) 은 3 이 됩니다. 계산 결과를 깔끔한 정수로 만들 때 씁니다.",
     example: { title: "소수를 정수로 바꾸기", code: "volt = 2.75\nprint(int(volt))" },
+  },
+  // TODO(plan6 task3): 아래 calc_* 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
+  calc_random: {
+    concept: "두 수 사이에서 정수 하나를 아무렇게나 골라요. 코드로는 random.randint(1, 6) 이고, 1 과 6 도 나올 수 있습니다. 주사위나 무작위 색처럼 매번 다른 값이 필요할 때 씁니다.",
+    example: { title: "주사위 굴리기", code: "dice = random.randint(1, 6)\nprint(dice)" },
+  },
+  calc_round: {
+    concept: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구해요. 코드로는 round(x), math.floor(x), math.ceil(x), abs(x), math.sqrt(x) 입니다. math 를 쓰면 import math 가 저절로 붙어요.",
+    example: { title: "소수를 반올림하고 내리기", code: "volt = 2.75\nprint(round(volt))\nprint(math.floor(volt))" },
+  },
+  calc_minmax: {
+    concept: "두 수 중에서 큰 수나 작은 수를 골라요. 코드로는 max(a, b) 와 min(a, b) 입니다. 값이 정한 범위를 넘지 않게 막을 때도 씁니다.",
+    example: { title: "두 수 중 큰 수 출력하기", code: "a = 3\nb = 7\nprint(max(a, b))" },
+  },
+  calc_len: {
+    concept: "글자 수나 리스트의 항목 수를 세요. 코드로는 len(word) 입니다. 빈 글자의 길이는 0 이에요.",
+    example: { title: "글자 수 세기", code: 'word = "hello"\nprint(len(word))' },
+  },
+  calc_item: {
+    concept: "글자나 리스트에서 몇 번째 항목을 꺼내요. 코드로는 word[0] 처럼 쓰고, 번호는 0부터 셉니다. 그래서 첫 번째 항목은 0번이에요.",
+    example: { title: "첫 글자 꺼내기", code: 'word = "hello"\nprint(word[0])' },
+  },
+  calc_ticks: {
+    concept: "보드가 켜진 뒤 지난 시간을 밀리초로 알려 줘요. 코드로는 time.ticks_ms() 입니다. 시작할 때 값을 적어 두고 나중 값과 빼면 걸린 시간을 알 수 있어요.",
+    example: { title: "1초 동안 걸린 시간 재기", code: "start = time.ticks_ms()\ntime.sleep(1)\nprint(time.ticks_ms() - start)" },
   },
 
   // 변수
@@ -140,6 +175,6 @@ export const coreContent: Record<string, BlockContent> = {
   },
   code_expr: {
     concept: "블록으로 바꾸지 못한 식(값)을 그대로 담아요. 값이 들어가는 칸에 끼울 수 있고, 안에 적은 글이 그대로 코드의 식이 됩니다.",
-    example: { title: "max 같은 함수 호출은 식 블록이 돼요", code: "print(max(3, 7))" },
+    example: { title: "세 수의 max 처럼 블록에 없는 꼴은 식 블록이 돼요", code: "print(max(3, 7, 5))" },
   },
 };

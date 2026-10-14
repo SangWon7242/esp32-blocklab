@@ -72,7 +72,8 @@ describe("import 규칙", () => {
     expect(isGeneratedImport("import ssd1306")).toBe(true);
     expect(isGeneratedImport("import time as t")).toBe(false);
     expect(isGeneratedImport("from machine import Pin as P")).toBe(false);
-    expect(isGeneratedImport("import random")).toBe(false);
+    expect(isGeneratedImport("import random")).toBe(true);
+    expect(isGeneratedImport("import network")).toBe(false);
   });
 });
 

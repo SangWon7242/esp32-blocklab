@@ -4,6 +4,7 @@ import { registerFieldColour } from "@blockly/field-colour";
 import { applyKoreanMessages } from "./messages";
 import { startBlocks } from "./definitions/start";
 import { flowBlocks } from "./definitions/flow";
+import { judgeBlocks } from "./definitions/judge";
 import { calcBlocks } from "./definitions/calc";
 import { codeBlocks } from "./definitions/code";
 import { isValidPythonName } from "./names";
@@ -14,7 +15,7 @@ export { toolbox } from "./toolbox";
 export { registerEntryToolbox } from "./entryToolbox";
 export { FUNCTION_NAME_HINT, isProgramName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
 
-const definitions = [...startBlocks, ...flowBlocks, ...calcBlocks, ...deviceBlockDefinitions(), ...codeBlocks];
+const definitions = [...startBlocks, ...flowBlocks, ...judgeBlocks, ...calcBlocks, ...deviceBlockDefinitions(), ...codeBlocks];
 
 export const CUSTOM_BLOCK_TYPES: readonly string[] = definitions.map((d) => d.type as string);
 

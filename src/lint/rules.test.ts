@@ -37,6 +37,13 @@ describe("empty-input", () => {
     expect(ids).toEqual(["a", "if", "c"]);
     expect(blockLabel("dev_servo_angle")).toBe("… 각도를 … 도로");
   });
+  it("판단·계산 새 블록도 빈 칸을 찾는다 (지난 시간 블록은 칸이 없다)", () => {
+    const set = (id: string, value: B) => ({ ...varSet("x", value), id: `set_${id}` });
+    const blocks = ["judge_between", "judge_contains", "calc_random", "calc_round", "calc_minmax", "calc_len", "calc_item", "calc_ticks"].map((type) => set(type, { type, id: type }));
+    const ids = only(run(program(blocks, { vars: ["x"] })), "empty-input").map((i) => i.blockId);
+    expect(ids).toEqual(["judge_between", "judge_contains", "calc_random", "calc_round", "calc_minmax", "calc_len", "calc_item"]);
+    expect(blockLabel("calc_item")).toBe("… 의 … 번째 항목 (0부터)");
+  });
 });
 
 describe("device-before-setup", () => {

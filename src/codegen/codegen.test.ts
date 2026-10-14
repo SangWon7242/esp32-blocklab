@@ -207,6 +207,29 @@ describe("식과 우선순위", () => {
     expect(body(arith("MULTIPLY", arith("ADD", num(1), num(2)), num(3)))).toBe("t = (1 + 2) * 3");
     expect(body(arith("MINUS", num(1), arith("MINUS", num(2), num(3))))).toBe("t = 1 - (2 - 3)");
   });
+  it("** 는 오른쪽부터 묶는다", () => {
+    expect(body(arith("POW", num(2), arith("POW", num(3), num(2))))).toBe("t = 2 ** 3 ** 2");
+    expect(body(arith("POW", arith("POW", num(2), num(3)), num(2)))).toBe("t = (2 ** 3) ** 2");
+    expect(body(arith("POW", num(-2), num(2)))).toBe("t = (-2) ** 2");
+    expect(body(arith("MULTIPLY", num(2), arith("POW", varGet("t"), num(2))))).toBe("t = 2 * t ** 2");
+  });
+  it("판단·계산 블록 코드 (계획 6)", () => {
+    const b = (type: string, fields: B | undefined, inputs: Record<string, B> = {}): B => ({ type, ...(fields ? { fields } : {}), inputs: Object.fromEntries(Object.entries(inputs).map(([k, x]) => [k, { block: x }])) });
+    const compare = b("logic_compare", { OP: "LT" }, { A: num(1), B: num(2) });
+    expect(body(b("judge_between", undefined, { A: varGet("t"), LOW: num(0), HIGH: num(100) }))).toBe("t = 0 <= t <= 100");
+    expect(body(b("judge_contains", undefined, { CONTAINER: varGet("t"), ITEM: compare }))).toBe("t = (1 < 2) in t");
+    expect(body(b("judge_between", undefined, { A: arith("ADD", varGet("t"), num(1)), LOW: num(-1), HIGH: arith("MULTIPLY", num(2), num(3)) }))).toBe("t = -1 <= t + 1 <= 2 * 3");
+    expect(body(b("judge_contains", undefined, { CONTAINER: str("abc"), ITEM: str("a") }))).toBe('t = "a" in "abc"');
+    expect(body(b("logic_negate", undefined, { BOOL: b("judge_contains", undefined, { CONTAINER: str("abc"), ITEM: str("a") }) }))).toBe('t = "a" not in "abc"');
+    expect(body(b("calc_minmax", { OP: "MIN" }, { A: num(1), B: num(2) }))).toBe("t = min(1, 2)");
+    expect(body(b("calc_len", undefined, { X: str("abc") }))).toBe('t = len("abc")');
+    expect(body(b("calc_item", undefined, { X: str("abc"), INDEX: num(0) }))).toBe('t = "abc"[0]');
+    expect(body(b("calc_item", undefined, { X: b("calc_item", undefined, { X: varGet("t"), INDEX: num(0) }), INDEX: num(1) }))).toBe("t = t[0][1]");
+    expect(body(b("calc_round", { OP: "ABS" }, { X: num(-3) }))).toBe("t = abs(-3)");
+    expect(body(b("calc_round", { OP: "SQRT" }, { X: num(9) }))).toBe("import math\n\nt = math.sqrt(9)");
+    expect(body(b("calc_random", undefined, { A: num(1), B: num(6) }))).toBe("import random\n\nt = random.randint(1, 6)");
+    expect(body(b("calc_ticks", undefined))).toBe("import time\n\nt = time.ticks_ms()");
+  });
   it("코드 식은 그대로, time. 이 보이면 import time", () => {
     const code = workspaceJsonToCode(program([setT({ type: "code_expr", fields: { CODE: "time.ticks_us()" } })], { vars: ["t"] }));
     expect(code).toBe("import time\n\nt = time.ticks_us()\n");
