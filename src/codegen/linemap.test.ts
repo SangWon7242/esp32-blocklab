@@ -239,11 +239,11 @@ describe("코드 지도: 블록 id ↔ 줄", () => {
   });
 });
 
-describe("코드 지도: 수업 파일 14개", () => {
+describe("코드 지도: 수업 파일 전부", () => {
   const root = join(__dirname, "../../content/chapters");
   const files = readdirSync(root).flatMap((dir) => readdirSync(join(root, dir)).filter((f) => f.endsWith(".py")).map((f) => join(dir, f)));
 
-  it("수업 파일이 14개 있다", () => expect(files).toHaveLength(14));
+  it("수업 파일이 14개 이상 있다", () => expect(files.length).toBeGreaterThanOrEqual(14));
 
   for (const file of files) {
     it(`${file}: 코드가 같고, import·머리말 밖의 내용 줄은 모두 작업판 블록에 이어진다`, () => {

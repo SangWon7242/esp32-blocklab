@@ -9,6 +9,11 @@ export type JudgeInput = {
   blocksJson?: unknown;
   /** 실행 출력 (FakeDevice 포함) */
   output?: string;
+  /**
+   * codeEquals 비교용 표준 꼴 함수 (없으면 정규화 원문). 화면은 src/app/track/canonical.ts 의 canonicalLines 를 넘긴다:
+   * 블록으로 바꿨다가 다시 코드로 낸 것이라, 생성기가 함수 정의를 위로 올리고 import 순서를 정해도 선생님 파일과 같다고 본다.
+   */
+  canonical?: (code: string) => string[];
 };
 export type JudgeResult = { pass: boolean; failures: string[] };
 
@@ -30,7 +35,8 @@ function passes(rule: Rule, input: JudgeInput, files: Readonly<Record<string, st
   if ("codeMatches" in rule) return new RegExp(rule.codeMatches, "m").test(lines().join("\n"));
   if ("codeEquals" in rule) {
     const expected = files[rule.codeEquals.file];
-    return expected !== undefined && codeEquals(lines(), normalizeCode(expected), rule.codeEquals.tolerance ?? 0);
+    const canon = input.canonical ?? normalizeCode;
+    return expected !== undefined && codeEquals(canon(input.code ?? ""), canon(expected), rule.codeEquals.tolerance ?? 0);
   }
   if ("pinIs" in rule) {
     const { name, pin } = rule.pinIs;

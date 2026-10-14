@@ -32,6 +32,17 @@ describe("judge — 6가지 규칙", () => {
     const rules: Rule[] = [{ codeEquals: { file: "slow.py" }, fail: "다시" }];
     expect(judge(rules, { code: blink.replace("time.sleep(2)", "time.sleep( 2 )") }, files)).toEqual({ pass: true, failures: [] });
   });
+  it("codeEquals: canonical 함수가 있으면 양쪽을 그 꼴로 바꿔 비교한다 (함수 위치·import 순서 차이 흡수)", () => {
+    const rules: Rule[] = [{ codeEquals: { file: "t.py" }, fail: "다시" }];
+    const files = { "t.py": "import time\nfrom machine import Pin\nled = Pin(26, Pin.OUT)\ndef on():\n    led.value(1)\non()\n" };
+    const student = "from machine import Pin\nimport time\n\ndef on():\n    led.value(1)\n\nled = Pin(26, Pin.OUT)\n\non()\n";
+    // 정규화 원문끼리는 순서가 달라 실패
+    expect(judge(rules, { code: student }, files).pass).toBe(false);
+    // 표준 꼴(여기서는 줄을 정렬하는 가짜 함수)로는 통과
+    const canonical = (code: string) => code.split("\n").map((l) => l.trim()).filter(Boolean).sort();
+    expect(judge(rules, { code: student, canonical }, files).pass).toBe(true);
+  });
+
   it("codeEquals: 숫자가 다르면 실패하고 규칙의 fail 을 돌려준다", () => {
     const rules: Rule[] = [{ codeEquals: { file: "slow.py" }, fail: "켜진 시간을 다시 보세요" }];
     expect(judge(rules, { code: blink.replace("time.sleep(2)", "time.sleep(1)") }, files)).toEqual({ pass: false, failures: ["켜진 시간을 다시 보세요"] });

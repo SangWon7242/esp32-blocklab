@@ -1,4 +1,5 @@
 import { Fragment, useRef, useState } from "react";
+import { canonicalLines } from "../canonical";
 import { Link } from "react-router";
 import { CheckCircle2, ListChecks, Lock, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
   const onJudge = () => {
     const program = editor.current?.getProgram();
     if (!program) return;
-    const result = judge([{ codeEquals: { file: step.targetCode }, fail: DESIGN_FAIL }], { code: program.code, blocksJson: program.blocksJson }, chapter.files);
+    const result = judge([{ codeEquals: { file: step.targetCode }, fail: DESIGN_FAIL }], { code: program.code, blocksJson: program.blocksJson , canonical: canonicalLines }, chapter.files);
     update(() => ({ program: { code: program.code, blocksJson: program.blocksJson }, passed: result.pass, failures: result.failures, judgedCode: program.code }), { attempt: true });
   };
 

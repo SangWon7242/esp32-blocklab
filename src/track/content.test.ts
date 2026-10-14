@@ -115,10 +115,13 @@ describe("챕터 YAML", () => {
     for (const [path, svg] of Object.entries(allChapterImages())) expect(unsafeSvgReason(svg), path).toBeNull();
   });
 
-  it("loadChapters 는 import.meta.glob 으로 같은 두 챕터를 order 순으로 읽는다", () => {
+  it("loadChapters 는 import.meta.glob 으로 모든 챕터를 order 순으로 읽는다", () => {
     const loaded = loadChapters();
-    expect(loaded.map((c) => c.id)).toEqual(["01-led", "10-auto-door"]);
-    expect(loaded[1]).toEqual(chapters["10-auto-door"]);
+    const ids = loaded.map((c) => c.id);
+    expect(ids).toContain("01-led");
+    expect(ids).toContain("10-auto-door");
+    expect(loaded.map((c) => c.order)).toEqual([...loaded.map((c) => c.order)].sort((a, b) => a - b));
+    expect(loaded.find((c) => c.id === "10-auto-door")).toEqual(chapters["10-auto-door"]);
   });
 });
 
