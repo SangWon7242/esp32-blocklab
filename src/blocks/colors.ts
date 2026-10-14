@@ -47,7 +47,7 @@ export const CATEGORY_COLORS: Record<CategoryId, CategoryColour> = {
   variable: ENTRY_COLORS.VARIABLE,
   func: ENTRY_COLORS.FUNC,
   pin: ENTRY_COLORS.HARDWARE,
-  led: shadesOf("#ffd500"),
+  led: shadesOf("#c99c00"),
   switch: shadesOf("#6d3fe0"), // 계획서 #8a5cf6 은 흰 글자·검은 글자 모두 4.5:1 에 못 미쳐 어둡게
   sensor: shadesOf("#5b9a1a"),
   sound: shadesOf("#e4518c"),

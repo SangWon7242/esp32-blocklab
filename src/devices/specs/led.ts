@@ -6,7 +6,7 @@ import { factor, isSingleOperand, pinNo, RE_NAME, RE_PIN, validPins } from "./co
  * 그래서 레지스트리에서 pwm 보다 앞에 둔다. 장치 kind 는 pwm 이라 세기 블록은 PWM 핀에도 쓸 수 있다.
  */
 export const ledPwm: DeviceSpec = {
-  id: "led_pwm", category: "led", label: "밝기 LED", toolboxOrder: 11, colour: "#d4cb00",
+  id: "led_pwm", category: "led", label: "밝기 LED", toolboxOrder: 11, colour: "#c38100",
   setup: {
     blockType: "dev_led_pwm_setup",
     message: "밝기 조절 LED를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -49,7 +49,7 @@ export const ledPwm: DeviceSpec = {
 
 /** LED: 준비 블록은 핀 출력(esp_pin_setup, pinOut.alsoIn)을 쓴다. 깜빡이기는 반복 블록으로 돌아온다 */
 export const led: DeviceSpec = {
-  id: "led", category: "led", label: "LED", toolboxOrder: 10, colour: "#ffd500",
+  id: "led", category: "led", label: "LED", toolboxOrder: 10, colour: "#c99c00",
   actions: [
     {
       blockType: "dev_led_blink", message: "%1 을(를) %2 초 간격으로 %3 번 깜빡이기",
@@ -69,7 +69,7 @@ const hex2 = (n: number) => n.toString(16).padStart(2, "0");
 
 /** RGB LED (dev_rgb_setup). 이름 red/green/blue 고정, set_color(r, g, b) 도우미 (0~255) */
 export const rgb: DeviceSpec = {
-  id: "rgb", category: "led", label: "RGB LED", toolboxOrder: 12, colour: "#fcf347",
+  id: "rgb", category: "led", label: "RGB LED", toolboxOrder: 12, colour: "#9ba624",
   setup: {
     blockType: "dev_rgb_setup",
     message: "RGB LED 준비하기 (빨강 핀 %1, 초록 핀 %2, 파랑 핀 %3)",
@@ -134,7 +134,7 @@ export const rgb: DeviceSpec = {
 
 /** 흐르는 LED (dev_flow_setup). 이름 pins 고정, flow_leds(ms) 도우미 */
 export const flowLed: DeviceSpec = {
-  id: "flow_led", category: "led", label: "흐르는 LED", toolboxOrder: 13, colour: "#cde847",
+  id: "flow_led", category: "led", label: "흐르는 LED", toolboxOrder: 13, colour: "#ea913a",
   setup: {
     blockType: "dev_flow_setup",
     message: "흐르는 LED 준비하기 (핀 목록 %1)",
