@@ -1,7 +1,7 @@
 import type { BlockContent } from "../types";
 
 /** 아날로그 센서 준비 3줄 (조도·가변저항·소리·불꽃: 이름만 다르다) */
-const adcSetup = (name: string) => `${name} = ADC(Pin(36))\n${name}.atten(ADC.ATTN_11DB)\n${name}.width(ADC.WIDTH_12BIT)`;
+export const adcSetup = (name: string) => `${name} = ADC(Pin(36))\n${name}.atten(ADC.ATTN_11DB)\n${name}.width(ADC.WIDTH_12BIT)`;
 
 const NTC_SETUP = [
   adcSetup("ntc"),
@@ -15,7 +15,7 @@ const NTC_SETUP = [
 
 const LM35_SETUP = [adcSetup("lm35"), "", "", "def lm35_temperature():", "    return lm35.read() * 330 / 4095", "", ""].join("\n");
 
-const ULTRASONIC_SETUP = [
+export const ULTRASONIC_SETUP = [
   "trig = Pin(13, Pin.OUT)", "echo = Pin(12, Pin.IN)",
   "", "",
   "def get_distance():",

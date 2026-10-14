@@ -1,4 +1,5 @@
 import type { BlockContent } from "../types";
+import { adcSetup, ULTRASONIC_SETUP } from "./sensor";
 
 /** 시작·흐름·판단·계산·변수·함수·코드 블록 설명 */
 export const coreContent: Record<string, BlockContent> = {
@@ -52,22 +53,44 @@ export const coreContent: Record<string, BlockContent> = {
     example: { title: "10마이크로초 펄스 보내기", code: "trig = Pin(13, Pin.OUT)\ntrig.value(1)\ntime.sleep_us(10)\ntrig.value(0)" },
   },
 
-  // TODO(plan6 task3): 아래 flow_for_range·flow_for_each·flow_break·flow_continue 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
   flow_for_range: {
-    concept: "변수를 시작 수부터 1씩 늘리며 안의 블록을 반복해요. 코드로는 for x in range(0, 5): 이고, 끝 수(5)는 들어가지 않습니다. 그래서 x 는 0, 1, 2, 3, 4 가 돼요.",
-    example: { title: "1부터 5까지 출력하기", code: "for x in range(1, 6):\n    print(x)" },
+    concept: "변수를 시작 수부터 1씩 늘리며 안의 블록을 반복해요. 코드로는 for n in range(1, 6): 이고, 끝 수 6 은 들어가지 않아서 n 은 1, 2, 3, 4, 5 가 됩니다. 몇 번째 반복인지 그 번호를 안에서 쓰고 싶을 때 좋아요.",
+    example: {
+      title: "1번부터 5번까지 번호를 말하며 LED 깜빡이기",
+      code: "led = Pin(26, Pin.OUT)\nfor n in range(1, 6):\n    print(n)\n    led.value(1)\n    time.sleep(0.3)\n    led.value(0)\n    time.sleep(0.3)",
+    },
+    tips: [
+      "끝 수는 들어가지 않아요. 1부터 5까지 돌리려면 range(1, 6) 처럼 끝 수를 하나 크게 적어요.",
+      "코드에 range(5) 처럼 수를 하나만 쓰면 블록으로 바꿀 때 range(0, 5) 로 적혀요. 뜻은 같아요.",
+      "반복 변수가 i 이고 range(3) 처럼 수가 하나면 '번 반복하기' 블록이 돼요.",
+    ],
   },
   flow_for_each: {
-    concept: "리스트의 항목을 앞에서부터 하나씩 변수에 넣으며 반복해요. 코드로는 for item in items: 입니다. 글자를 넣으면 한 글자씩 반복해요.",
-    example: { title: "리스트의 항목 하나씩 출력하기", code: "items = [3, 5, 7]\nfor item in items:\n    print(item)" },
+    concept: "리스트의 항목을 앞에서부터 하나씩 꺼내 변수에 넣으며 반복해요. 코드로는 for name in names: 이고, 항목 수만큼 돕니다. 리스트 대신 글자를 넣으면 한 글자씩 꺼내며 반복해요.",
+    example: { title: "모은 이름에게 한 명씩 인사하기", code: 'names = ["mina", "jun", "sora"]\nfor name in names:\n    print("hi " + name)\n    time.sleep(1)' },
+    tips: [
+      "반복하는 동안 그 리스트에 항목을 더하거나 지우면 순서가 꼬여요. 바꾸는 일은 반복이 끝난 뒤에 해요.",
+      "몇 번째 항목인지 번호도 필요하면 '바꾸며 반복' 블록과 'n 번째 항목' 블록을 함께 써요.",
+    ],
   },
   flow_break: {
-    concept: "지금 도는 반복을 바로 끝내요. 코드로는 break 입니다. 반복 다음 블록부터 이어서 실행됩니다.",
-    example: { title: "5 가 되면 반복 멈추기", code: "for x in range(0, 10):\n    if x == 5:\n        break\n    print(x)" },
+    concept: "지금 도는 반복을 바로 끝내고 반복 다음 블록으로 넘어가요. 코드로는 break 입니다. 끝없이 반복하다가 버튼이 눌리는 것처럼 어떤 일이 생기면 빠져나올 때 씁니다.",
+    example: {
+      title: "버튼을 누르면 기다리기 반복 끝내기",
+      code: 'button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile True:\n    if button.value() == 0:\n        break\n    print("waiting")\n    time.sleep(0.1)\nprint("start!")',
+    },
+    tips: [
+      "반복 블록 안에서만 써요. 반복 밖에 두면 실행할 때 SyntaxError 가 나요.",
+      "반복 안에 반복이 있으면 가장 안쪽 반복 하나만 끝나요.",
+    ],
   },
   flow_continue: {
-    concept: "이번 반복의 남은 블록을 건너뛰고 다음 반복으로 가요. 코드로는 continue 입니다. 반복을 끝내지는 않아요.",
-    example: { title: "3 만 빼고 출력하기", code: "for x in range(0, 6):\n    if x == 3:\n        continue\n    print(x)" },
+    concept: "이번 반복의 남은 블록을 건너뛰고 바로 다음 반복으로 가요. 코드로는 continue 입니다. 반복 자체는 끝나지 않아서, 어떤 값만 빼고 처리할 때 씁니다.",
+    example: { title: "1부터 10까지 홀수만 출력하기", code: "for n in range(1, 11):\n    if n % 2 == 0:\n        continue\n    print(n)" },
+    tips: [
+      "반복 블록 안에서만 써요. 반복 밖에 두면 실행할 때 SyntaxError 가 나요.",
+      "조건 반복(while) 안에서 쓸 때는 건너뛰기 전에 값을 바꿔야 해요. 그렇지 않으면 같은 값에서 끝없이 돌아요.",
+    ],
   },
 
   // 판단
@@ -89,14 +112,27 @@ export const coreContent: Record<string, BlockContent> = {
     example: { title: "상태를 변수에 담기", code: 'light_on = True\nif light_on:\n    print("on")' },
   },
 
-  // TODO(plan6 task3): 아래 judge_* 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
   judge_between: {
-    concept: "값이 두 수 사이에 있는지 따져요. 코드로는 10 <= d <= 30 처럼 쓰고, 두 끝 값도 사이에 들어갑니다. 거리나 온도가 알맞은 범위인지 볼 때 씁니다.",
-    example: { title: "거리가 10부터 30 사이면 출력하기", code: 'd = 25\nif 10 <= d <= 30:\n    print("near")' },
+    concept: "값이 두 수 사이에 있는지 따져서 참이나 거짓을 만들어요. 코드로는 10 <= d <= 30 이고, 끝 값 10 과 30 도 사이에 들어갑니다. d >= 10 and d <= 30 과 같은 뜻을 블록 하나로 쓸 수 있어요.",
+    example: {
+      title: "적당한 거리(10~30cm)면 LED 켜기",
+      code: `led = Pin(26, Pin.OUT)\n${ULTRASONIC_SETUP}while True:\n    d = get_distance()\n    if 10 <= d <= 30:\n        led.value(1)\n    else:\n        led.value(0)\n    time.sleep(0.2)`,
+    },
+    tips: [
+      "작은 수를 앞 칸(부터), 큰 수를 뒤 칸에 넣어요. 거꾸로 넣으면 언제나 거짓이에요.",
+      "코드에서 10 <= d < 30 처럼 < 가 섞이면 이 블록이 아니라 식 블록이 돼요. 끝 값을 빼고 싶으면 비교 블록 두 개를 '그리고' 로 이어요.",
+    ],
   },
   judge_contains: {
-    concept: "글자나 리스트 안에 어떤 값이 들어 있는지 따져요. 코드로는 \"e\" in word 처럼 in 을 씁니다. 아니다 블록으로 감싸면 not in 이 돼요.",
-    example: { title: "글자에 e 가 있으면 출력하기", code: 'word = "hello"\nif "e" in word:\n    print("found")' },
+    concept: "글자나 리스트 안에 어떤 값이 들어 있는지 따져요. 코드로는 \"jun\" in names 처럼 in 을 쓰고, 들어 있으면 참이에요. '아니다' 블록으로 감싸면 \"jun\" not in names 가 됩니다.",
+    example: {
+      title: "출석부에 이름이 있는지 보기",
+      code: 'names = ["mina", "jun", "sora"]\nif "jun" in names:\n    print("here")\nelse:\n    print("absent")',
+    },
+    tips: [
+      "글자에서는 \"ell\" in \"hello\" 처럼 이어진 글자 묶음도 찾을 수 있어요.",
+      "대문자와 소문자는 다른 글자예요. \"A\" in \"apple\" 은 거짓이에요.",
+    ],
   },
 
   // 계산
@@ -110,9 +146,12 @@ export const coreContent: Record<string, BlockContent> = {
     tips: ["OLED·LCD 화면은 한글을 보여 주지 못해요. 화면에 띄울 글은 영어로 적어요."],
   },
   calc_arith: {
-    concept: "두 수로 계산해요. +, -, ×(*), ÷(/) 말고도 // 는 나눈 몫(정수), % 는 나머지를 구합니다. 예를 들어 7 // 2 는 3, 7 % 2 는 1 이에요.",
-    example: { title: "몫과 나머지 구하기", code: "a = 7\nb = 2\nprint(a + b)\nprint(a // b)\nprint(a % b)" },
-    tips: ["/ 로 나누면 7 / 2 가 3.5 처럼 소수가 나와요."],
+    concept: "두 수로 계산해요. +, -, ×(*), ÷(/) 말고도 // 는 나눈 몫(정수), % 는 나머지, ^ 는 거듭제곱을 구합니다. 예를 들어 7 // 2 는 3, 7 % 2 는 1 이고, 2 ^ 3 은 2 를 세 번 곱한 8 이에요.",
+    example: { title: "몫과 나머지, 거듭제곱 구하기", code: "a = 7\nb = 2\nprint(a + b)\nprint(a // b)\nprint(a % b)\nprint(a ** b)" },
+    tips: [
+      "/ 로 나누면 7 / 2 가 3.5 처럼 소수가 나와요.",
+      "^ 를 고르면 코드에는 ** 로 적혀요. 파이썬 코드에서 ^ 는 거듭제곱이 아니라 전혀 다른 계산이에요.",
+    ],
   },
   calc_concat: {
     concept: "두 글자를 하나로 이어 붙여요. 코드로는 \"count: \" + \"3\" 처럼 + 로 잇습니다. 숫자를 붙이려면 먼저 '글자로' 블록으로 바꿔야 해요.",
@@ -126,30 +165,67 @@ export const coreContent: Record<string, BlockContent> = {
     concept: "값을 정수로 바꾸고 소수점 아래는 버려요. 코드로는 int(값) 이라서 int(3.7) 은 3 이 됩니다. 계산 결과를 깔끔한 정수로 만들 때 씁니다.",
     example: { title: "소수를 정수로 바꾸기", code: "volt = 2.75\nprint(int(volt))" },
   },
-  // TODO(plan6 task3): 아래 calc_* 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
   calc_random: {
-    concept: "두 수 사이에서 정수 하나를 아무렇게나 골라요. 코드로는 random.randint(1, 6) 이고, 1 과 6 도 나올 수 있습니다. 주사위나 무작위 색처럼 매번 다른 값이 필요할 때 씁니다.",
-    example: { title: "주사위 굴리기", code: "dice = random.randint(1, 6)\nprint(dice)" },
+    concept: "두 수 사이에서 정수 하나를 아무렇게나 골라요. 코드로는 random.randint(1, 6) 이고, 끝 값 1 과 6 도 나올 수 있습니다. 주사위처럼 매번 다른 값이 필요할 때 씁니다.",
+    example: {
+      title: "버튼을 누르면 주사위 굴리기",
+      code: "button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile True:\n    if button.value() == 0:\n        dice = random.randint(1, 6)\n        print(dice)\n        time.sleep(0.5)",
+    },
+    tips: [
+      "작은 수를 앞 칸에 넣어요. random.randint(6, 1) 처럼 거꾸로 쓰면 오류가 나요.",
+      "이 블록을 쓰면 코드 맨 위에 import random 이 저절로 붙어요.",
+    ],
   },
   calc_round: {
-    concept: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구해요. 코드로는 round(x), math.floor(x), math.ceil(x), abs(x), math.sqrt(x) 입니다. math 를 쓰면 import math 가 저절로 붙어요.",
-    example: { title: "소수를 반올림하고 내리기", code: "volt = 2.75\nprint(round(volt))\nprint(math.floor(volt))" },
+    concept: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구해요. 코드로는 round(x), math.floor(x), math.ceil(x), abs(x), math.sqrt(x) 입니다. 내림·올림·제곱근을 고르면 import math 가 저절로 붙어요.",
+    example: {
+      title: "가변저항 전압을 반올림·내림해서 보기",
+      code: `${adcSetup("knob")}\nwhile True:\n    volt = knob.read() * 3.3 / 4095\n    print(round(volt))\n    print(math.floor(volt))\n    time.sleep(0.5)`,
+    },
+    tips: [
+      "파이썬의 round 는 딱 반일 때 짝수 쪽으로 가요. round(2.5) 는 2, round(3.5) 는 4 예요.",
+      "절댓값은 -5 를 5 로 만들어요. 두 값이 얼마나 차이 나는지 볼 때 abs(a - b) 처럼 써요.",
+      "음수의 제곱근은 구할 수 없어서 오류가 나요.",
+    ],
   },
   calc_minmax: {
-    concept: "두 수 중에서 큰 수나 작은 수를 골라요. 코드로는 max(a, b) 와 min(a, b) 입니다. 값이 정한 범위를 넘지 않게 막을 때도 씁니다.",
-    example: { title: "두 수 중 큰 수 출력하기", code: "a = 3\nb = 7\nprint(max(a, b))" },
+    concept: "두 수 중에서 큰 수나 작은 수를 골라요. 코드로는 max(a, b) 와 min(a, b) 입니다. min(speed, 100) 처럼 쓰면 값이 100 을 넘지 않게 막을 수 있어요.",
+    example: {
+      title: "주사위 5번 중 가장 큰 수 기억하기",
+      code: "best = 0\nfor i in range(5):\n    dice = random.randint(1, 6)\n    print(dice)\n    best = max(best, dice)\nprint(best)",
+    },
+    tips: [
+      "세 수 중에서 고르려면 블록 칸에 이 블록을 하나 더 끼워요.",
+      "코드에 max(a, b, c) 처럼 세 개를 한 번에 쓰면 식 블록이 돼요.",
+    ],
   },
   calc_len: {
-    concept: "글자 수나 리스트의 항목 수를 세요. 코드로는 len(word) 입니다. 빈 글자의 길이는 0 이에요.",
-    example: { title: "글자 수 세기", code: 'word = "hello"\nprint(len(word))' },
+    concept: "글자의 글자 수나 리스트의 항목 수를 세요. 코드로는 len(values) 입니다. 빈 글자와 빈 리스트의 길이는 0 이에요.",
+    example: {
+      title: "센서 값이 5개 모일 때까지 읽기",
+      code: `${adcSetup("knob")}\nvalues = []\nwhile len(values) < 5:\n    values.append(knob.read())\n    time.sleep(0.2)\nprint(values)`,
+    },
+    tips: ["마지막 항목의 번호는 길이보다 1 작아요. 항목이 5개면 마지막은 4번이에요 (0부터)."],
   },
   calc_item: {
-    concept: "글자나 리스트에서 몇 번째 항목을 꺼내요. 코드로는 word[0] 처럼 쓰고, 번호는 0부터 셉니다. 그래서 첫 번째 항목은 0번이에요.",
-    example: { title: "첫 글자 꺼내기", code: 'word = "hello"\nprint(word[0])' },
+    concept: "글자나 리스트에서 몇 번째 항목을 꺼내요. 코드로는 names[0] 처럼 대괄호 안에 번호를 쓰고, 번호는 0부터 셉니다. 그래서 첫 번째 항목은 0번, 두 번째 항목은 1번이에요.",
+    example: { title: "오늘의 당번 뽑기", code: 'names = ["mina", "jun", "sora"]\nn = random.randint(0, 2)\nprint(names[n])' },
+    tips: [
+      "블록의 '(0부터)' 는 번호를 0부터 센다는 뜻이에요. 항목이 3개면 쓸 수 있는 번호는 0, 1, 2 예요.",
+      "없는 번호를 쓰면 IndexError 오류가 나요.",
+      "번호에 -1 을 넣으면 맨 마지막 항목을 꺼내요.",
+    ],
   },
   calc_ticks: {
-    concept: "보드가 켜진 뒤 지난 시간을 밀리초로 알려 줘요. 코드로는 time.ticks_ms() 입니다. 시작할 때 값을 적어 두고 나중 값과 빼면 걸린 시간을 알 수 있어요.",
-    example: { title: "1초 동안 걸린 시간 재기", code: "start = time.ticks_ms()\ntime.sleep(1)\nprint(time.ticks_ms() - start)" },
+    concept: "보드가 켜진 뒤 지난 시간을 밀리초(1000분의 1초)로 알려 줘요. 코드로는 time.ticks_ms() 입니다. 시작할 때 값을 변수에 적어 두고 나중 값에서 빼면 걸린 시간을 알 수 있어요.",
+    example: {
+      title: "반응 속도 재기: LED 가 켜지면 버튼 누르기",
+      code: "led = Pin(26, Pin.OUT)\nbutton = Pin(14, Pin.IN, Pin.PULL_UP)\ntime.sleep(random.randint(2, 5))\nled.value(1)\nstart = time.ticks_ms()\nwhile button.value() == 1:\n    time.sleep_ms(1)\nprint(time.ticks_ms() - start)\nled.value(0)",
+    },
+    tips: [
+      "1000 이 1초예요. 초로 보려면 걸린 시간을 1000 으로 나눠요.",
+      "보드를 며칠 동안 켜 두면 값이 다시 작은 수로 돌아가요. 몇 분 정도 재는 데는 그냥 빼도 괜찮아요.",
+    ],
   },
 
   // 변수
@@ -163,48 +239,100 @@ export const coreContent: Record<string, BlockContent> = {
     example: { title: "변수 값으로 계산하기", code: "speed = 3\nprint(speed * 2)" },
   },
 
-  // TODO(plan6 task3): 아래 var_change·list_* 설명은 Task 3 가 다듬는다 (지금은 카탈로그 테스트를 지키는 최소 내용)
   var_change: {
-    concept: "변수의 값에 수를 더해 바꿔요. 코드로는 count += 1 이고 count = count + 1 과 같습니다. 음수를 넣으면 줄어들어요.",
-    example: { title: "1초마다 하나씩 세기", code: "count = 0\nwhile True:\n    count += 1\n    print(count)\n    time.sleep(1)" },
+    concept: "변수의 값에 수를 더해서 바꿔요. 코드로는 count += 1 이고 count = count + 1 과 뜻이 같습니다. -1 처럼 음수를 넣으면 그만큼 줄어들어요.",
+    example: {
+      title: "버튼 누른 횟수 세기",
+      code: "button = Pin(14, Pin.IN, Pin.PULL_UP)\ncount = 0\nwhile True:\n    if button.value() == 0:\n        count += 1\n        print(count)\n        time.sleep(0.3)",
+    },
+    tips: [
+      "바꾸기 전에 '정하기' 블록으로 처음 값을 꼭 넣어 두어요. 값이 없는 변수는 바꿀 수 없어요.",
+      "버튼 한 번에 여러 번 세어지면 바꾼 다음 잠깐 기다려요.",
+      "코드의 count -= 1 은 이 블록이 아니라 코드 블록이 돼요. 줄일 때는 -1 만큼 바꾸기를 써요.",
+    ],
   },
 
   // 리스트
   list_create: {
-    concept: "항목이 하나도 없는 빈 리스트를 만들어요. 코드로는 items = [] 입니다. 나중에 추가하기 블록으로 항목을 넣어요.",
-    example: { title: "빈 리스트에 값 넣기", code: "items = []\nitems.append(3)\nprint(items)" },
+    concept: "항목이 하나도 없는 빈 리스트를 만들어요. 코드로는 values = [] 입니다. 처음에는 비워 두고 추가하기 블록으로 값을 하나씩 모을 때 씁니다.",
+    example: {
+      title: "센서 값 5개 모아 평균 내기",
+      code: `${adcSetup("knob")}\nvalues = []\nfor i in range(5):\n    values.append(knob.read())\n    time.sleep(0.2)\ntotal = 0\nfor v in values:\n    total += v\nprint(total / len(values))`,
+    },
+    tips: [
+      "반복 안에서 빈 리스트를 만들면 반복할 때마다 다시 비워져요. 모으기 전에 한 번만 만들어요.",
+      "리스트 이름도 변수 이름처럼 영어로 지어요. values, names 처럼 끝에 s 를 붙이면 여러 개가 든 것을 알아보기 쉬워요.",
+    ],
   },
   list_create_from: {
-    concept: "쉼표로 나눈 항목으로 리스트를 만들어요. 코드로는 items = [1, 2, 3] 입니다. 글자 항목은 \"red\" 처럼 따옴표로 감싸요.",
-    example: { title: "숫자 세 개로 리스트 만들기", code: "items = [1, 2, 3]\nprint(items)" },
+    concept: "처음부터 항목을 넣어 리스트를 만들어요. 칸에 80, 95, 70 처럼 쉼표로 나눠 적으면 코드로는 scores = [80, 95, 70] 이 됩니다. 글자 항목은 \"mina\" 처럼 큰따옴표로 감싸요.",
+    example: { title: "점수 리스트의 합 구하기", code: "scores = [80, 95, 70]\ntotal = 0\nfor s in scores:\n    total += s\nprint(total)" },
+    tips: [
+      "칸에 적은 글이 대괄호 안에 그대로 들어가요. 쉼표를 빠뜨리지 않게 조심해요.",
+      "글자 항목에 따옴표를 빼먹으면 변수 이름으로 읽혀서 NameError 오류가 나요.",
+    ],
   },
   list_append: {
-    concept: "리스트 맨 끝에 항목을 하나 붙여요. 코드로는 items.append(4) 입니다. 센서 값을 하나씩 모을 때 씁니다.",
-    example: { title: "끝에 항목 붙이기", code: "items = [1, 2, 3]\nitems.append(4)\nprint(items)" },
+    concept: "리스트 맨 끝에 항목을 하나 붙여요. 코드로는 values.append(3) 이고, 붙일 때마다 리스트 길이가 1 늘어납니다. 센서 값이나 이름을 하나씩 모을 때 씁니다.",
+    example: {
+      title: "버튼을 누를 때마다 밝기 값 모으기",
+      code: `${adcSetup("light")}\nbutton = Pin(14, Pin.IN, Pin.PULL_UP)\nvalues = []\nwhile len(values) < 3:\n    if button.value() == 0:\n        values.append(light.read())\n        print(values)\n        time.sleep(0.3)`,
+    },
+    tips: [
+      "한 번에 항목 하나만 붙어요. 여러 개를 붙이려면 블록을 여러 번 써요.",
+      "모으기 전에 '리스트 만들기' 블록으로 리스트를 먼저 만들어 두어요.",
+    ],
   },
   list_insert: {
-    concept: "리스트의 정한 자리에 항목을 끼워 넣어요. 코드로는 items.insert(0, 5) 이고 번호는 0부터 셉니다. 뒤의 항목은 한 칸씩 밀려요.",
-    example: { title: "맨 앞에 끼워 넣기", code: "items = [1, 2, 3]\nitems.insert(0, 5)\nprint(items)" },
+    concept: "리스트의 정한 자리에 항목을 끼워 넣어요. 코드로는 line.insert(0, \"sora\") 이고, 그 자리에 있던 항목부터 뒤로 한 칸씩 밀립니다. 0 번째에 넣으면 맨 앞에 들어가요.",
+    example: { title: "줄 맨 앞에 새 친구 세우기", code: 'line = ["mina", "jun"]\nline.insert(0, "sora")\nprint(line)' },
+    tips: [
+      "번호는 (0부터) 세요. 0 은 맨 앞, 1 은 두 번째 자리예요.",
+      "길이보다 큰 번호를 넣으면 오류 없이 맨 끝에 붙어요.",
+    ],
   },
   list_remove_at: {
-    concept: "리스트에서 몇 번째 항목을 지워요. 코드로는 items.pop(0) 이고 번호는 0부터 셉니다. 그래서 0 은 첫 항목이에요.",
-    example: { title: "첫 항목 지우기", code: "items = [1, 2, 3]\nitems.pop(0)\nprint(items)" },
+    concept: "리스트에서 몇 번째 항목을 지워요. 코드로는 values.pop(0) 이고, 뒤의 항목들이 한 칸씩 앞으로 당겨집니다. 0 번째를 지우면 가장 먼저 넣은 값이 빠져요.",
+    example: {
+      title: "가장 최근 센서 값 3개만 남기기",
+      code: `${adcSetup("knob")}\nvalues = []\nwhile True:\n    values.append(knob.read())\n    if len(values) > 3:\n        values.pop(0)\n    print(values)\n    time.sleep(0.5)`,
+    },
+    tips: [
+      "번호는 (0부터) 세요. 첫 항목은 0번이에요.",
+      "없는 번호를 지우면 IndexError 오류가 나요. 빈 리스트에서 지워도 마찬가지예요.",
+    ],
   },
   list_remove_value: {
-    concept: "리스트에서 어떤 값을 찾아 지워요. 코드로는 items.remove(3) 이고, 같은 값이 여럿이면 앞의 하나만 지웁니다. 없는 값을 지우면 오류가 나요.",
-    example: { title: "값 3 지우기", code: "items = [1, 2, 3]\nitems.remove(3)\nprint(items)" },
+    concept: "리스트에서 어떤 값을 찾아 지워요. 코드로는 names.remove(\"jun\") 이고, 같은 값이 여럿이면 맨 앞의 하나만 지웁니다. 번호가 아니라 값으로 지울 때 씁니다.",
+    example: {
+      title: "집에 간 친구 이름 지우기",
+      code: 'names = ["mina", "jun", "sora"]\nif "jun" in names:\n    names.remove("jun")\nprint(names)',
+    },
+    tips: ["없는 값을 지우면 ValueError 오류가 나요. '들어 있는가' 블록으로 먼저 확인하면 안전해요."],
   },
   list_clear: {
-    concept: "리스트의 항목을 모두 지워 빈 리스트로 만들어요. 코드로는 items.clear() 입니다. 리스트 변수는 그대로 남아요.",
-    example: { title: "리스트 비우기", code: "items = [1, 2, 3]\nitems.clear()\nprint(items)" },
+    concept: "리스트의 항목을 모두 지워 빈 리스트로 만들어요. 코드로는 values.clear() 입니다. 리스트 변수는 그대로 남아서 다시 항목을 모을 수 있어요.",
+    example: {
+      title: "센서 값 5개씩 모아 보여 주고 다시 모으기",
+      code: `${adcSetup("knob")}\nvalues = []\nwhile True:\n    values.append(knob.read())\n    if len(values) == 5:\n        print(values)\n        values.clear()\n    time.sleep(0.2)`,
+    },
+    tips: ["비운 뒤의 길이는 0 이에요. 길이 블록으로 비었는지 확인할 수 있어요."],
   },
   list_set: {
-    concept: "리스트의 몇 번째 항목을 새 값으로 바꿔요. 코드로는 items[0] = 10 이고 번호는 0부터 셉니다. 없는 번호를 쓰면 오류가 나요.",
-    example: { title: "첫 항목 바꾸기", code: "items = [1, 2, 3]\nitems[0] = 10\nprint(items)" },
+    concept: "리스트의 몇 번째 항목을 새 값으로 바꿔요. 코드로는 scores[2] = 75 입니다. 리스트 길이는 그대로이고 그 자리의 값만 바뀌어요.",
+    example: { title: "세 번째 점수 고치기", code: "scores = [80, 95, 70]\nscores[2] = 75\nprint(scores)" },
+    tips: [
+      "번호는 (0부터) 세요. 세 번째 항목은 2번이에요.",
+      "없는 번호에 값을 넣으면 IndexError 오류가 나요. 새 항목은 추가하기 블록으로 붙여요.",
+    ],
   },
   list_index: {
-    concept: "리스트에서 어떤 값이 몇 번째에 있는지 알려 줘요. 코드로는 items.index(3) 이고 번호는 0부터 셉니다. 없는 값을 찾으면 오류가 나요.",
-    example: { title: "값 3 의 위치 찾기", code: "items = [1, 2, 3]\nprint(items.index(3))" },
+    concept: "리스트에서 어떤 값이 몇 번째에 있는지 찾아 알려 줘요. 코드로는 names.index(\"sora\") 이고, 같은 값이 여럿이면 맨 앞의 번호를 알려 줍니다. 결과 번호도 0부터 세요.",
+    example: { title: "친구가 줄의 몇 번째에 섰는지 찾기", code: 'names = ["mina", "jun", "sora"]\nprint(names.index("sora"))' },
+    tips: [
+      "결과는 (0부터) 센 번호예요. 맨 앞이면 0 이 나와요.",
+      "없는 값을 찾으면 ValueError 오류가 나요. '들어 있는가' 블록으로 먼저 확인해요.",
+    ],
   },
 
   // 함수
