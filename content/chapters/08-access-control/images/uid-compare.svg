@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="auc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="auc-title">카드 번호 비교: 읽은 카드 번호 [180, 180, 170, 219] 가 들여보낼 카드 목록 allowed 안에 있으면 문이 열리고, 목록에 없는 카드 [12, 34, 56, 78] 은 문이 닫힌 채로 있다</title>
+  <!-- 목록 -->
+  <rect x="236" y="70" width="230" height="160" rx="10" fill="var(--card)"/>
+  <text x="351" y="58" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">allowed (들여보낼 카드 목록)</text>
+  <rect x="252" y="90" width="198" height="36" rx="6" fill="#2f9e44" fill-opacity="0.18" stroke="#2f9e44"/>
+  <text x="351" y="114" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">[180, 180, 170, 219]</text>
+  <rect x="252" y="136" width="198" height="36" rx="6" fill="var(--muted)"/>
+  <text x="351" y="160" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">[231, 185, 101, 101]</text>
+  <text x="351" y="204" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">카드가 늘면 칸을 더해요</text>
+  <!-- 카드 1 -->
+  <rect x="22" y="78" width="176" height="64" rx="8" fill="#f4af18" fill-opacity="0.25" stroke="#f4af18"/>
+  <text x="110" y="100" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">읽은 카드 번호 uid</text>
+  <text x="110" y="126" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">[180, 180, 170, 219]</text>
+  <path d="M200 108 H244 M236 101 L244 108 L236 115" stroke-width="2.5"/>
+  <text x="222" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">in</text>
+  <!-- 카드 2 -->
+  <rect x="22" y="250" width="176" height="64" rx="8" fill="var(--muted)"/>
+  <text x="110" y="272" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">모르는 카드</text>
+  <text x="110" y="298" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">[12, 34, 56, 78]</text>
+  <path d="M330 282 V232" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M200 282 H518 M510 275 L518 282 L510 289" stroke-width="2.5"/>
+  <text x="262" y="272" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">in</text>
+  <!-- 결과 -->
+  <path d="M470 108 H518 M510 101 L518 108 L510 115" stroke-width="2.5"/>
+  <rect x="526" y="84" width="96" height="48" rx="24" fill="#2f9e44"/>
+  <text x="574" y="114" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff" stroke="none">열림</text>
+  <text x="574" y="154" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">목록에 있어요</text>
+  <rect x="526" y="258" width="96" height="48" rx="24" fill="#c92a2a"/>
+  <text x="574" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff" stroke="none">닫힘</text>
+  <text x="574" y="328" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">목록에 없어요</text>
+  <text x="430" y="272" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">같은 칸이 없어요</text>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="acv-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="acv-title">학생이 카드를 RFID 리더에 갖다 대자 리더가 카드 번호를 읽고, 옆의 서보 모터가 차단기 팔을 들어 올려 문이 열리는 장면</title>
+  <defs>
+    <marker id="acv-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#c92a2a" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 바닥 -->
+  <path d="M20 320 H620"/>
+  <!-- 사람 -->
+  <circle cx="132" cy="168" r="17" fill="var(--card)"/>
+  <path d="M132 185 V258 M132 258 L114 318 M132 258 L150 318 M132 204 L108 240" stroke-width="3"/>
+  <path d="M132 204 L190 180 L224 156" stroke-width="3"/>
+  <!-- 카드 -->
+  <rect x="222" y="128" width="26" height="38" rx="4" fill="#f4af18" transform="rotate(-12 235 147)"/>
+  <!-- 읽는 물결 -->
+  <g stroke="#4562f5" stroke-width="3">
+    <path d="M258 128 A20 20 0 0 1 258 160"/>
+    <path d="M266 118 A32 32 0 0 1 266 170"/>
+  </g>
+  <!-- 리더 -->
+  <rect x="292" y="196" width="14" height="124" fill="var(--muted)"/>
+  <rect x="274" y="110" width="50" height="86" rx="6" fill="#1d4ed8"/>
+  <rect x="284" y="122" width="30" height="40" rx="5" stroke="#bfdbfe"/>
+  <circle cx="299" cy="178" r="6" fill="#2f9e44" stroke="#ffffff" stroke-width="1.5"/>
+  <text x="299" y="96" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">RFID 리더</text>
+  <!-- 차단기 기둥과 서보 -->
+  <rect x="420" y="246" width="40" height="74" rx="4" fill="var(--card)"/>
+  <rect x="414" y="214" width="52" height="40" rx="6" fill="#c92a2a"/>
+  <circle cx="440" cy="234" r="7" fill="var(--card)"/>
+  <!-- 닫힌 팔 (흐리게) -->
+  <rect x="440" y="228" width="170" height="12" rx="4" stroke-dasharray="6 6" opacity="0.45"/>
+  <!-- 열린 팔 -->
+  <g transform="rotate(-70 440 234)">
+    <rect x="440" y="228" width="170" height="12" rx="4" fill="var(--card)"/>
+    <path d="M470 228 v12 M500 228 v12 M530 228 v12 M560 228 v12 M590 228 v12" stroke="#c92a2a" stroke-width="6"/>
+  </g>
+  <circle cx="440" cy="234" r="7" fill="var(--card)"/>
+  <path d="M600 214 A160 160 0 0 0 520 90" stroke="#c92a2a" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#acv-arrow)"/>
+  <text x="440" y="342" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">서보 모터 = 문</text>
+  <text x="132" y="342" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">카드를 대요</text>
+  <text x="620" y="40" text-anchor="end" font-size="17" font-weight="700" fill="currentColor" stroke="none">등록된 카드면 문이 열려요</text>
+</svg>

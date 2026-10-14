@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ai2-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ai2-title">I2C 두 선: ESP32 의 22번 SCL(박자 선)과 21번 SDA(데이터 선) 두 줄을 여러 부품이 함께 쓰고, 이름표(주소) 0x28 로 RFID 리더에게 하는 말인지 구분한다</title>
+  <!-- ESP32 -->
+  <rect x="24" y="90" width="120" height="180" rx="10" fill="var(--card)"/>
+  <text x="84" y="190" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <!-- 말풍선 -->
+  <path d="M40 24 H240 a10 10 0 0 1 10 10 V62 a10 10 0 0 1 -10 10 H100 L82 88 L84 72 H40 a10 10 0 0 1 -10 -10 V34 a10 10 0 0 1 10 -10 Z" fill="var(--card)"/>
+  <text x="140" y="54" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor" stroke="none">0x28, 카드 왔니?</text>
+  <!-- 두 선 -->
+  <path d="M144 132 H620" stroke="#f59f00" stroke-width="5"/>
+  <path d="M144 168 H620" stroke="#2f9e44" stroke-width="5"/>
+  <circle cx="144" cy="132" r="5" fill="#f59f00" stroke="none"/>
+  <circle cx="144" cy="168" r="5" fill="#2f9e44" stroke="none"/>
+  <text x="170" y="122" font-size="14" font-weight="700" fill="currentColor" stroke="none">SCL · 22번 · 박자를 맞추는 선</text>
+  <text x="170" y="192" font-size="14" font-weight="700" fill="currentColor" stroke="none">SDA · 21번 · 데이터가 오가는 선</text>
+  <!-- RFID -->
+  <path d="M410 132 V240 M440 168 V240" stroke-width="3"/>
+  <circle cx="410" cy="132" r="5" fill="currentColor" stroke="none"/>
+  <circle cx="440" cy="168" r="5" fill="currentColor" stroke="none"/>
+  <rect x="356" y="240" width="140" height="74" rx="8" fill="#1d4ed8"/>
+  <text x="426" y="270" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" stroke="none">RFID 리더</text>
+  <rect x="386" y="282" width="80" height="22" rx="11" fill="#ffffff" stroke="none"/>
+  <text x="426" y="298" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8" stroke="none">이름표 0x28</text>
+  <!-- 다른 부품 (흐리게) -->
+  <g opacity="0.5">
+    <path d="M555 132 V240 M585 168 V240" stroke-width="3" stroke-dasharray="5 5"/>
+    <rect x="512" y="240" width="116" height="74" rx="8" stroke-dasharray="6 5"/>
+    <text x="570" y="272" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">다른 부품</text>
+    <text x="570" y="294" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">다른 이름표</text>
+  </g>
+  <text x="320" y="346" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">선 두 개를 여럿이 함께 쓰고, 이름표로 누구에게 하는 말인지 구분해요</text>
+</svg>
