@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import * as Blockly from "blockly";
-import { entryTheme, registerBlocks, toolbox } from "@/blocks";
+import { entryTheme, registerBlocks, registerEntryToolbox, toolbox } from "@/blocks";
 import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
 import type { Issue } from "@/lint";
 import { cn } from "@/lib/utils";
@@ -103,6 +103,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     const host = hostRef.current;
     if (!host) return;
     registerBlocks();
+    // 엔트리식 카테고리 열 (아이콘 위·이름 아래, 고르면 카테고리 색으로 채운 타일). inject 전에 등록해야 툴박스가 쓴다
+    registerEntryToolbox();
     // 메뉴 항목은 전역에 한 번만 등록되고, 콜백은 지금 마운트된 작업판의 것으로 바뀐다
     registerBlockDocMenu((req) => onDocRequestRef.current?.(req));
     const ws = Blockly.inject(host, {

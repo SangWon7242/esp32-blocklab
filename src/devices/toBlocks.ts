@@ -46,7 +46,8 @@ export function textFieldValidators(): { blockType: string; field: string; patte
 }
 
 export type ToolboxItem = { kind: "label"; text: string } | { kind: "block"; type: string; fields?: Record<string, unknown>; inputs?: Record<string, unknown> };
-export type ToolboxCategory = { kind: "category"; name: string; categorystyle: string; contents: ToolboxItem[] };
+/** icon: 카테고리 열 아이콘 id (src/blocks/icons.ts, 장치 카테고리 id 와 같다) */
+export type ToolboxCategory = { kind: "category"; name: string; categorystyle: string; icon: string; contents: ToolboxItem[] };
 
 const allParts = new Map(DEVICES.flatMap((d) => [...(d.setup ? [d.setup] : []), ...d.actions, ...d.values]).map((s) => [s.blockType, s.parts]));
 
@@ -86,7 +87,7 @@ const byToolboxOrder = (ds: DeviceSpec[]): DeviceSpec[] =>
 /** 하드웨어 카테고리 8개 (DEVICE_CATEGORIES 순). 장치가 없는 카테고리는 빈 채로 둔다 */
 export function deviceToolboxCategories(): ToolboxCategory[] {
   return DEVICE_CATEGORIES.map((c) => ({
-    kind: "category", name: c.label, categorystyle: "hardware_category",
+    kind: "category", name: c.label, categorystyle: `${c.id}_category`, icon: c.id,
     contents: byToolboxOrder(DEVICES.filter((d) => d.category === c.id || d.alsoIn?.includes(c.id))).flatMap(deviceItems),
   }));
 }

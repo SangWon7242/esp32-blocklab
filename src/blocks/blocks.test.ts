@@ -2,6 +2,7 @@ import { describe, expect, it, beforeAll } from "vitest";
 import * as Blockly from "blockly";
 import { FieldMultilineInput } from "@blockly/field-multilineinput";
 import { BUILTIN_BLOCK_TYPES, CUSTOM_BLOCK_TYPES, entryTheme, registerBlocks, toolbox } from "./index";
+import { CATEGORY_COLORS, CATEGORY_IDS, type CategoryId } from "./colors";
 
 beforeAll(() => {
   registerBlocks();
@@ -70,6 +71,17 @@ describe("테마와 툴박스", () => {
     expect(entryTheme.blockStyles.logic_blocks.colourPrimary).toBe("#4562f5");
     expect(entryTheme.blockStyles.hardware_blocks.colourPrimary).toBe("#00b6b1");
     expect(entryTheme.blockStyles.code_blocks.colourPrimary).toBe("#8aa3b2");
+  });
+
+  it("카테고리마다 자기 색 스타일과 아이콘 id 가 있고, 15개 색은 모두 다르다", () => {
+    const cats = (toolbox as { contents: { name: string; categorystyle: string; icon?: string }[] }).contents;
+    expect(cats.map((c) => c.icon)).toEqual(CATEGORY_IDS);
+    for (const c of cats) {
+      expect(c.categorystyle, c.name).toBe(`${c.icon}_category`);
+      expect(entryTheme.categoryStyles[c.categorystyle]?.colour, c.name).toBe(CATEGORY_COLORS[c.icon as CategoryId].primary);
+    }
+    const primaries = CATEGORY_IDS.map((id) => CATEGORY_COLORS[id].primary.toLowerCase());
+    expect(new Set(primaries).size).toBe(15);
   });
 
   it("카테고리 순서가 엔트리와 같다", () => {

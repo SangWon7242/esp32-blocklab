@@ -1,5 +1,5 @@
 import * as Blockly from "blockly";
-import { ENTRY_COLORS } from "./colors";
+import { CATEGORY_COLORS, CATEGORY_IDS, ENTRY_COLORS } from "./colors";
 
 const style = (c: { primary: string; secondary: string; tertiary: string }) => ({
   colourPrimary: c.primary,
@@ -22,16 +22,8 @@ export const entryTheme = Blockly.Theme.defineTheme("entry", {
     hardware_blocks: style(ENTRY_COLORS.HARDWARE),
     code_blocks: style(ENTRY_COLORS.CODE),
   },
-  categoryStyles: {
-    start_category: { colour: ENTRY_COLORS.START.primary },
-    flow_category: { colour: ENTRY_COLORS.FLOW.primary },
-    judge_category: { colour: ENTRY_COLORS.JUDGE.primary },
-    calc_category: { colour: ENTRY_COLORS.CALC.primary },
-    variable_category: { colour: ENTRY_COLORS.VARIABLE.primary },
-    func_category: { colour: ENTRY_COLORS.FUNC.primary },
-    hardware_category: { colour: ENTRY_COLORS.HARDWARE.primary },
-    code_category: { colour: ENTRY_COLORS.CODE.primary },
-  },
+  // 카테고리마다 <id>_category (start_category … input_category, code_category) — 카테고리 열 타일 색
+  categoryStyles: Object.fromEntries(CATEGORY_IDS.map((id) => [`${id}_category`, { colour: CATEGORY_COLORS[id].primary }])),
   componentStyles: {
     workspaceBackgroundColour: "#f6f7f9",
     toolboxBackgroundColour: "#ffffff",

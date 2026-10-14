@@ -1,11 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
+import { openSample } from "./sample";
 
 /** 작업판에 그 글자가 든 블록이 그려질 때까지 (코드 → 블록 변환이 끝났다는 신호) */
 const blockWithText = (page: Page, text: string) =>
   page.getByTestId("blockly-host").locator(".blocklyBlockCanvas .blocklyText", { hasText: text });
 
 test("블록이 코드로, 코드가 블록으로 바뀐다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   await expect(page.getByTestId("blockly-host").locator(".blocklyMainBackground")).toBeVisible();
   const code = page.getByTestId("code-panel");
   await expect(code).toContainText("led = Pin(26, Pin.OUT)");
@@ -68,7 +69,7 @@ test("문법 오류가 있으면 블록 탭으로 가지 않고 친 코드를 �
 });
 
 test("작업판에서 블록을 끌어 놓으면 탭을 바꾸지 않아도 코드가 바뀐다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   const host = page.getByTestId("blockly-host");
   await expect(host.locator(".blocklyMainBackground")).toBeVisible();
   const code = page.getByTestId("code-panel");
@@ -257,7 +258,7 @@ test("문제 항목을 누르면 코드 줄이 강조된다", async ({ page }) =
 });
 
 test("블록을 선택하면 그 코드 줄이 강조된다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   const host = page.getByTestId("blockly-host");
   await expect(host.locator(".blocklyMainBackground")).toBeVisible();
   // 첫 "켜기" 블록의 왼쪽 가장자리(입력 칸이 아닌 곳)를 누른다
@@ -278,7 +279,7 @@ test("블록을 선택하면 그 코드 줄이 강조된다", async ({ page }) =
 });
 
 test("코드 모드의 콘솔은 영어로 문법 오류를 보여 준다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   await page.getByRole("tab", { name: "코드" }).click();
   await page.getByTestId("code-panel").locator(".cm-content").click();
   await page.keyboard.press("ControlOrMeta+End");
@@ -295,7 +296,7 @@ test("코드 모드의 콘솔은 영어로 문법 오류를 보여 준다", asyn
 });
 
 test("코드 모드에서 줄 번호를 눌러도 다음 글자는 코드 편집기로 간다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   const host = page.getByTestId("blockly-host");
   await expect(host.locator(".blocklyMainBackground")).toBeVisible();
   const blocksBefore = await host.locator(".blocklyBlockCanvas .blocklyDraggable").count();
@@ -331,7 +332,7 @@ test("코드 모드에서 줄 번호를 눌러도 다음 글자는 코드 편집
 });
 
 test("블록 모드에서 줄 번호를 누르면 그 블록이 파란 테두리로 표시되고 선택된다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   const host = page.getByTestId("blockly-host");
   await expect(host.locator(".blocklyMainBackground")).toBeVisible();
   const code = page.getByTestId("code-panel");

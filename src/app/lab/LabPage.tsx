@@ -4,7 +4,7 @@ import { findDoc } from "@/docs/catalog";
 import { contentFile } from "@/track/files";
 import { readSettings } from "../settings/settings";
 import { EditorWorkbench, type EditorWorkbenchHandle } from "./EditorWorkbench";
-import { SAMPLE_CODE } from "./sample";
+import { START_ONLY_CODE } from "./sample";
 
 export type { Panels } from "./EditorWorkbench";
 
@@ -37,8 +37,9 @@ export function LabPage() {
     <EditorWorkbench
       ref={workbench}
       initialExample={example}
-      // ?code=<챕터 id>/<파일> 이면 그 콘텐츠 코드로 시작한다 (트랙 편집기 단계에서 넘어올 때). 모르는 이름이면 예시 코드
-      initialCode={example !== undefined ? SAMPLE_CODE : contentFile(searchParams.get("code")) ?? SAMPLE_CODE}
+      // ?code=<챕터 id>/<파일> 이면 그 콘텐츠 코드로 시작한다 (트랙 편집기 단계에서 넘어올 때). 없거나 모르는 이름이면
+      // 시작 블록만 있는 빈 프로그램
+      initialCode={example !== undefined ? START_ONLY_CODE : contentFile(searchParams.get("code")) ?? START_ONLY_CODE}
       // 설정의 "가짜 보드" 또는 ?device=fake
       fake={searchParams.get("device") === "fake" || readSettings().fakeBoard}
     />

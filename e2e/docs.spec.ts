@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { openSample } from "./sample";
 
 /** 작업판(팔레트 말고)에 그려진, 그 글자가 든 블록 글자 */
 const workspaceText = (page: Page, text: string) =>
@@ -8,7 +9,7 @@ const docMenuItem = (page: Page) =>
   page.locator(".blocklyContextMenu [role=menuitem]", { hasText: "이 블록 설명 보기" });
 
 test("블록을 우클릭해 이 블록 설명 보기를 연다", async ({ page }) => {
-  await page.goto("/#/lab?device=fake");
+  await openSample(page, "/#/lab?device=fake");
   const wait = workspaceText(page, "초 기다리기").first();
   await expect(wait).toBeVisible();
   await wait.click({ button: "right" });
@@ -31,7 +32,7 @@ test("블록을 우클릭해 이 블록 설명 보기를 연다", async ({ page 
 });
 
 test("팔레트 블록도 설명을 볼 수 있다", async ({ page }) => {
-  await page.goto("/#/lab?device=fake");
+  await openSample(page, "/#/lab?device=fake");
   await expect(workspaceText(page, "초 기다리기").first()).toBeVisible();
   await page.getByRole("treeitem", { name: "흐름" }).click();
   const flyoutBlock = page.locator(".blocklyFlyout .blocklyText", { hasText: "밀리초 기다리기" }).first();
@@ -47,7 +48,7 @@ test("팔레트 블록도 설명을 볼 수 있다", async ({ page }) => {
 });
 
 test("자유 코딩에서는 예시를 편집기에 열 수 있다", async ({ page }) => {
-  await page.goto("/#/lab?device=fake");
+  await openSample(page, "/#/lab?device=fake");
   const wait = workspaceText(page, "초 기다리기").first();
   await expect(wait).toBeVisible();
   await wait.click({ button: "right" });
@@ -95,7 +96,7 @@ test("?block= 으로 들어오면 그 카드로 스크롤한다", async ({ page 
 });
 
 test("이미 자유 코딩에 있을 때 주소만 ?example= 으로 바뀌어도 예시가 실린다", async ({ page }) => {
-  await page.goto("/#/lab");
+  await openSample(page);
   await expect(page.getByTestId("blockly-host").locator(".blocklyMainBackground")).toBeVisible();
   await page.getByRole("tab", { name: "코드" }).click();
   const code = page.getByTestId("code-panel");

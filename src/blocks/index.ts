@@ -11,6 +11,7 @@ import { deviceBlockDefinitions, textFieldValidators } from "@/devices/toBlocks"
 
 export { entryTheme } from "./theme";
 export { toolbox } from "./toolbox";
+export { registerEntryToolbox } from "./entryToolbox";
 export { FUNCTION_NAME_HINT, isProgramName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
 
 const definitions = [...startBlocks, ...flowBlocks, ...calcBlocks, ...deviceBlockDefinitions(), ...codeBlocks];

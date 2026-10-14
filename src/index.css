@@ -158,3 +158,65 @@
 .injectionDiv .blocklyToolbox {
   z-index: 40;
 }
+/*
+ * 엔트리식 카테고리 열 (src/blocks/entryToolbox.ts): 폭 84px 의 흰 열에 꽉 찬 타일을 세로로 쌓는다. 타일은 아이콘(26px,
+ * 카테고리 색) 위·이름(12px) 아래, 사이에 1px 선. 고른 타일의 배경·글자색은 EntryToolboxCategory 가 칠한다.
+ * 열이 화면보다 길면 열 안에서 스크롤한다. Blockly 기본(높이 22px, 왼쪽 색 띠, 숨긴 접기 아이콘)을 덮도록 특정도 0,2,0 이상
+ */
+.injectionDiv .blocklyToolbox {
+  width: 84px;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-right: 1px solid #e5e7eb;
+}
+.injectionDiv .blocklyToolboxCategoryGroup {
+  flex-wrap: nowrap;
+}
+.injectionDiv .blocklyToolboxCategoryContainer {
+  border-bottom: 1px solid #e5e7eb;
+}
+.injectionDiv .blocklyToolboxCategory.entryCategoryRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: auto;
+  min-height: 64px;
+  margin: 0;
+  padding: 8px 4px;
+  border-radius: 0;
+  line-height: normal;
+  white-space: normal;
+  cursor: pointer;
+}
+.injectionDiv .blocklyToolboxCategory.entryCategoryRow:not(.blocklyToolboxSelected):hover {
+  background-color: #f3f4f6;
+}
+.injectionDiv .entryCategoryContents {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.injectionDiv .entryCategoryIcon {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+.injectionDiv .entryCategoryIcon[hidden] {
+  display: none;
+}
+.injectionDiv .entryCategoryIcon > svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+.injectionDiv .blocklyToolboxCategoryLabel.entryCategoryLabel {
+  padding: 0;
+  font: 600 12px/1.2 "Pretendard Variable", Pretendard, sans-serif;
+  color: inherit;
+  text-align: center;
+  word-break: keep-all;
+  cursor: pointer;
+}
