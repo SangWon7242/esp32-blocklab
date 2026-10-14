@@ -3,6 +3,8 @@ import * as Blockly from "blockly";
 import { registerBlocks, toolbox } from "@/blocks";
 import { codeToBlocks } from "@/parser";
 import { findDoc, getCatalog, searchDocs } from "./catalog";
+import { adc, pinOut } from "@/devices/specs/pin";
+import { knob, light } from "@/devices/specs/sensor";
 
 /** 변수·함수 꾸러미(custom 카테고리)에 나오는 내장 블록 */
 const CUSTOM_CATEGORY_TYPES = [
@@ -111,6 +113,19 @@ describe("블록 사전 카탈로그", () => {
     expect(findDoc("esp_pin_setup")!.category).toEqual({ id: "pin", name: "핀", colour: "#00b6b1" });
     expect(findDoc("flow_wait")!.category).toEqual({ id: "flow", name: "흐름", colour: "#19baea" });
     expect(findDoc("flow_wait")!.tooltip).toBe("time.sleep(초)");
+  });
+
+  it("BlockDoc.colour 는 블록 자체의 색 (hex): 스타일 블록은 테마 색, 장치 블록은 장치 색", () => {
+    for (const d of getCatalog().flatMap((c) => c.blocks)) expect(d.colour, d.type).toMatch(/^#[0-9a-f]{6}$/);
+    expect(findDoc("flow_wait")!.colour).toBe("#19baea");
+    expect(findDoc("math_number")!.colour).toBe("#f4af18");
+    expect(findDoc("esp_pin_setup")!.colour).toBe(pinOut.colour);
+    expect(findDoc("dev_light_setup")!.colour).toBe(light.colour);
+    expect(findDoc("dev_knob_setup")!.colour).toBe(knob.colour);
+    expect(findDoc("dev_light_setup")!.colour).not.toBe(findDoc("dev_knob_setup")!.colour);
+    // 다른 카테고리에도 나오는 블록(센서 밑의 아날로그 읽기)은 원래 장치(아날로그 핀) 색, 카테고리는 처음 나온 곳
+    expect(findDoc("dev_adc_read")!.colour).toBe(adc.colour);
+    expect(findDoc("dev_adc_read")!.category.id).toBe("pin");
   });
 
   it("같은 종류가 다른 모양으로 또 나오면 variants 에 둔다", () => {

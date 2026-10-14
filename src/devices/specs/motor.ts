@@ -3,7 +3,7 @@ import { factor, isSingleOperand, NO_SETUP_PATTERN, pinNo, validPins } from "./c
 
 /** 서보 (esp_servo_setup). PWM 2줄보다 구체적인 3줄이라 레지스트리에서 pwm 보다 앞에 둔다 */
 export const servo: DeviceSpec = {
-  id: "servo", category: "motor", label: "서보 모터", toolboxOrder: 60,
+  id: "servo", category: "motor", label: "서보 모터", toolboxOrder: 60, colour: "#c92a2a",
   setup: {
     blockType: "esp_servo_setup", message: "서보 %1 을(를) 핀 %2 에 준비하기 (처음엔 닫기)",
     parts: [{ kind: "var", name: "VAR", default: "servo" }, pinNo("PIN", 4, "out")],
@@ -43,7 +43,7 @@ export const servo: DeviceSpec = {
 
 /** DC 모터 (dev_motor_setup). 이름 motor1a/motor1b 고정, forward(speed)·backward(speed)·stop() 도우미. PWM 핀 둘이라 pwm 보다 앞 */
 export const dcMotor: DeviceSpec = {
-  id: "dc_motor", category: "motor", label: "DC 모터", toolboxOrder: 61,
+  id: "dc_motor", category: "motor", label: "DC 모터", toolboxOrder: 61, colour: "#a83e00",
   setup: {
     blockType: "dev_motor_setup",
     message: "DC 모터 준비하기 (IN+ 핀 %1, IN- 핀 %2)",
@@ -96,7 +96,7 @@ export const dcMotor: DeviceSpec = {
 
 /** 릴레이 (dev_relay_setup). 출력 핀이라 준비 줄은 esp_pin_setup 이 접고, 켜기·끄기는 esp_pin_write 를 쓴다 */
 export const relay: DeviceSpec = {
-  id: "relay", category: "motor", label: "릴레이", toolboxOrder: 62,
+  id: "relay", category: "motor", label: "릴레이", toolboxOrder: 62, colour: "#b81049",
   setup: {
     blockType: "dev_relay_setup",
     message: "릴레이를 핀 %1 에 준비하고 %2 이름 붙이기",

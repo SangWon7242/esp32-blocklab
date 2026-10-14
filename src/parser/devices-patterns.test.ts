@@ -13,7 +13,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
   type D = (typeof actual.DEVICES)[number];
   const v = (name: string, extra: object = {}) => ({ kind: "var" as const, name, default: name.toLowerCase(), ...extra });
   const beeper: D = {
-    id: "fake_beeper", category: "sound", label: "가짜 부저",
+    id: "fake_beeper", category: "sound", label: "가짜 부저", colour: "#888888",
     setup: {
       blockType: "fake_beeper_setup", message: "부저 %1 핀 %2", parts: [{ kind: "var", name: "VAR", default: "beeper" }, { kind: "pin", name: "PIN", default: 15, dir: "out" }], tooltip: "",
       lines: (x) => [`${x.VAR} = PWM(Pin(${x.PIN}))`, `${x.VAR}.freq(440)`, `${x.VAR}.duty(0)`],
@@ -49,7 +49,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
     values: [],
   };
   const lcd: D = {
-    id: "fake_lcd", category: "display", label: "가짜 LCD",
+    id: "fake_lcd", category: "display", label: "가짜 LCD", colour: "#888888",
     setup: {
       blockType: "fake_lcd_setup", message: "LCD 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 21, dir: "out" }], tooltip: "",
       lines: (x) => [`lcd = LCD(${x.PIN})`], kind: "lcd", provides: () => ["lcd"],
@@ -71,7 +71,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
     values: [],
   };
   const tilt: D = {
-    id: "fake_tilt", category: "switch", label: "가짜 틸트",
+    id: "fake_tilt", category: "switch", label: "가짜 틸트", colour: "#888888",
     setup: {
       blockType: "fake_tilt_setup", message: "틸트 핀 %1 %2", parts: [{ kind: "pin", name: "PIN", default: 14, dir: "out" }, v("VAR")], tooltip: "",
       lines: (x) => [`${x.VAR} = Pin(${x.PIN}, Pin.IN)`], kind: "pin", provides: (x) => [x.VAR],
@@ -87,7 +87,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
     ],
   };
   const motor: D = {
-    id: "fake_motor", category: "motor", label: "가짜 모터",
+    id: "fake_motor", category: "motor", label: "가짜 모터", colour: "#888888",
     setup: {
       blockType: "fake_motor_setup", message: "모터 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 13, dir: "out" }], tooltip: "",
       lines: (x) => [`m = Motor(${x.PIN})`],

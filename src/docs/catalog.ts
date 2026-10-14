@@ -83,7 +83,17 @@ function slotText(block: Blockly.Block | null): string {
     .join(" ");
 }
 
-type Built = { title: TitlePart[]; code: string; tooltip: string };
+type Built = { title: TitlePart[]; code: string; tooltip: string; colour: string };
+
+/**
+ * 블록이 작업판에 그려지는 색. 테마 스타일을 쓰는 블록(흐름·판단…)은 헤드리스 작업판이 스타일을 칠하지 않으므로
+ * (getColour 가 #000000) entryTheme 의 그 스타일 primary 를, 장치 블록처럼 colour 를 직접 가진 블록은 getColour() 를.
+ */
+export function blockColour(block: Blockly.Block): string {
+  const style = block.getStyleName();
+  const primary = style ? entryTheme.blockStyles[style]?.colourPrimary : undefined;
+  return (primary ?? block.getColour()).toLowerCase();
+}
 
 /** 헤드리스 작업판에 툴박스 항목 그대로 블록 하나를 만들어 제목·코드·도움말을 뽑는다 */
 function buildBlock(item: BlockItem, before?: BlockItem): Built {
@@ -94,7 +104,7 @@ function buildBlock(item: BlockItem, before?: BlockItem): Built {
     const state = (i: BlockItem) => ({ type: i.type, fields: i.fields, inputs: i.inputs, extraState: i.extraState }) as Blockly.serialization.blocks.State;
     if (before) Blockly.serialization.blocks.append(state(before), ws);
     const block = Blockly.serialization.blocks.append(state(item), ws);
-    return { title: titleOfBlock(block), code: blockSnippet(block), tooltip: Blockly.Tooltip.getTooltipOfObject(block) };
+    return { title: titleOfBlock(block), code: blockSnippet(block), tooltip: Blockly.Tooltip.getTooltipOfObject(block), colour: blockColour(block) };
   } finally {
     ws.dispose();
     Blockly.Events.enable();

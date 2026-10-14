@@ -6,7 +6,7 @@ import { adcLines, adcPatternLines, NO_SETUP_PATTERN, pinNo, validPins } from ".
  * 도우미가 같은 이름·표준 본문으로 최상위에 있을 때만 접힌다(Task 4). 아니면 두 줄은 esp_pin_setup 으로 떨어진다.
  */
 export const ultrasonic: DeviceSpec = {
-  id: "ultrasonic", category: "sensor", label: "초음파 센서", toolboxOrder: 46,
+  id: "ultrasonic", category: "sensor", label: "초음파 센서", toolboxOrder: 46, colour: "#838500",
   setup: {
     blockType: "esp_ultrasonic_setup", message: "초음파 센서 준비하기 (trig 핀 %1, echo 핀 %2)",
     parts: [pinNo("TRIG", 13, "out"), pinNo("ECHO", 12, "in")],
@@ -49,9 +49,9 @@ export const ultrasonic: DeviceSpec = {
  * 아날로그 센서 (조도·가변저항·소리·불꽃). 준비 줄은 아날로그 핀과 같은 3줄이라 dev_adc_setup 으로 접히고,
  * 값은 dev_adc_read 를 함께 쓴다 (툴박스에는 그 센서 이름으로 넣는다).
  */
-function adcSensor(id: string, label: string, subject: string, name: string, toolboxOrder: number): DeviceSpec {
+function adcSensor(id: string, label: string, subject: string, name: string, toolboxOrder: number, colour: string): DeviceSpec {
   return {
-    id, category: "sensor", label, toolboxOrder,
+    id, category: "sensor", label, toolboxOrder, colour,
     setup: {
       blockType: `dev_${id}_setup`,
       message: `${subject} 핀 %1 에 준비하고 %2 이름 붙이기`,
@@ -68,14 +68,14 @@ function adcSensor(id: string, label: string, subject: string, name: string, too
   };
 }
 
-export const light = adcSensor("light", "조도 센서", "조도 센서를", "light", 40);
-export const knob = adcSensor("knob", "가변저항", "가변저항을", "knob", 41);
-export const sound = adcSensor("sound", "소리 센서", "소리 센서를", "sound", 42);
-export const flame = adcSensor("flame", "불꽃 센서", "불꽃 센서를", "flame", 43);
+export const light = adcSensor("light", "조도 센서", "조도 센서를", "light", 40, "#5b9a1a");
+export const knob = adcSensor("knob", "가변저항", "가변저항을", "knob", 41, "#389228");
+export const sound = adcSensor("sound", "소리 센서", "소리 센서를", "sound", 42, "#678c00");
+export const flame = adcSensor("flame", "불꽃 센서", "불꽃 센서를", "flame", 43, "#34ad54");
 
 /** 온습도 센서 DHT11 (dev_dht_setup). measure() 로 잰 뒤 temperature()·humidity() 를 읽는다 */
 export const dht11: DeviceSpec = {
-  id: "dht11", category: "sensor", label: "온습도(DHT11)", toolboxOrder: 47,
+  id: "dht11", category: "sensor", label: "온습도(DHT11)", toolboxOrder: 47, colour: "#00ac79",
   setup: {
     blockType: "dev_dht_setup",
     message: "온습도 센서(DHT11)를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -129,7 +129,7 @@ const fixedAdcPattern = (name: string) => ({
 
 /** 서미스터 (dev_ntc_setup). 이름 ntc 고정, ntc_temperature() 도우미가 10kΩ NTC(B 3950)의 저항을 온도로 바꾼다 */
 export const ntc: DeviceSpec = {
-  id: "ntc", category: "sensor", label: "온도(서미스터)", toolboxOrder: 44,
+  id: "ntc", category: "sensor", label: "온도(서미스터)", toolboxOrder: 44, colour: "#8a9e00",
   setup: {
     blockType: "dev_ntc_setup",
     message: "서미스터를 핀 %1 에 준비하기",
@@ -164,7 +164,7 @@ export const ntc: DeviceSpec = {
 
 /** LM35 온도 센서 (dev_lm35_setup). 이름 lm35 고정, lm35_temperature() 도우미 (10mV/℃) */
 export const lm35: DeviceSpec = {
-  id: "lm35", category: "sensor", label: "온도(LM35)", toolboxOrder: 45,
+  id: "lm35", category: "sensor", label: "온도(LM35)", toolboxOrder: 45, colour: "#009456",
   setup: {
     blockType: "dev_lm35_setup",
     message: "LM35 온도 센서를 핀 %1 에 준비하기",

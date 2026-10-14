@@ -36,7 +36,7 @@ export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) 
             {doc ? (
               // 제목은 우클릭한 블록의 지금 값으로 (아래 코드와 같은 값)
               <DialogTitle asChild className="leading-normal">
-                <TitlePill as="h2" parts={request.title} colour={doc.category.colour} />
+                <TitlePill as="h2" parts={request.title} colour={doc.colour} />
               </DialogTitle>
             ) : (
               <DialogTitle>블록 설명</DialogTitle>

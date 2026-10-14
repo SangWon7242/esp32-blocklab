@@ -103,6 +103,12 @@ export type DeviceSpec = {
   id: string;
   category: DeviceCategory;
   label: string;
+  /**
+   * 이 장치 블록(준비·명령·값)의 색 "#rrggbb". 같은 카테고리 장치끼리 서로 다르고 카테고리 색 계열이다:
+   * src/blocks/colors.ts 의 spreadHues(카테고리 색, 장치 수) 를 카테고리 안 툴박스 순서대로 적는다(첫 장치 = 카테고리 색).
+   * 장치를 더하거나 빼면 그 카테고리 장치 색을 다시 뽑는다 (src/devices/colours.test.ts 가 확인한다).
+   */
+  colour: string;
   /** print 처럼 준비가 필요 없는 묶음은 생략 */
   setup?: SetupSpec;
   actions: ActionSpec[];

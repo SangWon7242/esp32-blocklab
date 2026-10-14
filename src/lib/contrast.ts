@@ -19,6 +19,13 @@ export function relativeLuminance(hex: string): number | null {
 const DARK_LUMINANCE = relativeLuminance(DARK_TEXT)!;
 const contrast = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
+/** 바탕색과 그 위 글자색(textColourOn)의 대비 (1~21). 색을 읽지 못하면 1 */
+export function textContrastOn(background: string): number {
+  const l = relativeLuminance(background);
+  if (l === null) return 1;
+  return Math.max(contrast(l, DARK_LUMINANCE), contrast(l, 1));
+}
+
 /**
  * 바탕색 위에서 더 잘 읽히는 글자색. 휘도가 약 0.18 을 넘는 밝은 바탕(흐름·계산·하드웨어…)은 진한 글자,
  * 어두운 바탕(판단)은 흰 글자. 색을 읽지 못하면 흰 글자

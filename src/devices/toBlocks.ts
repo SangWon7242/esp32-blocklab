@@ -23,14 +23,17 @@ function arg(p: Part): Record<string, unknown> {
 const inline = (parts: Part[]) => (parts.filter((p) => p.kind === "value").length >= 2 ? { inputsInline: true } : {});
 const args = (parts: Part[]) => (parts.length ? { args0: parts.map(arg) } : {});
 
-/** 모든 장치 블록의 Blockly JSON 정의 */
+/**
+ * 모든 장치 블록의 Blockly JSON 정의. 색은 테마 스타일이 아니라 장치마다의 colour (Zelos 가 밝은·어두운 색을 만든다).
+ * 다른 카테고리에도 보여 주는 블록(alsoIn·extraToolbox)도 블록 종류에 붙은 원래 장치 색 그대로다.
+ */
 export function deviceBlockDefinitions(): Record<string, unknown>[] {
   const out: Record<string, unknown>[] = [];
-  const stmt = { previousStatement: null, nextStatement: null, style: "hardware_blocks" };
   for (const d of DEVICES) {
+    const stmt = { previousStatement: null, nextStatement: null, colour: d.colour };
     if (d.setup) out.push({ type: d.setup.blockType, message0: d.setup.message, ...args(d.setup.parts), ...stmt, tooltip: d.setup.tooltip });
     for (const a of d.actions) out.push({ type: a.blockType, message0: a.message, ...args(a.parts), ...inline(a.parts), ...stmt, tooltip: a.tooltip });
-    for (const v of d.values) out.push({ type: v.blockType, message0: v.message, ...args(v.parts), ...inline(v.parts), output: v.output, style: "hardware_blocks", tooltip: v.tooltip });
+    for (const v of d.values) out.push({ type: v.blockType, message0: v.message, ...args(v.parts), ...inline(v.parts), output: v.output, colour: d.colour, tooltip: v.tooltip });
   }
   return out;
 }

@@ -19,6 +19,7 @@ export const entryTheme = Blockly.Theme.defineTheme("entry", {
     variable_blocks: style(ENTRY_COLORS.VARIABLE),
     variable_dynamic_blocks: style(ENTRY_COLORS.VARIABLE),
     procedure_blocks: style(ENTRY_COLORS.FUNC),
+    // 장치 블록은 이 스타일을 쓰지 않고 장치마다의 colour 를 쓴다 (src/devices/toBlocks.ts). 예전 저장본·확장용으로 남긴다
     hardware_blocks: style(ENTRY_COLORS.HARDWARE),
     code_blocks: style(ENTRY_COLORS.CODE),
   },

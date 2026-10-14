@@ -3,6 +3,7 @@ import * as Blockly from "blockly";
 import { FieldMultilineInput } from "@blockly/field-multilineinput";
 import { BUILTIN_BLOCK_TYPES, CUSTOM_BLOCK_TYPES, entryTheme, registerBlocks, toolbox } from "./index";
 import { CATEGORY_COLORS, CATEGORY_IDS, type CategoryId } from "./colors";
+import { DEVICES } from "@/devices/registry";
 
 beforeAll(() => {
   registerBlocks();
@@ -69,8 +70,24 @@ describe("테마와 툴박스", () => {
     expect(entryTheme.blockStyles.start_blocks.colourPrimary).toBe("#00b400");
     expect(entryTheme.blockStyles.loop_blocks.colourPrimary).toBe("#19baea");
     expect(entryTheme.blockStyles.logic_blocks.colourPrimary).toBe("#4562f5");
-    expect(entryTheme.blockStyles.hardware_blocks.colourPrimary).toBe("#00b6b1");
     expect(entryTheme.blockStyles.code_blocks.colourPrimary).toBe("#8aa3b2");
+  });
+
+  it("장치 블록(준비·명령·값)은 테마 스타일이 아니라 자기 장치의 colour 를 쓴다", () => {
+    const ws = new Blockly.Workspace();
+    for (const d of DEVICES) {
+      for (const s of [...(d.setup ? [d.setup] : []), ...d.actions, ...d.values]) {
+        const block = ws.newBlock(s.blockType);
+        expect(block.getStyleName(), s.blockType).toBe("");
+        expect(block.getColour().toLowerCase(), s.blockType).toBe(d.colour);
+      }
+    }
+    // 같은 카테고리라도 장치가 다르면 블록 색이 다르다 (조도 센서 준비 ≠ 가변저항 준비 ≠ 초음파)
+    const colour = (t: string) => ws.newBlock(t).getColour();
+    expect(new Set([colour("dev_light_setup"), colour("dev_knob_setup"), colour("esp_ultrasonic_setup")]).size).toBe(3);
+    // 다른 카테고리에도 보여 주는 블록은 원래 장치 색: LED 카테고리의 핀 출력 블록 = 핀 색
+    expect(colour("esp_pin_setup").toLowerCase()).toBe(CATEGORY_COLORS.pin.primary);
+    ws.dispose();
   });
 
   it("카테고리마다 자기 색 스타일과 아이콘 id 가 있고, 15개 색은 모두 다르다", () => {

@@ -3,7 +3,7 @@ import { factor, NO_SETUP_PATTERN, pinNo, RE_NAME, RE_PIN, validPins } from "./c
 
 /** 능동 부저 (dev_buzzer_setup). 출력 핀이라 준비 줄은 esp_pin_setup 이 접고, 켜기·끄기는 esp_pin_write 를 쓴다 */
 export const buzzerActive: DeviceSpec = {
-  id: "buzzer_active", category: "sound", label: "능동 부저", toolboxOrder: 50,
+  id: "buzzer_active", category: "sound", label: "능동 부저", toolboxOrder: 50, colour: "#e4518c",
   setup: {
     blockType: "dev_buzzer_setup",
     message: "부저를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -32,7 +32,7 @@ const toneCode = (name: string, hz: string, sec: string) => [`${name}.freq(${hz}
  * 레지스트리에서 pwm 보다 앞에 둔다.
  */
 export const buzzerPassive: DeviceSpec = {
-  id: "buzzer_passive", category: "sound", label: "수동 부저(음)", toolboxOrder: 51,
+  id: "buzzer_passive", category: "sound", label: "수동 부저(음)", toolboxOrder: 51, colour: "#e14861",
   setup: {
     blockType: "dev_beeper_setup",
     message: "소리 나는 부저를 핀 %1 에 준비하고 %2 이름 붙이기",

@@ -29,13 +29,13 @@ export function TitleChips({ parts }: { parts: TitlePart[] }) {
 
 type TitlePillProps = Omit<ComponentProps<"div">, "children"> & {
   parts: TitlePart[];
-  /** 카테고리 색 (바탕). 글자색은 이 색의 밝기로 고른다 */
+  /** 블록 색 (바탕, BlockDoc.colour). 글자색은 이 색의 밝기로 고른다 */
   colour: string;
   /** 제목 알약을 그릴 요소 (사전 카드는 h3, 설명 팝업은 h2) */
   as?: "div" | "h2" | "h3";
 };
 
-/** 블록 모양을 닮은 제목 알약 (카테고리 색 바탕). 사전 카드·설명 팝업 제목이 함께 쓴다 */
+/** 블록 모양을 닮은 제목 알약 (블록 색 바탕). 사전 카드·설명 팝업 제목이 함께 쓴다 */
 export function TitlePill({ parts, colour, as: Tag = "div", className, style, ...rest }: TitlePillProps) {
   return (
     <Tag
@@ -148,7 +148,7 @@ export function BlockDocCard({ doc, highlighted }: { doc: BlockDoc; highlighted?
     >
       <CardHeader className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <TitlePill as="h3" parts={doc.title} colour={doc.category.colour} />
+          <TitlePill as="h3" parts={doc.title} colour={doc.colour} />
           <CategoryBadge doc={doc} />
         </div>
         {doc.variants && doc.variants.length > 0 && (
@@ -156,7 +156,7 @@ export function BlockDocCard({ doc, highlighted }: { doc: BlockDoc; highlighted?
           <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
             <span>이런 이름으로도 나와요:</span>
             {doc.variants.map((parts, i) => (
-              <TitlePill key={i} parts={parts} colour={doc.category.colour} className="px-2 py-0.5 text-sm" />
+              <TitlePill key={i} parts={parts} colour={doc.colour} className="px-2 py-0.5 text-sm" />
             ))}
           </div>
         )}

@@ -16,6 +16,8 @@ export type BlockDoc = {
   type: string;
   /** name: 툴박스 카테고리 이름, colour: 카테고리 primary 색 */
   category: { id: string; name: string; colour: string };
+  /** 블록 자체의 색 "#rrggbb" (장치 블록은 장치마다 다르다). 제목 알약 바탕 */
+  colour: string;
   title: TitlePart[];
   /** 툴박스 항목 그대로 만든 블록 하나의 코드 (값 블록이면 식) */
   code: string;
