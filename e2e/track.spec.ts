@@ -197,3 +197,45 @@ test("localStorage 가 막힌 브라우저에서도 트랙이 열리고, 저장�
   await page.getByRole("link", { name: "설정" }).click();
   await expect(page.getByText(/저장이 막혀 있어/)).toBeVisible();
 });
+
+test("단계 화면: 안내 칸을 접으면 활동 칸이 넓어지고, 새로 고쳐도 접힌 채로 남는다", async ({ page }) => {
+  await page.goto("/#/track/10-auto-door/problem");
+  const guide = page.getByTestId("step-guide");
+  const activity = page.getByTestId("step-activity");
+  const toggle = page.getByTestId("guide-toggle");
+  await expect(guide).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const before = (await activity.boundingBox())!.width;
+
+  await toggle.click();
+  await expect(guide).toBeHidden();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  const after = (await activity.boundingBox())!.width;
+  expect(after).toBeGreaterThan(before + 300);
+
+  await page.reload();
+  await expect(page.getByTestId("step-guide")).toBeHidden();
+  await page.getByTestId("guide-toggle").click();
+  await expect(page.getByTestId("step-guide")).toBeVisible();
+});
+
+test("챕터 화면: 표지 그림·준비물이 보이고, 배선 보기를 펼치면 배선도가 나온다", async ({ page }) => {
+  await page.goto("/#/track/01-led");
+  await expect(page.getByTestId("chapter-cover").locator("svg[role=img]")).toBeVisible();
+  await expect(page.getByTestId("material-chips")).toContainText("220Ω 저항");
+  const wiring = page.getByTestId("chapter-wiring");
+  await expect(wiring.locator("svg[role=img]")).toHaveCount(0);
+  await wiring.getByRole("button", { name: "배선 보기" }).click();
+  await expect(wiring.locator("svg[role=img]")).toBeVisible();
+});
+
+test("안내 칸 그림: 크게 보기를 누르면 큰 창에 그림이 나오고 Esc 로 닫힌다", async ({ page }) => {
+  await page.goto("/#/track/10-auto-door/problem");
+  await page.getByTestId("step-guide").getByTestId("illustration-zoom").click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("문에는 눈이 없어요");
+  await expect(dialog.locator("svg[role=img]")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});

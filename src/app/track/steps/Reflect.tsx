@@ -21,13 +21,13 @@ export function Reflect({ step, chapter, input, onInput }: StepProps<"reflect">)
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-1 flex-col gap-6">
       <section>
         <h3 className="font-semibold">한 줄씩 내 말로</h3>
         <p className="mt-1 text-sm text-muted-foreground">{step.lineExplain} 의 줄마다 "이 줄은 ___" 을 채워 보세요. 할 수 있는 만큼 써도 괜찮아요.</p>
         <ol className="mt-3 space-y-2">
           {explainableLines(code).map((n) => (
-            <li key={n} className="grid gap-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center md:gap-3">
+            <li key={n} className="grid gap-1 @xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @xl:items-center @xl:gap-3">
               <code className="block truncate rounded bg-muted px-2 py-1 text-xs whitespace-pre" title={source[n - 1]}>
                 <span className="mr-2 text-muted-foreground">{n}</span>{source[n - 1]}
               </code>
@@ -42,14 +42,25 @@ export function Reflect({ step, chapter, input, onInput }: StepProps<"reflect">)
           ))}
         </ol>
       </section>
-      <section className="space-y-4">
-        <h3 className="font-semibold">오늘 한 생각</h3>
-        {step.prompts.map((p, i) => (
-          <div key={i} className="space-y-2">
-            <Label htmlFor={`prompt-${i}`} className="leading-snug">{i + 1}. {p}</Label>
-            <Textarea id={`prompt-${i}`} value={prompts[i] ?? ""} onChange={(e) => setPrompt(i, e.target.value)} rows={3} />
-          </div>
-        ))}
+      <section className="flex flex-1 flex-col gap-3">
+        <div>
+          <h3 className="font-semibold">오늘 한 생각</h3>
+          <p className="mt-1 text-sm text-muted-foreground">모든 칸을 써야 완료할 수 있어요.</p>
+        </div>
+        {/* 넓은 활동 칸에서는 2×2 격자. 칸이 남는 높이를 나눠 채운다 */}
+        <div className="grid flex-1 auto-rows-fr grid-cols-1 gap-4 @lg:grid-cols-2">
+          {step.prompts.map((p, i) => (
+            <div key={i} className="flex flex-col gap-2 rounded-xl border bg-card p-4">
+              <Label htmlFor={`prompt-${i}`} className="leading-snug">{i + 1}. {p}</Label>
+              <Textarea
+                id={`prompt-${i}`}
+                value={prompts[i] ?? ""}
+                onChange={(e) => setPrompt(i, e.target.value)}
+                className="min-h-24 flex-1 resize-none"
+              />
+            </div>
+          ))}
+        </div>
       </section>
       <AiCheck
         label="내 설명 점검 받기"

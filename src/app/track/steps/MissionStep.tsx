@@ -32,7 +32,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
 
   const initial = m.program?.code ?? (step.code ? chapter.files[step.code] : undefined) ?? "";
   return (
-    <div className="space-y-4">
+    <div className="flex flex-1 flex-col gap-4">
       <section className="rounded-lg border p-4">
         <h3 className="font-semibold">미션</h3>
         <p className="mt-1">{step.instructions}</p>
@@ -49,6 +49,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
       </section>
       <JudgePanel onJudge={onJudge} failures={m.failures} passed={m.passed} passText="통과했어요. 아래 완료를 누르세요." />
       <TrackEditor
+        fill
         ref={editor}
         initialCode={initial}
         onProgram={(code, blocksJson) => update((cur) => onEditedProgram(cur, { code, blocksJson }))}

@@ -4,7 +4,6 @@ import { CheckCircle2, Lock, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import { debugMessage } from "@/ai/claude";
 import { filled, judgeIsStale, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
@@ -52,7 +51,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-1 flex-col gap-4">
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="증상">
         {step.symptoms.map((s, i) => (
           <Button
@@ -111,12 +110,12 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
       </section>
 
       {!saved ? (
-        <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground" data-testid="editor-locked">
+        <div className="flex min-h-40 flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground" data-testid="editor-locked">
           <Lock className="size-5" />
           설명을 저장하면 편집기가 열려요
         </div>
       ) : (
-        <div className={cn("space-y-4")}>
+        <div className="flex flex-1 flex-col gap-4">
           <JudgePanel
             onJudge={onJudge}
             failures={d.failures?.[current]}
@@ -124,6 +123,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
             passText={step.symptoms.every((_, i) => d.passed?.[i]) ? "모든 증상을 고쳤어요. 아래 완료를 누르세요." : "이 증상은 고쳤어요. 다음 증상으로 가 보세요."}
           />
           <TrackEditor
+            fill
             key={current}
             ref={editor}
             initialCode={d.programs?.[current]?.code ?? symptom.code}

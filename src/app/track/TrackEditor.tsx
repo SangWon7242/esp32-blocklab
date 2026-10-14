@@ -23,6 +23,8 @@ type Props = {
   assemblyMode?: boolean;
   /** 높이를 줄인다 */
   compact?: boolean;
+  /** 넓은 화면(lg)에서 남은 높이를 채운다 (부모가 flex 열이어야 한다). 좁은 화면은 정해진 높이 */
+  fill?: boolean;
   ref?: Ref<TrackEditorHandle>;
 };
 
@@ -30,7 +32,7 @@ type Props = {
  * 트랙 편집기 단계(실행·미션·디버깅)의 편집기. 자유 코딩 화면과 같은 편집기(EditorWorkbench)에
  * "보드에 저장"만 숨기고, 가짜 보드(?device=fake·설정)를 따른다.
  */
-export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgram, onRunEnd, compact, ref }: Props) {
+export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgram, onRunEnd, compact, fill, ref }: Props) {
   const [searchParams] = useSearchParams();
   const fake = searchParams.get("device") === "fake" || readSettings().fakeBoard;
   const inner = useRef<EditorWorkbenchHandle>(null);
@@ -64,7 +66,15 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   useEffect(() => flush, [flush]);
 
   return (
-    <div className={cn("overflow-hidden rounded-lg border", compact ? "h-[420px]" : "h-[min(640px,70vh)] min-h-[440px]")} data-testid="track-editor">
+    <div
+      className={cn(
+        "overflow-hidden rounded-lg border",
+        compact ? "h-[420px]" : "h-[min(640px,70vh)] min-h-[440px]",
+        // 남은 높이를 채운다(최소 440px). contain:size — 편집기 속 내용 크기가 활동 칸 높이를 밀어 올리지 않게
+        fill && "lg:h-0 lg:min-h-[440px] lg:flex-1 lg:[contain:size]",
+      )}
+      data-testid="track-editor"
+    >
       <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} assemblyMode={assemblyMode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
     </div>
   );

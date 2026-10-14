@@ -22,7 +22,7 @@ import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
 import { saveStepRecord, useProgress } from "./progressState";
 import { STEP_TYPE_GUIDE, STEP_TYPE_LABEL } from "./stepMeta";
-import { Analysis } from "./steps/Analysis";
+import { ANALYSIS_IMAGE, Analysis } from "./steps/Analysis";
 import { DebugStep } from "./steps/DebugStep";
 import { DesignStep } from "./steps/DesignStep";
 import { MissionStep } from "./steps/MissionStep";
@@ -161,7 +161,7 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
       <div
         className={cn(
           "min-h-0 flex-1 overflow-y-auto lg:grid lg:overflow-hidden",
-          guideCollapsed ? "lg:grid-cols-1" : "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]",
+          guideCollapsed ? "lg:grid-cols-1" : "lg:grid-cols-[minmax(320px,2fr)_minmax(0,3fr)]",
         )}
       >
         <aside
@@ -172,7 +172,10 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
         >
           <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} />
         </aside>
-        <section className="p-4 sm:p-6 lg:overflow-y-auto" aria-label="활동">{activity}</section>
+        {/* 활동 칸: 세로로 꽉 차게 (편집기·입력 칸이 남는 높이를 채운다). 칸 폭에 따라 안쪽 배치가 바뀐다(@container) */}
+        <section className="@container flex min-h-0 flex-col p-4 sm:p-6 lg:overflow-y-auto" aria-label="활동" data-testid="step-activity">
+          {activity}
+        </section>
       </div>
 
       <div className="flex shrink-0 items-center gap-2 border-t px-3 py-2">
@@ -220,12 +223,14 @@ function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter;
       </div>
       <h1 className="mt-3 text-xl font-bold">{step.title}</h1>
 
-      {step.scene && (
+      {/* 조건 분석의 세 칸 그림은 활동 칸에서 입력 칸 바로 위에 보인다 (두 번 그리지 않게) */}
+      {step.scene && !(step.type === "analysis" && step.scene.image === ANALYSIS_IMAGE) && (
         <Illustration
           chapterId={chapter.id}
           image={step.scene.image}
           caption={step.scene.caption}
           className="mt-4 rounded-lg border bg-muted/30 p-3"
+          zoomable
         />
       )}
 
@@ -269,7 +274,7 @@ function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter;
           <CollapsibleContent className="space-y-4 px-3 pt-1 pb-3">
             {chapter.materials && <MaterialChips chapterId={chapter.id} materials={chapter.materials} />}
             {chapter.wiring && (
-              <Illustration chapterId={chapter.id} image={chapter.wiring.image} caption={chapter.wiring.caption} className="rounded-md bg-muted/30 p-2" />
+              <Illustration chapterId={chapter.id} image={chapter.wiring.image} caption={chapter.wiring.caption} className="rounded-md bg-muted/30 p-2" zoomable />
             )}
           </CollapsibleContent>
         </Collapsible>
