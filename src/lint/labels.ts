@@ -32,7 +32,7 @@ const BUILTIN_LABELS: Record<string, string> = {
   calc_len: "… 의 길이",
   calc_item: "… 의 … 번째 항목 (0부터)",
   calc_ticks: "지금까지 지난 시간 (ms)",
-  variables_set: "… 를 … 로 정하기",
+  variables_set: "… 을(를) … 로 정하기",
   variables_get: "변수",
   var_change: "… 을(를) … 만큼 바꾸기",
   list_create: "리스트 … 만들기 (비어 있음)",

@@ -195,6 +195,27 @@ describe("리스트 블록 왕복", () => {
   });
 });
 
+describe("사전(d[\"k\"]) 은 n번째 리스트 블록이 아니다", () => {
+  it('d["k"] = 1 · d.pop("k") · d.insert("k", 2) 는 code_stmt 로 원문 그대로 (표시는 문장마다 하나)', () => {
+    for (const line of ['d["k"] = 1', 'd.pop("k")', 'd.insert("k", 2)']) {
+      const src = `d = {"k": 1}\n${line}\n`;
+      const r = parse(src);
+      const t = types(r.json);
+      expect(t, src).toContain("code_stmt");
+      expect(t.some((x) => x.startsWith("list_")), src).toBe(false);
+      expect(r.unparsed.length, src).toBe(2);
+      expect(codeToCode(src), src).toBe(src);
+    }
+  });
+
+  it("숫자 번호는 그대로 리스트 블록", () => {
+    expect(body(`${HEAD}items[1] = 5\n`)[1].type).toBe("list_set");
+    expect(body(`${HEAD}items.pop(0)\n`)[1].type).toBe("list_remove_at");
+    expect(body(`${HEAD}items.insert(0, 5)\n`)[1].type).toBe("list_insert");
+    expect(body(`${HEAD}x = 1\nitems[x] = 5\n`)[2].type).toBe("list_set");
+  });
+});
+
 describe("흐름 추가 블록 왕복", () => {
   it("각 항목 반복: 몸통의 반복 변수는 변수 블록", () => {
     roundTrip(
@@ -245,6 +266,16 @@ describe("흐름 추가 블록 왕복", () => {
       expect(types(parse(src).json), src).toContain("code_stmt");
       expect(codeToCode(src), src).toBe(src);
     }
+  });
+
+  it("반례: for x in a, b: (콤마로 여러 개) 는 첫 항목만 남기지 않고 code_stmt 로 원문 그대로", () => {
+    for (const src of ['for c in "red", "green":\n    print(c)\n', "for x in 1, 2, 3:\n    print(x)\n", `${HEAD}for x in items,:\n    print(x)\n`]) {
+      const t = types(parse(src).json);
+      expect(t, src).toContain("code_stmt");
+      expect(t, src).not.toContain("flow_for_each");
+      expect(codeToCode(src), src).toBe(src);
+    }
+    expect(body(`${HEAD}for x in items:\n    print(x)\n`)[1].type).toBe("flow_for_each");
   });
 
   it("반복 변수는 반복 뒤에서 읽어도 변수 블록 (변수 표에 등록된다)", () => {

@@ -51,7 +51,7 @@ export const calcBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "random.randint(A, B). A 와 B 도 나올 수 있습니다.",
+    tooltip: "random.randint(작은 수, 큰 수). 두 끝 수도 나올 수 있습니다.",
   },
   {
     type: "calc_round",
@@ -67,7 +67,7 @@ export const calcBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구합니다. 코드로는 round(X), math.floor(X), math.ceil(X), abs(X), math.sqrt(X) 입니다.",
+    tooltip: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구합니다. 코드로는 round(수), math.floor(수), math.ceil(수), abs(수), math.sqrt(수) 입니다.",
   },
   {
     type: "calc_minmax",
@@ -80,7 +80,7 @@ export const calcBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "max(A, B) 는 큰 수, min(A, B) 는 작은 수입니다.",
+    tooltip: "max(수, 수) 는 큰 수, min(수, 수) 는 작은 수입니다.",
   },
   {
     type: "calc_len",
@@ -89,7 +89,7 @@ export const calcBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "len(X). 글자 수나 리스트의 항목 수입니다.",
+    tooltip: "len(값). 글자 수나 리스트의 항목 수입니다.",
   },
   {
     type: "calc_item",
@@ -101,7 +101,7 @@ export const calcBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: null,
     style: "math_blocks",
-    tooltip: "X[INDEX]. 첫 번째 항목의 번호는 0 입니다.",
+    tooltip: "리스트[번째]. 첫 번째 항목의 번호는 0 입니다.",
   },
   {
     type: "calc_ticks",

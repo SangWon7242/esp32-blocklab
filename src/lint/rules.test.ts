@@ -209,6 +209,31 @@ describe("break-outside-loop", () => {
   });
 });
 
+describe("repeat-reuses-i", () => {
+  const repeatN = (id: string, body?: B): B => ({ type: "flow_repeat_n", id, inputs: { TIMES: shadowNum(3), ...(body ? { DO: { block: body } } : {}) } });
+  const forRange = (id: string, v: string, body: B): B => ({ type: "flow_for_range", id, fields: { VAR: { id: `var_${v}` } }, inputs: { FROM: shadowNum(0), TO: shadowNum(5), DO: { block: body } } });
+  const forEach = (id: string, v: string, body: B): B => ({ type: "flow_for_each", id, fields: { VAR: { id: `var_${v}` } }, inputs: { LIST: { block: varGet("xs") }, DO: { block: body } } });
+  const cond = { block: { type: "logic_boolean", id: "tb", fields: { BOOL: "TRUE" } } };
+  it("i 로 바꾸며 반복 · 각 항목 반복 안의 n번 반복 → 주의 (if 안쪽, 더 깊어도)", () => {
+    const deep = { type: "controls_if", id: "if", inputs: { IF0: cond, DO0: { block: repeatN("r2") } } };
+    const json = program([forRange("o1", "i", repeatN("r1")), forEach("o2", "i", { ...wait("w", 1), next: { block: deep } })], { vars: ["i", "xs"] });
+    const issues = only(run(json), "repeat-reuses-i");
+    expect(issues.map((i) => [i.blockId, i.level, i.ko, i.en])).toEqual([
+      ["r1", "warning", "바깥 반복도 i 를 쓰고 있어요. 안쪽 반복의 i 가 바깥 i 를 덮어써요", "Warning: inner loop reuses 'i' of the outer loop"],
+      ["r2", "warning", "바깥 반복도 i 를 쓰고 있어요. 안쪽 반복의 i 가 바깥 i 를 덮어써요", "Warning: inner loop reuses 'i' of the outer loop"],
+    ]);
+  });
+  it("바깥 변수가 i 가 아니거나 n번 반복끼리 겹치거나 반복 밖이면 없음", () => {
+    const json = program([forRange("o1", "n", repeatN("r1")), repeatN("o2", repeatN("r2")), repeatN("r3"), forEach("o3", "item", repeatN("r4"))], { vars: ["n", "item", "xs"] });
+    expect(only(run(json), "repeat-reuses-i")).toEqual([]);
+  });
+  it("함수 몸통에서 멈춘다 (def 안의 i 는 따로)", () => {
+    const def = { type: "procedures_defnoreturn", id: "def", fields: { NAME: "f" }, inputs: { STACK: { block: repeatN("r") } } };
+    const call = { type: "procedures_callnoreturn", id: "call", extraState: { name: "f" } };
+    expect(only(run(program([forRange("o", "i", call)], { vars: ["i"], tops: [def] })), "repeat-reuses-i")).toEqual([]);
+  });
+});
+
 describe("orphan", () => {
   it("시작 블록 밖 최상위 명령 → 주의 (줄 머리에 한 번)", () => {
     const loose = { ...pinWrite("o", "led"), next: { block: pinWrite("o2", "led") } };

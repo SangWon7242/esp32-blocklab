@@ -80,7 +80,7 @@ export const coreContent: Record<string, BlockContent> = {
       code: 'button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile True:\n    if button.value() == 0:\n        break\n    print("waiting")\n    time.sleep(0.1)\nprint("start!")',
     },
     tips: [
-      "반복 블록 안에서만 써요. 반복 밖에 두면 실행할 때 SyntaxError 가 나요.",
+      "반복 블록 안에서만 써요. 반복 밖에 두면 실행할 때 SyntaxError 가 나는데, 검사가 빨간 표시로 먼저 알려 줘요.",
       "반복 안에 반복이 있으면 가장 안쪽 반복 하나만 끝나요.",
     ],
   },
@@ -88,7 +88,7 @@ export const coreContent: Record<string, BlockContent> = {
     concept: "이번 반복의 남은 블록을 건너뛰고 바로 다음 반복으로 가요. 코드로는 continue 입니다. 반복 자체는 끝나지 않아서, 어떤 값만 빼고 처리할 때 씁니다.",
     example: { title: "1부터 10까지 홀수만 출력하기", code: "for n in range(1, 11):\n    if n % 2 == 0:\n        continue\n    print(n)" },
     tips: [
-      "반복 블록 안에서만 써요. 반복 밖에 두면 실행할 때 SyntaxError 가 나요.",
+      "반복 블록 안에서만 써요. 반복 밖에 두면 실행할 때 SyntaxError 가 나는데, 검사가 빨간 표시로 먼저 알려 줘요.",
       "조건 반복(while) 안에서 쓸 때는 건너뛰기 전에 값을 바꿔야 해요. 그렇지 않으면 같은 값에서 끝없이 돌아요.",
     ],
   },

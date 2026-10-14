@@ -10,7 +10,7 @@ export const judgeBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Boolean",
     style: "logic_blocks",
-    tooltip: "LOW <= A <= HIGH. 두 끝 값도 사이에 들어갑니다.",
+    tooltip: "작은 수 <= 값 <= 큰 수. 두 끝 값도 사이에 들어갑니다.",
   },
   {
     type: "judge_contains",
@@ -22,6 +22,6 @@ export const judgeBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Boolean",
     style: "logic_blocks",
-    tooltip: "ITEM in CONTAINER. 글자 안에 글자가, 리스트 안에 값이 들어 있는지 봅니다.",
+    tooltip: "값 in 리스트. 글자 안에 글자가, 리스트 안에 값이 들어 있는지 봅니다.",
   },
 ];

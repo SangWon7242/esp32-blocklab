@@ -2,7 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { block, chain, codeStmt, commentText, num, varSet, withComment } from "./builders";
 import type { ParseContext } from "./context";
 import { isFoldedHelper, matchActionLines, matchCall, matchSetupAt, setupBlock } from "./devices";
-import { callBlock, callParts, convertExpr, isListVariable, isWholeNot, memberParts } from "./expressions";
+import { callBlock, callParts, convertAllOrNull, convertExpr, isListVariable, isWholeNot, memberParts } from "./expressions";
 import { functionParts, isKnownImport, returnsValue } from "./patterns";
 import { bodyStatements, children, operands } from "./tree";
 import type { BlockJson } from "./types";
@@ -104,6 +104,8 @@ function forParts(node: SyntaxNode, ctx: ParseContext): { target: string; iter: 
   const kids = children(node).filter((k) => k.name !== "Comment");
   const inAt = kids.findIndex((k) => k.name === "in");
   if (kids[0]?.name !== "for" || inAt !== 2 || kids[1].name !== "VariableName" || !kids[3] || kids[3].name === "Body") return null;
+  // for x in a, b: 처럼 반복할 것이 여러 개(튜플)면 kids[3] 뒤에 콤마가 온다 — 첫 항목만 남기면 뜻이 바뀌므로 코드로
+  if (kids[4]?.name !== "Body") return null;
   return { target: ctx.src.slice(kids[1]), iter: kids[3] };
 }
 
@@ -137,7 +139,10 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
       const sub = subscriptParts(target);
       if (sub && sub[0].name === "VariableName" && isListVariable(ctx.src.slice(sub[0]), ctx)) {
         const name = ctx.src.slice(sub[0]);
-        return one(block("list_set", varField(name, ctx), { I: convertExpr(sub[1], ctx, "Number"), V: convertExpr(value, ctx) }));
+        // 번호가 숫자 칸에 못 끼우면(d["k"] = 1 사전 정하기) "0부터 n번째" 로 보이지 않게 문장 전체를 코드로 (읽기 쪽 calc_item 과 같다)
+        const index = convertAllOrNull([sub[1]], ctx, "Number");
+        if (!index) return unknown(node, ctx);
+        return one(block("list_set", varField(name, ctx), { I: index[0], V: convertExpr(value, ctx) }));
       }
       return unknown(node, ctx);
     }
@@ -175,7 +180,16 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
         // 장치 변수가 아닌 이름의 append·insert·pop·remove·clear → 리스트 블록 (장치 메서드는 위 matchCall 이 먼저 본다)
         const method = Object.hasOwn(LIST_METHODS, prop) ? LIST_METHODS[prop] : undefined;
         if (method && method.inputs.length === args.length && isListVariable(obj, ctx)) {
-          const inputs = Object.fromEntries(method.inputs.map((input, k) => [input.name, convertExpr(args[k], ctx, input.check)]));
+          // 번호 칸(pop·insert 의 I)은 숫자 칸에 못 끼우면(d.pop("k")) 문장 전체를 코드로
+          const mark = ctx.unparsed.length;
+          const inputs: Record<string, BlockJson> = {};
+          for (const [k, input] of method.inputs.entries()) {
+            if (input.check === "Number") {
+              const index = convertAllOrNull([args[k]], ctx, "Number");
+              if (!index) { ctx.unparsed.length = mark; return unknown(node, ctx); }
+              inputs[input.name] = index[0];
+            } else inputs[input.name] = convertExpr(args[k], ctx);
+          }
           return one(block(method.type, varField(obj, ctx), inputs));
         }
         return unknown(node, ctx);

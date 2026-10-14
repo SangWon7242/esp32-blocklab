@@ -12,7 +12,7 @@ export function applyKoreanMessages(): void {
     LOGIC_NEGATE_TITLE: "%1 이(가) 아니다",
     LOGIC_BOOLEAN_TRUE: "참",
     LOGIC_BOOLEAN_FALSE: "거짓",
-    VARIABLES_SET: "%1 를 %2 로 정하기",
+    VARIABLES_SET: "%1 을(를) %2 로 정하기",
     PROCEDURES_DEFNORETURN_TITLE: "함수 정의하기",
     // 팔레트 함수 블록의 처음 이름. 그대로 써도 코드에 같은 이름이 나오도록 파이썬 이름으로 둔다
     PROCEDURES_DEFNORETURN_PROCEDURE: "my_function",

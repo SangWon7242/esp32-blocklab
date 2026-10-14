@@ -13,7 +13,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     ],
     ...statement,
     style: "variable_blocks",
-    tooltip: "VAR += DELTA. 변수의 값에 DELTA 를 더합니다 (빼려면 음수).",
+    tooltip: "변수 += 수. 변수의 값에 수를 더합니다 (빼려면 음수).",
   },
   {
     type: "list_create",
@@ -21,7 +21,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR = []. 항목이 없는 빈 리스트를 만듭니다.",
+    tooltip: "리스트 = []. 항목이 없는 빈 리스트를 만듭니다.",
   },
   {
     type: "list_create_from",
@@ -29,7 +29,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar, { type: "field_input", name: "ITEMS", text: "1, 2, 3" }],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR = [ITEMS]. 쉼표로 나눈 항목으로 리스트를 만듭니다. 글자 항목은 \"red\" 처럼 따옴표로 감쌉니다.",
+    tooltip: "리스트 = [항목, 항목]. 쉼표로 나눈 항목으로 리스트를 만듭니다. 글자 항목은 \"red\" 처럼 따옴표로 감쌉니다.",
   },
   {
     type: "list_append",
@@ -37,7 +37,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar, { type: "input_value", name: "V" }],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR.append(V). 리스트 맨 끝에 항목을 붙입니다.",
+    tooltip: "리스트.append(값). 리스트 맨 끝에 항목을 붙입니다.",
   },
   {
     type: "list_insert",
@@ -45,7 +45,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar, { type: "input_value", name: "I", check: "Number" }, { type: "input_value", name: "V" }],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR.insert(I, V). I 번째 자리에 넣고 뒤 항목은 한 칸씩 밀립니다. 첫 자리는 0 입니다.",
+    tooltip: "리스트.insert(번째, 값). 그 번째 자리에 넣고 뒤 항목은 한 칸씩 밀립니다. 첫 자리는 0 입니다.",
   },
   {
     type: "list_remove_at",
@@ -53,7 +53,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar, { type: "input_value", name: "I", check: "Number" }],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR.pop(I). I 번째 항목을 지웁니다. 첫 항목은 0 번입니다.",
+    tooltip: "리스트.pop(번째). 그 번째 항목을 지웁니다. 첫 항목은 0 번입니다.",
   },
   {
     type: "list_remove_value",
@@ -61,7 +61,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar, { type: "input_value", name: "V" }],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR.remove(V). 앞에서부터 처음 만나는 같은 값 하나를 지웁니다. 없으면 오류가 납니다.",
+    tooltip: "리스트.remove(값). 앞에서부터 처음 만나는 같은 값 하나를 지웁니다. 없으면 오류가 납니다.",
   },
   {
     type: "list_clear",
@@ -69,7 +69,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR.clear(). 리스트의 항목을 모두 지웁니다.",
+    tooltip: "리스트.clear(). 리스트의 항목을 모두 지웁니다.",
   },
   {
     type: "list_set",
@@ -77,7 +77,7 @@ export const dataBlocks: Record<string, unknown>[] = [
     args0: [listVar, { type: "input_value", name: "I", check: "Number" }, { type: "input_value", name: "V" }],
     ...statement,
     style: "list_blocks",
-    tooltip: "VAR[I] = V. I 번째 항목을 새 값으로 바꿉니다. 첫 항목은 0 번입니다.",
+    tooltip: "리스트[번째] = 값. 그 번째 항목을 새 값으로 바꿉니다. 첫 항목은 0 번입니다.",
   },
   {
     type: "list_index",
@@ -86,6 +86,6 @@ export const dataBlocks: Record<string, unknown>[] = [
     inputsInline: true,
     output: "Number",
     style: "list_blocks",
-    tooltip: "VAR.index(V). 값이 처음 나오는 번호입니다. 첫 항목은 0 번이고, 없으면 오류가 납니다.",
+    tooltip: "리스트.index(값). 값이 처음 나오는 번호입니다. 첫 항목은 0 번이고, 없으면 오류가 납니다.",
   },
 ];

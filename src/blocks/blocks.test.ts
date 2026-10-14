@@ -60,7 +60,7 @@ describe("블록 정의", () => {
   it("한국어 문구가 엔트리 표현으로 바뀐다", () => {
     expect(Blockly.Msg.CONTROLS_IF_MSG_THEN).toBe("이라면");
     expect(Blockly.Msg.CONTROLS_IF_MSG_ELSE).toBe("아니면");
-    expect(Blockly.Msg.VARIABLES_SET).toBe("%1 를 %2 로 정하기");
+    expect(Blockly.Msg.VARIABLES_SET).toBe("%1 을(를) %2 로 정하기");
     expect(Blockly.Msg.CONTROLS_REPEAT_TITLE).toBe("%1회 반복"); // 로케일이 적용됐다는 표식
   });
 });
@@ -177,7 +177,7 @@ describe("계획 6 변수·리스트·흐름 블록", () => {
       ["list_set", ["I", "V"], null, "items"],
       ["list_index", ["V"], "Number", "items"],
       ["flow_for_each", ["LIST", "DO"], null, "item"],
-      ["flow_for_range", ["FROM", "TO", "DO"], null, "i"],
+      ["flow_for_range", ["FROM", "TO", "DO"], null, "n"],
     ];
     for (const [type, inputs, output, varName] of spec) {
       const b = w.newBlock(type);
@@ -224,6 +224,12 @@ describe("계획 6 변수·리스트·흐름 블록", () => {
     ]);
     const flow = cats.find((c) => c.name === "흐름")!.contents!.map((b) => b.type);
     expect(flow).toEqual(expect.arrayContaining(["flow_for_range", "flow_for_each", "flow_break", "flow_continue", "flow_repeat_n"]));
+    // 기다리기 블록 다음, 새 반복 블록 앞에 "반복 더 보기" 글자 표시
+    const flowItems = cats.find((c) => c.name === "흐름")!.contents! as { kind?: string; type?: string; text?: string }[];
+    const labelAt = flowItems.findIndex((b) => b.kind === "label");
+    expect(flowItems[labelAt]?.text).toBe("반복 더 보기");
+    expect(flowItems[labelAt - 1].type).toBe("flow_wait_us");
+    expect(flowItems[labelAt + 1].type).toBe("flow_for_range");
   });
 
   it("변수 꾸러미: 변수가 있으면 버튼 → 정하기 → 만큼 바꾸기(같은 변수, 숫자 1) → 변수 값들", () => {

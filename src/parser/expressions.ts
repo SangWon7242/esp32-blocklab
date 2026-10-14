@@ -164,7 +164,7 @@ export function convertExpr(node: SyntaxNode, ctx: ParseContext, expect?: Check)
 }
 
 /** 노드들을 값 블록으로. 하나라도 expect 칸에 못 끼우면 null (그동안 남긴 표시도 지운다) */
-function convertAllOrNull(nodes: SyntaxNode[], ctx: ParseContext, expect: Check): BlockJson[] | null {
+export function convertAllOrNull(nodes: SyntaxNode[], ctx: ParseContext, expect: Check): BlockJson[] | null {
   const mark = ctx.unparsed.length;
   const out = nodes.map((n) => convertAny(n, ctx));
   if (out.every((b) => { const types = outputTypes(b.type); return !types || types.includes(expect); })) return out;

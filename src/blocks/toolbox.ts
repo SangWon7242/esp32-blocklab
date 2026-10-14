@@ -25,7 +25,9 @@ export const toolbox = {
         block("flow_wait", { inputs: { SEC: num(1) } }),
         block("flow_wait_ms", { inputs: { MS: num(500) } }),
         block("flow_wait_us", { inputs: { US: num(10) } }),
-        // 계획 6: 범위·각 항목 반복, 멈추기·건너뛰기 (자주 쓰는 반복·기다리기가 팔레트 위에 그대로 보이게 뒤에 둔다)
+        // 계획 6: 범위·각 항목 반복, 멈추기·건너뛰기 (자주 쓰는 반복·기다리기가 팔레트 위에 그대로 보이게 뒤에 둔다).
+        // 팔레트가 넘쳐 아래가 가려지므로 글자 표시로 아래에 반복 블록이 더 있다고 알린다
+        { kind: "label", text: "반복 더 보기" },
         block("flow_for_range", { inputs: { FROM: num(0), TO: num(5) } }),
         block("flow_for_each", { inputs: { LIST: items() } }),
         block("flow_break"),
@@ -93,4 +95,5 @@ export const toolbox = {
     ...deviceToolboxCategories(),
     { kind: "category", name: "코드", categorystyle: "code_category", icon: "code", contents: [block("code_stmt"), block("code_expr")] },
   ],
-} as Blockly.utils.toolbox.ToolboxDefinition;
+// icon 은 Blockly 정의에 없는 칸(entryToolbox 가 읽는다)이고 글자 표시(label)가 섞이면 TS 가 겹침을 못 찾으므로 unknown 을 거친다
+} as unknown as Blockly.utils.toolbox.ToolboxDefinition;

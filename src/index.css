@@ -235,3 +235,9 @@
   word-break: keep-all;
   cursor: pointer;
 }
+
+/* 꾸러미 안 글자 표시(흐름의 "반복 더 보기"): 블록보다 눈에 덜 띄게 흐린 회색 (날개 바탕은 늘 밝다) */
+.injectionDiv .blocklyFlyoutLabelText {
+  fill: #6b7280;
+  font: 600 12px "Pretendard Variable", Pretendard, sans-serif;
+}

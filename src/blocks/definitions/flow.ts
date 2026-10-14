@@ -24,7 +24,7 @@ export const flowBlocks: Record<string, unknown>[] = [
     type: "flow_for_range",
     message0: "%1 을(를) %2 부터 %3 전까지 바꾸며 반복",
     args0: [
-      { type: "field_variable", name: "VAR", variable: "i" },
+      { type: "field_variable", name: "VAR", variable: "n" },
       { type: "input_value", name: "FROM", check: "Number" },
       { type: "input_value", name: "TO", check: "Number" },
     ],
@@ -34,7 +34,7 @@ export const flowBlocks: Record<string, unknown>[] = [
     previousStatement: null,
     nextStatement: null,
     style: "loop_blocks",
-    tooltip: "for VAR in range(FROM, TO): 변수를 FROM 부터 1씩 늘리며 반복합니다. TO 는 들어가지 않습니다.",
+    tooltip: "for 변수 in range(시작, 끝): 변수를 시작 수부터 1씩 늘리며 반복합니다. 끝 수는 들어가지 않습니다.",
   },
   {
     type: "flow_for_each",
@@ -49,7 +49,7 @@ export const flowBlocks: Record<string, unknown>[] = [
     previousStatement: null,
     nextStatement: null,
     style: "loop_blocks",
-    tooltip: "for VAR in LIST: 리스트(또는 글자)의 항목을 앞에서부터 하나씩 변수에 넣으며 반복합니다.",
+    tooltip: "for 변수 in 리스트: 리스트(또는 글자)의 항목을 앞에서부터 하나씩 변수에 넣으며 반복합니다.",
   },
   {
     type: "controls_whileUntil",
