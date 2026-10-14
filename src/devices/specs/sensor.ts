@@ -1,5 +1,5 @@
 import type { DeviceSpec } from "../types";
-import { adcLines, adcPatternLines, NO_SETUP_PATTERN, pinNo, validPins } from "./common";
+import { adcLines, adcPatternLines, pinNo, validPins } from "./common";
 
 /**
  * 초음파 (esp_ultrasonic_setup). 이름 trig/echo 고정, get_distance() 도우미.
@@ -46,10 +46,15 @@ export const ultrasonic: DeviceSpec = {
 };
 
 /**
- * 아날로그 센서 (조도·가변저항·소리·불꽃). 준비 줄은 아날로그 핀과 같은 3줄이라 dev_adc_setup 으로 접히고,
- * 값은 dev_adc_read 를 함께 쓴다 (툴박스에는 그 센서 이름으로 넣는다).
+ * 아날로그 센서 (조도·가변저항·소리·불꽃). 준비 줄은 아날로그 핀과 같은 3줄이지만, 변수 이름이 그 센서 이름(light…)으로
+ * 시작할 때만 그 센서 준비 블록으로 접는다 (아니면 뒤의 dev_adc_setup 이 잡는다 — 레지스트리에서 adc 보다 앞에 둔다).
+ * 값 블록(`dev_<id>_value`)은 센서마다 따로 두어 센서 색으로 보이게 한다. kind 도 센서마다 달라서 `light.read()` 는
+ * 조도 센서 값 블록으로 돌아온다. 아날로그 핀의 dev_adc_read·dev_adc_voltage 도 이 변수들을 받는다 (objKinds).
  */
-function adcSensor(id: string, label: string, subject: string, name: string, toolboxOrder: number, colour: string): DeviceSpec {
+export const ADC_SENSOR_KINDS = ["light", "knob", "sound", "flame"] as const;
+
+function adcSensor(id: (typeof ADC_SENSOR_KINDS)[number], label: string, subject: string, name: string, toolboxOrder: number, colour: string): DeviceSpec {
+  const prefix = new RegExp(`^${id}`);
   return {
     id, category: "sensor", label, toolboxOrder, colour,
     setup: {
@@ -58,13 +63,24 @@ function adcSensor(id: string, label: string, subject: string, name: string, too
       parts: [pinNo("PIN", 36, "adc"), { kind: "var", name: "VAR", default: name }],
       tooltip: `${name} = ADC(Pin(36)) — 값은 0~4095 로 읽습니다.`,
       lines: (v) => adcLines(v.VAR, v.PIN),
-      kind: "adc",
+      kind: id,
       provides: (v) => [v.VAR],
-      pattern: NO_SETUP_PATTERN,
+      pattern: {
+        lines: adcPatternLines(),
+        fields: ([a, b, c]) => (a[1] === b[1] && a[1] === c[1] && prefix.test(a[1]) && validPins(a[2]) ? { PIN: a[2], VAR: a[1] } : null),
+      },
     },
     actions: [],
-    values: [],
-    extraToolbox: [{ blockType: "dev_adc_read", fields: { VAR: name } }],
+    values: [
+      {
+        blockType: `dev_${id}_value`, message: "%1 값 (0~4095)",
+        parts: [{ kind: "var", name: "VAR", default: name }],
+        tooltip: `${name}.read() — 0 ~ 4095`,
+        code: (v) => `${v.VAR}.read()`,
+        output: "Number",
+        pattern: { kind: "method", name: "read", args: [], objPart: "VAR" },
+      },
+    ],
   };
 }
 

@@ -99,6 +99,9 @@ export const pinIn: DeviceSpec = {
 };
 
 /** 아날로그 핀 (dev_adc_setup). 0~4095 로 읽는다. 조도·가변저항·소리·불꽃 센서도 이 3줄로 접힌다 */
+/** 아날로그 값·전압 블록이 받는 변수 종류: 아날로그 핀과 아날로그 센서 넷 */
+const ADC_KINDS = ["adc", "light", "knob", "sound", "flame"];
+
 export const adc: DeviceSpec = {
   id: "adc", category: "pin", label: "아날로그 핀", toolboxOrder: 4, colour: "#3abce1",
   setup: {
@@ -122,7 +125,7 @@ export const adc: DeviceSpec = {
       tooltip: "adc.read() — 0(0V) ~ 4095(3.3V)",
       code: (v) => `${v.VAR}.read()`,
       output: "Number",
-      pattern: { kind: "method", name: "read", args: [], objPart: "VAR" },
+      pattern: { kind: "method", name: "read", args: [], objPart: "VAR", objKinds: ADC_KINDS },
     },
     {
       blockType: "dev_adc_voltage", message: "%1 전압 (V)",
@@ -131,7 +134,7 @@ export const adc: DeviceSpec = {
       code: (v) => `${v.VAR}.read() * 3.3 / 4095`,
       output: "Number",
       order: ORDER.MULTIPLICATIVE,
-      pattern: { kind: "expr", regex: /^(\w+)\.read\(\) \* 3\.3 \/ 4095$/, objPart: "VAR" },
+      pattern: { kind: "expr", regex: /^(\w+)\.read\(\) \* 3\.3 \/ 4095$/, objPart: "VAR", objKinds: ADC_KINDS },
     },
   ],
 };

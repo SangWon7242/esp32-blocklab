@@ -114,24 +114,36 @@ describe("아날로그 핀 (dev_adc_setup)", () => {
 
 describe("아날로그 센서 (조도·가변저항·소리·불꽃)", () => {
   for (const id of ["light", "knob", "sound", "flame"]) {
-    it(`${id}: 아날로그 핀 3줄을 내고 dev_adc_setup 으로 돌아온다`, () => {
-      const code = toCode([{ type: `dev_${id}_setup`, fields: { PIN: 39, VAR: v(id) } }, print(adcRead(id))], [id]);
+    it(`${id}: 아날로그 핀 3줄을 내고 이름이 ${id} 로 시작하면 자기 준비·값 블록으로 돌아온다`, () => {
+      const code = toCode([{ type: `dev_${id}_setup`, fields: { PIN: 39, VAR: v(id) } }, print({ type: `dev_${id}_value`, fields: { VAR: v(id) } })], [id]);
       expect(code).toBe(`from machine import Pin, ADC\n\n${id} = ADC(Pin(39))\n${id}.atten(ADC.ATTN_11DB)\n${id}.width(ADC.WIDTH_12BIT)\n\nprint(${id}.read())\n`);
       const r = fromCode(code);
-      expect(r.types).toEqual(["dev_adc_setup", "esp_print", "dev_adc_read"]);
+      expect(r.types).toEqual([`dev_${id}_setup`, "esp_print", `dev_${id}_value`]);
       expect(r.body[0].fields).toEqual({ PIN: 39, VAR: v(id) });
       expect(r.unparsed).toEqual([]);
       expect(r.code).toBe(code);
     });
   }
 
-  it("툴박스: 센서 라벨 밑에 준비 블록과 그 이름의 dev_adc_read (extraToolbox, shadow 없이)", () => {
+  it("이름이 센서 이름으로 시작하지 않으면 아날로그 핀 블록으로 돌아온다", () => {
+    const r = fromCode("from machine import Pin, ADC\n\nsensor1 = ADC(Pin(39))\nsensor1.atten(ADC.ATTN_11DB)\nsensor1.width(ADC.WIDTH_12BIT)\n\nprint(sensor1.read())\n");
+    expect(r.types).toEqual(["dev_adc_setup", "esp_print", "dev_adc_read"]);
+    expect(r.unparsed).toEqual([]);
+  });
+
+  it("아날로그 핀의 값·전압 블록도 센서 변수를 받는다 (light.read() * 3.3 / 4095 는 전압 블록)", () => {
+    const r = fromCode("from machine import Pin, ADC\n\nlight = ADC(Pin(39))\nlight.atten(ADC.ATTN_11DB)\nlight.width(ADC.WIDTH_12BIT)\n\nprint(light.read() * 3.3 / 4095)\n");
+    expect(r.types).toEqual(["dev_light_setup", "esp_print", "dev_adc_voltage"]);
+    expect(r.unparsed).toEqual([]);
+  });
+
+  it("툴박스: 센서 라벨 밑에 그 센서의 준비 블록과 값 블록 (센서 색)", () => {
     const sensor = deviceToolboxCategories().find((c) => c.name === "센서")!.contents;
     const at = sensor.findIndex((i) => i.kind === "label" && i.text === "조도 센서");
     expect(sensor.slice(at, at + 3)).toEqual([
       { kind: "label", text: "조도 센서" },
       { kind: "block", type: "dev_light_setup" },
-      { kind: "block", type: "dev_adc_read", fields: { VAR: { name: "light" } } },
+      { kind: "block", type: "dev_light_value" },
     ]);
   });
 });

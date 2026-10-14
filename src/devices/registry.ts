@@ -24,7 +24,7 @@ export const DEVICE_CATEGORIES: { id: DeviceCategory; label: string }[] = [
 export const DEVICES: DeviceSpec[] = [
   servo, ultrasonic, oled, lcd, seg7, rfid, keypad, ir,
   joystick, button, tilt, pir,
-  pinIn, dht11, ntc, lm35, adc, light, knob, sound, flame,
+  pinIn, dht11, ntc, lm35, light, knob, sound, flame, adc,
   pinOut, ledPwm, led, rgb, flowLed,
   buzzerActive, buzzerPassive, dcMotor, relay,
   pwm, printer,
