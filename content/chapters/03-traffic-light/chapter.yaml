@@ -1,0 +1,244 @@
+# 챕터 3 · 신호등 — 수업 코드 저장소 03_신호등 (README·code) 그대로. 형식 설명은 src/track/README.md
+id: 03-traffic-light
+order: 3
+title: 신호등
+summary: |
+  빨강 · 노랑 · 초록 LED 세 개를 브레드보드에 꽂고, 진짜 신호등처럼 **순서대로** 불이 바뀌게 해요.
+  LED 마다 `led_red` · `led_yellow` · `led_green` 이름을 붙여 순서와 시간을 정하고, 똑같이 되풀이되는 노란불 깜빡임은 `for` 반복문으로 묶어 짧게 만들어요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
+  - { name: "LED 3개 (빨강·노랑·초록)", note: 긴 다리가 + }
+  - { name: 220Ω 저항 3개, note: "LED 마다 하나씩. 빨강-빨강-갈색 띠" }
+  - { name: 점퍼선, note: "7개 (신호선 3, LED → − 줄 3, − 줄 → GND 1)" }
+  - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "13번 → 220Ω → 빨강 LED 긴 다리, 14번 → 220Ω → 노랑 LED 긴 다리, 16번 → 220Ω → 초록 LED 긴 다리. 세 LED 의 짧은 다리(−)는 모두 브레드보드 − 줄 → GND"
+goals:
+  content: LED 세 개에 각각 이름을 붙여 켜는 순서와 시간을 정하고, 되풀이되는 부분을 for 반복문으로 묶는다
+  thinking: 신호등이 하는 일을 시간 순서대로 쪼개고, 같은 줄이 되풀이되는 곳을 찾아 "몇 번" 으로 바꿔 생각한다
+successCriteria:
+  - LED 세 개가 몇 번 핀에 있고, 코드에서 어떤 이름으로 부르는지 말할 수 있다
+  - 빨강 · 노랑 · 초록 불이 몇 초씩, 어떤 순서로 켜지는지 코드에서 찾아 설명할 수 있다
+  - 같은 줄을 여러 번 쓰는 대신 for 반복문으로 묶고, 반복할 범위가 어디까지인지 들여쓰기로 설명할 수 있다
+parts:
+  - id: part1
+    title: 신호등 만들기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 신호등은 어떻게 바뀔까?
+        scene:
+          image: images/cover.svg
+          caption: 오늘의 목표 — LED 세 개로 진짜 신호등처럼 순서대로 불 바꾸기
+        body: |
+          학교 앞 횡단보도의 신호등을 떠올려 보세요. 불이 아무렇게나 켜지지 않고 늘 **정해진 순서**로, **정해진 시간**만큼 켜져요.
+
+          1장에서는 LED 하나를 켜고 껐어요. 이번에는 LED가 **세 개**예요. 보드는 셋 중 어느 LED를 켜라는 건지 어떻게 알아들을까요? 코드를 보기 전에 내 생각부터 적어 봐요.
+        todo:
+          - 준비물(ESP32 보드, 브레드보드, LED 3개, 저항 3개, 점퍼선, USB 선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 다 적으면 **완료** 누르기
+        questions:
+          - 길에서 본 신호등은 어떤 순서로 불이 바뀌나요? 불마다 얼마나 오래 켜져 있는 것 같나요?
+          - LED가 세 개면 코드에서 셋을 어떻게 구별해 부를 수 있을까요? 1장의 `led` 라는 이름을 떠올려 보세요.
+          - 노란불을 여러 번 깜빡이게 하려면 같은 줄을 몇 번 써야 할까요? 더 짧게 쓰는 방법은 없을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "신호등 만들기"를 보드에게 시키려면 일을 잘게 나눠야 해요. 이번에는 LED가 셋이라 나눌 것이 1장보다 많아요.
+
+          활동 칸의 세 칸에 각각 한 가지 이상 적어 보세요. 순서와 시간은 누가 정해 줘야 할까요? 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 보드가 시작 전에 알고 있어야 할 사실 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 순서나 숫자 적기"
+          - "**해야 할 것**: 보드가 실제로 바꾸는 일 적기"
+        answer:
+          know: ["LED 세 개가 각각 몇 번 핀에 있는지 (13 · 14 · 16)"]
+          decide: ["불이 바뀌는 순서", "불마다 켜 둘 시간", "노란불을 몇 번 깜빡일지"]
+          act: ["LED 하나씩 켜고 끄기", "그 순서를 끝없이 되풀이하기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기
+        scene:
+          image: images/sequence-timeline.svg
+          caption: 신호등 시간표 — 한 번에 켜지는 불은 하나뿐이에요
+        body: |
+          활동 칸의 코드는 아직 실행하지 않아요. 맨 위 세 줄 `led_red = Pin(13, Pin.OUT)` 처럼, LED마다 **다른 이름**과 **다른 핀 번호**를 붙였어요.
+
+          `while True:` 아래 줄들을 위에서부터 한 줄씩 짚어 가며, 어떤 불이 몇 초 동안 켜질지 상상해 보세요. 틀려도 괜찮아요. 다음 단계에서 직접 확인해요.
+        todo:
+          - 코드를 위에서부터 한 줄씩 소리 내어 읽기
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_traffic_light.py
+        blanks:
+          - q: 가장 먼저 켜지는 불은 무슨 색이고, 몇 초 동안 켜져 있을까요?
+          - q: 노란불은 몇 번 깜빡일까요?
+          - q: 초록불이 꺼진 다음에는 무슨 일이 일어날까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 신호등 켜기
+        scene:
+          image: images/breadboard-basics.svg
+          caption: "브레드보드 읽는 법: 같은 번호의 다섯 칸은 이어져 있고, − 줄은 가로로 끝까지 이어져요"
+        body: |
+          이제 예측을 직접 확인해요. LED마다 **저항을 하나씩** 달고, 세 LED의 짧은 다리(−)는 모두 브레드보드의 같은 **− 줄**에 이어요. − 줄은 가로로 끝까지 이어져 있어서 GND 선 하나로 셋이 함께 돌아와요.
+
+          아래 **부품과 배선**의 배선도를 보고 꽂은 뒤 실행하세요. 불이 바뀌는 순서와 시간이 내 예측과 같았나요?
+        todo:
+          - "**부품과 배선**의 배선도대로 LED 3개 · 저항 3개 · 선 꽂기"
+          - "핀 번호와 색이 맞는지 확인하기: 13 빨강 · 14 노랑 · 16 초록"
+          - "**보드 연결** → **실행** 누르고 불이 바뀌는 순서 보기"
+        code: step1_traffic_light.py
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          노란불이 깜빡이는 동안은 너무 빨라서 눈으로 세기 어려워요. 하지만 코드를 읽으면 몇 번인지 정확히 알 수 있어요.
+
+          `led_yellow` 가 나오는 줄을 손가락으로 짚으며 읽어 보세요. 켜는 줄과 끄는 줄은 무엇이 다를까요? 세 문제에 답하고 **확인**을 누르세요.
+        todo:
+          - "`led_yellow.value(1)` 줄이 몇 번 나오는지 세기"
+          - "맨 위 세 줄에서 `Pin(...)` 괄호 안 숫자 보기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_traffic_light.py
+        questions:
+          - { kind: number, q: "노란불은 한 바퀴에 모두 몇 번 깜빡이나요?", answer: 3 }
+          - { kind: choice, q: "노란 LED가 꽂힌 핀은 몇 번인가요?", options: ["13번", "14번", "16번"], answer: 1 }
+          - { kind: line, q: "노란불이 마지막으로 꺼지는 줄의 줄 번호를 클릭하세요", answer: 23 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 노란불을 다섯 번 깜빡이게
+        scene:
+          image: images/for-repeat.svg
+          caption: 같은 4줄을 붙여 쓰는 대신, 반복 블록으로 한 번만 쓰고 몇 번 할지 정해요
+        body: |
+          지금 노란불은 세 번 깜빡여요. 그런데 코드를 보면 **똑같은 4줄**이 세 번이나 붙어 있어요. 다섯 번 깜빡이게 하려고 20줄을 쓰는 건 너무 길죠.
+
+          같은 줄을 더 붙여 쓰지 말고, **반복 블록**(`for i in range(...)`)으로 묶어 보세요. 반복할 줄은 블록 안쪽에, 코드에서는 **한 칸 더 들여쓰기**한 곳에 있어야 해요.
+        todo:
+          - 노란불 한 번 깜빡임이 어느 4줄인지 찾기
+          - 그 4줄만 남기고 반복 블록 안에 넣어 다섯 번 되풀이하게 하기
+          - 실행해서 노란불을 세어 본 뒤 **판정** 누르기
+        instructions: 노란불이 세 번이 아니라 다섯 번 깜빡이게 하세요. 같은 줄을 더 붙여 쓰지 말고 for 반복문(반복 블록)으로 묶어 보세요
+        hint: 노란불 한 번 깜빡임은 켜기 · 기다리기 · 끄기 · 기다리기 4줄이에요. 이 4줄을 반복 안에 넣으면, 나머지 8줄은 아직 필요할까요?
+        code: step1_traffic_light.py
+        rules:
+          - useBlock: ["flow_repeat_n"]
+            fail: 같은 줄을 여러 번 붙여 쓰지 않고 한 번에 묶어 주는 블록이 들어 있나요?
+          - codeEquals: { file: mission_yellow_5times.py }
+            fail: 노란불이 정말 다섯 번 깜빡이나요? 반복 안쪽에 든 줄과 바깥에 남은 줄, 빨강 · 초록 시간이 그대로인지 다시 보세요
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        scene:
+          image: images/sequence-timeline.svg
+          caption: 이 시간표를 우리말 순서로 먼저 써요 (노랑은 이번에 다섯 번)
+        body: |
+          프로그래머는 코드를 바로 쓰지 않고, 먼저 **우리말로 순서**를 적어요. 신호등은 순서가 하나라도 바뀌면 전혀 다른 신호등이 돼요.
+
+          미션에서 만든 신호등(빨강 → 노랑 다섯 번 깜빡 → 초록)을 우리말 설계도로 옮겨 보세요. 빈칸을 채우고, 번역표를 보고, 섞인 블록을 그 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸(몇 초? 몇 번?)을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 우리말 한 줄이 어떤 코드가 되는지 짝 지어 보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 계속 반복한다
+          - text: 빨간불을 켠다
+          - text: __초 기다린다
+            blank: { answer: 5 }
+          - text: 빨간불을 끈다
+          - text: 아래를 __번 반복한다
+            blank: { answer: 5 }
+          - text: "반복 안: 노란불을 켜고 __초 기다린다"
+            blank: { answer: 0.5 }
+          - text: "반복 안: 노란불을 끄고 __초 기다린다"
+            blank: { answer: 0.5 }
+          - text: 초록불을 켠다
+          - text: __초 기다린다
+            blank: { answer: 5 }
+          - text: 초록불을 끈다
+        translation:
+          - ["빨간불을 켠다", "led_red.value(1)"]
+          - ["노란불을 끈다", "led_yellow.value(0)"]
+          - ["기다린다", "time.sleep(초)"]
+          - ["__번 반복한다", "for i in range(번):"]
+          - ["계속 반복", "while True:"]
+        targetCode: mission_yellow_5times.py
+
+      - id: extra1
+        type: mission
+        title: 추가 미션 1 — 신호 시간 바꾸기
+        optional: true
+        scene:
+          image: images/sequence-timeline.svg
+          caption: 빨강 칸과 초록 칸의 길이를 바꾸면 어떻게 될까요?
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 차가 많은 길에서는 초록불을 더 길게 주기도 해요. **빨간불 3초, 초록불 7초**로 바꿔 보세요.
+
+          코드에서 숫자 `5` 가 여러 군데 있어요. 그중 어느 `5` 가 빨간불 시간이고, 어느 `5` 가 초록불 시간일까요? 노란불 쪽 숫자는 그대로 두어요.
+        todo:
+          - 빨간불을 켠 다음 줄과 초록불을 켠 다음 줄 찾기
+          - 숫자를 바꾸고 실행해서 시간 세어 보기
+          - "**판정** 누르기"
+        instructions: 빨간불은 3초, 초록불은 7초 동안 켜지도록 바꾸세요. 노란불 깜빡임(다섯 번)은 그대로 둡니다
+        code: mission_yellow_5times.py
+        rules:
+          - codeEquals: { file: extra1_change_time.py }
+            fail: 빨간불을 켠 바로 다음 기다리기는 몇 초인가요? 초록불 다음은요? 노란불 숫자까지 바뀌지 않았는지도 보세요
+
+      - id: extra2
+        type: mission
+        title: 추가 미션 2 — 순서 바꾸기
+        optional: true
+        scene:
+          image: images/cover.svg
+          caption: 초록 → 노랑 → 빨강 순서로 바꿔 보기
+        body: |
+          이번에는 불의 **순서**를 바꿔요. 초록 → 노랑 깜빡 → 빨강 순서가 되게 해 보세요.
+
+          블록 묶음(켜기 · 기다리기 · 끄기) 하나를 통째로 옮기면 돼요. 묶음의 줄 순서가 섞이면 어떤 일이 생길까요? 노란불 반복은 가운데 그대로 두어요.
+        todo:
+          - 빨간불 묶음 3줄과 초록불 묶음 3줄 찾기
+          - 두 묶음의 자리를 바꾸고 실행해 보기
+          - "**판정** 누르기"
+        instructions: 초록 → 노랑 → 빨강 순서로 불이 바뀌게 하세요. 시간은 그대로(초록 5초, 노랑 0.5초씩 다섯 번, 빨강 5초)입니다
+        code: mission_yellow_5times.py
+        rules:
+          - codeEquals: { file: extra2_change_order.py }
+            fail: 가장 먼저 켜지는 불은 무슨 색인가요? 켜기 · 기다리기 · 끄기 묶음이 통째로 함께 옮겨졌는지 보세요
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        scene:
+          image: images/for-repeat.svg
+          caption: 12줄이 5줄로 — 반복을 묶으면 무엇이 좋아졌나요?
+        body: |
+          오늘 LED 세 개로 신호등을 만들고, 되풀이되는 줄을 `for` 로 묶었어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          먼저 코드 줄마다 "이 줄은 ___"을 내 말로 채우고, 아래 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸(막힌 곳 · 해 본 것 · 원인 · 다음엔)을 모두 채우기
+        lineExplain: mission_yellow_5times.py
+        prompts:
+          - 막힌 곳
+          - 내가 해 본 것
+          - 결국 원인은
+          - 다음엔 여기부터 본다

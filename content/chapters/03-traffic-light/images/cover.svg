@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>길가 신호등 장면: 횡단보도 앞 신호등에 빨간불이 켜져 있고, 책상 위에는 ESP32 보드와 빨강·노랑·초록 LED 세 개로 만든 작은 신호등이 있다</title>
+  <!-- 도로와 횡단보도 -->
+  <path d="M20 262 H620" stroke-width="3"/>
+  <path d="M20 326 H620" stroke-width="3"/>
+  <g fill="currentColor" fill-opacity="0.16" stroke="none">
+    <rect x="40" y="272" width="30" height="44" rx="3"/>
+    <rect x="86" y="272" width="30" height="44" rx="3"/>
+    <rect x="132" y="272" width="30" height="44" rx="3"/>
+    <rect x="178" y="272" width="30" height="44" rx="3"/>
+    <rect x="224" y="272" width="30" height="44" rx="3"/>
+  </g>
+  <!-- 자동차 (멈춤) -->
+  <path d="M292 304 V286 L306 266 H362 L378 286 H398 V304 Z" fill="var(--muted)"/>
+  <path d="M312 270 L302 286 H336 V270 Z M342 270 V286 H370 L360 270 Z" fill="var(--card)"/>
+  <circle cx="318" cy="306" r="10" fill="var(--card)" stroke-width="3"/>
+  <circle cx="374" cy="306" r="10" fill="var(--card)" stroke-width="3"/>
+  <!-- 신호등 기둥과 몸통 -->
+  <path d="M150 262 V150" stroke-width="5"/>
+  <rect x="116" y="30" width="68" height="190" rx="14" fill="var(--card)" stroke-width="3"/>
+  <circle cx="150" cy="70" r="40" fill="#e03131" fill-opacity="0.16" stroke="none"/>
+  <circle cx="150" cy="70" r="22" fill="#e03131"/>
+  <circle cx="150" cy="125" r="22" fill="#f2c200" fill-opacity="0.22"/>
+  <circle cx="150" cy="180" r="22" fill="#2f9e44" fill-opacity="0.22"/>
+  <!-- 사람 (기다림) -->
+  <circle cx="226" cy="186" r="13" fill="var(--card)"/>
+  <path d="M226 199 V232 M226 232 L216 258 M226 232 L236 258 M226 208 L212 226 M226 208 L240 226" stroke-width="3"/>
+  <!-- 책상 위 작은 신호등 -->
+  <rect x="426" y="78" width="190" height="150" rx="14" fill="var(--card)" stroke-dasharray="6 6"/>
+  <text x="521" y="104" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">우리가 만들 신호등</text>
+  <rect x="442" y="150" width="70" height="44" rx="6" fill="#00b6b1" fill-opacity="0.25"/>
+  <rect x="458" y="160" width="34" height="24" rx="3" fill="var(--card)"/>
+  <text x="477" y="214" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">ESP32</text>
+  <rect x="524" y="150" width="78" height="44" rx="4" fill="var(--muted)"/>
+  <path d="M512 160 C 520 160, 522 166, 538 166 M512 172 C 524 172, 548 170, 563 166 M512 184 C 530 184, 576 176, 588 166" stroke-width="2"/>
+  <circle cx="538" cy="128" r="16" fill="#e03131" fill-opacity="0.2" stroke="none"/>
+  <path d="M531 150 V130 A7 7 0 0 1 545 130 V150 Z" fill="#e03131"/>
+  <path d="M556 150 V130 A7 7 0 0 1 570 130 V150 Z" fill="#f2c200" fill-opacity="0.3"/>
+  <path d="M581 150 V130 A7 7 0 0 1 595 130 V150 Z" fill="#2f9e44" fill-opacity="0.3"/>
+  <!-- 바뀌는 순서 -->
+  <g font-size="14" font-weight="700" stroke="none" text-anchor="middle">
+    <text x="450" y="262" fill="#e03131">빨강</text>
+    <text x="521" y="262" fill="currentColor">노랑 깜빡</text>
+    <text x="596" y="262" fill="#2f9e44">초록</text>
+  </g>
+  <path d="M472 257 H484 M478 252 L484 257 L478 262 M560 257 H572 M566 252 L572 257 L566 262" stroke-width="2"/>
+</svg>

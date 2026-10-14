@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>신호등 시간표: 빨간불 5초, 그다음 노란불이 0.5초 켜지고 0.5초 꺼지기를 세 번, 그다음 초록불 5초, 그리고 처음부터 계속 반복. 한 번에 켜지는 불은 하나뿐</title>
+  <!-- 계속 반복 화살표 -->
+  <path d="M578 72 C 578 34, 110 34, 110 66"/>
+  <path d="M103 58 L110 68 L118 59"/>
+  <text x="344" y="30" text-anchor="middle" font-size="15" font-weight="600" fill="currentColor" stroke="none">처음부터 계속 반복</text>
+  <!-- 줄 이름 -->
+  <g font-size="16" font-weight="700" text-anchor="end" stroke="none">
+    <text x="96" y="110" fill="#e03131">빨강</text>
+    <text x="96" y="170" fill="currentColor">노랑</text>
+    <text x="96" y="230" fill="#2f9e44">초록</text>
+  </g>
+  <!-- 꺼진 바탕 -->
+  <g fill="var(--muted)" stroke="none">
+    <rect x="110" y="86" width="468" height="36" rx="5"/>
+    <rect x="110" y="146" width="468" height="36" rx="5"/>
+    <rect x="110" y="206" width="468" height="36" rx="5"/>
+  </g>
+  <!-- 켜진 칸: 1초 = 36px -->
+  <rect x="110" y="86" width="180" height="36" rx="5" fill="#e03131"/>
+  <text x="200" y="110" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">켜짐 5초</text>
+  <rect x="290" y="146" width="18" height="36" rx="3" fill="#f2c200"/>
+  <rect x="326" y="146" width="18" height="36" rx="3" fill="#f2c200"/>
+  <rect x="362" y="146" width="18" height="36" rx="3" fill="#f2c200"/>
+  <text x="344" y="140" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" opacity="0.8">켜짐 0.5초 · 꺼짐 0.5초</text>
+  <rect x="398" y="206" width="180" height="36" rx="5" fill="#2f9e44"/>
+  <text x="488" y="230" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">켜짐 5초</text>
+  <!-- 노랑 깜빡 횟수 -->
+  <g font-size="12" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="299" y="198">1</text><text x="335" y="198">2</text><text x="371" y="198">3</text>
+  </g>
+  <!-- 시간 축 -->
+  <path d="M110 276 H598"/>
+  <path d="M590 269 L598 276 L590 283"/>
+  <path d="M110 270 V282 M290 270 V282 M398 270 V282 M578 270 V282"/>
+  <path d="M290 122 V270 M398 182 V270" stroke-dasharray="3 5" stroke-opacity="0.5"/>
+  <g font-size="14" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="110" y="302">0초</text>
+    <text x="290" y="302">5초</text>
+    <text x="398" y="302">8초</text>
+    <text x="578" y="302">13초</text>
+  </g>
+  <text x="598" y="330" text-anchor="end" font-size="14" fill="currentColor" stroke="none" opacity="0.75">시간 →</text>
+  <text x="110" y="330" font-size="14" fill="currentColor" stroke="none" opacity="0.75">한 번에 켜지는 불은 하나뿐</text>
+</svg>
