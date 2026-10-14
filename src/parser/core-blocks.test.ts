@@ -364,3 +364,28 @@ describe("괄호 블록: 학생이 적은 괄호를 그대로 남긴다", () => 
     expect(keep(`${HEAD}x = ("a") + word\n`)).toContain("calc_concat");
   });
 });
+
+describe("코드 블록 안에서 정한 이름은 변수가 된다", () => {
+  it("a, b = 3, 4 뒤의 a·b 는 변수 블록이고 코드는 그대로", () => {
+    const code = "a, b = 3, 4\navg = (a + b) / 2\nprint(avg)\n";
+    const r = parse(code);
+    const found = types(r.json);
+    expect(found).toContain("code_stmt");
+    expect(found.filter((t) => t === "variables_get")).toHaveLength(3); // a, b, avg
+    expect(found).not.toContain("code_expr");
+    expect(codeToCode(code)).toBe(code);
+  });
+  it("for k in d: 처럼 code_stmt 안의 반복 변수도 변수", () => {
+    const code = "d = {}\nfor k in d:\n    print(k)\n";
+    const found = types(parse(code).json);
+    expect(found).toContain("flow_for_each"); // d 가 변수로 등록돼 각 항목 반복이 된다
+    expect(found.filter((t) => t === "code_expr")).toEqual(["code_expr"]); // {} 만 코드 식
+    expect(codeToCode(code)).toBe(code);
+  });
+  it("장치 변수 이름은 코드 블록이 다시 정해도 장치로 남는다", () => {
+    const code = "led = Pin(26, Pin.OUT)\nled = led\nled.value(1)\n";
+    const found = types(parse(code).json);
+    expect(found).toContain("esp_pin_setup");
+    expect(found).toContain("esp_pin_write");
+  });
+});

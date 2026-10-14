@@ -1,5 +1,6 @@
 import type { SyntaxNode } from "@lezer/common";
 import { block, chain, codeStmt, commentText, num, varSet, withComment } from "./builders";
+import { definedNames } from "./codeNames";
 import type { ParseContext } from "./context";
 import { isFoldedHelper, matchActionLines, matchCall, matchSetupAt, setupBlock } from "./devices";
 import { callBlock, callParts, convertAllOrNull, convertExpr, isListVariable, isWholeNot, memberParts } from "./expressions";
@@ -112,7 +113,16 @@ function forParts(node: SyntaxNode, ctx: ParseContext): { target: string; iter: 
 const one = (b: BlockJson, consumed = 1): Converted => ({ blocks: [b], tops: [], consumed });
 const none = (consumed = 1): Converted => ({ blocks: [], tops: [], consumed });
 // 복합문 조각은 Body 끝의 줄바꿈까지 담기므로 끝 공백을 뗀다 (code_stmt 생성기가 줄바꿈을 붙인다)
-const unknown = (node: SyntaxNode, ctx: ParseContext): Converted => { ctx.markUnparsed(node); return one(codeStmt(ctx.src.dedent(node).replace(/\s+$/, ""))); };
+/**
+ * 블록이 되지 못한 문장은 code_stmt 로 남긴다. 그 안에서 값을 정하는 이름(`a, b = 0, 0`, `for k in d:` …)은 변수로
+ * 등록해, 뒤에 나오는 `a` 가 코드 식이 아니라 변수 블록으로 돌아오게 한다 (검사의 정의 인식과 같은 규칙, codeNames.ts).
+ */
+const unknown = (node: SyntaxNode, ctx: ParseContext): Converted => {
+  ctx.markUnparsed(node);
+  const code = ctx.src.dedent(node).replace(/\s+$/, "");
+  for (const name of definedNames(code)) if (!ctx.devices.has(name)) ctx.varId(name);
+  return one(codeStmt(code));
+};
 
 function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean): Converted {
   const text = ctx.src.slice(node).trim();

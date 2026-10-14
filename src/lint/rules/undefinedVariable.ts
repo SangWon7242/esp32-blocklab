@@ -1,5 +1,5 @@
 import { findSetupByBlock } from "@/devices/registry";
-import { definedNames } from "../codeNames";
+import { definedNames } from "@/parser/codeNames";
 import { issueAt, realBlocks } from "../walk";
 import type { Rule } from "../types";
 
