@@ -1,5 +1,5 @@
 import { Link, Navigate, useParams } from "react-router";
-import { ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Lock, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Lightbulb, Lock, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -17,7 +17,7 @@ import { STEP_TYPE_LABEL } from "./stepMeta";
 const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, done: CheckCircle2 };
 const STATE_LABEL: Record<StepState, string> = { locked: "잠김", open: "열림", done: "완료" };
 
-/** #/track/:chapter — 표지·목표(hero) → 준비물·배선 → 단계 카드 격자(진행표) */
+/** #/track/:chapter — 표지·목표(hero) → 준비물·배선 → 원리 → 단계 카드 격자(진행표) */
 export function ChapterPage() {
   const { chapter: chapterId = "" } = useParams();
   const chapter = getChapter(chapterId);
@@ -125,6 +125,26 @@ export function ChapterPage() {
             )}
           </div>
         </div>
+
+        {/* 원리 (Keyestudio 수업의 "원리"): 그림 왼쪽 + 글. 기본 펼침 */}
+        {chapter.principle && (
+          <Collapsible defaultOpen className="mt-6 rounded-xl border bg-card" data-testid="chapter-principle">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="group h-auto w-full justify-start rounded-xl px-4 py-3 text-base font-semibold">
+                <Lightbulb className="size-4 text-primary" />원리
+                <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-180" />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 pb-4">
+              <div className={cn("grid gap-4", chapter.principle.image && "md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start")}>
+                {chapter.principle.image && (
+                  <Illustration chapterId={chapter.id} image={chapter.principle.image} className="rounded-lg bg-muted/30 p-2" zoomable />
+                )}
+                <GuideBody text={chapter.principle.body} className="min-w-0" />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         {chapter.parts.map((part) => (
           <section key={part.id} className="mt-8">

@@ -69,7 +69,20 @@ export const PredictStep = z.object({
   blanks: z.array(z.object({ q: z.string().min(1), unit: z.string().optional() }).strict()).min(1),
 }).strict();
 
-export const RunStep = z.object({ ...base, type: z.literal("run"), code: FileRef }).strict();
+/** 코드 설명 한 줄: 코드 파일 원문의 줄 번호(1부터, 빈 줄·주석 포함) → 그 줄이 하는 일 (markdown 한 줄) */
+export const CodeNoteSchema = z.object({ line: z.number().int().positive(), note: z.string().min(1) }).strict();
+export type CodeNote = z.infer<typeof CodeNoteSchema>;
+/** 코드 설명 목록 (Keyestudio 수업의 "코드 설명"). 줄 번호가 파일 줄 수 안인지는 parseChapter 가 검사 */
+const codeNotes = z.array(CodeNoteSchema).min(1).optional();
+
+export const RunStep = z.object({
+  ...base,
+  type: z.literal("run"),
+  code: FileRef,
+  /** 실행 결과: 코드를 올리면 무엇이 보이는지 (안내 칸 "이렇게 되면 성공" 카드, markdown) */
+  expected: z.string().min(1).optional(),
+  codeNotes,
+}).strict();
 
 const hint = z.string().optional();
 export const ReadQuestion = z.discriminatedUnion("kind", [
@@ -86,6 +99,7 @@ export const ReadCheckStep = z.object({
   type: z.literal("readcheck"),
   code: FileRef,
   questions: z.array(ReadQuestion).min(1),
+  codeNotes,
 }).strict();
 
 export const MissionStep = z.object({
@@ -166,6 +180,8 @@ export const ChapterSchema = z.object({
   materials: z.array(z.object({ name: z.string().min(1), image: ImageRef.optional(), note: z.string().min(1).optional() }).strict()).min(1).optional(),
   /** 배선도 */
   wiring: FigureSchema.optional(),
+  /** 원리 (Keyestudio 수업의 "원리"): 챕터 화면 hero 아래 카드. body 는 markdown, image 는 왼쪽 그림 */
+  principle: z.object({ body: z.string().min(1), image: ImageRef.optional() }).strict().optional(),
   goals: z.object({ content: z.string().min(1), thinking: z.string().min(1) }).strict().optional(),
   successCriteria: z.array(z.string().min(1)).optional(),
   parts: z.array(PartSchema).min(1),

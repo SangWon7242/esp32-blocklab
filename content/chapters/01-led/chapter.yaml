@@ -16,6 +16,16 @@ materials:
 wiring:
   image: images/wiring-led.svg
   caption: "브레드보드 위에서: 26번 핀 → 7번 줄 → 220Ω 저항 → 12번 줄의 LED 긴 다리(+). 짧은 다리(−)는 13번 줄 → 브레드보드 − 줄 → GND"
+principle:
+  image: images/led-parts.svg
+  body: |
+    LED는 전기가 지나갈 때 빛을 내는 작은 부품이에요. 전기는 **긴 다리(+)로 들어가 짧은 다리(−)로 나올 때만** 흘러서, 거꾸로 꽂으면 불이 들어오지 않아요.
+
+    불이 켜지려면 전기가 한 바퀴 돌아야 해요: 보드의 26번 핀 → 저항 → LED → GND(전기가 돌아가는 곳).
+
+    - 핀이 **HIGH**(3.3V)이면 전기가 흘러 불이 켜져요
+    - 핀이 **LOW**(0V)이면 전기가 흐르지 않아 불이 꺼져요
+    - **220Ω 저항**은 전기가 너무 많이 흘러 LED가 상하지 않도록 흐름을 줄여 줘요
 parts:
   - id: part1
     title: LED 켜고 깜빡이기
@@ -93,6 +103,11 @@ parts:
           - 위쪽 **보드 연결**을 누르고 USB로 이은 보드 고르기
           - "**실행**을 누르고 LED에 불이 들어오는지 보기"
         code: step1_led_on.py
+        expected: 코드를 실행하면 26번 핀에 꽂은 LED에 불이 들어오고, 그대로 켜져 있어요.
+        codeNotes:
+          - { line: 1, note: "보드의 핀을 다루는 `Pin` 기능을 가져와요" }
+          - { line: 3, note: "26번 핀을 내보내는(출력) 핀으로 정하고 이름을 `led`로 붙여요" }
+          - { line: 5, note: "`led`에 1(HIGH)을 보내 LED를 켜요" }
 
       - id: readcheck
         type: readcheck

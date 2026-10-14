@@ -41,7 +41,7 @@ export function codeRefs(chapter: Chapter): string[] {
   return refs;
 }
 
-/** 챕터가 가리키는 그림 ("images/x.svg", 중복 없이, 나온 순서대로): 표지·부품·배선·단계 장면 */
+/** 챕터가 가리키는 그림 ("images/x.svg", 중복 없이, 나온 순서대로): 표지·부품·배선·원리·단계 장면 */
 export function imageRefs(chapter: Chapter): string[] {
   const refs: string[] = [];
   const add = (f: string | undefined) => {
@@ -50,6 +50,7 @@ export function imageRefs(chapter: Chapter): string[] {
   add(chapter.cover);
   chapter.materials?.forEach((m) => add(m.image));
   add(chapter.wiring?.image);
+  add(chapter.principle?.image);
   for (const s of allSteps(chapter)) add(s.scene?.image);
   return refs;
 }
@@ -84,8 +85,12 @@ export function parseChapter(
   if (images) for (const ref of imageRefs(chapter)) if (!images.includes(ref)) errors.push(`그림 ${ref} 이 폴더에 없습니다`);
 
   for (const s of allSteps(chapter)) {
-    if (s.type !== "readcheck") continue;
+    if (s.type !== "readcheck" && s.type !== "run") continue;
     const lineCount = files[s.code]?.replace(/\n$/, "").split("\n").length ?? 0;
+    s.codeNotes?.forEach((n, i) => {
+      if (n.line > lineCount) errors.push(`${s.id} 코드 설명 ${i + 1}: ${n.line}번 줄이 ${s.code} 에 없습니다 (${lineCount}줄)`);
+    });
+    if (s.type !== "readcheck") continue;
     s.questions.forEach((q, i) => {
       if (q.kind === "choice" && q.answer >= q.options.length) errors.push(`${s.id} 문항 ${i + 1}: 답 ${q.answer} 이 선택지 범위 밖입니다`);
       if (q.kind === "line" && q.answer > lineCount) errors.push(`${s.id} 문항 ${i + 1}: ${q.answer}번 줄이 ${s.code} 에 없습니다 (${lineCount}줄)`);

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { gradeReadCheck, type ReadCheckInput } from "@/track/completion";
 import type { ReadQuestion } from "@/track/schema";
 import type { LineHighlight } from "@/components/editor/CodePanel";
+import { CodeNotesPanel, noteHighlight } from "./CodeNotes";
 import { CODE_SPLIT, CODE_SPLIT_CODE, CODE_SPLIT_PANEL, ReadOnlyCode } from "./ReadOnlyCode";
 import type { StepProps } from "./types";
 
@@ -24,6 +25,8 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
   const lineQuestions = step.questions.flatMap((q, i) => (q.kind === "line" ? [i] : []));
   /** 코드 줄 번호를 누르면 답이 들어갈 줄 문항 */
   const [activeLine, setActiveLine] = useState<number | undefined>(lineQuestions[0]);
+  /** 코드 설명에서 고른 줄 (코드에서 강조) */
+  const [noteLine, setNoteLine] = useState<number | undefined>();
 
   const setAnswer = (i: number, text: string) => {
     const nextAnswers = [...answers];
@@ -33,11 +36,13 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
     onInput({ ...rc, answers: nextAnswers, results: nextResults });
   };
 
+  // 코드 설명 줄을 앞에 둔다 (처음 "focus" 줄로 스크롤하므로 방금 고른 설명 줄이 보인다)
   const highlights = useMemo<LineHighlight[]>(() => {
-    if (activeLine === undefined) return [];
+    const notes = noteHighlight(noteLine);
+    if (activeLine === undefined) return notes;
     const n = Number(answers[activeLine]);
-    return Number.isInteger(n) && n > 0 ? [{ line: n, kind: "focus" }] : [];
-  }, [activeLine, answers]);
+    return Number.isInteger(n) && n > 0 ? [...notes, { line: n, kind: "focus" }] : notes;
+  }, [noteLine, activeLine, answers]);
 
   const check = () => onInput({ ...rc, answers, results: gradeReadCheck(step.questions, answers) }, { attempt: true });
   const allRight = step.questions.every((_, i) => results[i] === true);
@@ -49,11 +54,15 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
         code={chapter.files[step.code] ?? ""}
         name={step.code}
         highlightLines={highlights}
-        onLineClick={activeLine === undefined ? undefined : (line) => setAnswer(activeLine, String(line))}
+        onLineClick={activeLine === undefined ? undefined : (line) => {
+          setNoteLine(undefined);
+          setAnswer(activeLine, String(line));
+        }}
         className={CODE_SPLIT_CODE}
         panelClassName={CODE_SPLIT_PANEL}
       />
       <div className="space-y-4">
+        {step.codeNotes && <CodeNotesPanel notes={step.codeNotes} selected={noteLine} onSelect={setNoteLine} />}
         <ol className="space-y-3">
           {step.questions.map((q, i) => {
             const result = results[i];

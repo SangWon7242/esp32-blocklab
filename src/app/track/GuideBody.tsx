@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { parseGuide, type Inline } from "./guideMarkdown";
+import { parseGuide, parseInline, type Inline } from "./guideMarkdown";
 
 function Inlines({ inlines }: { inlines: Inline[] }) {
   return inlines.map((x, i) =>
@@ -7,6 +7,11 @@ function Inlines({ inlines }: { inlines: Inline[] }) {
     : x.kind === "code" ? <code key={i} className="rounded bg-muted px-1 py-0.5 font-mono text-[0.85em]">{x.text}</code>
     : x.text,
   );
+}
+
+/** 한 줄짜리 글(**굵게**·`코드`만): 버튼·배지 옆처럼 문단을 넣을 수 없는 자리 */
+export function GuideInline({ text, className }: { text: string; className?: string }) {
+  return <span className={className}><Inlines inlines={parseInline(text)} /></span>;
 }
 
 /** 단계 안내 글: 가벼운 markdown(문단·**굵게**·- 목록·1. 번호·`코드`). 문법은 guideMarkdown.ts */

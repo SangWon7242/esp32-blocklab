@@ -229,6 +229,31 @@ test("챕터 화면: 표지 그림·준비물이 보이고, 배선 보기를 펼
   await expect(wiring.locator("svg[role=img]")).toBeVisible();
 });
 
+test("원리 카드, 실행 단계의 이렇게 되면 성공과 코드 설명(누르면 원본 코드에서 그 줄 표시)", async ({ page }) => {
+  await seedDone(page, "01-led", ["problem", "analysis", "predict"]);
+  await page.goto("/#/track/01-led");
+  const principle = page.getByTestId("chapter-principle");
+  await expect(principle).toContainText("HIGH");
+  await expect(principle.locator("svg[role=img]")).toBeVisible();
+  await principle.getByRole("button", { name: "원리" }).click();
+  await expect(principle).not.toContainText("HIGH");
+
+  await stepRow(page, "run").getByRole("link").click();
+  await expect(page.getByTestId("step-expected")).toContainText("이렇게 되면 성공");
+  await expect(page.getByTestId("step-expected")).toContainText("LED에 불이 들어오고");
+
+  const notes = page.getByTestId("code-notes-panel");
+  await expect(notes.getByTestId("code-notes")).toHaveCount(0);
+  await notes.getByRole("button", { name: /코드 설명/ }).click();
+  const note = notes.getByTestId("code-note-3");
+  await expect(note).toContainText("3번 줄");
+  await note.click();
+  await expect(note).toHaveAttribute("aria-pressed", "true");
+  await expect(notes.getByTestId("code-panel").locator(".cm-lint-focus")).toContainText("led = Pin(26, Pin.OUT)");
+  await notes.getByTestId("code-note-5").click();
+  await expect(notes.getByTestId("code-panel").locator(".cm-lint-focus")).toContainText("led.value(1)");
+});
+
 test("안내 칸 그림: 크게 보기를 누르면 큰 창에 그림이 나오고 Esc 로 닫힌다", async ({ page }) => {
   await page.goto("/#/track/10-auto-door/problem");
   await page.getByTestId("step-guide").getByTestId("illustration-zoom").click();

@@ -7,7 +7,7 @@
 코드를 가리키는 키(`code`, `targetCode`, `lineExplain`, `answerCode`, `codeEquals.file`)는 **같은 폴더의 파일 이름**만 쓴다
 (`code: step1_distance.py`). 예외: `debug`의 증상 `code`는 파일 이름이 아니라 **고장 난 코드 조각 그대로**다.
 
-그림을 가리키는 키(`cover`, `materials[].image`, `wiring.image`, `scene.image`)는 **챕터 폴더 기준 `images/<이름>.svg`** 만 쓴다
+그림을 가리키는 키(`cover`, `materials[].image`, `wiring.image`, `principle.image`, `scene.image`)는 **챕터 폴더 기준 `images/<이름>.svg`** 만 쓴다
 (`image: images/wiring-led.svg`, 영문·숫자·`_`·`.`·`-` 이름). 없는 그림, 다른 모양(`.png`, 하위 폴더, `../`)은 테스트에서 걸린다.
 
 ## 챕터
@@ -23,12 +23,42 @@ materials:                # 선택. 준비물(부품) 칩
   - { name: ESP32 보드, image: images/part-esp32.svg }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 }      # image·note 는 선택
 wiring: { image: images/wiring-led.svg, caption: "LED 긴 다리 → 저항 → 26번" }   # 선택. 배선도
+principle:                # 선택. 원리 카드 (아래 "Keyestudio 수업 구조")
+  image: images/led-parts.svg   # 선택. 카드 왼쪽 그림
+  body: |                 # markdown
+    핀이 **HIGH**(3.3V)이면 전기가 흘러 불이 켜져요
 goals: { content: ..., thinking: ... }   # 선택
 successCriteria: [...]    # 선택
 parts:
   - id: part1
     title: 1부 · 초음파 센서 익히기
     steps: [ ... ]
+```
+
+## Keyestudio 수업 구조 (원리 · 실행 결과 · 코드 설명)
+
+Keyestudio 수업의 "2. 원리", "6. 실행 결과", "7. 코드 설명"을 담는 키. 모두 선택이다.
+
+| 키 | 어디에 | 화면 |
+|---|---|---|
+| `principle: { body, image? }` | 챕터 | 챕터 화면 hero(진행·소개) 밑 **원리** 카드. 기본 펼침(접을 수 있음). `image` 가 있으면 넓은 화면에서 그림이 글 왼쪽(좁으면 위), 눌러서 크게 보기. `body` 는 안내 글 markdown |
+| `expected` | `run` 단계 | 안내 칸 "지금 할 일" 다음의 **이렇게 되면 성공** 카드. "코드를 실행하면 … 보여요" 처럼 눈에 보이는 결과를 쓴다 (markdown) |
+| `codeNotes: [{ line, note }]` | `run`·`readcheck` 단계 | 접힌 **코드 설명** 칸: 줄 번호 배지 + 설명 목록. 설명을 누르면 읽기 전용 코드에서 그 줄을 강조(파란 띠)하고 그 줄까지 스크롤, 다시 누르면 해제 |
+
+- `codeNotes[].line` 은 그 단계 `code` 파일 **원문**의 줄 번호(1부터, 빈 줄·주석 포함 — 읽기 체크 `line` 답과 같은 기준). 파일 줄 수를 넘으면 검사에서 걸리고, 빈 줄을 가리켜도 content 테스트가 잡는다. `note` 는 한 줄 markdown(`**굵게**`·`` `코드` ``만).
+- `run` 의 코드 설명 칸은 활동 칸 편집기 위에 있고, 칸을 펼치면 **원본 파일**(`code`)을 읽기 전용으로 함께 보여 준다(학생이 편집기에서 코드를 고쳐도 줄 번호가 어긋나지 않게).
+- `readcheck` 의 코드 설명 칸은 문항 위에 접혀 있다(문항의 답을 먼저 드러내지 않게). 이미 있는 읽기 전용 코드에서 줄을 강조한다.
+- `principle.image` 는 다른 그림 키와 같은 규칙(`images/<이름>.svg`, 폴더에 있어야 함).
+
+```yaml
+- id: run
+  type: run
+  title: 복사 · 실행
+  code: step1_led_on.py
+  expected: 코드를 실행하면 26번 핀에 꽂은 LED에 불이 들어와요.
+  codeNotes:
+    - { line: 3, note: "26번 핀을 내보내는(출력) 핀으로 정하고 이름을 `led`로 붙여요" }
+    - { line: 5, note: "`led`에 1(HIGH)을 보내 LED를 켜요" }
 ```
 
 ## 단계 (공통 키)
@@ -44,14 +74,14 @@ parts:
 | `todo` | 선택. "지금 할 일" 1~4개 (markdown 한 줄씩). 체크 표시는 장식이고 완료 조건은 유형별 규칙 그대로 |
 | `optional` | 선택. `true`면 건너뛸 수 있고, 마치지 않아도 다음 단계가 열린다 |
 
-안내 칸 순서: 단계 배지·제목 → `scene` 그림 → `body` → "지금 할 일"(`todo`) → 접힘 "부품과 배선"(챕터 `materials`·`wiring`) → 시간·완료.
+안내 칸 순서: 단계 배지·제목 → `scene` 그림 → `body` → "지금 할 일"(`todo`) → "이렇게 되면 성공"(`run` 의 `expected`) → 접힘 "부품과 배선"(챕터 `materials`·`wiring`) → 시간·완료.
 안내 칸의 그림은 눌러서 크게 볼 수 있다(좁은 칸에서는 그림 속 글자가 작아지므로 핵심은 `caption`·`body` 에도 글로 쓴다).
 `analysis` 단계는 챕터 폴더의 `images/three-boxes.svg` 가 있으면 활동 칸의 세 입력 칸 위에 그린다. `scene` 이 그 그림이면 안내 칸에서는 빼고 활동 칸에만 (설명은 `scene.caption`).
 넓은 화면에서는 안내 칸을 접어 활동을 전폭으로 쓸 수 있다(이 브라우저에 기억).
 
 ### 안내 글 markdown
 
-`body`·`todo`·`summary` 는 라이브러리 없는 가벼운 markdown(`src/app/track/guideMarkdown.ts`)으로 그린다.
+`body`·`todo`·`summary`·`principle.body`·`expected` 는 라이브러리 없는 가벼운 markdown(`src/app/track/guideMarkdown.ts`)으로 그린다.
 
 - 빈 줄 = 문단 나눔. 문단 안 줄바꿈은 그대로 보인다
 - `- 항목` (또는 `* 항목`) = 글머리 목록, `1. 항목` = 번호 목록. 들여 쓴 다음 줄은 앞 항목에 이어 붙는다
@@ -84,8 +114,8 @@ todo: [보드를 USB 로 연결하기, "`26`번 핀에 LED 꽂기"]
 | `problem` | `questions`: 열린 질문 1~3개 |
 | `analysis` | `answer: { know: [...], decide: [...], act: [...] }` — 예시 답 (세 칸을 다 쓴 뒤에만 공개) |
 | `predict` | `code`, `blanks: [{ q, unit? }]` — 빈칸 하나에 질문 하나 |
-| `run` | `code` |
-| `readcheck` | `code`, `questions: [...]` (아래) |
+| `run` | `code`, `expected?`(실행 결과), `codeNotes?`(코드 설명) |
+| `readcheck` | `code`, `questions: [...]` (아래), `codeNotes?`(코드 설명) |
 | `mission` | `instructions`, `code?`(미리 깔 코드), `hint?`, `rules`(1개 이상), `answerCode?` |
 | `debug` | `symptoms: [{ title, code(코드 조각), question, rules? }]`, `rules?`(전체 규칙), `answerCode?` |
 | `design` | `pseudocode: [{ text, blank?: { answer, tolerance? } }]`, `translation: [[우리말, 코드], ...]`, `targetCode` |

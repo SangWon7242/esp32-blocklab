@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import {
-  ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, Clock, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
+  ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -211,7 +211,7 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
   );
 }
 
-/** 왼쪽 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → (접힘) 부품과 배선 → 시간·완료 */
+/** 왼쪽 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → 이렇게 되면 성공(run 의 expected) → (접힘) 부품과 배선 → 시간·완료 */
 function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean }) {
   const hasKit = Boolean(chapter.materials?.length || chapter.wiring);
   return (
@@ -259,6 +259,18 @@ function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter;
                 </li>
               ))}
             </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 실행 결과 (Keyestudio 수업의 "실행 결과"): 코드를 올리면 무엇이 보이는지 */}
+      {step.type === "run" && step.expected && (
+        <Card size="sm" className="mt-4" data-testid="step-expected">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold"><CircleCheck className="size-4 text-primary" />이렇게 되면 성공</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <GuideBody text={step.expected} />
           </CardContent>
         </Card>
       )}
