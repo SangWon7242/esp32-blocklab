@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ft-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ft-title">흐르는 물빛 시간표: 칸 하나가 0.2초(켜짐 0.1초, 꺼짐 0.1초). 가는 길에는 18, 5, 14, 17, 26번 LED 가 차례로 켜지고, 돌아오는 길에는 26, 17, 14, 5, 18번 순서로 켜진다. 그다음 처음부터 다시</title>
+  <path d="M100 86 V78 H342 V86" stroke-width="1.5"/>
+  <text x="221.0" y="70" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">가는 길 (for pin in pins)</text>
+  <path d="M350 86 V78 H592 V86" stroke-width="1.5"/>
+  <text x="471.0" y="70" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">돌아오는 길 (reversed)</text>
+  <text x="82" y="124" font-size="14" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">18번</text>
+  <rect x="96" y="104" width="500" height="28" rx="6" fill="var(--muted)" stroke="none"/>
+  <text x="82" y="160" font-size="14" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">5번</text>
+  <rect x="96" y="140" width="500" height="28" rx="6" fill="var(--muted)" stroke="none"/>
+  <text x="82" y="196" font-size="14" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">14번</text>
+  <rect x="96" y="176" width="500" height="28" rx="6" fill="var(--muted)" stroke="none"/>
+  <text x="82" y="232" font-size="14" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">17번</text>
+  <rect x="96" y="212" width="500" height="28" rx="6" fill="var(--muted)" stroke="none"/>
+  <text x="82" y="268" font-size="14" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">26번</text>
+  <rect x="96" y="248" width="500" height="28" rx="6" fill="var(--muted)" stroke="none"/>
+  <rect x="98" y="106" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="148" y="142" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="198" y="178" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="248" y="214" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="298" y="250" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="348" y="250" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="398" y="214" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="448" y="178" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="498" y="142" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <rect x="548" y="106" width="23.0" height="24" rx="4" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M96 100 V280 M146 100 V280 M196 100 V280 M246 100 V280 M296 100 V280 M346 100 V280 M396 100 V280 M446 100 V280 M496 100 V280 M546 100 V280 M596 100 V280" stroke-width="1" stroke-opacity="0.25"/>
+  <path d="M346 94 V286" stroke-width="2" stroke-dasharray="4 4" stroke-opacity="0.7"/>
+  <path d="M96 296 H616"/>
+  <path d="M608 290 L616 296 L608 302"/>
+  <path d="M96 291 V301"/>
+  <text x="96" y="318" font-size="13" text-anchor="middle" fill="currentColor" stroke="none">0초</text>
+  <path d="M196 291 V301"/>
+  <text x="196" y="318" font-size="13" text-anchor="middle" fill="currentColor" stroke="none">0.4초</text>
+  <path d="M296 291 V301"/>
+  <text x="296" y="318" font-size="13" text-anchor="middle" fill="currentColor" stroke="none">0.8초</text>
+  <path d="M396 291 V301"/>
+  <text x="396" y="318" font-size="13" text-anchor="middle" fill="currentColor" stroke="none">1.2초</text>
+  <path d="M496 291 V301"/>
+  <text x="496" y="318" font-size="13" text-anchor="middle" fill="currentColor" stroke="none">1.6초</text>
+  <path d="M596 291 V301"/>
+  <text x="596" y="318" font-size="13" text-anchor="middle" fill="currentColor" stroke="none">2.0초</text>
+  <rect x="96" y="332" width="16" height="16" rx="3" fill="#fa5252" stroke-width="1.5"/>
+  <text x="118" y="345" font-size="13" text-anchor="start" fill="currentColor" stroke="none">켜짐 0.1초</text>
+  <rect x="206" y="332" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="228" y="345" font-size="13" text-anchor="start" fill="currentColor" stroke="none">꺼짐 0.1초</text>
+  <text x="616" y="345" font-size="13" text-anchor="end" fill="currentColor" stroke="none" fill-opacity="0.75">showLed() 한 번 끝 → 처음부터 다시</text>
+</svg>

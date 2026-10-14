@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fc-title">흐르는 물빛: 브레드보드 위 LED 다섯 개(18, 5, 14, 17, 26번 핀)가 물결처럼 차례로 켜졌다 꺼지고, 끝까지 가면 거꾸로 되돌아오는 그림</title>
+  <text x="40" y="52" font-size="26" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">흐르는 물빛</text>
+  <text x="40" y="78" font-size="15" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">LED 다섯 개가 물결처럼 차례로 켜졌다 꺼져요</text>
+  <rect x="60" y="246" width="520" height="34" rx="8" fill="var(--muted)"/>
+  <path d="M134.0 256 V226.0 M146.0 250.0 V226.0" stroke-width="2.5"/>
+  <path d="M123.0 226.0 H157.0 V219.0 H123.0 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M126.0 219.0 V190.0 A14.0 14.0 0 0 1 154.0 190.0 V219.0 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <circle cx="230" cy="194.0" r="46.0" fill="#fa5252" fill-opacity="0.06" stroke="none"/>
+  <circle cx="230" cy="194.0" r="30.0" fill="#fa5252" fill-opacity="0.10" stroke="none"/>
+  <path d="M224.0 256 V226.0 M236.0 250.0 V226.0" stroke-width="2.5"/>
+  <path d="M213.0 226.0 H247.0 V219.0 H213.0 Z" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M216.0 219.0 V190.0 A14.0 14.0 0 0 1 244.0 190.0 V219.0 Z" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M223.0 186.0 Q222.0 176.0 230 174.0" stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.5"/>
+  <circle cx="320" cy="194.0" r="46.0" fill="#fa5252" fill-opacity="0.18" stroke="none"/>
+  <circle cx="320" cy="194.0" r="30.0" fill="#fa5252" fill-opacity="0.28" stroke="none"/>
+  <path d="M314.0 256 V226.0 M326.0 250.0 V226.0" stroke-width="2.5"/>
+  <path d="M303.0 226.0 H337.0 V219.0 H303.0 Z" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M306.0 219.0 V190.0 A14.0 14.0 0 0 1 334.0 190.0 V219.0 Z" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M313.0 186.0 Q312.0 176.0 320 174.0" stroke="#ffffff" stroke-opacity="0.8" stroke-width="2.5"/>
+  <path d="M404.0 256 V226.0 M416.0 250.0 V226.0" stroke-width="2.5"/>
+  <path d="M393.0 226.0 H427.0 V219.0 H393.0 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M396.0 219.0 V190.0 A14.0 14.0 0 0 1 424.0 190.0 V219.0 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M494.0 256 V226.0 M506.0 250.0 V226.0" stroke-width="2.5"/>
+  <path d="M483.0 226.0 H517.0 V219.0 H483.0 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M486.0 219.0 V190.0 A14.0 14.0 0 0 1 514.0 190.0 V219.0 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <text x="140" y="306" font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">18</text>
+  <text x="230" y="306" font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">5</text>
+  <text x="320" y="306" font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">14</text>
+  <text x="410" y="306" font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">17</text>
+  <text x="500" y="306" font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">26</text>
+  <path d="M120 142 C 170 122, 210 162, 260 142 S 350 122, 400 142 S 480 162, 520 142" stroke="#1971c2" stroke-width="3"/>
+  <path d="M510 133 L522 142 L510 152" stroke="#1971c2" stroke-width="3"/>
+  <path d="M500 336 H130" stroke="#1971c2" stroke-width="2" stroke-dasharray="6 6" stroke-opacity="0.8"/>
+  <path d="M140 328 L128 336 L140 344" stroke="#1971c2" stroke-width="2" stroke-opacity="0.8"/>
+  <text x="580" y="340" font-size="13" font-weight="600" text-anchor="end" fill="currentColor" stroke="none" fill-opacity="0.75">되돌아오기</text>
+  <rect x="40" y="92" width="232" height="30" rx="15" fill="var(--card)" stroke-width="1.5"/>
+  <text x="156" y="112" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">pins = [18, 5, 14, 17, 26]</text>
+</svg>

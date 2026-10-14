@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="fw-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fw-title">흐르는 물빛 브레드보드 배선도: ESP32 18·5·14·17·26번 핀에서 나온 신호선 다섯 개가 보드에 가까운 칸부터 차례로 18, 5, 14, 17, 26 순서로 꽂힌다. 핀마다 220Ω 저항을 거쳐 LED 긴 다리(+)로 가고, LED 는 가운데 홈을 건너 꽂는다. LED 짧은 다리(−) 쪽 줄은 검은 선으로 아래 − 줄에 모이고, − 줄 하나가 ESP32 GND 에 이어진다</title>
+  <rect x="200" y="104" width="394" height="252" rx="8" fill="var(--muted)"/>
+  <rect x="206" y="224" width="382" height="8" rx="3" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M226 111 H578" stroke="#e03131" stroke-width="2"/>
+  <path d="M226 141 H578" stroke="#1971c2" stroke-width="2"/>
+  <path d="M226 315 H578" stroke="#1971c2" stroke-width="2"/>
+  <path d="M226 345 H578" stroke="#e03131" stroke-width="2"/>
+  <path d="M228 168h0 M240 168h0 M252 168h0 M264 168h0 M276 168h0 M288 168h0 M300 168h0 M312 168h0 M324 168h0 M336 168h0 M348 168h0 M360 168h0 M372 168h0 M384 168h0 M396 168h0 M408 168h0 M420 168h0 M432 168h0 M444 168h0 M456 168h0 M468 168h0 M480 168h0 M492 168h0 M504 168h0 M516 168h0 M528 168h0 M540 168h0 M552 168h0 M564 168h0 M576 168h0 M228 180h0 M240 180h0 M252 180h0 M264 180h0 M276 180h0 M288 180h0 M300 180h0 M312 180h0 M324 180h0 M336 180h0 M348 180h0 M360 180h0 M372 180h0 M384 180h0 M396 180h0 M408 180h0 M420 180h0 M432 180h0 M444 180h0 M456 180h0 M468 180h0 M480 180h0 M492 180h0 M504 180h0 M516 180h0 M528 180h0 M540 180h0 M552 180h0 M564 180h0 M576 180h0 M228 192h0 M240 192h0 M252 192h0 M264 192h0 M276 192h0 M288 192h0 M300 192h0 M312 192h0 M324 192h0 M336 192h0 M348 192h0 M360 192h0 M372 192h0 M384 192h0 M396 192h0 M408 192h0 M420 192h0 M432 192h0 M444 192h0 M456 192h0 M468 192h0 M480 192h0 M492 192h0 M504 192h0 M516 192h0 M528 192h0 M540 192h0 M552 192h0 M564 192h0 M576 192h0 M228 204h0 M240 204h0 M252 204h0 M264 204h0 M276 204h0 M288 204h0 M300 204h0 M312 204h0 M324 204h0 M336 204h0 M348 204h0 M360 204h0 M372 204h0 M384 204h0 M396 204h0 M408 204h0 M420 204h0 M432 204h0 M444 204h0 M456 204h0 M468 204h0 M480 204h0 M492 204h0 M504 204h0 M516 204h0 M528 204h0 M540 204h0 M552 204h0 M564 204h0 M576 204h0 M228 216h0 M240 216h0 M252 216h0 M264 216h0 M276 216h0 M288 216h0 M300 216h0 M312 216h0 M324 216h0 M336 216h0 M348 216h0 M360 216h0 M372 216h0 M384 216h0 M396 216h0 M408 216h0 M420 216h0 M432 216h0 M444 216h0 M456 216h0 M468 216h0 M480 216h0 M492 216h0 M504 216h0 M516 216h0 M528 216h0 M540 216h0 M552 216h0 M564 216h0 M576 216h0 M228 240h0 M240 240h0 M252 240h0 M264 240h0 M276 240h0 M288 240h0 M300 240h0 M312 240h0 M324 240h0 M336 240h0 M348 240h0 M360 240h0 M372 240h0 M384 240h0 M396 240h0 M408 240h0 M420 240h0 M432 240h0 M444 240h0 M456 240h0 M468 240h0 M480 240h0 M492 240h0 M504 240h0 M516 240h0 M528 240h0 M540 240h0 M552 240h0 M564 240h0 M576 240h0 M228 252h0 M240 252h0 M252 252h0 M264 252h0 M276 252h0 M288 252h0 M300 252h0 M312 252h0 M324 252h0 M336 252h0 M348 252h0 M360 252h0 M372 252h0 M384 252h0 M396 252h0 M408 252h0 M420 252h0 M432 252h0 M444 252h0 M456 252h0 M468 252h0 M480 252h0 M492 252h0 M504 252h0 M516 252h0 M528 252h0 M540 252h0 M552 252h0 M564 252h0 M576 252h0 M228 264h0 M240 264h0 M252 264h0 M264 264h0 M276 264h0 M288 264h0 M300 264h0 M312 264h0 M324 264h0 M336 264h0 M348 264h0 M360 264h0 M372 264h0 M384 264h0 M396 264h0 M408 264h0 M420 264h0 M432 264h0 M444 264h0 M456 264h0 M468 264h0 M480 264h0 M492 264h0 M504 264h0 M516 264h0 M528 264h0 M540 264h0 M552 264h0 M564 264h0 M576 264h0 M228 276h0 M240 276h0 M252 276h0 M264 276h0 M276 276h0 M288 276h0 M300 276h0 M312 276h0 M324 276h0 M336 276h0 M348 276h0 M360 276h0 M372 276h0 M384 276h0 M396 276h0 M408 276h0 M420 276h0 M432 276h0 M444 276h0 M456 276h0 M468 276h0 M480 276h0 M492 276h0 M504 276h0 M516 276h0 M528 276h0 M540 276h0 M552 276h0 M564 276h0 M576 276h0 M228 288h0 M240 288h0 M252 288h0 M264 288h0 M276 288h0 M288 288h0 M300 288h0 M312 288h0 M324 288h0 M336 288h0 M348 288h0 M360 288h0 M372 288h0 M384 288h0 M396 288h0 M408 288h0 M420 288h0 M432 288h0 M444 288h0 M456 288h0 M468 288h0 M480 288h0 M492 288h0 M504 288h0 M516 288h0 M528 288h0 M540 288h0 M552 288h0 M564 288h0 M576 288h0 M234.0 120h0 M246.0 120h0 M258.0 120h0 M270.0 120h0 M282.0 120h0 M306.0 120h0 M318.0 120h0 M330.0 120h0 M342.0 120h0 M354.0 120h0 M378.0 120h0 M390.0 120h0 M402.0 120h0 M414.0 120h0 M426.0 120h0 M450.0 120h0 M462.0 120h0 M474.0 120h0 M486.0 120h0 M498.0 120h0 M522.0 120h0 M534.0 120h0 M546.0 120h0 M558.0 120h0 M570.0 120h0 M234.0 132h0 M246.0 132h0 M258.0 132h0 M270.0 132h0 M282.0 132h0 M306.0 132h0 M318.0 132h0 M330.0 132h0 M342.0 132h0 M354.0 132h0 M378.0 132h0 M390.0 132h0 M402.0 132h0 M414.0 132h0 M426.0 132h0 M450.0 132h0 M462.0 132h0 M474.0 132h0 M486.0 132h0 M498.0 132h0 M522.0 132h0 M534.0 132h0 M546.0 132h0 M558.0 132h0 M570.0 132h0 M234.0 324h0 M246.0 324h0 M258.0 324h0 M270.0 324h0 M282.0 324h0 M306.0 324h0 M318.0 324h0 M330.0 324h0 M342.0 324h0 M354.0 324h0 M378.0 324h0 M390.0 324h0 M402.0 324h0 M414.0 324h0 M426.0 324h0 M450.0 324h0 M462.0 324h0 M474.0 324h0 M486.0 324h0 M498.0 324h0 M522.0 324h0 M534.0 324h0 M546.0 324h0 M558.0 324h0 M570.0 324h0 M234.0 336h0 M246.0 336h0 M258.0 336h0 M270.0 336h0 M282.0 336h0 M306.0 336h0 M318.0 336h0 M330.0 336h0 M342.0 336h0 M354.0 336h0 M378.0 336h0 M390.0 336h0 M402.0 336h0 M414.0 336h0 M426.0 336h0 M450.0 336h0 M462.0 336h0 M474.0 336h0 M486.0 336h0 M498.0 336h0 M522.0 336h0 M534.0 336h0 M546.0 336h0 M558.0 336h0 M570.0 336h0" stroke-width="4.5" stroke-opacity="0.38"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="middle">
+  <text x="213" y="172" fill-opacity="0.6">a</text>
+  <text x="585" y="172" fill-opacity="0.6">a</text>
+  <text x="213" y="184" fill-opacity="0.6">b</text>
+  <text x="585" y="184" fill-opacity="0.6">b</text>
+  <text x="213" y="196" fill-opacity="0.6">c</text>
+  <text x="585" y="196" fill-opacity="0.6">c</text>
+  <text x="213" y="208" fill-opacity="0.6">d</text>
+  <text x="585" y="208" fill-opacity="0.6">d</text>
+  <text x="213" y="220" fill-opacity="0.6">e</text>
+  <text x="585" y="220" fill-opacity="0.6">e</text>
+  <text x="213" y="244" fill-opacity="0.6">f</text>
+  <text x="585" y="244" fill-opacity="0.6">f</text>
+  <text x="213" y="256" fill-opacity="0.6">g</text>
+  <text x="585" y="256" fill-opacity="0.6">g</text>
+  <text x="213" y="268" fill-opacity="0.6">h</text>
+  <text x="585" y="268" fill-opacity="0.6">h</text>
+  <text x="213" y="280" fill-opacity="0.6">i</text>
+  <text x="585" y="280" fill-opacity="0.6">i</text>
+  <text x="213" y="292" fill-opacity="0.6">j</text>
+  <text x="585" y="292" fill-opacity="0.6">j</text>
+  <text x="228" y="157" fill-opacity="0.6">1</text>
+  <text x="228" y="309" fill-opacity="0.6">1</text>
+  <text x="276" y="157" fill-opacity="0.6">5</text>
+  <text x="276" y="309" fill-opacity="0.6">5</text>
+  <text x="336" y="157" fill-opacity="0.6">10</text>
+  <text x="336" y="309" fill-opacity="0.6">10</text>
+  <text x="396" y="157" fill-opacity="0.6">15</text>
+  <text x="396" y="309" fill-opacity="0.6">15</text>
+  <text x="456" y="157" fill-opacity="0.6">20</text>
+  <text x="456" y="309" fill-opacity="0.6">20</text>
+  <text x="516" y="157" fill-opacity="0.6">25</text>
+  <text x="516" y="309" fill-opacity="0.6">25</text>
+  <text x="576" y="157" fill-opacity="0.6">30</text>
+  <text x="576" y="309" fill-opacity="0.6">30</text>
+  </g>
+  <g stroke="none" font-size="14" font-weight="700" text-anchor="middle">
+  <text x="213" y="125" fill="#e03131">+</text>
+  <text x="585" y="125" fill="#e03131">+</text>
+  <text x="213" y="137" fill="#1971c2">−</text>
+  <text x="585" y="137" fill="#1971c2">−</text>
+  <text x="213" y="329" fill="#1971c2">−</text>
+  <text x="585" y="329" fill="#1971c2">−</text>
+  <text x="213" y="341" fill="#e03131">+</text>
+  <text x="585" y="341" fill="#e03131">+</text>
+  </g>
+  <rect x="40" y="20" width="120" height="320" rx="10" fill="var(--card)"/>
+  <rect x="58" y="140" width="74" height="74" rx="4" fill="var(--muted)"/>
+  <path d="M66 152 h10 v-6 h10 v6 h10 v-6 h10 v6 h10" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="95.0" y="192" font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">ESP32</text>
+  <rect x="78.0" y="334" width="34" height="16" rx="3" fill="var(--muted)"/>
+  <path d="M50 48h0 M50 60h0 M50 72h0 M50 84h0 M50 96h0 M50 108h0 M150 108h0 M50 120h0 M150 120h0 M50 132h0 M150 132h0 M50 144h0 M150 144h0 M50 156h0 M150 156h0 M50 168h0 M150 168h0 M50 180h0 M150 180h0 M50 192h0 M150 192h0 M50 204h0 M150 204h0 M50 216h0 M150 216h0 M50 228h0 M150 228h0 M50 240h0 M150 240h0 M50 252h0 M150 252h0 M50 264h0 M150 264h0 M50 276h0 M150 276h0 M50 288h0 M150 288h0 M50 300h0 M150 300h0 M50 312h0 M150 312h0 M50 324h0" stroke-width="5" stroke-opacity="0.3"/>
+  <circle cx="150" cy="48" r="4" fill="#f76707" stroke-width="1.5"/>
+  <text x="141" y="52.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">26</text>
+  <circle cx="150" cy="60" r="4" fill="#7048e8" stroke-width="1.5"/>
+  <text x="141" y="64.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">17</text>
+  <circle cx="150" cy="72" r="4" fill="#1971c2" stroke-width="1.5"/>
+  <text x="141" y="76.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">14</text>
+  <circle cx="150" cy="84" r="4" fill="#2f9e44" stroke-width="1.5"/>
+  <text x="141" y="88.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">5</text>
+  <circle cx="150" cy="96" r="4" fill="#f59f00" stroke-width="1.5"/>
+  <text x="141" y="100.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">18</text>
+  <circle cx="150" cy="324" r="4" fill="#1e1e1e" stroke-width="1.5"/>
+  <text x="141" y="328.5" font-size="13" font-weight="700" text-anchor="end" fill="currentColor" stroke="none">GND</text>
+  <rect x="234.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="270.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="270.5" y="234" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M240 180 H276" stroke-width="2.5"/>
+  <rect x="245" y="174" width="26" height="12" rx="5" fill="#e9d3a5" stroke-width="1.5"/>
+  <path d="M251 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M256 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M261 174.5 V185.5" stroke="#8b5a2b" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M266 174.5 V185.5" stroke="#c99c00" stroke-width="2.5" stroke-linecap="butt"/>
+  <circle cx="240" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="276" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M276 216 V240" stroke-width="2.5"/>
+  <circle cx="276" cy="228.0" r="9" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M267 232.0 H285" stroke="#c92a2a" stroke-width="1.5"/>
+  <circle cx="276" cy="216" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="276" cy="240" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M276 288 L276 314 L282.0 324" stroke-width="6"/>
+  <path d="M276 288 L276 314 L282.0 324" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="272.5" y="284.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="278.5" y="320.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M150 96 L240 96 L240 168" stroke-width="6"/>
+  <path d="M150 96 L240 96 L240 168" stroke="#f59f00" stroke-width="3.5"/>
+  <rect x="236.5" y="164.5" width="7" height="7" rx="1.5" fill="#f59f00" stroke-width="1.5"/>
+  <rect x="191.8" y="86.0" width="38.2" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="210.9" y="100.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">18번</text>
+  <rect x="306.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="342.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="342.5" y="234" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M312 180 H348" stroke-width="2.5"/>
+  <rect x="317" y="174" width="26" height="12" rx="5" fill="#e9d3a5" stroke-width="1.5"/>
+  <path d="M323 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M328 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M333 174.5 V185.5" stroke="#8b5a2b" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M338 174.5 V185.5" stroke="#c99c00" stroke-width="2.5" stroke-linecap="butt"/>
+  <circle cx="312" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="348" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M348 216 V240" stroke-width="2.5"/>
+  <circle cx="348" cy="228.0" r="9" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M339 232.0 H357" stroke="#c92a2a" stroke-width="1.5"/>
+  <circle cx="348" cy="216" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="348" cy="240" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M348 288 L348 314 L354.0 324" stroke-width="6"/>
+  <path d="M348 288 L348 314 L354.0 324" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="344.5" y="284.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="350.5" y="320.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M150 84 L312 84 L312 168" stroke-width="6"/>
+  <path d="M150 84 L312 84 L312 168" stroke="#2f9e44" stroke-width="3.5"/>
+  <rect x="308.5" y="164.5" width="7" height="7" rx="1.5" fill="#2f9e44" stroke-width="1.5"/>
+  <rect x="271.0" y="74.0" width="31.0" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="286.5" y="88.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">5번</text>
+  <rect x="378.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="414.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="414.5" y="234" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M384 180 H420" stroke-width="2.5"/>
+  <rect x="389" y="174" width="26" height="12" rx="5" fill="#e9d3a5" stroke-width="1.5"/>
+  <path d="M395 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M400 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M405 174.5 V185.5" stroke="#8b5a2b" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M410 174.5 V185.5" stroke="#c99c00" stroke-width="2.5" stroke-linecap="butt"/>
+  <circle cx="384" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="420" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M420 216 V240" stroke-width="2.5"/>
+  <circle cx="420" cy="228.0" r="9" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M411 232.0 H429" stroke="#c92a2a" stroke-width="1.5"/>
+  <circle cx="420" cy="216" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="420" cy="240" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M420 288 L420 314 L426.0 324" stroke-width="6"/>
+  <path d="M420 288 L420 314 L426.0 324" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="416.5" y="284.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="422.5" y="320.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M150 72 L384 72 L384 168" stroke-width="6"/>
+  <path d="M150 72 L384 72 L384 168" stroke="#1971c2" stroke-width="3.5"/>
+  <rect x="380.5" y="164.5" width="7" height="7" rx="1.5" fill="#1971c2" stroke-width="1.5"/>
+  <rect x="335.8" y="62.0" width="38.2" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="354.9" y="76.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">14번</text>
+  <rect x="450.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="486.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="486.5" y="234" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M456 180 H492" stroke-width="2.5"/>
+  <rect x="461" y="174" width="26" height="12" rx="5" fill="#e9d3a5" stroke-width="1.5"/>
+  <path d="M467 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M472 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M477 174.5 V185.5" stroke="#8b5a2b" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M482 174.5 V185.5" stroke="#c99c00" stroke-width="2.5" stroke-linecap="butt"/>
+  <circle cx="456" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="492" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M492 216 V240" stroke-width="2.5"/>
+  <circle cx="492" cy="228.0" r="9" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M483 232.0 H501" stroke="#c92a2a" stroke-width="1.5"/>
+  <circle cx="492" cy="216" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="492" cy="240" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M492 288 L492 314 L498.0 324" stroke-width="6"/>
+  <path d="M492 288 L492 314 L498.0 324" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="488.5" y="284.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="494.5" y="320.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M150 60 L456 60 L456 168" stroke-width="6"/>
+  <path d="M150 60 L456 60 L456 168" stroke="#7048e8" stroke-width="3.5"/>
+  <rect x="452.5" y="164.5" width="7" height="7" rx="1.5" fill="#7048e8" stroke-width="1.5"/>
+  <rect x="407.8" y="50.0" width="38.2" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="426.9" y="64.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">17번</text>
+  <rect x="522.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="558.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="558.5" y="234" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M528 180 H564" stroke-width="2.5"/>
+  <rect x="533" y="174" width="26" height="12" rx="5" fill="#e9d3a5" stroke-width="1.5"/>
+  <path d="M539 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M544 174.5 V185.5" stroke="#c92a2a" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M549 174.5 V185.5" stroke="#8b5a2b" stroke-width="2.5" stroke-linecap="butt"/>
+  <path d="M554 174.5 V185.5" stroke="#c99c00" stroke-width="2.5" stroke-linecap="butt"/>
+  <circle cx="528" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="564" cy="180" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M564 216 V240" stroke-width="2.5"/>
+  <circle cx="564" cy="228.0" r="9" fill="#fa5252" stroke-width="1.5"/>
+  <path d="M555 232.0 H573" stroke="#c92a2a" stroke-width="1.5"/>
+  <circle cx="564" cy="216" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="564" cy="240" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M564 288 L564 314 L570.0 324" stroke-width="6"/>
+  <path d="M564 288 L564 314 L570.0 324" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="560.5" y="284.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="566.5" y="320.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M150 48 L528 48 L528 168" stroke-width="6"/>
+  <path d="M150 48 L528 48 L528 168" stroke="#f76707" stroke-width="3.5"/>
+  <rect x="524.5" y="164.5" width="7" height="7" rx="1.5" fill="#f76707" stroke-width="1.5"/>
+  <rect x="479.8" y="38.0" width="38.2" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="498.9" y="52.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">26번</text>
+  <path d="M234.0 324 L150 324" stroke-width="6"/>
+  <path d="M234.0 324 L150 324" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="230.5" y="320.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="275.4" y="259.5" width="265.2" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="408.0" y="274.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">LED 짧은 다리 쪽 줄 → 함께 쓰는 − 줄 → GND</text>
+  <rect x="281.7" y="187.5" width="252.5" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="408.0" y="202.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">핀마다 220Ω 저항 하나 → LED 긴 다리(+)</text>
+</svg>

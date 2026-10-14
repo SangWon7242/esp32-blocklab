@@ -1,0 +1,259 @@
+# 챕터 4 · 흐르는 물빛 — 수업 저장소 04_흐르는물빛. 형식 설명은 src/track/README.md
+id: 04-flowing-light
+order: 4
+title: 흐르는 물빛
+summary: |
+  LED **다섯 개**가 물이 흐르듯 차례로 켜졌다 꺼지고, 끝까지 가면 거꾸로 되돌아와요.
+  핀 번호 다섯 개를 **목록(리스트)** 하나에 모아 두고 `for` 로 하나씩 꺼내 쓰면, "켜기 → 기다리기 → 끄기"를 다섯 번 쓰지 않아도 돼요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: Micro USB 선으로 노트북과 연결 }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
+  - { name: 빨강 LED 5개, note: 긴 다리가 + }
+  - { name: 220Ω 저항 5개, note: "LED 마다 하나씩. 빨강-빨강-갈색 띠" }
+  - { name: 점퍼선, note: "11개 (신호 5, LED → − 줄 5, − 줄 → GND 1)" }
+  - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "보드에 가까운 칸부터 18 · 5 · 14 · 17 · 26 순서로: 핀 → 220Ω 저항 → LED 긴 다리(+). LED 짧은 다리(−) 쪽 줄은 모두 아래 − 줄로 모으고, − 줄 하나를 GND 에 이어요"
+goals:
+  content: 핀 번호를 리스트에 담고 for 로 하나씩 꺼내 써서 LED 다섯 개를 차례로 켜고 끈다
+  thinking: 되풀이되는 일을 찾아 한 번만 쓰고, 순서(앞으로 · 거꾸로)를 목록으로 다룬다
+successCriteria:
+  - pins 목록의 첫 칸(pins[0])이 무엇이고, for 가 몇 번 도는지 말할 수 있다
+  - reversed(pins) 가 어떤 순서로 읽는지 내 말로 설명할 수 있다
+  - 기다리는 숫자를 바꿔 흐르는 빠르기를 내 뜻대로 바꿀 수 있다
+parts:
+  - id: part1
+    title: 흐르는 물빛 만들기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 다섯 개를 차례로 켜려면?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 오늘의 목표 — LED 다섯 개가 물결처럼 차례로 켜졌다 꺼지고, 끝에서 되돌아오기
+        body: |
+          1장에서는 LED **하나**를 "켜기 → 기다리기 → 끄기"로 깜빡였어요. 오늘은 LED 가 **다섯 개**예요. 물결처럼 하나씩 차례로 켜졌다 꺼지게 하고 싶어요.
+
+          1장처럼 LED 마다 코드를 따로 쓰면 어떻게 될까요? 더 짧고 똑똑하게 쓰는 방법은 없을까요? 코드를 보기 전에 내 생각부터 적어 봐요. 정답은 없고, 틀려도 괜찮아요.
+        todo:
+          - 준비물(LED 5개, 저항 5개, 브레드보드, 점퍼선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 숫자를 묻는 질문에는 **숫자와 그 이유**를 함께 쓰기
+        questions:
+          - LED 다섯 개를 차례로 켜고 끄려면 "켜기 → 기다리기 → 끄기"를 몇 번 써야 할까요? 그렇게 쓰면 코드는 몇 줄쯤 될까요?
+          - 핀 번호 다섯 개(18 · 5 · 14 · 17 · 26)를 한곳에 모아 두고 하나씩 꺼내 쓸 수 있다면, 무엇이 편해질까요?
+          - 물결이 끝까지 간 다음 되돌아오게 하려면, 핀 번호를 어떤 순서로 읽어야 할까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "흐르는 물빛"을 보드에게 시키려면 일을 잘게 나눠야 해요. LED 가 다섯 개라도, 보드는 한 번에 한 가지씩만 알아들어요.
+
+          활동 칸의 세 칸에 각각 한 가지 이상 적어 보세요. **순서**도 무언가를 정하는 일일까요? 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 보드가 시작 전에 알고 있어야 할 사실 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 순서나 숫자 적기"
+          - "**해야 할 것**: 보드가 실제로 하는 일 적기"
+        answer:
+          know: ["LED 다섯 개가 각각 몇 번 핀에 꽂혀 있는지", "LED 가 꽂힌 순서"]
+          decide: ["어떤 순서로 켤지", "LED 하나를 얼마나 오래 켜 둘지", "끝에서 되돌아올지"]
+          act: ["LED 를 하나씩 켰다 끄기", "끝에서 거꾸로 되돌아오기", "이 일을 계속 되풀이하기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 목록에서 하나씩
+        minutes: 5
+        scene:
+          image: images/list-loop.svg
+          caption: "pins 목록의 칸을 for 가 하나씩 꺼내 pin 에 담고, 그 핀의 LED 를 켰다 꺼요"
+        body: |
+          아직 실행하지 않아요. `pins = [18, 5, 14, 17, 26]` 은 핀 번호 다섯 개를 **목록(리스트)** 하나에 담아 `pins` 라고 이름 붙이는 줄이에요.
+
+          `for pin in pins:` 는 목록에서 하나씩 꺼내 `pin` 에 담고, 아래 들여 쓴 줄들을 해요. 다 꺼낼 때까지요. `time.sleep_ms(100)` 의 **ms** 는 1000분의 1초예요. 코드를 따라가며 빈칸에 내 예측을 적어요.
+        todo:
+          - 그림에서 목록의 칸과 for 가 꺼내는 차례를 짝지어 보기
+          - "`showLed()` 안의 for 두 개가 각각 무엇을 하는지 손가락으로 짚어 읽기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_flowing.py
+        blanks:
+          - q: LED 하나가 켜져 있는 시간은 몇 초일까요?
+            unit: 초
+          - q: 26번 LED 까지 켜진 다음에는 어떤 일이 일어날까요?
+          - q: 가는 길에 다섯 개가 한 번씩 켜지는 데 걸리는 시간은 대략 몇 초일까요?
+            unit: 초
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 흐르는 물빛
+        minutes: 8
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "보드에 가까운 칸부터 18 · 5 · 14 · 17 · 26. 핀마다 저항 하나, LED 짧은 다리 쪽은 모두 같은 − 줄로"
+        body: |
+          이제 LED 다섯 개를 **브레드보드**에 꽂아요. 핀마다 220Ω 저항을 하나씩 거쳐 LED 긴 다리(+)로 가고, 짧은 다리(−) 쪽은 모두 **같은 − 줄**에 모아 GND 하나로 이어요.
+
+          순서가 중요해요. 보드에 가까운 칸부터 **18 · 5 · 14 · 17 · 26** 순서로 꽂아야 물결처럼 보여요. 실행하면 창에 핀 번호가 찍혀요. 찍히는 순서와 불이 켜지는 자리가 같은지 보세요.
+        todo:
+          - USB 를 뺀 채 그림대로 LED · 저항 · 선 꽂기 (저항 5개, GND 는 − 줄 하나로)
+          - "**보드 연결** → **실행** 누르기"
+          - 창의 핀 번호 순서와 불이 켜지는 자리가 같은지, 예측과 비교하기
+        code: step1_flowing.py
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          `showLed()` 안에는 `for` 가 **두 개** 있어요. 하나는 목록을 앞에서부터, 하나는 `reversed(pins)` 로 **뒤에서부터** 읽어요.
+
+          손가락으로 한 줄씩 짚으며 for 가 몇 번 도는지 세어 보세요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - for 두 개가 각각 몇 번 도는지 세기
+          - "`reversed(pins)` 가 목록을 어떤 순서로 읽는지 따라가 보기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_flowing.py
+        questions:
+          - { kind: number, q: "showLed() 를 한 번 부르면 LED 가 켜지는 일은 모두 몇 번 일어나나요?", answer: 10, hint: "for 가 두 개, 목록의 칸은 다섯 개" }
+          - { kind: choice, q: "거꾸로 돌아오는 길에서 가장 먼저 켜지는 LED 는 몇 번 핀인가요?", options: ["18", "5", "26"], answer: 2 }
+          - { kind: line, q: "목록을 뒤에서부터 읽기 시작하는 for 줄의 줄 번호를 클릭하세요", answer: 16 }
+
+      - id: mission
+        type: mission
+        title: 미션 — 두 배 빠르게 흐르기
+        minutes: 6
+        scene:
+          image: images/flow-timeline.svg
+          caption: "지금은 칸 하나가 0.2초: 켜짐 0.1초 + 꺼짐 0.1초. 가는 길 다섯 칸, 돌아오는 길 다섯 칸"
+        body: |
+          지금 물빛은 칸 하나에 0.2초씩 흘러요. 이 물살을 **두 배 빠르게** 만들어 봐요. 빨라지면 기다리는 시간은 늘어날까요, 줄어들까요?
+
+          그리고 핀 번호를 찍던 `print(pin)` 두 줄은 순서 확인이 끝났으니 지워요. 이 미션은 편집기의 **코드** 탭에서 고쳐요. 고친 뒤 실행해서 물빛이 정말 빨라졌는지 눈으로 보고 **판정**을 눌러요.
+        todo:
+          - "`time.sleep_ms(...)` 가 몇 군데 있는지 모두 찾기"
+          - "**코드** 탭에서 기다리는 숫자를 바꾸고 `print(pin)` 두 줄 지우기"
+          - 실행해서 빨라졌는지 보고 **판정** 누르기
+        instructions: 흐르는 속도를 두 배 빠르게 만들어 주세요. 기다리는 시간을 모두 바꾸고, 핀 번호를 찍던 print(pin) 두 줄은 지워요
+        hint: time.sleep_ms 가 몇 군데 있나요? 가는 길에만 있지 않아요. 두 배 빠르면 한 번 기다리는 시간은 지금의 몇 분의 몇일까요?
+        code: step1_flowing.py
+        rules:
+          - codeEquals: { file: mission_faster.py }
+            fail: 기다리는 곳을 모두 찾았나요? 두 배 빠르면 그 숫자들은 어떻게 되어야 할까요? 지우기로 한 줄은 남아 있지 않나요?
+        answerCode: mission_faster.py
+
+      - id: extra1
+        type: mission
+        title: 추가 미션 ① — 한 방향으로만 흐르기
+        optional: true
+        minutes: 4
+        scene:
+          image: images/flow-timeline.svg
+          caption: 시간표에서 돌아오는 길 다섯 칸이 없어지면 물빛은 어떻게 흐를까요?
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 물빛이 끝까지 가면 되돌아오지 말고, **처음 자리에서 다시** 흐르게 해 봐요. 폭포처럼 한 방향으로만요.
+
+          어느 덩어리를 없애면 될까요? 그 덩어리는 몇 줄부터 몇 줄까지일까요? 들여쓰기를 보고 경계를 찾아요.
+        todo:
+          - 되돌아오는 일을 하는 덩어리를 찾기
+          - 그 덩어리를 지우고 `print(pin)` 줄도 지우기
+          - 실행해서 한 방향으로만 흐르는지 보고 **판정** 누르기
+        instructions: 되돌아오지 않고 한 방향으로만 흐르게 해 주세요 (print 줄은 지워요)
+        code: step1_flowing.py
+        rules:
+          # 처음 자리(?<![\s\S])에서 시작해, 코드 어디에도 reversed 가 없을 때만 맞는다
+          - codeMatches: '(?<![\s\S])(?![\s\S]*reversed)'
+            fail: 거꾸로 읽는 부분이 아직 남아 있지 않나요?
+          - codeMatches: 'for pin in pins:'
+            fail: 앞으로 흐르는 부분은 남겨 두었나요?
+        answerCode: extra1_one_way.py
+
+      - id: extra2
+        type: mission
+        title: 추가 미션 ② — 모두 켰다가 한꺼번에 끄기
+        optional: true
+        minutes: 5
+        scene:
+          image: images/list-loop.svg
+          caption: 목록을 한 번 돌며 켜기만 하고, 한 번 더 돌며 끄기만 한다면?
+        body: |
+          이번에는 하나씩 켜지되 **꺼지지 않게** 해 봐요. 다섯 개가 모두 켜지면 1초 뒤 **한꺼번에** 꺼지고, 다시 처음부터요.
+
+          켜는 일과 끄는 일을 한 for 안에 두면 어떻게 될까요? for 를 둘로 나누면요? 하나 켤 때마다 0.3초 기다려요.
+        todo:
+          - 켜기만 하는 for 와 끄기만 하는 for 로 나누기
+          - 하나 켤 때마다 0.3초, 다 켜진 뒤 1초 기다리기
+          - 실행해 보고 **판정** 누르기
+        instructions: 하나씩 0.3초 간격으로 켜되 끄지 말고, 다섯 개가 다 켜지면 1초 뒤 한꺼번에 꺼지게 해 주세요 (되돌아오는 길은 없어요)
+        code: step1_flowing.py
+        rules:
+          - codeMatches: 'for pin in pins:[\s\S]*for pin in pins:'
+            fail: 켜는 일과 끄는 일을 한 for 안에서 하고 있지 않나요?
+          - codeMatches: 'time\.sleep\(1\)'
+            fail: 다 켜진 채로 1초를 기다리는 줄이 있나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*reversed)'
+            fail: 이번에도 되돌아오는 길이 필요할까요?
+        answerCode: extra2_all_on_then_off.py
+
+      - id: design
+        type: design
+        title: 설계 — 우리말로 먼저 쓰기
+        minutes: 6
+        scene:
+          image: images/list-loop.svg
+          caption: 목록에 담고, 하나씩 꺼내 켰다 끄기 — 이 순서를 우리말로 먼저 써요
+        body: |
+          이번에는 물이 처음엔 **천천히** 흐르다 점점 빨라지게 설계해요. 처음 한 번은 300 ms 간격, 다음 한 번은 200 ms 간격, 그다음부터는 계속 100 ms 간격으로요.
+
+          블록 중 **흐르는 LED 준비하기** 는 `pins` 목록과 "하나씩 꺼내 켰다 끄기"(`for pin in pins:`)를 한꺼번에 만들어 줘요. 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "하나씩 꺼낸다"가 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 핀 번호 __ 개를 목록(pins)에 담는다
+            blank: { answer: 5 }
+          - text: 처음엔 __ ms 간격으로 천천히 한 번 흐른다
+            blank: { answer: 300 }
+          - text: 조금 빠르게 __ ms 간격으로 한 번 더 흐른다
+            blank: { answer: 200 }
+          - text: 계속 반복한다
+          - text: __ ms 간격으로 흐른다
+            blank: { answer: 100 }
+        translation:
+          - ["핀 번호를 목록에 담는다", "pins = [18, 5, 14, 17, 26]"]
+          - ["목록에서 하나씩 꺼낸다", "for pin in pins:"]
+          - ["차례로 켰다 끈다 (간격 ms)", "flow_leds(ms)"]
+          - ["계속 반복한다", "while True:"]
+        targetCode: design_flowing.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 목록의 순서만 바꾸면 물빛은 어떻게 흐를까요?
+        body: |
+          오늘은 같은 일을 다섯 번 쓰는 대신, 목록 하나와 `for` 하나로 해냈어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          먼저 코드 줄마다 "이 줄은 ___"을 내 말로 채우고, 아래 네 칸에 오늘 있었던 일을 솔직하게 적어요. 다 쓰면 짝에게 1분 동안 설명해 보세요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 설명하기
+        lineExplain: step1_flowing.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - pins 목록과 for 가 없었다면 코드는 어떻게 달라졌을까요? 몇 줄쯤 더 써야 했을까요?
+          - 목록을 [26, 17, 14, 5, 18] 로 바꾸면 물빛은 어떻게 흐를까요? 왜 그렇게 생각하나요?
+          - "다음엔 여기부터 본다: 한 줄로"
