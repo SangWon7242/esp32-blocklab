@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ls-levels-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ls-levels-title">센서 값 막대 0~4095 를 세 구간으로 나눈 그림. 0~999 는 밝음(LED 끄기), 1000~2500 은 보통(LED 한 번 깜빡), 2501~4095 는 어두움(LED 켜기). 이 챕터의 모듈은 가릴수록 값이 커진다. 경계 숫자 1000 과 2500 은 교실에서 잰 값으로 정한다</title>
+  <text x="320" y="36" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">센서 값을 세 구간으로 나누기</text>
+  <!-- 구간 아이콘 -->
+  <circle cx="124" cy="84" r="13" fill="#f4af18" stroke="none"/>
+  <g stroke="#f4af18" stroke-width="2.5">
+    <path d="M124 62 V58"/><path d="M124 110 V106"/><path d="M102 84 H98"/><path d="M150 84 H146"/>
+    <path d="M108 68 L105 65"/><path d="M140 100 L143 103"/><path d="M140 68 L143 65"/><path d="M108 100 L105 103"/>
+  </g>
+  <circle cx="282" cy="84" r="14" fill="#f4af18" fill-opacity="0.5" stroke="none"/>
+  <path d="M266 96 h36 a10 10 0 0 0 -4 -19 a13 13 0 0 0 -25 3 a8 8 0 0 0 -7 16 Z" fill="var(--card)" stroke-width="2"/>
+  <path d="M478 70 A18 18 0 1 0 494 98 A14 14 0 1 1 478 70 Z" fill="#f4af18" fill-opacity="0.85" stroke="none"/>
+  <!-- 막대 -->
+  <rect x="60" y="130" width="127" height="44" fill="#f4af18" fill-opacity="0.35" stroke="none"/>
+  <rect x="187" y="130" width="190.5" height="44" fill="#4562f5" fill-opacity="0.22" stroke="none"/>
+  <rect x="377.5" y="130" width="202.5" height="44" fill="currentColor" fill-opacity="0.32" stroke="none"/>
+  <rect x="60" y="130" width="520" height="44" rx="4" stroke-width="2"/>
+  <path d="M187 124 V180 M377.5 124 V180" stroke-width="2.5"/>
+  <g font-size="17" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="123.5" y="158">밝음</text>
+    <text x="282" y="158">보통</text>
+    <text x="479" y="158">어두움</text>
+  </g>
+  <g font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="60" y="198">0</text>
+    <text x="187" y="198">1000</text>
+    <text x="377.5" y="198">2500</text>
+    <text x="580" y="198">4095</text>
+  </g>
+  <!-- 가릴수록 값이 커져요 -->
+  <path d="M120 222 H560 M550 216 L560 222 L550 228" stroke-width="2"/>
+  <text x="340" y="244" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">가릴수록 값이 커져요 (이 챕터의 모듈)</text>
+  <!-- 할 일 -->
+  <g stroke-width="1.8">
+    <rect x="66" y="262" width="115" height="62" rx="12" fill="var(--card)"/>
+    <rect x="224.5" y="262" width="115" height="62" rx="12" fill="var(--card)"/>
+    <rect x="421.5" y="262" width="115" height="62" rx="12" fill="var(--card)"/>
+  </g>
+  <g stroke-width="1.8">
+    <path d="M90 300 V284 a8 8 0 0 1 16 0 V300 Z" fill="var(--muted)"/>
+    <path d="M249 300 V284 a8 8 0 0 1 16 0 V300 Z" fill="#c99c00" fill-opacity="0.5" stroke-dasharray="3 3"/>
+    <path d="M446 300 V284 a8 8 0 0 1 16 0 V300 Z" fill="#c99c00"/>
+  </g>
+  <circle cx="454" cy="290" r="16" fill="#f4af18" fill-opacity="0.3" stroke="none"/>
+  <g font-size="14" font-weight="700" fill="currentColor" stroke="none">
+    <text x="116" y="292">LED</text><text x="116" y="310">끄기</text>
+    <text x="275" y="292">LED</text><text x="275" y="310">깜빡</text>
+    <text x="472" y="292">LED</text><text x="472" y="310">켜기</text>
+  </g>
+  <text x="320" y="348" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">경계 숫자 1000 과 2500 은 우리 교실에서 잰 값으로 정해요</text>
+</svg>
