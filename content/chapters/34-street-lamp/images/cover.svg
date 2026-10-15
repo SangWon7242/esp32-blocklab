@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>밝기 단계 가로등: 해 질 녘 거리의 가로등 꼭대기에 조도 센서가 있고, 기둥의 OLED 화면에 DIM 이 떠 있다. 아래에는 DARK · DIM · MEDIUM · BRIGHT 네 단계와 단계마다 LED 밝기 100 · 66 · 33 · 0 % 가 보인다</title>
+  <rect x="0" y="0" width="640" height="300" fill="#4562f5" fill-opacity="0.12" stroke="none"/>
+  <rect x="0" y="300" width="640" height="60" fill="currentColor" fill-opacity="0.08" stroke="none"/>
+  <path d="M0 300 H640" stroke-width="2.5"/>
+  <!-- 건물 -->
+  <g fill="currentColor" fill-opacity="0.10" stroke="none">
+    <rect x="230" y="150" width="70" height="150"/>
+    <rect x="310" y="118" width="58" height="182"/>
+    <rect x="590" y="180" width="50" height="120"/>
+  </g>
+  <g fill="#f4af18" fill-opacity="0.75" stroke="none">
+    <rect x="246" y="170" width="12" height="12"/>
+    <rect x="326" y="140" width="12" height="12"/>
+    <rect x="346" y="190" width="12" height="12"/>
+  </g>
+  <!-- 달 -->
+  <path d="M410 46 A20 20 0 1 0 432 74 A15 15 0 1 1 410 46 Z" fill="#f4af18" stroke="none"/>
+  <!-- 제목 말풍선 -->
+  <rect x="24" y="24" width="300" height="76" rx="14" fill="var(--card)" stroke-width="2.5"/>
+  <text x="44" y="56" font-size="16" font-weight="700" fill="currentColor" stroke="none">어두운 만큼만 밝게 켜는 가로등</text>
+  <text x="44" y="82" font-size="14" fill="currentColor" stroke="none" opacity="0.75">조금 어두울 때와 아주 어두울 때는 달라요</text>
+  <!-- 가로등 -->
+  <path d="M488 296 V104 Q488 92 500 92 H540" stroke-width="7"/>
+  <path d="M476 298 H500" stroke-width="5"/>
+  <path d="M524 96 H572 L562 124 H534 Z" fill="var(--card)" stroke-width="2.5"/>
+  <ellipse cx="548" cy="126" rx="15" ry="5" fill="#f4af18" stroke-width="2"/>
+  <path d="M533 131 L478 298 H618 L563 131 Z" fill="#f4af18" fill-opacity="0.25" stroke="none"/>
+  <rect x="540" y="80" width="18" height="14" rx="3" fill="#2f9e44" fill-opacity="0.6" stroke-width="1.8"/>
+  <circle cx="549" cy="76" r="4" fill="#f4e3b0" stroke-width="1.5"/>
+  <!-- OLED -->
+  <rect x="406" y="170" width="74" height="46" rx="4" fill="#1d4ed8" stroke-width="1.8"/>
+  <rect x="412" y="176" width="62" height="34" rx="2" fill="#0b1b4d" stroke="none"/>
+  <text x="443" y="191" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none" text-anchor="middle">DIM</text>
+  <text x="443" y="205" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none" text-anchor="middle">LED 66%</text>
+  <path d="M480 193 H488" stroke-width="2.5"/>
+  <!-- 네 단계 칩 -->
+  <g stroke-width="1.8">
+    <rect x="24" y="200" width="44" height="76" rx="8" fill="var(--card)"/>
+    <rect x="76" y="200" width="44" height="76" rx="8" fill="var(--card)"/>
+    <rect x="128" y="200" width="44" height="76" rx="8" fill="var(--card)"/>
+    <rect x="180" y="200" width="44" height="76" rx="8" fill="var(--card)"/>
+  </g>
+  <circle cx="46" cy="226" r="11" fill="#f4af18" stroke-width="1.5"/>
+  <circle cx="98" cy="226" r="11" fill="#f4af18" fill-opacity="0.66" stroke-width="1.5"/>
+  <circle cx="150" cy="226" r="11" fill="#f4af18" fill-opacity="0.33" stroke-width="1.5"/>
+  <circle cx="202" cy="226" r="11" fill="var(--muted)" stroke-width="1.5"/>
+  <g font-size="12" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="46" y="256">0</text>
+    <text x="98" y="256">1</text>
+    <text x="150" y="256">2</text>
+    <text x="202" y="256">3</text>
+  </g>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle" opacity="0.8">
+    <text x="46" y="270">100</text>
+    <text x="98" y="270">66</text>
+    <text x="150" y="270">33</text>
+    <text x="202" y="270">0</text>
+  </g>
+  <text x="124" y="194" font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">단계 · LED 밝기 %</text>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>빛 값을 단계로 바꾸는 그래프: 가로축은 빛 값(가렸을 때 3500에서 비췄을 때 500까지), 세로축은 단계 0~3. 점선은 비례하는 직선이고, 나머지를 버리는 나누기(//) 때문에 실제 단계는 계단 모양이 된다. 3500은 0, 2500은 1, 1500은 2, 500은 3</title>
+  <text x="32" y="36" font-size="16" font-weight="700" fill="currentColor" stroke="none">빛 값을 단계 0~3 으로 바꾸기</text>
+  <g font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="end">
+    <text x="120" y="294">0 DARK</text>
+    <text x="120" y="234">1 DIM</text>
+    <text x="120" y="174">2 MEDIUM</text>
+    <text x="120" y="114">3 BRIGHT</text>
+  </g>
+  <path d="M132 300 V84" stroke-width="2"/>
+  <path d="M132 300 H572" stroke-width="2"/>
+  <path d="M566 294 L574 300 L566 306" stroke-width="2"/>
+  <g stroke-opacity="0.18" stroke-width="1.5">
+    <path d="M132 230 H560 M132 170 H560 M132 110 H560"/>
+  </g>
+  <path d="M150 290 L530 110" stroke="#4562f5" stroke-width="2.5" stroke-dasharray="7 6"/>
+  <path d="M150 290 H277 M277 230 H403 M403 170 H530" stroke="#f4af18" stroke-width="6"/>
+  <circle cx="150" cy="290" r="5" fill="#f4af18" stroke-width="1.5"/>
+  <circle cx="277" cy="230" r="5" fill="#f4af18" stroke-width="1.5"/>
+  <circle cx="403" cy="170" r="5" fill="#f4af18" stroke-width="1.5"/>
+  <circle cx="530" cy="110" r="5" fill="#f4af18" stroke-width="1.5"/>
+  <g font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="150" y="322">3500</text>
+    <text x="277" y="322">2500</text>
+    <text x="403" y="322">1500</text>
+    <text x="530" y="322">500</text>
+  </g>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle" opacity="0.75">
+    <text x="150" y="342">손으로 가렸을 때</text>
+    <text x="530" y="342">손전등을 비췄을 때</text>
+    <text x="340" y="342">빛 값 (밝아질수록 →)</text>
+  </g>
+  <rect x="300" y="66" width="200" height="22" rx="11" fill="var(--card)" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="400" y="81.5" font-size="12" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">점선: 똑같이 비례하는 직선</text>
+  <rect x="380" y="256" width="196" height="22" rx="11" fill="var(--card)" stroke="#f4af18" stroke-width="1.5"/>
+  <text x="478" y="271.5" font-size="12" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">굵은 선: // 로 소수를 버린 계단</text>
+</svg>

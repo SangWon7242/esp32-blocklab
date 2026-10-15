@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>측정한 범위 밖의 값: 가렸을 때 3500 과 비췄을 때 500 사이에서는 단계가 0~3 이지만, 더 꽉 가려 3800 이 되면 단계 −1 이 되어 names 의 −1 번째인 맨 끝 글자 BRIGHT 가 나온다. 훨씬 더 밝아지면 단계 4 가 되어 IndexError 가 난다</title>
+  <text x="32" y="36" font-size="16" font-weight="700" fill="currentColor" stroke="none">잰 범위 밖의 값이 들어오면?</text>
+  <!-- 수직선 -->
+  <rect x="150" y="96" width="340" height="40" rx="6" fill="#4562f5" fill-opacity="0.12" stroke="#4562f5" stroke-width="1.8"/>
+  <rect x="40" y="96" width="104" height="40" rx="6" fill="#e03131" fill-opacity="0.10" stroke="#e03131" stroke-width="1.8" stroke-dasharray="6 5"/>
+  <rect x="496" y="96" width="104" height="40" rx="6" fill="#e03131" fill-opacity="0.10" stroke="#e03131" stroke-width="1.8" stroke-dasharray="6 5"/>
+  <g font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="320" y="121">잰 범위: 3500 ~ 500 → 단계 0 ~ 3</text>
+    <text x="92" y="121">더 어두움</text>
+    <text x="548" y="121">더 밝음</text>
+  </g>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle" opacity="0.75">
+    <text x="150" y="156">3500</text>
+    <text x="490" y="156">500</text>
+  </g>
+  <!-- 왼쪽 결과 -->
+  <path d="M92 140 V196" stroke-width="2"/>
+  <path d="M86 188 L92 198 L98 188" stroke-width="2"/>
+  <rect x="32" y="204" width="250" height="96" rx="10" fill="var(--card)" stroke-width="1.8"/>
+  <g fill="currentColor" stroke="none">
+    <text x="48" y="230" font-size="14" font-weight="700">값 3800 → 단계 −1</text>
+    <text x="48" y="254" font-size="13">names 의 −1 번째 = 맨 끝 글자</text>
+    <text x="48" y="282" font-size="15" font-weight="700" fill="#e03131">가렸는데 "BRIGHT" ?</text>
+  </g>
+  <!-- 오른쪽 결과 -->
+  <path d="M548 140 V196" stroke-width="2"/>
+  <path d="M542 188 L548 198 L554 188" stroke-width="2"/>
+  <rect x="358" y="204" width="250" height="96" rx="10" fill="var(--card)" stroke-width="1.8"/>
+  <g fill="currentColor" stroke="none">
+    <text x="374" y="230" font-size="14" font-weight="700">훨씬 밝으면 → 단계 4</text>
+    <text x="374" y="254" font-size="13">names 에는 0~3 번째까지만</text>
+    <text x="374" y="282" font-size="15" font-weight="700" fill="#e03131">IndexError</text>
+  </g>
+  <text x="320" y="334" font-size="13" fill="currentColor" stroke="none" text-anchor="middle" opacity="0.8">단계를 0 ~ 3 안에 가둘 방법은 없을까요?</text>
+</svg>

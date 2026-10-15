@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>단계별 글자와 LED 밝기 표: 단계 0 DARK 는 LED 100 %, 1 DIM 은 66 %, 2 MEDIUM 은 33 %, 3 BRIGHT 는 0 %. 단계가 낮을수록(어두울수록) LED 를 밝게 켜고, 밝을 때는 꺼서 전기를 아낀다</title>
+  <text x="32" y="36" font-size="16" font-weight="700" fill="currentColor" stroke="none">단계가 낮을수록 LED 를 밝게</text>
+  <!-- 하늘 그림 -->
+  <path d="M152 62 A18 18 0 1 0 170 88 A14 14 0 1 1 152 62 Z" fill="#f4af18" stroke="none"/>
+  <path d="M272 64 A16 16 0 1 0 288 88 A12 12 0 1 1 272 64 Z" fill="#f4af18" stroke="none" fill-opacity="0.7"/>
+  <path d="M276 92 h28 a9 9 0 0 0 0 -18 a12 12 0 0 0 -22 -2 a8 8 0 0 0 -6 20 Z" fill="var(--card)" stroke-width="1.8"/>
+  <circle cx="396" cy="74" r="11" fill="#f4af18" stroke="none" fill-opacity="0.8"/>
+  <path d="M378 94 h28 a9 9 0 0 0 0 -18 a12 12 0 0 0 -22 -2 a8 8 0 0 0 -6 20 Z" fill="var(--card)" stroke-width="1.8"/>
+  <circle cx="512" cy="76" r="13" fill="#f4af18" stroke="none"/>
+  <path d="M512 54 v-6 M512 98 v6 M490 76 h-6 M534 76 h6 M497 61 l-4 -4 M527 91 l4 4 M527 61 l4 -4 M497 91 l-4 4" stroke="#f4af18" stroke-width="2.5"/>
+  <!-- 단계 이름 -->
+  <g font-size="14" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="160" y="132">0 DARK</text>
+    <text x="280" y="132">1 DIM</text>
+    <text x="400" y="132">2 MEDIUM</text>
+    <text x="520" y="132">3 BRIGHT</text>
+  </g>
+  <!-- 막대 -->
+  <path d="M96 272 H584" stroke-width="2"/>
+  <rect x="130" y="152" width="60" height="120" rx="4" fill="#f4af18" stroke-width="1.8"/>
+  <rect x="250" y="192" width="60" height="80" rx="4" fill="#f4af18" fill-opacity="0.7" stroke-width="1.8"/>
+  <rect x="370" y="232" width="60" height="40" rx="4" fill="#f4af18" fill-opacity="0.4" stroke-width="1.8"/>
+  <path d="M490 272 H550" stroke-width="4"/>
+  <g font-size="14" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="160" y="294">100 %</text>
+    <text x="280" y="294">66 %</text>
+    <text x="400" y="294">33 %</text>
+    <text x="520" y="294">0 % (끔)</text>
+  </g>
+  <text x="60" y="216" font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">LED</text>
+  <text x="60" y="233" font-size="13" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">밝기</text>
+  <text x="320" y="332" font-size="13" fill="currentColor" stroke="none" text-anchor="middle" opacity="0.8">밤새 100 % 로 켜 두는 것보다 전기를 아껴요 (밝기 값은 예시)</text>
+</svg>
