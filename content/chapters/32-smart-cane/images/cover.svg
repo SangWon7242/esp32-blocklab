@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="scc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="scc-title">스마트 지팡이: 흰 지팡이를 든 사람이 길을 걷고, 지팡이 끝의 초음파 센서가 앞의 기둥으로 소리를 쏘아 메아리를 듣는다. 지팡이에서 삐 소리가 나고, 지팡이의 LED 가 빛나 밤에도 다른 사람이 볼 수 있다</title>
+  <defs>
+    <marker id="scc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <text x="36" y="46" font-size="16" font-weight="700" fill="currentColor" stroke="none">스마트 지팡이</text>
+  <text x="36" y="68" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">거리 · 빛 · 기울기를 알려 주는 흰 지팡이</text>
+  <path d="M24 304 H616" stroke-width="2.5"/>
+  <path d="M40 318 H90 M130 318 H200 M250 318 H330 M380 318 H440 M490 318 H560" stroke-opacity="0.35"/>
+  <!-- 기둥 -->
+  <rect x="480" y="112" width="44" height="192" rx="4" fill="var(--muted)" stroke-width="2"/>
+  <path d="M480 150 H524 M480 190 H524 M480 230 H524 M480 270 H524" stroke-opacity="0.3"/>
+  <text x="502" y="102" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">기둥</text>
+  <!-- 사람 -->
+  <circle cx="150" cy="118" r="20" fill="var(--card)"/>
+  <path d="M138 114 H162" stroke-width="5" stroke-opacity="0.75"/>
+  <path d="M150 138 V222"/>
+  <path d="M150 222 L130 300 M150 222 L172 300" stroke-width="2.5"/>
+  <path d="M150 160 L184 194" stroke-width="2.5"/>
+  <path d="M150 160 L124 196" stroke-width="2.5"/>
+  <!-- 흰 지팡이 -->
+  <path d="M186 192 L300 300" stroke-width="7"/>
+  <path d="M186 192 L300 300" stroke="var(--card)" stroke-width="4.5"/>
+  <path d="M286 287 L300 300" stroke="#e03131" stroke-width="4.5"/>
+  <!-- 센서 상자 -->
+  <rect x="236" y="232" width="36" height="22" rx="4" fill="#2f9e44" fill-opacity="0.25" transform="rotate(43 254 243)"/>
+  <circle cx="226" cy="222" r="6" fill="#f59f00" stroke-width="1.5"/>
+  <path d="M214 210 L208 204 M226 206 V198 M238 210 L244 204" stroke="#f59f00" stroke-width="2"/>
+  <!-- 초음파 -->
+  <path d="M300 230 A40 40 0 0 1 300 262" stroke="#1971c2"/>
+  <path d="M330 220 A56 56 0 0 1 330 272" stroke="#1971c2"/>
+  <path d="M360 210 A72 72 0 0 1 360 282" stroke="#1971c2"/>
+  <path d="M396 236 H470" stroke="#1971c2" stroke-dasharray="6 6" marker-end="url(#scc-arrow)"/>
+  <path d="M470 258 H400" stroke="#1971c2" stroke-dasharray="2 6" marker-end="url(#scc-arrow)"/>
+  <text x="434" y="286" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">메아리</text>
+  <!-- 소리 -->
+  <rect x="226" y="140" width="92" height="30" rx="15" fill="var(--card)" stroke-width="1.5"/>
+  <text x="272" y="160" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">삐 · 삐 · 삐</text>
+  <path d="M244 172 L232 196" stroke-width="1.5" stroke-opacity="0.6"/>
+  <!-- 기능 칩 -->
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <rect x="356" y="36" width="64" height="24" rx="12" fill="#1971c2" fill-opacity="0.18"/>
+    <text x="388" y="52">거리</text>
+    <rect x="428" y="36" width="56" height="24" rx="12" fill="#f59f00" fill-opacity="0.22"/>
+    <text x="456" y="52">빛</text>
+    <rect x="492" y="36" width="64" height="24" rx="12" fill="#2f9e44" fill-opacity="0.2"/>
+    <text x="524" y="52">기울기</text>
+  </g>
+</svg>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="scg-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="scg-title">거리와 삐 간격의 비례 그래프: 가로축은 거리 0~30cm, 세로축은 삐 사이 쉬는 시간 0~300ms. 원점을 지나는 곧은 선 위에 5cm-50ms, 10cm-100ms, 20cm-200ms, 30cm-300ms 점이 있다. 오른쪽 표는 거리가 2배가 되면 쉬는 시간도 2배가 됨을 보여 준다. 30cm 보다 멀면 소리가 나지 않는다</title>
+  <text x="40" y="40" font-size="15" font-weight="700" fill="currentColor" stroke="none">가까울수록 삐 간격이 짧게</text>
+  <!-- 축 -->
+  <path d="M80 300 H392 M80 300 V76"/>
+  <path d="M392 300 l-8 -4 v8 Z M80 76 l-4 8 h8 Z" fill="currentColor"/>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="80" y="318">0</text>
+    <text x="130" y="318">5</text>
+    <text x="180" y="318">10</text>
+    <text x="280" y="318">20</text>
+    <text x="380" y="318">30</text>
+    <text x="236" y="342">거리 d (cm)</text>
+  </g>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="end">
+    <text x="72" y="304">0</text>
+    <text x="72" y="236">100</text>
+    <text x="72" y="168">200</text>
+    <text x="72" y="100">300</text>
+  </g>
+  <text x="40" y="66" font-size="12" fill="currentColor" stroke="none">쉬는 시간 (ms)</text>
+  <path d="M80 232 H392 M80 164 H392 M80 96 H392" stroke-opacity="0.15"/>
+  <path d="M180 300 V96 M280 300 V96 M380 300 V96" stroke-opacity="0.15"/>
+  <!-- 비례 직선 -->
+  <path d="M80 300 L380 96" stroke="#1971c2" stroke-width="3"/>
+  <g fill="#1971c2" stroke="var(--card)" stroke-width="1.5">
+    <circle cx="130" cy="266" r="6"/>
+    <circle cx="180" cy="232" r="6"/>
+    <circle cx="280" cy="164" r="6"/>
+    <circle cx="380" cy="96" r="6"/>
+  </g>
+  <path d="M380 96 H392" stroke="#1971c2" stroke-width="3"/>
+  <text x="300" y="268" font-size="12" fill="currentColor" stroke="none">30cm 보다 멀면 조용</text>
+  <!-- 표 -->
+  <rect x="440" y="88" width="168" height="196" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <path d="M440 124 H608 M524 88 V284"/>
+  <g font-size="13" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="482" y="111" font-weight="700">거리 (cm)</text>
+    <text x="566" y="111" font-weight="700">간격 (ms)</text>
+    <text x="482" y="154">5</text><text x="566" y="154">50</text>
+    <text x="482" y="194">10</text><text x="566" y="194">100</text>
+    <text x="482" y="234">20</text><text x="566" y="234">200</text>
+    <text x="482" y="274">30</text><text x="566" y="274">300</text>
+  </g>
+  <path d="M440 164 H608 M440 204 H608 M440 244 H608" stroke-opacity="0.25"/>
+  <text x="524" y="314" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">거리가 2배면 간격도 2배</text>
+</svg>
