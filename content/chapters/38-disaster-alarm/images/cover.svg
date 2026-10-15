@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="da-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="da-cover-title">우리 교실 재난 알리미. 교실 책상 위 ESP32 보드에 불꽃 센서, 온습도 센서, 틸트 스위치, 버튼, 부저가 붙어 있고, 복도에 있는 선생님 폰 화면에 빨간 FIRE 와 출구 알리기 버튼이 보인다. 말풍선: 교실에 없는 선생님 폰에 어떻게 바로 알릴까?</title>
+  <rect x="0" y="0" width="640" height="360" fill="var(--muted)" stroke="none"/>
+  <!-- 바닥 -->
+  <rect x="0" y="296" width="640" height="64" fill="currentColor" fill-opacity="0.07" stroke="none"/>
+  <path d="M0 296 H640"/>
+  <!-- 교실 칸막이와 문 -->
+  <path d="M372 40 V296" stroke-width="3"/>
+  <rect x="300" y="150" width="60" height="146" rx="4" fill="var(--card)"/>
+  <circle cx="348" cy="226" r="4" fill="currentColor" stroke="none"/>
+  <text x="330" y="140" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">출구</text>
+  <!-- 책상 -->
+  <rect x="34" y="210" width="236" height="12" rx="3" fill="var(--card)"/>
+  <path d="M50 222 V296 M254 222 V296"/>
+  <!-- ESP32 보드 -->
+  <rect x="100" y="166" width="104" height="44" rx="6" fill="var(--card)"/>
+  <rect x="116" y="176" width="40" height="24" rx="3" fill="currentColor" fill-opacity="0.15" stroke="none"/>
+  <text x="178" y="192" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <!-- 센서 다섯: 불꽃·온습도·틸트·버튼·부저 -->
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="60" y="160">불꽃</text>
+    <text x="110" y="134">온습도</text>
+    <text x="164" y="134">틸트</text>
+    <text x="222" y="160">버튼</text>
+    <text x="258" y="134">부저</text>
+  </g>
+  <rect x="46" y="164" width="28" height="22" rx="3" fill="#2f9e44" fill-opacity="0.3"/>
+  <path d="M60 169 c3 3 5 5 5 8 a5 5 0 0 1 -10 0 c0 -3 2 -5 5 -8 Z" fill="#f08c00" stroke="none"/>
+  <rect x="96" y="138" width="28" height="22" rx="3" fill="#1971c2" fill-opacity="0.3"/>
+  <path d="M104 144 V154 M110 144 V154 M116 144 V154" stroke-width="1.5"/>
+  <rect x="150" y="138" width="28" height="22" rx="3" fill="#f59f00" fill-opacity="0.3"/>
+  <rect x="155" y="145" width="18" height="8" rx="4" fill="var(--card)" stroke-width="1.5"/>
+  <circle cx="168" cy="149" r="2.5" fill="currentColor" stroke="none"/>
+  <rect x="208" y="164" width="28" height="22" rx="3" fill="#9c36b5" fill-opacity="0.3"/>
+  <circle cx="222" cy="175" r="6" fill="#495057" stroke-width="1.5"/>
+  <circle cx="258" cy="150" r="11" fill="#343a40" stroke-width="1.5"/>
+  <circle cx="258" cy="150" r="2.5" fill="var(--muted)" stroke="none"/>
+  <path d="M276 140 q8 10 0 20 M284 134 q12 16 0 32" stroke="#0f7c8c" stroke-width="2"/>
+  <path d="M60 186 V210 M110 160 V166 M164 160 V166 M222 186 V210 M258 161 V166" stroke-width="1.5" stroke-opacity="0.6"/>
+  <!-- 불꽃 (리모컨 시험) -->
+  <rect x="40" y="248" width="34" height="14" rx="3" fill="#495057" stroke-width="1.5"/>
+  <circle cx="47" cy="255" r="2" fill="#f08c00" stroke="none"/>
+  <text x="90" y="260" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">IR 리모컨으로 시험</text>
+  <!-- WiFi 전파 -->
+  <path d="M232 112 a40 40 0 0 1 56 0 M244 124 a24 24 0 0 1 32 0" stroke="#0f7c8c" stroke-width="2.5"/>
+  <circle cx="260" cy="134" r="3" fill="#0f7c8c" stroke="none"/>
+  <path d="M296 96 C340 70 380 70 420 96" stroke="#0f7c8c" stroke-width="2" stroke-dasharray="6 5"/>
+  <!-- 선생님 (복도) -->
+  <circle cx="470" cy="150" r="20" fill="var(--card)"/>
+  <path d="M470 170 V250 M440 200 L470 184 L500 196 M470 250 L452 296 M470 250 L488 296"/>
+  <!-- 폰 -->
+  <rect x="494" y="160" width="86" height="150" rx="10" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="502" y="176" width="70" height="44" rx="5" fill="#e03131" fill-opacity="0.85" stroke="none"/>
+  <text x="537" y="204" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">FIRE</text>
+  <text x="537" y="242" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">온도 29℃</text>
+  <rect x="504" y="256" width="66" height="26" rx="6" fill="#0f7c8c" fill-opacity="0.2" stroke-width="1.5"/>
+  <text x="537" y="274" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">출구 알리기</text>
+  <circle cx="537" cy="298" r="4" fill="currentColor" fill-opacity="0.4" stroke="none"/>
+  <!-- 말풍선 -->
+  <path d="M396 40 H612 a8 8 0 0 1 8 8 V92 a8 8 0 0 1 -8 8 H470 L452 118 L456 100 H396 a8 8 0 0 1 -8 -8 V48 a8 8 0 0 1 8 -8 Z" fill="var(--card)"/>
+  <text x="504" y="64" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">교실에 없는 선생님 폰에</text>
+  <text x="504" y="86" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">어떻게 바로 알릴까?</text>
+  <text x="24" y="330" font-size="16" font-weight="700" fill="currentColor" stroke="none">우리 교실 재난 알리미</text>
+  <text x="24" y="350" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">불꽃 · 온도 · 흔들림 · 위치 버튼 → 부저와 폰 상태판</text>
+</svg>

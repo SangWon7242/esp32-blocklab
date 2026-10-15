@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="da-web-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="da-web-title">보드와 폰이 WiFi 로 주고받는 두 길. 폰이 /data 를 요청하면 보드가 JSON 으로 상태와 온도를 보내고, 폰에서 출구 버튼을 누르면 /cmd?exit=1 요청이 가서 보드가 부저를 1초 울리고 OK 라고 답한다. 폰 화면에는 FIRE 와 온도, 출구 알리기 버튼이 있다</title>
+  <defs>
+    <marker id="da-web-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <text x="24" y="36" font-size="16" font-weight="700" fill="currentColor" stroke="none">폰과 보드가 WiFi 로 주고받는 약속 두 가지</text>
+  <!-- 보드 -->
+  <rect x="40" y="110" width="170" height="150" rx="10" fill="var(--card)"/>
+  <rect x="64" y="134" width="60" height="40" rx="4" fill="currentColor" fill-opacity="0.15" stroke="none"/>
+  <text x="166" y="160" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <g fill="currentColor" stroke="none" font-size="12">
+    <text x="60" y="200">불꽃 · 온도 · 틸트 · 버튼</text>
+    <text x="60" y="220">→ state 를 정해요</text>
+    <text x="60" y="244">부저: 15번 핀</text>
+  </g>
+  <path d="M110 86 a28 28 0 0 1 40 0 M118 96 a16 16 0 0 1 24 0" stroke="#0f7c8c" stroke-width="2.5"/>
+  <circle cx="130" cy="104" r="2.5" fill="#0f7c8c" stroke="none"/>
+  <!-- 폰 -->
+  <rect x="470" y="70" width="130" height="230" rx="14" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="482" y="94" width="106" height="60" rx="6" fill="#e03131" fill-opacity="0.85" stroke="none"/>
+  <text x="535" y="130" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff" stroke="none">FIRE</text>
+  <text x="535" y="180" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">온도 29℃</text>
+  <rect x="486" y="200" width="98" height="30" rx="7" fill="#0f7c8c" fill-opacity="0.2" stroke-width="1.5"/>
+  <text x="535" y="220" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">출구 알리기</text>
+  <text x="535" y="262" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.65" stroke="none">2초마다 /data 읽기</text>
+  <circle cx="535" cy="286" r="4" fill="currentColor" fill-opacity="0.4" stroke="none"/>
+  <!-- 길 1: 읽기 -->
+  <path d="M460 118 H222" marker-end="url(#da-web-arrow)"/>
+  <rect x="268" y="90" width="140" height="22" rx="11" fill="var(--card)" stroke-width="1.5"/>
+  <text x="338" y="106" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">읽기 /data</text>
+  <path d="M222 148 H460" marker-end="url(#da-web-arrow)" stroke="#0f7c8c"/>
+  <text x="340" y="170" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">{"state": "FIRE", "temp": 29}</text>
+  <!-- 길 2: 명령 -->
+  <path d="M460 214 H222" marker-end="url(#da-web-arrow)"/>
+  <rect x="258" y="186" width="160" height="22" rx="11" fill="var(--card)" stroke-width="1.5"/>
+  <text x="338" y="202" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">명령 /cmd?exit=1</text>
+  <path d="M222 244 H460" marker-end="url(#da-web-arrow)" stroke="#0f7c8c"/>
+  <text x="340" y="266" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">부저 1초 울리고 "OK"</text>
+  <!-- 부저 소리 -->
+  <circle cx="62" cy="290" r="10" fill="#343a40" stroke-width="1.5"/>
+  <path d="M78 282 q6 8 0 16 M86 276 q10 14 0 28" stroke="#0f7c8c" stroke-width="2"/>
+  <text x="104" y="296" font-size="12" fill="currentColor" stroke="none">출구 알림 소리</text>
+  <text x="24" y="340" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">1부 페이지 응답은 두 길이 한 페이지에 들어 있어요. 앱 만들기에서는 /data 와 /cmd 로 나눠요</text>
+</svg>

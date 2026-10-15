@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="da-and-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="da-and-title">화재 판단은 두 조건 and. 왼쪽 원: 불꽃 센서 값이 기준 이상(적외선을 봤다). 오른쪽 원: 온도가 27도 이상(열이 있다). 두 원이 겹치는 곳만 FIRE. 불꽃만 있을 때는 햇빛이나 리모컨일 수 있고, 온도만 높을 때는 난방이나 더운 날일 수 있어 둘 다 오경보</title>
+  <text x="24" y="38" font-size="16" font-weight="700" fill="currentColor" stroke="none">불꽃만 보이면 화재일까? 두 조건을 and 로 묶어요</text>
+  <!-- 두 원 -->
+  <circle cx="250" cy="190" r="96" fill="#f08c00" fill-opacity="0.18" stroke="#f08c00" stroke-width="2.5"/>
+  <circle cx="390" cy="190" r="96" fill="#e03131" fill-opacity="0.16" stroke="#e03131" stroke-width="2.5"/>
+  <!-- 겹치는 부분 -->
+  <path d="M320 118 A96 96 0 0 1 320 262 A96 96 0 0 1 320 118 Z" fill="#e03131" fill-opacity="0.45" stroke="none"/>
+  <text x="320" y="186" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">FIRE</text>
+  <text x="320" y="206" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">둘 다 참</text>
+  <!-- 왼쪽 원 글 -->
+  <g fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="214" y="166" font-size="14" font-weight="700">불꽃 값</text>
+    <text x="214" y="186" font-size="13">1500 이상</text>
+    <text x="214" y="206" font-size="12" fill-opacity="0.7">적외선을 봤다</text>
+    <text x="426" y="166" font-size="14" font-weight="700">온도</text>
+    <text x="426" y="186" font-size="13">27℃ 이상</text>
+    <text x="426" y="206" font-size="12" fill-opacity="0.7">열이 있다</text>
+  </g>
+  <!-- 오경보 설명 -->
+  <g fill="currentColor" stroke="none" font-size="12">
+    <text x="24" y="318" font-weight="700">불꽃만:</text>
+    <text x="78" y="318">창가 햇빛 · IR 리모컨 → 불이 아니에요</text>
+    <text x="350" y="318" font-weight="700">온도만:</text>
+    <text x="404" y="318">난방 · 더운 날 → 불이 아니에요</text>
+    <text x="24" y="344" font-weight="700">둘 다:</text>
+    <text x="66" y="344">불꽃이 보이고 주위가 뜨거워진다 → 화재일 가능성이 커요</text>
+  </g>
+  <!-- 가운데 아래 and 표시 -->
+  <rect x="290" y="276" width="60" height="22" rx="11" fill="var(--card)" stroke-width="1.5"/>
+  <text x="320" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">and</text>
+  <!-- 불꽃 그림 -->
+  <path d="M140 118 c8 10 14 16 14 26 a14 14 0 0 1 -28 0 c0 -10 6 -16 14 -26 Z" fill="#f08c00" stroke="none"/>
+  <path d="M140 132 c4 5 7 8 7 13 a7 7 0 0 1 -14 0 c0 -5 3 -8 7 -13 Z" fill="#ffd43b" stroke="none"/>
+  <!-- 온도계 -->
+  <rect x="500" y="98" width="12" height="52" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <circle cx="506" cy="158" r="10" fill="#e03131" stroke-width="1.5"/>
+  <path d="M506 150 V120" stroke="#e03131" stroke-width="5"/>
+</svg>

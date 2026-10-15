@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="da-wiring-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="da-wiring-title">브레드보드 배선도: 불꽃 센서 모듈(S · + · −)을 e 칸 2·3·4번 줄, DHT11 모듈을 e 칸 8·9·10번 줄, 틸트 스위치 모듈을 e 칸 14·15·16번 줄에 꽂는다. ESP32 34번 초록 선 → 2번 줄(불꽃 S), 13번 파란 선 → 8번 줄(DHT11 S), 14번 주황 선 → 14번 줄(틸트 S). 세 모듈의 + 는 빨간 선으로 위쪽 + 줄 → 3V3, − 는 검은 선으로 위쪽 − 줄 → GND. 푸시 버튼은 가운데 홈에 걸쳐 20·22번 줄에 꽂고 27번 보라 선 → 20번 줄, 22번 줄 → 아래 − 줄. 수동 부저는 + 다리를 26번 줄, − 다리를 28번 줄에 꽂고 15번 청록 선 → 26번 줄, 28번 줄 → 아래 − 줄 → GND</title>
+  <rect x="200" y="60" width="394" height="252" rx="8" fill="var(--muted)"/>
+  <rect x="206" y="180" width="382" height="8" rx="3" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M226 67 H578" stroke="#e03131" stroke-width="2"/>
+  <path d="M226 97 H578" stroke="#1971c2" stroke-width="2"/>
+  <path d="M226 271 H578" stroke="#1971c2" stroke-width="2"/>
+  <path d="M226 301 H578" stroke="#e03131" stroke-width="2"/>
+  <path d="M228 124h0 M240 124h0 M252 124h0 M264 124h0 M276 124h0 M288 124h0 M300 124h0 M312 124h0 M324 124h0 M336 124h0 M348 124h0 M360 124h0 M372 124h0 M384 124h0 M396 124h0 M408 124h0 M420 124h0 M432 124h0 M444 124h0 M456 124h0 M468 124h0 M480 124h0 M492 124h0 M504 124h0 M516 124h0 M528 124h0 M540 124h0 M552 124h0 M564 124h0 M576 124h0 M228 136h0 M240 136h0 M252 136h0 M264 136h0 M276 136h0 M288 136h0 M300 136h0 M312 136h0 M324 136h0 M336 136h0 M348 136h0 M360 136h0 M372 136h0 M384 136h0 M396 136h0 M408 136h0 M420 136h0 M432 136h0 M444 136h0 M456 136h0 M468 136h0 M480 136h0 M492 136h0 M504 136h0 M516 136h0 M528 136h0 M540 136h0 M552 136h0 M564 136h0 M576 136h0 M228 148h0 M240 148h0 M252 148h0 M264 148h0 M276 148h0 M288 148h0 M300 148h0 M312 148h0 M324 148h0 M336 148h0 M348 148h0 M360 148h0 M372 148h0 M384 148h0 M396 148h0 M408 148h0 M420 148h0 M432 148h0 M444 148h0 M456 148h0 M468 148h0 M480 148h0 M492 148h0 M504 148h0 M516 148h0 M528 148h0 M540 148h0 M552 148h0 M564 148h0 M576 148h0 M228 160h0 M240 160h0 M252 160h0 M264 160h0 M276 160h0 M288 160h0 M300 160h0 M312 160h0 M324 160h0 M336 160h0 M348 160h0 M360 160h0 M372 160h0 M384 160h0 M396 160h0 M408 160h0 M420 160h0 M432 160h0 M444 160h0 M456 160h0 M468 160h0 M480 160h0 M492 160h0 M504 160h0 M516 160h0 M528 160h0 M540 160h0 M552 160h0 M564 160h0 M576 160h0 M228 172h0 M240 172h0 M252 172h0 M264 172h0 M276 172h0 M288 172h0 M300 172h0 M312 172h0 M324 172h0 M336 172h0 M348 172h0 M360 172h0 M372 172h0 M384 172h0 M396 172h0 M408 172h0 M420 172h0 M432 172h0 M444 172h0 M456 172h0 M468 172h0 M480 172h0 M492 172h0 M504 172h0 M516 172h0 M528 172h0 M540 172h0 M552 172h0 M564 172h0 M576 172h0 M228 196h0 M240 196h0 M252 196h0 M264 196h0 M276 196h0 M288 196h0 M300 196h0 M312 196h0 M324 196h0 M336 196h0 M348 196h0 M360 196h0 M372 196h0 M384 196h0 M396 196h0 M408 196h0 M420 196h0 M432 196h0 M444 196h0 M456 196h0 M468 196h0 M480 196h0 M492 196h0 M504 196h0 M516 196h0 M528 196h0 M540 196h0 M552 196h0 M564 196h0 M576 196h0 M228 208h0 M240 208h0 M252 208h0 M264 208h0 M276 208h0 M288 208h0 M300 208h0 M312 208h0 M324 208h0 M336 208h0 M348 208h0 M360 208h0 M372 208h0 M384 208h0 M396 208h0 M408 208h0 M420 208h0 M432 208h0 M444 208h0 M456 208h0 M468 208h0 M480 208h0 M492 208h0 M504 208h0 M516 208h0 M528 208h0 M540 208h0 M552 208h0 M564 208h0 M576 208h0 M228 220h0 M240 220h0 M252 220h0 M264 220h0 M276 220h0 M288 220h0 M300 220h0 M312 220h0 M324 220h0 M336 220h0 M348 220h0 M360 220h0 M372 220h0 M384 220h0 M396 220h0 M408 220h0 M420 220h0 M432 220h0 M444 220h0 M456 220h0 M468 220h0 M480 220h0 M492 220h0 M504 220h0 M516 220h0 M528 220h0 M540 220h0 M552 220h0 M564 220h0 M576 220h0 M228 232h0 M240 232h0 M252 232h0 M264 232h0 M276 232h0 M288 232h0 M300 232h0 M312 232h0 M324 232h0 M336 232h0 M348 232h0 M360 232h0 M372 232h0 M384 232h0 M396 232h0 M408 232h0 M420 232h0 M432 232h0 M444 232h0 M456 232h0 M468 232h0 M480 232h0 M492 232h0 M504 232h0 M516 232h0 M528 232h0 M540 232h0 M552 232h0 M564 232h0 M576 232h0 M228 244h0 M240 244h0 M252 244h0 M264 244h0 M276 244h0 M288 244h0 M300 244h0 M312 244h0 M324 244h0 M336 244h0 M348 244h0 M360 244h0 M372 244h0 M384 244h0 M396 244h0 M408 244h0 M420 244h0 M432 244h0 M444 244h0 M456 244h0 M468 244h0 M480 244h0 M492 244h0 M504 244h0 M516 244h0 M528 244h0 M540 244h0 M552 244h0 M564 244h0 M576 244h0 M234 76h0 M246 76h0 M258 76h0 M270 76h0 M282 76h0 M306 76h0 M318 76h0 M330 76h0 M342 76h0 M354 76h0 M378 76h0 M390 76h0 M402 76h0 M414 76h0 M426 76h0 M450 76h0 M462 76h0 M474 76h0 M486 76h0 M498 76h0 M522 76h0 M534 76h0 M546 76h0 M558 76h0 M570 76h0 M234 88h0 M246 88h0 M258 88h0 M270 88h0 M282 88h0 M306 88h0 M318 88h0 M330 88h0 M342 88h0 M354 88h0 M378 88h0 M390 88h0 M402 88h0 M414 88h0 M426 88h0 M450 88h0 M462 88h0 M474 88h0 M486 88h0 M498 88h0 M522 88h0 M534 88h0 M546 88h0 M558 88h0 M570 88h0 M234 280h0 M246 280h0 M258 280h0 M270 280h0 M282 280h0 M306 280h0 M318 280h0 M330 280h0 M342 280h0 M354 280h0 M378 280h0 M390 280h0 M402 280h0 M414 280h0 M426 280h0 M450 280h0 M462 280h0 M474 280h0 M486 280h0 M498 280h0 M522 280h0 M534 280h0 M546 280h0 M558 280h0 M570 280h0 M234 292h0 M246 292h0 M258 292h0 M270 292h0 M282 292h0 M306 292h0 M318 292h0 M330 292h0 M342 292h0 M354 292h0 M378 292h0 M390 292h0 M402 292h0 M414 292h0 M426 292h0 M450 292h0 M462 292h0 M474 292h0 M486 292h0 M498 292h0 M522 292h0 M534 292h0 M546 292h0 M558 292h0 M570 292h0" stroke-width="4.5" stroke-opacity="0.38"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="middle">
+  <text x="213" y="128" fill-opacity="0.6">a</text><text x="585" y="128" fill-opacity="0.6">a</text>
+  <text x="213" y="140" fill-opacity="0.6">b</text><text x="585" y="140" fill-opacity="0.6">b</text>
+  <text x="213" y="152" fill-opacity="0.6">c</text><text x="585" y="152" fill-opacity="0.6">c</text>
+  <text x="213" y="164" fill-opacity="0.6">d</text><text x="585" y="164" fill-opacity="0.6">d</text>
+  <text x="213" y="176" fill-opacity="0.6">e</text><text x="585" y="176" fill-opacity="0.6">e</text>
+  <text x="213" y="200" fill-opacity="0.6">f</text><text x="585" y="200" fill-opacity="0.6">f</text>
+  <text x="213" y="212" fill-opacity="0.6">g</text><text x="585" y="212" fill-opacity="0.6">g</text>
+  <text x="213" y="224" fill-opacity="0.6">h</text><text x="585" y="224" fill-opacity="0.6">h</text>
+  <text x="213" y="236" fill-opacity="0.6">i</text><text x="585" y="236" fill-opacity="0.6">i</text>
+  <text x="213" y="248" fill-opacity="0.6">j</text><text x="585" y="248" fill-opacity="0.6">j</text>
+  <text x="228" y="113" fill-opacity="0.6">1</text><text x="228" y="265" fill-opacity="0.6">1</text>
+  <text x="276" y="113" fill-opacity="0.6">5</text><text x="276" y="265" fill-opacity="0.6">5</text>
+  <text x="336" y="113" fill-opacity="0.6">10</text><text x="336" y="265" fill-opacity="0.6">10</text>
+  <text x="396" y="113" fill-opacity="0.6">15</text><text x="396" y="265" fill-opacity="0.6">15</text>
+  <text x="456" y="113" fill-opacity="0.6">20</text><text x="456" y="265" fill-opacity="0.6">20</text>
+  <text x="516" y="113" fill-opacity="0.6">25</text><text x="516" y="265" fill-opacity="0.6">25</text>
+  <text x="576" y="113" fill-opacity="0.6">30</text><text x="576" y="265" fill-opacity="0.6">30</text>
+  </g>
+  <g stroke="none" font-size="14" font-weight="700" text-anchor="middle">
+  <text x="213" y="81" fill="#e03131">+</text><text x="585" y="81" fill="#e03131">+</text>
+  <text x="213" y="93" fill="#1971c2">−</text><text x="585" y="93" fill="#1971c2">−</text>
+  <text x="213" y="285" fill="#1971c2">−</text><text x="585" y="285" fill="#1971c2">−</text>
+  <text x="213" y="297" fill="#e03131">+</text><text x="585" y="297" fill="#e03131">+</text>
+  </g>
+  <rect x="40" y="40" width="120" height="280" rx="10" fill="var(--card)"/>
+  <rect x="58" y="160" width="74" height="60" rx="4" fill="var(--muted)"/>
+  <path d="M66 176 h10 v-6 h10 v6 h10 v-6 h10 v6 h10" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="95" y="206" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <rect x="78" y="314" width="34" height="16" rx="3" fill="var(--muted)"/>
+  <text x="95" y="308" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">USB</text>
+  <path d="M50 76h0 M50 88h0 M50 100h0 M150 100h0 M50 112h0 M150 112h0 M50 124h0 M50 136h0 M50 148h0 M50 160h0 M50 172h0 M150 172h0 M50 184h0 M150 184h0 M50 196h0 M150 196h0 M50 208h0 M150 208h0 M50 220h0 M150 220h0 M50 232h0 M50 244h0 M150 244h0 M50 256h0 M150 256h0 M50 268h0 M150 268h0 M50 280h0 M50 292h0 M150 292h0" stroke-width="5" stroke-opacity="0.3"/>
+  <circle cx="150" cy="76" r="4" fill="#e03131" stroke-width="1.5"/>
+  <text x="141" y="80.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">3V3</text>
+  <circle cx="150" cy="88" r="4" fill="#1e1e1e" stroke-width="1.5"/>
+  <text x="141" y="92.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">GND</text>
+  <circle cx="150" cy="124" r="4" fill="#2f9e44" stroke-width="1.5"/>
+  <text x="141" y="128.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">34</text>
+  <circle cx="150" cy="136" r="4" fill="#1971c2" stroke-width="1.5"/>
+  <text x="141" y="140.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">13</text>
+  <circle cx="150" cy="148" r="4" fill="#f59f00" stroke-width="1.5"/>
+  <text x="141" y="152.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">14</text>
+  <circle cx="150" cy="160" r="4" fill="#9c36b5" stroke-width="1.5"/>
+  <text x="141" y="164.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">27</text>
+  <circle cx="150" cy="232" r="4" fill="#0f7c8c" stroke-width="1.5"/>
+  <text x="141" y="236.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">15</text>
+  <circle cx="150" cy="280" r="4" fill="#1e1e1e" stroke-width="1.5"/>
+  <text x="141" y="284.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">GND</text>
+  <rect x="228" y="140" width="48" height="23" rx="3" fill="#2f9e44" fill-opacity="0.25" stroke-width="1.8"/>
+  <path d="M252 143 c3 3 5 5 5 8 a5 5 0 0 1 -10 0 c0 -3 2 -5 5 -8 Z" fill="#f08c00" stroke="none"/>
+  <text x="240" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">S</text>
+  <circle cx="240" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <text x="252" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">+</text>
+  <circle cx="252" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <text x="264" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">−</text>
+  <circle cx="264" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <rect x="300" y="140" width="48" height="23" rx="3" fill="#1971c2" fill-opacity="0.25" stroke-width="1.8"/>
+  <rect x="316" y="142" width="16" height="12" rx="2" fill="#1c7ed6" fill-opacity="0.8" stroke="none"/>
+  <path d="M319 145 V151 M323 145 V151 M327 145 V151" stroke="#ffffff" stroke-width="1.2"/>
+  <text x="312" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">S</text>
+  <circle cx="312" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <text x="324" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">+</text>
+  <circle cx="324" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <text x="336" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">−</text>
+  <circle cx="336" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <rect x="372" y="140" width="48" height="23" rx="3" fill="#f59f00" fill-opacity="0.25" stroke-width="1.8"/>
+  <rect x="387" y="142" width="18" height="10" rx="5" fill="var(--card)" stroke-width="1.5"/>
+  <circle cx="399" cy="147" r="3" fill="currentColor" stroke="none"/>
+  <text x="384" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">S</text>
+  <circle cx="384" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <text x="396" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">+</text>
+  <circle cx="396" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <text x="408" y="164" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">−</text>
+  <circle cx="408" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <rect x="448" y="164" width="40" height="40" rx="4" fill="var(--card)" stroke-width="1.8"/>
+  <circle cx="468.0" cy="184" r="9" fill="#495057" stroke-width="1.5"/>
+  <circle cx="456" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="480" cy="172" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="456" cy="196" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="480" cy="196" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M528 196 V180 M552 196 V180" stroke-width="2.5"/>
+  <circle cx="540.0" cy="168" r="15" fill="#343a40" stroke-width="1.5"/>
+  <circle cx="540.0" cy="168" r="3" fill="var(--muted)" stroke="none"/>
+  <text x="532" y="162" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff" stroke="none">+</text>
+  <circle cx="528" cy="196" r="2.5" fill="currentColor" stroke="none"/><circle cx="552" cy="196" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M150 124 L240 124" stroke-width="6"/>
+  <path d="M150 124 L240 124" stroke="#2f9e44" stroke-width="3.5"/>
+  <rect x="236.5" y="120.5" width="7" height="7" rx="1.5" fill="#2f9e44" stroke-width="1.5"/>
+  <path d="M150 136 L312 136" stroke-width="6"/>
+  <path d="M150 136 L312 136" stroke="#1971c2" stroke-width="3.5"/>
+  <rect x="308.5" y="132.5" width="7" height="7" rx="1.5" fill="#1971c2" stroke-width="1.5"/>
+  <path d="M150 148 L384 148" stroke-width="6"/>
+  <path d="M150 148 L384 148" stroke="#f59f00" stroke-width="3.5"/>
+  <rect x="380.5" y="144.5" width="7" height="7" rx="1.5" fill="#f59f00" stroke-width="1.5"/>
+  <path d="M150 160 L456 160" stroke-width="6"/>
+  <path d="M150 160 L456 160" stroke="#9c36b5" stroke-width="3.5"/>
+  <rect x="452.5" y="156.5" width="7" height="7" rx="1.5" fill="#9c36b5" stroke-width="1.5"/>
+  <path d="M150 232 L528 232" stroke-width="6"/>
+  <path d="M150 232 L528 232" stroke="#0f7c8c" stroke-width="3.5"/>
+  <rect x="524.5" y="228.5" width="7" height="7" rx="1.5" fill="#0f7c8c" stroke-width="1.5"/>
+  <path d="M252 124 L252 76" stroke-width="6"/>
+  <path d="M252 124 L252 76" stroke="#e03131" stroke-width="3.5"/>
+  <rect x="248.5" y="120.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <rect x="248.5" y="72.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <path d="M264 124 L264 88" stroke-width="6"/>
+  <path d="M264 124 L264 88" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="260.5" y="120.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="260.5" y="84.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M324 124 L324 76" stroke-width="6"/>
+  <path d="M324 124 L324 76" stroke="#e03131" stroke-width="3.5"/>
+  <rect x="320.5" y="120.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <rect x="320.5" y="72.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <path d="M336 124 L336 88" stroke-width="6"/>
+  <path d="M336 124 L336 88" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="332.5" y="120.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="332.5" y="84.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M396 124 L396 76" stroke-width="6"/>
+  <path d="M396 124 L396 76" stroke="#e03131" stroke-width="3.5"/>
+  <rect x="392.5" y="120.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <rect x="392.5" y="72.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <path d="M408 124 L408 88" stroke-width="6"/>
+  <path d="M408 124 L408 88" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="404.5" y="120.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="404.5" y="84.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M480 244 L480 268 L486 280" stroke-width="6"/>
+  <path d="M480 244 L480 268 L486 280" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="476.5" y="240.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="476.5" y="264.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="482.5" y="276.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M552 244 L552 268 L558 280" stroke-width="6"/>
+  <path d="M552 244 L552 268 L558 280" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="548.5" y="240.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="548.5" y="264.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="554.5" y="276.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M150 76 L234 76" stroke-width="6"/>
+  <path d="M150 76 L234 76" stroke="#e03131" stroke-width="3.5"/>
+  <rect x="230.5" y="72.5" width="7" height="7" rx="1.5" fill="#e03131" stroke-width="1.5"/>
+  <path d="M150 88 L246 88" stroke-width="6"/>
+  <path d="M150 88 L246 88" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="242.5" y="84.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M234 280 L150 280" stroke-width="6"/>
+  <path d="M234 280 L150 280" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="230.5" y="276.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M228 142 L252 46" stroke-width="1.5"/>
+  <rect x="213.0" y="29.5" width="78" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="252" y="44.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">불꽃 센서</text>
+  <path d="M300 142 L340 46" stroke-width="1.5"/>
+  <rect x="286.0" y="29.5" width="108" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="340" y="44.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">DHT11 (온습도)</text>
+  <path d="M372 142 L452 46" stroke-width="1.5"/>
+  <rect x="410.0" y="29.5" width="84" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="452" y="44.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">틸트 스위치</text>
+  <path d="M488 166 L540 122" stroke-width="1.5"/>
+  <rect x="515.0" y="105.5" width="50" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="540" y="120.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">버튼</text>
+  <path d="M555 176 L552 216" stroke-width="1.5"/>
+  <rect x="512.0" y="199.5" width="80" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="552" y="214.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">수동 부저</text>
+  <path d="M24 344 H42" stroke-width="6"/><path d="M24 344 H42" stroke="#2f9e44" stroke-width="3.5"/>
+  <text x="48" y="348.5" font-size="12" font-weight="600" fill="currentColor" stroke="none">34 → 불꽃 S</text>
+  <path d="M118 344 H136" stroke-width="6"/><path d="M118 344 H136" stroke="#1971c2" stroke-width="3.5"/>
+  <text x="142" y="348.5" font-size="12" font-weight="600" fill="currentColor" stroke="none">13 → DHT11 S</text>
+  <path d="M226 344 H244" stroke-width="6"/><path d="M226 344 H244" stroke="#f59f00" stroke-width="3.5"/>
+  <text x="250" y="348.5" font-size="12" font-weight="600" fill="currentColor" stroke="none">14 → 틸트 S</text>
+  <path d="M318 344 H336" stroke-width="6"/><path d="M318 344 H336" stroke="#9c36b5" stroke-width="3.5"/>
+  <text x="342" y="348.5" font-size="12" font-weight="600" fill="currentColor" stroke="none">27 → 버튼</text>
+  <path d="M400 344 H418" stroke-width="6"/><path d="M400 344 H418" stroke="#0f7c8c" stroke-width="3.5"/>
+  <text x="424" y="348.5" font-size="12" font-weight="600" fill="currentColor" stroke="none">15 → 부저 +</text>
+  <path d="M492 344 H510" stroke-width="6"/><path d="M492 344 H510" stroke="#1e1e1e" stroke-width="3.5"/>
+  <text x="516" y="348.5" font-size="12" font-weight="600" fill="currentColor" stroke="none">− 줄 → GND</text>
+</svg>
