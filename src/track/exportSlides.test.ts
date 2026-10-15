@@ -63,6 +63,33 @@ describe("슬라이드 내보내기", () => {
     }
   }, 60_000);
 
+  it("app 단계: 설계 세 칸(빈 칸)·약속표·프롬프트 템플릿·검사 항목·읽기 체크 문항 (답은 넣지 않는다)", async () => {
+    const loaded = loadChapter(ROOT, "01-led");
+    const app = {
+      type: "app" as const,
+      id: "app-test",
+      title: "폰 앱 만들기",
+      api: [
+        { path: "/data", method: "읽기" as const, fields: ["temp"], note: "2초마다 읽기" },
+        { path: "/cmd?led=on", method: "명령" as const, note: "LED 켜기" },
+      ],
+      design: { show: ["보기글온도"], buttons: [], changes: [] },
+      promptTemplate: "ESP32 주소 {{ip}} 에서 {{data}} 를 읽어 {{show}} 을(를) 보여 줘.\n외부 라이브러리 없이.\n",
+      readcheck: [{ kind: "choice" as const, q: "값을 가져오는 함수는?", options: ["fetch", "print"], answer: 0, hint: "숨긴힌트" }],
+    };
+    const chapter = { ...loaded.chapter, parts: [{ id: "p", title: "앱", steps: [app] }] };
+    const { pres } = await buildDeck({ ...loaded, chapter }, { font: "Malgun Gothic", codeFont: "Consolas" });
+    const zip = await JSZip.loadAsync(await deckBuffer(pres));
+    const names = Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n));
+    const body = (await Promise.all(names.map((n) => zip.file(n)!.async("string")))).map(texts).join("\n");
+    for (const t of ["화면 설계", "보여 줄 값", "누를 버튼", "바뀌는 모습", "약속표", "/cmd?led=on", "프롬프트 템플릿", "＿＿(보여 줄 값)", "붙여넣기 검사", "약속 주소 /data 쓰기", "크기 12000 바이트 이하", "값을 가져오는 함수는?"]) {
+      expect(body).toContain(t);
+    }
+    // 학생 설계 칸은 빈 칸으로 (보기 글은 넣지 않는다), 힌트도 넣지 않는다
+    expect(body).not.toContain("보기글온도");
+    expect(body).not.toContain("숨긴힌트");
+  }, 60_000);
+
   it("한 문단에 문단 속성(pPr)은 하나뿐이고, 동아시아 글꼴은 한글 charset", async () => {
     const { all } = await exportChapter("01-led");
     for (const [, para] of all.matchAll(/<a:p>([\s\S]*?)<\/a:p>/g)) expect((para.match(/<a:pPr\b/g) ?? []).length).toBeLessThanOrEqual(1);

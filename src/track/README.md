@@ -112,7 +112,7 @@ Keyestudio 수업의 "2. 원리", "6. 실행 결과", "7. 코드 설명"을 담�
 | 키 | 뜻 |
 |---|---|
 | `id` | 챕터 안에서 겹치지 않는 영어 소문자·숫자·`-` (진행 기록의 키가 되므로 바꾸지 말 것) |
-| `type` | 아래 8가지 + `debug` |
+| `type` | 아래 유형 (`problem`·`analysis`·`predict`·`run`·`readcheck`·`mission`·`debug`·`design`·`reflect`·`app`) |
 | `title` | 단계 제목 |
 | `minutes` | 선택. 기준 시간(분) |
 | `scene` | 선택. `{ image, caption? }` — 안내 칸 맨 위 장면 그림과 그 아래 설명 |
@@ -166,11 +166,79 @@ todo: [보드를 USB 로 연결하기, "`26`번 핀에 LED 꽂기"]
 | `debug` | `symptoms: [{ title, code(코드 조각), question, rules? }]`, `rules?`(전체 규칙), `answerCode?` |
 | `design` | `pseudocode: [{ text, blank?: { answer, tolerance? } }]`, `translation: [[우리말, 코드], ...]`, `targetCode` |
 | `reflect` | `lineExplain`(줄마다 "이 줄은 ___" 을 쓸 코드), `prompts`: 정확히 4개 |
+| `app` | `api`(약속표), `design: { show, buttons, changes }`(설계 칸 보기 글), `promptTemplate`, `checks?: { maxBytes?, mustUse? }`, `readcheck`(1~3문항) — 아래 "앱 만들기" |
 
 - `design.pseudocode`: `text`의 `__` 자리가 빈칸이고 `blank.answer`가 예시 답이다(글 또는 숫자). 빈칸 없는 줄은 `blank`를 빼면 된다.
   채점(`src/track/design.ts`): 숫자이거나 숫자로 시작하는 답(`15 cm`)은 학생 글의 첫 숫자를 `tolerance`(기본 0) 범위로, 글 답은 공백을 무시하고 비교한다. `문(서보)`처럼 괄호가 있으면 `문`, `서보`도 맞다.
   조립 작업판은 `targetCode`를 블록으로 바꾼 뒤 시작 블록 몸통의 명령 블록을 하나씩 떼어(안쪽 몸통은 그대로) 섞어 둔다. 판정은 `codeEquals targetCode`.
 - `debug.symptoms[].rules`: 그 증상의 고장 코드를 고친 결과에 거는 규칙.
+
+### 앱 만들기 (`app`)
+
+AI 바이브 코딩으로 폰 앱(웹 페이지 한 장)을 만드는 단계. 활동 칸은 위에서부터 차례로:
+① **화면 설계** 세 칸(보여 줄 값·누를 버튼·바뀌는 모습, 학생이 한 줄에 하나씩) → ② **약속표**(`api`) →
+③ **프롬프트**(템플릿을 설계·약속표로 채운 글 + 복사) → ④ **결과 붙여넣기 · 검사** → ⑤ 통과하면 **보드에 `index.html` 저장**(보드 연결 필요, 선택)·**미리 보기**(`sandbox` iframe — 스크립트·요청 없이 모양만) → ⑥ **읽기 체크**.
+완료 조건: 검사 통과 + 읽기 체크 통과. 보드 저장은 하지 않아도 완료할 수 있다(보드가 없는 교실). 검사 뒤 붙여 둔 글을 고치면 다시 검사해야 한다.
+
+```yaml
+- type: app
+  id: app
+  title: 폰 앱 만들기
+  minutes: 20
+  api:                         # 약속표: ESP32 코드가 내는 주소 (코드와 맞춰 적는다)
+    - { path: "/data", method: "읽기", fields: ["temp", "hum"], note: "2초마다 읽기" }
+    - { path: "/cmd?led=on", method: "명령", note: "LED 켜기" }
+    - { path: "/cmd?led=off", method: "명령", note: "LED 끄기" }
+  design:                      # 설계 칸의 보기 글 (학생 칸에 "예:" 로 흐리게만 보인다). 칸마다 생략하면 []
+    show: ["온도", "습도"]
+    buttons: ["LED 켜기", "LED 끄기"]
+    changes: ["온도 28 넘으면 빨강"]
+  promptTemplate: |
+    ESP32 주소 {{ip}} 에서 {{data}} 를 2초마다 읽어 {{show}} 을(를) 보여 주고,
+    버튼 {{buttons}} 을(를) 누르면 {{commands}} 를 요청하는 한 파일짜리 HTML 을 만들어 줘.
+    외부 라이브러리·외부 스크립트 없이, 폰 화면에 맞게.
+  checks:                      # 선택. 기본: maxBytes 12000, mustUse = 약속표 주소의 경로(/data, /cmd)
+    maxBytes: 12000
+    mustUse: ["led=on"]        # 기본에 덧붙는다
+  readcheck:                   # 1~3문항
+    - { kind: choice, q: "값을 가져오는 줄에 쓰인 것은?", options: ["fetch", "print", "import"], answer: 0, hint: "주소에 요청을 보내는 함수" }
+    - { kind: text, q: "버튼을 누르면 어느 줄이 보드에 요청을 보내나요?" }
+```
+
+| 키 | 뜻 |
+|---|---|
+| `api[].path` | `/` 로 시작하는 상대 주소(빈칸 없이). 질의(`?led=on`)를 붙여도 된다 |
+| `api[].method` | `읽기`(값 JSON 을 주는 주소) \| `명령`(보드에 일을 시키는 주소) |
+| `api[].fields` | 선택. 읽기 주소가 주는 JSON 키 |
+| `api[].note` | 선택. 설명 (명령 주소의 설명은 프롬프트에도 들어간다) |
+| `design` | 세 칸의 보기 글. 학생 답이 아니라 흐린 예시로만 보인다 |
+| `promptTemplate` | 빈칸 `{{ip}}`·`{{data}}`·`{{commands}}`·`{{show}}`·`{{buttons}}`·`{{changes}}` 만 쓸 수 있다(다른 이름은 검사에서 걸린다) |
+| `checks.maxBytes` | 선택. 크기 한도(UTF-8 바이트, 기본 12000) |
+| `checks.mustUse` | 선택. 코드에 꼭 있어야 할 글. 약속표 주소의 경로(`?` 앞)는 늘 기본으로 들어간다 |
+| `readcheck` | 결과 HTML 읽기 체크 1~3문항. `choice` 는 채점(`answer` = 선택지 번호), `text` 는 학생 코드마다 답이 달라 채점하지 않고 쓰기만 하면 통과(교사가 확인) |
+
+프롬프트 빈칸이 채워지는 글 (`src/track/appCheck.ts` `fillPrompt`):
+
+| 빈칸 | 채우는 글 |
+|---|---|
+| `{{ip}}` | `이 페이지를 내준 보드(상대 주소)` — 앱은 보드가 내주므로 늘 상대 주소로 묻는다. "ESP32 주소 {{ip}} 에서" 처럼 쓴다 |
+| `{{data}}` | 읽기 주소들: `/data(JSON: temp, hum)` |
+| `{{commands}}` | 명령 주소들: `/cmd?led=on(LED 켜기), /cmd?led=off(LED 끄기)` |
+| `{{show}}`·`{{buttons}}`·`{{changes}}` | 학생 설계 칸의 줄을 `, ` 로 이은 것. 템플릿이 쓰는 칸이 비어 있으면 `___` 로 남고 복사 버튼이 꺼진다 |
+
+붙여넣기 검사 (`checkAppHtml`, 실패마다 되묻기 한 줄). AI 답을 ```` ``` ```` 울타리째 붙여도 울타리는 걷고 검사한다:
+
+| 항목 | 통과 조건 |
+|---|---|
+| 한 파일짜리 HTML | `<html` 이 있다 |
+| 다른 파일의 스크립트를 불러오지 않기 | `<script src=…>` 가 없다 (상대 주소여도 — 보드에는 `index.html` 하나뿐) |
+| 바깥 스타일·글꼴을 불러오지 않기 | `<link href="http…">`·`<link href="//…">` 가 없다 |
+| ESP32 상대 주소만 쓰기 | `http://`·`https://` 주소, `src=`/`href=` 의 `//…` 가 없다 (보드 IP 를 박은 주소도 실패). `http://www.w3.org/…`(SVG `xmlns`)는 예외 |
+| 약속 주소 쓰기 | `mustUse` 글이 모두 있다 (항목마다 따로) |
+| 크기 | UTF-8 바이트 ≤ `maxBytes` |
+| `<iframe` 쓰지 않기 / `eval(` 쓰지 않기 | 없다 |
+
+슬라이드(`npm run slides`)의 app 단계 장: 화면 설계 세 칸(빈 칸) · 약속표 · 프롬프트 템플릿(빈칸은 `＿＿(보여 줄 값)` 꼴) · 붙여넣기 검사 항목 · 읽기 체크 문항(답·힌트 없이).
 
 ### 읽기 체크 문항
 

@@ -14,6 +14,7 @@ import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
 import { useProgress } from "./progressState";
 import { STEP_TYPE_LABEL } from "./stepMeta";
+import { StepTypeIcon } from "./StepTypeIcon";
 import { DraftBadge, PrerequisiteList, Sessions, SubjectChips } from "./TrackMeta";
 
 const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, done: CheckCircle2 };
@@ -183,7 +184,7 @@ export function ChapterPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-1.5">
-                        <Badge variant="secondary" className="font-normal">{STEP_TYPE_LABEL[step.type]}</Badge>
+                        <Badge variant="secondary" className="font-normal"><StepTypeIcon type={step.type} />{STEP_TYPE_LABEL[step.type]}</Badge>
                         {step.optional && <Badge variant="outline" className="font-normal">선택</Badge>}
                         {step.minutes && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="size-3" />{step.minutes}분</span>}
                       </span>

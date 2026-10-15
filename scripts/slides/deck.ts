@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import PptxGenJS from "pptxgenjs";
+import { APP_DESIGN_BOXES, appCheckLabels, appCheckOptions } from "../../src/track/appCheck.ts";
 import type { Step } from "../../src/track/schema.ts";
 import type { LoadedSlideChapter, SlideChapter } from "./chapter.ts";
 import { blockLines, itemBlock, markdownBlocks, plainBlock, splitBlock, textWidthPt, type Block } from "./text.ts";
@@ -42,6 +43,7 @@ export const STEP_TYPE_LABEL: Record<string, string> = {
   debug: "디버깅",
   design: "설계",
   reflect: "성찰",
+  app: "앱 만들기",
 };
 
 const TYPE_COLOR: Record<string, string> = {
@@ -54,6 +56,7 @@ const TYPE_COLOR: Record<string, string> = {
   debug: "DC2626",
   design: "4F46E5",
   reflect: "475569",
+  app: "DB2777",
 };
 
 // 색
@@ -581,6 +584,9 @@ class DeckBuilder {
       case "reflect":
         this.reflectBoard(step, badge, notes);
         break;
+      case "app":
+        this.appBoard(step, badge, notes);
+        break;
       default:
         break;
     }
@@ -624,6 +630,52 @@ class DeckBuilder {
       fontSize: rows.length > 8 ? 14 : 17, valign: "middle", margin: [2, 6, 2, 6],
       border: { type: "solid", pt: 1, color: CARD_LINE }, fill: { color: "FFFFFF" },
     });
+  }
+
+  /** 앱 만들기: 화면 설계 세 칸(빈 칸) → 약속표 → 프롬프트 템플릿 → 검사 항목 → 읽기 체크 문항(답 없이) */
+  private appBoard(step: Extract<Step, { type: "app" }>, badge: Badge, notes: string) {
+    const s = this.framed("화면 설계", badge);
+    s.addNotes(notes);
+    const colors = ["0D9488", "D97706", "2563EB"];
+    const gap = 0.3;
+    const w = (FULL_W - 2 * gap) / 3;
+    APP_DESIGN_BOXES.forEach((b, i) => this.card(s, { x: X0 + i * (w + gap), y: BODY_Y + 0.1, w, h: BODY_H - 0.2 }, b.label, b.help, colors[i]));
+
+    const t = this.framed("약속표", badge);
+    t.addNotes(notes);
+    const head = (text: string): PptxGenJS.TableCell => ({ text, options: { bold: true, color: "FFFFFF", fill: { color: BAR }, fontFace: this.font } });
+    const rows: PptxGenJS.TableRow[] = [
+      [head("주소"), head("종류"), head("값"), head("설명")],
+      ...step.api.map((a): PptxGenJS.TableRow => [
+        { text: a.path, options: { fontFace: this.codeFont, color: INLINE_CODE } },
+        { text: a.method, options: { fontFace: this.font, color: INK } },
+        { text: a.fields?.join(", ") ?? "", options: { fontFace: this.codeFont, color: INK } },
+        { text: a.note ?? "", options: { fontFace: this.font, color: INK } },
+      ]),
+    ];
+    t.addTable(rows, {
+      x: X0, y: BODY_Y + 0.1, w: FULL_W, colW: [FULL_W * 0.28, FULL_W * 0.12, FULL_W * 0.22, FULL_W * 0.38],
+      rowH: Math.min(0.62, (BODY_H - 0.2) / rows.length), fontSize: rows.length > 8 ? 14 : 18, valign: "middle", margin: [2, 6, 2, 6],
+      border: { type: "solid", pt: 1, color: CARD_LINE }, fill: { color: "FFFFFF" },
+    });
+
+    const names: Record<string, string> = {
+      ip: "보드 주소(상대 주소)", data: "읽기 주소", commands: "명령 주소", show: "보여 줄 값", buttons: "누를 버튼", changes: "바뀌는 모습",
+    };
+    const template = step.promptTemplate.replace(/\{\{\s*([^}]*?)\s*\}\}/g, (all, k: string) => (names[k] ? `＿＿(${names[k]})` : all));
+    this.textSlides("프롬프트 템플릿", [{ blocks: template.replace(/\n+$/, "").split("\n").filter((l) => l.trim()).map((l) => plainBlock(l)) }], {
+      badge, notes, pt: 20, footer: "빈칸은 화면 설계와 약속표로 채워요",
+    });
+
+    const opts = appCheckOptions(step);
+    this.textSlides("붙여넣기 검사", [{ heading: "AI 가 만든 HTML 이 지켜야 할 것", blocks: appCheckLabels(opts).map((l) => itemBlock(l)) }], { badge, notes, pt: 20, maxLines: 10 });
+
+    const blocks: Block[] = [];
+    step.readcheck.forEach((q, i) => {
+      blocks.push(itemBlock(q.q, "number", i + 1));
+      if (q.kind === "choice") q.options.forEach((o, k) => blocks.push({ kind: "p", runs: [{ text: `      ${CIRCLED[k] ?? `${k + 1})`} ` }, { text: o, code: /[()=_.<]/.test(o) }] }));
+    });
+    this.textSlides("읽기 체크 문항", [{ blocks }], { badge, notes });
   }
 
   private reflectBoard(step: Extract<Step, { type: "reflect" }>, badge: Badge, notes: string) {
