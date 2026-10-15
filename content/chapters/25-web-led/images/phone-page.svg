@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="wlp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="wlp-title">폰 화면 둘: 왼쪽은 주소 창에 보드 IP 를 넣어 열린 LED 페이지(버튼 led=on, led=off). 오른�른쪽은 led=on 을 누른 뒤 주소가 /cmd?led=on 으로 바뀌고 값 칸에 on 이 보이는 페이지. 가운데 콘솔에는 보드가 찍은 IP 가 있다</title>
+  <defs><marker id="wlp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="236" y="40" width="168" height="70" rx="8" fill="#1e1e1e" stroke="none"/>
+  <text x="248" y="62" font-size="12" fill="#adb5bd" stroke="none">출력 창</text>
+  <text x="248" y="84" font-size="13" font-weight="700" fill="#51cf66" stroke="none">IP: 192.168.0.5</text>
+  <text x="248" y="102" font-size="13" font-weight="700" fill="#51cf66" stroke="none">192.168.0.5</text>
+  <path d="M232 76 L176 76" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#wlp-arrow)"/>
+  <text x="204" y="66" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.75" stroke="none">주소 창에</text>
+  <rect x="48" y="48" width="136" height="264" rx="16" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="60" y="76" width="112" height="216" rx="6" fill="var(--muted)"/>
+  <rect x="104" y="58" width="24" height="5" rx="2.5" fill="currentColor" fill-opacity="0.3" stroke="none"/>
+  <rect x="66" y="82" width="100" height="18" rx="4" fill="var(--card)" stroke-width="1"/>
+  <text x="116" y="95" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.8" stroke="none">192.168.0.5</text>
+  <text x="116" y="130" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">LED</text>
+  <rect x="78" y="148" width="76" height="30" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="116" y="168" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">led=on</text>
+  <rect x="78" y="190" width="76" height="30" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="116" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">led=off</text>
+  <text x="116" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">1 주소를 열면 버튼 페이지</text>
+  <path d="M196 230 H258" stroke-width="2.5" marker-end="url(#wlp-arrow)"/>
+  <text x="227" y="220" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">led=on 누르기</text>
+  <rect x="276" y="128" width="136" height="184" rx="16" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="288" y="156" width="112" height="136" rx="6" fill="var(--muted)"/>
+  <rect x="332" y="138" width="24" height="5" rx="2.5" fill="currentColor" fill-opacity="0.3" stroke="none"/>
+  <rect x="294" y="162" width="100" height="18" rx="4" fill="var(--card)" stroke-width="1"/>
+  <text x="344" y="175" text-anchor="middle" font-size="9.5" fill="#0f7c8c" font-weight="700" stroke="none">192.168.0.5/cmd?led=on</text>
+  <text x="344" y="206" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">LED</text>
+  <rect x="306" y="220" width="76" height="24" rx="6" fill="#0f7c8c" stroke="none"/>
+  <text x="344" y="237" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">led=on</text>
+  <rect x="306" y="250" width="76" height="24" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="344" y="267" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">led=off</text>
+  <text x="344" y="286" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">on</text>
+  <text x="344" y="336" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">2 주소가 바뀌고 LED 가 켜짐</text>
+  <path d="M420 200 H456" stroke-width="2.5" marker-end="url(#wlp-arrow)"/>
+  <rect x="470" y="130" width="130" height="150" rx="12" fill="var(--card)" stroke-width="2"/>
+  <rect x="488" y="146" width="60" height="44" rx="4" fill="var(--muted)"/>
+  <text x="518" y="173" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <circle cx="574" cy="168" r="22" fill="#ffd43b" fill-opacity="0.35" stroke="none"/>
+  <path d="M566 182 H582 V178 H566 Z" fill="#e03131" stroke-width="1.5"/>
+  <path d="M567 178 V164 A7 7 0 0 1 581 164 V178 Z" fill="#ff6b6b" stroke-width="1.5"/>
+  <path d="M574 146 V138 M558 152 L552 146 M590 152 L596 146" stroke="#f59f00" stroke-width="2.5"/>
+  <text x="535" y="222" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">path = "/cmd"</text>
+  <text x="535" y="242" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">query 의 led = "on"</text>
+  <text x="535" y="264" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">→ led.value(1)</text>
+  <text x="535" y="300" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">3 보드가 읽고 켜요</text>
+</svg>

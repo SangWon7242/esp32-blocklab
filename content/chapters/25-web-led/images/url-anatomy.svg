@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="wlu-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="wlu-title">주소 해부: http://192.168.0.5/cmd?led=on 은 약속 이름(http), 보드의 IP 주소(192.168.0.5), 경로(/cmd), 물음표 뒤 질의(led=on) 네 조각이다. 코드에서 경로는 path, 질의 값은 query.get("led", "") 로 읽는다</title>
+  <text x="320" y="44" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">폰이 보내는 주소 한 줄을 네 조각으로</text>
+  <rect x="40" y="70" width="560" height="54" rx="12" fill="var(--card)" stroke-width="2"/>
+  <g font-size="21" font-weight="700" stroke="none" text-anchor="middle">
+  <text x="104" y="106" fill="currentColor" fill-opacity="0.55">http://</text>
+  <text x="246" y="106" fill="#0f7c8c">192.168.0.5</text>
+  <text x="394" y="106" fill="#4562f5">/cmd</text>
+  <text x="514" y="106" fill="#f4af18">?led=on</text>
+  </g>
+  <path d="M60 134 V150 H148 V134 M164 134 V150 H330 V134 M348 134 V150 H440 V134 M456 134 V150 H572 V134" stroke-width="1.5"/>
+  <g font-size="13" fill="currentColor" stroke="none" text-anchor="middle">
+  <text x="104" y="172" font-weight="700">약속 이름</text>
+  <text x="104" y="190" fill-opacity="0.75">웹의 말로 말할게요</text>
+  <text x="246" y="172" font-weight="700" fill="#0f7c8c">IP 주소 (어느 보드?)</text>
+  <text x="246" y="190" fill-opacity="0.75">콘솔에 찍힌 숫자 넷</text>
+  <text x="394" y="172" font-weight="700" fill="#4562f5">경로 path</text>
+  <text x="394" y="190" fill-opacity="0.75">물음표 앞, 어떤 일?</text>
+  <text x="514" y="172" font-weight="700" fill="#f4af18">질의 query</text>
+  <text x="514" y="190" fill-opacity="0.75">물음표 뒤, 이름=값</text>
+  </g>
+  <rect x="40" y="214" width="560" height="118" rx="12" fill="var(--muted)" stroke="none"/>
+  <text x="60" y="240" font-size="14" font-weight="700" fill="currentColor" stroke="none">보드 코드에서는</text>
+  <g font-size="14" fill="currentColor" stroke="none">
+  <text x="60" y="270"><tspan fill="#4562f5" font-weight="700">path</tspan> 는 <tspan font-weight="700">"/cmd"</tspan> 가 들어 있는 글</text>
+  <text x="60" y="296"><tspan fill="#f4af18" font-weight="700">query.get("led", "")</tspan> 는 <tspan font-weight="700">"on"</tspan> (led 가 없으면 빈 글 "")</text>
+  <text x="60" y="322" fill-opacity="0.8">버튼 led=off 를 누르면 같은 경로에 질의만 led=off 로 바뀌어요</text>
+  </g>
+</svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="wlc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="wlc-title">폰으로 켜는 LED 표지: 폰 브라우저의 켜기·끄기 버튼을 누르면 WiFi 공유기를 거쳐 ESP32 웹서버에 요청이 가고, 보드가 LED 를 켠 뒤 페이지로 답한다</title>
+  <defs><marker id="wlc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="62" y="56" width="124" height="236" rx="16" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="74" y="84" width="100" height="186" rx="6" fill="var(--muted)"/>
+  <rect x="112" y="66" width="24" height="5" rx="2.5" fill="currentColor" fill-opacity="0.3" stroke="none"/>
+  <rect x="80" y="90" width="88" height="16" rx="4" fill="var(--card)" stroke-width="1"/>
+  <text x="124" y="102" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.7" stroke="none">192.168.0.5</text>
+  <text x="124" y="134" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">LED</text>
+  <rect x="86" y="150" width="76" height="30" rx="6" fill="#0f7c8c" stroke="none"/>
+  <text x="124" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" stroke="none">led=on</text>
+  <rect x="86" y="192" width="76" height="30" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="124" y="212" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">led=off</text>
+  <text x="124" y="316" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">폰 브라우저</text>
+  <path d="M206 150 a16 16 0 0 1 0 22 M218 138 a30 30 0 0 1 0 46 M230 126 a44 44 0 0 1 0 70" stroke="#0f7c8c" stroke-width="2.5"/>
+  <rect x="266" y="140" width="92" height="44" rx="8" fill="var(--card)" stroke-width="2"/>
+  <path d="M284 140 V118 M340 140 V118" stroke-width="2.5"/>
+  <circle cx="290" cy="162" r="4" fill="#0f7c8c" stroke="none"/>
+  <circle cx="306" cy="162" r="4" fill="#0f7c8c" stroke="none"/>
+  <circle cx="322" cy="162" r="4" fill="currentColor" fill-opacity="0.3" stroke="none"/>
+  <text x="312" y="212" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">WiFi 공유기</text>
+  <path d="M366 150 a16 16 0 0 1 0 22 M378 138 a30 30 0 0 1 0 46" stroke="#0f7c8c" stroke-width="2.5"/>
+  <rect x="408" y="104" width="110" height="120" rx="12" fill="var(--card)" stroke-width="2"/>
+  <rect x="426" y="120" width="74" height="54" rx="4" fill="var(--muted)"/>
+  <text x="463" y="152" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="463" y="204" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" fill-opacity="0.7" stroke="none">웹서버</text>
+  <path d="M518 150 H552" stroke-width="2.5" marker-end="url(#wlc-arrow)"/>
+  <circle cx="586" cy="150" r="40" fill="#ffd43b" fill-opacity="0.35" stroke="none"/>
+  <path d="M572 178 H600 V172 H572 Z" fill="#e03131" stroke-width="2"/>
+  <path d="M574 172 V146 A12 12 0 0 1 598 146 V172 Z" fill="#ff6b6b" stroke-width="2"/>
+  <path d="M580 178 V200 M592 178 V194" stroke-width="2.5"/>
+  <path d="M586 110 V98 M556 120 L548 112 M616 120 L624 112" stroke="#f59f00" stroke-width="3"/>
+  <text x="586" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">2번 핀 LED</text>
+  <text x="320" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">요청 → 응답: 폰과 보드가 주고받는 약속</text>
+  <path d="M190 250 H400" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#wlc-arrow)"/>
+  <text x="295" y="242" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">요청 /cmd?led=on</text>
+  <path d="M400 290 H190" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#wlc-arrow)"/>
+  <text x="295" y="310" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">응답 페이지(버튼 두 개)</text>
+</svg>
