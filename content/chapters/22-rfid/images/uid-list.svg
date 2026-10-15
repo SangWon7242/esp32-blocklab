@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rfl-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rfl-title">카드 번호를 목록과 비교하기: 읽은 카드 번호 uid 가 들여보낼 카드 목록 allowed 의 한 칸과 똑같으면 OPEN 을 출력하고, 목록 어느 칸과도 같지 않은 카드는 DENY 를 출력한다</title>
+  <!-- 목록 -->
+  <rect x="226" y="66" width="220" height="164" rx="10" fill="var(--card)"/>
+  <text x="336" y="54" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">allowed (들여보낼 카드)</text>
+  <rect x="242" y="84" width="188" height="36" rx="6" fill="#2f9e44" fill-opacity="0.18" stroke="#2f9e44"/>
+  <text x="336" y="108" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">[180, 180, 170, 219]</text>
+  <rect x="242" y="130" width="188" height="36" rx="6" fill="var(--muted)"/>
+  <text x="336" y="154" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">[231, 185, 101, 101]</text>
+  <text x="336" y="204" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">한 칸 = 카드 한 장 (숫자 4개)</text>
+  <!-- 카드 1 -->
+  <rect x="22" y="70" width="170" height="64" rx="8" fill="#f4af18" fill-opacity="0.25" stroke="#f4af18"/>
+  <text x="107" y="92" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">읽은 카드 번호 uid</text>
+  <text x="107" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">[180, 180, 170, 219]</text>
+  <path d="M194 102 H234 M226 95 L234 102 L226 109" stroke-width="2.5"/>
+  <text x="212" y="92" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">in</text>
+  <!-- 카드 2 -->
+  <rect x="22" y="252" width="170" height="64" rx="8" fill="var(--muted)"/>
+  <text x="107" y="274" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">모르는 카드</text>
+  <text x="107" y="300" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">[12, 34, 56, 78]</text>
+  <path d="M320 284 V234" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M194 284 H486 M478 277 L486 284 L478 291" stroke-width="2.5"/>
+  <text x="250" y="274" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">in</text>
+  <text x="404" y="274" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">같은 칸이 없어요</text>
+  <!-- 결과 -->
+  <path d="M448 102 H486 M478 95 L486 102 L478 109" stroke-width="2.5"/>
+  <rect x="494" y="76" width="120" height="52" rx="8" fill="var(--card)"/>
+  <text x="554" y="108" text-anchor="middle" font-size="17" font-weight="700" fill="#2f9e44" stroke="none">OPEN</text>
+  <text x="554" y="150" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">목록에 있어요</text>
+  <rect x="494" y="258" width="120" height="52" rx="8" fill="var(--card)"/>
+  <text x="554" y="290" text-anchor="middle" font-size="17" font-weight="700" fill="#c92a2a" stroke="none">DENY</text>
+  <text x="554" y="332" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">목록에 없어요</text>
+</svg>
