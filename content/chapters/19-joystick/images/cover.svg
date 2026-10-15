@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="js-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="js-cover-title">조이스틱 조종기: 손잡이(조이스틱)를 조금 기울이면 굴착기 팔(서보)이 조금, 많이 기울이면 많이 움직인다. 조이스틱 값 0~4095 가 팔 각도 0~180도로 바뀐다</title>
+  <text x="300" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">조이스틱 조종기</text>
+  <text x="300" y="68" text-anchor="middle" font-size="14" fill="currentColor" fill-opacity="0.7" stroke="none">기울인 만큼 팔이 따라 움직여요</text>
+  <!-- 조이스틱 -->
+  <rect x="60" y="226" width="150" height="70" rx="10" fill="#8864ff" fill-opacity="0.9"/>
+  <ellipse cx="135" cy="226" rx="46" ry="14" fill="var(--card)"/>
+  <path d="M135 226 L172 140" stroke-width="10"/>
+  <circle cx="176" cy="132" r="18" fill="var(--card)" stroke-width="3"/>
+  <path d="M135 226 L135 140" stroke-dasharray="5 5" stroke-opacity="0.5"/>
+  <path d="M135 168 A58 58 0 0 1 158 172" stroke="#4562f5" stroke-width="3"/>
+  <text x="135" y="322" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">손잡이를 얼마나 기울였나</text>
+  <!-- 화살표 -->
+  <path d="M238 214 H318" stroke-width="3"/>
+  <path d="M306 204 L320 214 L306 224" stroke-width="3"/>
+  <text x="278" y="198" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">0~4095</text>
+  <text x="278" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">→ 0~180°</text>
+  <!-- 굴착기 몸 -->
+  <path d="M24 296 H616"/>
+  <rect x="352" y="232" width="120" height="44" rx="8" fill="var(--muted)"/>
+  <rect x="352" y="276" width="140" height="18" rx="9" fill="var(--card)" stroke-width="3"/>
+  <rect x="368" y="200" width="44" height="32" rx="4" fill="var(--card)"/>
+  <!-- 서보와 팔 -->
+  <rect x="446" y="206" width="52" height="40" rx="5" fill="#c92a2a"/>
+  <text x="472" y="240" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">서보</text>
+  <g transform="rotate(-50 472 214)">
+    <rect x="472" y="207" width="130" height="14" rx="5" fill="var(--card)"/>
+  </g>
+  <circle cx="472" cy="214" r="7" fill="var(--card)"/>
+  <path d="M560 214 A88 88 0 0 0 528 146" stroke="#4562f5" stroke-width="3"/>
+  <path d="M472 214 H590" stroke-dasharray="5 5" stroke-opacity="0.5"/>
+  <text x="572" y="178" font-size="17" font-weight="700" fill="#4562f5" stroke="none">각도</text>
+</svg>

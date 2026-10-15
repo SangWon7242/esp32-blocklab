@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="js-axes-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="js-axes-title">조이스틱 원리: 위에서 본 조이스틱. 좌우로 기울이면 X 값이 0에서 4095 까지, 앞뒤로 기울이면 Y 값이 0에서 4095 까지 바뀐다. 가만히 두면 둘 다 가운데쯤(약 2000). 속에는 가변저항 두 개와 누르는 버튼 하나가 있고, 버튼은 누르면 0 이다</title>
+  <text x="300" y="36" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">조이스틱 = 가변저항 2개 + 버튼 1개</text>
+  <!-- 위에서 본 조이스틱 -->
+  <rect x="70" y="70" width="240" height="240" rx="18" fill="#8864ff" fill-opacity="0.18"/>
+  <circle cx="190" cy="190" r="86" fill="var(--card)"/>
+  <path d="M90 190 H290" stroke="#2f9e44" stroke-width="4"/>
+  <path d="M190 90 V290" stroke="#1c7ed6" stroke-width="4"/>
+  <path d="M100 182 L88 190 L100 198 M280 182 L292 190 L280 198" stroke="#2f9e44" stroke-width="3"/>
+  <path d="M182 100 L190 88 L198 100 M182 280 L190 292 L198 280" stroke="#1c7ed6" stroke-width="3"/>
+  <circle cx="190" cy="190" r="22" fill="var(--muted)" stroke-width="3"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="84" y="220" fill="#2f9e44">X 0</text>
+    <text x="296" y="220" fill="#2f9e44">X 4095</text>
+    <text x="236" y="84" fill="#1c7ed6">Y 0</text>
+    <text x="242" y="308" fill="#1c7ed6">Y 4095</text>
+  </g>
+  <text x="190" y="166" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">가운데 ≈ 2000</text>
+  <!-- 속 -->
+  <g fill="currentColor" stroke="none">
+    <text x="360" y="98" font-size="15" font-weight="700">속에는</text>
+  </g>
+  <rect x="360" y="114" width="230" height="52" rx="10" fill="var(--card)"/>
+  <circle cx="390" cy="140" r="14" fill="#2f9e44" fill-opacity="0.85"/>
+  <path d="M390 140 L398 130" stroke-width="3"/>
+  <text x="414" y="137" font-size="14" font-weight="700" fill="currentColor" stroke="none">X 가변저항 → 36번</text>
+  <text x="414" y="156" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">좌우 기울기 0~4095</text>
+  <rect x="360" y="176" width="230" height="52" rx="10" fill="var(--card)"/>
+  <circle cx="390" cy="202" r="14" fill="#1c7ed6" fill-opacity="0.85"/>
+  <path d="M390 202 L380 193" stroke-width="3"/>
+  <text x="414" y="199" font-size="14" font-weight="700" fill="currentColor" stroke="none">Y 가변저항 → 39번</text>
+  <text x="414" y="218" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">앞뒤 기울기 0~4095</text>
+  <rect x="360" y="238" width="230" height="52" rx="10" fill="var(--card)"/>
+  <rect x="378" y="252" width="24" height="24" rx="4" fill="#f59f00"/>
+  <text x="414" y="261" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼 B → 26번</text>
+  <text x="414" y="280" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">꾹 누르면 0, 놓으면 1</text>
+</svg>

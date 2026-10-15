@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="js-dead-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="js-dead-title">기준값 정하기: X 값 0~4095 수직선. 1000 보다 작으면 Left, 3000 보다 크면 Right, 그 사이 넓은 칸은 Center. 손을 떼었을 때 값(예: 1890)은 2048 과 조금 다르다. 기준을 2048 하나로 두면 가만히 있어도 Left 로 읽힌다</title>
+  <text x="300" y="36" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">가운데는 넓게: 1000 과 3000 두 기준</text>
+  <!-- 칸 -->
+  <rect x="60" y="96" width="130" height="56" rx="8" fill="#2f9e44" fill-opacity="0.2"/>
+  <rect x="190" y="96" width="260" height="56" fill="var(--muted)"/>
+  <rect x="450" y="96" width="130" height="56" rx="8" fill="#2f9e44" fill-opacity="0.2"/>
+  <g fill="currentColor" stroke="none" font-size="16" font-weight="700" text-anchor="middle">
+    <text x="125" y="130">Left</text>
+    <text x="320" y="130">Center</text>
+    <text x="515" y="130">Right</text>
+  </g>
+  <!-- 수직선 -->
+  <path d="M60 176 H580" stroke-width="4"/>
+  <path d="M60 166 V186 M190 166 V186 M320 170 V182 M450 166 V186 M580 166 V186" stroke-width="2.5"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="60" y="206">0</text><text x="190" y="206">1000</text><text x="450" y="206">3000</text><text x="580" y="206">4095</text>
+  </g>
+  <!-- 2048 과 측정값 -->
+  <path d="M320 92 V250" stroke-dasharray="5 5" stroke-opacity="0.6"/>
+  <text x="330" y="240" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">2048</text>
+  <path d="M300 176 V262" stroke="#e03131" stroke-width="3"/>
+  <circle cx="300" cy="176" r="7" fill="#e03131" stroke="none"/>
+  <text x="292" y="262" text-anchor="end" font-size="13" font-weight="700" fill="#e03131" stroke="none">손을 뗀 값 예: 1890</text>
+  <!-- 설명 -->
+  <rect x="80" y="282" width="480" height="56" rx="10" fill="var(--card)"/>
+  <text x="320" y="305" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor" stroke="none">기준이 2048 하나뿐이면 1890 은 Left 로 읽혀요</text>
+  <text x="320" y="326" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">가만히 둔 값을 먼저 재고, 그 둘레를 넓게 비워 둬요</text>
+</svg>

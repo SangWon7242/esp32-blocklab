@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="js-map-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="js-map-title">범위 바꾸기: 조이스틱 X 값 0~4095 자를 서보 각도 0~180 자로 옮긴다. 0은 0도, 2048 은 90도, 4095 는 180도가 된다. 긴 자를 같은 비율로 줄이는 것과 같다</title>
+  <text x="300" y="38" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">범위 바꾸기: 0 ~ 4095 → 0 ~ 180</text>
+  <!-- 위 자 -->
+  <text x="60" y="88" font-size="14" font-weight="700" fill="#2f9e44" stroke="none">조이스틱 X 값</text>
+  <path d="M60 110 H580" stroke="#2f9e44" stroke-width="5"/>
+  <path d="M60 100 V120 M190 104 V116 M320 100 V120 M450 104 V116 M580 100 V120" stroke="#2f9e44" stroke-width="2.5"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="60" y="140">0</text><text x="320" y="140">2048</text><text x="580" y="140">4095</text>
+  </g>
+  <!-- 연결선 -->
+  <g stroke-dasharray="5 5" stroke-opacity="0.6">
+    <path d="M60 150 L200 228"/>
+    <path d="M320 150 L320 228"/>
+    <path d="M580 150 L440 228"/>
+  </g>
+  <!-- 아래 자 -->
+  <text x="200" y="256" font-size="14" font-weight="700" fill="#c92a2a" stroke="none" text-anchor="end" dx="-14">서보 각도</text>
+  <path d="M200 250 H440" stroke="#c92a2a" stroke-width="5"/>
+  <path d="M200 240 V260 M260 244 V256 M320 240 V260 M380 244 V256 M440 240 V260" stroke="#c92a2a" stroke-width="2.5"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="200" y="280">0°</text><text x="320" y="280">90°</text><text x="440" y="280">180°</text>
+  </g>
+  <!-- 작은 각도기 -->
+  <path d="M478 262 A44 44 0 0 1 566 262 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M522 262 L522 226" stroke="#c92a2a" stroke-width="5"/>
+  <circle cx="522" cy="262" r="4" fill="var(--card)"/>
+  <!-- 식 -->
+  <rect x="80" y="300" width="480" height="40" rx="10" fill="var(--card)"/>
+  <text x="320" y="325" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor" stroke="none">((값 − 0) × (180 − 0) // (4095 − 0) + 0)</text>
+</svg>
