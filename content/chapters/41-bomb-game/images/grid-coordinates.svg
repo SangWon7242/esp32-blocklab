@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bgg-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bgg-title">좌표 원리: OLED 128 × 64 점 화면을 5칸 × 5줄 격자로 나누면 칸 하나는 폭 25 · 높이 12 점. 칸 번호 x 3 에 25 를 곱하면 75, 줄 번호 y 1 에 12 를 곱하면 12 가 되어 oled.fill_rect(75, 12, 25, 12, 1) 로 폭탄 네모를 그린다. 플레이어는 늘 줄 4(세로 48)에 그린다. 폭탄 칸은 0~4 가운데 하나를 똑같은 가능성으로 뽑으니 내 칸에 올 가능성은 5분의 1</title>
+  <text x="32" y="38" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">화면을 5칸 × 5줄로 나누기</text>
+  <rect x="64" y="72" width="332" height="172" rx="6" fill="#0b1b4d" stroke="none"/>
+  <rect x="70" y="78" width="312.5" height="150" rx="0" fill="none" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.6"/>
+  <path d="M132.5 78 V228" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M70 108 H382.5" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M195.0 78 V228" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M70 138 H382.5" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M257.5 78 V228" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M70 168 H382.5" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M320.0 78 V228" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <path d="M70 198 H382.5" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.45"/>
+  <text x="101.25" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#4562f5" stroke="none">x 0</text>
+  <text x="56" y="97.0" text-anchor="end" font-size="12" font-weight="700" fill="#4562f5" stroke="none">y 0</text>
+  <text x="163.75" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#4562f5" stroke="none">x 1</text>
+  <text x="56" y="127.0" text-anchor="end" font-size="12" font-weight="700" fill="#4562f5" stroke="none">y 1</text>
+  <text x="226.25" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#4562f5" stroke="none">x 2</text>
+  <text x="56" y="157.0" text-anchor="end" font-size="12" font-weight="700" fill="#4562f5" stroke="none">y 2</text>
+  <text x="288.75" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#4562f5" stroke="none">x 3</text>
+  <text x="56" y="187.0" text-anchor="end" font-size="12" font-weight="700" fill="#4562f5" stroke="none">y 3</text>
+  <text x="351.25" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#4562f5" stroke="none">x 4</text>
+  <text x="56" y="217.0" text-anchor="end" font-size="12" font-weight="700" fill="#4562f5" stroke="none">y 4</text>
+  <rect x="259.5" y="110" width="58.5" height="26" rx="2" fill="#f08c00" stroke="none"/>
+  <text x="288.75" y="127.0" text-anchor="middle" font-size="12" font-weight="700" fill="#1e1e1e" stroke="none">폭탄</text>
+  <rect x="134.5" y="200" width="58.5" height="26" rx="2" fill="#7dd3fc" stroke="none"/>
+  <text x="163.75" y="217.0" text-anchor="middle" font-size="12" font-weight="700" fill="#1e1e1e" stroke="none">플레이어</text>
+  <text x="226" y="252" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">가로 128 점 · 세로 64 점</text>
+  <text x="420" y="86" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">칸 하나 = 폭 25 × 높이 12 점</text>
+  <text x="420" y="108" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">128 ÷ 5 ≈ 25, 64 ÷ 5 ≈ 12</text>
+  <rect x="420" y="124" width="200" height="86" rx="8" fill="var(--card)" stroke-width="1.5"/>
+  <text x="432" y="146" text-anchor="start" font-size="13" font-weight="600" fill="#f08c00" stroke="none">폭탄 x 3 → 3 × 25 = 75</text>
+  <text x="432" y="166" text-anchor="start" font-size="13" font-weight="600" fill="#f08c00" stroke="none">폭탄 y 1 → 1 × 12 = 12</text>
+  <text x="432" y="190" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">fill_rect(75, 12, 25, 12, 1)</text>
+  <text x="432" y="204" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">(가로, 세로, 폭, 높이, 켜기)</text>
+  <rect x="420" y="222" width="200" height="44" rx="8" fill="var(--card)" stroke-width="1.5"/>
+  <text x="432" y="242" text-anchor="start" font-size="13" font-weight="600" fill="#1971c2" stroke="none">플레이어 y 4 → 4 × 12 = 48</text>
+  <text x="432" y="258" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">늘 맨 밑 줄에 그려요</text>
+  <rect x="32" y="300" width="576" height="40" rx="10" fill="var(--muted)" stroke="none"/>
+  <text x="320" y="318" text-anchor="middle" font-size="13" font-weight="400" fill="currentColor" stroke="none">폭탄 칸은 0~4 가운데 하나를 똑같은 가능성으로 뽑아요</text>
+  <text x="320" y="334" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">그래서 폭탄 하나가 지금 내 칸에 떨어질 가능성은 5분의 1 이에요</text>
+</svg>

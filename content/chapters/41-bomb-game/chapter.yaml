@@ -1,0 +1,502 @@
+# 교과 융합 F14 · 바이러스 폭탄 피하기 — 원본: 마이크로비트 심화 W04 폭탄 피하기 게임(SDG 3). 형식 설명은 src/track/README.md
+# OLED(SCL 22 · SDA 21)를 5칸 × 5줄 격자(칸 폭 25px · 높이 12px)로 쓰고, 버튼 a(14) · b(27)로 플레이어를 움직인다. 수동 부저(15)는 설계 단계에서만(선택).
+# 2부의 핵심: 폭탄마다 "다음에 움직일 시각" 리스트를 두고 time.ticks_ms() 와 비교해 sleep 없이 각자 움직이기 (함수 move_bomb(i) 매개변수, global)
+id: 41-bomb-game
+order: 41
+track: fusion
+label: F14
+prerequisites: [11-button-touch, 21-oled, 23-button-king, 36-memory-game]
+subjects: [정보, 보건, 수학, 체육]
+sdg: [3]
+sessions: 2
+teacherNotes: |
+  **시간 값은 모두 예시예요.** 1부의 `0.5`초(폭탄이 한 줄 내려오는 간격), 2부의 `400~900`ms 랜덤 간격, 미션 2의 `900 - score * 50` 과 최소 `200`ms, 반복 끝의 `0.1`초는 반 수준에 맞게 바꿔도 됩니다. 버튼을 꾹 누르면 0.1초마다 한 칸씩 움직여 너무 빠르다고 하면 `time.sleep(0.1)` 을 `0.2` 로 늘려 주세요(그만큼 폭탄 그리기도 느려집니다).
+
+  **과몰입 시간 관리** 게임이 완성되면 아이들이 계속 하려고 합니다. 미션 판정 뒤 "3판만" 처럼 횟수를 먼저 정하고, 점수 기록표를 나눠 주어 **기록하는 활동**으로 바꿔 주세요. 반 전체 점수의 평균 · 최고값 구하기(수학), 반응 속도가 빠른 친구의 비결 이야기하기(체육)로 이어 갑니다.
+
+  - **1부 끝 미션 1** 시작 코드(step1)에는 범위 검사 · 충돌 비교 · 점수가 없습니다. 플레이어가 화면 밖으로 사라지는 것을 먼저 겪게 한 뒤 미션으로 고치게 하는 흐름이에요. 규칙 6개가 체크리스트처럼 하나씩 되묻습니다.
+  - **2부 핵심 개념** 보드는 한 번에 한 가지 일만 해서, 함수 안의 `sleep` 은 폭탄을 차례로만 움직입니다(디버깅 1 "엥? 하나씩"). 폭탄마다 다음에 움직일 시각을 리스트에 적어 두고 `time.ticks_diff(time.ticks_ms(), next_time[i]) >= 0` 으로 비교하는 꼴을 꼭 짚어 주세요. `global score` · `global playing` 은 함수 안에서 바깥 변수를 바꿀 때 필요합니다(변수 꾸러미의 "전역 변수 쓰기" 블록).
+  - **버튼 2개** 14번(a) · 27번(b) 모두 풀업 입력이라 누르면 0 입니다. 버튼은 가운데 홈에 걸쳐 꽂고 **대각선** 다리를 써야 해요(S8 참고). a · b 이름으로만 부르고 왼 · 오 같은 방향 말은 쓰지 않습니다(화면 번호 0~4 와 맞추기).
+  - **부저(선택)** 설계 단계 코드에만 수동 부저(15번)로 맞았을 때 220Hz 소리를 넣었습니다. 부품이 모자라면 배선 없이 설계만 해도 됩니다(S9 와 같은 자리: + 다리 → 15번, − 다리 → − 줄).
+  - **메이킹** 박스지로 게임기 틀(화면 창 + 버튼 두 구멍)을 만들어 OLED 와 버튼을 끼우면 "내 게임기"가 됩니다. 배선할 때는 USB 를 빼 두게 하세요.
+  - **흔한 막힘** 폭탄 세 개가 처음에 같은 시각에 함께 움직이는 것은 정상(다음 시각이 모두 0)이고 곧 흩어집니다. 점수가 늘어도 간격이 안 줄면 `gap` 을 함수 안에서 계산하는지, `score` 를 `global` 로 썼는지 확인합니다.
+
+  **교과 연결**
+  - 정보: 함수와 매개변수(`move_bomb(i)`), 리스트 세 개를 같은 번호로 묶어 쓰기, `time.ticks_ms()` 로 기다리지 않고 시간 재기, 상태 변수(`playing`).
+  - 보건(SDG 3 건강과 웰빙): 감염병은 "피하기"가 먼저 — 손 씻기 · 기침 예절 · 거리 두기를 게임의 "피하기"에 빗대어 이야기합니다.
+  - 수학: 좌표(칸 번호 × 25, 줄 번호 × 12 → 픽셀), 확률(폭탄 칸은 0~4 가운데 하나를 똑같은 가능성으로 뽑으니 내 칸에 올 가능성은 1/5), 반 점수의 평균 · 최고값.
+  - 체육: 반응 속도 — 폭탄 간격을 줄여 가며 몇 점까지 가는지 재고, 손 바꿔 하기 · 눈 감고 신호 듣기 같은 반응 놀이와 비교합니다.
+title: 바이러스 폭탄 피하기
+subtitle: 세 폭탄이 각자 떨어지는 OLED 게임
+summary: |
+  화면 맨 위에서 **바이러스 폭탄**이 떨어져요. 버튼 두 개로 플레이어를 0~4번 칸 사이에서 움직여 피하고, 피한 만큼 점수를 받아요.
+  1부에서는 폭탄 하나로 게임의 뼈대를 만들고, 2부에서는 **리스트**와 **다음에 움직일 시각**으로 폭탄 셋을 `sleep` 없이 각자 떨어지게 해요. 점수가 오르면 폭탄이 빨라져요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 마이크로 USB 선으로 노트북과 연결 }
+  - { name: 브레드보드, note: "위쪽 + 줄(5V) · − 줄(GND), OLED 두 줄(11 · 14번), 버튼 b 자리(18 · 20번), 버튼 a 자리(24 · 26번)" }
+  - { name: OLED 화면 (128×64), note: "I2C 방식. 핀 4개: GND · VCC · SCL · SDA (모듈에 적힌 글자를 읽기). 5칸 × 5줄 격자로 써요" }
+  - { name: 버튼(푸시 버튼) 2개, note: "a 버튼(14번) · b 버튼(27번). 다리 넷을 가운데 홈에 걸쳐 꽂고 대각선 다리를 써요" }
+  - { name: M-F 듀폰선, note: "4개. 구멍 쪽을 OLED 핀에 끼우고, 핀 쪽을 브레드보드에 꽂아요" }
+  - { name: 점퍼선(M-M), note: "8개 (5V · GND · 22번 · 21번 → 브레드보드 4, 14번 → 버튼 a 1, 27번 → 버튼 b 1, 버튼 → − 줄 2)" }
+  - { name: (선택) 수동 부저, note: "설계 단계에서 맞았을 때 소리. 초록 판이 보이는 쪽. + 다리 → 15번, − 다리 → − 줄" }
+  - { name: (선택) 박스지, note: "게임기 틀. 화면 창과 버튼 구멍 두 개를 뚫어 끼워요" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "OLED 는 M-F 듀폰선으로: GND → 위쪽 − 줄, VCC → 위쪽 + 줄, SCL → 11번 줄 a 칸, SDA → 14번 줄 f 칸. 보드는 점퍼선(M-M)으로: 5V → + 줄, GND → − 줄, 22번 → 11번 줄 e 칸, 21번 → 14번 줄 j 칸. 버튼 a 는 24 · 26번 줄에 걸쳐 꽂고 14번 → 24번 줄 h 칸, 대각선 다리 26번 줄 a 칸 → − 줄. 버튼 b 는 18 · 20번 줄에 걸쳐 꽂고 27번 → 18번 줄 i 칸, 대각선 다리 20번 줄 a 칸 → − 줄"
+principle:
+  image: images/grid-coordinates.svg
+  body: |
+    **좌표(수학)** OLED 는 가로 128 · 세로 64 개의 점으로 되어 있어요. 이 화면을 **5칸 × 5줄** 격자로 나누면 칸 하나는 폭 25 · 높이 12 점이에요. 칸 번호 `x` 에 25 를 곱하고 줄 번호 `y` 에 12 를 곱하면 네모를 그릴 픽셀 자리가 되어요. 그래서 폭탄과 플레이어는 0~4 사이의 **작은 숫자**만 기억하면 돼요.
+
+    **시간(정보)** 보드는 한 번에 한 가지 일만 해요. `time.sleep(0.5)` 로 기다리는 동안은 버튼도, 다른 폭탄도 보지 못해요. 그래서 폭탄마다 **다음에 움직일 시각**을 리스트에 적어 두고, 반복마다 지금 시각 `time.ticks_ms()` 와 비교해 시각이 지난 폭탄만 한 줄 내려요. 그러면 세 폭탄이 각자 다른 빠르기로 떨어지는 것처럼 보여요.
+
+    **확률(수학) · 감염병(보건)** 폭탄 칸은 0~4 가운데 하나를 똑같은 가능성으로 뽑으니, 폭탄 하나가 지금 내 칸에 떨어질 가능성은 **5분의 1** 이에요. 바이러스도 어디서 올지 모르니 미리 **피하는 습관**(손 씻기 · 거리 두기)이 가장 좋은 방어예요.
+goals:
+  content: OLED 격자 좌표와 버튼 두 개로 폭탄 피하기 게임을 만들고, 리스트와 다음 시각 비교로 폭탄 셋을 sleep 없이 각자 움직이게 한다
+  thinking: 게임을 "입력 → 움직이기 → 비교 → 그리기" 덩어리로 나누고, 기다리는 대신 시각을 비교하면 여러 일을 함께 할 수 있다는 것을 깨닫는다
+successCriteria:
+  - 칸 번호 x · 줄 번호 y 를 픽셀 자리(x × 25, y × 12)로 바꾸는 식을 말할 수 있다
+  - 플레이어를 0~4 안에서만 움직이고, 맨 밑에서 폭탄 칸과 플레이어 칸이 같으면 END 를 띄울 수 있다
+  - 함수 안의 sleep 이 폭탄을 차례로만 움직이는 까닭과, 다음 시각 리스트가 이를 푸는 방법을 설명할 수 있다
+  - 점수가 오르면 폭탄 간격이 줄되 200ms 보다 짧아지지 않게 할 수 있다
+parts:
+  - id: part1
+    title: 1부 · 폭탄 하나 피하기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 떨어지는 바이러스를 피할 수 있을까?
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 화면 맨 위에서 폭탄이 한 줄씩 내려와요. 버튼 a · b 로 플레이어 칸을 바꿔 피해요
+        body: |
+          감기나 독감 같은 감염병은 누가 걸릴지 모르게 퍼져요. 그래서 손 씻기 · 기침 예절 · 거리 두기처럼 **미리 피하는 습관**이 가장 좋은 약이에요. 모두가 건강하게 사는 것은 유엔 지속가능발전목표 **SDG 3**(건강과 웰빙)이기도 해요.
+
+          오늘은 그 "피하기"를 게임으로 만들어요. 화면 맨 위에서 바이러스 폭탄이 떨어지고, 버튼 두 개로 플레이어를 움직여 피해요. 폭탄 셋이 **동시에** 떨어지려면 보드는 무엇을 해야 할까요? 코드를 보기 전에 내 생각부터 적어 봐요.
+        todo:
+          - 준비물(OLED, 버튼 2개, 듀폰선, 점퍼선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 내가 아는 "피하기 게임"을 하나 떠올려 규칙을 한 줄로 적기
+        questions:
+          - OLED 화면은 점 128 × 64 개예요. 폭탄과 플레이어를 "몇 번 칸"처럼 작은 숫자로 다루려면 화면을 어떻게 나누면 좋을까요?
+          - 폭탄이 맨 밑에 닿았을 때 보드는 "맞았다"를 어떻게 알 수 있을까요? 무엇과 무엇을 비교해야 할까요?
+          - 폭탄 셋이 각자 다른 빠르기로 떨어지게 하려면, 보드는 폭탄마다 무엇을 기억해 두어야 할까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 7
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 움직여야 할 것 순서로 나눠요
+        body: |
+          게임기를 부품마다 나눠 생각해 봐요. **버튼**은 플레이어를 움직이고, **OLED** 는 폭탄과 플레이어를 그리고, **보드**는 칸 번호와 시각을 기억해 비교해요.
+
+          보드는 "저기 저 칸" 같은 말을 몰라요. 칸에 **0~4** 번호를 붙이고, 줄에도 0(맨 위)~4(맨 밑) 번호를 붙이면 숫자로 기억할 수 있어요. "맞았다"는 정확히 무엇이 같다는 뜻일까요? 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 플레이어 칸, 폭탄 칸 · 줄, 시각처럼 보드가 기억해야 할 것 적기"
+          - "**정해야 할 것**: 떨어지는 간격, 맞았다고 볼 규칙, 점수 같은 것 적기"
+          - "**움직여야 할 것**: 버튼 · OLED · 보드가 차례대로 하는 일 적기"
+        answer:
+          know: ["플레이어 칸 번호 x (0~4)", "폭탄의 칸 번호 x 와 줄 번호 y (0 맨 위 ~ 4 맨 밑)", "지금 시각과 폭탄이 다음에 움직일 시각", "버튼은 누르면 0 이 된다"]
+          decide: ["폭탄이 한 줄 내려오는 간격 (예: 0.5초, 2부에서는 400~900ms 랜덤)", "맞았다고 볼 규칙: 맨 밑에서 폭탄 칸과 플레이어 칸이 같다", "점수: 피한 폭탄 하나에 1점", "격자: 5칸 × 5줄, 칸 폭 25 · 높이 12 픽셀"]
+          act: ["버튼 값을 읽어 플레이어 칸을 바꾸기 (0~4 안에서만)", "폭탄 줄을 하나 내리고, 맨 밑이면 비교한 뒤 맨 위로 보내기", "OLED 를 지우고 폭탄 · 플레이어 네모를 다시 그려 내보내기", "맞으면 END 와 점수를 보여 주기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 칸 번호가 어떻게 바뀔까?
+        minutes: 5
+        scene:
+          image: images/grid-coordinates.svg
+          caption: 칸 번호 x 에 25 를 곱하고 줄 번호 y 에 12 를 곱하면 네모를 그릴 픽셀 자리가 돼요
+        body: |
+          아직 실행하지 않아요. `player` 는 플레이어 칸 번호, `bomb_x` · `bomb_y` 는 폭탄의 칸 · 줄 번호예요. `oled.fill_rect(bomb_x * 25, bomb_y * 12, 25, 12, 1)` 은 그 칸에 꽉 찬 네모를 그려요.
+
+          버튼은 누르면 `0` 이에요. a 버튼이면 `player` 에서 1 을 빼고, b 버튼이면 1 을 더해요. 반복 끝에서 `bomb_y` 가 4 면 0 으로, 아니면 1 늘려요. 코드를 따라가며 빈칸에 내 예측을 적어요.
+        todo:
+          - 반복 한 바퀴에 그리는 네모가 몇 개인지 세어 보기
+          - "`bomb_y` 가 0 → 1 → 2 → 3 → 4 → ? 로 어떻게 바뀌는지 따라가기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_one_bomb.py
+        blanks:
+          - q: a 버튼을 누르고 있으면 player 값은 커질까요, 작아질까요?
+          - q: 폭탄이 맨 밑(bomb_y 가 4)에 닿으면 그다음에 어떤 일이 일어날까요?
+          - q: 플레이어가 0번 칸에 있을 때 a 버튼을 한 번 더 누르면 player 는 몇이 될까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 폭탄 하나 떨어지기
+        minutes: 9
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "OLED 네 핀과 버튼 두 개: 14번 → 버튼 a(24 · 26번 줄), 27번 → 버튼 b(18 · 20번 줄). 대각선 다리는 − 줄로"
+        body: |
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 OLED 와 버튼 두 개를 이어요. 버튼은 가운데 홈에 걸쳐 꽂고, 핀 선과 − 줄 선은 **대각선** 다리에 꽂아요. OLED 라이브러리(`ssd1306.py`)는 **실행**을 누르면 블록랩이 함께 올려 줘요.
+
+          실행하고 버튼을 눌러 보세요. 폭탄을 피할 수 있나요? b 버튼을 계속 누르면 플레이어는 어디로 가나요? 폭탄이 플레이어와 같은 칸에 닿아도 아무 일이 없는 것도 지켜보세요.
+        todo:
+          - "**부품과 배선**대로 OLED 네 핀과 버튼 a · b 잇기"
+          - "**보드 연결** → **실행** 누르고 버튼 a · b 를 눌러 보기"
+          - 플레이어가 화면 밖으로 사라질 때 player 값이 몇일지 공책에 적기
+        code: step1_one_bomb.py
+        expected: 코드를 실행하면 OLED 맨 밑 줄 2번 칸에 플레이어 네모가 보이고, 맨 위에서 폭탄 네모가 0.5초마다 한 줄씩 내려와요. 맨 밑에 닿으면 다른 칸 맨 위에서 다시 떨어져요. 버튼 a · b 를 꾹 누르면 플레이어가 한 칸씩 움직이는데, 계속 누르면 화면 밖으로 나가 버려요. 폭탄이 플레이어와 같은 칸에 닿아도 아직은 아무 일도 일어나지 않아요.
+        codeNotes:
+          - { line: 4, note: "폭탄 칸을 아무렇게나 뽑을 `random` 을 가져와요" }
+          - { line: 6, note: "a 버튼(14번) · b 버튼(27번)을 풀업 입력으로 준비해요. 누르면 0 (6~7번 줄)" }
+          - { line: 8, note: "OLED 가 쓸 두 선(SCL 22번 · SDA 21번)을 준비해요 (8~9번 줄)" }
+          - { line: 11, note: "`player`: 플레이어 칸 번호. 2번 칸에서 시작해요" }
+          - { line: 12, note: "`bomb_x`: 폭탄 칸 번호를 0~4 가운데 하나로 뽑아요" }
+          - { line: 13, note: "`bomb_y`: 폭탄 줄 번호. 0 이 맨 위예요" }
+          - { line: 15, note: "a 버튼이 눌렸으면(0) 칸 번호를 1 줄여요 (15~16번 줄). b 버튼은 1 늘려요 (17~18번 줄)" }
+          - { line: 20, note: "폭탄 네모: 칸 번호 × 25 가 가로 자리, 줄 번호 × 12 가 세로 자리. 폭 25 · 높이 12" }
+          - { line: 21, note: "플레이어 네모는 늘 맨 밑 줄(세로 48)에 그려요" }
+          - { line: 23, note: "0.5초 기다려요. 이 동안은 버튼을 보지 못해요" }
+          - { line: 24, note: "폭탄이 맨 밑(4)이면 맨 위(0)로 보내고 칸을 새로 뽑아요 (24~26번 줄). 아니면 한 줄 내려요 (27~28번 줄)" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 — 칸 번호와 픽셀
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          플레이어를 **움직이는** 줄, 네모를 **그리는** 줄, 폭탄을 **내리는** 줄로 나눠 읽어요. 칸 번호에 25 를 곱하면 픽셀 자리가 된다는 것을 떠올려요.
+
+          답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - 움직이는 줄 · 그리는 줄 · 내리는 줄에 각각 표시하기
+          - 세 문제에 답하고 **확인** 누르기
+          - 틀린 문항은 그 줄을 다시 읽고 고치기
+        code: step1_one_bomb.py
+        questions:
+          - { kind: number, q: "플레이어 칸 번호가 3 이면 플레이어 네모의 가로 자리는 몇 픽셀인가요?", answer: 75, hint: "21번 줄에서 칸 번호에 무엇을 곱하나요?" }
+          - { kind: choice, q: "a 버튼을 누르고 있을 때 player 값은?", options: ["1 줄어든다", "1 늘어난다", "그대로다"], answer: 0, hint: "a 버튼이 눌리면(0) 바로 다음 줄에서 무엇을 하나요?" }
+          - { kind: line, q: "폭탄이 맨 밑 줄에 닿았는지 묻는 줄의 번호를 클릭하세요", answer: 24 }
+        codeNotes:
+          - { line: 8, note: "OLED 두 선을 준비해요" }
+          - { line: 14, note: "`while True:` 다음에 들여 쓴 줄들이 한 바퀴예요" }
+          - { line: 19, note: "지난 바퀴에 그린 것을 모두 지워요" }
+          - { line: 22, note: "지금까지 그린 네모를 화면에 내보내요" }
+          - { line: 28, note: "줄 번호를 1 늘려 한 줄 내려요" }
+
+      - id: mission
+        type: mission
+        title: 미션 1 — 범위 · 충돌 · 점수로 게임 완성
+        minutes: 12
+        scene:
+          image: images/grid-coordinates.svg
+          caption: 칸 번호는 0~4 사이에만. 맨 밑에서 폭탄 칸과 플레이어 칸이 같으면 맞은 것
+        body: |
+          지금은 플레이어가 화면 밖으로 나가고, 폭탄에 맞아도 아무 일이 없어요. 세 가지를 더해 **진짜 게임**으로 만들어요. 첫째, 플레이어 칸 번호는 **0~4** 안에서만 바뀌게 해요. 둘째, 폭탄이 맨 밑에 닿았을 때 **폭탄 칸과 플레이어 칸이 같으면** 맞은 거예요. 셋째, 피했으면 점수 `score` 를 1 올려요.
+
+          맞았으면 화면을 지우고 `END` 와 점수를 띄운 뒤 반복을 멈춰요. 조건에 `and` 로 "0 보다 클 때만" 같은 조건을 더 붙이면 범위를 지킬 수 있어요. 판정 목록의 항목을 하나씩 채워 가요.
+        todo:
+          - "a 버튼 조건에 `and player > 0`, b 버튼 조건에 `and player < 4` 붙이기"
+          - "`score = 0` 을 반복 밖에 두고, 맨 밑에서 폭탄 칸 == 플레이어 칸이면 END · 점수 띄우고 `break`, 아니면 점수 1 올리기"
+          - 실행해서 세 판 이상 해 본 뒤 **판정** 누르기
+        instructions: "(1) 플레이어 칸 번호가 0 보다 클 때만 줄이고, 4 보다 작을 때만 늘리기 (2) 폭탄이 맨 밑(bomb_y 가 4)에 닿았을 때 bomb_x 와 player 가 같으면 화면에 END 와 점수를 띄우고 반복을 멈추기 (3) 같지 않으면 점수 score 를 1 올리기. score 는 반복 밖에서 0 으로 시작해요"
+        hint: "조건에 and 붙이기: if button_a.value() == 0 and player > 0: · if button_b.value() == 0 and player < 4:. 맨 밑 검사 안: if bomb_x == player: → oled.fill(0) · oled.text(\"END\", 52, 20) · oled.text(\"SCORE \" + str(score), 32, 36) · oled.show() · break. 그다음 score = score + 1 → bomb_y = 0 → 칸 새로 뽑기"
+        code: step1_one_bomb.py
+        rules:
+          - codeMatches: '(player > 0|player >= 1|player < 0|player == 0|0 < player|1 <= player|max\()'
+            fail: a 버튼을 계속 누르면 플레이어 칸 번호가 몇까지 작아지나요? 0번 칸에서 더 줄여도 될까요? 조건에 무엇을 더 붙이면 될까요?
+          - codeMatches: '(player < 4|player <= 3|player > 4|player == 5|4 > player|3 >= player|min\()'
+            fail: b 버튼을 계속 누르면 플레이어가 화면 밖으로 나가요. 칸 번호는 몇까지만 커질 수 있나요?
+          - codeMatches: 'if [a-z_]+ (==|!=) [a-z_]+:'
+            fail: 폭탄이 맨 밑에 닿았을 때 무엇과 무엇을 비교해야 "맞았다"를 알 수 있을까요? 두 칸 번호를 비교하는 곳이 있나요?
+          - codeMatches: '^score = 0$[\s\S]*^ +score (\+= 1|= score \+ 1)$'
+            fail: 점수 score 는 어디에서 0 으로 시작하고, 피했을 때 어디에서 1 늘어나나요? 반복 안에서 0 으로 정하면 바퀴마다 처음으로 돌아가지 않을까요?
+          - codeMatches: '"END"'
+            fail: 맞았을 때 화면에 무엇을 보여 주기로 했나요? 글자를 적은 뒤 화면에 내보내는 줄도 있나요?
+          - codeMatches: '(break|while playing:|playing = False)'
+            fail: 맞았는데도 폭탄이 계속 떨어지지 않나요? 게임이 끝나면 반복을 어떻게 멈출 수 있을까요?
+        answerCode: mission_one_bomb.py
+
+  - id: part2
+    title: 2부 · 폭탄 셋이 각자 떨어지기
+    steps:
+      - id: run2
+        type: run
+        title: 실행 2 — 리스트 셋과 다음 시각
+        minutes: 9
+        scene:
+          image: images/time-schedule.svg
+          caption: 폭탄마다 "다음에 움직일 시각"을 적어 두고, 지금 시각이 그 시각을 지난 폭탄만 한 줄 내려요
+        body: |
+          폭탄이 셋이면 변수도 셋씩 필요해요. 그래서 칸 번호 `bomb_x`, 줄 번호 `bomb_y`, 다음에 움직일 시각 `next_time` 을 **리스트**로 만들고, 같은 번호 칸이 같은 폭탄이에요. 폭탄 하나를 한 줄 내리는 일은 `move_bomb(i)` **함수**로 묶고, 폭탄 번호 `i` 를 **매개변수**로 받아요.
+
+          `sleep` 대신 `time.ticks_ms()` 로 지금 시각을 재서, 폭탄마다 적어 둔 다음 시각이 지났으면 그 폭탄만 움직여요. 함수 안에서 바깥의 `score` · `playing` 을 바꾸려면 `global` 이 필요해요. 실행하고 세 폭탄의 빠르기를 비교해 보세요.
+        todo:
+          - "**실행**하고 세 폭탄이 각자 다른 빠르기로 떨어지는지 보기"
+          - 버튼이 1부보다 바로바로 듣는지 비교해 보기
+          - 출력 창에 에러가 없는지 확인하고, 맞아서 END 가 뜨면 점수 적기
+        code: step2_three_bombs.py
+        expected: 코드를 실행하면 폭탄 세 개가 0 · 2 · 4번 칸 맨 위에서 함께 나타나 각자 다른 빠르기로 떨어지기 시작해요. 버튼 a · b 를 누르면 플레이어가 바로 움직이고, 피한 폭탄은 다른 칸 맨 위에서 다시 떨어져요. 폭탄에 맞으면 END 와 SCORE 가 뜨고 멈춰요.
+        codeNotes:
+          - { line: 12, note: "`def move_bomb(i):` 폭탄 번호 `i` 를 받아 그 폭탄을 한 줄 내리는 함수예요. 40번 줄에서 불러요" }
+          - { line: 13, note: "함수 안에서 바깥 변수 `score` · `playing` 을 바꾸려면 `global` 로 알려요 (13~14번 줄)" }
+          - { line: 15, note: "`bomb_y[i]`: 리스트의 `i` 번 칸, 곧 `i` 번 폭탄의 줄 번호예요" }
+          - { line: 17, note: "폭탄 칸과 플레이어 칸이 같으면 `playing` 을 거짓으로 — 게임 끝" }
+          - { line: 19, note: "피했으면 점수 1" }
+          - { line: 23, note: "맨 밑이 아니면 `i` 번 폭탄만 한 줄 내려요" }
+          - { line: 24, note: "지금 시각에 400~900ms 를 더해 이 폭탄이 다음에 움직일 시각을 적어 둬요" }
+          - { line: 30, note: "리스트 세 개의 같은 번호 칸이 같은 폭탄이에요 (30~32번 줄). 다음 시각은 모두 0 이라 처음엔 바로 움직여요" }
+          - { line: 33, note: "`while playing:` playing 이 참인 동안만 되풀이해요" }
+          - { line: 39, note: "지금 시각에서 다음 시각을 뺀 값이 0 이상이면 그 시각이 지난 것 → 그 폭탄만 `move_bomb(i)`" }
+          - { line: 43, note: "폭탄 셋을 리스트 칸마다 하나씩 그려요" }
+          - { line: 46, note: "한 바퀴 0.1초. 1부보다 버튼을 5배 자주 봐요" }
+          - { line: 47, note: "반복이 끝나면(맞으면) END 와 점수를 보여 줘요 (47~50번 줄)" }
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 — 매개변수와 다음 시각
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 함수를 부르는 곳(괄호 안 값)과 정의(매개변수 i)를 오가며 읽어요
+        body: |
+          `move_bomb(i)` 를 부를 때 괄호 안 값이 함수 안의 `i` 가 되어요. `bomb_y[i]` 는 그 폭탄의 줄 번호예요. 부르는 곳과 정의를 손가락으로 오가며 따라가요.
+
+          `next_time[i]` 에 적힌 시각과 지금 시각을 비교하는 줄도 찾아보세요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - "`for i in range(3):` 에서 i 가 0 · 1 · 2 로 바뀌며 함수가 몇 번 불리는지 세기"
+          - 다음 시각을 정하는 줄에서 가장 짧은 간격 찾기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step2_three_bombs.py
+        questions:
+          - { kind: choice, q: "move_bomb(2) 를 부르면 함수 안의 i 는 몇인가요?", options: ["0", "1", "2"], answer: 2, hint: "괄호 안 값이 매개변수에 들어가요" }
+          - { kind: number, q: "폭탄 하나가 한 줄 내려온 뒤, 다음에 움직이기까지 가장 짧은 시간은 몇 ms 인가요?", answer: 400, hint: "다음 시각을 정하는 줄의 randint 범위를 보세요" }
+          - { kind: line, q: "게임이 끝났음을 기억하는 변수를 거짓(False)으로 바꾸는 줄의 번호를 클릭하세요", answer: 17 }
+        codeNotes:
+          - { line: 12, note: "함수의 정의예요. 여기서는 만들어 두기만 해요" }
+          - { line: 28, note: "점수는 0 에서 시작해요" }
+          - { line: 38, note: "폭탄 번호 0 · 1 · 2 를 차례로 i 에 넣어요" }
+          - { line: 40, note: "시각이 지난 폭탄만 함수를 불러 한 줄 내려요" }
+
+      - id: mission2
+        type: mission
+        title: 미션 2 — 점수가 오르면 빨라지는 폭탄 셋
+        minutes: 12
+        scene:
+          image: images/time-schedule.svg
+          caption: "다음 시각 = 지금 + 간격. 간격이 줄면 폭탄이 빨라져요. 200ms 보다는 짧아지지 않게"
+        body: |
+          게임이 너무 쉽지 않나요? 점수가 오를수록 폭탄이 **빨라지게** 해요. `move_bomb` 함수 안에서 간격 `gap` 을 `900 - score * 50` 으로 계산하고, 다음 시각을 정할 때 `random.randint(200, gap)` 처럼 그 간격을 써요.
+
+          점수가 많이 오르면 `gap` 이 200 보다 작아져 랜덤 범위가 뒤집히니, `gap` 이 200 보다 작으면 200 으로 묶어요. 함수 안에 `sleep` 을 넣지 않고 세 폭탄이 각자 움직이는지, 판정 목록으로 한꺼번에 확인해요.
+        todo:
+          - "`move_bomb` 안에 `gap = 900 - score * 50` 과 `if gap < 200: gap = 200` 넣기"
+          - "다음 시각을 `time.ticks_ms() + random.randint(200, gap)` 으로 바꾸기"
+          - 실행해서 10점 넘게 피해 보고 빨라지는지 느낀 뒤 **판정** 누르기
+        instructions: "(1) 폭탄 번호를 매개변수로 받는 함수 move_bomb(i) 로 세 폭탄을 움직이기 (2) 폭탄마다 다음에 움직일 시각을 리스트에 두고 지금 시각과 비교하기 (3) 함수 안에 time.sleep 을 쓰지 않기 (4) 간격 gap 을 900 - score * 50 으로 계산해 점수가 오르면 줄이기 (5) gap 이 200 보다 작아지면 200 으로 묶기"
+        hint: "함수 끝부분: gap = 900 - score * 50 → if gap < 200: gap = 200 → next_time[i] = time.ticks_ms() + random.randint(200, gap). gap 은 함수 안에서만 쓰는 변수라 global 이 필요 없어요"
+        code: step2_three_bombs.py
+        rules:
+          - codeMatches: '^def move_bomb\(\w+\):'
+            fail: 폭탄마다 같은 일을 하는 함수가 있나요? 폭탄 번호를 매개변수로 받고 있나요?
+          - codeMatches: 'time\.ticks_diff\(time\.ticks_ms\(\), \w+\[\w+\]\)'
+            fail: 폭탄마다 다음에 움직일 시각을 리스트에 두고, 지금 시각과 비교하는 곳이 있나요?
+          - codeMatches: '^def move_bomb\(\w+\):\n(?:    (?!\s*time\.sleep).*\n)+(?=\S)'
+            fail: 함수 안에서 기다리면 그동안 다른 폭탄은 어떻게 될까요? 함수 안에 기다리기가 남아 있지 않나요?
+          - codeMatches: '\d+ - score \* \d+|\d+ - \d+ \* score|\d+ - \(score \* \d+\)|\d+ - \(\d+ \* score\)'
+            fail: 점수가 오르면 간격이 어떻게 되어야 하나요? 점수를 써서 간격을 계산하는 줄이 있나요?
+          - codeMatches: 'if (\w+) <=? 200:\n\s+\1 = 200|max\(200, .+\)|max\(.+, 200\)'
+            fail: 점수가 아주 많이 오르면 간격은 몇까지 작아지나요? 200 보다 작아지지 않게 막는 곳이 있나요?
+        answerCode: mission_three_bombs.py
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 엥? 폭탄이 하나씩 내려오잖아?
+        minutes: 8
+        scene:
+          image: images/time-schedule.svg
+          caption: 함수 안에서 기다리면 그동안 다른 폭탄은 멈춰 있어요. 기다리는 자리가 어디인지부터 봐요
+        body: |
+          고장 난 코드 세 개가 있어요. 셋 다 빨간 글씨(에러)는 뜨지 않고 **움직임만 이상해요**. 바로 고치지 말고 증상을 보고 어디부터 볼지 먼저 정해요.
+
+          폭탄이 차례로만 움직이면 **기다리는 자리**를, 플레이어가 사라지면 **범위 조건**을, 맞았는데도 계속 떨어지면 **반복 조건**을 봐요. 최소 4분은 혼자 해 봐요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: 폭탄 셋이 동시에 안 떨어지고 0번, 1번, 2번 차례로 하나씩만 움직여요
+            code: |
+              from machine import Pin, SoftI2C
+              import ssd1306
+              import time
+              import random
+
+              i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
+              oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+              def move_bomb(i):
+                  if bomb_y[i] == 4:
+                      bomb_y[i] = 0
+                      bomb_x[i] = random.randint(0, 4)
+                  else:
+                      bomb_y[i] = bomb_y[i] + 1
+                  time.sleep(0.5)
+
+
+              bomb_x = [0, 2, 4]
+              bomb_y = [0, 0, 0]
+              while True:
+                  for i in range(3):
+                      move_bomb(i)
+                      oled.fill(0)
+                      for n in range(3):
+                          oled.fill_rect(bomb_x[n] * 25, bomb_y[n] * 12, 25, 12, 1)
+                      oled.show()
+            question: move_bomb(0) 을 부른 뒤 0.5초 동안 보드는 무엇을 하고 있나요? 그동안 1번 · 2번 폭탄은 움직일 수 있나요? 기다리기는 어디에 있어야 할까요?
+            rules:
+              - codeMatches: '^def move_bomb\(\w+\):\n(?:    (?!\s*time\.sleep).*\n)+(?=\S)'
+                fail: 함수 안에서 기다리면 그 폭탄 하나만 움직이고 나머지는 멈춰 있어요. 기다리기를 함수 밖으로 옮길 수 있을까요?
+              - codeMatches: '^while True:[\s\S]*^ +time\.sleep\('
+                fail: 세 폭탄을 모두 움직이고 그린 다음에 한 번만 기다리면 어떨까요? 반복 안에 기다리기가 있나요?
+          - title: b 버튼을 계속 누르면 플레이어가 화면에서 사라지고 출력 창에 5, 6, 7 이 찍혀요
+            code: |
+              from machine import Pin, SoftI2C
+              import ssd1306
+              import time
+
+              button_a = Pin(14, Pin.IN, Pin.PULL_UP)
+              button_b = Pin(27, Pin.IN, Pin.PULL_UP)
+              i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
+              oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+              player = 2
+              while True:
+                  if button_a.value() == 0:
+                      player = player - 1
+                  if button_b.value() == 0:
+                      player = player + 1
+                  print(player)
+                  oled.fill(0)
+                  oled.fill_rect(player * 25, 48, 25, 12, 1)
+                  oled.show()
+                  time.sleep(0.2)
+            question: 화면 칸 번호는 0~4 인데 player 가 5 가 되면 네모는 어디에 그려지나요? 칸 번호가 4 일 때 b 버튼을 또 누르면 어떻게 해야 할까요?
+            rules:
+              - codeMatches: '(player > 0|player >= 1|player < 0|player == 0|0 < player|1 <= player|max\()'
+                fail: 0번 칸에서 a 버튼을 또 누르면 player 는 몇이 되나요? 0 보다 클 때만 줄이는 조건이 있나요?
+              - codeMatches: '(player < 4|player <= 3|player > 4|player == 5|4 > player|3 >= player|min\()'
+                fail: 4번 칸에서 b 버튼을 또 누르면 player 는 몇이 되나요? 4 보다 작을 때만 늘리는 조건이 있나요?
+          - title: 폭탄에 맞았는데 END 가 안 뜨고 폭탄이 계속 떨어져요
+            code: |
+              from machine import Pin, SoftI2C
+              import ssd1306
+              import time
+              import random
+
+              i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
+              oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+
+              def move_bomb(i):
+                  global score
+                  global playing
+                  if bomb_y[i] == 4:
+                      if bomb_x[i] == player:
+                          playing = False
+                      else:
+                          score += 1
+                      bomb_y[i] = 0
+                      bomb_x[i] = random.randint(0, 4)
+                  else:
+                      bomb_y[i] = bomb_y[i] + 1
+                  next_time[i] = time.ticks_ms() + random.randint(400, 900)
+
+
+              player = 2
+              score = 0
+              playing = True
+              bomb_x = [0, 2, 4]
+              bomb_y = [0, 0, 0]
+              next_time = [0, 0, 0]
+              while True:
+                  for i in range(3):
+                      if time.ticks_diff(time.ticks_ms(), next_time[i]) >= 0:
+                          move_bomb(i)
+                  oled.fill(0)
+                  for i in range(3):
+                      oled.fill_rect(bomb_x[i] * 25, bomb_y[i] * 12, 25, 12, 1)
+                  oled.fill_rect(player * 25, 48, 25, 12, 1)
+                  oled.show()
+                  time.sleep(0.1)
+              oled.fill(0)
+              oled.text("END", 52, 20)
+              oled.text("SCORE " + str(score), 32, 36)
+              oled.show()
+            question: 폭탄에 맞으면 playing 은 거짓이 되어요. 그런데 반복은 무엇을 보고 계속 돌고 있나요? END 를 띄우는 줄에는 언제 가게 될까요?
+            rules:
+              - codeMatches: 'while playing:|if not playing:\n\s+break|if playing == False:\n\s+break'
+                fail: playing 이 거짓이 되었을 때 반복이 멈추려면 반복 조건이 무엇을 보아야 할까요?
+
+      - id: design
+        type: design
+        title: 설계 — 소리 나는 게임기 전체 흐름
+        minutes: 7
+        scene:
+          image: images/game-flow.svg
+          caption: 준비 → playing 인 동안 [버튼 → 폭탄마다 시각 비교 → 그리기 → 0.1초] → 맞으면 END · SCORE · 소리
+        body: |
+          맞았을 때 수동 부저(15번)로 **"삐"** 소리가 나는 게임기 전체를 우리말 설계도로 써 봐요. `move_bomb` 함수는 미리 만들어 두었고, 시작 블록 안의 순서를 맞추면 돼요.
+
+          설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 설계도 순서대로 이어 붙여요. 부저가 없어도 설계는 할 수 있어요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "다음 시각이 지났으면"이 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 버튼 a 14번 · 버튼 b 27번 · OLED · 부저 __번을 준비한다
+            blank: { answer: 15 }
+          - text: "함수 move_bomb(i): i 번 폭탄을 한 줄 내리고, 맨 밑이면 플레이어 칸과 비교해 점수나 끝을 정하고, 다음 시각을 적어 둔다"
+          - text: 플레이어는 __번 칸, 점수는 0, playing 은 참으로 시작한다
+            blank: { answer: 2 }
+          - text: 폭탄 칸 · 줄 · 다음 시각 리스트를 각각 __칸으로 만든다
+            blank: { answer: 3 }
+          - text: playing 인 동안 반복한다
+          - text: "  ↳ 버튼 a · b 로 플레이어 칸을 0~__ 안에서 바꾼다"
+            blank: { answer: 4 }
+          - text: "  ↳ 폭탄마다 다음 시각이 지났으면 move_bomb 을 부른다"
+          - text: "  ↳ 화면을 지우고 폭탄 셋과 플레이어를 그려 내보낸다"
+          - text: "  ↳ 0.1초 쉰다"
+          - text: END 와 SCORE 를 띄우고 부저를 __초 울린다
+            blank: { answer: 0.5 }
+        translation:
+          - ["다음 시각이 지났으면", "if time.ticks_diff(time.ticks_ms(), next_time[i]) >= 0:"]
+          - ["i 번 폭탄의 줄 번호", "bomb_y[i]"]
+          - ["함수 안에서 바깥 점수를 바꾼다", "global score"]
+          - ["playing 인 동안 반복한다", "while playing:"]
+          - ["리스트 세 칸", "next_time = [0, 0, 0]"]
+          - ["0~4 안에서 1 늘린다", "if button_b.value() == 0 and player < 4:"]
+          - ["부저로 220Hz 음을 0.5초 울린다", "beeper.freq(220) → beeper.duty(512) → time.sleep(0.5) → beeper.duty(0)"]
+        targetCode: design_bomb_game.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 기다리지 않고 시각을 비교하면 보드 하나가 폭탄 셋을 함께 움직일 수 있어요
+        body: |
+          오늘은 좌표로 그리고, 리스트와 매개변수로 폭탄 셋을 다루고, `sleep` 대신 **시각 비교**로 함께 움직이게 했어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          먼저 활동 칸의 짧은 코드 줄마다 "이 줄은 ___"을 내 말로 채워요. 이 코드는 3초 동안 폭탄 셋이 각각 몇 번 움직였는지 세어 출력 창에 찍어요. 그다음 네 칸에 오늘 있었던 일을 솔직하게 적어요. 체육 시간에는 반 친구들의 점수를 모아 평균과 최고값을 구하고, 반응 속도가 점수와 어떤 관계인지 이야기해 보자. 보건 시간에는 바이러스를 피하는 진짜 방법(손 씻기 · 거리 두기 · 기침 예절)을 게임 규칙에 빗대어 한 줄씩 적어 보자.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 "다음 시각 리스트"가 하는 일을 설명하기
+        lineExplain: reflect_next_time.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 함수 안에 sleep 을 넣으면 폭탄이 왜 하나씩만 내려올까요? 다음 시각 리스트는 이 문제를 어떻게 풀었나요?
+          - 폭탄 칸을 0~4 가운데 아무렇게나 뽑으면 내 칸에 떨어질 가능성은 얼마일까요? 폭탄이 셋이면 왜 더 어려워지는지 내 말로 설명해 보세요.
+          - "다음엔 여기부터 본다: 한 줄로"

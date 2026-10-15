@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bgt-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bgt-title">시간 원리: 함수 안에서 time.sleep(0.5) 로 기다리면 폭탄 0 이 움직인 뒤 0.5초 멈추고, 폭탄 1, 다시 0.5초, 폭탄 2 순서로 하나씩만 움직인다. 대신 폭탄마다 다음에 움직일 시각을 리스트 next_time 에 적어 두면(예: 1200, 1650, 1400) 지금 시각 1400 과 비교해 시각이 지난 폭탄 0 과 2 만 움직이고 폭탄 1 은 기다린다. 기다리는 동안에도 버튼을 볼 수 있다</title>
+  <defs><marker id="bgt-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="32" y="34" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">기다리기(sleep) 대신 다음 시각 비교</text>
+  <rect x="32" y="50" width="576" height="108" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="48" y="72" text-anchor="start" font-size="14" font-weight="700" fill="#e03131" stroke="none">함수 안에서 sleep(0.5)</text>
+  <text x="230" y="72" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">폭탄이 하나씩 차례로 움직여요. 그동안 버튼도 못 봐요</text>
+  <rect x="48" y="90" width="56" height="36" rx="6" fill="#7dd3fc" fill-opacity="0.9" stroke="#7dd3fc" stroke-width="1.5"/>
+  <text x="76.0" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#1e1e1e" stroke="none">폭탄 0</text>
+  <rect x="110" y="90" width="92" height="36" rx="6" fill="#e03131" fill-opacity="0.16" stroke="#e03131" stroke-width="1.5"/>
+  <text x="156.0" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#e03131" stroke="none">0.5초 기다림</text>
+  <rect x="208" y="90" width="56" height="36" rx="6" fill="#7dd3fc" fill-opacity="0.9" stroke="#7dd3fc" stroke-width="1.5"/>
+  <text x="236.0" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#1e1e1e" stroke="none">폭탄 1</text>
+  <rect x="270" y="90" width="92" height="36" rx="6" fill="#e03131" fill-opacity="0.16" stroke="#e03131" stroke-width="1.5"/>
+  <text x="316.0" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#e03131" stroke="none">0.5초 기다림</text>
+  <rect x="368" y="90" width="56" height="36" rx="6" fill="#7dd3fc" fill-opacity="0.9" stroke="#7dd3fc" stroke-width="1.5"/>
+  <text x="396.0" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#1e1e1e" stroke="none">폭탄 2</text>
+  <rect x="430" y="90" width="92" height="36" rx="6" fill="#e03131" fill-opacity="0.16" stroke="#e03131" stroke-width="1.5"/>
+  <text x="476.0" y="113" text-anchor="middle" font-size="12" font-weight="700" fill="#e03131" stroke="none">0.5초 기다림</text>
+  <path d="M528 108 H538" stroke-width="1.5" marker-end="url(#bgt-arrow)"/>
+  <text x="48" y="146" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">1.5초에 세 폭탄이 한 줄씩 → 함께 움직이는 것처럼 보이지 않아요</text>
+  <rect x="32" y="172" width="576" height="176" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="48" y="194" text-anchor="start" font-size="14" font-weight="700" fill="#2f9e44" stroke="none">다음 시각 리스트 next_time</text>
+  <text x="292" y="194" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">지금 시각이 지난 폭탄만 한 줄 내려요. 반복은 0.1초마다 돌아요</text>
+  <path d="M200 330 H568" stroke-width="1.5" marker-end="url(#bgt-arrow)"/>
+  <path d="M200.0 326 V334" stroke-width="1.2"/>
+  <text x="200.0" y="346" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.7" stroke="none">1000</text>
+  <path d="M290.0 326 V334" stroke-width="1.2"/>
+  <text x="290.0" y="346" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.7" stroke="none">1200</text>
+  <path d="M380.0 326 V334" stroke-width="1.2"/>
+  <text x="380.0" y="346" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.7" stroke="none">1400</text>
+  <path d="M470.0 326 V334" stroke-width="1.2"/>
+  <text x="470.0" y="346" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.7" stroke="none">1600</text>
+  <path d="M560.0 326 V334" stroke-width="1.2"/>
+  <text x="560.0" y="346" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.7" stroke="none">1800</text>
+  <text x="580" y="334" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.7" stroke="none">ms</text>
+  <path d="M380.0 206 V326" stroke="#4562f5" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="380.0" y="224" text-anchor="middle" font-size="12" font-weight="700" fill="#4562f5" stroke="none">지금 ticks_ms() = 1400</text>
+  <text x="48" y="252" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">폭탄 0</text>
+  <text x="100" y="252" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">next_time[0] = 1200</text>
+  <path d="M200 248 H560" stroke-width="1" stroke-opacity="0.25"/>
+  <circle cx="290.0" cy="248" r="7" fill="#2f9e44" stroke="none"/>
+  <text x="302.0" y="252" text-anchor="start" font-size="12" font-weight="700" fill="#2f9e44" stroke="none">지났다 → 움직임</text>
+  <text x="48" y="278" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">폭탄 1</text>
+  <text x="100" y="278" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">next_time[1] = 1650</text>
+  <path d="M200 274 H560" stroke-width="1" stroke-opacity="0.25"/>
+  <circle cx="492.5" cy="274" r="7" fill="#868e96" stroke="none"/>
+  <text x="504.5" y="278" text-anchor="start" font-size="12" font-weight="700" fill="#868e96" stroke="none">아직 → 기다림</text>
+  <text x="48" y="304" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">폭탄 2</text>
+  <text x="100" y="304" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">next_time[2] = 1400</text>
+  <path d="M200 300 H560" stroke-width="1" stroke-opacity="0.25"/>
+  <circle cx="380.0" cy="300" r="7" fill="#2f9e44" stroke="none"/>
+  <text x="368.0" y="304" text-anchor="end" font-size="12" font-weight="700" fill="#2f9e44" stroke="none">지났다 → 움직임</text>
+</svg>

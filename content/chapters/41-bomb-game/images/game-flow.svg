@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bgf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bgf-title">게임 전체 흐름: 준비(버튼 a · b, OLED, 부저, 리스트 셋, 플레이어 2, 점수 0, playing 참) → playing 인 동안 반복: 버튼으로 플레이어 칸을 0~4 안에서 바꾸기 → 폭탄마다 다음 시각이 지났으면 move_bomb(i) → 화면을 지우고 폭탄 셋과 플레이어 그려 내보내기 → 0.1초 쉬기. move_bomb(i) 는 맨 밑이면 플레이어 칸과 비교해 같으면 playing 거짓, 다르면 점수 1, 그 뒤 맨 위로 보내고 다음 시각을 정한다. 반복이 끝나면 END · SCORE 를 띄우고 부저를 울린다</title>
+  <defs><marker id="bgf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="20" y="24" width="200" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="120.0" y="45.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">준비</text>
+  <text x="120.0" y="63.0" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none">버튼 a · b, OLED, 부저, 리스트 셋</text>
+  <path d="M120 72 V96" marker-end="url(#bgf-arrow)"/>
+  <rect x="20" y="100" width="290" height="212" rx="12" fill="var(--muted)" stroke="none"/>
+  <text x="36" y="122" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">playing 인 동안 반복</text>
+  <rect x="36" y="134" width="258" height="40" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="165.0" y="159.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼 a · b → 플레이어 칸 (0~4 안에서)</text>
+  <path d="M165 174 V186" marker-end="url(#bgf-arrow)"/>
+  <rect x="36" y="190" width="258" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="165.0" y="211.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">폭탄마다 다음 시각이 지났으면</text>
+  <text x="165.0" y="229.0" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none">move_bomb(i)</text>
+  <path d="M165 238 V250" marker-end="url(#bgf-arrow)"/>
+  <rect x="36" y="254" width="258" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="165.0" y="275.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">지우고 · 폭탄 셋 + 플레이어 그리고</text>
+  <text x="165.0" y="293.0" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none">내보내기 · 0.1초 쉬기</text>
+  <path d="M294 278 H302 V154 H298" marker-end="url(#bgf-arrow)"/>
+  <text x="165" y="324" text-anchor="middle" font-size="12" font-weight="600" fill="#e03131" stroke="none">playing 이 거짓이면 반복 끝</text>
+  <path d="M165 312 V336" stroke="#e03131" marker-end="url(#bgf-arrow)"/>
+  <rect x="60" y="336" width="210" height="22" rx="10" fill="var(--card)" stroke="#e03131" stroke-width="2"/>
+  <text x="165.0" y="352.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">END · SCORE · 부저 삐</text>
+  <rect x="340" y="100" width="280" height="240" rx="12" fill="var(--card)" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="356" y="122" text-anchor="start" font-size="14" font-weight="700" fill="#4562f5" stroke="none">함수 move_bomb(i)</text>
+  <path d="M294 214 H340" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#bgf-arrow)"/>
+  <path d="M480 134 L570 158 L480 182 L390 158 Z" fill="var(--muted)"/>
+  <text x="480" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">줄 번호 y 가 4 (맨 밑)?</text>
+  <path d="M390 158 H368 V 262 H380" marker-end="url(#bgf-arrow)"/>
+  <text x="370" y="150" text-anchor="start" font-size="12" font-weight="700" fill="#868e96" stroke="none">아니요</text>
+  <rect x="380" y="246" width="86" height="32" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="423.0" y="267.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">y 를 1 늘림</text>
+  <path d="M480 182 V196" marker-end="url(#bgf-arrow)"/>
+  <text x="488" y="194" text-anchor="start" font-size="12" font-weight="700" fill="#2f9e44" stroke="none">예</text>
+  <path d="M480 200 L576 222 L480 244 L384 222 Z" fill="var(--muted)"/>
+  <text x="480" y="226" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">폭탄 칸 == 플레이어 칸?</text>
+  <path d="M576 222 H592 V250" marker-end="url(#bgf-arrow)"/>
+  <rect x="536" y="252" width="80" height="30" rx="10" fill="var(--card)" stroke="#e03131" stroke-width="2"/>
+  <text x="576.0" y="272.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">playing 거짓</text>
+  <text x="580" y="246" text-anchor="start" font-size="12" font-weight="700" fill="#e03131" stroke="none">같다</text>
+  <path d="M480 244 V258" marker-end="url(#bgf-arrow)"/>
+  <text x="486" y="256" text-anchor="start" font-size="12" font-weight="700" fill="#2f9e44" stroke="none">다르다</text>
+  <rect x="470" y="260" width="60" height="24" rx="10" fill="var(--card)" stroke="#2f9e44" stroke-width="2"/>
+  <text x="500.0" y="277.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">점수 + 1</text>
+  <rect x="380" y="298" width="236" height="30" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="498.0" y="318.0" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">맨 위로(y 0) · 칸 새로 · 다음 시각 정하기</text>
+  <path d="M500 284 V294" marker-end="url(#bgf-arrow)"/>
+  <path d="M423 278 V294" marker-end="url(#bgf-arrow)"/>
+</svg>

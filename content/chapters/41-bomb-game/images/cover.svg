@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bgc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bgc-title">바이러스 폭탄 피하기 표지: OLED 화면을 5칸 × 5줄 격자로 나누어 바이러스 폭탄 셋이 맨 위에서 각자 떨어지고, 플레이어 네모는 맨 밑 줄에서 버튼 a(칸 번호 1 줄이기) · b(칸 번호 1 늘리기)로 움직여 피한다. 피하면 점수 1, 맞으면 END 와 SCORE</title>
+  <text x="32" y="38" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">떨어지는 바이러스 폭탄을 버튼으로 피하기</text>
+  <rect x="32" y="60" width="300" height="196" rx="12" fill="#1d4ed8"/>
+  <circle cx="48" cy="76" r="5" fill="var(--card)"/>
+  <circle cx="316" cy="76" r="5" fill="var(--card)"/>
+  <circle cx="48" cy="240" r="5" fill="var(--card)"/>
+  <circle cx="316" cy="240" r="5" fill="var(--card)"/>
+  <rect x="62" y="82" width="240" height="150" rx="4" fill="#0b1b4d" stroke="none"/>
+  <path d="M110 82 V232" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M62 112 H302" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M158 82 V232" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M62 142 H302" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M206 82 V232" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M62 172 H302" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M254 82 V232" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M62 202 H302" stroke="#7dd3fc" stroke-width="0.8" stroke-opacity="0.25"/>
+  <g stroke="#7dd3fc" stroke-width="2">
+    <path d="M95.0 127.0 L99.0 127.0"/>
+    <circle cx="99.0" cy="127.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M92.4 133.4 L95.2 136.2"/>
+    <circle cx="95.2" cy="136.2" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M86.0 136.0 L86.0 140.0"/>
+    <circle cx="86.0" cy="140.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M79.6 133.4 L76.8 136.2"/>
+    <circle cx="76.8" cy="136.2" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M77.0 127.0 L73.0 127.0"/>
+    <circle cx="73.0" cy="127.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M79.6 120.6 L76.8 117.8"/>
+    <circle cx="76.8" cy="117.8" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M86.0 118.0 L86.0 114.0"/>
+    <circle cx="86.0" cy="114.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M92.4 120.6 L95.2 117.8"/>
+    <circle cx="95.2" cy="117.8" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <circle cx="86.0" cy="127.0" r="9" fill="#7dd3fc" fill-opacity="0.9" stroke="none"/>
+  </g>
+  <g stroke="#7dd3fc" stroke-width="2">
+    <path d="M191.0 187.0 L195.0 187.0"/>
+    <circle cx="195.0" cy="187.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M188.4 193.4 L191.2 196.2"/>
+    <circle cx="191.2" cy="196.2" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M182.0 196.0 L182.0 200.0"/>
+    <circle cx="182.0" cy="200.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M175.6 193.4 L172.8 196.2"/>
+    <circle cx="172.8" cy="196.2" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M173.0 187.0 L169.0 187.0"/>
+    <circle cx="169.0" cy="187.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M175.6 180.6 L172.8 177.8"/>
+    <circle cx="172.8" cy="177.8" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M182.0 178.0 L182.0 174.0"/>
+    <circle cx="182.0" cy="174.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M188.4 180.6 L191.2 177.8"/>
+    <circle cx="191.2" cy="177.8" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <circle cx="182.0" cy="187.0" r="9" fill="#7dd3fc" fill-opacity="0.9" stroke="none"/>
+  </g>
+  <g stroke="#7dd3fc" stroke-width="2">
+    <path d="M287.0 97.0 L291.0 97.0"/>
+    <circle cx="291.0" cy="97.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M284.4 103.4 L287.2 106.2"/>
+    <circle cx="287.2" cy="106.2" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M278.0 106.0 L278.0 110.0"/>
+    <circle cx="278.0" cy="110.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M271.6 103.4 L268.8 106.2"/>
+    <circle cx="268.8" cy="106.2" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M269.0 97.0 L265.0 97.0"/>
+    <circle cx="265.0" cy="97.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M271.6 90.6 L268.8 87.8"/>
+    <circle cx="268.8" cy="87.8" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M278.0 88.0 L278.0 84.0"/>
+    <circle cx="278.0" cy="84.0" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <path d="M284.4 90.6 L287.2 87.8"/>
+    <circle cx="287.2" cy="87.8" r="1.6" fill="#7dd3fc" stroke="none"/>
+    <circle cx="278.0" cy="97.0" r="9" fill="#7dd3fc" fill-opacity="0.9" stroke="none"/>
+  </g>
+  <rect x="113" y="205" width="42" height="24" rx="2" fill="#7dd3fc" stroke="none"/>
+  <text x="134.0" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" fill-opacity="0.9" stroke="none">플레이어</text>
+  <text x="182.0" y="276" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">5칸 × 5줄 격자 · 칸 번호 0~4</text>
+  <text x="86.0" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" fill-opacity="0.8" stroke="none">0</text>
+  <text x="134.0" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" fill-opacity="0.8" stroke="none">1</text>
+  <text x="182.0" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" fill-opacity="0.8" stroke="none">2</text>
+  <text x="230.0" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" fill-opacity="0.8" stroke="none">3</text>
+  <text x="278.0" y="76" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" fill-opacity="0.8" stroke="none">4</text>
+  <rect x="374" y="94" width="52" height="52" rx="8" fill="#495057" stroke-width="1.5"/>
+  <circle cx="400" cy="120" r="14" fill="#212529" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="400" y="126" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">a</text>
+  <text x="400" y="166" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">칸 번호 − 1</text>
+  <rect x="474" y="94" width="52" height="52" rx="8" fill="#495057" stroke-width="1.5"/>
+  <circle cx="500" cy="120" r="14" fill="#212529" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="500" y="126" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">b</text>
+  <text x="500" y="166" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">칸 번호 + 1</text>
+  <path d="M436 110 H464 M458 104 L464 110 L458 116" stroke-width="2.5"/>
+  <path d="M464 130 H436 M442 124 L436 130 L442 136" stroke-width="2.5"/>
+  <text x="450" y="70" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">버튼 두 개로 움직여요</text>
+  <rect x="372" y="196" width="128" height="40" rx="10" fill="#2f9e44" stroke="#2f9e44" stroke-width="1.5" fill-opacity="0.16"/>
+  <text x="436" y="212" text-anchor="middle" font-size="14" font-weight="700" fill="#2f9e44" stroke="none">피하면 점수 + 1</text>
+  <text x="436" y="229" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none">폭탄은 다시 맨 위로</text>
+  <rect x="508" y="196" width="112" height="40" rx="10" fill="#e03131" stroke="#e03131" stroke-width="1.5" fill-opacity="0.12"/>
+  <text x="564" y="212" text-anchor="middle" font-size="14" font-weight="700" fill="#e03131" stroke="none">맞으면 END</text>
+  <text x="564" y="229" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none">SCORE 보여 주기</text>
+  <rect x="372" y="252" width="248" height="44" rx="10" fill="var(--muted)" stroke="none"/>
+  <text x="496" y="270" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">폭탄 셋이 각자 떨어지려면?</text>
+  <text x="496" y="288" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none">폭탄마다 "다음에 움직일 시각"을 적어 둬요</text>
+  <text x="320" y="336" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">바이러스는 어디서 올지 몰라요. 미리 피하는 습관이 가장 좋은 방어 (SDG 3)</text>
+</svg>
