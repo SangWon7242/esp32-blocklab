@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="usc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="usc-title">두 장면. 어두운 밤 하늘의 박쥐가 소리를 쏘고, 나방에 부딪혀 돌아온 메아리를 들어 나방이 어디 있는지 안다. 옆에서는 자동차가 뒤로 가며 뒤 범퍼의 주차 센서가 소리를 쏘아 벽까지 30 cm 남은 것을 알고 삐삐 소리로 알려 준다</title>
+  <rect x="0" y="0" width="640" height="360" fill="var(--muted)" stroke="none"/>
+  <!-- 왼쪽: 밤 하늘 -->
+  <rect x="0" y="0" width="318" height="360" fill="#1971c2" fill-opacity="0.18" stroke="none"/>
+  <path d="M262 132 A20 20 0 1 0 272 168 A15 15 0 1 1 262 132 Z" fill="#f4af18" fill-opacity="0.8" stroke="none"/>
+  <g fill="currentColor" stroke="none" fill-opacity="0.4">
+    <circle cx="40" cy="140" r="1.8"/><circle cx="196" cy="128" r="1.6"/><circle cx="296" cy="300" r="1.8"/><circle cx="34" cy="320" r="1.6"/>
+  </g>
+  <!-- 박쥐 -->
+  <g transform="translate(78 222)">
+    <path d="M0 0 C-14 -20 -40 -26 -58 -18 C-50 -10 -48 2 -52 10 C-40 4 -30 8 -26 16 C-18 8 -8 8 0 12 Z" fill="currentColor" fill-opacity="0.85" stroke-width="1.5"/>
+    <path d="M18 0 C32 -20 58 -26 76 -18 C68 -10 66 2 70 10 C58 4 48 8 44 16 C36 8 26 8 18 12 Z" fill="currentColor" fill-opacity="0.85" stroke-width="1.5"/>
+    <ellipse cx="9" cy="4" rx="11" ry="15" fill="currentColor" stroke-width="1.5"/>
+    <path d="M2 -9 L0 -20 L6 -12 M16 -9 L18 -20 L12 -12" fill="currentColor" stroke-width="1.5"/>
+  </g>
+  <!-- 박쥐 소리 (가는 것 · 돌아오는 것) -->
+  <g stroke="#2f9e44" stroke-width="3">
+    <path d="M166 208 A26 26 0 0 1 166 236"/>
+    <path d="M178 200 A40 40 0 0 1 178 244"/>
+    <path d="M190 192 A54 54 0 0 1 190 252"/>
+  </g>
+  <g stroke="#0ca678" stroke-width="2.5" stroke-dasharray="5 5">
+    <path d="M242 206 A30 30 0 0 0 242 238"/>
+    <path d="M228 198 A44 44 0 0 0 228 246"/>
+  </g>
+  <!-- 나방 -->
+  <g transform="translate(270 222)">
+    <path d="M0 0 L-12 -12 L-16 4 Z M0 0 L12 -12 L16 4 Z" fill="var(--card)" stroke-width="1.5"/>
+    <ellipse cx="0" cy="0" rx="3" ry="8" fill="currentColor" stroke="none"/>
+  </g>
+  <text x="160" y="300" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">박쥐: 소리를 쏘고 메아리를 들어요</text>
+  <!-- 가운데 나눔 -->
+  <path d="M318 0 V360" stroke-opacity="0.35"/>
+  <!-- 오른쪽: 주차 -->
+  <path d="M330 300 H640" stroke-width="2.5"/>
+  <rect x="330" y="300" width="310" height="60" fill="currentColor" fill-opacity="0.08" stroke="none"/>
+  <!-- 벽 -->
+  <rect x="596" y="150" width="30" height="150" fill="var(--card)" stroke-width="2"/>
+  <path d="M596 170 L626 160 M596 200 L626 190 M596 230 L626 220 M596 260 L626 250 M596 290 L626 280" stroke-width="1.5" stroke-opacity="0.7"/>
+  <!-- 자동차 (뒤가 벽 쪽) -->
+  <path d="M352 286 V254 Q352 244 362 242 L392 236 L418 208 Q424 202 434 202 H486 Q496 202 502 210 L520 236 Q534 238 534 252 V286 Z" fill="var(--card)" stroke-width="2.5"/>
+  <path d="M424 236 L436 214 H462 V236 Z M470 236 V214 H492 L506 236 Z" fill="#1971c2" fill-opacity="0.2" stroke-width="1.8"/>
+  <circle cx="386" cy="288" r="16" fill="var(--muted)" stroke-width="2.5"/>
+  <circle cx="386" cy="288" r="6" fill="currentColor" stroke="none"/>
+  <circle cx="500" cy="288" r="16" fill="var(--muted)" stroke-width="2.5"/>
+  <circle cx="500" cy="288" r="6" fill="currentColor" stroke="none"/>
+  <!-- 주차 센서 -->
+  <circle cx="531" cy="266" r="4" fill="#5b9a1a" stroke-width="1.5"/>
+  <g stroke="#2f9e44" stroke-width="2.5">
+    <path d="M546 256 A14 14 0 0 1 546 276"/>
+    <path d="M558 250 A24 24 0 0 1 558 282"/>
+    <path d="M570 244 A34 34 0 0 1 570 288"/>
+  </g>
+  <!-- 거리 -->
+  <path d="M536 322 H594" stroke-width="1.8"/>
+  <path d="M536 316 V328 M594 316 V328" stroke-width="1.8"/>
+  <text x="565" y="346" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">30 cm</text>
+  <rect x="452" y="150" width="120" height="30" rx="15" fill="var(--card)" stroke-width="1.5"/>
+  <text x="512" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">삐- 삐- 삐-</text>
+  <path d="M520 180 L530 254" stroke-width="1.5"/>
+  <text x="400" y="132" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">주차 센서</text>
+  <text x="400" y="152" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">벽까지 얼마나 남았지?</text>
+  <!-- 말풍선 -->
+  <rect x="24" y="24" width="372" height="76" rx="14" fill="var(--card)" stroke-width="1.8"/>
+  <text x="44" y="54" font-size="18" font-weight="700" fill="currentColor" stroke="none">소리로 거리를 재요</text>
+  <text x="44" y="82" font-size="14" fill="currentColor" fill-opacity="0.75" stroke="none">박쥐는 깜깜한 밤에 어떻게 부딪히지 않고 날까요?</text>
+</svg>

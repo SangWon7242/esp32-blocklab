@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="usp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="usp-title">초음파 센서의 원리: trig 가 소리를 쏘고, 소리가 벽에 부딪혀 돌아오면 echo 가 메아리를 듣는다. 거리는 갔다 오는 시간의 절반에 소리 빠르기를 곱해 구한다</title>
+  <defs>
+    <marker id="usp-arrow-go" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#5b9a1a" stroke-width="2"/>
+    </marker>
+    <marker id="usp-arrow-back" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#00b6b1" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 센서 -->
+  <rect x="32" y="84" width="168" height="104" rx="10" fill="#5b9a1a"/>
+  <circle cx="76" cy="126" r="28" fill="var(--card)"/>
+  <circle cx="156" cy="126" r="28" fill="var(--card)"/>
+  <circle cx="76" cy="126" r="12"/>
+  <circle cx="156" cy="126" r="12"/>
+  <text x="76" y="178" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" stroke="none">trig</text>
+  <text x="156" y="178" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff" stroke="none">echo</text>
+  <text x="116" y="212" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">HC-SR04</text>
+  <!-- 벽 -->
+  <rect x="568" y="56" width="28" height="156" fill="var(--muted)"/>
+  <path d="M568 76 L596 60 M568 106 L596 90 M568 136 L596 120 M568 166 L596 150 M568 196 L596 180"/>
+  <text x="582" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">벽</text>
+  <!-- 가는 소리 -->
+  <path d="M220 100 H556" stroke="#5b9a1a" stroke-width="3" marker-end="url(#usp-arrow-go)"/>
+  <text x="388" y="86" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">① trig 가 소리를 쏴요</text>
+  <!-- 돌아오는 메아리 -->
+  <path d="M556 152 H220" stroke="#00b6b1" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#usp-arrow-back)"/>
+  <text x="388" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">② echo 가 메아리를 들어요</text>
+  <!-- 식 -->
+  <rect x="32" y="234" width="576" height="106" rx="12" fill="var(--muted)" stroke="none"/>
+  <text x="320" y="268" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">거리 = 소리가 갔다 오는 시간의 절반 × 소리 빠르기</text>
+  <text x="320" y="296" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">거리(cm) = 시간(µs) × 340 ÷ 2 ÷ 10000</text>
+  <text x="320" y="324" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">갔다 왔으니까 2로 나눠요 → 코드의 t = t // 2</text>
+</svg>

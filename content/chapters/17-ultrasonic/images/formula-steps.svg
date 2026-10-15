@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="usf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="usf-title">거리 공식 만들기 ①~⑥. ① 왕복 거리(m) = 340(m/s) × 왕복 시간(s). ② 시간을 마이크로초로: 340 ÷ 1000000 × 왕복 시간(µs). ③ m 를 cm 로: 340 × 100 ÷ 1000000 × 왕복 시간(µs). ④ 식 정리: 340 ÷ 10000 × 왕복 시간(µs). ⑤ (340 × 왕복 시간) ÷ 10000. ⑥ 갔다 왔으니 절반: 물체까지 거리(cm) = (340 × 왕복 시간) ÷ 10000 ÷ 2. 코드에서는 t = 왕복 시간 // 2, 거리 = 340 * t // 10000</title>
+  <text x="32" y="38" font-size="18" font-weight="700" fill="currentColor" stroke="none">거리 공식 만들기 ①~⑥</text>
+  <text x="32" y="60" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">센서가 알려 주는 것은 소리가 갔다 온 시간(µs)뿐이에요</text>
+  <!-- 줄 바탕 -->
+  <g stroke="none">
+    <rect x="24" y="74" width="592" height="30" rx="6" fill="var(--muted)"/>
+    <rect x="24" y="108" width="592" height="30" rx="6" fill="var(--muted)" fill-opacity="0.6"/>
+    <rect x="24" y="142" width="592" height="30" rx="6" fill="var(--muted)"/>
+    <rect x="24" y="176" width="592" height="30" rx="6" fill="var(--muted)" fill-opacity="0.6"/>
+    <rect x="24" y="210" width="592" height="30" rx="6" fill="var(--muted)"/>
+    <rect x="24" y="244" width="592" height="30" rx="6" fill="#2f9e44" fill-opacity="0.18"/>
+  </g>
+  <g font-size="14" fill="currentColor" stroke="none">
+    <text x="36" y="94">① 왕복 거리(m) = 340(m/s) × 왕복 시간(s)</text>
+    <text x="36" y="128">② 왕복 거리(m) = 340 ÷ 1000000 × 왕복 시간(µs)</text>
+    <text x="36" y="162">③ 왕복 거리(cm) = 340 × 100 ÷ 1000000 × 왕복 시간(µs)</text>
+    <text x="36" y="196">④ 왕복 거리(cm) = 340 ÷ 10000 × 왕복 시간(µs)</text>
+    <text x="36" y="230">⑤ 왕복 거리(cm) = (340 × 왕복 시간) ÷ 10000</text>
+    <text x="36" y="264" font-weight="700">⑥ 물체까지 거리(cm) = (340 × 왕복 시간) ÷ 10000 ÷ 2</text>
+  </g>
+  <g font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none" text-anchor="end">
+    <text x="604" y="94">소리 빠르기 × 시간</text>
+    <text x="604" y="128">1초 = 1000000µs</text>
+    <text x="604" y="162">1m = 100cm</text>
+    <text x="604" y="196">100 ÷ 1000000 정리</text>
+    <text x="604" y="230">곱하고 나누기</text>
+  </g>
+  <text x="604" y="264" font-size="13" font-weight="700" fill="#2f9e44" stroke="none" text-anchor="end">갔다 왔으니 절반</text>
+  <!-- 코드와 짝 -->
+  <rect x="24" y="290" width="592" height="54" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="40" y="312" font-size="13" font-weight="700" fill="currentColor" stroke="none">코드에서는</text>
+  <text x="40" y="334" font-size="14" fill="currentColor" stroke="none">t = 왕복 시간 // 2   →   거리 = 340 * t // 10000</text>
+  <text x="604" y="334" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none" text-anchor="end">// 는 나머지를 버리는 나누기</text>
+</svg>
