@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { iconColourOn } from "../src/lib/contrast";
 
-const CATEGORIES = ["시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드"];
+const CATEGORIES = ["시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "통신", "코드"];
 /** src/blocks/colors.ts 의 CATEGORY_COLORS.led(#c99c00)·flow */
 const LED_HEX = "#c99c00";
 const LED_COLOUR = "rgb(201, 156, 0)";
@@ -30,14 +30,14 @@ test("처음 열면 작업판에는 시작 블록만 있고 코드는 비어 있
   await expect(code.locator(".cm-content")).not.toContainText("Pin(");
 });
 
-test("카테고리 열: 16개 타일에 아이콘, 고른 타일은 카테고리 색으로 채우고 글자는 대비가 큰 색", async ({ page }) => {
+test("카테고리 열: 17개 타일에 아이콘, 고른 타일은 카테고리 색으로 채우고 글자는 대비가 큰 색", async ({ page }) => {
   await page.goto("/#/lab");
   const toolbox = page.locator(".blocklyToolbox");
   await expect(toolbox).toBeVisible();
   const rows = toolbox.locator(".blocklyToolboxCategory");
-  await expect(rows).toHaveCount(16);
+  await expect(rows).toHaveCount(CATEGORIES.length);
   await expect(rows).toHaveText(CATEGORIES);
-  for (let i = 0; i < 16; i++) await expect(rows.nth(i).locator(".entryCategoryIcon svg")).toHaveCount(1);
+  for (let i = 0; i < CATEGORIES.length; i++) await expect(rows.nth(i).locator(".entryCategoryIcon svg")).toHaveCount(1);
   expect(Math.round((await toolbox.boundingBox())!.width)).toBe(84);
 
   const row = (name: string) => rows.filter({ hasText: new RegExp(`^${name}$`) });

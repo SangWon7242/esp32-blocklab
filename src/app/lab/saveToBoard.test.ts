@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { DeviceError, FakeDevice } from "@/device";
-import { saveToBoard, syncLibs } from "./saveToBoard";
+import { saveToBoard, syncLibs, writeBoardFile } from "./saveToBoard";
 
 async function connected() {
   const device = new FakeDevice();
@@ -71,5 +71,34 @@ describe("saveToBoard", () => {
     const lost = new DeviceError("disconnected");
     vi.spyOn(device, "saveFile").mockRejectedValueOnce(lost);
     await expect(saveToBoard(device, { code: "x\n", blockTypes: [] }, () => undefined)).rejects.toBe(lost);
+  });
+});
+
+describe("writeBoardFile", () => {
+  it("파일 하나를 보드에 쓰고 라이브러리와 같은 꼴로 알린다 (main.py·리셋은 건드리지 않음)", async () => {
+    const device = await connected();
+    const reset = vi.spyOn(device, "softReset");
+    const log: string[] = [];
+    await writeBoardFile(device, "index.html", "<h1>안녕</h1>\n", (t) => log.push(t));
+    expect(device.files.get("index.html")).toBe("<h1>안녕</h1>\n");
+    expect(device.files.has("main.py")).toBe(false);
+    expect(reset).not.toHaveBeenCalled();
+    expect(log).toEqual(["index.html 올리는 중…", "index.html 저장 완료"]);
+  });
+  it("이미 있는 파일은 새 글로 바꾼다 (로그 없이도 부를 수 있다)", async () => {
+    const device = await connected();
+    device.files.set("index.html", "old");
+    await writeBoardFile(device, "index.html", "new");
+    expect(device.files.get("index.html")).toBe("new");
+  });
+  it("보드 쪽 실패는 한국어로 감싸고, 장치 오류는 그대로 넘긴다", async () => {
+    const device = await connected();
+    vi.spyOn(device, "saveFile").mockRejectedValueOnce(new Error("OSError: 28"));
+    const log: string[] = [];
+    await expect(writeBoardFile(device, "index.html", "x", (t) => log.push(t))).rejects.toThrow("보드에 저장하지 못했어요: OSError: 28");
+    expect(log).toEqual(["index.html 올리는 중…"]);
+    const lost = new DeviceError("disconnected");
+    vi.spyOn(device, "saveFile").mockRejectedValueOnce(lost);
+    await expect(writeBoardFile(device, "index.html", "x")).rejects.toBe(lost);
   });
 });

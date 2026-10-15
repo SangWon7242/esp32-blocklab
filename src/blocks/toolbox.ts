@@ -96,7 +96,7 @@ export const toolbox = {
       ],
     },
     { kind: "category", name: "함수", categorystyle: "func_category", icon: "func", custom: "PROCEDURE" },
-    // 하드웨어 카테고리 8개 (핀·LED·버튼·스위치·센서·소리·모터·화면·입력장치)는 장치 레지스트리에서 (icon·categorystyle 은 장치 카테고리 id)
+    // 하드웨어 카테고리 9개 (핀·LED·버튼·스위치·센서·소리·모터·화면·입력장치·통신)는 장치 레지스트리에서 (icon·categorystyle 은 장치 카테고리 id)
     ...deviceToolboxCategories(),
     { kind: "category", name: "코드", categorystyle: "code_category", icon: "code", contents: [block("code_stmt"), block("code_expr")] },
   ],

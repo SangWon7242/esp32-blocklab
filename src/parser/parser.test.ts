@@ -229,8 +229,8 @@ describe("최종 리뷰: 뜻이 바뀌거나 사라지던 구문", () => {
   it("C1 블록이 다시 만들지 못하는 import 는 code_stmt 로 남긴다", () => {
     expect(body("from machine import Pin, UART\n")).toEqual([{ type: "code_stmt", fields: { CODE: "from machine import Pin, UART" } }]);
     expect(body("from machine import Pin as P\n")).toEqual([{ type: "code_stmt", fields: { CODE: "from machine import Pin as P" } }]);
-    expect(body("import time as t\nimport network\n").map((b) => b.fields?.CODE)).toEqual(["import time as t", "import network"]);
-    expect(lines("import time as t\nimport network\n")).toEqual([1, 2]);
+    expect(body("import time as t\nimport os\n").map((b) => b.fields?.CODE)).toEqual(["import time as t", "import os"]);
+    expect(lines("import time as t\nimport os\n")).toEqual([1, 2]);
     // 블록이 다시 만드는 꼴은 여전히 사라진다
     expect(body("from machine import Pin, PWM, SoftI2C\nimport time\nimport ssd1306\n")).toEqual([]);
   });

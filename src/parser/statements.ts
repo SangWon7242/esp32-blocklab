@@ -281,8 +281,10 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
 
     case "FunctionDefinition": {
       const { name, params, body, simple } = functionParts(node, ctx);
-      if (!topLevel || !simple || ctx.duplicateDefs.has(node.from)) return unknown(node, ctx);
+      if (!topLevel || ctx.duplicateDefs.has(node.from)) return unknown(node, ctx);
+      // 접힌 도우미는 기본값이 있어도(web_send 의 ctype="text/html") 생성기가 다시 만든다
       if (isFoldedHelper(name, ctx)) return none();
+      if (!simple) return unknown(node, ctx);
       const stmts = body ? bodyStatements(body) : [];
       const last = stmts[stmts.length - 1];
       let RETURN: BlockJson | undefined;

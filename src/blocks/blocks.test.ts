@@ -90,7 +90,7 @@ describe("테마와 툴박스", () => {
     ws.dispose();
   });
 
-  it("카테고리마다 자기 색 스타일과 아이콘 id 가 있고, 16개 색은 모두 다르다", () => {
+  it("카테고리마다 자기 색 스타일과 아이콘 id 가 있고, 17개 색은 모두 다르다", () => {
     const cats = (toolbox as { contents: { name: string; categorystyle: string; icon?: string }[] }).contents;
     expect(cats.map((c) => c.icon)).toEqual(CATEGORY_IDS);
     for (const c of cats) {
@@ -98,12 +98,12 @@ describe("테마와 툴박스", () => {
       expect(entryTheme.categoryStyles[c.categorystyle]?.colour, c.name).toBe(CATEGORY_COLORS[c.icon as CategoryId].primary);
     }
     const primaries = CATEGORY_IDS.map((id) => CATEGORY_COLORS[id].primary.toLowerCase());
-    expect(new Set(primaries).size).toBe(16);
+    expect(new Set(primaries).size).toBe(17);
   });
 
   it("카테고리 순서가 엔트리와 같다", () => {
     const names = (toolbox as { contents: { name: string }[] }).contents.map((c) => c.name);
-    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "코드"]);
+    expect(names).toEqual(["시작", "흐름", "판단", "계산", "변수", "리스트", "함수", "핀", "LED", "버튼·스위치", "센서", "소리", "모터", "화면", "입력장치", "통신", "코드"]);
   });
 
   it("툴박스의 모든 블록 type이 정의돼 있다", () => {

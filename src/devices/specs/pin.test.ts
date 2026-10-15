@@ -8,7 +8,7 @@ const adcRead = (name: string): B => ({ type: "dev_adc_read", fields: { VAR: v(n
 
 describe("ORDER 상수", () => {
   it("blockly/python 의 Order 와 같다", () => {
-    expect(ORDER).toEqual({ FUNCTION_CALL: Order.FUNCTION_CALL, MULTIPLICATIVE: Order.MULTIPLICATIVE, ADDITIVE: Order.ADDITIVE, RELATIONAL: Order.RELATIONAL });
+    expect(ORDER).toEqual({ ATOMIC: Order.ATOMIC, FUNCTION_CALL: Order.FUNCTION_CALL, MULTIPLICATIVE: Order.MULTIPLICATIVE, ADDITIVE: Order.ADDITIVE, RELATIONAL: Order.RELATIONAL });
   });
 });
 

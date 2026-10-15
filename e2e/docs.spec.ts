@@ -151,6 +151,25 @@ test("블록 사전은 카테고리마다 한 페이지이고 뒤로 가기로 �
   await expect(categoryButton(page, "흐름")).toHaveAttribute("aria-current", "page");
 });
 
+test("블록 사전에 통신(WiFi·웹서버) 카테고리가 코드 앞에 있다", async ({ page }) => {
+  await page.goto("/#/docs?cat=net");
+  const sections = page.getByTestId("doc-category");
+  await expect(sections).toHaveCount(1);
+  await expect(sections).toHaveAttribute("data-category", "net");
+  await expect(sections.getByRole("heading", { level: 2, name: "통신" })).toBeVisible();
+  await expect(categoryButton(page, "통신")).toHaveAttribute("aria-current", "page");
+  for (const type of ["dev_wifi_connect", "dev_wifi_ip", "dev_web_setup", "dev_web_accept", "dev_web_send_page", "dev_web_path_is"]) {
+    await expect(sections.locator(`[data-testid="block-doc-card"][data-type="${type}"]`)).toHaveCount(1);
+  }
+  const connect = sections.locator('[data-testid="block-doc-card"][data-type="dev_wifi_connect"]');
+  await expect(connect).toContainText('ip = wifi_connect("MyWiFi", "12345678")');
+  // 카테고리 목록에서 통신은 입력장치 다음, 코드 앞
+  const names = await page.locator("aside").getByRole("navigation", { name: "블록 카테고리" }).getByRole("button").allInnerTexts();
+  const labels = names.map((n) => n.replace(/\s*\d+\s*$/, "").trim());
+  expect(labels.indexOf("통신")).toBe(labels.indexOf("입력장치") + 1);
+  expect(labels.indexOf("코드")).toBe(labels.indexOf("통신") + 1);
+});
+
 test("검색 중에는 모든 카테고리에서 찾고, 지우면 그 카테고리로 돌아간다", async ({ page }) => {
   await page.goto("/#/docs?cat=flow");
   const sections = page.getByTestId("doc-category");

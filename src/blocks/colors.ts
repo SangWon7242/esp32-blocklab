@@ -12,10 +12,10 @@ export const ENTRY_COLORS = {
   CODE: { primary: "#8aa3b2", secondary: "#b8c7d1", tertiary: "#728997" },
 } as const;
 
-/** 카테고리 열의 16개 카테고리 (하드웨어 8개는 장치 카테고리 id 와 같다) */
+/** 카테고리 열의 17개 카테고리 (하드웨어 9개는 장치 카테고리 id 와 같다) */
 export type CategoryId =
   | "start" | "flow" | "judge" | "calc" | "variable" | "list" | "func"
-  | "pin" | "led" | "switch" | "sensor" | "sound" | "motor" | "display" | "input"
+  | "pin" | "led" | "switch" | "sensor" | "sound" | "motor" | "display" | "input" | "net"
   | "code";
 
 export type CategoryColour = { primary: string; secondary: string; tertiary: string };
@@ -35,7 +35,7 @@ export function shadesOf(primary: string): CategoryColour {
 }
 
 /**
- * 카테고리 색 (카테고리 열 타일·블록 사전 칩). 엔트리 6개 + 코드는 ENTRY_COLORS 그대로, 리스트와 하드웨어 8개는 카테고리마다
+ * 카테고리 색 (카테고리 열 타일·블록 사전 칩). 엔트리 6개 + 코드는 ENTRY_COLORS 그대로, 리스트와 하드웨어 9개는 카테고리마다
  * 다르게. 같은 계열은 명도를 벌린다: 시작(밝은 초록)·센서(어두운 올리브), 판단(밝은 파랑)·화면(짙은 파랑),
  * 계산(호박색)·LED(레몬색), 함수(주황)·모터(짙은 빨강)
  */
@@ -56,6 +56,7 @@ export const CATEGORY_COLORS: Record<CategoryId, CategoryColour> = {
   motor: shadesOf("#c92a2a"),
   display: shadesOf("#1d4ed8"),
   input: shadesOf("#8b6b3e"),
+  net: shadesOf("#0f7c8c"),
   code: ENTRY_COLORS.CODE,
 };
 

@@ -1,10 +1,10 @@
 import type { SyntaxNode } from "@lezer/common";
 import { DEVICES, setupsOf, setupSpecs, setupVars } from "@/devices/registry";
-import type { DeviceSpec, HelperSpec, Part, SetupSpec, Values } from "@/devices/types";
+import type { ActionSpec, DeviceSpec, HelperSpec, Part, SetupSpec, Values } from "@/devices/types";
 import { block } from "./builders";
 import type { ParseContext } from "./context";
 import { callParts, convertExpr, memberParts, type Check } from "./expressions";
-import { isStandardBody } from "./patterns";
+import { compactParams, isStandardBody } from "./patterns";
 import { parseSubExpr } from "./subexpr";
 import type { BlockJson } from "./types";
 
@@ -58,7 +58,7 @@ function inPlaceVarsKnown(spec: SetupSpec, fields: Values, ctx: ParseContext): b
 export function matchSetupAt(texts: string[], i: number, ctx: ParseContext, inPlaceOnly = false): SetupMatch | null {
   for (const spec of setupSpecs()) {
     if (inPlaceOnly && !spec.inPlace) continue;
-    if (spec.helpers?.length && !ctx.folded.has(spec.device.id)) continue;
+    if (spec.helpers?.length && !ctx.foldedSetups.has(spec.blockType)) continue;
     const hit = setupLinesAt(spec, texts, i);
     if (!hit || (spec.inPlace && !inPlaceVarsKnown(spec, hit.fields, ctx))) continue;
     return { spec, ...hit, consumed: spec.pattern.lines.length };
@@ -68,16 +68,15 @@ export function matchSetupAt(texts: string[], i: number, ctx: ParseContext, inPl
 
 /** 도우미 본문을 비교용으로: 2칸 단위 들여쓰기를 뗀 줄 (파서의 bodyLines 와 같은 꼴) */
 const standardBody = (h: HelperSpec): string[] => h.body.map((l) => l.trim());
-const paramList = (params: string): string => params.split(",").map((p) => p.trim()).filter(Boolean).join(",");
 
-/** 최상위 def 가 이 도우미와 이름·매개변수·표준 본문까지 같은지 */
-export function isStandardHelper(h: HelperSpec, def: { params: string[]; body: SyntaxNode | null } | undefined, ctx: ParseContext): boolean {
-  return !!def && !!def.body && def.params.join(",") === paramList(h.params) && isStandardBody(def.body, ctx, standardBody(h));
+/** 최상위 def 가 이 도우미와 이름·매개변수(기본값까지 글자 그대로)·표준 본문까지 같은지 */
+export function isStandardHelper(h: HelperSpec, def: { paramText: string; body: SyntaxNode | null } | undefined, ctx: ParseContext): boolean {
+  return !!def && !!def.body && def.paramText === compactParams(h.params) && isStandardBody(def.body, ctx, standardBody(h));
 }
 
-/** 접힌 장치의 도우미 이름이거나 접힌 선택 도우미인지 (그 def 는 블록을 만들지 않는다) */
+/** 접힌 준비의 도우미 이름이거나 접힌 선택 도우미인지 (그 def 는 블록을 만들지 않는다) */
 export function isFoldedHelper(name: string, ctx: ParseContext): boolean {
-  return ctx.foldedActionHelpers.has(name) || DEVICES.some((d) => ctx.folded.has(d.id) && setupsOf(d).some((s) => s.helpers?.some((h) => h.name === name)));
+  return ctx.foldedActionHelpers.has(name) || DEVICES.some((d) => setupsOf(d).some((s) => ctx.foldedSetups.has(s.blockType) && s.helpers?.some((h) => h.name === name)));
 }
 
 /** 변수 이름이 이 장치 패턴이 받는 kind 로 등록돼 있는지 */
@@ -201,6 +200,24 @@ export function matchExpr(node: SyntaxNode, ctx: ParseContext): BlockJson | null
   return null;
 }
 
+/** 한 줄 lines 명령 중 문장 글 text 에 맞는 것 (값 칸 검사까지). 준비·접기 여부는 보지 않는다 (survey 가 쓴다) */
+function oneLineActions(text: string): ActionSpec[] {
+  const out: ActionSpec[] = [];
+  for (const d of DEVICES) for (const a of d.actions) {
+    const p = a.pattern;
+    if (p.kind !== "lines" || p.lines.length !== 1) continue;
+    const ms = execLines(p.lines, [text], 0);
+    if (ms && p.values(ms)) out.push(a);
+  }
+  return out;
+}
+
+/** 문장 글이 선택 도우미를 부르는 한 줄 명령 꼴이면 그 도우미들 (`web_send(conn, web_page(…))` → web_page) */
+export const helpersCalledBy = (text: string): HelperSpec[] => oneLineActions(text).flatMap((a) => (a.helper ? [a.helper] : []));
+
+/** 문장 글이 학생 변수에 값을 정하는 한 줄 명령 꼴이면 그 이름들 (`conn, path, query = web_accept(server)`) */
+export const namesDefinedBy = (text: string): string[] => oneLineActions(text).flatMap((a) => a.defines ?? []);
+
 /** 문장 nodes[i..](텍스트 texts[i..])가 레지스트리의 lines 명령 패턴에 맞으면 블록과 먹은 문장 수 */
 export function matchActionLines(nodes: SyntaxNode[], texts: string[], i: number, ctx: ParseContext): { block: BlockJson; consumed: number } | null {
   for (const d of DEVICES) for (const spec of d.actions) {
@@ -211,6 +228,8 @@ export function matchActionLines(nodes: SyntaxNode[], texts: string[], i: number
     const vals = p.values(ms);
     if (!vals) continue;
     if (p.objPart ? !kindOk(ctx, vals[p.objPart], p.objKinds, d) : !devicePresent(d, ctx)) continue;
+    // 선택 도우미를 부르는 명령은 그 도우미 def 가 표준 본문으로 접혔을 때만 (matchCall 과 같다)
+    if (spec.helper && !ctx.foldedActionHelpers.has(spec.helper.name)) continue;
     return { block: buildBlock(spec.blockType, spec.parts, vals, ctx, ctx.src.lineOf(nodes[i].from)), consumed: p.lines.length };
   }
   return null;

@@ -1,6 +1,6 @@
 import {
   Box, Calculator, Check, Code, createElement, Fan, Flag, Keyboard, Lightbulb, List, Monitor, Pin, Radar, Repeat,
-  SquareFunction, ToggleLeft, Volume2, type IconNode,
+  SquareFunction, ToggleLeft, Volume2, Wifi, type IconNode,
 } from "lucide";
 import type { CategoryId } from "./colors";
 
@@ -21,6 +21,7 @@ const CATEGORY_ICON_NODES: Record<CategoryId, IconNode> = {
   motor: Fan,
   display: Monitor,
   input: Keyboard,
+  net: Wifi,
   code: Code,
 };
 

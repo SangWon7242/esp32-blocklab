@@ -3,6 +3,7 @@ import { Order } from "blockly/python";
 import type { MicroPythonGenerator } from "@/codegen/generator";
 import { actionHelpersOf, DEVICES, setupsOf } from "./registry";
 import type { HelperSpec, Part, Values } from "./types";
+import { LEADING_ASSIGN } from "./specs/common";
 
 /** 블록의 필드·입력을 코드 템플릿 값으로. 변수 필드는 파이썬 이름, 값 입력은 생성 코드(빈 칸은 check 유무에 따라 0 또는 "") */
 function readValues(block: Blockly.Block, gen: MicroPythonGenerator, parts: Part[]): Values {
@@ -22,8 +23,20 @@ function readValues(block: Blockly.Block, gen: MicroPythonGenerator, parts: Part
  * 템플릿에 끼워진 값 입력 코드(학생 함수 호출일 수 있다)는 건드리지 않는다.
  */
 function markLeadingHelper(code: string, helpers: string[], gen: MicroPythonGenerator): string {
-  const h = helpers.find((name) => code.startsWith(`${name}(`));
-  return h ? gen.helperCall(h) + code.slice(h.length) : code;
+  // 이름들에 담는 꼴(`ip = wifi_connect(…)`, `conn, path, query = web_accept(server)`)이면 = 뒤가 맨 앞이다
+  const prefix = LEADING_ASSIGN.exec(code)?.[0] ?? "";
+  const rest = code.slice(prefix.length);
+  const h = helpers.find((name) => rest.startsWith(`${name}(`));
+  return h ? prefix + gen.helperCall(h) + rest.slice(h.length) : code;
+}
+
+/**
+ * 맨 앞이 아닌 자리에서 부르는 선택 도우미 (`web_send(conn, web_page(…))` 의 web_page). 템플릿에서 선택 도우미 호출은
+ * 값 칸보다 앞에 오므로(devices.test.ts 불변식) 처음 나온 것 하나만 표시한다.
+ */
+function markActionHelper(code: string, helper: string, gen: MicroPythonGenerator): string {
+  if (code.includes(gen.helperCall(helper))) return code;
+  return code.replace(new RegExp(String.raw`(?<![\w.])${helper}\(`), `${gen.helperCall(helper)}(`);
 }
 
 /** 도우미 본문 안에서 같은 준비의 다른 도우미를 부르는 곳 (show_digit → hc595_shift) */
@@ -49,8 +62,12 @@ export function registerDeviceGenerators(gen: MicroPythonGenerator): void {
         const lines = s.lines(readValues(block, G, s.parts));
         // 제자리 준비(반복 안의 `led = Pin(pin, Pin.OUT)`)는 보통 명령처럼 블록 자리에 쓴다
         if (s.inPlace) return `${lines.join("\n")}\n`;
-        // 코드 지도 장부: 준비 줄과 도우미 함수는 끌어올려지므로 표식 대신 이 블록 id 를 적어 둔다
-        G.noteSetupBlock(block.id, G.addSetup(...lines));
+        // 코드 지도 장부: 준비 줄과 도우미 함수는 끌어올려지므로 표식 대신 이 블록 id 를 적어 둔다.
+        // 도우미를 부르는 준비 줄(`ip = wifi_connect(…)`)은 함수 정의 뒤에 둔다
+        const marked = s.afterHelpers ? lines.map((l) => markLeadingHelper(l, helpers, G)) : lines;
+        const at = G.addSetup(...marked);
+        G.noteSetupBlock(block.id, at);
+        if (s.afterHelpers) G.markLateSetup(at);
         for (const h of s.helpers ?? []) provide(G, h, helpers, block.id);
         return "";
       };
@@ -60,7 +77,8 @@ export function registerDeviceGenerators(gen: MicroPythonGenerator): void {
         const G = g as MicroPythonGenerator;
         // 선택 도우미는 이 블록이 쓰일 때만 정의한다 (같은 이름은 provideFunction_ 이 한 번만 넣는다)
         if (a.helper) provide(G, a.helper, helpers, block.id);
-        return `${markLeadingHelper(a.code(readValues(block, G, a.parts)), helpers, G)}\n`;
+        const code = markLeadingHelper(a.code(readValues(block, G, a.parts)), helpers, G);
+        return `${a.helper ? markActionHelper(code, a.helper.name, G) : code}\n`;
       };
     }
     for (const v of d.values) {

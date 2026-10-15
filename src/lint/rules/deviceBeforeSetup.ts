@@ -1,4 +1,4 @@
-import { findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds } from "@/devices/registry";
+import { findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupsOf } from "@/devices/registry";
 import type { DeviceSpec, SetupSpec } from "@/devices/types";
 import { blockValues, fixedNameOf, objVarPart, setupDeviceLabel } from "../device";
 import { deviceNoun, josa } from "../labels";
@@ -43,7 +43,8 @@ export const deviceBeforeSetup: Rule = (ctx) => {
       continue;
     }
     const own = spec.device.setup;
-    if (!own || setupTypes.has(own.blockType)) continue;
+    // 같은 장치의 다른 준비(WiFi 공유기 모드)도 준비로 친다
+    if (!own || setupsOf(spec.device).some((s) => setupTypes.has(s.blockType))) continue;
     out.push(issueAt(ctx, b, "device-before-setup", "error",
       `${josa(deviceNoun(spec.device.id, spec.device.label), ["을", "를"])} 먼저 준비해 주세요`,
       `NameError: name '${fixedNameOf(spec, own)}' is not defined`));

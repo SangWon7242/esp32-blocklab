@@ -1,4 +1,4 @@
-export type DeviceCategory = "pin" | "led" | "switch" | "sensor" | "sound" | "motor" | "display" | "input";
+export type DeviceCategory = "pin" | "led" | "switch" | "sensor" | "sound" | "motor" | "display" | "input" | "net";
 
 /**
  * 핀의 쓰임 (계획 2B 검사용). out: 출력(LED·릴레이·부저·서보·PWM·모터·7세그먼트·trig),
@@ -68,6 +68,11 @@ export type SetupSpec = {
    * 패턴은 한 줄이어야 하고, provides 에 들지 않는 변수 칸(PINVAR)은 이미 값이 정해진 학생 변수여야 맞는다.
    */
   inPlace?: boolean;
+  /**
+   * 준비 줄이 이 준비의 도우미를 부른다 (`ip = wifi_connect("…", "…")`). 생성기는 이 준비 줄을 맨 위가 아니라
+   * 도우미·사용자 함수 정의 뒤(본문 바로 앞)에 둔다 — 정의되기 전에 부르면 NameError 다. 파서는 어디서든 똑같이 접는다.
+   */
+  afterHelpers?: boolean;
   /** 이 장치 변수들의 종류. 메서드 패턴이 objKind 로 맞춘다 */
   kind: string;
   /**
@@ -103,6 +108,11 @@ export type ActionSpec = {
    * 준비 블록의 helpers 와 달리 장치 준비가 접히는 데는 필요 없다.
    */
   helper?: HelperSpec;
+  /**
+   * 이 명령이 값을 정하는 학생 변수 이름 (예: dev_web_accept → conn·path·query). 파서는 이 명령 꼴이 보이면 그 이름을
+   * 변수로 등록해 뒤의 `print(path)` 가 변수 블록으로 돌아오게 하고, 검사(undefined-variable)는 정한 것으로 친다.
+   */
+  defines?: string[];
 };
 
 export type ValueSpec = Omit<ActionSpec, "code"> & {
