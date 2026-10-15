@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bkd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bkd-title">두 번 누르기 판정 시간표: 한 번 = 짧게 누르고 400 ms 동안 아무 일이 없으면 빨강. 두 번 = 400 ms 안에 또 누르고, 마지막 클릭 뒤 400 ms 가 지나면 초록. 길게 = 500 ms 이상 누르면 손을 떼는 순간 파랑. 한 번인지 두 번인지는 마지막 클릭 뒤 400 ms 가 지나야 안다</title>
+  <defs><marker id="bkd-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="40" y="84" text-anchor="start" font-size="15" font-weight="700" fill="currentColor" stroke="none">한 번</text>
+  <path d="M120 92 H600" stroke-width="1.5" stroke-opacity="0.4"/>
+  <rect x="150" y="64" width="35" height="28" rx="4" fill="#4562f5" fill-opacity="0.85" stroke="none"/>
+  <rect x="185" y="64" width="160" height="28" rx="4" fill="currentColor" fill-opacity="0.08" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="265.0" y="83" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none" fill-opacity="0.8">400 ms 조용히 기다림</text>
+  <path d="M351 78 H385" stroke-width="2" marker-end="url(#bkd-arrow)"/>
+  <circle cx="407" cy="78" r="14" fill="#e03131" stroke-width="1.5"/>
+  <text x="429" y="83" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">빨강</text>
+  <text x="40" y="184" text-anchor="start" font-size="15" font-weight="700" fill="currentColor" stroke="none">두 번</text>
+  <path d="M120 192 H600" stroke-width="1.5" stroke-opacity="0.4"/>
+  <rect x="150" y="164" width="35" height="28" rx="4" fill="#4562f5" fill-opacity="0.85" stroke="none"/>
+  <rect x="250" y="164" width="35" height="28" rx="4" fill="#4562f5" fill-opacity="0.85" stroke="none"/>
+  <path d="M185 204 H250" stroke-width="1.5" marker-start="url(#bkd-arrow)" marker-end="url(#bkd-arrow)"/>
+  <text x="217.5" y="222" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">400 ms 안에 또</text>
+  <rect x="285" y="164" width="160" height="28" rx="4" fill="currentColor" fill-opacity="0.08" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="365.0" y="183" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none" fill-opacity="0.8">400 ms 조용히 기다림</text>
+  <path d="M451 178 H485" stroke-width="2" marker-end="url(#bkd-arrow)"/>
+  <circle cx="507" cy="178" r="14" fill="#2f9e44" stroke-width="1.5"/>
+  <text x="529" y="183" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">초록</text>
+  <text x="40" y="284" text-anchor="start" font-size="15" font-weight="700" fill="currentColor" stroke="none">길게</text>
+  <path d="M120 292 H600" stroke-width="1.5" stroke-opacity="0.4"/>
+  <rect x="150" y="264" width="170" height="28" rx="4" fill="#4562f5" fill-opacity="0.85" stroke="none"/>
+  <text x="235.0" y="283" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">500 ms 이상</text>
+  <path d="M326 278 H360" stroke-width="2" marker-end="url(#bkd-arrow)"/>
+  <circle cx="382" cy="278" r="14" fill="#1971c2" stroke-width="1.5"/>
+  <text x="404" y="283" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">파랑</text>
+  <text x="326" y="316" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.75">손을 떼는 순간 바로 판정</text>
+  <text x="320" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">한 번인지 두 번인지는 마지막 클릭 뒤 400 ms 가 지나야 알 수 있어요</text>
+</svg>

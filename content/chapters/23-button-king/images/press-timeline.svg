@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bkp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bkp-title">누른 시간 재기 원리: 버튼 값이 1 에서 0 으로 바뀌는 순간 시각(start = 3200)을 적고, 다시 1 이 되는 순간 시각(3650)에서 빼면 누른 시간 held = 450 ms. 아래 막대: 500 ms 보다 짧으면 짧게, 500 ms 이상이면 길게 (기준은 예시)</title>
+  <defs><marker id="bkp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="76" y="75" text-anchor="end" font-size="14" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <text x="76" y="125" text-anchor="end" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="40" y="40" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼 값</text>
+  <path d="M90 70 H200 V120 H430 V70 H600" stroke="#4562f5" stroke-width="3"/>
+  <rect x="200" y="70" width="230" height="50" fill="#4562f5" fill-opacity="0.12" stroke="none"/>
+  <text x="315.0" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">누르고 있는 동안</text>
+  <text x="140" y="60" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.7">떼고 있음</text>
+  <text x="515" y="60" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.7">뗌</text>
+  <path d="M90 160 H600" stroke-width="2" marker-end="url(#bkp-arrow)"/>
+  <text x="600" y="182" text-anchor="end" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.7">time.ticks_ms()</text>
+  <path d="M200 120 V166" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <circle cx="200" cy="160" r="5" fill="currentColor" stroke="none"/>
+  <rect x="151.1" y="179.5" width="97.8" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="200.0" y="194.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">start = 3200</text>
+  <text x="200" y="216" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.75">누르기 시작한 시각</text>
+  <path d="M430 120 V166" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <circle cx="430" cy="160" r="5" fill="currentColor" stroke="none"/>
+  <rect x="387.9" y="179.5" width="84.3" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="430.0" y="194.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">지금 = 3650</text>
+  <text x="430" y="216" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.75">손을 뗀 시각</text>
+  <path d="M200 240 H430" stroke-width="2" marker-start="url(#bkp-arrow)" marker-end="url(#bkp-arrow)"/>
+  <rect x="217.3" y="229.5" width="195.3" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="315.0" y="244.7" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">held = 3650 − 3200 = 450 ms</text>
+  <rect x="90" y="284" width="255" height="26" rx="4" fill="#e03131" fill-opacity="0.85" stroke="none"/>
+  <rect x="345" y="284" width="255" height="26" rx="4" fill="#1971c2" fill-opacity="0.85" stroke="none"/>
+  <text x="217.5" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" stroke="none">500 ms 보다 짧게</text>
+  <text x="472.5" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" stroke="none">500 ms 이상 길게</text>
+  <text x="90" y="330" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.7">0</text>
+  <text x="345" y="330" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">500</text>
+  <text x="600" y="330" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.7">1000 ms</text>
+  <path d="M345 278 V316" stroke-width="2.5"/>
+  <text x="40" y="274" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">기준 (예시)</text>
+</svg>

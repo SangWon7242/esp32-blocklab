@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bkc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bkc-title">버튼 왕 표지: 버튼 하나를 짧게 한 번, 길게, 두 번 누르면 ESP32 가 누른 시간(ms)을 재서 RGB LED 를 빨강, 파랑, 초록으로 켠다</title>
+  <defs><marker id="bkc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="44" y="118" width="120" height="96" rx="12" fill="var(--card)" stroke-width="2"/>
+  <rect x="70" y="140" width="68" height="52" rx="6" fill="#495057" stroke-width="2"/>
+  <circle cx="104" cy="166" r="17" fill="#212529" stroke="#adb5bd" stroke-width="2"/>
+  <text x="104" y="240" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">버튼 하나</text>
+  <rect x="214" y="122" width="132" height="116" rx="12" fill="var(--card)" stroke-width="2"/>
+  <rect x="232" y="136" width="96" height="50" rx="4" fill="var(--muted)"/>
+  <text x="280" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="280" y="214" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.8">몇 ms 눌렀나?</text>
+  <circle cx="280" cy="76" r="30" fill="var(--card)" stroke-width="2.5"/>
+  <path d="M272 42 H288 M280 42 V46" stroke-width="3"/>
+  <path d="M280 76 V56 M280 76 L294 84" stroke-width="2.5"/>
+  <path d="M280 106 V122" stroke-width="2" stroke-dasharray="3 4"/>
+  <path d="M172 166 L206 172" stroke-width="2.5" marker-end="url(#bkc-arrow)"/>
+  <path d="M354 180 C380 180 380 92 404 92" stroke-width="2" marker-end="url(#bkc-arrow)"/>
+  <rect x="412" y="66" width="186" height="52" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="426" y="97" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">짧게 한 번</text>
+  <circle cx="566" cy="92" r="16" fill="#e03131" fill-opacity="0.25" stroke="none"/>
+  <circle cx="566" cy="92" r="10" fill="#e03131" stroke-width="1.5"/>
+  <text x="534" y="97" text-anchor="end" font-size="12" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.8">빨강</text>
+  <path d="M354 180 C380 180 380 180 404 180" stroke-width="2" marker-end="url(#bkc-arrow)"/>
+  <rect x="412" y="154" width="186" height="52" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="426" y="185" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">길게 꾹</text>
+  <circle cx="566" cy="180" r="16" fill="#1971c2" fill-opacity="0.25" stroke="none"/>
+  <circle cx="566" cy="180" r="10" fill="#1971c2" stroke-width="1.5"/>
+  <text x="534" y="185" text-anchor="end" font-size="12" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.8">파랑</text>
+  <path d="M354 180 C380 180 380 268 404 268" stroke-width="2" marker-end="url(#bkc-arrow)"/>
+  <rect x="412" y="242" width="186" height="52" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="426" y="273" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">두 번 톡톡</text>
+  <circle cx="566" cy="268" r="16" fill="#2f9e44" fill-opacity="0.25" stroke="none"/>
+  <circle cx="566" cy="268" r="10" fill="#2f9e44" stroke-width="1.5"/>
+  <text x="534" y="273" text-anchor="end" font-size="12" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.8">초록</text>
+  <text x="104" y="290" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none" fill-opacity="0.75">누르는 시간과</text>
+  <text x="104" y="308" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none" fill-opacity="0.75">누르는 횟수로</text>
+  <text x="104" y="326" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none" fill-opacity="0.75">뜻이 달라져요</text>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bkb-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bkb-title">버튼 떨림(바운스) 그림: 생각한 버튼 값은 누르면 0, 떼면 1 로 한 번씩 바뀌지만 실제 값은 누를 때와 뗄 때 몇 ms 동안 0 과 1 이 빠르게 바뀐다. 그래서 한 번 누름이 두 번으로 세어질 수 있고, 뗀 뒤 50 ms 쉬었다 다시 읽으면 떨림이 끝난다</title>
+  <defs><marker id="bkb-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="40" y="50" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">생각한 버튼 값</text>
+  <text x="98" y="69" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <text x="98" y="115" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <path d="M110 64 H220 V110 H420 V64 H600" stroke="#4562f5" stroke-width="2.5"/>
+  <text x="40" y="170" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">실제 버튼 값 (떨림)</text>
+  <text x="98" y="189" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <text x="98" y="235" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <path d="M110 184 H220 V230 H226 V184 H232 V230 H240 V184 H244 V230 H420 V184 H426 V230 H433 V184 H438 V230 H444 V184 H600" stroke="#4562f5" stroke-width="2.5"/>
+  <circle cx="232" cy="207" r="26" stroke="#e03131" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="232" y="260" text-anchor="middle" font-size="12" font-weight="700" fill="#e03131" stroke="none">누를 때 떨림</text>
+  <circle cx="432" cy="207" r="26" stroke="#e03131" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="432" y="260" text-anchor="middle" font-size="12" font-weight="700" fill="#e03131" stroke="none">뗄 때 떨림</text>
+  <rect x="420" y="282" width="80" height="26" rx="4" fill="#00b6b1" fill-opacity="0.25" stroke="#00b6b1" stroke-width="1.5"/>
+  <text x="460" y="300" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">50 ms 쉬기</text>
+  <text x="510" y="300" text-anchor="start" font-size="12" font-weight="600" fill="currentColor" stroke="none" fill-opacity="0.85">→ 떨림이 끝난 뒤 다시 읽기</text>
+  <text x="40" y="300" text-anchor="start" font-size="13" font-weight="600" fill="currentColor" stroke="none">몇 ms 동안 0 · 1 이 빠르게 바뀌어</text>
+  <text x="40" y="320" text-anchor="start" font-size="13" font-weight="600" fill="currentColor" stroke="none">한 번 누름이 두 번으로 세어질 수 있어요</text>
+</svg>

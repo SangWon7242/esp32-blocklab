@@ -1,0 +1,344 @@
+# 센서 트랙 S20 · 시간 재기: 버튼 왕 — 원본: 아두이노 기본 W09(버튼킹 ButtonKing 라이브러리: click · doubleclick · press). MicroPython 에는 ButtonKing 이 없어 time.ticks_ms() / ticks_diff() 로 직접 만든다. 형식 설명은 src/track/README.md
+id: 23-button-king
+order: 23
+track: sensor
+label: S20
+prerequisites: [11-button-touch]
+subjects: [수학, 체육, 정보]
+sessions: 1
+teacherNotes: |
+  **기준 ms 는 예시예요.** 짧게 · 길게를 나누는 `500` ms, 두 번 누르기 간격 `400` ms, 떨림을 기다리는 `50` ms 는 모두 예시값입니다. 손이 빠른 학생은 톡 쳐도 80 ms, 느린 학생은 200 ms 가 나옵니다. 실행 단계에서 "톡 치기"와 "꾹 누르기"를 세 번씩 재어 공책에 적고, 그 사이에서 **자기 기준**을 고르게 해 주세요. 미션 판정은 지시대로 500 을 보지만, 판정 뒤에 자기 숫자로 바꿔 보게 하면 좋습니다.
+
+  **판정은 손을 떼는 순간에 해요.** 이 챕터의 코드는 모두 "눌림을 보면 시각을 적고 → 뗄 때까지 작은 반복에서 기다리고 → 떼는 순간 지금 시각과 빼서 누른 시간을 구한다"는 같은 뼈대입니다. 그래서 길게 누르기(파랑)도 **손을 뗀 뒤에** 켜집니다. 누르고 있는 동안 500 ms 가 지나자마자 켜고 싶다면(원본 ButtonKing 의 press) 기다리는 반복 안에서 `time.ticks_diff(time.ticks_ms(), start) >= 500` 을 확인하면 됩니다 — 먼저 끝낸 학생의 도전 과제로 쓰세요.
+
+  **두 번 누르기는 기다려야 알 수 있어요.** 첫 클릭을 떼는 순간에는 두 번째 클릭이 올지 모릅니다. 그래서 클릭 수(`clicks`)와 마지막 클릭 시각(`last`)을 **반복 밖 상태 변수**로 기억해 두고, 마지막 클릭 뒤 400 ms 동안 아무 일이 없을 때 판정합니다(디버깅 증상 1, 설계). 이 챕터는 인터럽트를 쓰지 않으므로 함수 · `global` 이 필요 없습니다. 인터럽트는 S21 에서 다룹니다.
+
+  - `time.ticks_ms()` 는 ESP32 에서 약 12.4일(2^30 ms)마다 0 으로 돌아갑니다. 그래서 시각끼리 뺄 때는 `-` 대신 `time.ticks_diff(나중, 처음)` 을 씁니다(디버깅 증상 2). 수업 중에는 재현되지 않으니 "선생님 보드 이야기"로 소개해 주세요.
+  - 버튼 떨림(바운스)은 버튼마다 정도가 다릅니다. 증상 3 이 잘 안 보이면 톡톡 아주 빠르게 여러 번 눌러 보게 하세요.
+  - RGB LED 배선은 S5(05-rgb-led)와 같은 자리이고, 버튼은 S8 과 같은 방법(가운데 홈에 걸치고 대각선 다리)으로 26 · 28번 줄에 꽂습니다.
+  - 교과 연결: 수학(ms 단위, 1초 = 1000 ms, 측정값으로 기준 정하기, 평균), 체육(반응 속도 — 짝과 "가장 짧게 톡 치기" 겨루기), 정보(상태 변수, 시간에 따른 판정).
+title: 시간 재기 — 버튼 왕
+subtitle: 짧게 · 길게 · 두 번, 버튼 하나로 세 가지 명령
+summary: |
+  이어폰 버튼은 하나뿐인데 한 번 누르면 멈춤, 두 번 누르면 다음 곡, 길게 누르면 음성 비서가 켜져요. 보드는 이것을 **시간**으로 구분해요.
+  누르기 시작한 시각과 뗀 시각을 `time.ticks_ms()` 로 적고 빼서 **누른 시간(ms)**을 재요. 그 시간으로 짧게는 빨강, 길게는 파랑을 켜고, 마지막에는 두 번 누르기(초록)까지 알아차리는 버튼 왕을 만들어요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
+  - { name: 버튼(푸시 버튼), note: 다리가 네 개. 가운데 홈에 걸쳐 꽂아요 }
+  - { name: RGB LED, note: "다리 4개. 가장 긴 다리가 GND. 순서는 빨강 · GND · 초록 · 파랑 (S5 와 같은 자리)" }
+  - { name: 220Ω 저항, note: "3개. 빨강-빨강-갈색 띠. 빨강 · 초록 · 파랑 다리에 하나씩" }
+  - { name: 점퍼선(M-M), note: "8개 (27 · 25 · 26 · 14번 4, LED GND 줄 → − 줄 1, 버튼 → − 줄 1, − 줄 → GND 2)" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "RGB LED 는 S5 와 같은 자리: 다리를 d 칸 14 · 16 · 18 · 20번 줄에(빨강 · GND · 초록 · 파랑), 저항 셋이 가운데 홈을 건너고 27번 → 14번 줄, 25번 → 18번 줄, 26번 → 20번 줄, 가장 긴 다리 줄(16번) → 위쪽 − 줄 → GND. 버튼은 가운데 홈에 걸쳐 26 · 28번 줄에 꽂고 14번 → 26번 줄, 대각선 반대쪽 28번 줄 → 아래쪽 − 줄 → GND"
+principle:
+  image: images/press-timeline.svg
+  body: |
+    보드 안에는 켜진 순간부터 1000분의 1초(**ms**)씩 세는 시계가 있어요. `time.ticks_ms()` 는 그 시계가 **지금 몇 ms 인지** 알려 줘요. 1초는 1000 ms 예요.
+
+    버튼이 눌리는 순간 시계를 보고 `start` 에 적어 두고, 손을 떼는 순간 시계를 다시 봐요. **지금 − 시작**이 바로 누른 시간이에요. 시각끼리 뺄 때는 `time.ticks_diff(time.ticks_ms(), start)` 를 써요(블록: "start 부터 지난 시간 (ms)").
+
+    누른 시간을 **기준**(예: 500 ms)과 비교하면 짧게 · 길게를 나눌 수 있어요. 두 번 누르기는 첫 클릭 뒤 조금(예: 400 ms) **기다려 봐야** 알 수 있어요.
+goals:
+  content: time.ticks_ms() 로 버튼을 누른 시간(ms)을 재고, 기준과 비교해 짧게 · 길게 · 두 번 누르기를 RGB LED 색으로 구분한다
+  thinking: 사건(누름 · 뗌)이 일어난 시각을 적어 두고 빼서 시간을 구하며, 바로 알 수 없는 일은 상태 변수에 기억해 두었다가 나중에 판정한다
+successCriteria:
+  - 내 "톡 치기"와 "꾹 누르기"를 ms 로 재고, 그 값을 보고 기준을 정할 수 있다
+  - 누른 시간이 500 ms 보다 짧으면 빨강, 길면 파랑을 켤 수 있다
+  - 두 번 누르기를 알려면 왜 첫 클릭 뒤에 기다려야 하는지 시간표로 설명할 수 있다
+parts:
+  - id: part1
+    title: 누른 시간으로 명령 나누기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 버튼 하나로 명령 세 개?
+        minutes: 3
+        scene:
+          image: images/cover.svg
+          caption: 오늘의 목표 — 짧게 한 번은 빨강, 길게는 파랑, 두 번 톡톡은 초록
+        body: |
+          무선 이어폰에는 버튼이 하나뿐이에요. 그런데 한 번 누르면 음악이 멈추고, 두 번 누르면 다음 곡으로 넘어가고, 길게 누르면 음성 비서가 켜져요.
+
+          버튼은 눌렸을 때 `0`, 뗐을 때 `1` 밖에 모르는데 어떻게 세 가지를 구분할까요? 코드를 보기 전에 내 생각부터 적어 봐요. 정답은 없어요.
+        todo:
+          - 준비물(버튼, RGB LED, 저항, 점퍼선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 버튼 하나로 여러 일을 하는 물건을 하나 더 떠올려 쓰기
+        questions:
+          - 이어폰 버튼은 하나인데 한 번 · 두 번 · 길게 누르기를 어떻게 구분할까요?
+          - "\"짧게\"와 \"길게\"는 몇 초쯤에서 나뉠까요? 사람마다 다를까요?"
+          - 한 번 눌렀을 때, 이어폰은 두 번째 클릭이 올지 안 올지 어떻게 알 수 있을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 4
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          "누른 시간으로 색 바꾸기"를 보드에게 시키려면 일을 잘게 나눠야 해요. 보드는 버튼 값(0 · 1)과 **시계**(지금 몇 ms)만 볼 수 있어요.
+
+          활동 칸의 세 칸에 각각 한 가지 이상 적어 보세요. 시각은 언제언제 알아야 할까요? 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 보드가 재거나 기억해야 할 시각 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 기준 ms 적기"
+          - "**해야 할 것**: 보드가 실제로 하는 일 적기"
+        answer:
+          know: ["누르기 시작한 시각", "손을 뗀 시각 (누른 시간 = 뗀 시각 − 누른 시각)", "직전 클릭을 뗀 시각"]
+          decide: ["몇 ms 보다 짧으면 짧게로 볼지 (예: 500 ms)", "두 클릭 사이가 몇 ms 안이면 두 번으로 볼지 (예: 400 ms)", "버튼 떨림을 몇 ms 기다릴지"]
+          act: ["짧게 누르면 빨강 켜기", "길게 누르면 파랑 켜기", "두 번 누르면 초록 켜기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 숫자는 언제 찍힐까?
+        minutes: 4
+        scene:
+          image: images/press-timeline.svg
+          caption: 누르는 순간 시각을 적고, 떼는 순간 시각에서 빼면 누른 시간
+        body: |
+          아직 실행하지 않아요. `time.ticks_ms()` 는 보드가 켜진 뒤 지난 시간을 ms 로 알려 줘요. 코드는 눌림을 보면 그 값을 `start` 에 적고, 손을 뗄 때까지 작은 반복에서 기다려요.
+
+          그림의 시간표를 보며 코드를 따라가 보세요. 출력 창에 숫자가 **언제** 찍히고, **얼마쯤** 찍힐지 빈칸에 내 예측을 적어요.
+        todo:
+          - "`start = time.ticks_ms()` 와 `held = ...` 줄을 찾아 표시하기"
+          - 버튼을 누르고 있는 동안 어느 반복이 도는지 따라가기
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_press_time.py
+        blanks:
+          - q: 버튼을 건드리지 않으면 출력 창에는 무엇이 찍힐까요?
+          - q: 숫자는 버튼을 누르는 순간, 누르고 있는 동안, 손을 뗀 순간 중 언제 찍힐까요?
+          - q: 버튼을 1초쯤 꾹 눌렀다 떼면 찍히는 숫자는 대략 얼마일까요?
+            unit: ms
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 누른 시간 재기
+        minutes: 6
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "RGB LED 는 S5 자리, 버튼은 가운데 홈에 걸쳐 26 · 28번 줄. 14번 선과 − 줄 선은 대각선 다리에"
+        body: |
+          먼저 브레드보드에 버튼과 RGB LED 를 꽂아요. RGB LED 는 오늘 미션부터 쓰지만, 한 번에 꽂아 두면 편해요. 버튼은 **가운데 홈에 걸쳐**, 14번 선과 − 줄 선은 **대각선** 다리 줄에 이어요.
+
+          실행한 뒤 "톡 치기"와 "꾹 누르기"를 세 번씩 해 보고 찍힌 ms 를 공책에 적어요. 내 짧게와 길게는 몇 ms 쯤에서 나뉘나요?
+        todo:
+          - USB 를 뺀 채 그림대로 버튼 · RGB LED · 저항 · 선 꽂기
+          - "**보드 연결** → **실행** 누르기"
+          - 톡 치기 · 꾹 누르기를 세 번씩 하고 ms 를 공책에 적기
+        code: step1_press_time.py
+        expected: 코드를 실행하면 처음엔 출력 창이 조용해요. 버튼을 눌렀다 떼면 그 순간 누른 시간이 ms 로 한 줄 찍혀요. 톡 치면 100 안팎, 1초쯤 꾹 누르면 1000 안팎의 숫자가 나와요.
+        codeNotes:
+          - { line: 4, note: "14번 핀을 풀업 입력으로 준비해요. 떼면 1, 누르면 0 (S8 과 같아요)" }
+          - { line: 6, note: "아래 들여 쓴 줄들을 끝없이 되풀이해요" }
+          - { line: 7, note: "버튼이 눌렸는지 물어요. 0 이면 누르기 시작한 거예요" }
+          - { line: 8, note: "`time.ticks_ms()` 로 지금 시각(ms)을 읽어 `start` 에 적어 둬요 (블록: 지금까지 지난 시간)" }
+          - { line: 9, note: "버튼이 눌려 있는 동안은 이 작은 반복 안에서 기다려요" }
+          - { line: 10, note: "0.01초(10 ms)씩 쉬면서 버튼 값을 다시 봐요" }
+          - { line: 11, note: "손을 떼면 여기로 와요. **지금 − start** 를 `time.ticks_diff` 로 구해 `held` 에 담아요" }
+          - { line: 12, note: "누른 시간(ms)을 출력 창에 찍어요" }
+          - { line: 13, note: "바깥 반복도 10 ms 쉬고 다시 버튼을 봐요" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 — 시각 두 번, 빼기 한 번
+        minutes: 4
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          이 코드는 시계를 **두 번** 봐요. 한 번은 누르기 시작할 때, 한 번은 손을 뗀 뒤예요. 그리고 둘을 빼요.
+
+          손가락으로 한 줄씩 짚으며 따라가 보세요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - 시계를 보는 줄 두 곳을 찾기
+          - 누르고 있는 동안 도는 줄을 손가락으로 짚기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_press_time.py
+        questions:
+          - { kind: choice, q: "출력 창에 숫자가 찍히는 때는?", options: ["버튼을 누르는 순간", "버튼을 누르고 있는 동안 계속", "버튼에서 손을 뗀 순간"], answer: 2, hint: "print 줄은 어느 반복이 끝난 뒤에 있나요?" }
+          - { kind: number, q: "start 에 5000 이 적혔고, 손을 뗀 순간 time.ticks_ms() 가 5320 이면 찍히는 숫자는?", answer: 320, hint: "지금 − 시작" }
+          - { kind: line, q: "누르기 시작한 시각을 적어 두는 줄의 줄 번호를 클릭하세요", answer: 8 }
+        codeNotes:
+          - { line: 4, note: "풀업 버튼이라 누르면 0, 떼면 1 이에요" }
+          - { line: 9, note: "버튼 값이 0 인 동안(누르고 있는 동안) 이 반복을 빠져나가지 않아요" }
+          - { line: 10, note: "기다리는 반복 안에서 10 ms 씩 쉬어요" }
+          - { line: 13, note: "바깥 반복이 한 바퀴 끝날 때마다 10 ms 쉬어요" }
+
+      - id: mission
+        type: mission
+        title: 미션 — 짧게는 빨강, 길게는 파랑
+        minutes: 8
+        scene:
+          image: images/press-timeline.svg
+          caption: "누른 시간 held 를 기준 500 ms 와 비교해요. 짧으면 빨강, 같거나 길면 파랑"
+        body: |
+          이제 누른 시간으로 명령을 나눠요. **500 ms 보다 짧게** 누르면 RGB LED 를 빨강으로, **500 ms 이상 길게** 누르면 파랑으로 켜요.
+
+          먼저 RGB LED 를 쓸 준비가 필요해요. 그다음 `held` 를 구한 바로 뒤에서 기준과 비교하면 돼요. 판정이 끝나면 500 을 내가 공책에 적은 기준으로 바꿔 시험해 봐도 좋아요.
+        todo:
+          - "RGB LED 준비 블록을 넣고 핀(빨강 27 · 초록 25 · 파랑 26)을 배선도와 맞추기"
+          - "`held` 가 500 보다 작으면 빨강, 아니면 파랑을 켜는 조건 넣기"
+          - 톡 치기 · 꾹 누르기로 시험해 본 뒤 **판정** 누르기
+        instructions: 버튼을 500 ms 보다 짧게 눌렀다 떼면 RGB LED 가 빨강, 500 ms 이상 길게 눌렀다 떼면 파랑으로 켜지게 바꿔 주세요. 누른 시간을 출력 창에 찍는 줄은 그대로 두어도 돼요
+        hint: LED 카테고리의 RGB LED 준비 블록을 맨 위에 놓아요. held 를 구한 줄 아래에 "만약 held < 500 이면 RGB 색 빨강, 아니면 RGB 색 파랑" 을 넣어요. 빨강은 (255, 0, 0), 파랑은 (0, 0, 255) 예요
+        code: step1_press_time.py
+        rules:
+          - codeMatches: '^red = PWM\(Pin\(27\)\)$'
+            fail: RGB LED 를 쓸 준비가 되어 있나요? 빨강 · 초록 · 파랑 다리는 각각 몇 번 핀에 이어져 있나요?
+          - codeMatches: '^\s+if .+ (<|<=|>|>=) 500:$'
+            fail: 몇 ms 를 기준으로 짧게와 길게를 나누기로 했나요? 누른 시간을 그 기준과 비교하는 조건이 있나요?
+          - codeMatches: 'if .+ <=? 500:\n\s+set_color\(255, 0, 0\)|if .+ >=? 500:\n(\s+.*\n)*?\s+else:\n\s+set_color\(255, 0, 0\)'
+            fail: 500 ms 보다 짧게 눌렀을 때는 어느 갈래로 가나요? 그 갈래에서 켜는 색은 무엇인가요?
+          - codeMatches: 'if .+ >=? 500:\n\s+set_color\(0, 0, 255\)|if .+ <=? 500:\n(\s+.*\n)*?\s+else:\n\s+set_color\(0, 0, 255\)'
+            fail: 500 ms 이상 길게 눌렀을 때는 어느 갈래로 가나요? 그 갈래에서 켜는 색은 무엇인가요?
+        answerCode: mission_short_long.py
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 이상한 버튼 왕 세 개
+        minutes: 6
+        scene:
+          image: images/bounce-signal.svg
+          caption: 실제 버튼은 누를 때와 뗄 때 몇 ms 동안 0 · 1 이 떨려요
+        body: |
+          고장 난 코드 세 개가 있어요. 셋 다 빨간 글씨(에러)는 뜨지 않고 **이상하게만** 굴어요. 바로 고치지 말고, 증상을 보고 시간표를 그려 보며 어디가 문제인지 먼저 정해요.
+
+          시간 문제는 **언제** 재고, **언제** 판정하는지를 따라가면 보여요. 최소 3분은 혼자 해 봐요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: 두 번 톡톡 눌렀는데 "한 번" 이 두 번 찍혀요
+            code: |
+              from machine import Pin
+              import time
+
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+              clicks = 0
+              while True:
+                  if button.value() == 0:
+                      while button.value() == 0:
+                          time.sleep(0.01)
+                      time.sleep(0.05)
+                      clicks = clicks + 1
+                      if clicks == 1:
+                          print("한 번")
+                      else:
+                          print("두 번")
+                      clicks = 0
+                  time.sleep(0.01)
+            question: 첫 클릭을 떼는 순간, 두 번째 클릭이 올지 보드는 알고 있나요? 이 코드는 언제 판정하고, 그때 clicks 는 늘 몇일까요?
+            rules:
+              - codeMatches: '^\s+\w+ = time\.ticks_ms\(\)$'
+                fail: 마지막 클릭을 뗀 시각을 어딘가에 적어 두었나요? 그래야 "그 뒤로 얼마나 지났나"를 잴 수 있어요.
+              - codeMatches: 'time\.ticks_diff\(time\.ticks_ms\(\), \w+\) (>|>=) \d+'
+                fail: 판정을 언제 하나요? 마지막 클릭 뒤 몇 ms 동안 조용히 기다렸다가 판정하고 있나요?
+          - title: 선생님 보드는 며칠 켜 두었더니 누른 시간이 -1073741000 처럼 이상하게 나왔대요
+            code: |
+              from machine import Pin
+              import time
+
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+              while True:
+                  if button.value() == 0:
+                      start = time.ticks_ms()
+                      while button.value() == 0:
+                          time.sleep(0.01)
+                      held = time.ticks_ms() - start
+                      print(held)
+                  time.sleep(0.01)
+            question: time.ticks_ms() 는 끝없이 커질까요? 시계가 한 바퀴 돌아 다시 0 부터 세기 시작한 직후에 "지금 − 시작" 을 하면 어떻게 될까요? 시각끼리 빼라고 따로 만든 블록은 무엇이었나요?
+            rules:
+              - codeMatches: '^\s+\w+ = time\.ticks_diff\(time\.ticks_ms\(\), \w+\)$'
+                fail: 누른 시간을 구하는 줄이 여전히 그냥 빼기인가요? 원리 카드에서 시각끼리 뺄 때 쓴다고 한 것을 찾아보세요.
+          - title: 한 번만 눌렀는데 가끔 2 가 찍혀요
+            code: |
+              from machine import Pin
+              import time
+
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+              clicks = 0
+              last = time.ticks_ms()
+              while True:
+                  if button.value() == 0:
+                      while button.value() == 0:
+                          time.sleep(0.01)
+                      clicks = clicks + 1
+                      last = time.ticks_ms()
+                  if clicks > 0 and time.ticks_diff(time.ticks_ms(), last) > 400:
+                      print(clicks)
+                      clicks = 0
+                  time.sleep(0.01)
+            question: 손을 떼는 순간 버튼 값이 몇 ms 동안 0 · 1 로 떨리면, 바깥 반복은 다음 바퀴에서 무엇을 보게 될까요? 장면 그림의 "실제 버튼 값"을 따라가 보세요.
+            rules:
+              - codeMatches: '^ {4}( {4})?time\.sleep(\(0\.(0[3-9]|1)\d*\)|_ms\(([3-9]\d|1\d\d)\))$'
+                fail: 손을 뗀 뒤 떨림이 끝날 때까지 기다리는 곳이 있나요? 몇 ms 쯤 기다리면 떨림이 끝날까요?
+
+      - id: design
+        type: design
+        title: 설계 — 두 번 누르기까지, 버튼 왕 완성
+        minutes: 6
+        scene:
+          image: images/click-window.svg
+          caption: 짧은 클릭은 세어 두었다가, 마지막 클릭 뒤 400 ms 가 조용히 지나면 한 번(빨강)인지 두 번(초록)인지 판정해요
+        body: |
+          미션에서는 손을 떼자마자 판정했어요. 그런데 두 번 누르기는 첫 클릭을 뗀 순간에는 알 수 없어요. 그래서 짧은 클릭은 **세어 두고**(`clicks`), 마지막 클릭 시각을 **적어 두었다가**(`last`), 400 ms 동안 조용하면 그때 판정해요.
+
+          길게 누르기는 지금처럼 떼는 순간 바로 파랑이에요. 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "last 부터 지난 ms" 가 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 버튼(14번)과 RGB LED(27 · 25 · 26번)를 준비한다
+          - text: 클릭 수 clicks 를 __(으)로 정하고, 마지막 클릭 시각 last 에 지금 시각을 적는다
+            blank: { answer: 0 }
+          - text: 계속 반복한다
+          - text: "  ↳ 버튼이 눌렸으면 시작 시각을 적고, 뗄 때까지 기다려 누른 시간 held 를 구한다"
+          - text: "  ↳ 떨림이 끝나도록 __초 쉰다"
+            blank: { answer: 0.05 }
+          - text: "  ↳ held 가 __ms 이상이면 파랑을 켜고 clicks 를 0 으로"
+            blank: { answer: 500 }
+          - text: "  ↳ 아니면 clicks 를 1 늘리고 last 에 지금 시각을 적는다"
+          - text: "  ↳ 클릭이 있고 last 부터 __ms 넘게 지났으면"
+            blank: { answer: 400 }
+          - text: "    ↳ clicks 가 1 이면 빨강, 아니면 초록을 켜고 clicks 를 0 으로"
+          - text: "  ↳ 0.01초 쉰다"
+        translation:
+          - ["지금 시각을 적는다", "last = time.ticks_ms()"]
+          - ["last 부터 지난 ms", "time.ticks_diff(time.ticks_ms(), last)"]
+          - ["클릭 수를 1 늘린다", "clicks = clicks + 1"]
+          - ["클릭이 있고 400 ms 넘게 지났으면", "if clicks > 0 and time.ticks_diff(time.ticks_ms(), last) > 400:"]
+          - ["초록을 켠다", "set_color(0, 255, 0)"]
+        targetCode: design_button_king.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 버튼은 하나, 명령은 셋. 차이는 "얼마나 오래"와 "몇 번"이었어요
+        body: |
+          오늘은 보드에게 **시계**를 보는 법을 가르쳤어요. 사건이 일어난 시각을 적어 두고 빼면 시간이 되고, 바로 알 수 없는 일은 기억해 두었다가 나중에 판정했어요.
+
+          먼저 미션 코드의 줄마다 "이 줄은 ___"을 내 말로 채우고, 아래 네 칸에 오늘 있었던 일을 솔직하게 적어요. 다 쓰면 짝에게 1분 동안 설명해 보세요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 설명하기
+        lineExplain: mission_short_long.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 내 "톡 치기"와 "꾹 누르기"는 몇 ms 였나요? 그 값을 보고 기준을 몇 ms 로 정하고 싶나요?
+          - 두 번 누르기를 알려면 왜 첫 클릭 뒤에 기다려야 할까요? 기다리는 시간을 너무 길게 하면 무엇이 불편할까요?
+          - "다음엔 여기부터 본다: 한 줄로"
