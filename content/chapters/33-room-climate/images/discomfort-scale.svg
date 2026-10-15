@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rc-scale-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rc-scale-title">불쾌지수 눈금과 알리미의 움직임. 식: 0.81 × T + 0.01 × H × (0.99 × T − 14.3) + 46.3. 68 미만 쾌적(초록), 68 이상 75 미만 보통(노랑), 75 이상 80 미만 높음(주황), 80 이상 매우 높음(빨강). 75 이상이면 팬을 켠다. 예: 25℃ · 40% 는 70.7, 25℃ · 90% 는 76.0, 30℃ · 80% 는 82.9</title>
+  <!-- 식 -->
+  <rect x="24" y="18" width="380" height="62" rx="10" fill="var(--card)" stroke-width="2"/>
+  <text x="40" y="42" font-size="13" font-weight="700" fill="currentColor" fill-opacity="0.7" stroke="none">불쾌지수 (T = 온도 ℃, H = 습도 %)</text>
+  <text x="40" y="68" font-size="16" font-weight="700" fill="currentColor" stroke="none">0.81 × T + 0.01 × H × (0.99 × T − 14.3) + 46.3</text>
+  <!-- 팬 켜기 괄호 -->
+  <path d="M310 124 V114 H580 V124" stroke="#1c7ed6" stroke-width="2.5"/>
+  <text x="445" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#1c7ed6" stroke="none">75 이상이면 팬 켜기</text>
+  <!-- 눈금 막대 (60 → x 40, 90 → x 580) -->
+  <g stroke-width="1.8">
+    <rect x="40" y="132" width="144" height="40" fill="#2f9e44" fill-opacity="0.45"/>
+    <rect x="184" y="132" width="126" height="40" fill="#f4af18" fill-opacity="0.5"/>
+    <rect x="310" y="132" width="90" height="40" fill="#f08c00" fill-opacity="0.6"/>
+    <rect x="400" y="132" width="180" height="40" fill="#e03131" fill-opacity="0.55"/>
+  </g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="112" y="157">쾌적</text><text x="247" y="157">보통</text><text x="355" y="157">높음</text><text x="490" y="157">매우 높음</text>
+  </g>
+  <g font-size="13" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="184" y="190">68</text><text x="310" y="190">75</text><text x="400" y="190">80</text>
+  </g>
+  <!-- RGB 색 -->
+  <text x="40" y="222" font-size="13" font-weight="700" fill="currentColor" stroke="none">RGB 색</text>
+  <g stroke-width="1.5">
+    <circle cx="112" cy="240" r="11" fill="#2f9e44"/>
+    <circle cx="247" cy="240" r="11" fill="#fcc419"/>
+    <circle cx="355" cy="240" r="11" fill="#f76707"/>
+    <circle cx="490" cy="240" r="11" fill="#e03131"/>
+  </g>
+  <g font-size="12" text-anchor="middle" fill="currentColor" fill-opacity="0.75" stroke="none">
+    <text x="112" y="266">초록</text><text x="247" y="266">노랑</text><text x="355" y="266">주황</text><text x="490" y="266">빨강</text>
+  </g>
+  <!-- 예 -->
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="40" y="304" font-weight="700">계산 예</text>
+    <text x="112" y="304">25℃ · 40% → 70.7</text>
+    <text x="276" y="304">25℃ · 90% → 76.0</text>
+    <text x="440" y="304">30℃ · 80% → 82.9</text>
+  </g>
+  <text x="40" y="334" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">단계 경계(68 · 75 · 80)는 기상청 표 기준이에요. 우리 교실 값을 재 보고 기준을 다시 정할 수 있어요</text>
+</svg>

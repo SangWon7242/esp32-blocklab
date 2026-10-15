@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rc-humid-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rc-humid-title">같은 25℃ 두 교실 비교. 습도 40% 교실에서는 피부의 땀이 수증기로 날아가며 열을 가져가 시원하게 느낀다(불쾌지수 70.7, 보통). 습도 90% 교실에서는 공기에 물기가 가득해 땀이 잘 마르지 않아 열이 빠지지 않고 더 덥게 느낀다(불쾌지수 76.0, 높음)</title>
+  <!-- 왼쪽 칸 -->
+  <rect x="24" y="24" width="286" height="312" rx="12" fill="var(--card)" stroke-width="2"/>
+  <text x="44" y="54" font-size="16" font-weight="700" fill="currentColor" stroke="none">25℃ · 습도 40%</text>
+  <!-- 오른쪽 칸 -->
+  <rect x="330" y="24" width="286" height="312" rx="12" fill="var(--card)" stroke-width="2"/>
+  <text x="350" y="54" font-size="16" font-weight="700" fill="currentColor" stroke="none">25℃ · 습도 90%</text>
+  <!-- 공기 속 물기 (왼쪽 적게, 오른쪽 많이) -->
+  <g fill="#1c7ed6" fill-opacity="0.45" stroke="none">
+    <circle cx="70" cy="86" r="4"/><circle cx="250" cy="96" r="4"/><circle cx="200" cy="80" r="4"/><circle cx="276" cy="140" r="4"/>
+    <circle cx="360" cy="84" r="4"/><circle cx="392" cy="100" r="4"/><circle cx="424" cy="80" r="4"/><circle cx="458" cy="96" r="4"/>
+    <circle cx="490" cy="82" r="4"/><circle cx="522" cy="100" r="4"/><circle cx="556" cy="86" r="4"/><circle cx="590" cy="100" r="4"/>
+    <circle cx="372" cy="124" r="4"/><circle cx="560" cy="126" r="4"/><circle cx="588" cy="150" r="4"/><circle cx="364" cy="158" r="4"/>
+    <circle cx="592" cy="190" r="4"/><circle cx="360" cy="196" r="4"/>
+  </g>
+  <!-- 팔(피부) 두 개 -->
+  <path d="M60 236 C110 214 220 214 274 236 L274 266 C220 250 110 250 60 266 Z" fill="#f4af18" fill-opacity="0.35" stroke-width="2"/>
+  <path d="M366 236 C416 214 526 214 580 236 L580 266 C526 250 416 250 366 266 Z" fill="#f4af18" fill-opacity="0.35" stroke-width="2"/>
+  <!-- 땀방울 -->
+  <g fill="#1c7ed6" fill-opacity="0.6" stroke="#1c7ed6" stroke-width="1.5">
+    <path d="M120 214 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z"/>
+    <path d="M210 214 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z"/>
+    <path d="M410 214 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z"/>
+    <path d="M450 210 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z"/>
+    <path d="M490 208 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z"/>
+    <path d="M530 210 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z"/>
+  </g>
+  <!-- 왼쪽: 수증기로 날아감 (물결 화살표 셋) -->
+  <g stroke="#e03131" stroke-width="2.5">
+    <path d="M120 200 c-8 -10 8 -18 0 -28 c-8 -10 8 -18 0 -28"/>
+    <path d="M112 152 L120 140 L128 152"/>
+    <path d="M166 204 c-8 -10 8 -18 0 -28 c-8 -10 8 -18 0 -28"/>
+    <path d="M158 156 L166 144 L174 156"/>
+    <path d="M210 200 c-8 -10 8 -18 0 -28 c-8 -10 8 -18 0 -28"/>
+    <path d="M202 152 L210 140 L218 152"/>
+  </g>
+  <!-- 오른쪽: 거의 못 날아감 (짧은 화살표 하나) -->
+  <g stroke="#e03131" stroke-width="2.5">
+    <path d="M470 200 c-8 -8 8 -12 0 -20"/>
+    <path d="M463 186 L470 176 L477 186"/>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <text x="167" y="292" text-anchor="middle" font-size="14" font-weight="700">땀이 잘 말라 열을 가져가요</text>
+    <text x="167" y="318" text-anchor="middle" font-size="13" fill-opacity="0.75">불쾌지수 70.7 · 보통</text>
+    <text x="473" y="292" text-anchor="middle" font-size="14" font-weight="700">땀이 마르지 않아 더 더워요</text>
+    <text x="473" y="318" text-anchor="middle" font-size="13" fill-opacity="0.75">불쾌지수 76.0 · 높음</text>
+  </g>
+</svg>

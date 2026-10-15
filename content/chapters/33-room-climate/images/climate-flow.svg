@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rc-flow-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rc-flow-title">온습도 알리미 한 바퀴. 1 재기: DHT11 에게 측정을 부탁하고 온도 t, 습도 h 를 꺼낸다. 2 계산: 불쾌지수 식으로 di 를 구한다. 3 보여 주기: OLED 에 글을 적고 RGB LED 색을 고른다. 4 판단: di 가 75 이상이면 팬을 켜고 아니면 멈춘다. 5 2초 쉬고 처음으로 돌아간다</title>
+  <defs>
+    <marker id="rc-flow-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <text x="24" y="40" font-size="16" font-weight="700" fill="currentColor" stroke="none">알리미가 2초마다 도는 한 바퀴</text>
+  <!-- 상자 넷 -->
+  <g stroke-width="2">
+    <rect x="24" y="72" width="128" height="150" rx="12" fill="var(--card)"/>
+    <rect x="178" y="72" width="128" height="150" rx="12" fill="var(--card)"/>
+    <rect x="332" y="72" width="128" height="150" rx="12" fill="var(--card)"/>
+    <rect x="486" y="72" width="130" height="150" rx="12" fill="var(--card)"/>
+  </g>
+  <g stroke="none">
+    <circle cx="48" cy="98" r="13" fill="#847500"/>
+    <circle cx="202" cy="98" r="13" fill="#f4af18"/>
+    <circle cx="356" cy="98" r="13" fill="#1d4ed8"/>
+    <circle cx="510" cy="98" r="13" fill="#ae4500"/>
+  </g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">
+    <text x="48" y="103">1</text><text x="202" y="103">2</text><text x="356" y="103">3</text><text x="510" y="103">4</text>
+  </g>
+  <g font-size="16" font-weight="700" fill="currentColor" stroke="none">
+    <text x="68" y="104">재기</text><text x="222" y="104">계산</text><text x="376" y="104">보여 주기</text><text x="530" y="104">판단</text>
+  </g>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="38" y="134" font-weight="700">DHT11</text>
+    <text x="38" y="156" fill-opacity="0.8">측정 부탁</text>
+    <text x="38" y="176" fill-opacity="0.8">온도 → t</text>
+    <text x="38" y="196" fill-opacity="0.8">습도 → h</text>
+    <text x="192" y="134" font-weight="700">불쾌지수 식</text>
+    <text x="192" y="156" fill-opacity="0.8">t 와 h 를 넣어</text>
+    <text x="192" y="176" fill-opacity="0.8">di 에 담기</text>
+    <text x="346" y="134" font-weight="700">OLED · RGB</text>
+    <text x="346" y="156" fill-opacity="0.8">T · H · DI 적기</text>
+    <text x="346" y="176" fill-opacity="0.8">단계 색 고르기</text>
+    <text x="500" y="134" font-weight="700">모터(팬)</text>
+    <text x="500" y="156" fill-opacity="0.8">di ≥ 75 → 켜기</text>
+    <text x="500" y="176" fill-opacity="0.8">아니면 → 정지</text>
+  </g>
+  <!-- 화살표 -->
+  <g stroke-width="2.5" marker-end="url(#rc-flow-arrow)">
+    <path d="M154 147 H174"/>
+    <path d="M308 147 H328"/>
+    <path d="M462 147 H482"/>
+  </g>
+  <!-- 되돌아가기 -->
+  <path d="M551 224 V292 H88 V230" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#rc-flow-arrow)"/>
+  <rect x="246" y="276" width="146" height="32" rx="16" fill="var(--muted)" stroke-width="1.8"/>
+  <text x="319" y="297" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">5 · 2초 쉬기</text>
+  <text x="24" y="336" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">DHT11 은 한 번 잰 뒤 1초 넘게 쉬어야 해요. 그래서 한 바퀴 끝에 2초를 기다려요</text>
+</svg>

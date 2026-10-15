@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rc-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rc-cover-title">여름 교실의 온습도 알리미. 창밖에 해가 뜨겁고, 책상 위 OLED 화면에 T: 27C, H: 70%, DI: 76 이 보인다. 옆의 RGB LED는 주황색으로 빛나고, 작은 선풍기(팬)가 돌며 바람을 보낸다. 말풍선: 같은 25도인데 왜 습한 날은 더 더울까요?</title>
+  <rect x="0" y="0" width="640" height="360" fill="var(--muted)" stroke="none"/>
+  <!-- 바닥 -->
+  <rect x="0" y="300" width="640" height="60" fill="currentColor" fill-opacity="0.07" stroke="none"/>
+  <path d="M0 300 H640" stroke-width="2"/>
+  <!-- 창문과 해, 물방울 -->
+  <rect x="34" y="128" width="150" height="128" rx="6" fill="#4dabf7" fill-opacity="0.22" stroke-width="2.5"/>
+  <path d="M109 128 V256 M34 192 H184" stroke-width="2"/>
+  <circle cx="72" cy="160" r="17" fill="#f08c00" fill-opacity="0.75" stroke="none"/>
+  <path d="M72 134 V128 M72 186 V192 M46 160 H40 M98 160 H104 M54 142 L50 138 M90 178 L94 182 M90 142 L94 138 M54 178 L50 182" stroke="#f08c00" stroke-width="2"/>
+  <path d="M140 214 c-6 9 -6 15 0 15 c6 0 6 -6 0 -15 Z M160 228 c-5 8 -5 13 0 13 c5 0 5 -5 0 -13 Z M128 236 c-4 6 -4 10 0 10 c4 0 4 -4 0 -10 Z" fill="#1c7ed6" fill-opacity="0.5" stroke="#1c7ed6" stroke-width="1.5"/>
+  <!-- 책상 -->
+  <rect x="210" y="266" width="400" height="12" rx="3" fill="var(--card)" stroke-width="2"/>
+  <path d="M230 278 V300 M590 278 V300" stroke-width="3"/>
+  <!-- OLED 화면 -->
+  <rect x="230" y="128" width="150" height="112" rx="8" fill="#1d4ed8" stroke-width="2"/>
+  <rect x="242" y="140" width="126" height="80" rx="3" fill="#0b1b4d" stroke="none"/>
+  <g font-size="15" font-weight="700" fill="#7dd3fc" stroke="none" font-family="ui-monospace, monospace">
+    <text x="252" y="164">T: 27C</text>
+    <text x="252" y="186">H: 70%</text>
+    <text x="252" y="208">DI: 76</text>
+  </g>
+  <path d="M262 240 V266 M348 240 V266" stroke-width="2.5"/>
+  <text x="305" y="258" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">OLED</text>
+  <!-- RGB LED (주황) -->
+  <circle cx="430" cy="214" r="30" fill="#f08c00" fill-opacity="0.18" stroke="none"/>
+  <path d="M416 236 V210 A14 14 0 0 1 444 210 V236 Z" fill="#f08c00" fill-opacity="0.8" stroke-width="2"/>
+  <rect x="412" y="234" width="36" height="6" rx="2" fill="var(--card)" stroke-width="1.5"/>
+  <path d="M422 240 V266 M430 240 V266 M438 240 V266" stroke-width="2"/>
+  <path d="M430 176 V168 M402 190 L396 185 M458 190 L464 185" stroke="#f08c00" stroke-width="2.5"/>
+  <text x="430" y="290" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">RGB LED</text>
+  <!-- 팬 -->
+  <path d="M540 214 V266 M516 266 H564" stroke-width="3"/>
+  <circle cx="540" cy="180" r="38" fill="var(--card)" stroke-width="2.5"/>
+  <path d="M540 180 C530 160 536 148 548 146 C554 160 550 172 540 180 Z M540 180 C562 176 572 184 570 196 C556 200 546 192 540 180 Z M540 180 C528 198 516 202 508 194 C514 180 526 176 540 180 Z" fill="#1c7ed6" fill-opacity="0.45" stroke-width="1.8"/>
+  <circle cx="540" cy="180" r="5" fill="currentColor" stroke="none"/>
+  <path d="M492 162 H474 M488 182 H466 M492 202 H474" stroke="#1c7ed6" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <text x="540" y="290" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">팬</text>
+  <!-- 말풍선 -->
+  <rect x="28" y="24" width="400" height="76" rx="14" fill="var(--card)" stroke-width="1.8"/>
+  <path d="M120 100 L132 116 L146 100" fill="var(--card)" stroke-width="1.8"/>
+  <path d="M121 99 H145" stroke="var(--card)" stroke-width="3"/>
+  <text x="48" y="54" font-size="18" font-weight="700" fill="currentColor" stroke="none">같은 25도인데 왜 더 덥게 느껴질까?</text>
+  <text x="48" y="82" font-size="14" fill="currentColor" fill-opacity="0.75" stroke="none">온도 · 습도를 재서 화면, 색, 바람으로 알려 줘요</text>
+</svg>
