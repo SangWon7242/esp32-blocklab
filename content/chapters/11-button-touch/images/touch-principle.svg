@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="btp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="btp-title">정전식 터치의 원리: 몸은 전기를 조금 담는 그릇이라 손가락이 4번 핀에 이은 호일에 닿으면 터치 값이 줄어든다. 손을 떼면 600 안팎, 만지면 100 안팎. 기준 300 보다 작으면 만진 것으로 본다 (값은 보드와 패드마다 다르다)</title>
+  <rect x="16" y="16" width="290" height="328" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="161" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">몸은 전기를 조금 담는 그릇</text>
+  <path d="M60 236 L110 230 L160 237 L210 231 L262 236 L258 276 L208 282 L160 276 L110 283 L62 277 Z" fill="#ced4da" stroke-width="1.5"/>
+  <path d="M90 242 L104 262 L96 272 M150 244 L140 266 M200 242 L212 268 M236 246 L228 270" stroke="#868e96" stroke-width="1.2"/>
+  <path d="M136 66 V196 A26 26 0 0 0 188 196 V66" fill="#f3c9a8" stroke-width="2"/>
+  <path d="M146 186 A16 14 0 0 0 178 186 V176 H146 Z" fill="#fbe3d3" stroke-width="1.5"/>
+  <path d="M136 120 H150 M174 120 H188" stroke-width="1.5" stroke-opacity="0.5"/>
+  <path d="M120 226 L110 214 M204 226 L214 214 M162 226 V212" stroke="#00b6b1" stroke-width="3"/>
+  <path d="M60 256 L36 256 L36 314 L110 314" stroke-width="6"/>
+  <path d="M60 256 L36 256 L36 314 L110 314" stroke="#f76707" stroke-width="3.5"/>
+  <rect x="56.5" y="252.5" width="7" height="7" rx="1.5" fill="#f76707" stroke-width="1.5"/>
+  <rect x="110" y="300" width="70" height="28" rx="6" fill="var(--muted)" stroke-width="2"/>
+  <text x="145" y="319" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">4번 핀</text>
+  <text x="244" y="312" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">호일 = 패드</text>
+  <text x="336" y="44" text-anchor="start" font-size="15" font-weight="700" fill="currentColor" stroke="none">터치 값</text>
+  <text x="336" y="64" text-anchor="start" font-size="12" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.7">touch.read()</text>
+  <path d="M360 70 V300 H612" stroke-width="2"/>
+  <text x="352" y="304.0" text-anchor="end" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.6">0</text>
+  <text x="352" y="221.5" text-anchor="end" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.6">300</text>
+  <text x="352" y="139.0" text-anchor="end" font-size="12" font-weight="400" fill="currentColor" stroke="none" fill-opacity="0.6">600</text>
+  <rect x="388" y="135.0" width="64" height="165.0" rx="4" fill="#4562f5" fill-opacity="0.85" stroke="none"/>
+  <text x="420" y="320" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">손 뗌</text>
+  <text x="420" y="127.0" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">600 안팎</text>
+  <rect x="498" y="272.5" width="64" height="27.500000000000004" rx="4" fill="#4562f5" fill-opacity="0.85" stroke="none"/>
+  <text x="530" y="320" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">만짐</text>
+  <text x="530" y="264.5" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">100 안팎</text>
+  <path d="M360 217.5 H612" stroke="#f76707" stroke-width="2.5" stroke-dasharray="7 5"/>
+  <text x="612" y="209.5" text-anchor="end" font-size="13" font-weight="700" fill="#f76707" stroke="none">기준 300</text>
+  <text x="484" y="344" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">몸이 닿으면 값이 줄어요 → 기준보다 작으면 만진 것</text>
+</svg>

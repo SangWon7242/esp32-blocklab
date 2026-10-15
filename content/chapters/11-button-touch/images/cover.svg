@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="btc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="btc-title">버튼과 터치 표지: 버튼을 누르거나 호일을 만지면 ESP32 가 0·1 과 값을 읽고 LED 를 켜고 끈다</title>
+  <defs><marker id="btc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="218" y="192" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.7">입력</text>
+  <text x="422" y="168" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.7">출력</text>
+  <rect x="70" y="70" width="120" height="86" rx="10" fill="var(--card)" stroke-width="2"/>
+  <rect x="96" y="92" width="68" height="44" rx="6" fill="#495057" stroke-width="2"/>
+  <circle cx="130" cy="114" r="15" fill="#212529" stroke="#adb5bd" stroke-width="2"/>
+  <text x="130" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼 누르기</text>
+  <path d="M66 262 L110 256 L150 263 L194 257 L196 300 L150 306 L108 300 L68 305 Z" fill="#ced4da" stroke-width="1.5"/>
+  <path d="M118 206 V258 A12 12 0 0 0 142 258 V206" fill="#f3c9a8" stroke-width="2"/>
+  <text x="130" y="330" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">호일 만지기</text>
+  <rect x="262" y="118" width="116" height="124" rx="12" fill="var(--card)" stroke-width="2"/>
+  <rect x="280" y="134" width="80" height="58" rx="4" fill="var(--muted)"/>
+  <text x="320" y="170" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="320" y="222" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none" fill-opacity="0.7">0 · 1 · 값</text>
+  <path d="M200 113 L254 160" stroke-width="2.5" marker-end="url(#btc-arrow)"/>
+  <path d="M200 278 L254 214" stroke-width="2.5" marker-end="url(#btc-arrow)"/>
+  <path d="M386 180 L458 180" stroke-width="2.5" marker-end="url(#btc-arrow)"/>
+  <circle cx="530" cy="168" r="56" fill="#ffd43b" fill-opacity="0.35" stroke="none"/>
+  <path d="M510 206 H550 V198 H510 Z" fill="#e03131" stroke-width="2"/>
+  <path d="M513 198 V160 A17 17 0 0 1 547 160 V198 Z" fill="#ff6b6b" stroke-width="2"/>
+  <path d="M522 206 V236 M538 206 V228" stroke-width="2.5"/>
+  <path d="M530 112 L530 96" stroke="#f59f00" stroke-width="3"/>
+  <path d="M486 132 L474 120" stroke="#f59f00" stroke-width="3"/>
+  <path d="M574 132 L586 120" stroke="#f59f00" stroke-width="3"/>
+  <path d="M474 168 L458 168" stroke="#f59f00" stroke-width="3"/>
+  <path d="M586 168 L602 168" stroke="#f59f00" stroke-width="3"/>
+  <text x="530" y="270" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">LED 켜기 · 끄기</text>
+</svg>
