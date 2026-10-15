@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cd-avd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cd-avd-title">디지털과 아날로그: 버튼 같은 디지털 입력은 0 아니면 1, 가변저항 같은 아날로그 입력은 0V부터 3.3V까지 이어지는 전압을 0부터 4095 숫자로 읽는다. 가변저항은 3.3V 와 0V 사이를 나누어 가운데 다리로 그 중간 전압을 내보낸다</title>
+  <!-- 디지털 -->
+  <rect x="20" y="20" width="370" height="150" rx="12" fill="var(--card)"/>
+  <text x="36" y="46" font-size="15" font-weight="700" fill="currentColor" stroke="none">디지털 (버튼): 0 아니면 1</text>
+  <path d="M60 140 H370 M60 140 V60" stroke-opacity="0.5"/>
+  <path d="M60 136 H120 V76 H200 V136 H250 V76 H330 V136 H370" stroke="#4562f5" stroke-width="3"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="end">
+    <text x="54" y="80">1</text><text x="54" y="140">0</text>
+  </g>
+  <!-- 아날로그 -->
+  <rect x="20" y="190" width="370" height="150" rx="12" fill="var(--card)"/>
+  <text x="36" y="216" font-size="15" font-weight="700" fill="currentColor" stroke="none">아날로그 (가변저항): 0 ~ 4095</text>
+  <path d="M60 310 H370 M60 310 V230" stroke-opacity="0.5"/>
+  <path d="M60 300 C120 300 140 240 200 240 S280 290 320 262 S360 246 370 246" stroke="#2f9e44" stroke-width="3"/>
+  <g stroke-opacity="0.25">
+    <path d="M60 250 H370 M60 270 H370 M60 290 H370"/>
+  </g>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="end">
+    <text x="54" y="238">4095</text><text x="54" y="314">0</text>
+  </g>
+  <!-- 전압 나누기 -->
+  <rect x="410" y="20" width="210" height="320" rx="12" fill="var(--card)"/>
+  <text x="515" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">전압 나누기</text>
+  <rect x="470" y="80" width="30" height="220" rx="6" fill="#e9d3a5" stroke-width="2"/>
+  <path d="M485 80 V66 M485 300 V314" stroke-width="2.5"/>
+  <path d="M540 190 H508 M516 182 L506 190 L516 198" stroke="#2f9e44" stroke-width="3"/>
+  <path d="M540 190 H580" stroke="#2f9e44" stroke-width="3"/>
+  <g fill="currentColor" stroke="none" font-size="13" font-weight="600">
+    <text x="440" y="70" fill="#e03131">3.3V</text>
+    <text x="446" y="326">0V</text>
+    <text x="540" y="178" fill="#2f9e44">가운데 다리</text>
+    <text x="540" y="214">1.65V</text>
+    <text x="540" y="232" fill-opacity="0.7">→ 약 2048</text>
+  </g>
+</svg>

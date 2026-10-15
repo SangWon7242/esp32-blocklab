@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cd-map-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cd-map-title">범위 바꾸기: 가변저항 값 0~4095 자를 LED 세기 0~1023 자로 옮긴다. 0은 0, 2048 은 511, 4095 는 1023 이 된다. 긴 자를 같은 비율로 줄이는 것과 같다</title>
+  <text x="320" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">범위 바꾸기: 0 ~ 4095 → 0 ~ 1023</text>
+  <!-- 위 자 -->
+  <text x="60" y="88" font-size="14" font-weight="700" fill="#2f9e44" stroke="none">가변저항 값</text>
+  <path d="M60 110 H580" stroke="#2f9e44" stroke-width="5"/>
+  <path d="M60 100 V120 M190 104 V116 M320 100 V120 M450 104 V116 M580 100 V120" stroke="#2f9e44" stroke-width="2.5"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="60" y="140">0</text><text x="320" y="140">2048</text><text x="580" y="140">4095</text>
+  </g>
+  <!-- 연결선 -->
+  <g stroke-dasharray="5 5" stroke-opacity="0.6">
+    <path d="M60 150 L180 228"/>
+    <path d="M320 150 L320 228"/>
+    <path d="M580 150 L460 228"/>
+  </g>
+  <!-- 아래 자 -->
+  <text x="180" y="226" font-size="14" font-weight="700" fill="#e8590c" stroke="none" text-anchor="end" dx="-10" dy="30">LED 세기</text>
+  <path d="M180 250 H460" stroke="#e8590c" stroke-width="5"/>
+  <path d="M180 240 V260 M250 244 V256 M320 240 V260 M390 244 V256 M460 240 V260" stroke="#e8590c" stroke-width="2.5"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="180" y="280">0</text><text x="320" y="280">511</text><text x="460" y="280">1023</text>
+  </g>
+  <!-- 식 -->
+  <rect x="80" y="300" width="480" height="40" rx="10" fill="var(--card)"/>
+  <text x="320" y="325" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor" stroke="none">((값 − 0) × (1023 − 0) // (4095 − 0) + 0)</text>
+</svg>

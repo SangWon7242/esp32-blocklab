@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cd-th-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cd-th-title">소리 값 그래프와 기준선: 조용할 때는 300~500 쯤에서 조금씩 흔들리고, 박수를 치면 3000 넘게 솟는다. 기준선 2000 을 넘으면 박수로 센다. 박수 한 번에도 기준을 넘는 점이 여러 개라, 한 번 센 뒤 0.3초 기다려야 한 번만 센다</title>
+  <rect x="20" y="16" width="600" height="328" rx="12" fill="var(--card)"/>
+  <text x="36" y="42" font-size="15" font-weight="700" fill="currentColor" stroke="none">소리 값 (0 ~ 4095)</text>
+  <path d="M60 310 H604 M60 310 V60" stroke-opacity="0.5"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="end" fill-opacity="0.7">
+    <text x="54" y="74.0">4095</text><text x="54" y="196.8">2000</text><text x="54" y="314">0</text>
+  </g>
+  <text x="600" y="330" text-anchor="end" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">시간 →</text>
+  <rect x="60" y="70.0" width="544" height="122.8" fill="#e03131" fill-opacity="0.07" stroke="none"/>
+  <path d="M60 286.8 L66 292.0 L72 284.7 L78 295.1 L84 294.4 L90 280.5 L96 293.7 L102 285.6 L108 294.8 L114 281.3 L120 290.1 L126 295.4 L132 293.9 L138 283.5 L144 284.0 L150 294.5 L156 289.3 L162 293.8 L168 283.8 L174 214.5 L180 194.9 L186 154.4 L192 140.3 L198 110.6 L204 113.2 L210 147.5 L216 178.1 L222 194.8 L228 238.4 L234 290.9 L240 285.4 L246 293.6 L252 280.1 L258 294.6 L264 294.8 L270 290.4 L276 281.6 L282 280.6 L288 283.7 L294 287.1 L300 282.6 L306 282.9 L312 285.7 L318 287.6 L324 289.1 L330 291.1 L336 289.3 L342 294.1 L348 287.6 L354 280.8 L360 281.7 L366 286.3 L372 283.1 L378 287.9 L384 294.4 L390 293.0 L396 281.2 L402 236.5 L408 207.0 L414 169.0 L420 149.5 L426 111.7 L432 97.0 L438 139.7 L444 163.6 L450 199.6 L456 222.2 L462 283.2 L468 288.0 L474 285.0 L480 286.1 L486 295.9 L492 282.7 L498 285.9 L504 291.5 L510 293.1 L516 281.8 L522 294.8 L528 290.0 L534 287.9 L540 292.7 L546 289.1 L552 284.6 L558 284.8 L564 281.6 L570 294.1 L576 291.5 L582 283.1 L588 284.5 L594 288.2 L600 292.4" stroke-width="2"/>
+  <circle cx="186" cy="154.4" r="3" fill="#1c7ed6" stroke="none"/><circle cx="192" cy="140.3" r="3" fill="#1c7ed6" stroke="none"/><circle cx="198" cy="110.6" r="3" fill="#1c7ed6" stroke="none"/><circle cx="204" cy="113.2" r="3" fill="#1c7ed6" stroke="none"/><circle cx="210" cy="147.5" r="3" fill="#1c7ed6" stroke="none"/><circle cx="216" cy="178.1" r="3" fill="#1c7ed6" stroke="none"/><circle cx="414" cy="169.0" r="3" fill="#1c7ed6" stroke="none"/><circle cx="420" cy="149.5" r="3" fill="#1c7ed6" stroke="none"/><circle cx="426" cy="111.7" r="3" fill="#1c7ed6" stroke="none"/><circle cx="432" cy="97.0" r="3" fill="#1c7ed6" stroke="none"/><circle cx="438" cy="139.7" r="3" fill="#1c7ed6" stroke="none"/><circle cx="444" cy="163.6" r="3" fill="#1c7ed6" stroke="none"/>
+  <path d="M60 192.8 H604" stroke="#e03131" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <rect x="470" y="168.8" width="120" height="20" rx="10" fill="var(--card)" stroke="#e03131" stroke-width="1.5"/>
+  <text x="530" y="183.3" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">기준 2000</text>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="200" y="81.2">박수 1</text>
+    <text x="430" y="81.2">박수 2</text>
+  </g>
+  <path d="M182 214.8 H242 M182 208.8 V220.8 M242 208.8 V220.8" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="248" y="219.8" font-size="13" font-weight="600" fill="#2f9e44" stroke="none">0.3초 기다리기</text>
+  <text x="330" y="262" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">조용할 때</text>
+</svg>

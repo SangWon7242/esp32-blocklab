@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cd-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cd-cover-title">박수 스위치와 다이얼: 다이얼(가변저항)을 돌리면 0부터 4095 사이 숫자가 나오고, 박수 소리가 기준선을 넘으면 횟수를 세어 LED 를 켜고 끈다</title>
+  <text x="320" y="44" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">박수 스위치와 다이얼</text>
+  <text x="320" y="70" text-anchor="middle" font-size="14" fill="currentColor" fill-opacity="0.7" stroke="none">0과 1 사이에도 숫자가 있어요: 0 ~ 4095</text>
+  <!-- 다이얼 -->
+  <rect x="40" y="96" width="250" height="230" rx="16" fill="var(--card)"/>
+  <path d="M95 250 A70 70 0 1 1 235 250" stroke="var(--muted)" stroke-width="16"/>
+  <path d="M95 250 A70 70 0 0 1 165 180" stroke="#2f9e44" stroke-width="16" stroke-linecap="butt"/>
+  <circle cx="165" cy="250" r="44" fill="#1c7ed6" fill-opacity="0.85" stroke-width="2"/>
+  <circle cx="165" cy="250" r="30" fill="var(--card)" stroke-width="2"/>
+  <path d="M165 250 L165 222" stroke-width="4"/>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="600" text-anchor="middle">
+    <text x="88" y="276">0</text>
+    <text x="242" y="276">4095</text>
+    <text x="165" y="140" font-size="16" font-weight="700" fill="#2f9e44">2048</text>
+    <text x="165" y="314" font-size="15">다이얼 돌리기</text>
+  </g>
+  <!-- 박수 -->
+  <rect x="350" y="96" width="250" height="230" rx="16" fill="var(--card)"/>
+  <g stroke-width="2.5">
+    <path d="M400 230 C392 200 400 170 418 160 L432 198 Z" fill="#ffd8a8"/>
+    <path d="M452 230 C460 200 452 170 434 160 L420 198 Z" fill="#ffd8a8"/>
+  </g>
+  <g stroke="#1c7ed6" stroke-width="3">
+    <path d="M462 160 Q474 150 470 136"/>
+    <path d="M476 172 Q494 156 488 134"/>
+    <path d="M390 160 Q378 150 382 136"/>
+  </g>
+  <!-- LED -->
+  <path d="M512 214 V246 M534 214 V246" stroke-width="2.5"/>
+  <path d="M507 214 H539 V208 H507 Z" fill="#fab005" stroke-width="1.5"/>
+  <path d="M509 208 V184 A14 14 0 0 1 537 184 V208 Z" fill="#fab005" stroke-width="1.5"/>
+  <g stroke="#fab005" stroke-width="3">
+    <path d="M523 150 V138"/><path d="M549 162 L558 154"/><path d="M497 162 L488 154"/><path d="M556 188 H568"/>
+  </g>
+  <g fill="currentColor" stroke="none" font-size="15" text-anchor="middle">
+    <text x="420" y="256">짝!</text>
+    <text x="523" y="270">켜짐</text>
+    <text x="475" y="314">박수 두 번에 켜고 끄기</text>
+  </g>
+</svg>
