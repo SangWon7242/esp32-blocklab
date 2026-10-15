@@ -30,7 +30,7 @@ export function parseInline(text: string): Inline[] {
     }
     const bits = part.split(/(\*\*[^*\n](?:[^\n]*?[^*\n])?\*\*)/);
     for (const bit of bits) {
-      if (bit.length > 4 && bit.startsWith("**") && bit.endsWith("**")) push("bold", bit.slice(2, -2));
+      if (bit.length >= 5 && bit.startsWith("**") && bit.endsWith("**")) push("bold", bit.slice(2, -2)); // 한 글자 굵게(**0**)도 허용
       else push("text", bit);
     }
   }

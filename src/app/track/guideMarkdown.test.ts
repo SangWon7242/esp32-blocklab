@@ -44,3 +44,10 @@ describe("parseGuide", () => {
     expect(parseGuide("  \n\n")).toEqual([]);
   });
 });
+
+import { parseInline as _parseInlineOneChar } from "./guideMarkdown";
+it("한 글자도 굵게 된다 (**0**)", () => {
+  expect(_parseInlineOneChar("값이 **0** 이면")).toEqual([
+    { kind: "text", text: "값이 " }, { kind: "bold", text: "0" }, { kind: "text", text: " 이면" },
+  ]);
+});
