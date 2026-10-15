@@ -29,21 +29,28 @@ describe("버튼 (dev_button_setup)", () => {
   });
 });
 
-describe("틸트 스위치·인체감지 (준비 줄은 esp_pin_setup 이 접는다)", () => {
-  it("틸트: 준비 + 기울었는가 → esp_pin_setup + dev_tilt_tilted", () => {
+describe("틸트 스위치·인체감지 (이름 접두사로 자기 준비 블록에 접힌다)", () => {
+  it("틸트: 준비 + 기울었는가 → dev_tilt_setup + dev_tilt_tilted (이름이 tilt 로 시작)", () => {
     const code = toCode([{ type: "dev_tilt_setup", fields: { PIN: 14, VAR: v("tilt") } }, ifThen(val("dev_tilt_tilted", "tilt"), [print(num(1))])], ["tilt"]);
     expect(code).toBe("from machine import Pin\n\ntilt = Pin(14, Pin.IN)\n\nif tilt.value() == 1:\n    print(1)\n");
     const r = fromCode(code);
-    expect(r.types).toEqual(["esp_pin_setup", "controls_if", "esp_print", "math_number", "dev_tilt_tilted"]);
-    expect(r.body[0].fields).toEqual({ VAR: v("tilt"), PIN: 14, MODE: "IN" });
+    expect(r.types).toEqual(["dev_tilt_setup", "controls_if", "esp_print", "math_number", "dev_tilt_tilted"]);
+    expect(r.body[0].fields).toEqual({ VAR: v("tilt"), PIN: 14 });
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
-  it("PIR: 같은 식이라 틸트 블록으로 돌아온다 (코드는 같다)", () => {
+  it("PIR: 이름이 pir 로 시작하면 자기 블록(dev_pir_setup·dev_pir_detected)으로 돌아온다", () => {
     const code = toCode([{ type: "dev_pir_setup", fields: { PIN: 27, VAR: v("pir") } }, ifThen(val("dev_pir_detected", "pir"), [print(num(1))])], ["pir"]);
     expect(code).toBe("from machine import Pin\n\npir = Pin(27, Pin.IN)\n\nif pir.value() == 1:\n    print(1)\n");
     const r = fromCode(code);
-    expect(r.types).toEqual(["esp_pin_setup", "controls_if", "esp_print", "math_number", "dev_tilt_tilted"]);
+    expect(r.types).toEqual(["dev_pir_setup", "controls_if", "esp_print", "math_number", "dev_pir_detected"]);
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(code);
+  });
+  it("다른 이름(sensor)의 입력 핀은 핀 준비·핀 읽기 비교로 접힌다(틸트·PIR 블록이 아니다)", () => {
+    const code = "from machine import Pin\n\nsensor = Pin(27, Pin.IN)\n\nif sensor.value() == 1:\n    print(1)\n";
+    const r = fromCode(code);
+    expect(r.types).toEqual(["esp_pin_setup", "controls_if", "esp_print", "math_number", "logic_compare", "esp_pin_read", "math_number"]);
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });

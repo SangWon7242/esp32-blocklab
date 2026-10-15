@@ -1,5 +1,5 @@
 import type { DeviceSpec } from "../types";
-import { factor, isSingleOperand, NO_SETUP_PATTERN, ORDER, pinNo, RE_NAME, RE_PIN, unfactor, validPins } from "./common";
+import { ORDER, RE_NAME, RE_PIN, factor, isSingleOperand, pinNo, unfactor, validPins } from "./common";
 
 /** 인터럽트 함수 이름 칸: 파이썬 이름 꼴 */
 const HANDLER_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -28,7 +28,7 @@ export const button: DeviceSpec = {
       code: (v) => `${v.VAR}.irq(trigger=Pin.IRQ_FALLING, handler=${v.FUNC})`,
       // 이름 붙인 인자라 method 패턴(위치 인자만)으로는 못 잡는다. 생성기가 쓰는 글자 그대로의 한 줄만 블록으로
       pattern: {
-        kind: "lines", objPart: "VAR", objKinds: ["pin"],
+        kind: "lines", objPart: "VAR", objKinds: ["pin", "tilt", "pir"],
         lines: [/^(\w+)\.irq\(trigger=Pin\.IRQ_FALLING, handler=([A-Za-z_]\w*)\)$/],
         values: ([m]) => ({ VAR: m[1], FUNC: m[2] }),
       },
@@ -93,7 +93,7 @@ export const touch: DeviceSpec = {
   ],
 };
 
-/** 틸트 스위치 (dev_tilt_setup). 준비 줄은 esp_pin_setup 이 접는다 */
+/** 틸트 스위치 (dev_tilt_setup). 이름이 tilt… 이면 자기 준비 블록으로 접힌다(kind tilt) */
 export const tilt: DeviceSpec = {
   id: "tilt", category: "switch", label: "틸트 스위치", toolboxOrder: 32, colour: "#7c20c2",
   setup: {
@@ -102,9 +102,13 @@ export const tilt: DeviceSpec = {
     parts: [pinNo("PIN", 14, "in"), { kind: "var", name: "VAR", default: "tilt" }],
     tooltip: "tilt = Pin(14, Pin.IN) — 기울면 1",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.IN)`],
-    kind: "pin",
+    kind: "tilt",
     provides: (v) => [v.VAR],
-    pattern: NO_SETUP_PATTERN,
+    // 이름이 tilt 으로 시작하는 `x = Pin(n, Pin.IN)` 만 이 장치로 접는다 (아니면 입력 핀 선언이 잡는다)
+    pattern: {
+      lines: [new RegExp(String.raw`^${RE_NAME}\s*=\s*Pin\(\s*${RE_PIN}\s*,\s*Pin\.IN\s*\)$`)],
+      fields: ([m]) => (/^tilt/.test(m[1]) && validPins(m[2]) ? { PIN: m[2], VAR: m[1] } : null),
+    },
   },
   actions: [],
   values: [
@@ -115,12 +119,12 @@ export const tilt: DeviceSpec = {
       code: (v) => `${v.VAR}.value() == 1`,
       output: "Boolean",
       order: ORDER.RELATIONAL,
-      pattern: { kind: "expr", regex: /^(\w+)\.value\(\) == 1$/, objPart: "VAR", objKinds: ["pin"] },
+      pattern: { kind: "expr", regex: /^(\w+)\.value\(\) == 1$/, objPart: "VAR" },
     },
   ],
 };
 
-/** 인체감지 센서 (dev_pir_setup). 준비 줄은 esp_pin_setup, `x.value() == 1` 은 틸트 선언이 먼저 잡는다 */
+/** 인체감지 센서 (dev_pir_setup). 이름이 pir… 이면 자기 준비 블록으로 접힌다(kind pir) */
 export const pir: DeviceSpec = {
   id: "pir", category: "switch", label: "인체감지(PIR)", toolboxOrder: 33, colour: "#591ec4",
   setup: {
@@ -129,9 +133,13 @@ export const pir: DeviceSpec = {
     parts: [pinNo("PIN", 14, "in"), { kind: "var", name: "VAR", default: "pir" }],
     tooltip: "pir = Pin(14, Pin.IN) — 사람이 움직이면 1",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.IN)`],
-    kind: "pin",
+    kind: "pir",
     provides: (v) => [v.VAR],
-    pattern: NO_SETUP_PATTERN,
+    // 이름이 pir 으로 시작하는 `x = Pin(n, Pin.IN)` 만 이 장치로 접는다 (아니면 입력 핀 선언이 잡는다)
+    pattern: {
+      lines: [new RegExp(String.raw`^${RE_NAME}\s*=\s*Pin\(\s*${RE_PIN}\s*,\s*Pin\.IN\s*\)$`)],
+      fields: ([m]) => (/^pir/.test(m[1]) && validPins(m[2]) ? { PIN: m[2], VAR: m[1] } : null),
+    },
   },
   actions: [],
   values: [
@@ -142,7 +150,7 @@ export const pir: DeviceSpec = {
       code: (v) => `${v.VAR}.value() == 1`,
       output: "Boolean",
       order: ORDER.RELATIONAL,
-      pattern: { kind: "expr", regex: /^(\w+)\.value\(\) == 1$/, objPart: "VAR", objKinds: ["pin"] },
+      pattern: { kind: "expr", regex: /^(\w+)\.value\(\) == 1$/, objPart: "VAR" },
     },
   ],
 };

@@ -1,6 +1,9 @@
 import type { DeviceSpec } from "../types";
 import { adcLines, adcPatternLines, NO_SETUP_PATTERN, ORDER, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
 
+/** 핀 켜기/끄기·값 블록이 받는 변수 종류: 핀, 초음파(trig/echo), 틸트, PIR */
+const PIN_KINDS = ["pin", "ultrasonic", "tilt", "pir"];
+
 /** 핀 출력·입력 (esp_pin_setup). 초음파 trig/echo 도 핀이므로 켜기·끄기·값 블록은 그 변수에도 맞는다 */
 export const pinOut: DeviceSpec = {
   id: "pin_out", category: "pin", label: "핀", toolboxOrder: 1, colour: "#00b6b1",
@@ -42,7 +45,7 @@ export const pinOut: DeviceSpec = {
       parts: [{ kind: "var", name: "VAR", default: "led" }, { kind: "dropdown", name: "VALUE", options: [["켜기", "1"], ["끄기", "0"]] }],
       tooltip: "led.value(1) 은 켜기, led.value(0) 은 끄기",
       code: (v) => `${v.VAR}.value(${v.VALUE})`,
-      pattern: { kind: "method", name: "value", args: [["0", "1"]], objPart: "VAR", objKinds: ["pin", "ultrasonic"] },
+      pattern: { kind: "method", name: "value", args: [["0", "1"]], objPart: "VAR", objKinds: PIN_KINDS },
     },
   ],
   values: [
@@ -52,7 +55,7 @@ export const pinOut: DeviceSpec = {
       tooltip: "echo.value() — 입력 핀의 값(0 또는 1)",
       code: (v) => `${v.VAR}.value()`,
       output: ["Number", "Boolean"], // while not echo.value(): 처럼 조건에도 쓴다
-      pattern: { kind: "method", name: "value", args: [], objPart: "VAR", objKinds: ["pin", "ultrasonic"] },
+      pattern: { kind: "method", name: "value", args: [], objPart: "VAR", objKinds: PIN_KINDS },
     },
   ],
 };

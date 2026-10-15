@@ -38,7 +38,7 @@ export const deviceBeforeSetup: Rule = (ctx) => {
       } else if (!kinds.includes(found.setup.kind)) {
         out.push(issueAt(ctx, b, "device-before-setup", "error",
           `${name} 는 ${josa(found.device.label, ["이에요", "예요"])}. ${expected} 블록으로 준비해 주세요`,
-          `TypeError: '${name}' is a ${found.setup.kind} device, not ${kinds.join(" or ")}`));
+          `TypeError: '${name}' is a ${found.setup.kind} device, not ${kinds.length > 1 ? kinds.slice(0, -1).join(", ") + " or " + kinds[kinds.length - 1] : kinds[0]}`));
       }
       continue;
     }
