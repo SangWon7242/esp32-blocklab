@@ -15,7 +15,7 @@ export const IMPORT_RULES: ImportRule[] = [
 ];
 
 /** 생성기가 `Name(` 이 보이면 `from machine import …` 로 가져오는 이름 (이 순서로) */
-export const MACHINE_NAMES = ["Pin", "PWM", "SoftI2C", "ADC"];
+export const MACHINE_NAMES = ["Pin", "PWM", "SoftI2C", "ADC", "TouchPad"];
 
 /**
  * 생성기가 똑같이 다시 만드는 import 줄인지 (파서가 code_stmt 로 남기지 않고 지워도 되는지).

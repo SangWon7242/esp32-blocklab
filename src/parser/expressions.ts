@@ -138,6 +138,7 @@ const OUTPUT_TYPES: Record<string, readonly string[]> = {
   logic_compare: ["Boolean"], logic_operation: ["Boolean"], logic_negate: ["Boolean"], logic_boolean: ["Boolean"],
   judge_between: ["Boolean"], judge_contains: ["Boolean"],
   calc_random: ["Number"], calc_round: ["Number"], calc_minmax: ["Number"], calc_len: ["Number"], calc_ticks: ["Number"],
+  calc_elapsed: ["Number"], calc_map: ["Number"],
   list_index: ["Number"],
   // calc_item 은 output null (리스트·글자의 항목은 어떤 값이든) 이라 여기에 넣지 않는다
 };
@@ -203,6 +204,8 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
       // 학생이 적은 괄호는 괄호 블록으로 남긴다 (안이 code_expr 여도 감싸서 글자가 그대로). 튜플 (1, 2)·빈 () 는 코드로
       const kids = children(node);
       if (kids.length !== 3 || kids[0].name !== "(" || kids[2].name !== ")") return fallback(node, ctx);
+      const map = mapParts(kids[1], ctx);
+      if (map) return map;
       return block("calc_paren", undefined, { X: convertExpr(kids[1], ctx) });
     }
     case "UnaryExpression": {
@@ -268,6 +271,10 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
         return block("calc_round", { OP: ROUND_MATH[member.prop] }, { X: convertExpr(args[0], ctx, "Number") });
       }
       if (member?.obj === "time" && member.prop === "ticks_ms" && args.length === 0) return block("calc_ticks");
+      // time.ticks_diff(time.ticks_ms(), 시작) → 지난 시간. 첫 인자가 바로 그 꼴일 때만 (ticks_diff(stop, start) 는 코드로)
+      if (member?.obj === "time" && member.prop === "ticks_diff" && args.length === 2 && ctx.src.slice(args[0]) === "time.ticks_ms()") {
+        return block("calc_elapsed", undefined, { X: convertExpr(args[1], ctx, "Number") });
+      }
       // items.index(3) → 리스트에서 위치
       if (member && member.prop === "index" && args.length === 1 && isListVariable(member.obj, ctx)) {
         return block("list_index", { VAR: { id: ctx.varId(member.obj) } }, { V: convertExpr(args[0], ctx) });
@@ -293,6 +300,44 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
     default:
       return fallback(node, ctx);
   }
+}
+
+/** 이항식 노드의 (왼쪽, 연산자 글, 오른쪽). 이항식이 아니면 null */
+function binaryParts(node: SyntaxNode, ctx: ParseContext): [SyntaxNode, string, SyntaxNode] | null {
+  if (node.name !== "BinaryExpression") return null;
+  const kids = children(node);
+  return kids.length === 3 ? [kids[0], ctx.src.slice(kids[1]), kids[2]] : null;
+}
+
+/** (L - R) 괄호 식이면 [L, R] */
+function parenMinus(node: SyntaxNode, ctx: ParseContext): [SyntaxNode, SyntaxNode] | null {
+  if (node.name !== "ParenthesizedExpression") return null;
+  const kids = children(node);
+  if (kids.length !== 3 || kids[0].name !== "(" || kids[2].name !== ")") return null;
+  const minus = binaryParts(kids[1], ctx);
+  return minus && minus[1] === "-" ? [minus[0], minus[2]] : null;
+}
+
+/**
+ * 범위 바꾸기 calc_map: 괄호 안이 (X - A) * (D - C) // (B - A) + C 이고 두 A·두 C 의 글자가 같으면 그 블록.
+ * 생성기가 쓰는 꼴 그대로만 (괄호를 덜 치거나 순서가 다르면 계산 블록들로 읽는다).
+ */
+function mapParts(inner: SyntaxNode, ctx: ParseContext): BlockJson | null {
+  const plus = binaryParts(inner, ctx);
+  if (!plus || plus[1] !== "+") return null;
+  const div = binaryParts(plus[0], ctx);
+  if (!div || div[1] !== "//") return null;
+  const mul = binaryParts(div[0], ctx);
+  if (!mul || mul[1] !== "*") return null;
+  const [xa, dc, ba] = [parenMinus(mul[0], ctx), parenMinus(mul[2], ctx), parenMinus(div[2], ctx)];
+  if (!xa || !dc || !ba) return null;
+  const c = plus[2];
+  const same = (p: SyntaxNode, q: SyntaxNode) => ctx.src.slice(p) === ctx.src.slice(q);
+  if (!same(xa[1], ba[1]) || !same(dc[1], c)) return null;
+  const parts = convertAllOrNull([xa[0], xa[1], ba[0], c, dc[0]], ctx, "Number");
+  if (!parts) return null;
+  const [X, A, B, C, D] = parts;
+  return block("calc_map", undefined, { X, A, B, C, D });
 }
 
 export function callBlock(type: "procedures_callreturn" | "procedures_callnoreturn", name: string, params: string[], args: SyntaxNode[], ctx: ParseContext): BlockJson {

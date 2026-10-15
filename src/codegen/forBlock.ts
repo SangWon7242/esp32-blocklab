@@ -117,6 +117,17 @@ export function registerForBlocks(gen: Gen): void {
   f["calc_len"] = (block, g) => [`len(${value(block, g as Gen, "X", Order.NONE, '""')})`, Order.FUNCTION_CALL];
   f["calc_item"] = (block, g) => [`${value(block, g as Gen, "X", Order.MEMBER, '""')}[${value(block, g as Gen, "INDEX")}]`, Order.MEMBER];
   f["calc_ticks"] = () => ["time.ticks_ms()", Order.FUNCTION_CALL];
+  f["calc_elapsed"] = (block, g) => [`time.ticks_diff(time.ticks_ms(), ${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
+  // 범위 바꾸기: 바깥 괄호까지 한 덩어리((X - A) * (D - C) // (B - A) + C)로 써서 어디에 끼워도 더 감싸지 않는다(ATOMIC).
+  // 빼기의 왼쪽 칸은 같은 우선순위에 괄호를 치지 않고(order + 1), 오른쪽 칸과 + C 는 덧셈·뺄셈이면 괄호 (calc_arith 와 같은 규칙).
+  // A·C 는 두 번 쓰이지만 같은 칸·같은 우선순위라 글자가 같다 (파서가 두 글자가 같을 때만 이 블록으로 읽는다)
+  f["calc_map"] = (block, g) => {
+    const gen = g as Gen;
+    const left = (name: string) => value(block, gen, name, Order.ADDITIVE + 1);
+    const right = (name: string) => value(block, gen, name, Order.ADDITIVE);
+    const [a, c] = [right("A"), right("C")];
+    return [`((${left("X")} - ${a}) * (${left("D")} - ${c}) // (${left("B")} - ${a}) + ${c})`, Order.ATOMIC];
+  };
 
   f["judge_between"] = (block, g) => {
     const [a, low, high] = relational(block, g as Gen, "A", "LOW", "HIGH");

@@ -133,6 +133,8 @@ describe("계획 6 판단·계산 블록", () => {
       ["calc_len", ["X"], "Number"],
       ["calc_item", ["X", "INDEX"], null],
       ["calc_ticks", [], "Number"],
+      ["calc_elapsed", ["X"], "Number"],
+      ["calc_map", ["X", "A", "B", "C", "D"], "Number"],
     ];
     for (const [type, inputs, output] of spec) {
       const b = w.newBlock(type);
@@ -154,7 +156,7 @@ describe("계획 6 판단·계산 블록", () => {
   it("툴박스 판단·계산 카테고리에 새 블록이 있다", () => {
     const cat = (name: string) => (toolbox as { contents: { name: string; contents?: { type?: string }[] }[] }).contents.find((c) => c.name === name)!.contents!.map((b) => b.type);
     expect(cat("판단")).toEqual(expect.arrayContaining(["judge_between", "judge_contains"]));
-    expect(cat("계산")).toEqual(expect.arrayContaining(["calc_random", "calc_round", "calc_minmax", "calc_len", "calc_item", "calc_ticks"]));
+    expect(cat("계산")).toEqual(expect.arrayContaining(["calc_random", "calc_round", "calc_minmax", "calc_len", "calc_item", "calc_ticks", "calc_elapsed", "calc_map"]));
   });
 });
 

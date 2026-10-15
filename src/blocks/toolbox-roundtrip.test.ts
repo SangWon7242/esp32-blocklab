@@ -76,6 +76,8 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
     case "var_change": return { body: [{ type: "variables_set", fields: { VAR: { name: varName ?? "x" } } }], tops: [] };
     case "list_create":
     case "list_create_from": return { body: [], tops: [] };
+    // 지난 시간 블록은 시작 시각 변수 start 를 읽는다
+    case "calc_elapsed": return { body: [{ type: "variables_set", fields: { VAR: { name: "start" } }, inputs: { VALUE: { block: { type: "calc_ticks" } } } }], tops: [] };
     case "procedures_callnoreturn":
     case "procedures_callreturn": {
       const name = (entry.extraState as { name: string }).name;

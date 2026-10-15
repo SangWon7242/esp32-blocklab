@@ -5,6 +5,8 @@ export const pinNo = (name: string, d: number, dir: PinDir): Part => ({ kind: "p
 
 /** ESP32 에서 ADC 로 읽을 수 있는 GPIO (ADC1: 32~39, ADC2: 0·2·4·12~15·25~27). dir "adc" 핀은 이 중 하나여야 한다 */
 export const ADC_PINS: readonly number[] = [0, 2, 4, 12, 13, 14, 15, 25, 26, 27, 32, 33, 34, 35, 36, 37, 38, 39];
+/** ESP32 내장 터치 패드 핀 (T0~T9 순: 4·0·2·15·13·12·14·27·33·32). dir "touch" 핀은 이 중 하나여야 한다 */
+export const TOUCH_PINS: readonly number[] = [4, 0, 2, 15, 13, 12, 14, 27, 33, 32];
 /** I2C 주소 칸(LCD·RFID)의 글: 16진수 1~2자리 */
 export const I2C_ADDR = /^0x[0-9a-fA-F]{1,2}$/;
 

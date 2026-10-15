@@ -9,7 +9,7 @@ const LOOPS = new Set(["flow_repeat_forever", "controls_whileUntil"]);
  * 블록들 중 쉬어 가는 것이 있는지. 코드 블록은 글에 sleep 이 있으면, 함수 호출은 그 함수 몸통이 쉬어 가면 친다.
  * defs 는 함수 이름 → 정의 블록, seen 은 재귀 호출 막기.
  */
-function sleeps(ctx: LintContext, blocks: FlatBlock[], defs: Map<string, FlatBlock>, seen: Set<string>): boolean {
+export function sleeps(ctx: LintContext, blocks: FlatBlock[], defs: Map<string, FlatBlock>, seen: Set<string>): boolean {
   return blocks.some((x) => {
     if (SLEEPERS.has(x.type)) return true;
     if (x.type === "code_stmt" || x.type === "code_expr") return /\bsleep/.test(String(x.fields.CODE ?? ""));

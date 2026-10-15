@@ -4,8 +4,9 @@ export type DeviceCategory = "pin" | "led" | "switch" | "sensor" | "sound" | "mo
  * 핀의 쓰임 (계획 2B 검사용). out: 출력(LED·릴레이·부저·서보·PWM·모터·7세그먼트·trig),
  * in: 디지털 입력(버튼·틸트·PIR·echo·조이스틱 버튼·IR), adc: 아날로그 입력(ADC_PINS 중 하나여야),
  * bus: 양방향 데이터 선(I2C scl/sda, DHT11 한 선 데이터). 출력·버스 핀은 입력 전용 핀(34~39)을 쓸 수 없다.
+ * touch: 내장 터치 패드 입력(TOUCH_PINS 중 하나여야, 계획 11).
  */
-export type PinDir = "out" | "in" | "adc" | "bus";
+export type PinDir = "out" | "in" | "adc" | "bus" | "touch";
 
 /** 블록 한 칸. 필드(고정 값)와 값 입력(다른 블록이 끼워짐)을 메시지의 %n 순서대로 나열한다 */
 export type Part =
@@ -49,7 +50,7 @@ export type ActionPattern =
   | { kind: "method"; name: string; args: (string[] | null)[]; objPart?: string /* VAR 필드 이름 */; objName?: string /* 고정 이름 */; objKinds?: string[] /* 기본: 자기 장치 kind */ }
   | { kind: "call"; name: string; args: (string[] | null)[] }
   | { kind: "lines"; lines: RegExp[]; values: (m: RegExpExecArray[]) => Values | null; objPart?: string; objKinds?: string[] }
-  | { kind: "expr"; regex: RegExp; objPart?: string; objKinds?: string[]; values?: (m: RegExpExecArray) => Values };
+  | { kind: "expr"; regex: RegExp; objPart?: string; objKinds?: string[]; values?: (m: RegExpExecArray) => Values | null };
 
 export type HelperSpec = { name: string; params: string; body: string[] /* 2칸 단위 들여쓰기 */ };
 

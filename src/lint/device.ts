@@ -1,6 +1,6 @@
 import { DEVICES, defaultValues } from "@/devices/registry";
 import { HELPER_MARK } from "@/devices/specs/common";
-import type { ActionSpec, DeviceSpec, Part, SetupSpec, ValueSpec, Values } from "@/devices/types";
+import type { ActionSpec, DeviceSpec, Part, PinDir, SetupSpec, ValueSpec, Values } from "@/devices/types";
 import type { FlatBlock, LintContext } from "./types";
 
 /** 블록의 칸 값 (변수 칸은 변수 이름으로, 빠진 칸은 기본값) — 레지스트리 provides·lines 가 받는 꼴 */
@@ -16,7 +16,7 @@ export function blockValues(ctx: LintContext, b: FlatBlock, parts: Part[]): Valu
 }
 
 /** 준비 블록의 핀 칸들: 칸 이름, 번호, 쓰임(out·in·adc·bus) */
-export function setupPins(spec: SetupSpec, values: Values): { part: string; pin: number; dir: "out" | "in" | "adc" | "bus" }[] {
+export function setupPins(spec: SetupSpec, values: Values): { part: string; pin: number; dir: PinDir }[] {
   return spec.parts.flatMap((p) => {
     if (p.kind !== "pin") return [];
     const dir = p.dir === "mode" ? (values[p.modeField ?? "MODE"] === "IN" ? "in" : "out") : p.dir;

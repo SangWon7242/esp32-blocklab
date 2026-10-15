@@ -1,5 +1,8 @@
 import type { DeviceSpec } from "../types";
-import { NO_SETUP_PATTERN, ORDER, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
+import { factor, isSingleOperand, NO_SETUP_PATTERN, ORDER, pinNo, RE_NAME, RE_PIN, unfactor, validPins } from "./common";
+
+/** 인터럽트 함수 이름 칸: 파이썬 이름 꼴 */
+const HANDLER_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 /** 버튼 (dev_button_setup). 풀업 입력 핀 줄을 dev_pin_in_setup 보다 먼저 잡는다 */
 export const button: DeviceSpec = {
@@ -17,7 +20,20 @@ export const button: DeviceSpec = {
       fields: ([m]) => (validPins(m[2]) ? { PIN: m[2], VAR: m[1] } : null),
     },
   },
-  actions: [],
+  actions: [
+    {
+      blockType: "dev_button_irq", message: "버튼 %1 이 눌렸을 때 함수 %2 실행하기",
+      parts: [{ kind: "var", name: "VAR", default: "button" }, { kind: "text", name: "FUNC", default: "on_press", validate: HANDLER_NAME }],
+      tooltip: "button.irq(trigger=Pin.IRQ_FALLING, handler=on_press) — 버튼을 누르는 순간(1 → 0) 함수를 실행합니다. 함수는 매개변수 하나(pin)를 받아야 해요.",
+      code: (v) => `${v.VAR}.irq(trigger=Pin.IRQ_FALLING, handler=${v.FUNC})`,
+      // 이름 붙인 인자라 method 패턴(위치 인자만)으로는 못 잡는다. 생성기가 쓰는 글자 그대로의 한 줄만 블록으로
+      pattern: {
+        kind: "lines", objPart: "VAR", objKinds: ["pin"],
+        lines: [/^(\w+)\.irq\(trigger=Pin\.IRQ_FALLING, handler=([A-Za-z_]\w*)\)$/],
+        values: ([m]) => ({ VAR: m[1], FUNC: m[2] }),
+      },
+    },
+  ],
   values: [
     {
       blockType: "dev_button_pressed", message: "%1 이(가) 눌렸는가",
@@ -31,9 +47,55 @@ export const button: DeviceSpec = {
   ],
 };
 
+/**
+ * 내장 터치 패드 (dev_touch_setup). 핀에 손가락을 대면 read() 값이 작아진다 (손을 떼면 수백, 대면 100 안팎).
+ * 터치 핀은 T0~T9: 4·0·2·15·13·12·14·27·33·32 (검사 pin-rule 이 다른 핀에 주의를 준다).
+ */
+export const touch: DeviceSpec = {
+  id: "touch", category: "switch", label: "터치 패드", toolboxOrder: 31, colour: "#9340de",
+  setup: {
+    blockType: "dev_touch_setup",
+    message: "터치 핀 %1 을 %2 이름으로 준비하기",
+    parts: [pinNo("PIN", 4, "touch"), { kind: "var", name: "VAR", default: "touch" }],
+    tooltip: "touch = TouchPad(Pin(4)) — 손가락을 대면 값이 작아집니다.",
+    lines: (v) => [`${v.VAR} = TouchPad(Pin(${v.PIN}))`],
+    kind: "touch",
+    provides: (v) => [v.VAR],
+    pattern: {
+      lines: [new RegExp(String.raw`^${RE_NAME}\s*=\s*TouchPad\(\s*Pin\(\s*${RE_PIN}\s*\)\s*\)$`)],
+      fields: ([m]) => (validPins(m[2]) ? { PIN: m[2], VAR: m[1] } : null),
+    },
+  },
+  actions: [],
+  values: [
+    {
+      blockType: "dev_touch_value", message: "%1 터치 값",
+      parts: [{ kind: "var", name: "VAR", default: "touch" }],
+      tooltip: "touch.read() — 손을 떼면 큰 값, 손가락을 대면 작은 값",
+      code: (v) => `${v.VAR}.read()`,
+      output: "Number",
+      pattern: { kind: "method", name: "read", args: [], objPart: "VAR" },
+    },
+    {
+      blockType: "dev_touch_pressed", message: "%1 을 만졌는가 (기준 %2)",
+      parts: [{ kind: "var", name: "VAR", default: "touch" }, { kind: "value", name: "THRESHOLD", check: "Number", shadow: 300 }],
+      tooltip: "touch.read() < 300 — 값이 기준보다 작으면 만진 것입니다.",
+      code: (v) => `${v.VAR}.read() < ${factor(v.THRESHOLD)}`,
+      output: "Boolean",
+      order: ORDER.RELATIONAL,
+      // 기준 칸은 비교보다 단단히 묶는 피연산자 하나일 때만 (`touch.read() < 300 and ok` 의 `300 and ok` 는 아니다)
+      pattern: {
+        kind: "expr", regex: /^(\w+)\.read\(\) < (.+)$/, objPart: "VAR",
+        values: (m) => (isSingleOperand(m[2]) ? { THRESHOLD: unfactor(m[2]) } : null),
+      },
+      range: { THRESHOLD: { min: 0, max: 1023, label: { ko: "기준", en: "threshold" } } },
+    },
+  ],
+};
+
 /** 틸트 스위치 (dev_tilt_setup). 준비 줄은 esp_pin_setup 이 접는다 */
 export const tilt: DeviceSpec = {
-  id: "tilt", category: "switch", label: "틸트 스위치", toolboxOrder: 31, colour: "#9340de",
+  id: "tilt", category: "switch", label: "틸트 스위치", toolboxOrder: 32, colour: "#7c20c2",
   setup: {
     blockType: "dev_tilt_setup",
     message: "틸트 스위치를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -60,7 +122,7 @@ export const tilt: DeviceSpec = {
 
 /** 인체감지 센서 (dev_pir_setup). 준비 줄은 esp_pin_setup, `x.value() == 1` 은 틸트 선언이 먼저 잡는다 */
 export const pir: DeviceSpec = {
-  id: "pir", category: "switch", label: "인체감지(PIR)", toolboxOrder: 32, colour: "#7c20c2",
+  id: "pir", category: "switch", label: "인체감지(PIR)", toolboxOrder: 33, colour: "#591ec4",
   setup: {
     blockType: "dev_pir_setup",
     message: "인체감지 센서를 핀 %1 에 준비하고 %2 이름 붙이기",
@@ -87,7 +149,7 @@ export const pir: DeviceSpec = {
 
 /** 조이스틱 (dev_joystick_setup). 이름 rocker_x/rocker_y/button_z 고정. adc·버튼 선언보다 앞에 둔다 */
 export const joystick: DeviceSpec = {
-  id: "joystick", category: "switch", label: "조이스틱", toolboxOrder: 33, colour: "#591ec4",
+  id: "joystick", category: "switch", label: "조이스틱", toolboxOrder: 34, colour: "#8864ff",
   setup: {
     blockType: "dev_joystick_setup",
     message: "조이스틱 준비하기 (X 핀 %1, Y 핀 %2, 버튼 핀 %3)",

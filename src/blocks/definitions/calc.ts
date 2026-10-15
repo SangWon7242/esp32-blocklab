@@ -119,4 +119,28 @@ export const calcBlocks: Record<string, unknown>[] = [
     style: "math_blocks",
     tooltip: "time.ticks_ms(). 보드가 켜진 뒤 지난 밀리초입니다.",
   },
+  {
+    type: "calc_elapsed",
+    message0: "%1 부터 지난 시간 (ms)",
+    args0: [{ type: "input_value", name: "X", check: "Number" }],
+    inputsInline: true,
+    output: "Number",
+    style: "math_blocks",
+    tooltip: "time.ticks_diff(time.ticks_ms(), 시작). 시작 시각(지금까지 지난 시간 값)부터 지금까지 지난 밀리초입니다.",
+  },
+  {
+    type: "calc_map",
+    message0: "%1 을(를) %2~%3 에서 %4~%5 로 바꾸기",
+    args0: [
+      { type: "input_value", name: "X", check: "Number" },
+      { type: "input_value", name: "A", check: "Number" },
+      { type: "input_value", name: "B", check: "Number" },
+      { type: "input_value", name: "C", check: "Number" },
+      { type: "input_value", name: "D", check: "Number" },
+    ],
+    inputsInline: true,
+    output: "Number",
+    style: "math_blocks",
+    tooltip: "((값 - A) * (D - C) // (B - A) + C). A~B 범위의 값을 같은 비율로 C~D 범위의 정수로 바꿉니다 (아두이노 map 과 같아요).",
+  },
 ];

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { defaultValues, DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupSpecs } from "./registry";
-import { ADC_PINS } from "./specs/common";
+import { ADC_PINS, TOUCH_PINS } from "./specs/common";
 import { setupLinesAt } from "@/parser/devices";
 import { deviceBlockDefinitions, deviceToolboxCategories } from "./toBlocks";
 import { collectImports } from "@/codegen/imports";
@@ -52,7 +52,7 @@ describe("툴박스 순서 (toolboxOrder)", () => {
     expect(labels).toEqual({
       "핀": ["핀", "입력 핀", "PWM 핀", "아날로그 핀", "출력"],
       "LED": ["핀", "LED", "밝기 LED", "RGB LED", "흐르는 LED"],
-      "버튼·스위치": ["버튼", "틸트 스위치", "인체감지(PIR)", "조이스틱"],
+      "버튼·스위치": ["버튼", "터치 패드", "틸트 스위치", "인체감지(PIR)", "조이스틱"],
       "센서": ["조도 센서", "가변저항", "소리 센서", "불꽃 센서", "온도(서미스터)", "온도(LM35)", "초음파 센서", "온습도(DHT11)"],
       "소리": ["능동 부저", "수동 부저(음)"],
       "모터": ["서보 모터", "DC 모터", "릴레이"],
@@ -97,7 +97,8 @@ describe("계획 2B 검사용 메타데이터", () => {
   it("모든 핀 칸에 쓰임(dir)이 있고, mode 는 OUT/IN 드롭다운을 가리키며, adc 핀 기본값은 ADC 핀이다", () => {
     for (const d of DEVICES) for (const s of specsOf(d)) for (const p of s.parts) {
       if (p.kind !== "pin") continue;
-      expect(["out", "in", "adc", "bus", "mode"], `${s.blockType}.${p.name}`).toContain(p.dir);
+      expect(["out", "in", "adc", "bus", "touch", "mode"], `${s.blockType}.${p.name}`).toContain(p.dir);
+      if (p.dir === "touch") expect(TOUCH_PINS, `${s.blockType}.${p.name}`).toContain(p.default);
       if (p.dir === "mode") {
         const mode = s.parts.find((q) => q.name === p.modeField);
         expect(mode?.kind === "dropdown" ? mode.options.map(([, v]) => v).sort() : null, s.blockType).toEqual(["IN", "OUT"]);

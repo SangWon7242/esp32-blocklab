@@ -246,6 +246,28 @@ export const coreContent: Record<string, BlockContent> = {
       "보드를 며칠 동안 켜 두면 값이 다시 작은 수로 돌아가요. 몇 분 정도 재는 데는 그냥 빼도 괜찮아요.",
     ],
   },
+  calc_elapsed: {
+    concept: "시작 시각부터 지금까지 지난 시간을 밀리초로 알려 줘요. 시작할 때 '지금까지 지난 시간' 값을 변수에 넣어 두고 그 변수를 이 블록에 끼우면 됩니다. 코드로는 time.ticks_diff(time.ticks_ms(), start) 예요.",
+    example: {
+      title: "버튼을 누를 때까지 걸린 시간 재기",
+      code: "button = Pin(14, Pin.IN, Pin.PULL_UP)\nstart = time.ticks_ms()\nwhile button.value() == 1:\n    time.sleep_ms(1)\nprint(time.ticks_diff(time.ticks_ms(), start))",
+    },
+    tips: [
+      "1000 이 1초예요. 반응 속도 게임이나 '3초 동안 누르기' 같은 시간 재기에 써요.",
+      "그냥 빼도 되지만, ticks_diff 는 보드를 오래 켜 두어 시간 값이 다시 작은 수로 돌아가도 바르게 계산해요.",
+    ],
+  },
+  calc_map: {
+    concept: "한 범위의 값을 같은 비율로 다른 범위의 값으로 바꿔요. 0~4095 인 가변저항 값을 0~100 으로 바꾸면 퍼센트가 되고, 0~180 으로 바꾸면 서보 각도가 됩니다. 아두이노의 map() 과 같은 일을 하고, 결과는 정수예요.",
+    example: {
+      title: "가변저항 값을 0~100 으로 바꾸기",
+      code: "knob = ADC(Pin(39))\nknob.atten(ADC.ATTN_11DB)\nknob.width(ADC.WIDTH_12BIT)\nwhile True:\n    percent = ((knob.read() - 0) * (100 - 0) // (4095 - 0) + 0)\n    print(percent)\n    time.sleep(0.2)",
+    },
+    tips: [
+      "코드로는 ((값 - A) * (D - C) // (B - A) + C) 로 바뀌어요. A~B 는 원래 범위, C~D 는 바꿀 범위예요.",
+      "C 를 D 보다 크게 적으면 거꾸로 바뀌어요. 0~4095 를 180~0 으로 바꾸면 손잡이를 돌릴 때 서보가 반대로 돌아요.",
+    ],
+  },
 
   // 변수
   variables_set: {
