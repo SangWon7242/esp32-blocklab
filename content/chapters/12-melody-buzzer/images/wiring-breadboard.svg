@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mbw-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mbw-title">멜로디 버저 브레드보드 배선도: 부저의 + 다리는 16번 줄, − 다리는 19번 줄에 꽂는다. 16번 줄에서 노란 선으로 ESP32 15번 핀, 19번 줄에서 검은 선으로 위쪽 − 줄, − 줄은 검은 선으로 ESP32 GND 에 연결. 1단계에는 능동 부저(검은 스티커), 2단계부터는 같은 자리에 수동 부저(초록 판)를 꽂는다</title>
+  <rect x="200" y="104" width="394" height="252" rx="8" fill="var(--muted)"/>
+  <rect x="206" y="224" width="382" height="8" rx="3" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M226 111 H578" stroke="#e03131" stroke-width="2"/>
+  <path d="M226 141 H578" stroke="#1971c2" stroke-width="2"/>
+  <path d="M226 315 H578" stroke="#1971c2" stroke-width="2"/>
+  <path d="M226 345 H578" stroke="#e03131" stroke-width="2"/>
+  <path d="M228 168h0 M240 168h0 M252 168h0 M264 168h0 M276 168h0 M288 168h0 M300 168h0 M312 168h0 M324 168h0 M336 168h0 M348 168h0 M360 168h0 M372 168h0 M384 168h0 M396 168h0 M408 168h0 M420 168h0 M432 168h0 M444 168h0 M456 168h0 M468 168h0 M480 168h0 M492 168h0 M504 168h0 M516 168h0 M528 168h0 M540 168h0 M552 168h0 M564 168h0 M576 168h0 M228 180h0 M240 180h0 M252 180h0 M264 180h0 M276 180h0 M288 180h0 M300 180h0 M312 180h0 M324 180h0 M336 180h0 M348 180h0 M360 180h0 M372 180h0 M384 180h0 M396 180h0 M408 180h0 M420 180h0 M432 180h0 M444 180h0 M456 180h0 M468 180h0 M480 180h0 M492 180h0 M504 180h0 M516 180h0 M528 180h0 M540 180h0 M552 180h0 M564 180h0 M576 180h0 M228 192h0 M240 192h0 M252 192h0 M264 192h0 M276 192h0 M288 192h0 M300 192h0 M312 192h0 M324 192h0 M336 192h0 M348 192h0 M360 192h0 M372 192h0 M384 192h0 M396 192h0 M408 192h0 M420 192h0 M432 192h0 M444 192h0 M456 192h0 M468 192h0 M480 192h0 M492 192h0 M504 192h0 M516 192h0 M528 192h0 M540 192h0 M552 192h0 M564 192h0 M576 192h0 M228 204h0 M240 204h0 M252 204h0 M264 204h0 M276 204h0 M288 204h0 M300 204h0 M312 204h0 M324 204h0 M336 204h0 M348 204h0 M360 204h0 M372 204h0 M384 204h0 M396 204h0 M408 204h0 M420 204h0 M432 204h0 M444 204h0 M456 204h0 M468 204h0 M480 204h0 M492 204h0 M504 204h0 M516 204h0 M528 204h0 M540 204h0 M552 204h0 M564 204h0 M576 204h0 M228 216h0 M240 216h0 M252 216h0 M264 216h0 M276 216h0 M288 216h0 M300 216h0 M312 216h0 M324 216h0 M336 216h0 M348 216h0 M360 216h0 M372 216h0 M384 216h0 M396 216h0 M408 216h0 M420 216h0 M432 216h0 M444 216h0 M456 216h0 M468 216h0 M480 216h0 M492 216h0 M504 216h0 M516 216h0 M528 216h0 M540 216h0 M552 216h0 M564 216h0 M576 216h0 M228 240h0 M240 240h0 M252 240h0 M264 240h0 M276 240h0 M288 240h0 M300 240h0 M312 240h0 M324 240h0 M336 240h0 M348 240h0 M360 240h0 M372 240h0 M384 240h0 M396 240h0 M408 240h0 M420 240h0 M432 240h0 M444 240h0 M456 240h0 M468 240h0 M480 240h0 M492 240h0 M504 240h0 M516 240h0 M528 240h0 M540 240h0 M552 240h0 M564 240h0 M576 240h0 M228 252h0 M240 252h0 M252 252h0 M264 252h0 M276 252h0 M288 252h0 M300 252h0 M312 252h0 M324 252h0 M336 252h0 M348 252h0 M360 252h0 M372 252h0 M384 252h0 M396 252h0 M408 252h0 M420 252h0 M432 252h0 M444 252h0 M456 252h0 M468 252h0 M480 252h0 M492 252h0 M504 252h0 M516 252h0 M528 252h0 M540 252h0 M552 252h0 M564 252h0 M576 252h0 M228 264h0 M240 264h0 M252 264h0 M264 264h0 M276 264h0 M288 264h0 M300 264h0 M312 264h0 M324 264h0 M336 264h0 M348 264h0 M360 264h0 M372 264h0 M384 264h0 M396 264h0 M408 264h0 M420 264h0 M432 264h0 M444 264h0 M456 264h0 M468 264h0 M480 264h0 M492 264h0 M504 264h0 M516 264h0 M528 264h0 M540 264h0 M552 264h0 M564 264h0 M576 264h0 M228 276h0 M240 276h0 M252 276h0 M264 276h0 M276 276h0 M288 276h0 M300 276h0 M312 276h0 M324 276h0 M336 276h0 M348 276h0 M360 276h0 M372 276h0 M384 276h0 M396 276h0 M408 276h0 M420 276h0 M432 276h0 M444 276h0 M456 276h0 M468 276h0 M480 276h0 M492 276h0 M504 276h0 M516 276h0 M528 276h0 M540 276h0 M552 276h0 M564 276h0 M576 276h0 M228 288h0 M240 288h0 M252 288h0 M264 288h0 M276 288h0 M288 288h0 M300 288h0 M312 288h0 M324 288h0 M336 288h0 M348 288h0 M360 288h0 M372 288h0 M384 288h0 M396 288h0 M408 288h0 M420 288h0 M432 288h0 M444 288h0 M456 288h0 M468 288h0 M480 288h0 M492 288h0 M504 288h0 M516 288h0 M528 288h0 M540 288h0 M552 288h0 M564 288h0 M576 288h0 M234.0 120h0 M246.0 120h0 M258.0 120h0 M270.0 120h0 M282.0 120h0 M306.0 120h0 M318.0 120h0 M330.0 120h0 M342.0 120h0 M354.0 120h0 M378.0 120h0 M390.0 120h0 M402.0 120h0 M414.0 120h0 M426.0 120h0 M450.0 120h0 M462.0 120h0 M474.0 120h0 M486.0 120h0 M498.0 120h0 M522.0 120h0 M534.0 120h0 M546.0 120h0 M558.0 120h0 M570.0 120h0 M234.0 132h0 M246.0 132h0 M258.0 132h0 M270.0 132h0 M282.0 132h0 M306.0 132h0 M318.0 132h0 M330.0 132h0 M342.0 132h0 M354.0 132h0 M378.0 132h0 M390.0 132h0 M402.0 132h0 M414.0 132h0 M426.0 132h0 M450.0 132h0 M462.0 132h0 M474.0 132h0 M486.0 132h0 M498.0 132h0 M522.0 132h0 M534.0 132h0 M546.0 132h0 M558.0 132h0 M570.0 132h0 M234.0 324h0 M246.0 324h0 M258.0 324h0 M270.0 324h0 M282.0 324h0 M306.0 324h0 M318.0 324h0 M330.0 324h0 M342.0 324h0 M354.0 324h0 M378.0 324h0 M390.0 324h0 M402.0 324h0 M414.0 324h0 M426.0 324h0 M450.0 324h0 M462.0 324h0 M474.0 324h0 M486.0 324h0 M498.0 324h0 M522.0 324h0 M534.0 324h0 M546.0 324h0 M558.0 324h0 M570.0 324h0 M234.0 336h0 M246.0 336h0 M258.0 336h0 M270.0 336h0 M282.0 336h0 M306.0 336h0 M318.0 336h0 M330.0 336h0 M342.0 336h0 M354.0 336h0 M378.0 336h0 M390.0 336h0 M402.0 336h0 M414.0 336h0 M426.0 336h0 M450.0 336h0 M462.0 336h0 M474.0 336h0 M486.0 336h0 M498.0 336h0 M522.0 336h0 M534.0 336h0 M546.0 336h0 M558.0 336h0 M570.0 336h0" stroke-width="4.5" stroke-opacity="0.38"/>
+  <g fill="currentColor" stroke="none" font-size="12" text-anchor="middle">
+  <text x="213" y="172" fill-opacity="0.6">a</text>
+  <text x="585" y="172" fill-opacity="0.6">a</text>
+  <text x="213" y="184" fill-opacity="0.6">b</text>
+  <text x="585" y="184" fill-opacity="0.6">b</text>
+  <text x="213" y="196" fill-opacity="0.6">c</text>
+  <text x="585" y="196" fill-opacity="0.6">c</text>
+  <text x="213" y="208" fill-opacity="0.6">d</text>
+  <text x="585" y="208" fill-opacity="0.6">d</text>
+  <text x="213" y="220" fill-opacity="0.6">e</text>
+  <text x="585" y="220" fill-opacity="0.6">e</text>
+  <text x="213" y="244" fill-opacity="0.6">f</text>
+  <text x="585" y="244" fill-opacity="0.6">f</text>
+  <text x="213" y="256" fill-opacity="0.6">g</text>
+  <text x="585" y="256" fill-opacity="0.6">g</text>
+  <text x="213" y="268" fill-opacity="0.6">h</text>
+  <text x="585" y="268" fill-opacity="0.6">h</text>
+  <text x="213" y="280" fill-opacity="0.6">i</text>
+  <text x="585" y="280" fill-opacity="0.6">i</text>
+  <text x="213" y="292" fill-opacity="0.6">j</text>
+  <text x="585" y="292" fill-opacity="0.6">j</text>
+  <text x="228" y="157" fill-opacity="0.6">1</text>
+  <text x="228" y="309" fill-opacity="0.6">1</text>
+  <text x="276" y="157" fill-opacity="0.6">5</text>
+  <text x="276" y="309" fill-opacity="0.6">5</text>
+  <text x="336" y="157" fill-opacity="0.6">10</text>
+  <text x="336" y="309" fill-opacity="0.6">10</text>
+  <text x="396" y="157" fill-opacity="0.6">15</text>
+  <text x="396" y="309" fill-opacity="0.6">15</text>
+  <text x="456" y="157" fill-opacity="0.6">20</text>
+  <text x="456" y="309" fill-opacity="0.6">20</text>
+  <text x="516" y="157" fill-opacity="0.6">25</text>
+  <text x="516" y="309" fill-opacity="0.6">25</text>
+  <text x="576" y="157" fill-opacity="0.6">30</text>
+  <text x="576" y="309" fill-opacity="0.6">30</text>
+  </g>
+  <g stroke="none" font-size="14" font-weight="700" text-anchor="middle">
+  <text x="213" y="125" fill="#e03131">+</text>
+  <text x="585" y="125" fill="#e03131">+</text>
+  <text x="213" y="137" fill="#1971c2">−</text>
+  <text x="585" y="137" fill="#1971c2">−</text>
+  <text x="213" y="329" fill="#1971c2">−</text>
+  <text x="585" y="329" fill="#1971c2">−</text>
+  <text x="213" y="341" fill="#e03131">+</text>
+  <text x="585" y="341" fill="#e03131">+</text>
+  </g>
+  <rect x="40" y="30" width="120" height="316" rx="10" fill="var(--card)"/>
+  <rect x="58" y="42" width="74" height="74" rx="4" fill="var(--muted)"/>
+  <path d="M66 54 h10 v-6 h10 v6 h10 v-6 h10 v6 h10" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="95.0" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <rect x="78.0" y="340" width="34" height="16" rx="3" fill="var(--muted)"/>
+  <text x="95.0" y="334" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">USB</text>
+  <path d="M50 120h0 M150 120h0 M50 132h0 M50 144h0 M150 144h0 M50 156h0 M150 156h0 M50 168h0 M150 168h0 M50 180h0 M150 180h0 M50 192h0 M150 192h0 M50 204h0 M150 204h0 M50 216h0 M150 216h0 M50 228h0 M150 228h0 M50 240h0 M150 240h0 M50 252h0 M150 252h0 M50 264h0 M50 276h0 M150 276h0 M50 288h0 M150 288h0 M50 300h0 M150 300h0 M50 312h0 M150 312h0 M50 324h0 M150 324h0 M50 336h0 M150 336h0" stroke-width="5" stroke-opacity="0.3"/>
+  <circle cx="150" cy="132" r="4" fill="#1e1e1e" stroke-width="1.5"/>
+  <text x="141" y="136.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">GND</text>
+  <circle cx="150" cy="264" r="4" fill="#f59f00" stroke-width="1.5"/>
+  <text x="141" y="268.5" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">15</text>
+  <rect x="402.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="438.5" y="162" width="11" height="60" rx="5.5" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <path d="M408 72 V168 M444 72 V168" stroke-width="2.5"/>
+  <circle cx="426.0" cy="52" r="30" fill="#1e1e1e"/>
+  <circle cx="426.0" cy="52" r="18.6" stroke="#ffffff" stroke-opacity="0.25" stroke-width="1.5"/>
+  <circle cx="426.0" cy="52" r="4.8" fill="var(--card)" stroke="none"/>
+  <text x="409.5" y="44.5" font-size="15" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">+</text>
+  <circle cx="408" cy="168" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="444" cy="168" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M408 216 L408 264 L150 264" stroke-width="6"/>
+  <path d="M408 216 L408 264 L150 264" stroke="#f59f00" stroke-width="3.5"/>
+  <rect x="404.5" y="212.5" width="7" height="7" rx="1.5" fill="#f59f00" stroke-width="1.5"/>
+  <path d="M444 192 L486.0 132" stroke-width="6"/>
+  <path d="M444 192 L486.0 132" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="440.5" y="188.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="482.5" y="128.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M234.0 132 L150 132" stroke-width="6"/>
+  <path d="M234.0 132 L150 132" stroke="#1e1e1e" stroke-width="3.5"/>
+  <rect x="230.5" y="128.5" width="7" height="7" rx="1.5" fill="#1e1e1e" stroke-width="1.5"/>
+  <rect x="460.8" y="47.5" width="122.5" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="522.0" y="62.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">부저 + 다리 → 15번</text>
+  <rect x="457.9" y="73.5" width="128.2" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5"/><text x="522.0" y="88.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">− 다리 → − 줄 → GND</text>
+  <rect x="158.9" y="238.0" width="38.2" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="178.0" y="252.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">15번</text>
+  <g fill="currentColor" stroke="none" font-size="14" font-weight="700"><text x="200" y="44">USB 를 뺀 채 꽂아요</text><text x="200" y="66">1단계 능동 → 2단계 수동,</text><text x="200" y="86">같은 자리에 바꿔 꽂기</text></g>
+</svg>

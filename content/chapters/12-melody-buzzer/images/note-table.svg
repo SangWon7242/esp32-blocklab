@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mbn-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mbn-title">음계 주파수표: 도 262, 레 294, 미 330, 파 349, 솔 392, 라 440, 시 494, 높은 도 523 Hz. 음이 높을수록 막대(진동수)가 길고, 높은 도는 도의 약 2배(한 옥타브)</title>
+  <text x="32" y="40" font-size="20" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">음계 주파수표</text>
+  <text x="32" y="64" font-size="14" font-weight="600" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.8">notes = [262, 294, 330, 349, 392, 440, 494, 523]</text>
+  <rect x="66" y="223.7" width="44" height="94.3" rx="4" fill="#f76707" fill-opacity="0.35" stroke="#f76707" stroke-width="1.5"/>
+  <text x="88.0" y="215.68" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">262</text>
+  <text x="88.0" y="340" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">도</text>
+  <rect x="134" y="212.2" width="44" height="105.8" rx="4" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="156.0" y="204.16000000000003" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">294</text>
+  <text x="156.0" y="340" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none">레</text>
+  <rect x="202" y="199.2" width="44" height="118.8" rx="4" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="224.0" y="191.2" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">330</text>
+  <text x="224.0" y="340" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none">미</text>
+  <rect x="270" y="192.4" width="44" height="125.6" rx="4" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="292.0" y="184.36" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">349</text>
+  <text x="292.0" y="340" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none">파</text>
+  <rect x="338" y="176.9" width="44" height="141.1" rx="4" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="360.0" y="168.88" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">392</text>
+  <text x="360.0" y="340" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none">솔</text>
+  <rect x="406" y="159.6" width="44" height="158.4" rx="4" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="428.0" y="151.6" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">440</text>
+  <text x="428.0" y="340" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none">라</text>
+  <rect x="474" y="140.2" width="44" height="177.8" rx="4" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="496.0" y="132.16" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">494</text>
+  <text x="496.0" y="340" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none">시</text>
+  <rect x="542" y="129.7" width="44" height="188.3" rx="4" fill="#f76707" fill-opacity="0.35" stroke="#f76707" stroke-width="1.5"/>
+  <text x="564.0" y="121.72" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">523</text>
+  <text x="564.0" y="340" font-size="14" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">높은 도</text>
+  <path d="M56 318 H596" stroke-width="2"/>
+  <path d="M88.0 197.68 V98 H564.0 V105.72" stroke="#f76707" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M558.0 98.72 L564.0 105.72 L570.0 98.72" stroke="#f76707" stroke-width="2"/>
+  <rect x="190.5" y="87.5" width="271.0" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5" stroke="#f76707"/><text x="326.0" y="102.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">한 옥타브 위 = 진동수 ×2  (262 × 2 ≈ 523)</text>
+</svg>

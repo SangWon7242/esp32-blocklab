@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mbt-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mbt-title">작은 별 첫 소절 박자 시간표: 도 도 솔 솔 라 라 솔. 앞의 여섯 음은 한 박(0.4초), 마지막 솔은 두 박(0.8초). notes 목록 262, 262, 392, 392, 440, 440, 392 와 beats 목록 1, 1, 1, 1, 1, 1, 2 가 같은 칸 번호 i 로 짝을 이룬다</title>
+  <text x="32" y="40" font-size="20" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">작은 별 첫 소절</text>
+  <text x="32" y="64" font-size="14" font-weight="400" text-anchor="start" fill="currentColor" stroke="none" fill-opacity="0.75">음 목록과 박자 목록에서 같은 칸(i)끼리 짝이에요</text>
+  <rect x="150" y="192.0" width="48" height="24" rx="5" fill="#4562f5" fill-opacity="0.25" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="174.0" y="209.0" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">도</text>
+  <path d="M150 230 V236 H198 V230" stroke-width="1.5"/>
+  <text x="174.0" y="252" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">한 박 0.4초</text>
+  <rect x="206" y="192.0" width="48" height="24" rx="5" fill="#4562f5" fill-opacity="0.25" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="230.0" y="209.0" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">도</text>
+  <rect x="262" y="120.5" width="48" height="24" rx="5" fill="#4562f5" fill-opacity="0.25" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="286.0" y="137.5" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">솔</text>
+  <rect x="318" y="120.5" width="48" height="24" rx="5" fill="#4562f5" fill-opacity="0.25" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="342.0" y="137.5" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">솔</text>
+  <rect x="374" y="94.1" width="48" height="24" rx="5" fill="#4562f5" fill-opacity="0.25" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="398.0" y="111.1" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">라</text>
+  <rect x="430" y="94.1" width="48" height="24" rx="5" fill="#4562f5" fill-opacity="0.25" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="454.0" y="111.1" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">라</text>
+  <rect x="486" y="120.5" width="96" height="24" rx="5" fill="#f76707" fill-opacity="0.25" stroke="#f76707" stroke-width="1.5"/>
+  <text x="534.0" y="137.5" font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">솔</text>
+  <path d="M486 230 V236 H582 V230" stroke="#f76707" stroke-width="1.5"/>
+  <text x="534.0" y="252" font-size="12" font-weight="700" text-anchor="middle" fill="#f76707" stroke="none">두 박 0.8초</text>
+  <path d="M140 222 H590" stroke-opacity="0.35"/>
+  <text x="140" y="120" font-size="12" font-weight="400" text-anchor="end" fill="currentColor" stroke="none" fill-opacity="0.6">높음</text>
+  <text x="140" y="212" font-size="12" font-weight="400" text-anchor="end" fill="currentColor" stroke="none" fill-opacity="0.6">낮음</text>
+  <rect x="24" y="258" width="592" height="88" rx="8" fill="var(--muted)" fill-opacity="0.6" stroke="none"/>
+  <text x="40" y="276" font-size="14" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">i</text>
+  <text x="174.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">0</text>
+  <text x="230.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">1</text>
+  <text x="286.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">2</text>
+  <text x="342.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">3</text>
+  <text x="398.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">4</text>
+  <text x="454.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">5</text>
+  <text x="534.0" y="276" font-size="14" font-weight="400" text-anchor="middle" fill="currentColor" stroke="none" fill-opacity="0.65">6</text>
+  <text x="40" y="304" font-size="14" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">notes[i]</text>
+  <text x="174.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">262</text>
+  <text x="230.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">262</text>
+  <text x="286.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">392</text>
+  <text x="342.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">392</text>
+  <text x="398.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">440</text>
+  <text x="454.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">440</text>
+  <text x="534.0" y="304" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">392</text>
+  <text x="40" y="332" font-size="14" font-weight="700" text-anchor="start" fill="currentColor" stroke="none">beats[i]</text>
+  <text x="174.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+  <text x="230.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+  <text x="286.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+  <text x="342.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+  <text x="398.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+  <text x="454.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">1</text>
+  <text x="534.0" y="332" font-size="14" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">2</text>
+</svg>
