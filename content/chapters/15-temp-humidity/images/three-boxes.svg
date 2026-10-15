@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>조건 분석 세 칸: 알아야 할 것, 정해야 할 것, 해야 할 것을 차례로 나눠 적기</title>
+  <text x="320" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">만들 것을 세 칸으로 나누기</text>
+  <!-- 칸 -->
+  <rect x="30" y="80" width="160" height="210" rx="14" fill="var(--card)"/>
+  <rect x="240" y="80" width="160" height="210" rx="14" fill="var(--card)"/>
+  <rect x="450" y="80" width="160" height="210" rx="14" fill="var(--card)"/>
+  <!-- 화살표 -->
+  <path d="M198 185 H230 M222 177 L230 185 L222 193" stroke-width="3"/>
+  <path d="M408 185 H440 M432 177 L440 185 L432 193" stroke-width="3"/>
+  <!-- 아이콘: 돋보기 / 조절 / 실행 -->
+  <circle cx="110" cy="132" r="28" fill="#19baea" fill-opacity="0.18" stroke="#19baea"/>
+  <circle cx="106" cy="128" r="9" stroke="#19baea" stroke-width="3"/>
+  <path d="M113 135 L121 143" stroke="#19baea" stroke-width="3"/>
+  <circle cx="320" cy="132" r="28" fill="#4562f5" fill-opacity="0.18" stroke="#4562f5"/>
+  <path d="M306 125 H334 M306 139 H334" stroke="#4562f5" stroke-width="3"/>
+  <circle cx="314" cy="125" r="4.5" fill="var(--card)" stroke="#4562f5" stroke-width="3"/>
+  <circle cx="327" cy="139" r="4.5" fill="var(--card)" stroke="#4562f5" stroke-width="3"/>
+  <circle cx="530" cy="132" r="28" fill="#00b400" fill-opacity="0.18" stroke="#00b400"/>
+  <path d="M524 121 L540 132 L524 143 Z" fill="#00b400" stroke="#00b400"/>
+  <!-- 글 -->
+  <g font-size="16" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="110" y="196">알아야 할 것</text>
+    <text x="320" y="196">정해야 할 것</text>
+    <text x="530" y="196">해야 할 것</text>
+  </g>
+  <g font-size="14" text-anchor="middle" fill="currentColor" stroke="none" opacity="0.75">
+    <text x="110" y="228">보드가 미리</text>
+    <text x="110" y="250">알고 있을 사실</text>
+    <text x="320" y="228">내가 골라 줄</text>
+    <text x="320" y="250">선택과 숫자</text>
+    <text x="530" y="228">보드가 실제로</text>
+    <text x="530" y="250">하는 동작</text>
+  </g>
+  <text x="320" y="328" text-anchor="middle" font-size="14" fill="currentColor" stroke="none" opacity="0.75">한 칸에 한 가지 이상 적어요</text>
+</svg>

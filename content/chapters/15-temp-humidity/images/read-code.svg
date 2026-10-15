@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>코드 읽기: 코드 창을 돋보기로 보며 숫자 찾기, 값을 넣어 보고 고르기, 줄 번호 누르기 (답은 코드 안에 있어요)</title>
+  <!-- 코드 창 -->
+  <rect x="48" y="28" width="380" height="308" rx="12" fill="var(--card)"/>
+  <path d="M48 58 H428"/>
+  <circle cx="70" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="88" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="106" cy="43" r="5" fill="var(--muted)"/>
+  <g font-size="12" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55">
+    <text x="84" y="82">1</text><text x="84" y="98">2</text><text x="84" y="114">3</text><text x="84" y="130">4</text>
+    <text x="84" y="146">5</text><text x="84" y="162">6</text><text x="84" y="178">7</text><text x="84" y="194">8</text>
+    <text x="84" y="210">9</text><text x="84" y="226">10</text><text x="84" y="242">11</text><text x="84" y="258">12</text>
+    <text x="84" y="274">13</text><text x="84" y="290">14</text><text x="84" y="306">15</text><text x="84" y="322">16</text>
+  </g>
+  <g fill="currentColor" stroke="none" opacity="0.28">
+    <rect x="100" y="74" width="120" height="8" rx="4"/>
+    <rect x="100" y="90" width="190" height="8" rx="4"/>
+    <rect x="100" y="122" width="220" height="8" rx="4"/>
+    <rect x="100" y="154" width="40" height="8" rx="4"/>
+    <rect x="120" y="170" width="90" height="8" rx="4"/>
+    <rect x="140" y="186" width="170" height="8" rx="4"/>
+    <rect x="160" y="202" width="100" height="8" rx="4"/>
+    <rect x="160" y="218" width="120" height="8" rx="4"/>
+    <rect x="140" y="250" width="170" height="8" rx="4"/>
+    <rect x="160" y="266" width="140" height="8" rx="4"/>
+    <rect x="160" y="282" width="120" height="8" rx="4"/>
+    <rect x="100" y="298" width="56" height="8" rx="4"/>
+    <rect x="120" y="314" width="110" height="8" rx="4"/>
+  </g>
+  <!-- 돋보기 -->
+  <circle cx="352" cy="214" r="38" fill="var(--muted)" fill-opacity="0.5" stroke-width="3"/>
+  <path d="M379 241 L404 266" stroke-width="7"/>
+  <!-- 세 가지 할 일 -->
+  <g stroke="none">
+    <circle cx="466" cy="110" r="13" fill="#4562f5"/>
+    <circle cx="466" cy="186" r="13" fill="#4562f5"/>
+    <circle cx="466" cy="262" r="13" fill="#4562f5"/>
+  </g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">
+    <text x="466" y="115">1</text><text x="466" y="191">2</text><text x="466" y="267">3</text>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <text x="488" y="110" font-size="16" font-weight="700">숫자 찾기</text>
+    <text x="488" y="132" font-size="14" opacity="0.75">괄호 안과 sleep 을 봐요</text>
+    <text x="488" y="186" font-size="16" font-weight="700">값 넣어 보기</text>
+    <text x="488" y="208" font-size="14" opacity="0.75">if 줄에 숫자를 넣어요</text>
+    <text x="488" y="262" font-size="16" font-weight="700">줄 번호 누르기</text>
+    <text x="488" y="284" font-size="14" opacity="0.75">줄 앞 회색 숫자</text>
+  </g>
+</svg>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="th-di-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="th-di-title">불쾌지수 표: 식은 0.81 × 온도 + 0.01 × 습도 × (0.99 × 온도 − 14.3) + 46.3. 단계는 68 미만 낮음, 68 이상 75 미만 보통, 75 이상 80 미만 높음, 80 이상 매우 높음. 계산 예: 온도 25℃, 습도 50% 이면 20.25 + 5.225 + 46.3 = 71.775 로 보통</title>
+  <!-- 식 -->
+  <rect x="24" y="20" width="470" height="62" rx="10" fill="var(--card)" stroke-width="2"/>
+  <text x="40" y="44" font-size="13" font-weight="700" fill="currentColor" fill-opacity="0.7" stroke="none">불쾌지수 (T = 온도 ℃, H = 습도 %)</text>
+  <text x="40" y="70" font-size="16" font-weight="700" fill="currentColor" stroke="none">0.81 × T + 0.01 × H × (0.99 × T − 14.3) + 46.3</text>
+  <!-- 단계 막대 -->
+  <text x="24" y="116" font-size="14" font-weight="700" fill="currentColor" stroke="none">단계</text>
+  <g stroke-width="1.8">
+    <rect x="24" y="128" width="64" height="44" rx="6" fill="#2f9e44" fill-opacity="0.35"/>
+    <rect x="24" y="178" width="64" height="44" rx="6" fill="#f4af18" fill-opacity="0.4"/>
+    <rect x="24" y="228" width="64" height="44" rx="6" fill="#f08c00" fill-opacity="0.5"/>
+    <rect x="24" y="278" width="64" height="44" rx="6" fill="#e03131" fill-opacity="0.5"/>
+  </g>
+  <g font-size="13" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="56" y="155">낮음</text><text x="56" y="205">보통</text><text x="56" y="255">높음</text><text x="56" y="300">매우</text><text x="56" y="315">높음</text>
+  </g>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="100" y="148" font-weight="700">68 미만</text><text x="100" y="165" fill-opacity="0.75">대부분 쾌적해요</text>
+    <text x="100" y="198" font-weight="700">68 이상 ~ 75 미만</text><text x="100" y="215" fill-opacity="0.75">불쾌한 사람이 생겨요</text>
+    <text x="100" y="248" font-weight="700">75 이상 ~ 80 미만</text><text x="100" y="265" fill-opacity="0.75">절반쯤 불쾌해요</text>
+    <text x="100" y="298" font-weight="700">80 이상</text><text x="100" y="315" fill-opacity="0.75">거의 모두 불쾌해요</text>
+  </g>
+  <!-- 계산 예 -->
+  <rect x="320" y="104" width="296" height="232" rx="10" fill="var(--muted)" stroke-width="1.8"/>
+  <text x="336" y="130" font-size="14" font-weight="700" fill="currentColor" stroke="none">계산 예: T = 25, H = 50</text>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="336" y="160">① 0.81 × 25 = 20.25</text>
+    <text x="336" y="186">② 0.99 × 25 − 14.3 = 10.45</text>
+    <text x="336" y="212">③ 0.01 × 50 × 10.45 = 5.225</text>
+    <text x="336" y="238">④ 20.25 + 5.225 + 46.3</text>
+  </g>
+  <path d="M336 254 H600" stroke-width="1.5" stroke-opacity="0.5"/>
+  <text x="336" y="280" font-size="16" font-weight="700" fill="currentColor" stroke="none">= 71.775 → 보통</text>
+  <text x="336" y="308" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">괄호 안을 먼저, 곱하기를 더하기보다 먼저</text>
+  <text x="336" y="324" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">계산해요. 코드도 같은 순서로 계산해요</text>
+</svg>

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="th-prin-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="th-prin-title">DHT11 원리: 센서 안의 습도 소자(물기를 머금으면 저항이 바뀜)와 온도 소자(서미스터, 따뜻해지면 저항이 작아짐)를 작은 칩이 숫자로 바꾼다. 칩은 S 선 한 가닥으로 ESP32 와 이야기한다. ESP32 가 선을 잠깐 낮춰 '재 줘' 하고 부르면 센서가 대답한 뒤 습도 정수·소수, 온도 정수·소수, 확인 합 다섯 묶음(40비트)을 차례로 보낸다. 한 번 잰 뒤에는 1초 넘게 쉬어야 한다</title>
+  <defs>
+    <marker id="th-prin-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+    </marker>
+  </defs>
+  <!-- 센서 상자 -->
+  <rect x="24" y="24" width="300" height="150" rx="10" fill="#1c7ed6" fill-opacity="0.12" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="36" y="46" font-size="14" font-weight="700" fill="currentColor" stroke="none">DHT11 속</text>
+  <!-- 습도 소자 -->
+  <rect x="40" y="60" width="116" height="48" rx="6" fill="var(--card)" stroke-width="1.8"/>
+  <path d="M52 72 h14 M52 80 h14 M52 88 h14 M52 96 h14" stroke="#1c7ed6" stroke-width="2"/>
+  <path d="M74 70 q4 6 0 10 q-4 -4 0 -10 Z" fill="#4dabf7" stroke="#1c7ed6" stroke-width="1.2"/>
+  <text x="88" y="80" font-size="13" font-weight="700" fill="currentColor" stroke="none">습도 소자</text>
+  <text x="88" y="98" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">물기 → 저항</text>
+  <!-- 온도 소자 -->
+  <rect x="40" y="116" width="116" height="48" rx="6" fill="var(--card)" stroke-width="1.8"/>
+  <rect x="54" y="130" width="10" height="22" rx="5" fill="#e03131" fill-opacity="0.5" stroke-width="1.5"/>
+  <text x="74" y="136" font-size="13" font-weight="700" fill="currentColor" stroke="none">온도 소자</text>
+  <text x="74" y="154" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">열 → 저항</text>
+  <!-- 칩 -->
+  <path d="M158 90 H196" stroke-width="1.8" marker-end="url(#th-prin-arrow)"/>
+  <path d="M158 134 H196" stroke-width="1.8" marker-end="url(#th-prin-arrow)"/>
+  <rect x="200" y="78" width="108" height="68" rx="6" fill="currentColor" fill-opacity="0.14" stroke-width="2"/>
+  <text x="254" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">작은 칩</text>
+  <text x="254" y="126" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">숫자로 바꿔요</text>
+  <!-- 한 선 -->
+  <path d="M308 112 H466" stroke="#2f9e44" stroke-width="4"/>
+  <text x="388" y="102" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">S 선 한 가닥</text>
+  <text x="388" y="134" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">주고받기를 한 선으로</text>
+  <rect x="466" y="84" width="96" height="56" rx="6" fill="var(--card)" stroke-width="2"/>
+  <text x="514" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="514" y="128" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">13번 핀</text>
+  <!-- 신호 그림 -->
+  <text x="24" y="210" font-size="14" font-weight="700" fill="currentColor" stroke="none">S 선에서 일어나는 일</text>
+  <path d="M24 244 H70 V276 H118 V256 H138 V244 H156" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="94" y="296" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">ESP32: "재 줘"</text>
+  <text x="94" y="312" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">(선을 잠깐 낮춤)</text>
+  <text x="140" y="236" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">대답</text>
+  <g stroke-width="1.8">
+    <rect x="160" y="232" width="84" height="40" rx="5" fill="#1c7ed6" fill-opacity="0.25"/>
+    <rect x="248" y="232" width="84" height="40" rx="5" fill="#1c7ed6" fill-opacity="0.12"/>
+    <rect x="336" y="232" width="84" height="40" rx="5" fill="#e03131" fill-opacity="0.25"/>
+    <rect x="424" y="232" width="84" height="40" rx="5" fill="#e03131" fill-opacity="0.12"/>
+    <rect x="512" y="232" width="84" height="40" rx="5" fill="var(--card)"/>
+  </g>
+  <g font-size="12" font-weight="600" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="202" y="250">습도</text><text x="202" y="265">정수</text>
+    <text x="290" y="250">습도</text><text x="290" y="265">소수</text>
+    <text x="378" y="250">온도</text><text x="378" y="265">정수</text>
+    <text x="466" y="250">온도</text><text x="466" y="265">소수</text>
+    <text x="554" y="250">확인</text><text x="554" y="265">합</text>
+  </g>
+  <text x="378" y="296" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">8비트씩 다섯 묶음 = 40비트를 차례로 보내요</text>
+  <rect x="200" y="314" width="360" height="30" rx="15" fill="var(--card)" stroke-width="1.5"/>
+  <text x="380" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">한 번 잰 뒤에는 1초 넘게 쉬어야 해요</text>
+</svg>

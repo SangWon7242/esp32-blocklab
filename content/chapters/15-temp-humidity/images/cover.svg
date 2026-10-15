@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="th-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="th-cover-title">여름 교실. 창밖에는 해가 쨍쨍하고, 벽에 걸린 온습도계 화면에 28℃ · 습도 70% 가 보인다. 옆에는 꺼진 에어컨, 책상 위에는 ESP32 보드와 파란 온습도 센서(DHT11). 말풍선: 몇 도부터 덥다고 할까요?</title>
+  <rect x="0" y="0" width="640" height="360" fill="var(--muted)" stroke="none"/>
+  <!-- 바닥 -->
+  <rect x="0" y="296" width="640" height="64" fill="currentColor" fill-opacity="0.07" stroke="none"/>
+  <path d="M0 296 H640" stroke-width="2"/>
+  <!-- 창문과 해 -->
+  <rect x="34" y="128" width="170" height="130" rx="6" fill="#4dabf7" fill-opacity="0.22" stroke-width="2.5"/>
+  <path d="M119 128 V258 M34 193 H204" stroke-width="2"/>
+  <circle cx="78" cy="162" r="18" fill="#f08c00" fill-opacity="0.75" stroke="none"/>
+  <path d="M78 134 V128 M78 190 V196 M50 162 H44 M106 162 H112 M58 142 L54 138 M98 182 L102 186 M98 142 L102 138 M58 182 L54 186" stroke="#f08c00" stroke-width="2"/>
+  <!-- 에어컨 (꺼짐) -->
+  <rect x="404" y="70" width="190" height="56" rx="10" fill="var(--card)" stroke-width="2"/>
+  <path d="M420 108 H578 M420 116 H578" stroke-width="1.5" stroke-opacity="0.5"/>
+  <circle cx="574" cy="86" r="4" fill="var(--muted)" stroke-width="1.5"/>
+  <text x="420" y="92" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">에어컨 꺼짐</text>
+  <!-- 벽 온습도계 -->
+  <rect x="250" y="120" width="128" height="96" rx="10" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="262" y="132" width="104" height="72" rx="5" fill="#00b6b1" fill-opacity="0.15" stroke-width="1.5"/>
+  <text x="314" y="162" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">28℃</text>
+  <text x="314" y="190" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">습도 70%</text>
+  <text x="314" y="234" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">교실 온습도계</text>
+  <!-- 책상 -->
+  <rect x="300" y="262" width="300" height="12" rx="3" fill="var(--card)" stroke-width="2"/>
+  <path d="M320 274 V296 M580 274 V296" stroke-width="3"/>
+  <!-- ESP32 보드 -->
+  <rect x="378" y="232" width="78" height="30" rx="4" fill="currentColor" fill-opacity="0.12" stroke-width="2"/>
+  <text x="417" y="252" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <!-- DHT11 -->
+  <rect x="470" y="216" width="40" height="46" rx="4" fill="#1c7ed6" fill-opacity="0.55" stroke-width="2"/>
+  <path d="M478 226h4 M488 226h4 M498 226h4 M478 236h4 M488 236h4 M498 236h4 M478 246h4 M488 246h4 M498 246h4" stroke-width="2.5" stroke-opacity="0.8"/>
+  <path d="M456 247 C462 247 464 240 470 240" stroke="#2f9e44" stroke-width="2.5"/>
+  <path d="M512 228 L540 204" stroke-width="1.5"/>
+  <rect x="512" y="182" width="104" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="564" y="199" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">온습도 센서</text>
+  <!-- 말풍선 -->
+  <rect x="28" y="24" width="330" height="76" rx="14" fill="var(--card)" stroke-width="1.8"/>
+  <text x="48" y="54" font-size="18" font-weight="700" fill="currentColor" stroke="none">몇 도부터 덥다고 할까요?</text>
+  <text x="48" y="82" font-size="14" fill="currentColor" fill-opacity="0.75" stroke="none">센서는 온도와 습도를 어떻게 숫자로 알까요?</text>
+</svg>
