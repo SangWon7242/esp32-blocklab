@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sff-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sff-title">안전 선풍기 한 바퀴 흐름: 버튼 A 를 봤나 → 버튼 B 를 봤나(모드 1 일 때만) → 거리가 위험한가 → 팬과 LED 를 속도에 맞추기 → 0.1초 쉬고 처음으로</title>
+  <defs>
+    <marker id="sff-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <text x="40" y="44" font-size="16" font-weight="700" fill="currentColor" stroke="none">반복 한 바퀴 = 네 가지 확인</text>
+  <g font-size="14" fill="currentColor" stroke="none" text-anchor="middle">
+  </g>
+  <rect x="30" y="80" width="130" height="92" rx="14" fill="#7048e8" fill-opacity="0.16"/>
+  <text x="95" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">1. 버튼 A?</text>
+  <text x="95" y="136" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">켜짐 ↔ 꺼짐</text>
+  <text x="95" y="156" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">모드 바꾸기</text>
+  <rect x="180" y="80" width="130" height="92" rx="14" fill="#ae3ec9" fill-opacity="0.16"/>
+  <text x="245" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">2. 버튼 B?</text>
+  <text x="245" y="136" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">모드 1 일 때만</text>
+  <text x="245" y="156" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">단계 올리기</text>
+  <rect x="330" y="80" width="130" height="92" rx="14" fill="#c92a2a" fill-opacity="0.16"/>
+  <text x="395" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">3. 거리 위험?</text>
+  <text x="395" y="136" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">2 초과 8 미만</text>
+  <text x="395" y="156" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">모드 0 으로</text>
+  <rect x="480" y="80" width="130" height="92" rx="14" fill="#00b6b1" fill-opacity="0.18"/>
+  <text x="545" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">4. 맞추기</text>
+  <text x="545" y="136" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">팬 속도</text>
+  <text x="545" y="156" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">LED 단계</text>
+  <path d="M162 126 H176" stroke-width="2.5" marker-end="url(#sff-arrow)"/>
+  <path d="M312 126 H326" stroke-width="2.5" marker-end="url(#sff-arrow)"/>
+  <path d="M462 126 H476" stroke-width="2.5" marker-end="url(#sff-arrow)"/>
+  <path d="M545 176 V216 H95 V178" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#sff-arrow)"/>
+  <rect x="250" y="204" width="140" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="320" y="221" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">0.1초 쉬고 다시</text>
+  <!-- 식 -->
+  <rect x="120" y="254" width="400" height="58" rx="12" fill="var(--card)"/>
+  <text x="320" y="279" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">속도 = 모드 × 단계 × 300</text>
+  <text x="320" y="300" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.8" stroke="none">모드가 0 이면 무엇을 곱해도 0 → 팬이 멈춰요</text>
+  <text x="320" y="340" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">위험 확인을 맞추기보다 먼저 해야 손을 지킬 수 있어요</text>
+</svg>

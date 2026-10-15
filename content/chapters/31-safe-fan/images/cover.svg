@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sfc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sfc-title">안전 선풍기: 종이컵 선풍기 앞으로 손이 8 cm 안쪽까지 다가오자 초음파 센서가 알아채고 팬을 멈춘다. 버튼 A 는 켜기·끄기, 버튼 B 는 세기 300·600·900, LED 세 개가 세기 단계를 보여 준다</title>
+  <defs>
+    <marker id="sfc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <text x="40" y="52" font-size="16" font-weight="700" fill="currentColor" stroke="none">손이 가까이 오면 먼저 멈추는 선풍기</text>
+  <!-- 받침 상자 -->
+  <rect x="80" y="250" width="160" height="60" rx="8" fill="var(--muted)"/>
+  <text x="160" y="286" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">박스지 받침</text>
+  <!-- 종이컵 -->
+  <path d="M120 250 L104 120 H216 L200 250 Z" fill="var(--card)"/>
+  <path d="M100 120 H220" stroke-width="3"/>
+  <!-- 초음파 눈 -->
+  <rect x="122" y="196" width="76" height="34" rx="6" fill="#71bb4a" fill-opacity="0.3"/>
+  <circle cx="142" cy="213" r="11" fill="var(--card)"/>
+  <circle cx="178" cy="213" r="11" fill="var(--card)"/>
+  <!-- 팬 -->
+  <circle cx="160" cy="110" r="10" fill="currentColor" stroke="none"/>
+  <path d="M160 110 C150 80 170 70 176 84 Z M160 110 C190 112 192 132 176 132 Z M160 110 C138 128 124 114 132 102 Z" fill="#00b6b1" fill-opacity="0.55"/>
+  <path d="M160 132 V120" stroke-width="3"/>
+  <!-- 초음파 소리 -->
+  <path d="M232 200 q8 13 0 26 M246 194 q12 19 0 38 M260 188 q16 25 0 50" stroke="#71bb4a" stroke-width="2.5"/>
+  <!-- 손 -->
+  <path d="M360 180 h40 a10 10 0 0 1 0 20 h-10 h30 a10 10 0 0 1 0 20 h-30 h24 a9 9 0 0 1 0 18 h-24 h16 a8 8 0 0 1 0 16 h-46 c-14 0 -22 -10 -22 -22 v-30 c0 -12 8 -22 22 -22 Z" fill="var(--card)"/>
+  <!-- 거리 -->
+  <path d="M204 262 H334" stroke-dasharray="6 5" marker-end="url(#sfc-arrow)"/>
+  <path d="M334 262 H208" stroke-dasharray="6 5" marker-end="url(#sfc-arrow)"/>
+  <rect x="252" y="274" width="96" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="300" y="291" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">8 cm 안쪽</text>
+  <!-- 멈춤 표지 -->
+  <path d="M300 96 l16 -16 h22 l16 16 v22 l-16 16 h-22 l-16 -16 Z" fill="#c92a2a"/>
+  <text x="327" y="112" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">멈춤</text>
+  <!-- 조종판 -->
+  <rect x="450" y="100" width="150" height="210" rx="12" fill="var(--card)"/>
+  <circle cx="490" cy="146" r="16" fill="#7048e8" fill-opacity="0.85"/>
+  <text x="490" y="151" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">A</text>
+  <text x="560" y="151" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">켜기·끄기</text>
+  <circle cx="490" cy="200" r="16" fill="#ae3ec9" fill-opacity="0.85"/>
+  <text x="490" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">B</text>
+  <text x="560" y="205" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">세기 바꾸기</text>
+  <circle cx="490" cy="262" r="9" fill="#2f9e44"/>
+  <circle cx="525" cy="262" r="9" fill="#f59f00"/>
+  <circle cx="560" cy="262" r="9" fill="var(--muted)"/>
+  <text x="525" y="294" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">세기 2단계 (600)</text>
+  <text x="320" y="340" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">팬 13·12 · 초음파 18·19 · 버튼 14·27 · LED 25·26·33</text>
+</svg>

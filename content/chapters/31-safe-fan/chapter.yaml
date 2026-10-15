@@ -1,0 +1,502 @@
+# 챕터 31 · 안전 선풍기 — 교과 융합 F4. 원본: 마이크로비트 심화 W03 안전선풍기(SDG 3). 형식 설명은 src/track/README.md
+# 팬(13·12)과 초음파(원래 13·12)가 겹치므로 초음파를 Trig 18 · Echo 19 로 옮겼다(키트 튜토리얼 2-4-22 배치)
+id: 31-safe-fan
+order: 31
+track: fusion
+label: F4
+prerequisites: [07-fan, 11-button-touch, 17-ultrasonic]
+subjects: [과학, 보건, 수학]
+sdg: [3]
+sessions: 2
+teacherNotes: |
+  **교과 연결**
+  - 과학: 전기의 이용 · 에너지 전환(전기 에너지 → 운동 에너지). 원리 카드 그림으로 배터리 → 모터 → 날개를 짚고, PWM 세기 300 · 600 · 900 을 "1023 가운데 켜져 있는 몫"으로 읽는다
+  - 수학: 초과 · 미만과 수직선(빈 동그라미), 300 씩 늘어나는 규칙(단계 × 300), 0 을 곱하면 0(설계의 `speed = mode * level * 300`)
+  - 보건: 생활 안전 — 집 안에서 아이 · 어르신이 다칠 수 있는 전기 제품 찾기, 날개 없는 선풍기 사례. 사회 시간의 SDG 3(건강과 복지)과 이어도 좋다
+
+  **안전**
+  - 팬 날개가 도는 동안 손가락으로 시험하지 않는다. 안전 기능 시험은 **종이 · 자 · 나무 막대**를 센서 앞에 대어서 한다
+  - 모터는 전기를 많이 쓰므로 보드 외부 전원 단자에 **배터리 홀더**(AA 6개)를 꽂아 쓴다(7장과 같다). 배선은 USB · 배터리를 모두 뺀 채로
+  - 날개는 배선과 첫 실행이 끝난 뒤에 끼운다. 코드를 올리는 순간 팬이 잠깐 돌 수 있다고 미리 알린다
+
+  **기준값은 예시** 위험 거리 2 cm · 8 cm, 세기 300 · 600 · 900 은 원본 수업의 값이다. 미션 판정은 이 숫자로 보지만, 판정 뒤에 모둠마다 컵 크기 · 센서 위치에 맞게 바꿔 보게 한다. 출력 창의 거리 값을 먼저 보고 정하게 하면 좋다.
+
+  **측정값 안내** 초음파는 2 cm 보다 가까운 것, 비스듬한 면, 천처럼 부드러운 면을 잘 못 재고, 메아리를 놓치면 `0` 을 돌려준다. 모터가 돌면 전원이 흔들려 0 이 더 자주 나오기도 한다. 그래서 원본도 "2 보다 크고"를 함께 썼다(디버깅 증상 3). 다만 손이 센서에 **딱 붙으면**(2 cm 안쪽) 멈추지 않을 수 있다 — 성찰 2번 문항에서 "그럼 어떻게 막을까?"(컵 테두리 · 망으로 손이 2 cm 안쪽에 못 들어오게)를 토의한다.
+
+  **메이킹(종이컵 · 박스지)** 종이컵 바닥에 팬 모듈을 테이프로 붙여 날개가 컵 밖으로 나오게 하고, 컵 옆면에 초음파 센서의 두 눈이 들어갈 구멍 둘을 뚫어 **팬과 같은 쪽**을 보게 한다. 박스지로 받침을 만들어 컵을 눕혀 고정하고, 버튼 · LED 브레드보드는 받침 앞에 둔다. 메이킹은 2차시 끝이나 다음 시간 20분.
+
+  - 1차시: 문제 만나기 ~ 읽기 체크(배선 전체를 이때 끝낸다)
+  - 2차시: 실행 2 ~ 성찰
+  - 버튼 떨림으로 한 번 누름이 두 번 세지면 손을 뗄 때까지 기다리는 `while` 의 `time.sleep(0.01)` 을 `0.05` 로 늘린다
+title: 안전 선풍기
+subtitle: 버튼 두 개와 초음파로 만드는, 손을 먼저 알아채는 선풍기
+summary: |
+  동생이 돌아가는 선풍기에 손가락을 넣으려 해요. 오늘은 **팬 · 버튼 두 개 · 초음파 센서 · LED 세 개**를 한 보드에 묶어, 손이 가까이 오면 먼저 멈추는 **안전 선풍기**를 만들어요.
+  1부에서 버튼 A 로 켜고 끄는 **모드 변수**를 익히고, 2부에서 버튼 B 로 세기를 300 → 600 → 900 으로 바꾼 뒤 **2 cm 초과 8 cm 미만**이면 멈추는 안전 기능을 더해요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 외부 전원 단자가 있는 보드. 배선할 때는 USB 를 빼 두기 }
+  - { name: 130 모터(팬) 모듈 + 날개, note: "핀 4개: G · V · IN+ · IN−. 날개는 배선과 첫 실행이 끝난 뒤에 끼워요" }
+  - { name: HC-SR04 초음파 센서, note: "핀 4개: VCC · Trig · Echo · GND. 팬과 같은 쪽을 보게 놓아요" }
+  - { name: 버튼(푸시 버튼) 2개, note: "버튼 A(켜기 · 끄기), 버튼 B(세기). 가운데 홈에 걸쳐 꽂아요" }
+  - { name: LED 3개 (초록 · 노랑 · 빨강), note: 세기 단계 표시. 긴 다리가 + }
+  - { name: 220Ω 저항 3개, note: 빨강-빨강-갈색 띠 }
+  - { name: 브레드보드, note: 버튼 · LED · 저항을 꽂는 판 }
+  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 팬 모듈 4가닥(GND · 5V · 13 · 12), 초음파 4가닥(5V · 18 · 19 · GND), 보드 → 브레드보드 6가닥(14 · 27 · 25 · 26 · 33 · GND)" }
+  - { name: 점퍼선(M-M), note: "양쪽 끝이 핀인 선. 브레드보드 안에서 LED 짧은 다리 줄 3개 · 버튼 대각선 다리 줄 2개 → − 줄, 5개" }
+  - { name: 배터리 홀더 (AA 6개), note: 보드 외부 전원 단자에 꽂아 모터 전기를 대요 }
+  - { name: 종이컵 · 박스지 · 테이프, note: 선풍기 몸체와 받침 만들기 }
+  - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "팬 모듈 G → GND, V → 5V, IN+ → 13번, IN− → 12번. 초음파 VCC → 5V, Trig → 18번, Echo → 19번, GND → GND (둘 다 M-F 듀폰선으로 보드에 바로). 버튼 A 는 18 · 20번 줄, 14번 → 18번 줄, 대각선 20번 줄 → − 줄. 버튼 B 는 23 · 25번 줄, 27번 → 23번 줄, 25번 줄 → − 줄. 25 · 26 · 33번 → 220Ω → LED 1 · 2 · 3 긴 다리, 짧은 다리 → − 줄. − 줄은 GND"
+principle:
+  image: images/energy-principle.svg
+  body: |
+    선풍기는 **에너지를 바꾸는 기계**예요. 배터리의 **전기 에너지**가 모터 안 코일을 전자석으로 만들고, 전자석과 자석이 밀고 당기며 축을 돌려 날개의 **운동 에너지**(바람)가 돼요.
+
+    ESP32 는 모터에 PWM 으로 세기(0~1023)를 보내요. 300 은 1023 가운데 약 3할만 켜져 있어 약한 바람, 900 은 9할 가까이 켜져 있어 센 바람이에요. 단계가 하나 오를 때마다 **300 씩** 늘어나요.
+
+    안전 기능은 초음파 센서가 맡아요. 손까지의 거리가 **2 cm 초과 8 cm 미만**이면 위험으로 보고 팬을 멈춰요. "2 보다 크다"는 조건은 센서가 메아리를 놓쳐 `0` 을 읽었을 때 잘못 멈추지 않게 해 줘요.
+goals:
+  content: 버튼 두 개 · 초음파 · 팬 · LED 를 한 프로그램으로 묶어, 모드 변수로 켜고 끄고 세기를 순환하며 위험 거리에서 멈추는 안전 선풍기를 만든다
+  thinking: 기계가 "지금 어떤 상태인가"를 변수로 기억하고, 범위(초과 · 미만)와 규칙(300 씩)을 조건과 계산으로 옮기며, 안전 확인을 어디에 둘지 정한다
+successCriteria:
+  - 모드 변수(0 · 1)로 버튼 A 한 번에 켜짐 · 꺼짐이 바뀌는 까닭을 코드를 짚으며 설명할 수 있다
+  - 세기가 900 을 넘으면 300 으로 돌아오고, 꺼져 있을 때는 버튼 B 가 아무 일도 하지 않게 할 수 있다
+  - 거리가 2 cm 초과 8 cm 미만일 때 팬을 멈추게 하고, 왜 "2 보다 크다"가 필요한지 말할 수 있다
+  - 생활 속 전기 제품의 위험을 하나 찾아 센서로 막는 방법을 제안할 수 있다
+parts:
+  - id: part1
+    title: 1부 · 켜고 끄는 선풍기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 선풍기가 먼저 알아챌 수 있을까?
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 손이 8 cm 안쪽으로 다가오면 초음파 센서가 알아채고 팬을 멈춰요
+        body: |
+          동생이 돌아가는 선풍기에 손가락을 넣으려 해요. 어른이 늘 옆에 있을 수는 없는데, **선풍기가 먼저 알아채고 멈출 수** 있을까요?
+
+          유엔의 지속가능발전목표 3번(건강과 복지)은 생활 속 사고를 줄이는 일도 담고 있어요. 그래서 날개를 아예 감춘 **날개 없는 선풍기**도 나왔어요. 코드를 보기 전에 내 생각부터 적어 봐요. 정답은 없어요.
+        todo:
+          - 준비물(팬 모듈, 초음파 센서, 버튼 2개, LED 3개)을 책상에 꺼내 놓기
+          - 세 질문에 내 생각을 한두 문장씩 적기
+          - 집 안에서 아이나 어르신이 다칠 수 있는 전기 제품을 하나 떠올려 함께 쓰기
+        questions:
+          - 선풍기가 "손이 가까이 왔다"는 것을 알려면 무엇을 재야 할까요? 몇 cm 안쪽을 위험으로 보면 좋을까요?
+          - 버튼 하나로 켜고, 같은 버튼을 또 누르면 꺼져요. 선풍기는 지금 켜져 있는지 꺼져 있는지를 어떻게 기억할까요?
+          - 꺼져 있는 선풍기의 세기 버튼을 누르면 어떻게 되어야 할까요? 그 까닭은?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 센서별로 세 칸 나누기
+        minutes: 6
+        scene:
+          image: images/three-boxes.svg
+          caption: 버튼 A · 버튼 B · 초음파마다 알아야 할 것, 정해야 할 것, 움직여야 할 것을 나눠요
+        body: |
+          안전 선풍기에는 입력이 셋(버튼 A, 버튼 B, 초음파), 출력이 둘(팬, LED)이에요. 한꺼번에 생각하면 엉키니까 **센서마다** 세 칸을 채워요.
+
+          "정해야 할 것"에는 모드 번호, 세기 숫자, 위험 거리처럼 사람이 골라 줄 숫자를 적어요. 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 버튼 A · B 가 눌렸는지, 손까지의 거리"
+          - "**정해야 할 것**: 모드 번호, 세기 단계 숫자, 위험으로 볼 거리"
+          - "**움직여야 할 것**: 팬 속도, LED 단계 표시"
+        answer:
+          know: ["버튼 A(14번)가 눌렸는가 — 누르면 0", "버튼 B(27번)가 눌렸는가", "초음파로 잰 손까지의 거리(cm)"]
+          decide: ["모드: 0 은 꺼짐, 1 은 켜짐", "세기: 300 · 600 · 900, 900 다음은 다시 300", "위험 거리: 2 cm 초과 8 cm 미만"]
+          act: ["팬을 지금 속도로 돌리기(forward)", "세기 단계만큼 LED 켜기(1 · 2 · 3개)", "위험하면 속도 0 · 모드 0 으로 바꾸기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 버튼 A 를 누를 때마다
+        minutes: 5
+        scene:
+          image: images/mode-cycle.svg
+          caption: 모드 0(꺼짐)과 모드 1(켜짐) 사이를 버튼 A 가 오가요. 오늘 1부는 이 그림의 A 화살표만 만들어요
+        body: |
+          아직 실행하지 않아요. 코드의 `mode` 는 선풍기가 지금 켜져 있는지(1) 꺼져 있는지(0)를 **기억하는 변수**이고, `speed` 는 팬 세기를 기억해요.
+
+          버튼 A 를 처음 누를 때, 두 번째 누를 때 두 변수가 어떻게 바뀔지 코드를 따라가며 빈칸에 내 예측을 적어요.
+        todo:
+          - "`mode = 0` 과 `speed = 0` 이 반복 밖에 있는 까닭 생각하기"
+          - 버튼 A 를 누를 때 지나가는 줄을 손가락으로 따라가기
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_on_off.py
+        blanks:
+          - q: 실행하고 아무것도 누르지 않으면 팬은 어떻게 될까요?
+          - q: 버튼 A 를 한 번 누르면 출력 창에 찍히는 speed 는 얼마일까요?
+          - q: 버튼 A 를 꾹 누른 채 3초 있으면 모드는 몇 번 바뀔까요?
+            unit: 번
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 버튼 A 로 켜고 끄기
+        minutes: 14
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: 팬과 초음파는 보드에 바로, 버튼 두 개와 LED 세 개는 브레드보드에. 1부에서 배선을 모두 끝내요
+        body: |
+          오늘 쓸 부품을 **지금 모두** 꽂아요. 팬 모듈과 초음파 센서는 M-F 듀폰선으로 보드에 바로 잇고, 버튼 두 개와 LED 세 개는 브레드보드에 꽂아요. 초음파는 팬과 핀이 겹치지 않게 **18 · 19번**이에요.
+
+          배터리 홀더를 외부 전원 단자에 꽂은 뒤 실행하고, 버튼 A 를 눌렀다 떼며 팬과 출력 창을 보세요. 날개는 첫 실행이 잘 되는 것을 본 다음에 끼워요.
+        todo:
+          - USB · 배터리를 뺀 채 그림대로 팬 · 초음파 · 버튼 2개 · LED 3개 꽂기
+          - "**보드 연결** → **실행** 누르기"
+          - 버튼 A 를 한 번, 두 번 누르며 팬과 출력 창을 예측과 비교하기
+        code: step1_on_off.py
+        expected: 코드를 실행하면 팬은 멈춰 있어요. 버튼 A 를 누르면 출력 창에 `speed 300` 이 찍히고 팬이 약하게 돌아요. 한 번 더 누르면 `speed 0` 이 찍히고 팬이 멈춰요. 버튼을 꾹 누르고 있어도 한 번만 바뀌어요.
+        codeNotes:
+          - { line: 4, note: "4~7번 줄은 DC 모터 준비 블록이에요. 13 · 12번을 PWM 핀으로 만들어요" }
+          - { line: 8, note: "14번 핀을 버튼 A 로 준비해요. 누르면 0, 떼면 1" }
+          - { line: 11, note: "`forward(speed)` 는 팬을 `speed` 세기(0~1023)로 앞으로 돌려요" }
+          - { line: 26, note: "처음엔 꺼짐(모드 0)이라고 기억해 둬요. 반복 밖이라 한 번만 정해요" }
+          - { line: 27, note: "처음 세기는 0 이에요" }
+          - { line: 29, note: "버튼 A 가 눌렸는지 물어요" }
+          - { line: 30, note: "꺼져 있었으면(모드 0) 켜짐으로 바꾸고 세기를 300 으로 (31~32번 줄)" }
+          - { line: 33, note: "켜져 있었으면 꺼짐으로 바꾸고 세기를 0 으로 (34~35번 줄)" }
+          - { line: 37, note: "손을 뗄 때까지 기다려요. 그래서 꾹 눌러도 한 번만 바뀌어요" }
+          - { line: 39, note: "바퀴마다 팬을 지금 세기로 맞춰요" }
+          - { line: 40, note: "0.1초 쉬고 다시 처음으로" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 — 모드 따라가기
+        minutes: 6
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          `mode` 와 `speed` 가 바뀌는 곳은 버튼 A 가 눌렸을 때뿐이에요. 누르기 전과 뒤에 두 변수의 값을 공책에 적어 가며 따라가 보세요.
+
+          답을 먼저 공책에 쓴 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - 버튼 A 를 한 번, 두 번 눌렀을 때 mode · speed 값을 표로 적기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_on_off.py
+        questions:
+          - { kind: number, q: "처음 실행한 뒤 버튼 A 를 두 번 눌렀어요. 지금 speed 는 얼마일까요?", answer: 0, hint: "한 번 누를 때마다 mode 가 어떻게 바뀌나요?" }
+          - { kind: choice, q: "팬이 돌고 있을 때(mode 가 1) 버튼 A 를 누르면?", options: ["더 세진다", "멈춘다", "그대로 돈다"], answer: 1 }
+          - { kind: line, q: "손을 뗄 때까지 기다리는 줄의 줄 번호를 클릭하세요", answer: 37 }
+        codeNotes:
+          - { line: 8, note: "버튼 A 는 풀업이라 누르면 0 이에요" }
+          - { line: 26, note: "반복 밖에서 한 번만 정하는 처음 값이에요" }
+          - { line: 29, note: "버튼 A 가 눌렸을 때만 안쪽 줄들을 해요" }
+          - { line: 39, note: "바퀴마다 팬 세기를 맞춰요" }
+
+  - id: part2
+    title: 2부 · 세기 바꾸고 손 지키기
+    steps:
+      - id: run2
+        type: run
+        title: 실행 2 — 버튼 B 로 세기 바꾸기
+        minutes: 10
+        scene:
+          image: images/mode-cycle.svg
+          caption: 켜져 있을 때 버튼 B 를 누를 때마다 300 → 600 → 900 → 다시 300. LED 는 1 · 2 · 3개
+        body: |
+          이제 버튼 B 로 세기를 바꿔요. 누를 때마다 **300 씩** 늘다가, 900 을 넘으면 다시 300 으로 돌아와요. 꺼져 있을 때(모드 0)는 B 를 눌러도 아무 일도 없어야 해요.
+
+          `show_level()` 함수는 세기만큼 LED 를 켜서 지금 몇 단계인지 보여 줘요. 실행해서 B 를 여러 번 눌러 보고, 꺼진 상태에서도 B 를 눌러 보세요.
+        todo:
+          - 코드를 실행하고 A 로 켠 뒤 B 를 네 번 누르며 출력 창과 LED 보기
+          - A 로 끈 뒤 B 를 눌러 팬이 그대로 멈춰 있는지 보기
+          - "날개 바람을 종이 띠로 받아 세기 1 · 2 · 3 단계의 흔들림을 비교하기"
+        code: step2_speed_levels.py
+        expected: 버튼 A 로 켜면 LED 1개가 켜지고 `speed 300` 이 찍혀요. B 를 누를 때마다 `speed 600`(LED 2개), `speed 900`(LED 3개), 다시 `speed 300`(LED 1개)이 돼요. 꺼진 상태에서 B 를 누르면 아무것도 찍히지 않고 팬도 LED 도 꺼져 있어요.
+        codeNotes:
+          - { line: 9, note: "27번 핀을 버튼 B 로 준비해요" }
+          - { line: 10, note: "10~12번 줄: LED 세 개를 25 · 26 · 33번 출력 핀으로 준비해요" }
+          - { line: 30, note: "세기를 보여 주는 함수예요. 300 이상이면 LED 1, 600 이상이면 LED 2, 900 이상이면 LED 3 을 켜요" }
+          - { line: 58, note: "켜져 있고(모드 1) 그리고 버튼 B 가 눌렸을 때만 안쪽 줄을 해요" }
+          - { line: 59, note: "세기를 300 늘려요" }
+          - { line: 60, note: "900 을 넘었으면 300 으로 되돌려요 (61번 줄)" }
+          - { line: 63, note: "버튼 B 에서 손을 뗄 때까지 기다려요" }
+          - { line: 65, note: "팬을 지금 세기로 맞추고" }
+          - { line: 66, note: "LED 도 지금 세기에 맞춰요" }
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 — 세기 순환
+        minutes: 6
+        scene:
+          image: images/read-code.svg
+          caption: speed 값을 공책에 적으며 한 번 누를 때마다 따라가요
+        body: |
+          버튼 B 를 누르면 `speed` 가 한 번 바뀌고, 그다음 `if` 가 한 번 더 바꿀 수도 있어요. 두 줄을 차례로 따라가야 해요.
+
+          `and` 는 두 조건이 **모두** 참일 때만 참이에요. 모드가 0 일 때는 어떻게 되는지 생각해 보세요.
+        todo:
+          - 600 에서 B 를 두 번 누를 때 speed 를 차례로 적기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step2_speed_levels.py
+        questions:
+          - { kind: number, q: "speed 가 600 일 때 버튼 B 를 두 번 누르면 speed 는 얼마일까요?", answer: 300, hint: "한 번 누를 때마다 59번 줄과 60번 줄을 차례로 지나가요" }
+          - { kind: choice, q: "꺼져 있을 때(mode 가 0) 버튼 B 를 누르면?", options: ["300 으로 돌기 시작한다", "아무 일도 없다", "900 이 된다"], answer: 1, hint: "and 앞의 조건은 참인가요?" }
+          - { kind: line, q: "세기가 900 을 넘었는지 묻는 줄의 줄 번호를 클릭하세요", answer: 60 }
+        codeNotes:
+          - { line: 9, note: "버튼 B 도 풀업이라 누르면 0 이에요" }
+          - { line: 30, note: "세기를 보고 LED 를 켜는 함수예요" }
+          - { line: 59, note: "세기를 300 늘려요" }
+          - { line: 66, note: "바퀴마다 LED 를 세기에 맞춰요" }
+
+      - id: mission
+        type: mission
+        title: 미션 — 손이 가까우면 멈추기 (통합 평가)
+        minutes: 12
+        scene:
+          image: images/danger-range.svg
+          caption: 2 cm 초과 8 cm 미만이면 멈춤. 빈 동그라미는 그 수를 넣지 않는다는 뜻이에요
+        body: |
+          이제 안전 기능을 더해 선풍기를 완성해요. 초음파 센서를 **18 · 19번**으로 준비하고, 바퀴마다 거리를 재서 **2 cm 초과 8 cm 미만**이면 팬을 멈추고 꺼짐(모드 0)으로 바꿔요.
+
+          판정은 기능 체크리스트예요. 새 기능뿐 아니라 켜기 · 끄기, 세기 순환, 꺼졌을 때 B 무시도 **그대로 되는지** 함께 봐요. 시험은 손가락 말고 종이나 막대로 해요.
+        todo:
+          - 초음파 센서 준비 블록을 넣고 Trig 18 · Echo 19 로 맞추기
+          - 팬을 맞추기 전에 거리를 재고, 위험 범위면 speed 와 mode 를 0 으로 바꾸기
+          - 막대를 5 cm 쯤에 대어 멈추는지 시험하고 **판정** 누르기
+        instructions: 거리가 2 cm 초과 8 cm 미만이면 팬을 멈추고 꺼짐(모드 0)으로 바꿔 주세요. 버튼 A 켜기 · 끄기, 버튼 B 세기 순환(900 다음은 300), 꺼져 있을 때 B 무시도 그대로 되어야 해요. 초음파는 Trig 18 · Echo 19 예요
+        hint: 반복 안 팬을 맞추는 줄(forward) 앞에 `d = get_distance()` 를 넣어요. 그다음 "d 가 2 보다 크고 그리고 d 가 8 보다 작으면" 조건 안에서 mode 와 speed 를 0 으로 바꿔요. 논리 블록의 "그리고"를 써요
+        code: step2_speed_levels.py
+        rules:
+          - codeMatches: 'if (button_a\.value\(\) == 0|not button_a\.value\(\)):\n\s+(if mode == 0:\n\s+(mode = 1\n\s+speed = 300|speed = 300\n\s+mode = 1)\n\s+else:\n\s+(mode = 0\n\s+speed = 0|speed = 0\n\s+mode = 0)|mode = 1 - mode)'
+            fail: (기능 1) 버튼 A 를 누를 때마다 켜짐 · 꺼짐이 바뀌나요? 꺼져 있었으면 모드와 세기가 무엇이 되고, 켜져 있었으면 무엇이 되나요?
+          - codeMatches: 'speed (= speed \+ 300|\+= 300)\n\s+if speed (> 900|>= 1000|> 1000|>= 1200|== 1200):\n\s+speed = 300|(\w+) (= \3 \+ 1|\+= 1)\n\s+if \3 (> 3|>= 4|== 4):\n\s+\3 = 1[\s\S]*speed = .*\3 \* 300'
+            fail: (기능 2) 900 에서 B 를 한 번 더 누르면 세기는 얼마가 되나요? 900 을 넘었을 때 300 으로 돌아오게 하는 곳이 있나요?
+          - codeMatches: 'if ((mode == 1|mode != 0) and (button_b\.value\(\) == 0|not button_b\.value\(\))|(button_b\.value\(\) == 0|not button_b\.value\(\)) and (mode == 1|mode != 0)):|if (mode == 1|mode != 0):\n\s+if (button_b\.value\(\) == 0|not button_b\.value\(\)):|if (button_b\.value\(\) == 0|not button_b\.value\(\)):\n\s+if (mode == 1|mode != 0):'
+            fail: (기능 3) 꺼져 있을 때 B 를 누르면 팬이 돌기 시작하지 않나요? B 를 볼 때 모드도 함께 묻고 있나요?
+          - codeMatches: 'if ((\w+(?:\(\))?) > 2 and \2 < 8|(\w+(?:\(\))?) < 8 and \3 > 2|2 < (\w+(?:\(\))?) and \4 < 8|2 < (\w+(?:\(\))?) < 8):\n(\s+.*\n)*?\s+(mode = 0\n\s+speed = 0|speed = 0\n\s+mode = 0|mode = 0\n[\s\S]*speed = mode \*)'
+            fail: (기능 4) 손이 5 cm 에 있을 때 팬이 멈추고 꺼짐으로 바뀌나요? 2 초과 8 미만, 두 끝을 모두 묻고 있나요? 모드는 그대로 두면 다음 바퀴에 어떻게 될까요?
+          - pinIs: { name: trig, pin: 18 }
+            fail: 초음파의 Trig 는 몇 번 핀에 꽂았나요? 팬이 13 · 12번을 쓰고 있지 않나요?
+          - pinIs: { name: echo, pin: 19 }
+            fail: 초음파의 Echo 는 몇 번 핀에 꽂았나요? 준비 블록의 핀 번호와 배선을 비교해 보세요
+        answerCode: mission_safe_fan.py
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 이상한 선풍기 세 대
+        minutes: 9
+        scene:
+          image: images/mode-cycle.svg
+          caption: 고장 난 코드를 그림의 화살표와 비교해 봐요. 어느 화살표가 빠졌거나 잘못되었나요?
+        body: |
+          고장 난 선풍기 코드 세 개가 있어요. 셋 다 빨간 글씨(에러)는 뜨지 않고 **이상하게만** 굴어요. 바로 고치지 말고 출력 창의 숫자와 그림의 화살표를 비교해 어디부터 볼지 정해요.
+
+          세 번째 선풍기는 센서가 가끔 `0` 을 읽어서 생기는 일이에요. 최소 3분은 혼자 해 봐요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: B 를 누를수록 출력 창 세기가 1200, 1500 … 끝없이 커져요
+            code: |
+              from machine import Pin, PWM
+              import time
+
+              motor1a = PWM(Pin(13))
+              motor1b = PWM(Pin(12))
+              motor1a.freq(1000)
+              motor1b.freq(1000)
+              button_b = Pin(27, Pin.IN, Pin.PULL_UP)
+
+
+              def forward(speed):
+                  motor1a.duty(speed)
+                  motor1b.duty(0)
+
+
+              def backward(speed):
+                  motor1a.duty(0)
+                  motor1b.duty(speed)
+
+
+              def stop():
+                  motor1a.duty(0)
+                  motor1b.duty(0)
+
+
+              mode = 1
+              speed = 300
+              while True:
+                  if mode == 1 and button_b.value() == 0:
+                      speed = speed + 300
+                      print("speed", speed)
+                      while button_b.value() == 0:
+                          time.sleep(0.01)
+                  forward(speed)
+                  time.sleep(0.1)
+            question: 900 에서 B 를 한 번 더 누르면 세기는 몇이 되어야 하나요? 그림의 "900 넘으면 300" 화살표가 코드 어디에 있나요?
+            rules:
+              - codeMatches: 'if speed (> 900|>= 1000|> 1000|>= 1200|== 1200):\n\s+speed = 300'
+                fail: 세기가 900 을 넘었을 때 무엇을 해야 하나요? 그 일을 하는 줄이 있나요?
+          - title: 꺼 둔 선풍기인데 B 를 누르면 팬이 돌기 시작해요
+            code: |
+              from machine import Pin, PWM
+              import time
+
+              motor1a = PWM(Pin(13))
+              motor1b = PWM(Pin(12))
+              motor1a.freq(1000)
+              motor1b.freq(1000)
+              button_a = Pin(14, Pin.IN, Pin.PULL_UP)
+              button_b = Pin(27, Pin.IN, Pin.PULL_UP)
+
+
+              def forward(speed):
+                  motor1a.duty(speed)
+                  motor1b.duty(0)
+
+
+              def backward(speed):
+                  motor1a.duty(0)
+                  motor1b.duty(speed)
+
+
+              def stop():
+                  motor1a.duty(0)
+                  motor1b.duty(0)
+
+
+              mode = 0
+              speed = 0
+              while True:
+                  if button_a.value() == 0:
+                      if mode == 0:
+                          mode = 1
+                          speed = 300
+                      else:
+                          mode = 0
+                          speed = 0
+                      while button_a.value() == 0:
+                          time.sleep(0.01)
+                  if button_b.value() == 0:
+                      speed = speed + 300
+                      if speed > 900:
+                          speed = 300
+                      while button_b.value() == 0:
+                          time.sleep(0.01)
+                  forward(speed)
+                  time.sleep(0.1)
+            question: 꺼져 있을 때 speed 는 0 이에요. B 를 누르면 0 이 무엇으로 바뀌나요? 그림에서 모드 0 의 B 는 어디로 가나요?
+            rules:
+              - codeMatches: 'if ((mode == 1|mode != 0) and (button_b\.value\(\) == 0|not button_b\.value\(\))|(button_b\.value\(\) == 0|not button_b\.value\(\)) and (mode == 1|mode != 0)):|if (mode == 1|mode != 0):\n\s+if (button_b\.value\(\) == 0|not button_b\.value\(\)):|if (button_b\.value\(\) == 0|not button_b\.value\(\)):\n\s+if (mode == 1|mode != 0):'
+                fail: B 를 눌렀을 때 선풍기가 켜져 있는지도 묻고 있나요? 두 조건을 함께 묻는 블록은 무엇이었나요?
+          - title: 앞에 아무것도 없는데 가끔 혼자 멈춰요. 그때 출력 창에 0 이 찍혀 있어요
+            code: |
+              from machine import Pin, PWM
+              import time
+
+              motor1a = PWM(Pin(13))
+              motor1b = PWM(Pin(12))
+              motor1a.freq(1000)
+              motor1b.freq(1000)
+              trig = Pin(18, Pin.OUT)
+              echo = Pin(19, Pin.IN)
+
+
+              def forward(speed):
+                  motor1a.duty(speed)
+                  motor1b.duty(0)
+
+
+              def backward(speed):
+                  motor1a.duty(0)
+                  motor1b.duty(speed)
+
+
+              def stop():
+                  motor1a.duty(0)
+                  motor1b.duty(0)
+
+
+              def get_distance():
+                  trig.value(1)
+                  time.sleep_us(10)
+                  trig.value(0)
+                  while not echo.value():
+                      pass
+                  start = time.ticks_us()
+                  while echo.value():
+                      pass
+                  stop = time.ticks_us()
+                  t = time.ticks_diff(stop, start) // 2
+                  return int(340 * t // 10000)
+
+
+              mode = 1
+              speed = 600
+              while True:
+                  d = get_distance()
+                  print(d, speed)
+                  if d < 8:
+                      mode = 0
+                      speed = 0
+                  forward(speed)
+                  time.sleep(0.1)
+            question: 센서가 메아리를 놓쳐 0 을 읽으면 `d < 8` 은 참일까요, 거짓일까요? 수직선 그림에서 0 은 어느 구간에 떨어지나요?
+            rules:
+              - codeMatches: 'if ((\w+(?:\(\))?) > 2 and \2 < 8|(\w+(?:\(\))?) < 8 and \3 > 2|2 < (\w+(?:\(\))?) and \4 < 8|2 < (\w+(?:\(\))?) < 8):\n(\s+.*\n)*?\s+(mode = 0\n\s+speed = 0|speed = 0\n\s+mode = 0)'
+                fail: 0 이 찍혔을 때도 조건이 참이 되지 않나요? 위험 범위의 작은 쪽 끝도 함께 물어야 하지 않을까요?
+
+      - id: design
+        type: design
+        title: 설계 — 단계 × 300 으로 다시 짜기
+        minutes: 10
+        scene:
+          image: images/flow-loop.svg
+          caption: 반복 한 바퀴는 네 가지 확인. 속도는 모드 × 단계 × 300 으로 한 줄에 계산해요
+        body: |
+          지금 코드는 세기 숫자(300 · 600 · 900)를 직접 바꿔요. 이번엔 **단계**(1 · 2 · 3)만 바꾸고, 속도는 `모드 × 단계 × 300` 으로 계산하게 설계해요. 모드가 0 이면 무엇을 곱해도 0 이니 팬이 저절로 멈춰요.
+
+          켜기 · 끄기도 `mode = 1 - mode` 한 줄로 바꿔요(1 이면 0, 0 이면 1). 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "모드를 뒤집는다"가 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 팬(13 · 12번), 버튼 A __번 · 버튼 B 27번, LED 25 · 26 · 33번, 초음파(18 · 19번)를 준비한다
+            blank: { answer: 14 }
+          - text: 모드 0, 단계 1, 속도 0 으로 시작한다
+          - text: 계속 반복한다
+          - text: "  ↳ 버튼 A 를 누르면 모드를 뒤집고 단계를 1 로, 손을 뗄 때까지 기다린다"
+          - text: "  ↳ 모드가 1 이고 버튼 B 를 누르면 단계를 1 올리고, __ 보다 크면 1 로 돌아간다"
+            blank: { answer: 3 }
+          - text: "  ↳ 거리를 재서 2 초과 __ 미만이면 모드를 0 으로 바꾼다"
+            blank: { answer: 8 }
+          - text: "  ↳ 속도 = 모드 × 단계 × __ 로 계산한다"
+            blank: { answer: 300 }
+          - text: "  ↳ 거리와 속도를 찍고, 팬과 LED 를 속도에 맞춘다"
+          - text: "  ↳ 0.1초 쉰다"
+        translation:
+          - ["모드를 뒤집는다", "mode = 1 - mode"]
+          - ["단계가 3 보다 크면", "if level > 3:"]
+          - ["2 초과 8 미만이면", "if d > 2 and d < 8:"]
+          - ["속도를 계산한다", "speed = mode * level * 300"]
+          - ["LED 를 속도에 맞춘다", "show_level()"]
+        targetCode: design_safe_fan.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 안전을 지키는 코드
+        minutes: 5
+        scene:
+          image: images/cover.svg
+          caption: 버튼 두 개, 센서 하나, 팬 하나, LED 세 개. 어디서 가장 오래 막혔나요?
+        body: |
+          오늘은 센서 여러 개를 한 프로그램에 묶고, 기계가 **지금 상태**를 변수로 기억하게 했어요. 먼저 미션 코드의 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+
+          교과와 이어 보기도 해요. 세기 단계 1 · 2 · 3 과 속도 300 · 600 · 900 을 표로 적고 둘 사이의 규칙을 식으로 써 보세요. 또 집 안에서 다칠 수 있는 전기 제품을 조사해 "센서로 막을 수 있는 사고" 목록을 만들어 보세요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 단계와 속도 표를 공책에 그리고 규칙 식 쓰기
+        lineExplain: mission_safe_fan.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 왜 "8 보다 작다"만 쓰지 않고 "2 보다 크다"도 함께 썼나요? 손이 센서에 2 cm 보다 더 가까이 붙으면 어떻게 될지, 그럼 무엇으로 막을지 적어 보세요.
+          - 세기 단계(1 · 2 · 3)와 속도(300 · 600 · 900) 사이의 규칙을 식으로 쓰고, 4단계가 있다면 속도가 얼마일지 적어 보세요.
+          - "다음엔 여기부터 본다: 한 줄로"

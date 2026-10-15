@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sfe-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sfe-title">에너지 전환과 세기: 배터리의 전기 에너지가 모터에서 운동 에너지로 바뀌어 날개가 돈다. PWM 세기 300·600·900 은 1023 가운데 켜져 있는 시간의 비율로, 클수록 바람이 세다</title>
+  <defs>
+    <marker id="sfe-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 에너지 사슬 -->
+  <rect x="30" y="40" width="150" height="100" rx="12" fill="var(--card)"/>
+  <rect x="62" y="64" width="54" height="30" rx="4" fill="#f4af18" fill-opacity="0.5"/>
+  <path d="M116 72 h6 v14 h-6"/>
+  <text x="105" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">전기 에너지</text>
+  <text x="105" y="134" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">배터리 · 핀 신호</text>
+  <path d="M184 90 H222" stroke-width="2.5" marker-end="url(#sfe-arrow)"/>
+  <rect x="226" y="40" width="150" height="100" rx="12" fill="var(--card)"/>
+  <circle cx="301" cy="78" r="22" fill="var(--muted)"/>
+  <path d="M287 70 q14 -14 28 0 M287 86 q14 14 28 0" stroke="#c92a2a" stroke-width="2.5"/>
+  <text x="301" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">모터</text>
+  <text x="301" y="134" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">코일 전자석 + 자석</text>
+  <path d="M380 90 H418" stroke-width="2.5" marker-end="url(#sfe-arrow)"/>
+  <rect x="422" y="40" width="150" height="100" rx="12" fill="var(--card)"/>
+  <circle cx="497" cy="78" r="5" fill="currentColor" stroke="none"/>
+  <path d="M497 78 C489 56 505 50 510 62 Z M497 78 C519 80 520 95 508 95 Z M497 78 C481 91 471 81 477 72 Z" fill="#00b6b1" fill-opacity="0.55"/>
+  <text x="497" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">운동 에너지</text>
+  <text x="497" y="134" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">날개 · 바람</text>
+  <!-- PWM 세기 -->
+  <text x="30" y="184" font-size="14" font-weight="700" fill="currentColor" stroke="none">세기 = 1023 가운데 켜져 있는 몫</text>
+  <g font-size="14" fill="currentColor" stroke="none" text-anchor="end">
+    <text x="84" y="223">300</text>
+    <text x="84" y="267">600</text>
+    <text x="84" y="311">900</text>
+  </g>
+  <rect x="96" y="206" width="360" height="24" rx="4" fill="var(--muted)"/>
+  <rect x="96" y="206" width="106" height="24" rx="4" fill="#00b6b1" fill-opacity="0.7"/>
+  <rect x="96" y="250" width="360" height="24" rx="4" fill="var(--muted)"/>
+  <rect x="96" y="250" width="211" height="24" rx="4" fill="#00b6b1" fill-opacity="0.7"/>
+  <rect x="96" y="294" width="360" height="24" rx="4" fill="var(--muted)"/>
+  <rect x="96" y="294" width="317" height="24" rx="4" fill="#00b6b1" fill-opacity="0.7"/>
+  <path d="M456 200 V324" stroke-dasharray="4 4"/>
+  <text x="456" y="342" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">1023</text>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="474" y="223">약한 바람 (1단계)</text>
+    <text x="474" y="267">보통 바람 (2단계)</text>
+    <text x="474" y="311">센 바람 (3단계)</text>
+  </g>
+  <text x="96" y="342" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">300 씩 늘어나요: 단계 × 300</text>
+</svg>

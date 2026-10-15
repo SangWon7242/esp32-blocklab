@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sfm-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sfm-title">모드와 세기 그림: 모드 0(꺼짐, 속도 0)에서 버튼 A 를 누르면 모드 1(켜짐, 속도 300). 모드 1 에서 버튼 B 를 누를 때마다 300 → 600 → 900 → 다시 300. 모드 1 에서 A 를 누르면 모드 0. 모드 0 에서 B 는 아무 일도 하지 않는다. LED 는 300 이면 하나, 600 이면 둘, 900 이면 셋</title>
+  <defs>
+    <marker id="sfm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 모드 0 -->
+  <rect x="24" y="120" width="130" height="96" rx="16" fill="var(--muted)"/>
+  <text x="89" y="154" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">모드 0</text>
+  <text x="89" y="176" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">꺼짐</text>
+  <text x="89" y="198" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">speed = 0</text>
+  <!-- B 는 무시 -->
+  <path d="M60 120 C50 76 128 76 118 120" stroke-dasharray="5 5" marker-end="url(#sfm-arrow)"/>
+  <text x="89" y="70" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">B: 그대로</text>
+  <!-- 모드 1 상자 -->
+  <rect x="226" y="60" width="390" height="236" rx="18" fill="var(--card)" stroke-dasharray="7 6"/>
+  <text x="246" y="88" font-size="16" font-weight="700" fill="currentColor" stroke="none">모드 1 · 켜짐</text>
+  <!-- A 화살표 -->
+  <path d="M158 148 H222" stroke="#7048e8" stroke-width="2.5" marker-end="url(#sfm-arrow)"/>
+  <path d="M222 190 H158" stroke="#7048e8" stroke-width="2.5" marker-end="url(#sfm-arrow)"/>
+  <text x="190" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="#7048e8" stroke="none">A</text>
+  <text x="190" y="210" text-anchor="middle" font-size="14" font-weight="700" fill="#7048e8" stroke="none">A</text>
+  <!-- 세기 칸 -->
+  <rect x="252" y="118" width="96" height="70" rx="12" fill="var(--muted)"/>
+  <rect x="374" y="118" width="96" height="70" rx="12" fill="var(--muted)"/>
+  <rect x="496" y="118" width="96" height="70" rx="12" fill="var(--muted)"/>
+  <g font-size="16" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="300" y="148">300</text>
+    <text x="422" y="148">600</text>
+    <text x="544" y="148">900</text>
+  </g>
+  <!-- LED -->
+  <circle cx="282" cy="168" r="7" fill="#2f9e44"/>
+  <circle cx="300" cy="168" r="7" fill="var(--card)"/>
+  <circle cx="318" cy="168" r="7" fill="var(--card)"/>
+  <circle cx="404" cy="168" r="7" fill="#2f9e44"/>
+  <circle cx="422" cy="168" r="7" fill="#f59f00"/>
+  <circle cx="440" cy="168" r="7" fill="var(--card)"/>
+  <circle cx="526" cy="168" r="7" fill="#2f9e44"/>
+  <circle cx="544" cy="168" r="7" fill="#f59f00"/>
+  <circle cx="562" cy="168" r="7" fill="#e03131"/>
+  <!-- B 순환 -->
+  <path d="M350 153 H370" stroke="#ae3ec9" stroke-width="2.5" marker-end="url(#sfm-arrow)"/>
+  <path d="M472 153 H492" stroke="#ae3ec9" stroke-width="2.5" marker-end="url(#sfm-arrow)"/>
+  <text x="360" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#ae3ec9" stroke="none">B +300</text>
+  <text x="482" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#ae3ec9" stroke="none">B +300</text>
+  <path d="M544 190 V230 H300 V194" stroke="#ae3ec9" stroke-width="2.5" marker-end="url(#sfm-arrow)"/>
+  <rect x="352" y="219" width="140" height="22" rx="11" fill="var(--card)" stroke="#ae3ec9" stroke-width="1.5"/>
+  <text x="422" y="235" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">B: 900 넘으면 300</text>
+  <!-- 손 -->
+  <path d="M260 296 C230 330 120 330 92 222" stroke="#c92a2a" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#sfm-arrow)"/>
+  <text x="250" y="276" font-size="13" font-weight="700" fill="currentColor" stroke="none">손이 2 cm 초과 8 cm 미만 → 모드 0 (2부 미션)</text>
+  <text x="320" y="346" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.8" stroke="none">모드는 "지금 켜져 있나"를 기억하는 변수, speed 는 "얼마나 세게"를 기억하는 변수</text>
+</svg>
