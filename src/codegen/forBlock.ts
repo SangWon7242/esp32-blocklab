@@ -152,6 +152,8 @@ export function registerForBlocks(gen: Gen): void {
 
   // 변수 만큼 바꾸기
   f["var_change"] = (block, g) => `${varName(block, g as Gen)} += ${value(block, g as Gen, "DELTA")}\n`;
+  // 전역 변수 쓰기: 함수 안에서 바깥 변수를 바꾸겠다고 알린다 (이름 하나에 한 줄)
+  f["var_global"] = (block, g) => `global ${varName(block, g as Gen)}\n`;
 
   // 리스트 (VAR 는 리스트 변수 칸)
   f["list_create"] = (block, g) => `${varName(block, g as Gen)} = []\n`;

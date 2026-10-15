@@ -235,17 +235,19 @@ describe("계획 6 변수·리스트·흐름 블록", () => {
     expect(flowItems[labelAt + 1].type).toBe("flow_for_range");
   });
 
-  it("변수 꾸러미: 변수가 있으면 버튼 → 정하기 → 만큼 바꾸기(같은 변수, 숫자 1) → 변수 값들", () => {
+  it("변수 꾸러미: 변수가 있으면 버튼 → 정하기 → 만큼 바꾸기(같은 변수, 숫자 1) → 전역 변수 쓰기(같은 변수) → 변수 값들", () => {
     const w = ws();
     w.getVariableMap().createVariable("a");
     w.getVariableMap().createVariable("b");
     const items = variableFlyout(fakeSvg(w)) as { kind: string; type?: string; fields?: { VAR?: { name?: string } }; inputs?: unknown; callbackkey?: string }[];
-    expect(items.map((i) => i.type ?? i.kind)).toEqual(["button", "variables_set", "var_change", "variables_get", "variables_get"]);
+    expect(items.map((i) => i.type ?? i.kind)).toEqual(["button", "variables_set", "var_change", "var_global", "variables_get", "variables_get"]);
     expect(items[0].callbackkey).toBe("CREATE_VARIABLE");
     // 정하기·바꾸기는 가장 최근에 만든 변수
     expect(items[1].fields?.VAR?.name).toBe("b");
     expect(items[2].fields?.VAR?.name).toBe("b");
     expect(items[2].inputs).toEqual({ DELTA: { shadow: { type: "math_number", fields: { NUM: 1 } } } });
+    expect(items[3].fields?.VAR?.name).toBe("b");
+    expect(items[3].inputs).toBeUndefined();
     w.dispose();
   });
 

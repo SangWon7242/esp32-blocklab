@@ -8,7 +8,7 @@ import { knob, light } from "@/devices/specs/sensor";
 
 /** 변수·함수 꾸러미(custom 카테고리)에 나오는 내장 블록 */
 const CUSTOM_CATEGORY_TYPES = [
-  "variables_get", "variables_set", "var_change", "math_change",
+  "variables_get", "variables_set", "var_change", "var_global", "math_change",
   "procedures_defnoreturn", "procedures_defreturn", "procedures_callnoreturn", "procedures_callreturn", "procedures_ifreturn",
 ];
 

@@ -166,6 +166,15 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
       return unknown(node, ctx);
     }
 
+    case "ScopeStatement": {
+      // global a, b → 전역 변수 쓰기 블록 둘 (nonlocal 은 블록이 없어 코드로)
+      const kids = children(node);
+      if (kids[0]?.name !== "global") return unknown(node, ctx);
+      const names = kids.slice(1).filter((k) => k.name === "VariableName");
+      if (!names.length || kids.slice(1).some((k) => k.name !== "VariableName" && k.name !== ",")) return unknown(node, ctx);
+      return { blocks: names.map((n) => block("var_global", varField(ctx.src.slice(n), ctx))), tops: [], consumed: 1 };
+    }
+
     case "BreakStatement":
       return one(block("flow_break"));
 

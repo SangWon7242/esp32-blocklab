@@ -16,6 +16,14 @@ export const dataBlocks: Record<string, unknown>[] = [
     tooltip: "변수 += 수. 변수의 값에 수를 더합니다 (빼려면 음수).",
   },
   {
+    type: "var_global",
+    message0: "전역 변수 %1 쓰기",
+    args0: [{ type: "field_variable", name: "VAR", variable: "count" }],
+    ...statement,
+    style: "variable_blocks",
+    tooltip: "global 변수. 함수 안에서 바깥(전역) 변수의 값을 바꿀 때 함수 몸통 맨 위에 둡니다.",
+  },
+  {
     type: "list_create",
     message0: "리스트 %1 만들기 (비어 있음)",
     args0: [listVar],

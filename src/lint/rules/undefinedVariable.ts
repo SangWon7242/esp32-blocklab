@@ -18,6 +18,7 @@ const READS_VAR = new Set([
  * (각 항목 반복·범위 반복·걸음 반복), 함수 매개변수, 준비 블록의 변수 칸, n번 반복이 있을 때의 i, 코드 블록(code_stmt) 원문이
  * 정하는 이름(`a, b = 0, 0`·`x = y = 0`·for·with … as·global·import, codeNames.ts). 읽는 것: 변수 값 블록,
  * 만큼 바꾸기, 리스트 블록(추가·끼우기·지우기·비우기·정하기·위치). 변수는 이름으로 맞춘다 (파이썬도 이름으로 찾는다).
+ * 전역 변수 쓰기(var_global, global x)는 이름을 알리기만 하므로 정하는 것도 읽는 것도 아니다.
  */
 export const undefinedVariable: Rule = (ctx) => {
   const blocks = realBlocks(ctx);

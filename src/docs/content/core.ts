@@ -292,6 +292,18 @@ export const coreContent: Record<string, BlockContent> = {
       "코드의 count -= 1 은 이 블록이 아니라 코드 블록이 돼요. 줄일 때는 -1 만큼 바꾸기를 써요.",
     ],
   },
+  var_global: {
+    concept: "함수 안에서 바깥(함수 밖)에 만든 변수의 값을 바꾸겠다고 알려요. 코드로는 global count 입니다. 이 블록이 없으면 함수 안의 count 는 그 함수만의 새 변수가 되어, count += 1 에서 UnboundLocalError 가 나요.",
+    example: {
+      title: "버튼 인터럽트로 누른 횟수 세기",
+      code: "count = 0\n\ndef on_press(pin):\n    global count\n    count += 1\n\nbutton = Pin(14, Pin.IN, Pin.PULL_UP)\nbutton.irq(trigger=Pin.IRQ_FALLING, handler=on_press)\nwhile True:\n    print(count)\n    time.sleep(1)",
+    },
+    tips: [
+      "함수 블록 안, 몸통 맨 위에 두어요. 함수 밖에서는 쓸 수 없어요.",
+      "값을 읽기만 할 때는 필요 없어요. 정하기·만큼 바꾸기로 바깥 변수의 값을 바꿀 때만 써요.",
+      "바꿀 변수가 둘이면 블록도 두 개 놓아요. 코드의 global a, b 는 블록 두 개가 돼요.",
+    ],
+  },
 
   // 리스트
   list_create: {

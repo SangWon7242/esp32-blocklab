@@ -39,6 +39,7 @@ const BUILTIN_LABELS: Record<string, string> = {
   variables_set: "… 을(를) … 로 정하기",
   variables_get: "변수",
   var_change: "… 을(를) … 만큼 바꾸기",
+  var_global: "전역 변수 … 쓰기",
   list_create: "리스트 … 만들기 (비어 있음)",
   list_create_from: "리스트 … 을(를) … 로 만들기",
   list_append: "… 에 … 추가하기",
