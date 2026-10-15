@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rhg-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rhg-title">망치 기계 흐름: 거리를 재고, 버튼을 눌렀고 거리가 20cm 이하이면 1~2 중 수를 뽑는다. 1이면 WIN 과 90도, 2이면 FAIL 과 50도, 1초 기다린다. 어느 쪽이든 마지막에 망치를 180도로 들어 올리고 0.1초 뒤 처음으로 돌아간다</title>
+  <defs>
+    <marker id="rhg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <!-- 1 거리 재기 -->
+  <rect x="24" y="36" width="150" height="44" rx="8" fill="var(--card)"/>
+  <text x="99" y="63" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">거리 재기 d</text>
+  <!-- 2 판단 -->
+  <path d="M99 104 L182 142 L99 180 L16 142 Z" fill="var(--muted)"/>
+  <text x="99" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">버튼 눌림</text>
+  <text x="99" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">그리고 d ≤ 20?</text>
+  <path d="M99 80 V102" marker-end="url(#rhg-arrow)"/>
+  <!-- 예 → 뽑기 -->
+  <path d="M182 142 H230" marker-end="url(#rhg-arrow)"/>
+  <text x="206" y="134" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">예</text>
+  <rect x="232" y="120" width="128" height="44" rx="8" fill="#f4af18" fill-opacity="0.3"/>
+  <text x="296" y="147" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">1~2 중 뽑기</text>
+  <!-- 1 / 2 -->
+  <path d="M360 132 L410 84" marker-end="url(#rhg-arrow)"/>
+  <path d="M360 152 L410 200" marker-end="url(#rhg-arrow)"/>
+  <text x="378" y="100" font-size="13" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <text x="378" y="196" font-size="13" font-weight="700" fill="currentColor" stroke="none">2</text>
+  <rect x="412" y="56" width="148" height="48" rx="8" fill="#2f9e44" fill-opacity="0.2" stroke="#2f9e44"/>
+  <text x="486" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">WIN · 90°</text>
+  <rect x="412" y="184" width="148" height="48" rx="8" fill="#e03131" fill-opacity="0.15" stroke="#e03131"/>
+  <text x="486" y="213" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">FAIL · 50°</text>
+  <!-- 1초 -->
+  <path d="M560 80 H596 V230" />
+  <path d="M560 208 H596"/>
+  <path d="M596 230 V250" marker-end="url(#rhg-arrow)"/>
+  <rect x="516" y="252" width="104" height="34" rx="8" fill="var(--card)"/>
+  <text x="568" y="274" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">1초 기다리기</text>
+  <!-- 아니오 -->
+  <path d="M99 180 V286" marker-end="url(#rhg-arrow)"/>
+  <text x="112" y="214" font-size="13" fill="currentColor" stroke="none">아니오</text>
+  <path d="M516 269 H360 V290" marker-end="url(#rhg-arrow)"/>
+  <!-- 180 들어 올리기 (if 밖) -->
+  <rect x="24" y="290" width="400" height="44" rx="8" fill="#1971c2" fill-opacity="0.15" stroke="#1971c2"/>
+  <text x="224" y="317" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">망치를 180° 로 들어 올리기 (늘 지나가는 자리)</text>
+  <!-- 처음으로 -->
+  <path d="M424 312 H462 V346 H8 V58 H22" marker-end="url(#rhg-arrow)" opacity="0.6"/>
+  <text x="470" y="340" font-size="13" fill="currentColor" stroke="none" opacity="0.75">0.1초 뒤 처음으로</text>
+</svg>

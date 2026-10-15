@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rhf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rhf-title">상대도수 기록표와 그래프 (예시 값): 10번 하면 당첨 7번으로 0.7, 20번 0.45, 50번 0.54, 100번 0.47, 반 전체 500번 0.49. 횟수가 많을수록 당첨 비율이 1/2 = 0.5 에 가까워진다</title>
+  <text x="32" y="44" font-size="16" font-weight="700" fill="currentColor" stroke="none">당첨 기록표 (예시)</text>
+  <rect x="32" y="60" width="290" height="236" rx="8" fill="var(--card)"/>
+  <path d="M32 98 H322 M128 60 V296 M216 60 V296"/>
+  <g font-size="14" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="85">횟수</text><text x="172" y="85">당첨</text><text x="269" y="85">당첨 ÷ 횟수</text></g>
+  <g font-size="14" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="128">10번</text><text x="172" y="128" font-size="14">7</text><text x="269" y="128" font-size="14" font-weight="700">0.7</text></g>
+  <path d="M32 140 H322" opacity="0.25"/>
+  <g font-size="14" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="168">20번</text><text x="172" y="168" font-size="14">9</text><text x="269" y="168" font-size="14" font-weight="700">0.45</text></g>
+  <path d="M32 180 H322" opacity="0.25"/>
+  <g font-size="14" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="208">50번</text><text x="172" y="208" font-size="14">27</text><text x="269" y="208" font-size="14" font-weight="700">0.54</text></g>
+  <path d="M32 220 H322" opacity="0.25"/>
+  <g font-size="14" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="248">100번</text><text x="172" y="248" font-size="14">47</text><text x="269" y="248" font-size="14" font-weight="700">0.47</text></g>
+  <path d="M32 260 H322" opacity="0.25"/>
+  <g font-size="13" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="288">반 전체 500번</text><text x="172" y="288" font-size="14">245</text><text x="269" y="288" font-size="14" font-weight="700">0.49</text></g>
+  <path d="M376 90 V300 H616"/>
+  <path d="M376 200 H616" stroke="#2f9e44" stroke-dasharray="6 5"/>
+  <text x="612" y="192" text-anchor="end" font-size="13" font-weight="700" fill="#2f9e44" stroke="none">1/2 = 0.5</text>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="end" opacity="0.7"><text x="370" y="304">0</text><text x="370" y="204">0.5</text><text x="370" y="104">1</text></g>
+  <polyline points="396,160 446,210 496,192 546,206 596,202" stroke="#4562f5" stroke-width="3"/>
+  <circle cx="396" cy="160" r="5" fill="#4562f5" stroke="none"/>
+  <circle cx="446" cy="210" r="5" fill="#4562f5" stroke="none"/>
+  <circle cx="496" cy="192" r="5" fill="#4562f5" stroke="none"/>
+  <circle cx="546" cy="206" r="5" fill="#4562f5" stroke="none"/>
+  <circle cx="596" cy="202" r="5" fill="#4562f5" stroke="none"/>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle"><text x="396" y="320">10</text><text x="446" y="320">20</text><text x="496" y="320">50</text><text x="546" y="320">100</text><text x="596" y="320">500</text></g>
+  <text x="496" y="342" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">횟수 (번)</text>
+  <text x="376" y="66" font-size="14" font-weight="700" fill="currentColor" stroke="none">많이 할수록 0.5 쪽으로</text>
+  <text x="32" y="330" font-size="13" fill="currentColor" stroke="none" opacity="0.75">적게 하면 들쭉날쭉, 많이 하면 1/2 에 가까이 (큰 수의 법칙)</text>
+</svg>

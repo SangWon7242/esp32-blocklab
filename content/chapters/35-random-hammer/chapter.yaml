@@ -1,0 +1,537 @@
+# 챕터 35 · 복불복 랜덤 망치 — 교과 융합 F8. 원본: 아두이노 심화 W05 랜덤 망치 게임(앱·블루투스는 버리고 버튼 + 출력 창/OLED 로 완결). 형식 설명은 src/track/README.md
+# 미션은 통합 평가형: 기능마다 codeMatches 규칙 하나(거리 20 이하, 1~2 뽑기, 90·50·180 각도, count 로 3번 제한)
+id: 35-random-hammer
+order: 35
+track: fusion
+label: F8
+prerequisites: [17-ultrasonic, 18-servo, 11-button-touch]   # 먼저 할 챕터 (안내만)
+subjects: [수학, 과학, 체육]
+sessions: 2
+teacherNotes: |
+  **교과 연결**
+  - 수학: 확률(경우의 수 2 가지 중 1 → 1/2, 3 가지 중 1 → 1/3), 상대도수(당첨 횟수 ÷ 전체 횟수)와 기록표, 큰 수의 법칙. 1부 연습 미션에서 모둠마다 20번, 시간이 되면 50번을 눌러 기록표에 적게 하고, 칠판에 반 전체 합계를 모아 상대도수가 0.5 에 가까워지는지 함께 봅니다(중1 자료의 정리와 해석, 중2 확률 단원과 연결).
+  - 과학: 소리의 속력 약 340 m/s, 거리 = 속력 × 시간. 초음파는 손까지 **갔다가 돌아온** 시간을 재므로 절반만 씁니다(디버깅 2).
+  - 체육(반응): 짝이 손을 넣고 다른 사람이 버튼을 누르면, 망치가 움직이는 순간 손을 빼는 반응 놀이로 바꿀 수 있습니다. 종이컵 망치만 쓰고, 꽝 각도(50°)는 손에 살짝 닿을 만큼만 맞춰 주세요.
+  - 미술·실과(메이킹): 나무젓가락 끝에 종이컵을 거꾸로 붙여 망치를 만들고, 젓가락을 서보 혼(팔)에 테이프나 케이블 타이로 묶습니다. 서보는 박스지 받침(약 10cm 높이) 위에 옆으로 눕혀 붙이고, 초음파 센서는 받침 앞 책상에 손 쪽을 보게 둡니다.
+
+  **각도 맞추기** 서보는 준비 줄에서 한 번 0° 로 갔다가 반복에 들어가면 180° 로 올라갑니다. 혼을 끼우는 방향에 따라 180° 가 "위로 선" 자리가 되도록 맞추고, 90° 는 손 위에서 멈추고 50° 는 손(종이컵)에 닿게 받침 높이로 조절하세요. 90 · 50 · 180 과 기준 20cm 는 **예시 값**이에요. 모둠 기계에 맞게 바꿔도 미션 판정은 이 세 각도와 20 을 보므로, 바꾸면 그 모둠은 판정 규칙 대신 선생님이 확인합니다.
+
+  **측정값 안내** 초음파는 3cm 보다 가까우면 값이 튀고, 손바닥을 센서에 나란히 펴야 잘 잡힙니다. 손을 5~20cm 에 두게 하세요. 출력 창 거리를 자로 잰 값과 한 번 비교하게 하면 디버깅 2 를 빨리 찾습니다.
+
+  **안전·전원**
+  - 서보는 전류를 많이 써서 USB 전원만으로는 ESP32 가 다시 켜지는(리셋) 일이 생깁니다. 망치가 움직일 때 출력 창이 끊기고 처음부터 다시 찍히면 전원 부족이에요. 서보 빨강 선은 **5V 외부 전원**(건전지 팩·전원 모듈)에 잇고 GND 는 보드와 함께 묶으세요.
+  - 배선은 USB 를 뺀 채로. 서보 혼을 손으로 억지로 돌리지 않게 합니다.
+  - 망치는 종이컵·나무젓가락만. 쇠붙이·무거운 것을 달지 않습니다.
+
+  **시간** 1부(문제 ~ 연습 미션 35분) / 2부(완성 기계 ~ 성찰 45분, 추가 미션 5분). 1부 끝에 공작(망치 만들기)을 숙제나 미술 시간으로 돌려도 됩니다. 원본 W05 의 앱(시작·종료·망치 버튼)은 버튼 하나와 OLED 화면으로 바꾸었고, 웹 앱 버전은 앱 단계 챕터에서 다룹니다.
+title: 복불복 랜덤 망치
+subtitle: 운에 맡기는 기계는 정말 공평할까?
+summary: |
+  점심 메뉴를 못 고를 때, 가위바위보 대신 **망치에게** 맡겨 볼까요? 손을 센서 앞에 넣고 버튼을 누르면 보드가 1 과 2 중 하나를 뽑아, 1 이면 망치가 손 위에서 멈추고(당첨) 2 면 손까지 내려와요(꽝).
+  1부에서 **무작위 수**를 뽑아 기록표에 적으며 정말 반반인지 확인하고, 2부에서 초음파 센서 · 서보 망치 · OLED 화면을 묶어 기계를 완성해요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 버튼(푸시 버튼), note: 다리가 네 개. 브레드보드 가운데 홈에 걸쳐 꽂아요 }
+  - { name: HC-SR04 초음파 센서, note: "핀 4개: VCC · Trig · Echo · GND" }
+  - { name: 서보 모터(SG90), note: "망치를 움직여요. 갈색 GND · 빨강 5V · 주황 신호(4번)" }
+  - { name: OLED 화면 (128×64), note: "2부에서 WIN · FAIL 을 띄워요. 핀 4개: GND · VCC · SCL · SDA" }
+  - { name: 브레드보드, note: "위 + 줄은 5V, − 줄은 GND. 센서 · 화면 · 서보가 함께 써요" }
+  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 초음파 센서 4개, OLED 4개 핀에 구멍 쪽을 끼우고 핀 쪽을 브레드보드에 꽂아요 (8개)" }
+  - { name: 점퍼선(M-M), note: "양쪽 끝이 핀인 선. 보드 5V · GND · 13 · 12 · 22 · 21 · 4 · 14 → 브레드보드 8개, 서보 플러그 → 브레드보드 3개, 버튼 → − 줄 1개 (12개)" }
+  - { name: 종이컵 · 나무젓가락 · 테이프 · 박스지, note: "망치와 서보 받침을 만들어요. 종이컵을 젓가락 끝에 거꾸로 붙이면 망치" }
+  - { name: (추가 미션) 수동 부저, note: "+ 다리 → 15번, − 다리 → − 줄 (점퍼선 2개 더)" }
+  - { name: USB 선, note: 배선할 때는 빼 두기. 서보가 많으면 5V 외부 전원도 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "보드 5V → 위 + 줄, GND → − 줄. 초음파(M-F): VCC → + 줄, Trig → 5번 줄 a 칸, Echo → 6번 줄 a 칸, GND → − 줄. OLED(M-F): GND → − 줄, VCC → + 줄, SCL → 15번 줄, SDA → 16번 줄. 서보 플러그(점퍼선): 갈색 → − 줄, 빨강 → + 줄, 주황 → 22번 줄. 버튼은 가운데 홈에 걸쳐 25 · 27번 줄, 27번 줄 b 칸 → − 줄. 보드 13 → 5번 줄 e 칸, 12 → 6번 줄 e 칸, 22 → 15번 줄 e 칸, 21 → 16번 줄 e 칸, 4 → 22번 줄 e 칸, 14 → 25번 줄 j 칸"
+principle:
+  image: images/relative-frequency.svg
+  body: |
+    **확률** `random.randint(1, 2)` 는 1 과 2 를 똑같은 기회로 골라요. 두 가지 중 하나이니 당첨(1)이 나올 확률은 **1/2** 이에요. 그런데 10번만 해 보면 7번 당첨처럼 치우칠 수 있어요. 횟수를 수십, 수백 번으로 늘리면 **당첨 횟수 ÷ 전체 횟수(상대도수)** 가 1/2 에 점점 가까워지는데, 이것을 **큰 수의 법칙**이라고 해요.
+
+    **소리의 속력** 초음파는 1초에 약 340m 를 가요. 손까지 갔다가 **돌아온** 시간을 재므로, 그 절반에 속력을 곱해야 손까지의 거리예요(거리 = 속력 × 시간). 그래서 `get_distance()` 안에서 시간을 2 로 나눠요.
+goals:
+  content: 버튼을 누르면 무작위 수(1~2)를 뽑고, 손이 20cm 안에 있을 때만 서보 망치를 당첨 90° · 꽝 50° 로 움직였다가 180° 로 되돌린다
+  thinking: 여러 센서를 "알아야 · 정해야 · 움직여야" 로 묶어 기계 흐름을 설계하고, 기록표로 확률과 상대도수를 비교한다
+successCriteria:
+  - 기록표에 20번 결과를 적고, 상대도수를 구해 1/2 과 비교해 설명할 수 있다
+  - 거리 · 버튼 두 조건이 모두 참일 때만 망치가 움직이게 할 수 있다
+  - 망치를 180° 로 되돌리는 줄이 어디에 있어야 하는지 설명할 수 있다
+  - 당첨 확률을 1/3 로 바꾸는 흐름을 우리말 설계도로 쓰고 코드로 옮길 수 있다
+parts:
+  - id: part1
+    title: 1부 · 운에 맡기는 버튼 (확률)
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 운에 맡기면 정말 공평할까?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 손을 넣고 버튼을 누르면 망치가 당첨(90°)에서 멈출까, 꽝(50°)까지 내려올까?
+        body: |
+          점심 메뉴나 발표 순서를 못 정할 때 우리는 가위바위보, 사다리 타기, 제비뽑기로 **운에 맡겨요**. 모두가 결과를 받아들이려면 누구에게나 기회가 **똑같아야** 해요.
+
+          오늘은 손을 넣으면 망치가 운에 따라 멈추거나 내려치는 "복불복 망치"를 만들어요. 코드를 보기 전에 내 생각부터 적어 봐요. 정답은 없어요.
+        todo:
+          - 준비물(버튼, 초음파 센서, 서보, OLED, 종이컵 · 나무젓가락)을 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+        questions:
+          - 점심 메뉴를 못 고를 때, 공정하게 운에 맡기는 기계를 만들 수 있을까요? "공정하다"는 무슨 뜻일까요?
+          - 당첨과 꽝이 반반인 기계로 20번 하면 당첨은 꼭 10번 나올까요?
+          - 손이 망치 아래에 있는지 기계는 어떻게 알 수 있을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 센서 묶기 세 칸
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 움직여야 할 것. 센서마다 나눠 적어요
+        body: |
+          이 기계는 부품이 넷이에요. **초음파 센서**와 **버튼**은 알아차리고, **서보**와 **화면**은 움직이고 보여 줘요. 그 사이에서 "몇 cm 안이면 손으로 볼지", "몇 도까지 내려칠지"는 사람이 정해 줘야 해요.
+
+          활동 칸의 세 칸에 센서별로 하나 이상 적어 보세요. 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 초음파 센서와 버튼이 알려 주는 것 적기"
+          - "**정해야 할 것**: 거리 기준, 뽑을 수의 범위, 당첨 · 꽝 각도 적기"
+          - "**움직여야 할 것**: 서보 · 화면 · 소리가 할 일 적기"
+        answer:
+          know: ["손이 센서에서 몇 cm 떨어져 있는지 (20cm 이하면 손이 있다)", "버튼이 눌렸는지 (풀업이라 누르면 0)"]
+          decide: ["1~2 중 무작위로 뽑기 (1 = 당첨, 2 = 꽝)", "당첨이면 90°, 꽝이면 50° 까지", "1초 뒤 180° 로 되돌리기", "몇 번까지 칠 수 있게 할지"]
+          act: ["서보 망치를 정한 각도로 움직이기", "화면에 WIN 또는 FAIL 띄우기 (출력 창에 글 찍기)", "당첨 · 꽝 소리 내기 (부저)"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 20번 하면 당첨은 몇 번?
+        minutes: 5
+        scene:
+          image: images/relative-frequency.svg
+          caption: 적게 하면 들쭉날쭉, 많이 하면 1/2 쪽으로. 내 예측은?
+        body: |
+          아직 실행하지 않아요. `random.randint(1, 2)` 는 1 부터 2 까지 정수 중 하나를 **아무렇게나** 골라요. 끝의 수 2 도 나올 수 있어요.
+
+          코드를 따라 읽고, 버튼을 누를 때마다 무엇이 찍힐지 생각해 빈칸에 내 예측을 적어요. 20번 중 당첨 횟수는 숫자 하나로 적어요.
+        todo:
+          - "`if button.value() == 0:` 이 무엇을 묻는지 읽기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_random.py
+        blanks:
+          - q: 버튼을 누르지 않고 가만히 두면 출력 창에는 무엇이 찍힐까요?
+          - q: 버튼을 20번 누르면 1 은 몇 번쯤 나올까요?
+            unit: 번
+          - q: 이 코드에서 3 이 찍힐 수 있을까요? 왜 그렇게 생각하나요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 버튼으로 수 뽑기
+        minutes: 8
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "1부에서는 버튼만 써요: 14번 → 25번 줄 j 칸, 27번 줄 b 칸 → − 줄, 보드 GND → − 줄"
+        body: |
+          1부에서는 **버튼만** 꽂아요. 버튼을 가운데 홈에 걸쳐 25 · 27번 줄에 꽂고, 14번 핀은 25번 줄, 대각선 반대쪽 27번 줄은 − 줄에 이어요. 나머지 부품은 2부에서 꽂아도 돼요.
+
+          실행한 뒤 버튼을 한 번씩 눌러 출력 창에 찍히는 수를 보세요. 1 이 나오면 당첨, 2 가 나오면 꽝이라고 정해요.
+        todo:
+          - USB 를 뺀 채 버튼과 선 꽂기
+          - "**보드 연결** → **실행** 누르기"
+          - 버튼을 10번 눌러 보고 1 과 2 가 몇 번씩 나왔는지 세기
+        code: step1_random.py
+        expected: 코드를 실행하면 출력 창이 조용히 기다려요. 버튼을 누를 때마다 1 또는 2 가 한 줄씩 찍히고, 무엇이 나올지는 매번 달라요.
+        codeNotes:
+          - { line: 3, note: "무작위 수를 뽑으려면 `random` 을 가져와요" }
+          - { line: 5, note: "14번 핀을 풀업 버튼으로 준비해요. 누르면 `0`, 떼면 `1`" }
+          - { line: 8, note: "버튼이 눌렸을 때만 들여 쓴 세 줄을 해요" }
+          - { line: 9, note: "`random.randint(1, 2)` 로 1 부터 2 까지 중 하나를 뽑아 `num` 에 담아요" }
+          - { line: 10, note: "뽑은 수를 출력 창에 찍어요" }
+          - { line: 11, note: "0.5초 쉬어서 한 번 누름이 여러 번 뽑히지 않게 해요" }
+          - { line: 12, note: "누르지 않았을 때는 0.05초마다 버튼을 다시 확인해요" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 — 수 뽑기
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          코드는 짧지만 중요한 줄이 두 개예요. 하나는 **언제** 뽑는지 정하고, 하나는 **무엇을** 뽑는지 정해요.
+
+          손가락으로 한 줄씩 짚으며 따라가 보세요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - 버튼을 눌렀을 때 지나가는 줄을 순서대로 짚기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_random.py
+        questions:
+          - { kind: choice, q: "random.randint(1, 2) 가 낼 수 있는 수는?", options: ["1 만", "1 과 2", "0, 1, 2", "1.5 같은 소수도"], answer: 1, hint: "두 끝의 수도 나올 수 있어요" }
+          - { kind: number, q: "수를 뽑아 찍은 바로 다음, 몇 초 쉬나요?", answer: 0.5 }
+          - { kind: line, q: "무작위 수를 뽑는 줄의 줄 번호를 클릭하세요", answer: 9 }
+        codeNotes:
+          - { line: 3, note: "`random` 기능을 가져와요" }
+          - { line: 7, note: "`while True:` 아래 들여 쓴 줄들이 한 바퀴예요" }
+          - { line: 8, note: "풀업 버튼이라 누르면 값이 `0` 이에요" }
+          - { line: 12, note: "누르지 않았을 때 쉬는 시간이에요" }
+
+      - id: practice
+        type: mission
+        title: 연습 미션 — 당첨과 꽝, 20번 기록하기
+        minutes: 8
+        scene:
+          image: images/relative-frequency.svg
+          caption: 20번 눌러 당첨 횟수를 적고, 당첨 ÷ 20 을 구해 1/2 = 0.5 와 비교해요
+        body: |
+          숫자만 찍히면 헷갈려요. 뽑은 수가 1 이면 "당첨", 아니면 "꽝" 이 찍히게 바꿔 봐요. "아니면"은 코드로 무엇일까요?
+
+          다 되면 버튼을 **20번** 눌러 공책 기록표에 당첨 횟수를 적고, **당첨 ÷ 20** 을 계산해요. 예측 단계에서 적은 수와 같았나요? 모둠끼리 결과를 모으면 몇에 가까워질까요?
+        todo:
+          - "1 이면 `\"당첨\"`, 아니면 `\"꽝\"` 을 찍게 고치고 **판정** 누르기"
+          - 20번 눌러 기록표에 당첨 횟수와 당첨 ÷ 20 적기
+          - 모둠 결과를 칠판 표에 더하기
+        instructions: 버튼을 누를 때마다 1~2 중 하나를 뽑아, 1 이면 출력 창에 "당첨", 아니면 "꽝" 을 찍어 주세요. 0.5초 쉬는 줄은 그대로 두어요
+        hint: "`print(num)` 자리에 if 를 넣어요. `if num == 1:` 아래에 당첨을 찍고, `else:` 아래에 꽝을 찍어요"
+        code: step1_random.py
+        rules:
+          - codeMatches: 'print\("당첨"\)'
+            fail: 1 이 나왔을 때 출력 창에 무엇을 찍기로 했나요?
+          - codeMatches: '^\s+else:$'
+            fail: 1 이 아니면(2 가 나오면) 어떻게 해야 하나요? "아니면"을 코드로 쓰면 무엇일까요?
+          - codeEquals: { file: practice_win_fail.py }
+            fail: 수를 뽑는 줄과 알려 주는 줄은 버튼을 눌렀을 때만 지나가나요? if 와 else 는 어느 줄 아래로 들여 써야 할까요? 0.5초 쉬는 줄은 그대로 있나요?
+        answerCode: practice_win_fail.py
+
+  - id: part2
+    title: 2부 · 망치 기계 완성
+    steps:
+      - id: run2
+        type: run
+        title: 복사 · 실행 — 손을 넣고 망치 치기
+        minutes: 10
+        scene:
+          image: images/game-flow.svg
+          caption: 버튼 눌림 그리고 20cm 이하일 때만 뽑고 친다. 들어 올리는 줄은 늘 지나가는 자리에
+        body: |
+          이제 배선도대로 초음파 센서 · 서보 · OLED 를 더 꽂고, 서보 혼에 종이컵 망치를 붙여요. 이 코드는 S14 의 `get_distance()`, F3 자동문의 `show()` 를 그대로 가져왔어요.
+
+          손을 센서 앞 20cm 안에 넣고 버튼을 눌러 보세요. 손을 빼고 누르면 어떻게 되나요? 망치가 180° 로 다시 올라가는 줄이 if **밖**에 있는 것도 찾아봐요.
+        todo:
+          - USB 를 뺀 채 배선도대로 초음파 · OLED · 서보 꽂기
+          - 실행하고, 손을 넣고 누를 때와 빼고 누를 때를 비교하기
+          - 망치가 50° 에서 손(종이컵)에 살짝 닿는지 받침 높이 맞추기
+        code: step2_hammer.py
+        expected: |
+          코드를 실행하면 2초 뒤 망치가 180° 로 올라가고 화면에 HAMMER 가 떠요. 손을 20cm 안에 넣고 버튼을 누르면 화면에 WIN(망치 90° 에서 멈춤) 또는 FAIL(망치 50° 까지 내려옴)과 거리가 뜨고, 1초 뒤 망치가 다시 180° 로 올라가요.
+
+          손을 빼고 누르면 아무 일도 일어나지 않아요.
+        codeNotes:
+          - { line: 1, note: "서보는 `PWM`, 화면은 `SoftI2C` 가 필요해요" }
+          - { line: 4, note: "무작위 수를 뽑으려고 `random` 을 가져와요" }
+          - { line: 6, note: "초음파 센서: 13번은 소리를 쏘고, 12번은 메아리를 들어요 (6~7번 줄)" }
+          - { line: 8, note: "4번 핀의 서보를 준비해요. 준비 줄 끝(10번 줄)에서 한 번 0° 로 가요" }
+          - { line: 11, note: "14번 핀 버튼" }
+          - { line: 12, note: "OLED 화면이 쓸 두 선(SCL 22, SDA 21)을 정해요 (12~13번 줄)" }
+          - { line: 16, note: "거리를 재서 cm 로 알려 주는 함수. 돌아온 시간을 2 로 나눠요(26번 줄)" }
+          - { line: 30, note: "화면을 지우고 두 줄을 띄우는 함수" }
+          - { line: 40, note: "바퀴마다 거리를 재서 `d` 에 담아요" }
+          - { line: 41, note: "버튼을 눌렀고(`== 0`) **그리고**(`and`) 손이 20cm 안일 때만 들여 쓴 줄을 해요" }
+          - { line: 42, note: "1 과 2 중 하나를 뽑아요" }
+          - { line: 45, note: "당첨: 망치를 90° 까지만 내려 손 위에서 멈춰요" }
+          - { line: 48, note: "꽝: 망치를 50° 까지 내려 손을 콩!" }
+          - { line: 49, note: "1초 동안 그 자리에 둬요" }
+          - { line: 51, note: "if 밖이라 바퀴마다 지나가요. 망치를 180° 로 들어 올려 둬요" }
+          - { line: 52, note: "0.1초마다 다시 처음부터" }
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 — 망치 기계
+        minutes: 5
+        scene:
+          image: images/hammer-angles.svg
+          caption: 180° 기다리기, 90° 당첨, 50° 꽝
+        body: |
+          이 코드에는 if 가 두 겹이에요. 바깥 if 는 "칠까 말까", 안쪽 if 는 "당첨일까 꽝일까"를 정해요.
+
+          손이 있을 때와 없을 때 각각 어느 줄을 지나가는지 짚어 가며 답해요.
+        todo:
+          - 손이 30cm 에 있을 때 지나가는 줄만 짚어 보기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step2_hammer.py
+        questions:
+          - { kind: choice, q: "손이 30cm 에 있을 때 버튼을 누르면?", options: ["망치가 90° 로 내려온다", "망치가 50° 로 내려온다", "망치는 180° 그대로, 화면도 그대로", "화면에 WIN 이 뜬다"], answer: 2, hint: "41번 줄의 두 조건은 모두 참이어야 해요" }
+          - { kind: number, q: "꽝일 때 망치는 몇 도까지 내려오나요?", answer: 50 }
+          - { kind: line, q: "망치를 180도로 들어 올리는 줄의 줄 번호를 클릭하세요", answer: 51 }
+        codeNotes:
+          - { line: 40, note: "바퀴마다 거리를 새로 재요" }
+          - { line: 41, note: "`and` 는 두 조건이 **모두** 참일 때만 참이에요" }
+          - { line: 43, note: "안쪽 if: 뽑은 수가 1 일 때" }
+          - { line: 49, note: "망치를 그 자리에 1초 둬요" }
+
+      - id: mission
+        type: mission
+        title: 미션 — 세 번만 치는 망치 (통합 평가)
+        minutes: 10
+        scene:
+          image: images/game-flow.svg
+          caption: 흐름은 그대로 두고, 친 횟수를 세는 곳과 3번이 되면 멈추는 조건을 더해요
+        body: |
+          지금 망치는 끝없이 칠 수 있어요. 한 사람이 **세 번까지만** 칠 수 있게 바꿔 봐요. 몇 번 쳤는지 보드가 기억하려면 무엇이 필요할까요? 그 변수는 반복 밖과 안 중 어디서 0 으로 시작해야 할까요?
+
+          판정은 기능 네 가지를 하나씩 봐요: ① 손이 20cm 안일 때만 치기 ② 1~2 중 뽑기 ③ 당첨 90° · 꽝 50° · 1초 뒤 180° ④ `count` 로 3번 제한. 화면에 몇 번째인지 띄우면 더 좋아요.
+        todo:
+          - 친 횟수를 셀 변수 `count` 를 반복 밖에 만들기
+          - 칠 때마다 `count` 를 1 늘리고, 3번이 되면 더 치지 않게 조건 더하기
+          - 실행해서 네 번째에는 망치가 안 움직이는지 보고 **판정** 누르기
+        instructions: 손이 20cm 안에 있고 버튼을 눌렀을 때만, 세 번까지만 망치를 치게 바꿔 주세요. 1~2 뽑기, 당첨 90° · 꽝 50°, 1초 뒤 180° 복귀는 그대로 지키고, 친 횟수는 count 변수로 세요
+        hint: "`count = 0` 을 반복 앞에 두고, 바깥 if 조건 끝에 `and count < 3` 을 더한 뒤, if 안 첫 줄에서 `count = count + 1` 로 늘려요. 화면에 `str(count) + \" / 3\"` 을 띄우면 몇 번째인지 보여요"
+        code: step2_hammer.py
+        rules:
+          - codeMatches: '(get_distance\(\)|\b\w+) (<= 20|< 21)\b'
+            fail: 손이 망치 아래에 있는지는 무엇으로 알 수 있나요? 몇 cm 안쪽일 때만 쳐야 했나요?
+          - codeMatches: 'random\.randint\(1, 2\)'
+            fail: 당첨과 꽝이 반반이 되려면 몇부터 몇 사이에서 뽑아야 할까요?
+          - codeMatches: '^(?=[\s\S]*\.duty_u16\(1638 \+ 90 \* 6462 // 180\))(?=[\s\S]*\.duty_u16\(1638 \+ 50 \* 6462 // 180\))(?=[\s\S]*\.duty_u16\(1638 \+ 180 \* 6462 // 180\))'
+            fail: 당첨, 꽝, 기다리기 때 망치는 각각 몇 도였나요? 세 각도가 모두 코드에 남아 있나요?
+          - codeMatches: '^(?=[\s\S]*^count = 0$)(?=[\s\S]*\bcount (< 3|<= 2)\b)(?=[\s\S]*^\s+count (= count \+ 1|\+= 1)$)'
+            fail: 몇 번 쳤는지 기억하는 count 가 반복 밖에서 0 으로 시작하나요? 칠 때마다 1씩 늘어나나요? 3번이 되면 더는 치지 않게 묻는 곳이 있나요?
+        answerCode: mission_three_tries.py
+
+      - id: extra
+        type: mission
+        title: 추가 미션 — 당첨 소리, 꽝 소리
+        optional: true
+        minutes: 5
+        scene:
+          image: images/hammer-angles.svg
+          caption: 당첨은 높은 소리, 꽝은 낮은 소리로
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 수동 부저의 + 다리를 15번에, − 다리를 − 줄에 꽂아요. 당첨이면 높은 소리, 꽝이면 낮은 소리가 나게 해 봐요.
+
+          S9 멜로디 챕터의 "Hz 음을 초 울리기" 블록을 쓰면 돼요. 몇 Hz 가 높은 소리였나요?
+        todo:
+          - 수동 부저를 15번과 − 줄에 꽂기
+          - 소리 나는 부저를 준비하고 당첨 · 꽝에 서로 다른 음 넣기
+          - 실행해 보고 **판정** 누르기
+        instructions: 15번 핀의 수동 부저로 당첨이면 높은 음, 꽝이면 낮은 음을 울려 주세요
+        code: step2_hammer.py
+        rules:
+          - codeMatches: '^\w+ = PWM\(Pin\(15\)\)$'
+            fail: 부저는 몇 번 핀에 꽂았나요? 소리 나는 부저를 그 핀에 준비했나요?
+          - codeMatches: '\.duty\(512\)[\s\S]*\.duty\(512\)'
+            fail: 당첨일 때와 꽝일 때 모두 소리가 나나요? 두 자리에 음을 하나씩 넣었나요?
+        answerCode: extra_sound.py
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 이상한 망치 세 대
+        minutes: 8
+        scene:
+          image: images/game-flow.svg
+          caption: 증상을 보고 흐름 그림에서 어느 칸이 문제인지 먼저 짚어요
+        body: |
+          고장 난 망치 코드 세 개예요. 셋 다 빨간 글씨(에러)는 뜨지 않아요. 바로 고치지 말고 **증상을 보고 흐름 그림의 어느 칸**이 문제인지 먼저 정해요.
+
+          들여쓰기 한 칸, 숫자 하나가 기계를 바꿔요. 최소 4분은 혼자 해 봐요. 망치가 움직일 때 출력 창이 끊기고 처음부터 다시 찍히면 코드가 아니라 서보 전원 부족이니 선생님께 알려요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: 처음 켜면 망치가 0° 쪽에 누워 있어요. 한 번 치기 전에는 올라오지 않아요
+            code: |
+              from machine import Pin, PWM
+              import time
+              import random
+
+              trig = Pin(13, Pin.OUT)
+              echo = Pin(12, Pin.IN)
+              servo = PWM(Pin(4))
+              servo.freq(50)
+              servo.duty_u16(1638)
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+
+              def get_distance():
+                  trig.value(1)
+                  time.sleep_us(10)
+                  trig.value(0)
+                  while not echo.value():
+                      pass
+                  start = time.ticks_us()
+                  while echo.value():
+                      pass
+                  stop = time.ticks_us()
+                  t = time.ticks_diff(stop, start) // 2
+                  return int(340 * t // 10000)
+
+
+              time.sleep(2)
+              while True:
+                  d = get_distance()
+                  if button.value() == 0 and d <= 20:
+                      num = random.randint(1, 2)
+                      if num == 1:
+                          print("WIN")
+                          servo.duty_u16(1638 + 90 * 6462 // 180)
+                      elif num == 2:
+                          print("FAIL")
+                          servo.duty_u16(1638 + 50 * 6462 // 180)
+                      time.sleep(1)
+                      servo.duty_u16(1638 + 180 * 6462 // 180)
+                  time.sleep_ms(100)
+            question: 망치를 180° 로 들어 올리는 줄은 언제 실행되나요? 버튼을 누르지 않았을 때(손이 없을 때)도 그 줄을 지나가나요?
+            rules:
+              - codeMatches: '^ {0,4}servo\.duty_u16\(1638 \+ 180 \* 6462 // 180\)$'
+                fail: 들어 올리는 줄의 들여쓰기를 보세요. 이 줄이 if 안에 있으면 언제만 실행될까요? 흐름 그림에서 이 칸은 어디에 있었나요?
+          - title: 손을 15cm 에 두고 눌러도 망치가 꿈쩍 안 해요. 출력 창 거리가 자로 잰 값의 두 배예요
+            code: |
+              from machine import Pin, PWM
+              import time
+              import random
+
+              trig = Pin(13, Pin.OUT)
+              echo = Pin(12, Pin.IN)
+              servo = PWM(Pin(4))
+              servo.freq(50)
+              servo.duty_u16(1638)
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+
+              def get_distance():
+                  trig.value(1)
+                  time.sleep_us(10)
+                  trig.value(0)
+                  while not echo.value():
+                      pass
+                  start = time.ticks_us()
+                  while echo.value():
+                      pass
+                  stop = time.ticks_us()
+                  t = time.ticks_diff(stop, start) // 2
+                  return int(340 * t // 10000)
+
+
+              time.sleep(2)
+              while True:
+                  d = get_distance() * 2
+                  print(d, "cm")
+                  if button.value() == 0 and d <= 20:
+                      num = random.randint(1, 2)
+                      if num == 1:
+                          servo.duty_u16(1638 + 90 * 6462 // 180)
+                      elif num == 2:
+                          servo.duty_u16(1638 + 50 * 6462 // 180)
+                      time.sleep(1)
+                  servo.duty_u16(1638 + 180 * 6462 // 180)
+                  time.sleep_ms(100)
+            question: 소리가 손까지 갔다가 돌아온 길은 손까지 거리의 몇 배일까요? `get_distance()` 가 이미 절반으로 나눴는데, d 에 담기 전에 무엇을 또 했나요?
+            rules:
+              - codeMatches: '^\s+d = get_distance\(\)$'
+                fail: 출력 창의 숫자가 자로 잰 거리와 같아졌나요? d 에 담는 값에서 무엇을 빼야 할까요?
+          - title: 세 번에 한 번쯤은 버튼을 눌러도 망치가 그대로예요. 그때 출력 창에는 3 이 찍혀요
+            code: |
+              from machine import Pin, PWM
+              import time
+              import random
+
+              trig = Pin(13, Pin.OUT)
+              echo = Pin(12, Pin.IN)
+              servo = PWM(Pin(4))
+              servo.freq(50)
+              servo.duty_u16(1638)
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+
+              def get_distance():
+                  trig.value(1)
+                  time.sleep_us(10)
+                  trig.value(0)
+                  while not echo.value():
+                      pass
+                  start = time.ticks_us()
+                  while echo.value():
+                      pass
+                  stop = time.ticks_us()
+                  t = time.ticks_diff(stop, start) // 2
+                  return int(340 * t // 10000)
+
+
+              time.sleep(2)
+              while True:
+                  d = get_distance()
+                  if button.value() == 0 and d <= 20:
+                      num = random.randint(1, 3)
+                      print(num)
+                      if num == 1:
+                          servo.duty_u16(1638 + 90 * 6462 // 180)
+                      elif num == 2:
+                          servo.duty_u16(1638 + 50 * 6462 // 180)
+                      time.sleep(1)
+                  servo.duty_u16(1638 + 180 * 6462 // 180)
+                  time.sleep_ms(100)
+            question: 뽑을 수 있는 수는 몇 개인가요? 그중 망치가 움직이는 수는 몇 개인가요? 3 이 나오면 if 와 elif 중 어디로 가나요?
+            rules:
+              - codeMatches: 'random\.randint\(1, 2\)'
+                fail: 당첨과 꽝이 반반인 기계였어요. 몇 부터 몇 사이에서 뽑아야 모든 수가 망치를 움직일까요?
+
+      - id: design
+        type: design
+        title: 설계 — 당첨 확률을 1/3 로
+        minutes: 7
+        scene:
+          image: images/game-flow.svg
+          caption: 흐름은 같고, 뽑는 범위와 "아니면"만 바뀌어요
+        body: |
+          당첨이 너무 잘 나와 재미없다면, 당첨 확률을 **1/3** 로 낮춰 봐요. 1~3 중 하나를 뽑아 1 만 당첨, 2 와 3 은 꽝이에요. 디버깅 3 처럼 3 이 나왔을 때 아무 일도 없으면 안 되니 "아니면"을 써야 해요.
+
+          기계 전체 흐름을 우리말 설계도로 먼저 쓰고, 번역표를 본 뒤, 섞인 블록을 설계도 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "아니면"과 "1 부터 3 사이에서 뽑는다"가 어떤 코드인지 찾기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 초음파(13 · 12) · 서보(4) · 버튼(14) · OLED 를 준비하고 2초 기다린다
+          - text: 화면에 HAMMER 와 1 in 3 을 띄운다
+          - text: 계속 반복한다
+          - text: "  ↳ 거리를 재서 d 에 담는다"
+          - text: "  ↳ 버튼을 눌렀고 d 가 __ 이하이면"
+            blank: { answer: 20 }
+          - text: "    ↳ 1 부터 __ 사이에서 수를 하나 뽑아 num 에 담는다"
+            blank: { answer: 3 }
+          - text: "    ↳ num 이 1 이면 WIN 을 띄우고 망치를 __ 도로"
+            blank: { answer: 90 }
+          - text: "    ↳ 아니면(2 또는 3) FAIL 을 띄우고 망치를 __ 도로"
+            blank: { answer: 50 }
+          - text: "    ↳ 1초 기다린다"
+          - text: "  ↳ 망치를 __ 도로 들어 올린다 (if 밖)"
+            blank: { answer: 180 }
+          - text: "  ↳ 0.1초 쉰다"
+        translation:
+          - ["두 조건이 모두 참이면", "if button.value() == 0 and d <= 20:"]
+          - ["1 부터 3 사이에서 뽑는다", "num = random.randint(1, 3)"]
+          - ["아니면", "else:"]
+          - ["망치를 90 도로", "servo.duty_u16(1638 + 90 * 6462 // 180)"]
+          - ["0.1초 쉰다", "time.sleep_ms(100)"]
+        targetCode: design_one_third.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 운은 정말 공평할까?
+        minutes: 5
+        scene:
+          image: images/relative-frequency.svg
+          caption: 우리 반 기록을 모으면 상대도수는 몇에 가까워졌나요?
+        body: |
+          먼저 미션 코드의 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+
+          수학 시간과 이어 보면, 모둠별 20번 · 50번 결과와 반 전체 합계를 표로 정리해 상대도수를 구하고, 횟수가 늘수록 1/2 에 가까워지는지 꺾은선 그래프로 그려 볼 수 있어요. 1/3 기계로 30번 해서 당첨이 10번 안팎인지도 비교해 봐요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 설명하기
+        lineExplain: mission_three_tries.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 20번 해서 당첨이 7번 나왔다면 이 기계는 불공평한 걸까요? 기록표와 상대도수로 설명해 보세요.
+          - 망치를 180° 로 되돌리는 줄은 왜 if 밖에 있어야 했나요?
+          - "다음엔 여기부터 본다: 한 줄로"

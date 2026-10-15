@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rha-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rha-title">망치 각도: 서보가 180도이면 망치가 위로 서서 기다리고, 90도이면 손 위에서 멈춰 당첨, 50도이면 손까지 내려와 꽝. 1초 뒤 다시 180도로 들어 올린다</title>
+  <!-- 책상과 받침 -->
+  <path d="M30 330 H600"/>
+  <rect x="120" y="230" width="100" height="100" rx="6" fill="var(--muted)"/>
+  <rect x="160" y="190" width="64" height="40" rx="5" fill="#c92a2a"/>
+  <circle cx="200" cy="210" r="8" fill="var(--card)"/>
+  <!-- 각도 호 -->
+  <path d="M200 160 A50 50 0 0 1 250 210" stroke-dasharray="4 5" opacity="0.6"/>
+  <path d="M250 210 A50 50 0 0 1 238 242" stroke-dasharray="4 5" opacity="0.6"/>
+  <!-- 180도: 위로 -->
+  <path d="M200 210 V100" stroke-width="5" stroke="#1971c2"/>
+  <rect x="180" y="80" width="40" height="22" rx="4" fill="var(--card)" stroke="#1971c2" stroke-width="2.5"/>
+  <text x="234" y="94" font-size="15" font-weight="700" fill="#1971c2" stroke="none">180° 기다리기</text>
+  <text x="234" y="114" font-size="13" fill="currentColor" stroke="none" opacity="0.75">처음과 1초 뒤에 늘 여기로</text>
+  <!-- 90도: 가로 -->
+  <path d="M200 210 H330" stroke-width="5" stroke="#2f9e44"/>
+  <rect x="330" y="198" width="24" height="24" rx="4" fill="var(--card)" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="366" y="208" font-size="15" font-weight="700" fill="#2f9e44" stroke="none">90° 당첨</text>
+  <text x="366" y="228" font-size="13" fill="currentColor" stroke="none" opacity="0.75">손 위에서 멈춰요</text>
+  <!-- 50도: 가로에서 40도 더 아래 -->
+  <path d="M200 210 L290 286" stroke-width="5" stroke="#e03131"/>
+  <rect x="284" y="278" width="26" height="22" rx="4" fill="var(--card)" stroke="#e03131" stroke-width="2.5" transform="rotate(40 297 289)"/>
+  <text x="402" y="290" font-size="15" font-weight="700" fill="#e03131" stroke="none">50° 꽝</text>
+  <text x="402" y="310" font-size="13" fill="currentColor" stroke="none" opacity="0.75">손까지 내려와 콩!</text>
+  <!-- 손 -->
+  <path d="M276 330 C276 316 288 308 306 308 H360 C372 308 374 320 364 322 H326" fill="var(--card)" stroke-width="2.5"/>
+  <!-- 1초 뒤 되돌림 -->
+  <path d="M100 290 C56 250 56 150 150 112" stroke-dasharray="6 5"/>
+  <path d="M139 106 L151 112 L143 122"/>
+  <text x="30" y="70" font-size="13" fill="currentColor" stroke="none">1초 뒤</text>
+  <text x="30" y="88" font-size="13" fill="currentColor" stroke="none">180° 로</text>
+  <!-- 각도와 신호 -->
+  <g font-size="13" fill="currentColor" stroke="none" opacity="0.85">
+    <text x="410" y="150">각도 → 서보 신호</text>
+    <text x="410" y="168">1638 + 각도 × 6462 // 180</text>
+  </g>
+</svg>

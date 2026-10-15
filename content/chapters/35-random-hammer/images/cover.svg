@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rhc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rhc-title">복불복 랜덤 망치: 상자 위 서보 모터에 종이컵 망치가 달려 있고, 아래 초음파 센서 앞에 손을 넣고 버튼을 누르면 망치가 90도에서 멈추면 당첨, 50도까지 내려와 손을 치면 꽝. OLED 화면에 WIN 또는 FAIL 이 뜬다</title>
+  <!-- 책상 -->
+  <path d="M20 318 H620"/>
+  <!-- 받침 상자 -->
+  <rect x="84" y="150" width="96" height="168" rx="6" fill="var(--muted)"/>
+  <text x="132" y="300" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" opacity="0.7">박스지 받침</text>
+  <!-- 서보 -->
+  <rect x="112" y="118" width="64" height="36" rx="5" fill="#c92a2a"/>
+  <circle cx="160" cy="136" r="9" fill="var(--card)"/>
+  <!-- 망치 (180도: 위로 서 있음) -->
+  <path d="M160 136 V52" stroke-width="7"/>
+  <path d="M160 136 V52" stroke="#c99c00" stroke-width="4"/>
+  <path d="M136 40 H184 L178 64 H142 Z" fill="var(--card)" stroke-width="2.5"/>
+  <text x="196" y="46" font-size="13" fill="currentColor" stroke="none">종이컵 망치</text>
+  <!-- 내려오는 길 (점선) -->
+  <path d="M248 136 A88 88 0 0 0 160 48" stroke-dasharray="5 6" opacity="0.5"/>
+  <path d="M228 210 A88 88 0 0 0 248 136" stroke-dasharray="5 6" opacity="0.5"/>
+  <path d="M220 214 L229 212 L231 202" opacity="0.6"/>
+  <!-- 손 -->
+  <path d="M206 318 C206 296 222 288 246 288 H306 C318 288 322 300 312 304 H262 M300 304 C314 304 316 316 304 318" fill="var(--card)" stroke-width="2.5"/>
+  <text x="262" y="344" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">손을 20cm 안에</text>
+  <!-- 초음파 센서 -->
+  <rect x="352" y="262" width="74" height="40" rx="5" fill="#5b9a1a"/>
+  <circle cx="372" cy="282" r="11" fill="var(--card)"/>
+  <circle cx="406" cy="282" r="11" fill="var(--card)"/>
+  <path d="M352 302 V318 M426 302 V318"/>
+  <g stroke="#5b9a1a" stroke-width="3">
+    <path d="M338 272 A22 22 0 0 0 338 296"/>
+    <path d="M326 264 A36 36 0 0 0 326 304"/>
+  </g>
+  <!-- 버튼 -->
+  <rect x="456" y="290" width="44" height="28" rx="4" fill="var(--muted)"/>
+  <circle cx="478" cy="290" r="10" fill="#6d3fe0"/>
+  <text x="478" y="344" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">버튼</text>
+  <!-- OLED 두 장면 -->
+  <rect x="346" y="96" width="104" height="64" rx="6" fill="#1e1e1e"/>
+  <text x="398" y="136" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">WIN</text>
+  <rect x="496" y="96" width="104" height="64" rx="6" fill="#1e1e1e"/>
+  <text x="548" y="136" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff" stroke="none">FAIL</text>
+  <text x="398" y="184" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">당첨 · 90°</text>
+  <text x="548" y="184" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">꽝 · 50°</text>
+  <text x="473" y="134" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">또는</text>
+  <!-- 질문 -->
+  <text x="346" y="58" font-size="16" font-weight="700" fill="currentColor" stroke="none">당첨일까, 꽝일까?</text>
+  <text x="346" y="80" font-size="14" fill="currentColor" stroke="none" opacity="0.75">정말 반반(1/2)일까?</text>
+</svg>
