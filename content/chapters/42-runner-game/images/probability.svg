@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rgp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rgp-title">수학으로 보기: random.randint(0, 2) 는 0, 1, 2 세 갈래가 똑같이 나와 0(벽돌)이 나올 확률은 1/3 이다. 30번 해 보면 0 이 10번쯤 나온다. 속력은 거리 나누기 시간: 한 프레임(0.1초)에 벽돌이 한 칸(8픽셀) 움직여 1초면 80픽셀, 15번 칸에서 1번 칸까지 14칸은 1.4초다. 프레임 간격을 0.05초로 줄이면 2배 빠르다</title>
+  <defs><marker id="rgp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="24" y="34" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">수학으로 보기: 확률 1/3, 속력</text>
+  <rect x="48.0" y="59.5" width="164.1" height="21" rx="10.5" fill="var(--card)" stroke-width="1.5" stroke="#f4af18"/><text x="130.0" y="74.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">random.randint(0, 2)</text>
+  <path d="M130 82 L60 112" stroke="currentColor" stroke-width="2" marker-end="url(#rgp-arrow)"/>
+  <rect x="38" y="114" width="44" height="36" rx="8" fill="var(--card)" stroke="#e03131" stroke-width="2"/>
+  <text x="60" y="139" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <path d="M130 82 L130 112" stroke="currentColor" stroke-width="2" marker-end="url(#rgp-arrow)"/>
+  <rect x="108" y="114" width="44" height="36" rx="8" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="130" y="139" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <path d="M130 82 L200 112" stroke="currentColor" stroke-width="2" marker-end="url(#rgp-arrow)"/>
+  <rect x="178" y="114" width="44" height="36" rx="8" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="200" y="139" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">2</text>
+  <text x="60" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">벽돌</text>
+  <text x="165" y="172" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">빈 칸</text>
+  <text x="130" y="200" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">세 갈래가 똑같이 나와요 → 벽돌 확률 1/3</text>
+  <text x="24" y="236" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">30번 해 보면 (예시)</text>
+  <rect x="24" y="246" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="40" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="56" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="72" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="88" y="246" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="104" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="120" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="136" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="152" y="246" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="168" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="184" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="200" y="246" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="216" y="246" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="232" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="248" y="246" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="24" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="40" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="56" y="264" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="72" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="88" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="104" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="120" y="264" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="136" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="152" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="168" y="264" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="184" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="200" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="216" y="264" width="14" height="14" rx="3" fill="#e03131" fill-opacity="0.85" stroke-width="1"/>
+  <rect x="232" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <rect x="248" y="264" width="14" height="14" rx="3" fill="var(--card)" fill-opacity="1" stroke-width="1"/>
+  <text x="24" y="304" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">0 이 10번쯤 → 10/30 = 1/3 (매번 꼭 10번은 아니에요)</text>
+  <text x="330" y="70" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">속력 = 거리 ÷ 시간</text>
+  <rect x="330" y="84" width="280" height="40" rx="6" fill="var(--muted)"/>
+  <rect x="334" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="351" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="368" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="385" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="402" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="419" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="436" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="453" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="470" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="487" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="504" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="521" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="538" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="555" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="572" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="589" y="92" width="14" height="24" rx="2" fill="var(--card)" stroke-width="1"/>
+  <rect x="555" y="92" width="14" height="24" rx="2" fill="#e03131" stroke-width="1"/>
+  <path d="M553 134 L540 134" stroke="#e03131" stroke-width="2" marker-end="url(#rgp-arrow)"/>
+  <text x="330" y="152" text-anchor="start" font-size="13" font-weight="600" fill="currentColor" stroke="none">한 프레임(0.1초)에 한 칸 = 8픽셀</text>
+  <text x="330" y="174" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">1초면 10칸 = 80픽셀</text>
+  <text x="330" y="196" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">15번 칸 → 1번 칸: 14칸 = 1.4초</text>
+  <path d="M330 212 H610" stroke-opacity="0.3"/>
+  <text x="330" y="236" text-anchor="start" font-size="14" font-weight="700" fill="currentColor" stroke="none">프레임 간격을 줄이면?</text>
+  <text x="330" y="258" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">0.1초 → 0.05초: 같은 거리를 반만에 → 2배 빠름</text>
+  <text x="330" y="280" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">점수가 오를수록 간격을 줄이면 점점 어려워져요</text>
+  <text x="330" y="304" text-anchor="start" font-size="12" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">표로 적어 보기: 간격(초) · 1초에 가는 칸 · 반응할 시간</text>
+</svg>

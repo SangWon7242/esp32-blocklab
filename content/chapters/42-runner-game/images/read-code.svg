@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rgr-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rgr-title">코드 읽기: 줄 번호가 붙은 코드 창을 돋보기로 보며 깃발이 올라가고 내려오는 길을 따라가고, 점프 상태 번호를 손가락으로 세고, 줄 번호를 누르기</title>
+  <rect x="40" y="28" width="380" height="306" rx="12" fill="var(--card)"/>
+  <path d="M40 58 H420"/>
+  <circle cx="62" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="80" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="98" cy="43" r="5" fill="var(--muted)"/>
+  <g font-size="12" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55">
+  <text x="74" y="86">1</text>
+  <text x="74" y="104">2</text>
+  <text x="74" y="122">3</text>
+  <text x="74" y="140">4</text>
+  <text x="74" y="158">5</text>
+  <text x="74" y="176">6</text>
+  <text x="74" y="194">7</text>
+  <text x="74" y="212">8</text>
+  <text x="74" y="230">9</text>
+  <text x="74" y="248">10</text>
+  <text x="74" y="266">11</text>
+  <text x="74" y="284">12</text>
+  <text x="74" y="302">13</text>
+  <text x="74" y="320">14</text>
+  </g>
+  <g fill="currentColor" stroke="none" opacity="0.28">
+  <rect x="90" y="78" width="150" height="8" rx="4"/>
+  <rect x="90" y="96" width="100" height="8" rx="4"/>
+  <rect x="90" y="114" width="60" height="8" rx="4"/>
+  <rect x="90" y="150" width="230" height="8" rx="4"/>
+  <rect x="90" y="168" width="200" height="8" rx="4"/>
+  <rect x="90" y="204" width="90" height="8" rx="4"/>
+  <rect x="112" y="222" width="120" height="8" rx="4"/>
+  <rect x="112" y="240" width="170" height="8" rx="4"/>
+  <rect x="134" y="258" width="100" height="8" rx="4"/>
+  <rect x="112" y="276" width="60" height="8" rx="4"/>
+  <rect x="134" y="294" width="140" height="8" rx="4"/>
+  <rect x="112" y="312" width="110" height="8" rx="4"/>
+  </g>
+  <circle cx="330" cy="170" r="38" fill="var(--muted)" fill-opacity="0.5" stroke-width="3"/>
+  <path d="M357 197 L388 228" stroke-width="7"/>
+  <circle cx="458" cy="110" r="13" fill="#4562f5" stroke="none"/>
+  <text x="458" y="115" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="480" y="111" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">깃발의 길 따라가기</text>
+  <text x="480" y="132" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">핸들러에서 올리고, 반복에서 내려요</text>
+  <circle cx="458" cy="188" r="13" fill="#4562f5" stroke="none"/>
+  <text x="458" y="193" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">2</text>
+  <text x="480" y="189" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">상태 번호 세기</text>
+  <text x="480" y="210" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">0 → 1 → 2 → 0 을 손가락으로</text>
+  <circle cx="458" cy="266" r="13" fill="#4562f5" stroke="none"/>
+  <text x="458" y="271" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">3</text>
+  <text x="480" y="267" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">줄 번호 누르기</text>
+  <text x="480" y="288" text-anchor="start" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.75" stroke="none">답은 코드 안에 있어요</text>
+</svg>

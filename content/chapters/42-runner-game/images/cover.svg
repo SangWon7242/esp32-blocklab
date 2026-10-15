@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rgc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rgc-title">달리는 디콘 표지: OLED 게임 화면에 점수 SCORE 12, 땅 위의 벽돌 네 개, 공중에 뜬 디콘이 있다. 작은 대기 화면에는 PRESS START 가 깜박인다. 14번 버튼을 누르는 순간 깃발이 올라가고 디콘이 점프한다. 벽돌은 한 프레임에 한 칸씩 다가오고, 디콘 칸에 벽돌이 있을 때 땅에 있으면 충돌이다. 점수는 달린 거리 ÷ 8</title>
+  <defs><marker id="rgc-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="32" y="38" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">버튼 하나로 하는 점프 게임</text>
+  <rect x="34" y="60" width="276" height="148" rx="8" fill="#1d4ed8"/>
+  <rect x="44" y="70" width="256" height="128" rx="2" fill="#0b1b4d" stroke="none"/>
+  <g fill="#7dd3fc" stroke="none">
+  <rect x="44" y="182" width="256" height="2"/>
+  <rect x="60" y="166" width="16" height="16"/>
+  <rect x="156" y="166" width="16" height="16"/>
+  <rect x="172" y="166" width="16" height="16"/>
+  <rect x="252" y="166" width="16" height="16"/>
+  <rect x="60" y="118" width="16" height="24"/>
+  <rect x="70" y="142" width="6" height="8"/>
+  <rect x="70" y="124" width="4" height="4" fill="#0b1b4d"/>
+  </g>
+  <text x="46" y="88" text-anchor="start" font-size="13.0" font-weight="700" fill="#7dd3fc" stroke="none">SCORE 12</text>
+  <text x="172" y="222" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">점프 중 (상태 2)</text>
+  <rect x="350" y="60" width="148" height="84" rx="8" fill="#1d4ed8"/>
+  <rect x="360" y="70" width="128" height="64" rx="2" fill="#0b1b4d" stroke="none"/>
+  <g fill="#7dd3fc" stroke="none">
+  </g>
+  <text x="424" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none">PRESS START</text>
+  <text x="424" y="156" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">대기 화면 (깜박임)</text>
+  <rect x="392" y="196" width="64" height="40" rx="6" fill="#495057" stroke-width="1.5"/>
+  <circle cx="424" cy="216" r="12" fill="#212529" stroke="#adb5bd" stroke-width="1.5"/>
+  <text x="424" y="254" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">버튼 14번</text>
+  <path d="M392 216 H322" stroke="currentColor" stroke-width="2.5" marker-end="url(#rgc-arrow)"/>
+  <rect x="300.8" y="190.0" width="112.3" height="20" rx="10.0" fill="var(--card)" stroke-width="1.5"/><text x="357.0" y="204.3" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">누르는 순간 → 깃발</text>
+  <text x="44" y="290" text-anchor="start" font-size="14" font-weight="600" fill="currentColor" stroke="none">벽돌은 한 프레임에 한 칸씩 디콘 쪽으로 다가와요</text>
+  <text x="44" y="314" text-anchor="start" font-size="14" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">디콘 칸(1번)에 벽돌이 있을 때 땅에 있으면 충돌 → GAME OVER</text>
+  <text x="44" y="338" text-anchor="start" font-size="14" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">점수 = 달린 거리 ÷ 8</text>
+</svg>

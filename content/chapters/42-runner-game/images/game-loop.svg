@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rgl-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rgl-title">게임 루프 원리: 한 바퀴가 한 프레임(0.1초)이다. 깃발 보기(pressed 면 점프 시작) → 상태 바꾸기(점프 1, 2, 0 과 벽돌 한 칸) → 충돌 판정(1번 칸 벽돌 and 땅) → 그리기(지우기, 그리기, 내보내기) → 0.1초 기다리기 → 다음 프레임. 버튼 인터럽트 함수 on_press 는 루프 밖에서 언제 눌러도 깃발만 올리고, 반복이 깃발을 보고 내린다</title>
+  <defs><marker id="rgl-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="24" y="34" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">게임 루프: 한 바퀴 = 한 프레임 (0.1초)</text>
+  <rect x="40" y="70" width="150" height="56" rx="10" fill="var(--card)" stroke="#4562f5" stroke-width="2"/>
+  <text x="115" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">깃발 보기</text>
+  <text x="115" y="113" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">pressed 면 점프 시작</text>
+  <rect x="210" y="70" width="150" height="56" rx="10" fill="var(--card)" stroke="#f4af18" stroke-width="2"/>
+  <text x="285" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">상태 바꾸기</text>
+  <text x="285" y="113" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">점프 1 → 2 → 0, 벽돌 한 칸</text>
+  <rect x="380" y="70" width="150" height="56" rx="10" fill="var(--card)" stroke="#e03131" stroke-width="2"/>
+  <text x="455" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">충돌 판정</text>
+  <text x="455" y="113" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">1번 칸 벽돌 and 땅</text>
+  <rect x="380" y="230" width="150" height="56" rx="10" fill="var(--card)" stroke="#1d4ed8" stroke-width="2"/>
+  <text x="455" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">그리기</text>
+  <text x="455" y="273" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">지우기 → 그리기 → 내보내기</text>
+  <rect x="210" y="230" width="150" height="56" rx="10" fill="var(--card)" stroke="#2f9e44" stroke-width="2"/>
+  <text x="285" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">기다리기</text>
+  <text x="285" y="273" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">0.1초 (한 프레임)</text>
+  <path d="M190 98 H206" stroke="currentColor" stroke-width="2" marker-end="url(#rgl-arrow)"/>
+  <path d="M360 98 H376" stroke="currentColor" stroke-width="2" marker-end="url(#rgl-arrow)"/>
+  <path d="M455 126 V226" stroke="currentColor" stroke-width="2" marker-end="url(#rgl-arrow)"/>
+  <path d="M380 258 H364" stroke="currentColor" stroke-width="2" marker-end="url(#rgl-arrow)"/>
+  <path d="M285 230 V160 H115 V130" stroke="currentColor" stroke-width="2" marker-end="url(#rgl-arrow)"/>
+  <text x="300" y="170" text-anchor="start" font-size="12" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">다음 프레임</text>
+  <rect x="40" y="230" width="150" height="56" rx="10" fill="var(--muted)" stroke="#00b6b1" stroke-width="2" stroke-dasharray="5 4"/>
+  <text x="115" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼 인터럽트</text>
+  <text x="115" y="273" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.8" stroke="none">on_press: 깃발 ↑ 만</text>
+  <path d="M115 230 V130" stroke="#00b6b1" stroke-width="2" marker-end="url(#rgl-arrow)"/>
+  <text x="60" y="185" text-anchor="start" font-size="12" font-weight="600" fill="#00b6b1" stroke="none">언제 눌러도</text>
+  <text x="60" y="201" text-anchor="start" font-size="12" font-weight="600" fill="#00b6b1" stroke="none">놓치지 않음</text>
+  <text x="24" y="326" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">핸들러는 깃발만 올리고, 반복이 깃발을 보고 내려요. 10프레임 = 1초, 벽돌 한 칸 = 8픽셀</text>
+</svg>

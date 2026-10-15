@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="rgb-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="rgb-title">벽돌 리스트 16칸: 지금 리스트에서 bricks.pop(0) 으로 0번 칸을 지우면 모든 벽돌의 번호가 1씩 줄어 디콘 칸(1번) 쪽으로 한 칸 다가온다. 새 벽돌은 append 로 맨 뒤 15번 칸에 들어가며, 15번 칸이 비어 있고 randint(0, 2) 가 0 일 때만 1 이다. i번 칸 벽돌은 화면 x = i × 8 에 그린다</title>
+  <defs><marker id="rgb-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <text x="24" y="34" text-anchor="start" font-size="16" font-weight="700" fill="currentColor" stroke="none">벽돌 리스트 16칸: pop(0) 하면 모두 한 칸 앞으로</text>
+  <text x="24" y="122" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">지금</text>
+  <rect x="110" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="123" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="123" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">0</text>
+  <rect x="140" y="96" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="153" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="153" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">1</text>
+  <rect x="170" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="183" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="183" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">2</text>
+  <rect x="200" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="213" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="213" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">3</text>
+  <rect x="230" y="96" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="243" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="243" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">4</text>
+  <rect x="260" y="96" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="273" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="273" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">5</text>
+  <rect x="290" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="303" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="303" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">6</text>
+  <rect x="320" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="333" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="333" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">7</text>
+  <rect x="350" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="363" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="363" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">8</text>
+  <rect x="380" y="96" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="393" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="393" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">9</text>
+  <rect x="410" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="423" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="423" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">10</text>
+  <rect x="440" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="453" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="453" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">11</text>
+  <rect x="470" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="483" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="483" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">12</text>
+  <rect x="500" y="96" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="513" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="513" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">13</text>
+  <rect x="530" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="543" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="543" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">14</text>
+  <rect x="560" y="96" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="573" y="120" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="573" y="146" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">15</text>
+  <rect x="147" y="66" width="12" height="18" rx="2" fill="#7dd3fc" stroke="none"/>
+  <rect x="147" y="84" width="5" height="6" fill="#7dd3fc" stroke="none"/>
+  <text x="123" y="80" text-anchor="start" font-size="12" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">디콘 칸은 1번</text>
+  <path d="M320 158 V186" stroke="currentColor" stroke-width="2" marker-end="url(#rgb-arrow)"/>
+  <text x="334" y="176" text-anchor="start" font-size="13" font-weight="600" fill="currentColor" stroke="none">bricks.pop(0) → 0번 칸 지우기 → 번호가 1씩 줄어요</text>
+  <text x="24" y="226" text-anchor="start" font-size="13" font-weight="700" fill="currentColor" stroke="none">다음 프레임</text>
+  <rect x="110" y="200" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="123" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="123" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">0</text>
+  <rect x="140" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="153" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="153" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">1</text>
+  <rect x="170" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="183" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="183" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">2</text>
+  <rect x="200" y="200" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="213" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="213" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">3</text>
+  <rect x="230" y="200" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="243" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="243" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">4</text>
+  <rect x="260" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="273" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="273" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">5</text>
+  <rect x="290" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="303" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="303" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">6</text>
+  <rect x="320" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="333" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="333" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">7</text>
+  <rect x="350" y="200" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="363" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="363" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">8</text>
+  <rect x="380" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="393" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="393" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">9</text>
+  <rect x="410" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="423" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="423" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">10</text>
+  <rect x="440" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="453" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="453" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">11</text>
+  <rect x="470" y="200" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="483" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="483" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">12</text>
+  <rect x="500" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="513" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="513" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">13</text>
+  <rect x="530" y="200" width="26" height="36" rx="4" fill="var(--card)" fill-opacity="1" stroke-width="1.5"/>
+  <text x="543" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <text x="543" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">14</text>
+  <rect x="560" y="200" width="26" height="36" rx="4" fill="#e03131" fill-opacity="0.85" stroke-width="1.5"/>
+  <text x="573" y="224" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="573" y="250" text-anchor="middle" font-size="12" font-weight="400" fill="currentColor" fill-opacity="0.6" stroke="none">15</text>
+  <rect x="147" y="170" width="12" height="18" rx="2" fill="#7dd3fc" stroke="none"/>
+  <rect x="147" y="188" width="5" height="6" fill="#7dd3fc" stroke="none"/>
+  <rect x="560" y="200" width="26" height="36" rx="4" fill="none" stroke="#2f9e44" stroke-width="2.5" stroke-dasharray="4 3"/>
+  <path d="M573 268 V246" stroke="#2f9e44" stroke-width="2" marker-end="url(#rgb-arrow)"/>
+  <text x="573" y="284" text-anchor="middle" font-size="12" font-weight="700" fill="#2f9e44" stroke="none">append(new)</text>
+  <text x="24" y="316" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">새 벽돌(new = 1)은 맨 뒤 15번 칸에. 15번 칸이 비어 있고 randint(0, 2) 가 0 일 때만</text>
+  <text x="24" y="340" text-anchor="start" font-size="13" font-weight="400" fill="currentColor" fill-opacity="0.85" stroke="none">i번 칸 벽돌은 화면 x = i × 8 에 8×8 로 그려요. 1번 칸에 1 이 오면 디콘과 같은 자리!</text>
+</svg>
