@@ -7,7 +7,7 @@ import type { AppInput } from "@/track/appCheck";
 import type { LoadedChapter } from "@/track/content";
 import { StepSchema, type StepOf } from "@/track/schema";
 import { AppStep } from "./AppStep";
-import { APP_FILE_NAME, saveAppToBoard, writeBoardFile } from "./appUpload";
+import { APP_FILE_NAME, saveAppToBoard } from "./appUpload";
 
 /*
  * 앱 단계 화면을 서버 렌더로 그려 본다 (testing-library 없이). 상호작용은 순수 함수 테스트(src/track/appCheck.test.ts)가 맡는다.
@@ -86,15 +86,6 @@ describe("AppStep 화면", () => {
 });
 
 describe("보드에 index.html 저장 (가짜 보드)", () => {
-  it("writeBoardFile 은 파일을 쓰고 로그를 남긴다", async () => {
-    const device = new FakeDevice();
-    await device.connect();
-    const log: string[] = [];
-    await writeBoardFile(device, "a.html", "<html></html>", (t) => log.push(t));
-    expect(device.files.get("a.html")).toBe("<html></html>");
-    expect(log).toEqual(["a.html 올리는 중…", "a.html 저장 완료"]);
-  });
-
   it("saveAppToBoard 는 index.html 을 쓰고 보드를 다시 시작한다", async () => {
     const device = new FakeDevice();
     await device.connect();

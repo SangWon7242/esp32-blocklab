@@ -1,29 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DeviceError, type Device, type DeviceStatus } from "@/device";
+import { writeBoardFile } from "../../lab/saveToBoard";
 import { createDevice } from "../../lab/useDevice";
 
-/*
- * 앱 단계의 보드 연결과 index.html 저장.
- * TODO(④-A 머지 뒤): 아래 임시 writeBoardFile 을 지우고 src/app/lab/saveToBoard.ts 의 writeBoardFile 을 import 한다 (같은 시그니처).
- */
+/* 앱 단계의 보드 연결과 index.html 저장. 파일 쓰기는 라이브러리 올리기와 같은 길(saveToBoard.writeBoardFile). */
 
 /** 보드에 저장할 앱 파일 이름 (ESP32 웹서버가 / 에 내준다) */
 export const APP_FILE_NAME = "index.html";
-
-/**
- * 임시: 보드에 파일 하나를 쓴다 (라이브러리 올리기와 같은 로그). ④-A 의 saveToBoard.writeBoardFile 과 같은 꼴.
- * 보드 쪽 실패는 학생 문구로 바꿔 던진다 (장치 오류는 이미 학생 문구라 그대로).
- */
-export async function writeBoardFile(device: Device, name: string, text: string, log: (text: string) => void = () => {}): Promise<void> {
-  log(`${name} 올리는 중…`);
-  try {
-    await device.saveFile(name, text);
-  } catch (e) {
-    if (e instanceof DeviceError) throw e;
-    throw new Error(`보드에 저장하지 못했어요: ${e instanceof Error ? e.message : String(e)}`, { cause: e });
-  }
-  log(`${name} 저장 완료`);
-}
 
 /** index.html 을 쓰고 보드를 다시 시작한다 (파일을 쓰느라 멈춘 main.py 웹서버가 다시 돈다) */
 export async function saveAppToBoard(device: Device, html: string, log: (text: string) => void = () => {}): Promise<void> {
