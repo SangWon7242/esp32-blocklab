@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="tp-alarm-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="tp-alarm-title">넘어짐 경보기의 흐름. 끝없이 되풀이하며 틸트 값을 읽고 "기울었는가?"를 묻는다. 예(값 1)이면 LED를 켜고 부저를 0.2초 켰다가 0.2초 끈다(삐삐). 아니오(값 0)이면 LED와 부저를 끈다. 두 길 모두 0.1초 쉬고 다시 처음으로 돌아간다</title>
+  <defs>
+    <marker id="tp-alarm-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <!-- 되풀이 -->
+  <rect x="20" y="16" width="600" height="328" rx="16" stroke-dasharray="8 7" stroke-opacity="0.5"/>
+  <text x="40" y="42" font-size="14" font-weight="700" fill="currentColor" stroke="none">끝없이 되풀이</text>
+  <!-- 읽기 -->
+  <rect x="190" y="56" width="180" height="40" rx="20" fill="var(--card)" stroke-width="1.8"/>
+  <text x="280" y="81" text-anchor="middle" font-size="15" font-weight="600" fill="currentColor" stroke="none">틸트 값 읽기</text>
+  <path d="M280 96 V112" marker-end="url(#tp-alarm-arrow)"/>
+  <!-- 판단 -->
+  <path d="M280 116 L360 146 L280 176 L200 146 Z" fill="#4562f5" fill-opacity="0.14" stroke="#4562f5" stroke-width="1.8"/>
+  <text x="280" y="151" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">기울었는가?</text>
+  <path d="M200 146 H130 V190" marker-end="url(#tp-alarm-arrow)"/>
+  <path d="M360 146 H430 V190" marker-end="url(#tp-alarm-arrow)"/>
+  <text x="166" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">예 (1)</text>
+  <text x="396" y="138" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">아니오 (0)</text>
+  <!-- 넘어짐 -->
+  <rect x="44" y="194" width="172" height="86" rx="12" fill="#e03131" fill-opacity="0.12" stroke="#e03131" stroke-width="1.8"/>
+  <text x="130" y="218" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">넘어졌어요</text>
+  <text x="130" y="240" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">LED 켜기</text>
+  <text x="130" y="260" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">부저 켜고 · 끄고 (삐삐)</text>
+  <!-- 바로 섬 -->
+  <rect x="344" y="194" width="172" height="86" rx="12" fill="var(--card)" stroke-width="1.8"/>
+  <text x="430" y="218" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">바로 서 있어요</text>
+  <text x="430" y="240" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">LED 끄기</text>
+  <text x="430" y="260" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">부저 끄기 (조용히)</text>
+  <!-- 모여서 쉬고 처음으로 -->
+  <path d="M130 280 V306 H250" marker-end="url(#tp-alarm-arrow)"/>
+  <path d="M430 280 V306 H310" marker-end="url(#tp-alarm-arrow)"/>
+  <rect x="250" y="292" width="60" height="28" rx="14" fill="var(--card)" stroke-width="1.5"/>
+  <text x="280" y="311" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">쉬기</text>
+  <path d="M280 320 V334 H560 V76 H374" marker-end="url(#tp-alarm-arrow)" stroke-opacity="0.6"/>
+  <text x="572" y="200" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none" transform="rotate(90 572 200)" text-anchor="middle">다시 처음으로</text>
+</svg>

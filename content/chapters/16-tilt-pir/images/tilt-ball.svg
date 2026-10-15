@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="tp-ball-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="tp-ball-title">틸트 스위치 속 구슬. 바로 섰을 때는 금속 구슬이 아래로 내려와 두 다리 끝을 이어 주고, 버튼을 누른 것처럼 값은 0. 기울이면 구슬이 굴러가 두 다리가 떨어지고, 버튼에서 손을 뗀 것처럼 값은 1. 옛날에는 구슬 대신 수은 방울을 썼다. 모듈과 배선에 따라 0과 1이 반대일 수 있으니 먼저 출력해서 확인한다</title>
+  <!-- 바로 섰을 때 -->
+  <rect x="20" y="16" width="290" height="250" rx="14" fill="var(--card)" stroke-width="1.8"/>
+  <text x="40" y="46" font-size="17" font-weight="700" fill="currentColor" stroke="none">바로 섰을 때</text>
+  <rect x="133" y="56" width="64" height="120" rx="22" fill="var(--muted)" stroke-width="2.5"/>
+  <path d="M152 176 V150 M178 176 V150" stroke="#868e96" stroke-width="5"/>
+  <path d="M152 176 V198 M178 176 V198" stroke-width="3"/>
+  <circle cx="165" cy="140" r="17" fill="#adb5bd" stroke-width="2"/>
+  <circle cx="159" cy="134" r="5" fill="#ffffff" fill-opacity="0.8" stroke="none"/>
+  <g stroke="#f4af18" stroke-width="3">
+    <path d="M120 150 L108 154"/><path d="M210 150 L222 154"/>
+  </g>
+  <text x="226" y="128" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">금속 구슬</text>
+  <text x="196" y="196" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">두 다리</text>
+  <text x="165" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">구슬이 두 다리를 이어요</text>
+  <rect x="85" y="236" width="160" height="24" rx="12" fill="currentColor" fill-opacity="0.1" stroke-width="1.5"/>
+  <text x="165" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">값 0 (누른 버튼처럼)</text>
+  <!-- 기울였을 때 -->
+  <rect x="330" y="16" width="290" height="250" rx="14" fill="var(--card)" stroke-width="1.8"/>
+  <text x="350" y="46" font-size="17" font-weight="700" fill="currentColor" stroke="none">기울였을 때</text>
+  <g transform="rotate(-100 476 128)">
+    <rect x="444" y="68" width="64" height="120" rx="22" fill="var(--muted)" stroke-width="2.5"/>
+    <path d="M463 188 V162 M489 188 V162" stroke="#868e96" stroke-width="5"/>
+    <path d="M463 188 V210 M489 188 V210" stroke-width="3"/>
+    <circle cx="476" cy="90" r="17" fill="#adb5bd" stroke-width="2"/>
+  </g>
+  <path d="M510 180 Q476 196 444 180 M452 178 L444 180 L449 187" stroke-width="2"/>
+  <text x="475" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">구슬이 굴러가 다리가 떨어져요</text>
+  <rect x="385" y="236" width="180" height="24" rx="12" fill="#2f9e44" fill-opacity="0.2" stroke="#2f9e44" stroke-width="1.5"/>
+  <text x="475" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">값 1 (손 뗀 버튼처럼)</text>
+  <!-- 아래 안내 -->
+  <text x="320" y="294" text-anchor="middle" font-size="14" fill="currentColor" fill-opacity="0.8" stroke="none">옛날 기울기 스위치는 구슬 대신 수은 방울을 썼어요. 수은은 몸에 해로워 지금은 금속 구슬을 써요</text>
+  <rect x="96" y="310" width="448" height="38" rx="19" fill="#4562f5" fill-opacity="0.14" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="320" y="334" text-anchor="middle" font-size="14" font-weight="600" fill="currentColor" stroke="none">0 과 1 이 반대인 모듈도 있어요 → 먼저 출력해서 확인</text>
+</svg>
