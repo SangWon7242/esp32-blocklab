@@ -1,8 +1,8 @@
 import { issueAt, realBlocks, subtree } from "../walk";
 import type { FlatBlock, LintContext, Rule } from "../types";
 
-/** 이 블록이 있으면 반복이 쉬어 간다 (기다리기와 안에서 기다리는 장치 명령) */
-const SLEEPERS = new Set(["flow_wait", "flow_wait_ms", "flow_wait_us", "dev_led_blink", "dev_beeper_tone", "dev_beeper_note", "dev_flow_run"]);
+/** 이 블록이 있으면 반복이 쉬어 간다 (기다리기와 안에서 기다리는 장치 명령. 요청 받기는 손님이 올 때까지 기다린다) */
+const SLEEPERS = new Set(["flow_wait", "flow_wait_ms", "flow_wait_us", "dev_led_blink", "dev_beeper_tone", "dev_beeper_note", "dev_flow_run", "dev_web_accept"]);
 const LOOPS = new Set(["flow_repeat_forever", "controls_whileUntil"]);
 
 /**

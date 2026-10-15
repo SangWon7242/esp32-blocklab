@@ -14,13 +14,14 @@ import { rawCode } from "./rules/rawCode";
 import { breakOutsideLoop, repeatReusesI } from "./rules/breakOutsideLoop";
 import { irqHandler } from "./rules/irqHandler";
 import { globalVariable } from "./rules/globalVariable";
+import { webAcceptOutsideLoop, wifiAdc2 } from "./rules/net";
 
 export type { ConsoleEntry, Issue, Level, LintWorkspaceJson } from "./types";
 export { blockLabel } from "./labels";
 export { formatConsole } from "./format";
 export { alignLines } from "./align";
 
-export const RULES: Rule[] = [noStart, emptyInput, deviceBeforeSetup, pinRule, valueRange, pinConflict, loopWithoutSleep, irqHandler, breakOutsideLoop, repeatReusesI, globalVariable, orphan, undefinedVariable, rawCode];
+export const RULES: Rule[] = [noStart, emptyInput, deviceBeforeSetup, pinRule, valueRange, pinConflict, loopWithoutSleep, irqHandler, breakOutsideLoop, repeatReusesI, globalVariable, wifiAdc2, webAcceptOutsideLoop, orphan, undefinedVariable, rawCode];
 
 const LEVEL_RANK: Record<Level, number> = { error: 0, warning: 1, info: 2 };
 

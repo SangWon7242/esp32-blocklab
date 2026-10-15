@@ -123,7 +123,7 @@ export function requiredInputs(type: string, extraState: unknown): string[] {
 }
 
 /** 고정 이름 장치를 "먼저 준비해 주세요" 문구에 쓸 때의 이름 (기본은 장치 label) */
-const DEVICE_NOUNS: Record<string, string> = { oled: "OLED 화면" };
+const DEVICE_NOUNS: Record<string, string> = { oled: "OLED 화면", wifi: "WiFi 연결" };
 export const deviceNoun = (deviceId: string, label: string): string => DEVICE_NOUNS[deviceId] ?? label;
 
 // ── 조사 ──────────────────────────────────────────────

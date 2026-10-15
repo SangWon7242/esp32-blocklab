@@ -41,6 +41,16 @@ export async function syncLibs(
 }
 
 /**
+ * 보드에 파일 하나를 쓴다 (웹서버가 내주는 index.html 등). 라이브러리 올리기와 같은 길(device.saveFile)·같은 로그:
+ * "index.html 올리는 중…" → "index.html 저장 완료". 보드 쪽 실패는 학생 문구로 감싼다. main.py 는 건드리지 않는다.
+ */
+export async function writeBoardFile(device: Device, name: string, text: string, log: (text: string) => void = () => undefined): Promise<void> {
+  log(`${name} 올리는 중…`);
+  await onBoard(() => device.saveFile(name, text));
+  log(`${name} 저장 완료`);
+}
+
+/**
  * 보드에 저장: 라이브러리를 맞춘 뒤(syncLibs) → main.py → 소프트 리셋(main.py 가 바로 돈다).
  * 진행은 log 로 한 줄씩 (콘솔 system 행). 실패하면 그 자리에서 멈추고 오류를 던진다.
  */

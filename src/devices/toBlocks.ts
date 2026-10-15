@@ -87,7 +87,7 @@ const byToolboxOrder = (ds: DeviceSpec[]): DeviceSpec[] =>
     .sort((a, b) => (a.d.toolboxOrder ?? Infinity) - (b.d.toolboxOrder ?? Infinity) || a.i - b.i)
     .map((x) => x.d);
 
-/** 하드웨어 카테고리 8개 (DEVICE_CATEGORIES 순). 장치가 없는 카테고리는 빈 채로 둔다 */
+/** 하드웨어 카테고리 9개 (DEVICE_CATEGORIES 순). 장치가 없는 카테고리는 빈 채로 둔다 */
 export function deviceToolboxCategories(): ToolboxCategory[] {
   return DEVICE_CATEGORIES.map((c) => ({
     kind: "category", name: c.label, categorystyle: `${c.id}_category`, icon: c.id,

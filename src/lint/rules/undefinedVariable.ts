@@ -1,4 +1,4 @@
-import { findSetupByBlock } from "@/devices/registry";
+import { findActionByBlock, findSetupByBlock } from "@/devices/registry";
 import { definedNames } from "@/parser/codeNames";
 import { blockValues } from "../device";
 import { issueAt, realBlocks } from "../walk";
@@ -32,6 +32,8 @@ export const undefinedVariable: Rule = (ctx) => {
       const params = (b.extraState as { params?: unknown } | undefined)?.params;
       if (Array.isArray(params)) for (const p of params) add(ctx.varName(p));
     } else {
+      // 학생 변수에 값을 정하는 장치 명령 (요청 받기 → conn·path·query)
+      findActionByBlock(b.type)?.defines?.forEach(add);
       const setup = findSetupByBlock(b.type);
       if (!setup) continue;
       // 준비가 만드는 이름만 (변수 핀 준비의 핀 번호 칸 PINVAR 는 읽는 변수다)

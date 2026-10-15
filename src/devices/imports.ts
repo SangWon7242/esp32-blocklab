@@ -12,6 +12,8 @@ export const IMPORT_RULES: ImportRule[] = [
   { when: /\birGetCMD\(/, line: "from irrecvdata import irGetCMD", rank: 3 },
   { when: /\blcd128_32\(/, line: "from lcd128_32 import lcd128_32", rank: 3 },
   { when: /\blcd128_32\(/, line: "import lcd128_32_fonts", rank: 3 },
+  { when: /\bnetwork\./, line: "import network", rank: 3 },
+  { when: /\bsocket\./, line: "import socket", rank: 3 },
 ];
 
 /** 생성기가 `Name(` 이 보이면 `from machine import …` 로 가져오는 이름 (이 순서로) */

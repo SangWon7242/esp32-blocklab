@@ -423,3 +423,75 @@ describe("lint: 순서와 줄 번호", () => {
     expect(runMapped(json)).toEqual([]);
   });
 });
+
+describe("WiFi·웹서버 검사 (계획 11 ④)", () => {
+  const wifi = { type: "dev_wifi_connect", id: "wifi", fields: { SSID: "MyWiFi", PASSWORD: "12345678" } };
+  const ap = { type: "dev_wifi_ap", id: "ap", fields: { NAME: "ESP32-LAB", PASSWORD: "12345678" } };
+  const web = { type: "dev_web_setup", id: "web", fields: { PORT: 80 } };
+  const accept = (id = "acc"): B => ({ type: "dev_web_accept", id });
+  const adcAt = (id: string, pin: number, name: string): B => ({ type: "dev_adc_setup", id, fields: { PIN: pin, VAR: { id: `var_${name}` } } });
+  const light = (id: string, pin: number): B => ({ type: "dev_light_setup", id, fields: { PIN: pin, VAR: { id: "var_light" } } });
+  const print = (id: string, value: B): B => ({ type: "esp_print", id, inputs: { VALUE: { block: value } } });
+
+  describe("wifi-adc2", () => {
+    it("WiFi 준비가 있으면 ADC2 핀(25·4…)의 아날로그 준비에 주의", () => {
+      const issues = only(run(program([wifi, adcAt("a1", 25, "knob"), light("l1", 4), adcAt("a2", 34, "x")], { vars: ["knob", "light", "x"] })), "wifi-adc2");
+      expect(issues.map((i) => i.blockId)).toEqual(["a1", "l1"]);
+      expect(issues[0]).toEqual({
+        id: "wifi-adc2", level: "warning", blockId: "a1",
+        ko: "WiFi 를 쓰는 동안 이 핀은 아날로그 값을 못 읽어요. 32~39 번 핀으로 옮겨 주세요",
+        en: "Warning: ADC2 pin 25 can't be read while WiFi is on (use pins 32-39)",
+      });
+    });
+    it("공유기 모드도 WiFi 를 쓴다", () => {
+      expect(only(run(program([ap, adcAt("a1", 26, "knob")], { vars: ["knob"] })), "wifi-adc2").map((i) => i.blockId)).toEqual(["a1"]);
+    });
+    it("WiFi 가 없거나 ADC1 핀(32~39)이면 없음", () => {
+      expect(only(run(program([adcAt("a1", 25, "knob")], { vars: ["knob"] })), "wifi-adc2")).toEqual([]);
+      expect(only(run(program([wifi, adcAt("a1", 36, "knob"), light("l1", 39)], { vars: ["knob", "light"] })), "wifi-adc2")).toEqual([]);
+    });
+    it("디지털 출력 핀(25)은 WiFi 와 함께 써도 된다", () => {
+      expect(only(run(program([wifi, pinSetup("p", "led", 25)], { vars: ["led"] })), "wifi-adc2")).toEqual([]);
+    });
+  });
+
+  describe("web-accept-outside-loop", () => {
+    it("반복 밖의 요청 받기 → 주의", () => {
+      const issues = only(run(program([wifi, web, accept()])), "web-accept-outside-loop");
+      expect(issues).toEqual([{
+        id: "web-accept-outside-loop", level: "warning", blockId: "acc",
+        ko: "요청 받기는 계속 반복 안에 두어야 여러 번 받을 수 있어요", en: "Warning: web_accept() outside a loop answers only one request",
+      }]);
+    });
+    it("계속 반복 안·만약 안의 반복·함수 몸통 안이면 없음", () => {
+      const def = { type: "procedures_defnoreturn", id: "def", fields: { NAME: "serve" }, inputs: { STACK: { block: accept("in_def") } } };
+      const json = program([wifi, web, forever("loop", [accept("in_loop")])], { tops: [def] });
+      expect(only(run(json), "web-accept-outside-loop")).toEqual([]);
+    });
+  });
+
+  it("요청 받기가 있는 반복은 기다리기가 없어도 바쁘지 않다 (손님을 기다린다)", () => {
+    expect(only(run(program([wifi, web, forever("loop", [accept()])])), "loop-without-sleep")).toEqual([]);
+  });
+
+  it("요청 받기가 정한 path·query·conn 은 정의된 변수", () => {
+    const json = program([wifi, web, forever("loop", [accept(), print("p", varGet("path")), print("q", varGet("query"))])], { vars: ["path", "query"] });
+    expect(only(run(json), "undefined-variable")).toEqual([]);
+    const without = program([print("p", varGet("path", "g"))], { vars: ["path"] });
+    expect(only(run(without), "undefined-variable").map((i) => i.blockId)).toEqual(["g"]);
+  });
+
+  it("IP 주소는 연결·공유기 모드 어느 쪽으로 준비해도 된다, 둘 다 없으면 오류", () => {
+    const ip = (id: string): B => print(id, { type: "dev_wifi_ip", id: `${id}_ip` });
+    expect(only(run(program([ap, ip("p")])), "device-before-setup")).toEqual([]);
+    expect(only(run(program([wifi, ip("p")])), "device-before-setup")).toEqual([]);
+    const issues = only(run(program([ip("p")])), "device-before-setup");
+    expect(issues.map((i) => [i.blockId, i.ko, i.en])).toEqual([["p_ip", "WiFi 연결을 먼저 준비해 주세요", "NameError: name 'ip' is not defined"]]);
+  });
+
+  it("웹서버 준비 없이 응답 블록 → 오류", () => {
+    const send = { type: "dev_web_send_text", id: "s", inputs: { TEXT: { block: str("hi") } } };
+    const issues = only(run(program([forever("loop", [send])])), "device-before-setup");
+    expect(issues.map((i) => [i.blockId, i.ko])).toEqual([["s", "웹서버를 먼저 준비해 주세요"]]);
+  });
+});

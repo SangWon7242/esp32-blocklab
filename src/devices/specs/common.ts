@@ -1,14 +1,19 @@
-import type { Part, PinDir, SetupPattern } from "../types";
+import type { HelperSpec, Part, PinDir, SetupPattern } from "../types";
 
 /** 핀 번호 칸 (0~39)과 그 핀의 쓰임 */
 export const pinNo = (name: string, d: number, dir: PinDir): Part => ({ kind: "pin", name, default: d, dir });
 
 /** ESP32 에서 ADC 로 읽을 수 있는 GPIO (ADC1: 32~39, ADC2: 0·2·4·12~15·25~27). dir "adc" 핀은 이 중 하나여야 한다 */
 export const ADC_PINS: readonly number[] = [0, 2, 4, 12, 13, 14, 15, 25, 26, 27, 32, 33, 34, 35, 36, 37, 38, 39];
+/** ADC2 쪽 아날로그 핀. WiFi 가 켜져 있는 동안은 읽을 수 없다 (검사 wifi-adc2) */
+export const ADC2_PINS: readonly number[] = [0, 2, 4, 12, 13, 14, 15, 25, 26, 27];
 /** ESP32 내장 터치 패드 핀 (T0~T9 순: 4·0·2·15·13·12·14·27·33·32). dir "touch" 핀은 이 중 하나여야 한다 */
 export const TOUCH_PINS: readonly number[] = [4, 0, 2, 15, 13, 12, 14, 27, 33, 32];
 /** I2C 주소 칸(LCD·RFID)의 글: 16진수 1~2자리 */
 export const I2C_ADDR = /^0x[0-9a-fA-F]{1,2}$/;
+
+/** 템플릿 맨 앞의 대입 꼴 `a = ` / `a, b, c = `. 생성기는 이 뒤의 도우미 호출을 맨 앞 호출로 본다 (devices.test.ts 불변식도) */
+export const LEADING_ASSIGN = /^\w+(?:, \w+)* = /;
 
 /** 패턴 정규식 조각: 이름 `(\w+)`, 숫자 `(\d+)` */
 export const RE_NAME = String.raw`(\w+)`;
@@ -20,7 +25,7 @@ export const validPins = (...ns: string[]): boolean => ns.every((n) => Number(n)
  * blockly/python 의 Order 값. specs 는 파서도 불러오므로 Blockly 를 import 하지 않고 숫자로 적는다
  * (값이 Blockly 와 같은지는 pin.test.ts 가 본다).
  */
-export const ORDER = { FUNCTION_CALL: 2.2, MULTIPLICATIVE: 5, ADDITIVE: 6, RELATIONAL: 11 } as const;
+export const ORDER = { ATOMIC: 0, FUNCTION_CALL: 2.2, MULTIPLICATIVE: 5, ADDITIVE: 6, RELATIONAL: 11 } as const;
 
 /**
  * 생성기가 도우미 호출 이름 앞뒤에 붙이는 표시 글자 (유니코드 사용자 영역, MicroPythonGenerator.helperCall).
@@ -106,3 +111,10 @@ export const isSingleArg = (text: string): boolean => {
   const top = topLevelChars(text);
   return top !== null && !top.includes(",");
 };
+
+/**
+ * 도우미 함수의 생성 코드 꼴 (`def name(params):` + 4칸 들여쓴 본문). 본문의 2칸 단위 들여쓰기를 4칸으로 바꾼다 (생성기의
+ * provideFunction_ 과 같다). 블록 사전 예시와 테스트가 도우미 정의를 손으로 베끼지 않게 쓴다.
+ */
+export const helperDef = (h: HelperSpec): string =>
+  [`def ${h.name}(${h.params}):`, ...h.body.map((l) => "    " + l.replace(/^ +/, (sp) => sp.repeat(2)))].join("\n");

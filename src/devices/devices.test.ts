@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { defaultValues, DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupSpecs } from "./registry";
-import { ADC_PINS, TOUCH_PINS } from "./specs/common";
+import { defaultValues, DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupsOf, setupSpecs } from "./registry";
+
+import { ADC_PINS, LEADING_ASSIGN, TOUCH_PINS } from "./specs/common";
 import { setupLinesAt } from "@/parser/devices";
 import { deviceBlockDefinitions, deviceToolboxCategories } from "./toBlocks";
 import { collectImports } from "@/codegen/imports";
@@ -58,6 +59,7 @@ describe("툴박스 순서 (toolboxOrder)", () => {
       "모터": ["서보 모터", "DC 모터", "릴레이"],
       "화면": ["OLED", "LCD 128×32", "7세그먼트"],
       "입력장치": ["RFID", "키패드", "IR 리모컨"],
+      "통신": ["WiFi", "웹서버"],
     });
   });
 });
@@ -73,7 +75,9 @@ describe("import 규칙", () => {
     expect(isGeneratedImport("import time as t")).toBe(false);
     expect(isGeneratedImport("from machine import Pin as P")).toBe(false);
     expect(isGeneratedImport("import random")).toBe(true);
-    expect(isGeneratedImport("import network")).toBe(false);
+    expect(isGeneratedImport("import network")).toBe(true);
+    expect(isGeneratedImport("import socket")).toBe(true);
+    expect(isGeneratedImport("import os")).toBe(false);
   });
 });
 
@@ -133,15 +137,38 @@ describe("계획 2B 검사용 메타데이터", () => {
 });
 
 describe("레지스트리 불변식", () => {
-  it("명령·값 템플릿은 도우미를 맨 앞에서만, 자기 장치의 것만 부른다 (생성기가 맨 앞 호출만 바뀐 이름으로 고친다)", () => {
-    const helperOwner = new Map(DEVICES.flatMap((d) => (d.setup?.helpers ?? []).map((h) => [h.name, d.id] as const)));
+  it("명령·값 템플릿은 도우미를 맨 앞에서만(대입 `a, b = ` 뒤 포함), 자기 장치의 것만 부른다 (생성기가 맨 앞 호출만 바뀐 이름으로 고친다)", () => {
+    const helperOwner = new Map(DEVICES.flatMap((d) => setupsOf(d).flatMap((s) => s.helpers ?? []).map((h) => [h.name, d.id] as const)));
     for (const d of DEVICES) for (const spec of [...d.actions, ...d.values]) {
       const code = spec.code(defaultValues(spec.parts));
+      const head = LEADING_ASSIGN.exec(code)?.[0].length ?? 0;
       for (const [name, owner] of helperOwner) {
         const at = [...code.matchAll(new RegExp(String.raw`(?<![\w.])${name}\(`, "g"))].map((m) => m.index);
         if (!at.length) continue;
-        expect({ at, owner }, `${spec.blockType}: ${code}`).toEqual({ at: [0], owner: d.id });
+        expect({ at, owner }, `${spec.blockType}: ${code}`).toEqual({ at: [head], owner: d.id });
       }
+    }
+  });
+  it("도우미를 부르는 준비 줄(afterHelpers)은 대입 뒤 맨 앞에서 자기 도우미를 부른다", () => {
+    for (const s of setupSpecs()) {
+      if (!s.afterHelpers) continue;
+      const names = (s.helpers ?? []).map((h) => h.name);
+      for (const line of s.lines(defaultValues(s.parts))) {
+        const rest = line.slice(LEADING_ASSIGN.exec(line)?.[0].length ?? 0);
+        expect(names.some((n) => rest.startsWith(`${n}(`)), `${s.blockType}: ${line}`).toBe(true);
+      }
+    }
+  });
+  it("선택 도우미 호출은 템플릿에서 값 칸보다 앞에 온다 (생성기가 처음 나온 호출 하나만 표시한다)", () => {
+    for (const d of DEVICES) for (const a of d.actions) {
+      if (!a.helper) continue;
+      const v = defaultValues(a.parts);
+      for (const p of a.parts) if (p.kind === "value") v[p.name] = `VALUE_${p.name}`;
+      const code = a.code(v);
+      const at = code.search(new RegExp(String.raw`(?<![\w.])${a.helper.name}\(`));
+      const firstValue = Math.min(...a.parts.filter((p) => p.kind === "value").map((p) => code.indexOf(`VALUE_${p.name}`)), Infinity);
+      expect(at, a.blockType).toBeGreaterThanOrEqual(0);
+      expect(at, a.blockType).toBeLessThan(firstValue);
     }
   });
   it("명령 lines 패턴의 첫 정규식은 어느 준비 블록의 첫 줄(기본값)에도 맞지 않는다", () => {

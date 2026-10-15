@@ -8,10 +8,12 @@ import { buzzerActive, buzzerPassive } from "./specs/sound";
 import { lcd, oled, seg7 } from "./specs/display";
 import { ir, keypad, rfid } from "./specs/input";
 import { printer } from "./specs/misc";
+import { web, wifi } from "./specs/net";
 
 export const DEVICE_CATEGORIES: { id: DeviceCategory; label: string }[] = [
   { id: "pin", label: "핀" }, { id: "led", label: "LED" }, { id: "switch", label: "버튼·스위치" }, { id: "sensor", label: "센서" },
   { id: "sound", label: "소리" }, { id: "motor", label: "모터" }, { id: "display", label: "화면" }, { id: "input", label: "입력장치" },
+  { id: "net", label: "통신" },
 ];
 
 /**
@@ -28,6 +30,7 @@ export const DEVICES: DeviceSpec[] = [
   pinOut, ledPwm, led, rgb, flowLed,
   buzzerActive, buzzerPassive, dcMotor, relay,
   pwm, printer,
+  wifi, web,
 ];
 
 /** 장치의 준비 블록들: setup 다음에 extraSetups (툴박스 순서) */

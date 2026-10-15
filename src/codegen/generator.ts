@@ -44,6 +44,8 @@ const HELPER_CALL = new RegExp(`${HELPER_MARK}(\\w+)${HELPER_MARK}`, "g");
  */
 export class MicroPythonGenerator extends PythonGenerator {
   setupLines: string[] = [];
+  /** setupLines 중 도우미를 부르는 준비 줄 번호 (SetupSpec.afterHelpers). finish 가 함수 정의 뒤, 본문 앞에 둔다 */
+  private lateSetup = new Set<number>();
   /** setupLines 번호 → 그 줄 위·끝에 붙일 준비 블록 코멘트 */
   private setupComments = new Map<number, SplitComment>();
   /** 시작 블록 코멘트: 파일 맨 위(import 보다 위) 주석 줄 */
@@ -78,6 +80,7 @@ export class MicroPythonGenerator extends PythonGenerator {
     super.init(workspace);
     delete this.definitions_["variables"];
     this.setupLines = [];
+    this.lateSetup.clear();
     this.setupComments.clear();
     this.headerLines = [];
     this.lastSetupLine = null;
@@ -96,6 +99,17 @@ export class MicroPythonGenerator extends PythonGenerator {
       if (i === 0) this.lastSetupLine = at;
       return at;
     });
+  }
+
+  /** 이 준비 줄들(addSetup 이 돌려준 번호)은 도우미를 부르므로 함수 정의 뒤에 둔다 */
+  markLateSetup(indices: number[]): void {
+    for (const i of indices) this.lateSetup.add(i);
+  }
+
+  /** 준비 줄 번호들을 [맨 위에 둘 것, 함수 정의 뒤에 둘 것] 으로 */
+  private splitSetup(): [number[], number[]] {
+    const all = this.setupLines.map((_, i) => i);
+    return [all.filter((i) => !this.lateSetup.has(i)), all.filter((i) => this.lateSetup.has(i))];
   }
 
   /** 준비 블록 장부: 이 블록이 낸 준비 줄들 (addSetup 이 돌려준 번호) */
@@ -193,7 +207,8 @@ export class MicroPythonGenerator extends PythonGenerator {
         if (/^(from\s+\S+\s+)?import\s+\S+/.test(def)) continue;
         (name.startsWith("%") ? defs : helpers).push(def.replace(/\n+$/, ""));
       }
-      const sections = [this.setupLines.join("\n"), ...helpers, ...defs, code].filter((s) => s.trim());
+      const [early, late] = this.splitSetup().map((ix) => ix.map((i) => this.setupLines[i]).join("\n"));
+      const sections = [early, ...helpers, ...defs, late, code].filter((s) => s.trim());
       return this.resolveHelperCalls(sections.join("\n\n"));
     } finally {
       this.isInitialized = false;
@@ -220,18 +235,24 @@ export class MicroPythonGenerator extends PythonGenerator {
     this.nameDB_?.reset();
 
     const functions = [...helpers, ...defs];
-    const generated = collectImports(stripTags([this.setupLines.join("\n"), ...functions, code].join("\n")));
+    const setupText = this.setupLines.map((line) => this.resolveHelperCalls(line));
+    const generated = collectImports(stripTags([setupText.join("\n"), ...functions, code].join("\n")));
     const { imports, body: rest } = hoistImports(code, generated, stripTags);
     const body = rest.replace(/\n+$/, "");
     const sections: string[] = [];
-    const setup = this.setupLines.map((line, i) => {
+    const setupLine = (i: number) => {
+      const line = setupText[i];
       const tag = (l: string) => (mapped ? tagLine(l, this.setupOwners[i] ?? []) : l);
       const c = this.setupComments.get(i);
       return c ? [...c.above.map(commentLine), c.trailing ? `${line}  # ${c.trailing}` : line].map(tag).join("\n") : tag(line);
-    });
-    if (setup.length) sections.push(setup.join("\n"));
+    };
+    const [early, late] = this.splitSetup().map((ix) => ix.map(setupLine));
+    if (early.length) sections.push(early.join("\n"));
     if (functions.length) sections.push(functions.join("\n\n\n"));
-    if (body) sections.push(body);
+    // 도우미를 부르는 준비 줄(ip = wifi_connect(…))은 함수 정의 뒤, 본문 바로 위 (빈 줄 하나를 두고 본문)
+    const lateText = late.join("\n");
+    if (lateText && body) sections.push(`${lateText}\n\n${body}`);
+    else if (lateText || body) sections.push(lateText || body);
     const text = sections.join(sections.length > 1 && functions.length ? "\n\n\n" : "\n\n");
     const header = this.headerLines.length ? this.headerLines.map(commentLine).join("\n") + "\n\n" : "";
     const out = header + (imports.length ? imports.join("\n") + "\n\n" : "") + text;

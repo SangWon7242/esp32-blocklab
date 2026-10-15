@@ -8,6 +8,7 @@ import { soundContent } from "./sound";
 import { motorContent } from "./motor";
 import { displayContent } from "./display";
 import { inputContent } from "./input";
+import { netContent } from "./net";
 
 /** 블록 종류 → 손으로 쓴 설명 (개념·예시·팁) */
 export const CONTENT: Record<string, BlockContent> = {
@@ -20,4 +21,5 @@ export const CONTENT: Record<string, BlockContent> = {
   ...motorContent,
   ...displayContent,
   ...inputContent,
+  ...netContent,
 };

@@ -13,6 +13,11 @@ export class ParseContext {
   readonly devices = new Map<string, { deviceId: string; kind: string }>();
   /** 도우미 함수까지 표준 본문으로 확인되어 접힌 장치 id. 그 장치의 call 패턴과 def 생략이 켜진다 */
   readonly folded = new Set<string>();
+  /**
+   * 도우미까지 표준 본문으로 확인되어 접힌 준비 블록 type. 한 장치에 도우미가 다른 준비가 둘 이상일 때(WiFi 연결·공유기 모드)
+   * 쓰인 준비의 도우미만 접고, 그 준비 줄만 블록이 된다 (folded 는 장치 단위: 값·명령 패턴이 쓴다)
+   */
+  readonly foldedSetups = new Set<string>();
   /** 명령 블록의 선택 도우미(ActionSpec.helper) 중 표준 본문으로 확인되어 접힌 이름. 그 명령의 call 패턴과 def 생략이 켜진다 */
   readonly foldedActionHelpers = new Set<string>();
   readonly functions = new Map<string, FunctionInfo>();
