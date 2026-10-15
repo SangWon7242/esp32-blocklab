@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ws-rr-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ws-rr-title">요청과 응답 순서도. 1 폰이 주소를 보낸다(요청: 경로 /data). 2 보드가 요청을 받고 센서를 측정한다. 3 보드가 경로를 보고 JSON 또는 페이지로 답한다(응답은 한 번만). 4 폰이 받아서 보여 준다. 페이지는 2초마다 다시 1 로 돌아간다</title>
+  <!-- 폰 -->
+  <rect x="48" y="60" width="92" height="170" rx="12" fill="var(--card)" stroke-width="2.2"/>
+  <rect x="58" y="76" width="72" height="134" rx="5" fill="#0f7c8c" fill-opacity="0.08" stroke-width="1.2"/>
+  <text x="94" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">폰 (손님)</text>
+  <text x="94" y="140" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">주소창에</text>
+  <text x="94" y="158" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">/data</text>
+  <!-- 보드 -->
+  <rect x="500" y="92" width="100" height="106" rx="10" fill="var(--card)" stroke-width="2.2"/>
+  <text x="550" y="218" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">ESP32 (서버)</text>
+  <text x="550" y="134" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="550" y="156" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7" stroke="none">웹서버 포트 80</text>
+  <!-- 1 요청 -->
+  <path d="M150 100 H488" stroke="#0f7c8c" stroke-width="2.5"/>
+  <path d="M480 94 L488 100 L480 106" stroke="#0f7c8c" stroke-width="2.5"/>
+  <circle cx="176" cy="100" r="11" fill="#0f7c8c" stroke="none"/>
+  <text x="176" y="104.5" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="330" y="92" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">요청: 경로 /data 를 보여 줘</text>
+  <!-- 2 측정 -->
+  <rect x="246" y="124" width="168" height="40" rx="8" fill="var(--muted)" stroke-width="1.5"/>
+  <circle cx="262" cy="144" r="11" fill="#5b9a1a" stroke="none"/>
+  <text x="262" y="148.5" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">2</text>
+  <text x="284" y="140" font-size="12" font-weight="600" fill="currentColor" stroke="none">요청 받기 → 측정하기</text>
+  <text x="284" y="156" font-size="11" fill="currentColor" fill-opacity="0.7" stroke="none">measure() 로 새 값을 재요</text>
+  <path d="M414 144 H500" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- 3 응답 -->
+  <path d="M488 190 H150" stroke="#f4af18" stroke-width="2.5"/>
+  <path d="M158 184 L150 190 L158 196" stroke="#f4af18" stroke-width="2.5"/>
+  <circle cx="462" cy="190" r="11" fill="#f4af18" stroke="none"/>
+  <text x="462" y="194.5" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">3</text>
+  <text x="310" y="182" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">응답: 경로를 보고 하나만 골라 답하기</text>
+  <text x="310" y="212" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">/data 면 JSON · 그 밖이면 페이지 · 한 요청에 응답은 하나</text>
+  <!-- 4 보여 주기 -->
+  <circle cx="94" cy="250" r="11" fill="#4562f5" stroke="none"/>
+  <text x="94" y="254.5" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">4</text>
+  <text x="116" y="255" font-size="13" font-weight="600" fill="currentColor" stroke="none">받은 글을 화면에 보여 줘요</text>
+  <!-- 되돌아가는 화살표 (새로고침) -->
+  <path d="M94 268 V300 H330 V232" stroke-width="1.8" stroke-dasharray="6 5"/>
+  <path d="M324 240 L330 232 L336 240" stroke-width="1.8"/>
+  <rect x="352" y="290" width="200" height="22" rx="11" fill="var(--card)" stroke-width="1.5"/>
+  <text x="452" y="305.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">페이지는 2초마다 다시 1 부터</text>
+  <text x="320" y="344" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">보드는 1 을 기다리며 서 있다가 손님이 오면 2 → 3 을 하고 다시 기다려요</text>
+</svg>

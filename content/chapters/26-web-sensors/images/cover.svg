@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ws-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ws-cover-title">교실의 ESP32 보드가 온습도·조도 센서 값을 WiFi 로 내보내고, 집에 있는 폰 화면에 교실 상황판(T: 24C, H: 40%)이 보인다. 폰 아래에는 앱이 읽는 JSON 글 {"temp": 24, "hum": 40} 이 적혀 있다</title>
+  <rect x="0" y="0" width="640" height="360" fill="var(--muted)" stroke="none"/>
+  <!-- 교실 쪽: 보드와 센서 -->
+  <rect x="36" y="118" width="212" height="150" rx="12" fill="var(--card)" stroke-width="1.8"/>
+  <text x="142" y="142" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">교실</text>
+  <rect x="64" y="160" width="86" height="60" rx="6" fill="var(--muted)"/>
+  <text x="107" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <rect x="166" y="158" width="38" height="28" rx="3" fill="#1c7ed6" fill-opacity="0.35" stroke-width="1.5"/>
+  <text x="185" y="177" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor" stroke="none">DHT11</text>
+  <circle cx="185" cy="212" r="9" fill="#f4e3b0" stroke-width="1.5"/>
+  <path d="M178 208 h14 M178 212 h14 M178 216 h14" stroke="#8b5a2b" stroke-width="1.2"/>
+  <path d="M150 174 H166 M150 212 H176" stroke-width="1.5"/>
+  <text x="142" y="252" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">온도 · 습도 · 밝기를 재요</text>
+  <!-- WiFi 물결 -->
+  <g stroke="#0f7c8c" stroke-width="2.5">
+    <path d="M292 193 A14 14 0 0 1 292 167"/>
+    <path d="M308 206 A32 32 0 0 1 308 154"/>
+    <path d="M324 219 A50 50 0 0 1 324 141"/>
+  </g>
+  <circle cx="276" cy="180" r="3.5" fill="#0f7c8c" stroke="none"/>
+  <path d="M340 180 H386" stroke-width="2" stroke-dasharray="6 5"/>
+  <path d="M380 174 L388 180 L380 186" stroke-width="2"/>
+  <!-- 집 쪽: 폰 -->
+  <path d="M398 120 L470 72 L542 120" stroke-width="2"/>
+  <text x="470" y="106" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">집</text>
+  <rect x="418" y="118" width="104" height="166" rx="14" fill="var(--card)" stroke-width="2.2"/>
+  <rect x="428" y="132" width="84" height="132" rx="6" fill="#0f7c8c" fill-opacity="0.08" stroke-width="1.2"/>
+  <rect x="434" y="138" width="72" height="13" rx="3" fill="currentColor" fill-opacity="0.1" stroke="none"/>
+  <text x="470" y="148" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.7" stroke="none">192.168.0.23/</text>
+  <text x="470" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">교실 상황판</text>
+  <text x="470" y="197" text-anchor="middle" font-size="16" font-weight="700" fill="#e03131" stroke="none">T: 24C</text>
+  <text x="470" y="223" text-anchor="middle" font-size="16" font-weight="700" fill="#1c7ed6" stroke="none">H: 40%</text>
+  <text x="470" y="248" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.65" stroke="none">2초마다 새로고침</text>
+  <circle cx="470" cy="275" r="4" stroke-width="1.5"/>
+  <!-- 앱이 읽는 JSON -->
+  <rect x="396" y="310" width="214" height="30" rx="8" fill="var(--card)" stroke="#0f7c8c" stroke-width="1.5"/>
+  <text x="503" y="330" text-anchor="middle" font-size="13" font-weight="600" fill="#0f7c8c" stroke="none">{"temp": 24, "hum": 40}</text>
+  <text x="396" y="303" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">앱이 읽는 데이터(JSON)</text>
+  <!-- 말풍선 -->
+  <rect x="28" y="28" width="330" height="70" rx="14" fill="var(--card)" stroke-width="1.8"/>
+  <text x="48" y="56" font-size="18" font-weight="700" fill="currentColor" stroke="none">교실 온도를 집에서 폰으로 볼까?</text>
+  <text x="48" y="82" font-size="14" fill="currentColor" fill-opacity="0.75" stroke="none">사람이 보는 페이지와 앱이 읽는 데이터는 달라요</text>
+</svg>

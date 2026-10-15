@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ws-pvj-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ws-pvj-title">같은 보드가 주소에 따라 다르게 답한다. 주소 끝이 / 이면 사람이 보는 HTML 페이지(제목, T: 24C, H: 40%, 2초마다 새로고침)를, /data 이면 앱이 읽는 JSON 글 {"temp": 24, "hum": 40} 을 보낸다. HTML 은 글자가 꾸며져 있고 JSON 은 이름과 값만 있다</title>
+  <!-- 가운데 보드 -->
+  <rect x="262" y="140" width="116" height="80" rx="10" fill="var(--card)" stroke-width="2"/>
+  <text x="320" y="172" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="320" y="194" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">같은 코드 하나</text>
+  <text x="320" y="246" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">경로가 무엇인가?</text>
+  <!-- 왼쪽: 사람 페이지 -->
+  <path d="M262 165 H180" stroke="#0f7c8c" stroke-width="2.5"/>
+  <path d="M188 159 L180 165 L188 171" stroke="#0f7c8c" stroke-width="2.5"/>
+  <rect x="190" y="144" width="60" height="18" rx="9" fill="var(--card)" stroke="#0f7c8c" stroke-width="1.5"/>
+  <text x="220" y="157" text-anchor="middle" font-size="12" font-weight="700" fill="#0f7c8c" stroke="none">/ (페이지)</text>
+  <rect x="40" y="66" width="130" height="230" rx="14" fill="var(--card)" stroke-width="2.2"/>
+  <rect x="52" y="84" width="106" height="190" rx="6" fill="#0f7c8c" fill-opacity="0.08" stroke-width="1.2"/>
+  <text x="105" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">교실 상황판</text>
+  <path d="M64 130 H146" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="105" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#e03131" stroke="none">T: 24C</text>
+  <text x="105" y="190" text-anchor="middle" font-size="16" font-weight="700" fill="#1c7ed6" stroke="none">H: 40%</text>
+  <text x="105" y="232" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.65" stroke="none">2초마다 새로고침</text>
+  <text x="105" y="52" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">사람이 보는 것</text>
+  <text x="105" y="318" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">HTML: 제목·글자·꾸밈</text>
+  <text x="105" y="336" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">눈으로 읽기 좋아요</text>
+  <!-- 오른쪽: 앱 데이터 -->
+  <path d="M378 165 H460" stroke="#f4af18" stroke-width="2.5"/>
+  <path d="M452 159 L460 165 L452 171" stroke="#f4af18" stroke-width="2.5"/>
+  <rect x="384" y="144" width="70" height="18" rx="9" fill="var(--card)" stroke="#f4af18" stroke-width="1.5"/>
+  <text x="419" y="157" text-anchor="middle" font-size="12" font-weight="700" fill="#b07a00" stroke="none">/data (JSON)</text>
+  <rect x="470" y="96" width="150" height="150" rx="12" fill="var(--card)" stroke-width="2.2"/>
+  <rect x="470" y="96" width="150" height="26" rx="12" fill="currentColor" fill-opacity="0.08" stroke="none"/>
+  <text x="545" y="114" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" fill-opacity="0.8" stroke="none">앱 · 프로그램</text>
+  <text x="484" y="156" font-size="14" font-weight="600" fill="#b07a00" stroke="none">{</text>
+  <text x="498" y="178" font-size="14" font-weight="600" fill="#b07a00" stroke="none">"temp": 24,</text>
+  <text x="498" y="200" font-size="14" font-weight="600" fill="#b07a00" stroke="none">"hum": 40</text>
+  <text x="484" y="222" font-size="14" font-weight="600" fill="#b07a00" stroke="none">}</text>
+  <text x="545" y="86" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">앱이 읽는 것</text>
+  <text x="545" y="286" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">JSON: 이름과 값만</text>
+  <text x="545" y="304" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">프로그램이 꺼내 쓰기 좋아요</text>
+  <text x="545" y="322" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">폰 브라우저로 열면 글자 그대로 보여요</text>
+</svg>
