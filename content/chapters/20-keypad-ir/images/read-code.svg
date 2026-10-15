@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="kr-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="kr-title">코드 읽기: 코드 창을 돋보기로 보며 안 눌렸을 때 값 떠올리기, 한 바퀴 쉬는 시간 찾기, 줄 번호 누르기</title>
+  <rect x="48" y="28" width="380" height="308" rx="12" fill="var(--card)"/>
+  <path d="M48 58 H428"/>
+  <circle cx="70" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="88" cy="43" r="5" fill="var(--muted)"/>
+  <circle cx="106" cy="43" r="5" fill="var(--muted)"/>
+  <g font-size="12" text-anchor="end" fill="currentColor" stroke="none" opacity="0.55"><text x="84" y="94">1</text><text x="84" y="116">2</text><text x="84" y="138">3</text><text x="84" y="160">4</text><text x="84" y="182">5</text><text x="84" y="204">6</text><text x="84" y="226">7</text><text x="84" y="248">8</text><text x="84" y="270">9</text><text x="84" y="292">10</text></g>
+  <g fill="currentColor" stroke="none" opacity="0.28"><rect x="100" y="86" width="90" height="8" rx="4"/><rect x="100" y="108" width="160" height="8" rx="4"/><rect x="100" y="152" width="250" height="8" rx="4"/><rect x="100" y="196" width="80" height="8" rx="4"/><rect x="122" y="218" width="200" height="8" rx="4"/><rect x="122" y="240" width="60" height="8" rx="4"/><rect x="144" y="262" width="90" height="8" rx="4"/><rect x="122" y="284" width="120" height="8" rx="4"/></g>
+  <circle cx="352" cy="244" r="38" fill="var(--muted)" fill-opacity="0.5" stroke-width="3"/>
+  <path d="M379 271 L404 296" stroke-width="7"/>
+  <circle cx="466" cy="105" r="13" fill="#4562f5" stroke="none"/>
+  <text x="466" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="488" y="110" font-size="16" font-weight="700" fill="currentColor" stroke="none">없을 때 떠올리기</text>
+  <text x="488" y="132" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">안 오면 무엇이 담길까</text>
+  <circle cx="466" cy="181" r="13" fill="#4562f5" stroke="none"/>
+  <text x="466" y="186" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">2</text>
+  <text x="488" y="186" font-size="16" font-weight="700" fill="currentColor" stroke="none">한 바퀴 시간</text>
+  <text x="488" y="208" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">쉬는 초를 찾아요</text>
+  <circle cx="466" cy="257" r="13" fill="#4562f5" stroke="none"/>
+  <text x="466" y="262" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">3</text>
+  <text x="488" y="262" font-size="16" font-weight="700" fill="currentColor" stroke="none">줄 번호 누르기</text>
+  <text x="488" y="284" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">줄 앞 회색 숫자</text>
+</svg>

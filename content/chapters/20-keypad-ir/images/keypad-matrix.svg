@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="km-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="km-title">키패드 원리: 키 16개가 가로 행 선 4개(26 · 25 · 17 · 16)와 세로 열 선 4개(27 · 14 · 12 · 13)가 만나는 자리에 있다. 보드는 행을 하나씩 켜고(1), 키가 눌리면 그 행과 열이 이어져 열 핀에 1 이 들어온다. 행 2 를 켰을 때 열 2 에 1 이 들어오면 눌린 키는 5. 열 핀은 풀다운이라 안 누르면 0. 핀 8개로 키 16개를 읽는다</title>
+  <path d="M108 88 H352" stroke="currentColor" stroke-width="2"/>
+  <text x="100" y="93" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">행1</text>
+  <text x="100" y="109" text-anchor="end" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">26</text>
+  <path d="M108 144 H352" stroke="#f76707" stroke-width="4"/>
+  <text x="100" y="149" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">행2</text>
+  <text x="100" y="165" text-anchor="end" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">25</text>
+  <path d="M108 200 H352" stroke="currentColor" stroke-width="2"/>
+  <text x="100" y="205" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">행3</text>
+  <text x="100" y="221" text-anchor="end" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">17</text>
+  <path d="M108 256 H352" stroke="currentColor" stroke-width="2"/>
+  <text x="100" y="261" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">행4</text>
+  <text x="100" y="277" text-anchor="end" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">16</text>
+  <path d="M150 64 V286" stroke="currentColor" stroke-width="2"/>
+  <text x="150" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">열1</text>
+  <text x="150" y="332" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">27</text>
+  <path d="M206 64 V286" stroke="#2f9e44" stroke-width="4"/>
+  <text x="206" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">열2</text>
+  <text x="206" y="332" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">14</text>
+  <path d="M262 64 V286" stroke="currentColor" stroke-width="2"/>
+  <text x="262" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">열3</text>
+  <text x="262" y="332" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">12</text>
+  <path d="M318 64 V286" stroke="currentColor" stroke-width="2"/>
+  <text x="318" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">열4</text>
+  <text x="318" y="332" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.6" stroke="none">13</text>
+  <rect x="133" y="71" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="150" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <rect x="189" y="71" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="206" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">2</text>
+  <rect x="245" y="71" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="262" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">3</text>
+  <rect x="301" y="71" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="318" y="93" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">A</text>
+  <rect x="133" y="127" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="150" y="149" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">4</text>
+  <rect x="189" y="127" width="34" height="34" rx="6" fill="#f59f00" stroke-width="2.5"/>
+  <text x="206" y="149" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">5</text>
+  <rect x="245" y="127" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="262" y="149" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">6</text>
+  <rect x="301" y="127" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="318" y="149" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">B</text>
+  <rect x="133" y="183" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="150" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">7</text>
+  <rect x="189" y="183" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="206" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">8</text>
+  <rect x="245" y="183" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="262" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">9</text>
+  <rect x="301" y="183" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="318" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">C</text>
+  <rect x="133" y="239" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="150" y="261" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">*</text>
+  <rect x="189" y="239" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="206" y="261" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <rect x="245" y="239" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="262" y="261" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">#</text>
+  <rect x="301" y="239" width="34" height="34" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="318" y="261" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">D</text>
+  <text x="366" y="149" font-size="12" font-weight="700" fill="#f76707" stroke="none">켜짐 1</text>
+  <path d="M206 286 V298" stroke="#2f9e44" stroke-width="4"/>
+  <text x="214" y="297" font-size="12" font-weight="700" fill="#2f9e44" stroke="none">1 이 와요</text>
+  <circle cx="438" cy="99" r="12" fill="#4562f5" stroke="none"/>
+  <text x="438" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="458" y="104" font-size="15" font-weight="700" fill="currentColor" stroke="none">행을 하나씩 켜요</text>
+  <text x="458" y="125" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">26 → 25 → 17 → 16 차례로</text>
+  <circle cx="438" cy="169" r="12" fill="#4562f5" stroke="none"/>
+  <text x="438" y="174" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" stroke="none">2</text>
+  <text x="458" y="174" font-size="15" font-weight="700" fill="currentColor" stroke="none">눌린 키가 길을 이어요</text>
+  <text x="458" y="195" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">5 를 누르면 행2 와 열2</text>
+  <circle cx="438" cy="239" r="12" fill="#4562f5" stroke="none"/>
+  <text x="438" y="244" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" stroke="none">3</text>
+  <text x="458" y="244" font-size="15" font-weight="700" fill="currentColor" stroke="none">1 이 온 열을 봐요</text>
+  <text x="458" y="265" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">행2 + 열2 → 키 5</text>
+  <rect x="424" y="290" width="196" height="50" rx="10" fill="var(--muted)" stroke="none"/>
+  <text x="436" y="311" font-size="13" font-weight="600" fill="currentColor" stroke="none">열 핀은 풀다운: 안 누르면 0</text>
+  <text x="436" y="330" font-size="13" font-weight="600" fill="currentColor" stroke="none">핀 8개로 키 16개</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ki-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ki-title">IR 원리: 리모컨 버튼을 누르면 앞쪽 LED 가 눈에 안 보이는 빛(적외선)을 1초에 38,000번 깜빡이며 보낸다. IR 수신기는 깜빡임 묶음을 켜짐 · 쉼 신호로 바꾸고, 쉬는 시간이 짧으면 0, 길면 1 이다. 0 · 1 32개를 모아 16진수 글자 하나로 만든다. 버튼마다 다른 글자가 나온다</title>
+  <text x="24" y="40" font-size="18" font-weight="700" fill="currentColor" stroke="none">버튼 하나 = 0 · 1 서른두 개</text>
+  <rect x="34" y="96" width="56" height="124" rx="14" fill="var(--card)" stroke-width="2.5"/>
+  <circle cx="62" cy="90" r="5" fill="#e03131" stroke="none"/>
+  <circle cx="62" cy="126" r="11" fill="var(--muted)" stroke-width="1.5"/>
+  <rect x="44" y="148" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="57" y="148" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="70" y="148" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="44" y="164" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="57" y="164" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="70" y="164" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="44" y="180" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="57" y="180" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="70" y="180" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="44" y="196" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="57" y="196" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="70" y="196" width="10" height="10" rx="2" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="33.5" y="233.0" width="57.0" height="22" rx="11.0" fill="var(--card)" stroke-width="1.5"/>
+  <text x="62" y="248.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">리모컨</text>
+  <path d="M83 72 A22 22 0 0 1 83 108" stroke="#e03131" stroke-width="3" stroke-dasharray="5 6" stroke-opacity="0.9"/>
+  <path d="M94 58 A40 40 0 0 1 94 122" stroke="#e03131" stroke-width="3" stroke-dasharray="5 6" stroke-opacity="0.7"/>
+  <path d="M105 44 A58 58 0 0 1 105 136" stroke="#e03131" stroke-width="3" stroke-dasharray="5 6" stroke-opacity="0.5"/>
+  <rect x="172" y="74" width="44" height="30" rx="5" fill="#343a40" stroke-width="2"/>
+  <path d="M184 74 A10 10 0 0 1 204 74" fill="#343a40" stroke-width="2"/>
+  <path d="M182 104 V128 M194 104 V128 M206 104 V128" stroke-width="2.5"/>
+  <text x="182" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" stroke="none">S</text>
+  <text x="194" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" stroke="none">−</text>
+  <text x="206" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor" stroke="none">+</text>
+  <rect x="153.4" y="159.0" width="81.2" height="22" rx="11.0" fill="var(--card)" stroke-width="1.5"/>
+  <text x="194" y="174.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">IR 수신기</text>
+  <path d="M228 92 H262" stroke-width="2"/><path d="M254 86 L262 92 L254 98" stroke-width="2"/>
+  <rect x="270" y="58" width="350" height="150" rx="12" fill="var(--muted)" stroke="none"/>
+  <text x="284" y="82" font-size="13" font-weight="700" fill="currentColor" stroke="none">S 핀에 들어오는 신호</text>
+  <path d="M284 150 V112 H328 V150 H350 V112 H358 V150 H366 V112 H374 V150 H382 V112 H390 V150 H412 V112 H420 V150 H442 V112 H450 V150 H458 V112 H466 V150 H488 V112 H496 V150 H504 V112 H512 V150 H534 H542" stroke="#2f9e44" stroke-width="3"/>
+  <text x="306" y="172" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">시작</text>
+  <text x="362.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1971c2" stroke="none">0</text>
+  <text x="378.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1971c2" stroke="none">0</text>
+  <text x="401.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">1</text>
+  <text x="431.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">1</text>
+  <text x="454.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1971c2" stroke="none">0</text>
+  <text x="477.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">1</text>
+  <text x="500.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1971c2" stroke="none">0</text>
+  <text x="523.0" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">1</text>
+  <text x="556" y="134" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">…</text>
+  <text x="284" y="196" font-size="13" font-weight="600" fill="currentColor" stroke="none">쉬는 시간이 짧으면 0, 길면 1</text>
+  <path d="M444 216 V238" stroke-width="2"/><path d="M438 230 L444 238 L450 230" stroke-width="2"/>
+  <rect x="270" y="246" width="350" height="92" rx="12" fill="var(--card)" stroke-width="2"/>
+  <text x="284" y="272" font-size="13" font-weight="700" fill="currentColor" stroke="none">0 · 1 32개를 모아 16진수 글자로</text>
+  <rect x="284" y="284" width="118" height="40" rx="8" fill="#1e1e1e" stroke="none"/>
+  <text x="343" y="310" text-anchor="middle" font-size="16" font-weight="700" fill="#69db7c" stroke="none">0xff02fd</text>
+  <text x="414" y="300" font-size="13" font-weight="600" fill="currentColor" stroke="none">버튼마다 다른 글자</text>
+  <text x="414" y="320" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">안 누르면 None</text>
+  <text x="24" y="290" font-size="13" font-weight="700" fill="currentColor" stroke="none">IR = 적외선(Infrared)</text>
+  <text x="24" y="310" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">눈에 안 보이는 빛을</text>
+  <text x="24" y="330" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">1초에 38,000번 깜빡여요</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="kc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="kc-title">표지: 두 장면. 비밀번호 문 — 문 옆 키패드에 네 자리를 눌러 열어요(카드를 잃어버려도 열 수 있을까요?). 리모컨으로 켜요 — 리모컨이 눈에 안 보이는 빛을 보내면 전등의 IR 수신기가 받아 불이 켜져요(손이 닿지 않아도 어떻게 알까요?)</title>
+  <rect x="16" y="16" width="296" height="328" rx="16" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="328" y="16" width="296" height="328" rx="16" fill="var(--muted)" stroke-width="2.5"/>
+  <text x="36" y="56" font-size="20" font-weight="700" fill="currentColor" stroke="none">번호로 열어요</text>
+  <text x="36" y="82" font-size="14" fill="currentColor" fill-opacity="0.75" stroke="none">카드를 잃어버려도 열 수 있을까요?</text>
+  <path d="M28 318 H300" stroke-width="3"/>
+  <rect x="54" y="118" width="116" height="200" rx="4" fill="var(--muted)" stroke-width="2.5"/>
+  <rect x="66" y="132" width="92" height="74" rx="3" stroke-width="1.5" stroke-opacity="0.5"/>
+  <rect x="66" y="222" width="92" height="82" rx="3" stroke-width="1.5" stroke-opacity="0.5"/>
+  <circle cx="150" cy="222" r="6" fill="currentColor" stroke="none"/>
+  <rect x="196" y="140" width="84" height="132" rx="10" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="206" y="150" width="64" height="24" rx="4" fill="#1e1e1e" stroke="none"/>
+  <text x="238" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#69db7c" stroke="none">* * * *</text>
+  <rect x="208" y="182" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="229" y="182" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="250" y="182" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="208" y="203" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="229" y="203" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="250" y="203" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="208" y="224" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="229" y="224" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="250" y="224" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="208" y="245" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="229" y="245" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="250" y="245" width="16" height="16" rx="3" fill="var(--muted)" stroke-width="1.2"/>
+  <rect x="229" y="203" width="16" height="16" rx="3" fill="#f59f00" stroke-width="1.2"/>
+  <path d="M262 236 C252 226 244 218 241 212" stroke-width="7"/>
+  <path d="M262 236 C252 226 244 218 241 212" stroke="#e8c4a0" stroke-width="4.5"/>
+  <path d="M196 104 L230 138" stroke-width="1.5"/>
+  <rect x="113.9" y="91.0" width="112.1" height="22" rx="11.0" fill="var(--card)" stroke-width="1.5"/>
+  <text x="170" y="106.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">4자리 비밀번호</text>
+  <text x="348" y="56" font-size="20" font-weight="700" fill="currentColor" stroke="none">리모컨으로 켜요</text>
+  <text x="348" y="82" font-size="14" fill="currentColor" fill-opacity="0.75" stroke="none">손이 닿지 않아도 어떻게 알까요?</text>
+  <path d="M340 318 H612" stroke-width="3"/>
+  <g transform="rotate(-18 392 250)"><rect x="366" y="196" width="52" height="112" rx="12" fill="var(--card)" stroke-width="2.5"/><circle cx="392" cy="190" r="4" fill="#e03131" stroke="none"/><circle cx="392" cy="224" r="10" fill="var(--muted)" stroke-width="1.5"/><rect x="376" y="244" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="388" y="244" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="400" y="244" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="376" y="258" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="388" y="258" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="400" y="258" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="376" y="272" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="388" y="272" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="400" y="272" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="376" y="286" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="388" y="286" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/><rect x="400" y="286" width="9" height="9" rx="2" fill="var(--muted)" stroke-width="1.2"/></g>
+  <path d="M399 177 A30 30 0 0 1 401 207" stroke="#e03131" stroke-width="3" stroke-dasharray="6 6" stroke-opacity="0.9"/>
+  <path d="M417 164 A52 52 0 0 1 421 216" stroke="#e03131" stroke-width="3" stroke-dasharray="6 6" stroke-opacity="0.7"/>
+  <path d="M435 152 A74 74 0 0 1 441 225" stroke="#e03131" stroke-width="3" stroke-dasharray="6 6" stroke-opacity="0.5"/>
+  <path d="M436 152 L452 132" stroke-width="1.5"/>
+  <rect x="420.4" y="111.0" width="99.1" height="22" rx="11.0" fill="var(--card)" stroke-width="1.5"/>
+  <text x="470" y="126.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">안 보이는 빛</text>
+  <path d="M560 318 V214" stroke-width="3"/>
+  <path d="M532 318 H588" stroke-width="4"/>
+  <path d="M560 214 L600 150 H520 Z" fill="#f59f00" fill-opacity="0.85" stroke-width="2.5"/>
+  <rect x="538" y="226" width="44" height="26" rx="6" fill="var(--card)" stroke-width="2"/>
+  <path d="M552 226 A8 8 0 0 1 568 226" fill="#1e1e1e" stroke-width="1.5"/>
+  <path d="M560 140 V122" stroke="#f59f00" stroke-width="3"/>
+  <path d="M524 140 L512 128" stroke="#f59f00" stroke-width="3"/>
+  <path d="M596 140 L608 128" stroke="#f59f00" stroke-width="3"/>
+  <path d="M538 246 L506 278" stroke-width="1.5"/>
+  <rect x="433.4" y="273.0" width="81.2" height="22" rx="11.0" fill="var(--card)" stroke-width="1.5"/>
+  <text x="474" y="288.7" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">IR 수신기</text>
+</svg>
