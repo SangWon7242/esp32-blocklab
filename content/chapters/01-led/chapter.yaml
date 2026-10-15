@@ -1,6 +1,9 @@
 # 챕터 1 · LED 켜기 — 형식 설명은 src/track/README.md
 id: 01-led
 order: 1
+track: sensor
+label: S1
+sessions: 1
 title: LED 켜기
 summary: |
   브레드보드에 LED 하나를 꽂아 ESP32 보드의 **26번 핀**에 잇고, 파이썬 코드 몇 줄로 불을 켜고, 끄고, 깜빡이게 해 봐요.

@@ -1,6 +1,9 @@
 # 챕터 5 · RGB LED — 수업 코드 저장소 05_RGB_LED. 형식 설명은 src/track/README.md
 id: 05-rgb-led
 order: 5
+track: sensor
+label: S5
+sessions: 2
 title: RGB LED
 summary: |
   다리가 4개인 **RGB LED** 하나에는 빨강·초록·파랑 세 개의 작은 불이 들어 있어요. 세 불의 세기를 **0~255** 숫자로 정해 섞으면 노랑, 하늘색, 보라, 흰색까지 만들 수 있어요.

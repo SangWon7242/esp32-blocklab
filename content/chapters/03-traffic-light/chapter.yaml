@@ -1,6 +1,9 @@
 # 챕터 3 · 신호등 — 수업 코드 저장소 03_신호등 (README·code) 그대로. 형식 설명은 src/track/README.md
 id: 03-traffic-light
 order: 3
+track: sensor
+label: S3
+sessions: 1
 title: 신호등
 summary: |
   빨강 · 노랑 · 초록 LED 세 개를 브레드보드에 꽂고, 진짜 신호등처럼 **순서대로** 불이 바뀌게 해요.

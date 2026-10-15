@@ -2,6 +2,11 @@
 # 미션 판정의 codeEquals 는 tolerance 255: 학생마다 카드 번호(0~255 숫자 넷)가 달라도 통과하게. 핀·켜고 끄기는 따로 규칙으로 본다
 id: 08-access-control
 order: 8
+track: fusion
+label: F1
+prerequisites: [18-servo, 22-rfid]   # 먼저 할 챕터 (안내만). 아직 없는 챕터는 목록에서 "준비 중"
+subjects: [사회, 정보]
+sessions: 2
 title: 스마트 출입 통제 시스템
 summary: |
   학교 출입문에 카드를 갖다 대면 "삑" 하고 문이 열려요. 오늘은 **RFID 리더**로 카드 번호를 읽고, 그 번호가 **들여보낼 카드 목록**에 있을 때만 **서보 모터(문)** 를 여는 출입 통제 장치를 만들어요.

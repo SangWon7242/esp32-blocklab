@@ -1,23 +1,28 @@
 import { Link, Navigate, useParams } from "react-router";
-import { ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Lightbulb, Lock, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Lightbulb, Lock, NotebookPen, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { getChapter } from "@/track/content";
+import { getChapter, loadChapters } from "@/track/content";
 import { allSteps, stepStates, type StepState } from "@/track/gating";
+import { TRACK_NAME } from "@/track/tracks";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
 import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
 import { useProgress } from "./progressState";
 import { STEP_TYPE_LABEL } from "./stepMeta";
+import { DraftBadge, PrerequisiteList, Sessions, SubjectChips } from "./TrackMeta";
 
 const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, done: CheckCircle2 };
 const STATE_LABEL: Record<StepState, string> = { locked: "잠김", open: "열림", done: "완료" };
 
-/** #/track/:chapter — 표지·목표(hero) → 준비물·배선 → 원리 → 단계 카드 격자(진행표) */
+/**
+ * #/track/:chapter — 트랙 배지·번호·교과·차시·먼저 할 챕터 → 표지·목표(hero) → 준비물·배선 → 원리 → 단계 카드 격자(진행표)
+ * → (교사 모드) 교사 메모. 먼저 할 챕터는 안내만 하고 잠그지 않는다. 초안(draft)도 주소로는 그대로 열린다.
+ */
 export function ChapterPage() {
   const { chapter: chapterId = "" } = useParams();
   const chapter = getChapter(chapterId);
@@ -38,13 +43,24 @@ export function ChapterPage() {
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-5xl p-4 sm:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
-          <Link to="/track"><ArrowLeft className="size-4" />챕터 목록</Link>
+          <Link to={`/track?track=${chapter.track}`}><ArrowLeft className="size-4" />챕터 목록</Link>
         </Button>
 
         <div className="mt-2">
-          <p className="text-sm text-muted-foreground">챕터 {chapter.order}</p>
-          <h1 className="text-2xl font-bold">{chapter.title}</h1>
+          <div className="flex flex-wrap items-center gap-1.5" data-testid="chapter-track">
+            <Badge variant="secondary">{TRACK_NAME[chapter.track]}</Badge>
+            <Badge className="font-semibold">{chapter.label}</Badge>
+            {chapter.status === "draft" && <DraftBadge />}
+          </div>
+          <h1 className="mt-2 text-2xl font-bold">{chapter.title}</h1>
           {chapter.subtitle && <p className="mt-1 text-muted-foreground">{chapter.subtitle}</p>}
+          {(chapter.sessions || chapter.subjects || chapter.sdg) && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+              <Sessions sessions={chapter.sessions} />
+              <SubjectChips chapter={chapter} />
+            </div>
+          )}
+          <PrerequisiteList chapter={chapter} chapters={loadChapters()} progressChapters={progress.chapters} className="mt-3" />
         </div>
 
         {/* hero: 표지 그림·진행·성공 기준(왼쪽) + 소개·목표·준비물·배선(오른쪽). 좁은 화면은 위아래 */}
@@ -195,6 +211,14 @@ export function ChapterPage() {
             </ol>
           </section>
         ))}
+
+        {/* 교사 메모: 교사 모드에서만 */}
+        {teacherMode && chapter.teacherNotes && (
+          <section aria-labelledby="teacher-notes-title" className="mt-8 rounded-xl border border-dashed bg-muted/30 p-4" data-testid="teacher-notes">
+            <h2 id="teacher-notes-title" className="flex items-center gap-1.5 font-semibold"><NotebookPen className="size-4 text-primary" />교사 메모</h2>
+            <GuideBody text={chapter.teacherNotes} className="mt-3" />
+          </section>
+        )}
       </div>
     </div>
   );

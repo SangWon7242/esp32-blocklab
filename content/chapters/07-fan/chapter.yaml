@@ -1,6 +1,9 @@
 # 챕터 7 · 작은 선풍기 — 수업 코드 저장소 07_작은선풍기. 형식 설명은 src/track/README.md
 id: 07-fan
 order: 7
+track: sensor
+label: S7
+sessions: 2
 title: 작은 선풍기
 summary: |
   130 모터에 팬 날개를 끼워 **앞으로 · 뒤로 · 정지**하는 작은 선풍기를 만들어요. 모터에는 선이 두 가닥(IN+, IN−) 들어가고, 두 핀에 보내는 **0과 1의 조합**이 도는 방향을 정해요.

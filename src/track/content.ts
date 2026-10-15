@@ -75,6 +75,11 @@ export function parseChapter(
   const chapter = result.data;
   const errors: string[] = [];
   if (chapter.id !== dir) errors.push(`id "${chapter.id}" 가 폴더 이름 "${dir}" 과 다릅니다`);
+  const prereqs = chapter.prerequisites ?? [];
+  if (prereqs.includes(chapter.id)) errors.push(`prerequisites 에 자기 자신(${chapter.id})이 있습니다`);
+  prereqs.forEach((p, i) => {
+    if (prereqs.indexOf(p) !== i) errors.push(`prerequisites 에 ${p} 가 두 번 나옵니다`);
+  });
 
   const seen = new Set<string>();
   for (const id of [...chapter.parts.map((p) => `part:${p.id}`), ...allSteps(chapter).map((s) => s.id)]) {

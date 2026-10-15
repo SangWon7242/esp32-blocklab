@@ -1,6 +1,9 @@
 # 챕터 2 · 숨쉬는 LED — 수업 저장소 02_숨쉬는LED 의 README·code 그대로. 형식 설명은 src/track/README.md
 id: 02-breathing-led
 order: 2
+track: sensor
+label: S2
+sessions: 1
 title: 숨쉬는 LED
 summary: |
   1장에서는 LED를 켜거나 끄는 것만 할 수 있었어요. 이번에는 **PWM** 으로 밝기를 0부터 1023까지 숫자로 정하고, `for` 반복문으로 그 숫자를 조금씩 바꿔 LED가 **숨을 쉬듯** 서서히 밝아졌다 어두워지게 만들어요.

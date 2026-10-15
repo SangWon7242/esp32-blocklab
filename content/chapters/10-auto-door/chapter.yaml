@@ -1,6 +1,12 @@
 # 챕터 10 · 다가가면 열리는 자동문 — 교사용 지도안(110분)·학생용 트랙 진행표의 표현 그대로. 형식 설명은 src/track/README.md
 id: 10-auto-door
 order: 10
+track: fusion
+label: F3
+prerequisites: [17-ultrasonic, 18-servo, 21-oled]   # 먼저 할 챕터 (안내만). 아직 없는 챕터는 목록에서 "준비 중"
+subjects: [과학, 수학]
+sdg: [11]
+sessions: 2
 title: 다가가면 열리는 자동문
 summary: |
   백화점 입구에 다가가면 손을 대지 않아도 문이 스르륵 열려요. 오늘은 **초음파 센서**로 거리를 재고, 가까우면 **서보 모터(문)** 를 열고 **OLED 화면**에 알려 주는 자동문을 만들어요.

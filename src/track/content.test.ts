@@ -127,7 +127,7 @@ describe("챕터 YAML", () => {
 
 describe("parseChapter 는 잘못된 YAML 을 거부한다", () => {
   const files = { "a.py": "print(1)\n" };
-  const base = (step: string) => `id: x\norder: 1\ntitle: x\nparts:\n  - id: p\n    title: p\n    steps:\n${step}`;
+  const base = (step: string) => `id: x\norder: 1\ntitle: x\ntrack: sensor\nlabel: S1\nparts:\n  - id: p\n    title: p\n    steps:\n${step}`;
   it("없는 코드 파일", () => {
     expect(() => parseChapter(base("      - { id: r, type: run, title: r, code: b.py }\n"), files, "x")).toThrow(/b\.py/);
   });
@@ -151,7 +151,7 @@ describe("parseChapter 는 잘못된 YAML 을 거부한다", () => {
 describe("그림·할 일·부품 키", () => {
   const files = { "a.py": "print(1)\n" };
   const chapter = (head: string, step = "{ id: r, type: run, title: r, code: a.py }") =>
-    `id: x\norder: 1\ntitle: x\n${head}parts:\n  - id: p\n    title: p\n    steps:\n      - ${step}\n`;
+    `id: x\norder: 1\ntitle: x\ntrack: sensor\nlabel: S1\n${head}parts:\n  - id: p\n    title: p\n    steps:\n      - ${step}\n`;
   const full = chapter(
     "summary: 요약\ncover: images/cover.svg\nmaterials:\n  - { name: LED, image: images/led.svg, note: 긴 다리가 + }\n  - { name: 점퍼선 }\nwiring: { image: images/wiring.svg, caption: 26번 핀 }\n",
     "{ id: r, type: run, title: r, code: a.py, scene: { image: images/scene.svg, caption: 교실 }, todo: [보드 연결, 실행] }",
@@ -183,7 +183,7 @@ describe("그림·할 일·부품 키", () => {
 describe("원리·실행 결과·코드 설명 (Keyestudio 수업 구조)", () => {
   const files = { "a.py": "import time\n\nprint(1)\n" };
   const chapter = (head: string, step: string) =>
-    `id: x\norder: 1\ntitle: x\n${head}parts:\n  - id: p\n    title: p\n    steps:\n      - ${step}\n`;
+    `id: x\norder: 1\ntitle: x\ntrack: sensor\nlabel: S1\n${head}parts:\n  - id: p\n    title: p\n    steps:\n      - ${step}\n`;
   const run = "{ id: r, type: run, title: r, code: a.py, expected: 불이 켜져요, codeNotes: [{ line: 1, note: 시간 기능 }, { line: 3, note: 출력 }] }";
   const rc = (line: number) =>
     `{ id: c, type: readcheck, title: c, code: a.py, questions: [{ kind: number, q: q, answer: 1 }], codeNotes: [{ line: ${line}, note: n }] }`;

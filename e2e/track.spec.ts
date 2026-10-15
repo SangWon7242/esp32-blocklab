@@ -23,6 +23,7 @@ const completeButton = (page: Page) => page.getByRole("button", { name: "완료"
 test("챕터 목록 → 챕터 10 → 첫 단계 글 쓰고 완료 → 둘째 단계가 열린다", async ({ page }) => {
   await page.goto("/#/");
   await page.getByRole("link", { name: "트랙", exact: true }).click();
+  await page.getByRole("tab", { name: "교과 융합 트랙" }).click();
   const card = page.getByTestId("chapter-card-10-auto-door");
   await expect(card).toContainText("다가가면 열리는 자동문");
   await card.getByRole("link", { name: /시작하기/ }).click();

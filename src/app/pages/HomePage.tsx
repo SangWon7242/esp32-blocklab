@@ -23,7 +23,7 @@ export function HomePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><RouteIcon className="size-5" />트랙</CardTitle>
-            <CardDescription>챕터별 단계를 순서대로 풀며 넘어갑니다.</CardDescription>
+            <CardDescription>센서 트랙과 교과 융합 트랙의 챕터를 단계별로 풀어 갑니다.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild><Link to="/track">열기 <ArrowRight className="size-4" /></Link></Button>

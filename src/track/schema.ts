@@ -166,11 +166,34 @@ export const PartSchema = z.object({
 }).strict();
 export type Part = z.infer<typeof PartSchema>;
 
+/** 챕터 id 모양 (폴더 이름, 예: 10-auto-door) */
+export const ChapterId = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "챕터 id 는 영어 소문자·숫자·- 만 (예: 18-servo)");
+
+/** 트랙: 센서 트랙(모듈 하나, 개념 하나) / 교과 융합 트랙(센서 묶기 → 교과·SDG 문제) */
+export const TrackId = z.enum(["sensor", "fusion"]);
+export type TrackId = z.infer<typeof TrackId>;
+
 export const ChapterSchema = z.object({
   /** 폴더 이름과 같아야 한다 (예: 10-auto-door) */
-  id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  id: ChapterId,
   order: z.number().int(),
   title: z.string().min(1),
+  /** 어느 트랙 목록에 보일지 */
+  track: TrackId,
+  /** 화면에 보일 번호 (센서 S1·S2…, 교과 융합 F1·F2…) */
+  label: z.string().regex(/^[A-Z][0-9]{1,3}$/, "번호는 영어 대문자 하나 + 숫자 (예: S8, F3)"),
+  /** 먼저 할 챕터 id (안내만 — 잠그지 않는다). 아직 없는 챕터 id 도 쓸 수 있고 목록에서 "준비 중"으로 보인다 */
+  prerequisites: z.array(ChapterId).min(1).optional(),
+  /** 연결 교과 (예: 과학, 수학) */
+  subjects: z.array(z.string().min(1)).min(1).optional(),
+  /** 유엔 지속가능발전목표 번호 1~17 */
+  sdg: z.array(z.number().int().min(1).max(17)).min(1).optional(),
+  /** 차시 수 */
+  sessions: z.number().int().positive().optional(),
+  /** draft 는 교사 모드에서만 목록에 보인다 (주소로는 누구나 열림) */
+  status: z.enum(["draft", "published"]).default("published"),
+  /** 교사 메모 (markdown). 교사 모드에서만 챕터 화면 아래에 보인다 */
+  teacherNotes: z.string().min(1).optional(),
   subtitle: z.string().optional(),
   /** 챕터 화면·목록 카드의 한두 문장 소개 */
   summary: z.string().min(1).optional(),

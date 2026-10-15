@@ -1,6 +1,9 @@
 # 챕터 6 · 7세그먼트 — 수업 저장소 06_7세그먼트. 형식 설명은 src/track/README.md
 id: 06-seven-segment
 order: 6
+track: sensor
+label: S6
+sessions: 2
 title: 7세그먼트
 subtitle: 1자리 디지털 튜브
 summary: |

@@ -1,6 +1,9 @@
 # 챕터 4 · 흐르는 물빛 — 수업 저장소 04_흐르는물빛. 형식 설명은 src/track/README.md
 id: 04-flowing-light
 order: 4
+track: sensor
+label: S4
+sessions: 2
 title: 흐르는 물빛
 summary: |
   LED **다섯 개**가 물이 흐르듯 차례로 켜졌다 꺼지고, 끝까지 가면 거꾸로 되돌아와요.

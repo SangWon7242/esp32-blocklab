@@ -14,7 +14,16 @@
 
 ```yaml
 id: 10-auto-door          # 폴더 이름과 같아야 함
-order: 10                 # 목록 순서
+order: 10                 # 목록 순서 (트랙 탭 안에서도 이 순서)
+track: fusion             # 필수. sensor(센서 트랙) | fusion(교과 융합 트랙) — 아래 "트랙 메타"
+label: F3                 # 필수. 화면 번호 (센서 S1·S2…, 교과 융합 F1·F2…)
+prerequisites: [17-ultrasonic, 18-servo, 21-oled]   # 선택. 먼저 할 챕터 id (안내만, 잠그지 않음)
+subjects: [과학, 수학]     # 선택. 연결 교과
+sdg: [11]                 # 선택. SDG 번호 1~17
+sessions: 2               # 선택. 차시 수
+status: published         # 선택. draft | published (기본 published)
+teacherNotes: |           # 선택. 교사 메모 (markdown, 교사 모드에서만)
+  ...
 title: 다가가면 열리는 자동문
 subtitle: ...             # 선택
 summary: ...              # 선택. 챕터 화면·목록 카드의 한두 문장 소개 (markdown)
@@ -33,6 +42,43 @@ parts:
   - id: part1
     title: 1부 · 초음파 센서 익히기
     steps: [ ... ]
+```
+
+## 트랙 메타 (센서 트랙 / 교과 융합 트랙)
+
+트랙 화면(`#/track`)은 두 탭이다: **센서 트랙**(모듈 하나, 개념 하나)과 **교과 융합 트랙**(센서 여러 개를 묶어 교과·SDG 문제 풀기).
+주소 `#/track?track=sensor|fusion` 으로 탭을 고르고, 주소에 없으면 이 브라우저에서 마지막으로 본 탭(처음엔 센서 트랙).
+챕터 화면의 "챕터 목록"은 그 챕터의 탭으로 돌아간다. 화면용 순수 함수는 `src/track/tracks.ts`.
+
+| 키 | 필수 | 뜻 · 화면 |
+|---|---|---|
+| `track` | 예 | `sensor` \| `fusion`. 어느 탭에 보일지. 탭 안 순서는 `order` |
+| `label` | 예 | 화면 번호. 영어 대문자 하나 + 숫자(`S8`, `F3`). 센서는 `S`, 교과 융합은 `F` 로 시작(테스트가 검사), 모든 챕터에서 겹치지 않게 |
+| `prerequisites` | | 먼저 할 챕터 id 목록. **안내만** 하고 잠그지 않는다(관문은 챕터 안에서만). 카드·챕터 화면에 링크 + 완료 표시(그 챕터의 필수 단계 — `optional` 아닌 단계 — 를 모두 끝내면 완료). 아직 폴더가 없는 id 도 쓸 수 있다: 링크 없이 "준비 중"(계획 표 `PLANNED_CHAPTERS` 에 있으면 번호·제목도). 모양은 `번호-영어`(`18-servo`), 자기 자신·중복은 검사에서 걸린다 |
+| `subjects` | | 연결 교과 칩(`[과학, 수학]`). 교과 융합 챕터에 쓴다 |
+| `sdg` | | 유엔 지속가능발전목표 번호 1~17 칩(`SDG 11`) |
+| `sessions` | | 차시 수(`2차시`). 1차시 = 45분 기준으로 단계 `minutes` 합을 올림해 정한다(분이 없으면 1) |
+| `status` | | `draft` 면 목록에서 **교사 모드에서만** "초안" 배지와 함께 보인다. 주소(`#/track/<id>`)로는 누구나 열리고 평소처럼 동작한다. 기본 `published` |
+| `teacherNotes` | | 교사 메모(안내 글 markdown). **교사 모드에서만** 챕터 화면 맨 아래 "교사 메모" 카드로 보인다 |
+
+새 챕터를 쓸 때: 폴더 이름 = id(`11-button-touch`), `track`·`label` 을 꼭 넣고, 다 쓰기 전에는 `status: draft` 로 두었다가 마치면 지운다(또는 `published`).
+교과 융합 챕터는 `prerequisites`·`subjects`·(있으면)`sdg`·`sessions` 을 채운다. 먼저 할 챕터가 아직 없어도 id 로 미리 적어 둔다.
+
+```yaml
+id: 32-smart-cane
+order: 32
+track: fusion
+label: F5
+prerequisites: [12-melody-buzzer, 14-light-sensor, 16-tilt-pir, 17-ultrasonic]
+subjects: [과학, 수학, 사회]
+sdg: [10]
+sessions: 3
+status: draft
+teacherNotes: |
+  **준비** 초음파 센서는 지팡이 끝에서 30° 아래를 보게 붙인다.
+
+  - 2차시: 소리 크기 ↔ 거리 비례를 수학 시간과 연결
+title: 스마트 지팡이
 ```
 
 ## Keyestudio 수업 구조 (원리 · 실행 결과 · 코드 설명)
@@ -81,7 +127,7 @@ Keyestudio 수업의 "2. 원리", "6. 실행 결과", "7. 코드 설명"을 담�
 
 ### 안내 글 markdown
 
-`body`·`todo`·`summary`·`principle.body`·`expected` 는 라이브러리 없는 가벼운 markdown(`src/app/track/guideMarkdown.ts`)으로 그린다.
+`body`·`todo`·`summary`·`principle.body`·`expected`·`teacherNotes` 는 라이브러리 없는 가벼운 markdown(`src/app/track/guideMarkdown.ts`)으로 그린다.
 
 - 빈 줄 = 문단 나눔. 문단 안 줄바꿈은 그대로 보인다
 - `- 항목` (또는 `* 항목`) = 글머리 목록, `1. 항목` = 번호 목록. 들여 쓴 다음 줄은 앞 항목에 이어 붙는다

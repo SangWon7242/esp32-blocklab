@@ -6,7 +6,7 @@ const p = (id: string, optional?: boolean): Step => ({ id, type: "problem", titl
 
 // part1: a b(선택) c / part2: d e(선택) f(선택) g
 const chapter: Chapter = {
-  id: "t", order: 1, title: "t",
+  id: "t", order: 1, title: "t", track: "sensor", label: "S1", status: "published",
   parts: [
     { id: "part1", title: "1부", steps: [p("a"), p("b", true), p("c")] },
     { id: "part2", title: "2부", steps: [p("d"), p("e", true), p("f", true), p("g")] },
