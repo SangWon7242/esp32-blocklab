@@ -152,8 +152,65 @@ export const ReflectStep = z.object({
   prompts: z.array(z.string().min(1)).length(4),
 }).strict();
 
+/** 앱 단계 프롬프트 템플릿의 빈칸 이름 ({{ip}} 등). 채우는 법은 src/track/appCheck.ts fillPrompt */
+export const APP_PROMPT_KEYS = ["ip", "data", "commands", "show", "buttons", "changes"] as const;
+
+/** 앱 약속표 한 줄: ESP32 웹서버가 내는 주소. 읽기 = 값(JSON)을 주는 주소, 명령 = 보드에 일을 시키는 주소 */
+export const AppApiSchema = z.object({
+  /** /data, /cmd?led=on 처럼 / 로 시작하는 상대 주소 */
+  path: z.string().regex(/^\/\S*$/, "주소는 / 로 시작하고 빈칸이 없어야 합니다 (예: /data, /cmd?led=on)"),
+  method: z.enum(["읽기", "명령"]),
+  /** 읽기 주소가 주는 JSON 키 (예: temp, hum) */
+  fields: z.array(z.string().min(1)).min(1).optional(),
+  note: z.string().min(1).optional(),
+}).strict();
+export type AppApi = z.infer<typeof AppApiSchema>;
+
+/** 결과 HTML 읽기 체크. choice 는 채점, text 는 학생 코드마다 답이 달라 채점하지 않고 교사가 확인한다(되묻기만) */
+export const AppReadQuestion = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("choice"), q: z.string().min(1), options: z.array(z.string()).min(2), answer: z.number().int().nonnegative(), hint })
+    .strict(),
+  z.object({ kind: z.literal("text"), q: z.string().min(1), hint }).strict(),
+]);
+export type AppReadQuestion = z.infer<typeof AppReadQuestion>;
+
+const designItems = z.array(z.string().min(1)).default([]);
+
+/**
+ * 앱 만들기(AI 바이브 코딩): 화면 설계 세 칸 → 약속표 → 프롬프트 복사 → AI 결과 붙여넣기·검사 → 보드에 index.html → 읽기 체크.
+ */
+export const AppStep = z.object({
+  ...base,
+  type: z.literal("app"),
+  /** 약속표 (ESP32 코드와 맞춰 챕터가 적는다) */
+  api: z.array(AppApiSchema).min(1),
+  /** 화면 설계 세 칸의 보기 글 (학생 칸의 예시로만 보인다) */
+  design: z.object({ show: designItems, buttons: designItems, changes: designItems }).strict(),
+  /** {{ip}}·{{data}}·{{commands}}·{{show}}·{{buttons}}·{{changes}} 빈칸이 있는 프롬프트 */
+  promptTemplate: z.string().min(1).superRefine((t, ctx) => {
+    for (const m of t.matchAll(/\{\{\s*([^}]*?)\s*\}\}/g)) {
+      if (!(APP_PROMPT_KEYS as readonly string[]).includes(m[1])) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `프롬프트 빈칸 {{${m[1]}}} 은 없는 이름입니다 (${APP_PROMPT_KEYS.join(", ")})` });
+      }
+    }
+  }),
+  /** 붙여넣기 검사 (기본: 크기 12000 바이트, 약속표 주소 모두 사용). mustUse 는 기본에 덧붙는다 */
+  checks: z.object({
+    maxBytes: z.number().int().positive().optional(),
+    mustUse: z.array(z.string().min(1)).min(1).optional(),
+  }).strict().optional(),
+  /** 결과 HTML 읽기 체크 1~3문항 */
+  readcheck: z.array(AppReadQuestion).min(1).max(3).superRefine((qs, ctx) => {
+    qs.forEach((q, i) => {
+      if (q.kind === "choice" && q.answer >= q.options.length) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: [i, "answer"], message: `답 ${q.answer} 이 선택지 범위 밖입니다` });
+      }
+    });
+  }),
+}).strict();
+
 export const StepSchema = z.discriminatedUnion("type", [
-  ProblemStep, AnalysisStep, PredictStep, RunStep, ReadCheckStep, MissionStep, DebugStep, DesignStep, ReflectStep,
+  ProblemStep, AnalysisStep, PredictStep, RunStep, ReadCheckStep, MissionStep, DebugStep, DesignStep, ReflectStep, AppStep,
 ]);
 export type Step = z.infer<typeof StepSchema>;
 export type StepType = Step["type"];

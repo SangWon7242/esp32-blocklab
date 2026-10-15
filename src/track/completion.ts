@@ -1,3 +1,4 @@
+import { appCompleted, type AppInput } from "./appCheck";
 import { checkAnswer } from "./judge";
 import type { ReadQuestion, Step } from "./schema";
 
@@ -146,7 +147,10 @@ export function explainableLines(code: string): number[] {
     .flatMap((line, i) => (line.trim() === "" || line.trim().startsWith("#") ? [] : [i + 1]));
 }
 
-/** 완료 버튼을 켤 수 있는지. run 은 실행 성공, mission 은 판정 통과, debug 는 모든 증상 통과, design 은 조립 판정 통과 */
+/**
+ * 완료 버튼을 켤 수 있는지. run 은 실행 성공, mission 은 판정 통과, debug 는 모든 증상 통과, design 은 조립 판정 통과,
+ * app 은 붙여넣기 검사 통과 + 읽기 체크 통과 (보드 저장은 선택)
+ */
 export function canComplete(step: Step, input: Record<string, unknown>): boolean {
   switch (step.type) {
     case "problem":
@@ -171,6 +175,8 @@ export function canComplete(step: Step, input: Record<string, unknown>): boolean
       return step.symptoms.every((_, i) => (input as DebugInput).passed?.[i] === true);
     case "design":
       return (input as DesignInput).passed === true;
+    case "app":
+      return appCompleted(step, input as AppInput);
     default:
       return false;
   }

@@ -1,3 +1,4 @@
+import { Smartphone, type LucideIcon } from "lucide-react";
 import type { StepType } from "@/track/schema";
 
 /** 단계 유형 이름 (목록 배지·안내 머리) */
@@ -11,6 +12,12 @@ export const STEP_TYPE_LABEL: Record<StepType, string> = {
   debug: "디버깅",
   design: "설계",
   reflect: "성찰",
+  app: "앱 만들기",
+};
+
+/** 단계 유형 아이콘 (배지 앞). 없는 유형은 글만 */
+export const STEP_TYPE_ICON: Partial<Record<StepType, LucideIcon>> = {
+  app: Smartphone,
 };
 
 /** 콘텐츠에 body 가 없을 때 왼쪽 안내 칸에 보일 기본 안내 */
@@ -24,4 +31,5 @@ export const STEP_TYPE_GUIDE: Record<StepType, string> = {
   debug: "고장 난 코드에서 증상의 원인을 찾아 고칩니다.",
   design: "코드로 옮기기 전에 우리말로 순서를 먼저 적어 봅니다.",
   reflect: "완성한 코드를 한 줄씩 내 말로 풀어 쓰고, 오늘 한 생각을 정리합니다.\n\n줄 설명은 할 수 있는 만큼, 아래 성찰 네 칸은 모두 써야 완료할 수 있어요.",
+  app: "AI 에게 폰 앱(웹 페이지 한 장)을 만들어 달라고 해 봅니다.\n\n1. 화면에 무엇을 보여 주고 어떤 버튼을 둘지 먼저 설계해요\n2. 약속표의 주소를 확인하고 프롬프트를 복사해 AI 에 붙여 넣어요\n3. AI 가 만든 HTML 을 붙여 넣고 검사해요\n4. 통과하면 보드에 저장하고, 코드를 읽고 질문에 답해요\n\n검사와 읽기 체크를 통과하면 완료할 수 있어요. 보드 저장은 보드가 있을 때 해요.",
 };

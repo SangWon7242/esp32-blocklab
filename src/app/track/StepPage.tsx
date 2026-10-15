@@ -22,6 +22,8 @@ import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
 import { saveStepRecord, useProgress } from "./progressState";
 import { STEP_TYPE_GUIDE, STEP_TYPE_LABEL } from "./stepMeta";
+import { StepTypeIcon } from "./StepTypeIcon";
+import { AppStep } from "./steps/AppStep";
 import { ANALYSIS_IMAGE, Analysis } from "./steps/Analysis";
 import { DebugStep } from "./steps/DebugStep";
 import { DesignStep } from "./steps/DesignStep";
@@ -126,6 +128,7 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
     case "mission": activity = <MissionStep step={step} {...props} />; break;
     case "debug": activity = <DebugStep step={step} {...props} />; break;
     case "design": activity = <DesignStep step={step} {...props} />; break;
+    case "app": activity = <AppStep step={step} {...props} />; break;
   }
 
   const ready = canComplete(step, input);
@@ -218,7 +221,7 @@ function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter;
     <>
       {partTitle && <p className="text-xs text-muted-foreground">{partTitle}</p>}
       <div className="mt-1 flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">{STEP_TYPE_LABEL[step.type]}</Badge>
+        <Badge variant="secondary"><StepTypeIcon type={step.type} />{STEP_TYPE_LABEL[step.type]}</Badge>
         {step.optional && <Badge variant="outline">선택</Badge>}
       </div>
       <h1 className="mt-3 text-xl font-bold">{step.title}</h1>
