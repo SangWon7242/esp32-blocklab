@@ -25,3 +25,6 @@ dist-ssr
 .superpowers/
 test-results
 playwright-report
+
+# 슬라이드 내보내기 결과 (npm run slides)
+/slides/
