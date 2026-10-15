@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mggf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mggf-title">기억력 게임기 흐름: 시작 버튼을 누르면 문제를 보여 주고, 패드 입력을 받는다. 두 리스트의 길이가 같지 않으면 입력을 더 받고, 같으면 칸마다 비교해 맞은 개수를 센다. 맞은 개수가 길이와 같으면 OK, 점수 1 올리기, 입력 비우기, 문제 1개 추가 뒤 다시 문제를 보여 주고, 아니면 END 와 점수를 띄우고 멈춘다</title>
+  <defs><marker id="mggf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="20" y="40" width="120" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="80.0" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">시작 버튼</text>
+  <text x="80.0" y="78" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">누를 때까지</text>
+  <rect x="180" y="40" width="150" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="255.0" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">문제 보여 주기</text>
+  <text x="255.0" y="78" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">show_problem()</text>
+  <rect x="370" y="40" width="140" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="440.0" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">패드 입력</text>
+  <text x="440.0" y="78" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">pick(n)</text>
+  <path d="M140 64 H176" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <path d="M330 64 H366" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <path d="M440 114.0 L528.0 142 L440 170.0 L352.0 142 Z" fill="var(--muted)" stroke-width="2"/>
+  <text x="440" y="147" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">길이가 같은가?</text>
+  <path d="M440 88 V110" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <path d="M528 142 H556 V64 H514" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <text x="538" y="162" font-size="13" font-weight="700" fill="#e03131" stroke="none">아니요</text>
+  <rect x="360" y="196" width="160" height="48" rx="10" fill="var(--card)" stroke="currentColor" stroke-width="2"/>
+  <text x="440.0" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">칸마다 비교</text>
+  <text x="440.0" y="234" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">맞은 개수 세기</text>
+  <path d="M440 170 V192" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <text x="448" y="188" font-size="13" font-weight="700" fill="#2f9e44" stroke="none">예</text>
+  <path d="M440 270.0 L538.0 296 L440 322.0 L342.0 296 Z" fill="var(--muted)" stroke-width="2"/>
+  <text x="440" y="301" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">맞은 개수 = 길이?</text>
+  <path d="M440 244 V266" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <rect x="20" y="260" width="230" height="72" rx="10" fill="#2f9e44" fill-opacity="0.14" stroke="#2f9e44" stroke-width="2"/>
+  <text x="135.0" y="283" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">OK · 점수 + 1</text>
+  <text x="135.0" y="301" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">입력 비우기</text>
+  <text x="135.0" y="319" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">문제 1개 추가</text>
+  <path d="M342 296 H254" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <text x="300" y="288" font-size="13" font-weight="700" fill="#2f9e44" stroke="none">예</text>
+  <path d="M135 260 V140 H255 V92" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <rect x="556" y="272" width="72" height="48" rx="10" fill="var(--card)" stroke="#e03131" stroke-width="2"/>
+  <text x="592.0" y="292" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">END</text>
+  <text x="592.0" y="310" text-anchor="middle" font-size="14" font-weight="400" fill="currentColor" stroke="none">SCORE</text>
+  <path d="M538 296 H552" stroke="currentColor" stroke-width="2" marker-end="url(#mggf-arrow)"/>
+  <text x="530" y="330" font-size="13" font-weight="700" fill="#e03131" stroke="none">아니요</text>
+  <text x="150" y="132" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">다음 단계</text>
+</svg>

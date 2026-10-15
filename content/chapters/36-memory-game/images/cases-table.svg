@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mgct-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mgct-title">경우의 수: 첫 글자는 A · B · C 세 가지, 글자 두 개면 갈래가 3 × 3 = 9 가지로 나뉜다. 표: 글자 1개 3가지, 2개 9가지, 3개 27가지, 4개와 5개는 물음표로 비워 두고 규칙을 찾게 한다</title>
+  <text x="32" y="38" font-size="16" font-weight="700" fill="currentColor" stroke="none">글자가 하나 늘면 문제는 몇 가지?</text>
+  <circle cx="60" cy="190" r="16" fill="var(--muted)" stroke-width="1.5"/>
+  <text x="60" y="194" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">시작</text>
+  <path d="M76 190 L135 100" stroke-width="1.5" stroke-opacity="0.7"/>
+  <circle cx="150" cy="100" r="15" fill="var(--card)" stroke="#4562f5" stroke-width="2"/>
+  <text x="150" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">A</text>
+  <path d="M165 100 L232 72" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="62" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="76.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">AA</text>
+  <path d="M165 100 L232 100" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="90" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="104.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">AB</text>
+  <path d="M165 100 L232 128" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="118" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="132.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">AC</text>
+  <path d="M76 190 L135 190" stroke-width="1.5" stroke-opacity="0.7"/>
+  <circle cx="150" cy="190" r="15" fill="var(--card)" stroke="#4562f5" stroke-width="2"/>
+  <text x="150" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">B</text>
+  <path d="M165 190 L232 162" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="152" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="166.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">BA</text>
+  <path d="M165 190 L232 190" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="180" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="194.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">BB</text>
+  <path d="M165 190 L232 218" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="208" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="222.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">BC</text>
+  <path d="M76 190 L135 280" stroke-width="1.5" stroke-opacity="0.7"/>
+  <circle cx="150" cy="280" r="15" fill="var(--card)" stroke="#4562f5" stroke-width="2"/>
+  <text x="150" y="285" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">C</text>
+  <path d="M165 280 L232 252" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="242" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="256.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">CA</text>
+  <path d="M165 280 L232 280" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="270" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="284.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">CB</text>
+  <path d="M165 280 L232 308" stroke-width="1.2" stroke-opacity="0.55"/>
+  <rect x="232" y="298" width="34" height="20" rx="5" fill="var(--card)" stroke-width="1.2"/>
+  <text x="249" y="312.5" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">CC</text>
+  <text x="150" y="338" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">1개: 3가지</text>
+  <text x="250" y="338" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">2개: 9가지</text>
+  <rect x="330" y="64" width="260" height="240" rx="8" fill="var(--card)" stroke-width="1.5"/>
+  <rect x="330" y="184" width="260" height="40" fill="#f08c00" fill-opacity="0.16" stroke="none"/>
+  <path d="M330 104 H590" stroke-width="1" stroke-opacity="0.5"/>
+  <path d="M330 144 H590" stroke-width="1" stroke-opacity="0.5"/>
+  <path d="M330 184 H590" stroke-width="1" stroke-opacity="0.5"/>
+  <path d="M330 224 H590" stroke-width="1" stroke-opacity="0.5"/>
+  <path d="M330 264 H590" stroke-width="1" stroke-opacity="0.5"/>
+  <path d="M440 64 V304" stroke-width="1" stroke-opacity="0.5"/>
+  <text x="385.0" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">글자 수</text>
+  <text x="515.0" y="90" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">나올 수 있는 문제</text>
+  <text x="385.0" y="130" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">1개</text>
+  <text x="515.0" y="130" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">3가지</text>
+  <path d="M600 124 q14 20 0 40" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="618" y="149" font-size="13" font-weight="700" fill="#4562f5" stroke="none">× 3</text>
+  <text x="385.0" y="170" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">2개</text>
+  <text x="515.0" y="170" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">9가지</text>
+  <path d="M600 164 q14 20 0 40" stroke="#4562f5" stroke-width="1.5"/>
+  <text x="618" y="189" font-size="13" font-weight="700" fill="#4562f5" stroke="none">× 3</text>
+  <text x="385.0" y="210" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">3개</text>
+  <text x="515.0" y="210" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">27가지</text>
+  <text x="385.0" y="250" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">4개</text>
+  <text x="515.0" y="250" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">?</text>
+  <text x="385.0" y="290" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">5개</text>
+  <text x="515.0" y="290" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">?</text>
+  <text x="330" y="334" font-size="13" fill="currentColor" stroke="none">게임은 3개에서 시작해요. 4개, 5개면 몇 가지일까요?</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mgc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mgc-title">기억력 게임기 표지: OLED 화면에 문제 글자가 A, C, B 차례로 하나씩 지나가고, 그 순서를 기억해 호일 패드 a · b · c 를 똑같이 만진다. 다 맞으면 OK 와 함께 글자가 하나 늘고, 틀리면 END 와 점수가 뜬다</title>
+  <text x="32" y="38" font-size="16" font-weight="700" fill="currentColor" stroke="none">보고 → 기억하고 → 똑같이 만지기</text>
+  <rect x="32" y="62" width="236" height="176" rx="12" fill="#1d4ed8"/>
+  <circle cx="48" cy="78" r="5" fill="var(--card)"/>
+  <circle cx="252" cy="78" r="5" fill="var(--card)"/>
+  <circle cx="48" cy="222" r="5" fill="var(--card)"/>
+  <circle cx="252" cy="222" r="5" fill="var(--card)"/>
+  <rect x="62" y="86" width="176" height="128" rx="4" fill="#0b1b4d" stroke="none"/>
+  <g fill="#7dd3fc" stroke="none"><rect x="128" y="116" width="8" height="8"/><rect x="137" y="116" width="8" height="8"/><rect x="146" y="116" width="8" height="8"/><rect x="155" y="116" width="8" height="8"/><rect x="128" y="125" width="8" height="8"/><rect x="164" y="125" width="8" height="8"/><rect x="128" y="134" width="8" height="8"/><rect x="164" y="134" width="8" height="8"/><rect x="128" y="143" width="8" height="8"/><rect x="137" y="143" width="8" height="8"/><rect x="146" y="143" width="8" height="8"/><rect x="155" y="143" width="8" height="8"/><rect x="128" y="152" width="8" height="8"/><rect x="164" y="152" width="8" height="8"/><rect x="128" y="161" width="8" height="8"/><rect x="164" y="161" width="8" height="8"/><rect x="128" y="170" width="8" height="8"/><rect x="137" y="170" width="8" height="8"/><rect x="146" y="170" width="8" height="8"/><rect x="155" y="170" width="8" height="8"/></g>
+  <text x="150" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none" fill-opacity="0.8">3번째 글자</text>
+  <text x="32" y="270" font-size="14" font-weight="700" fill="currentColor" stroke="none">문제</text>
+  <rect x="76" y="252" width="40" height="28" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="96" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">A</text>
+  <path d="M120 266 H136 M131 261 L136 266 L131 271" stroke-width="1.8"/>
+  <rect x="140" y="252" width="40" height="28" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="160" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">C</text>
+  <path d="M184 266 H200 M195 261 L200 266 L195 271" stroke-width="1.8"/>
+  <rect x="204" y="252" width="40" height="28" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="224" y="271" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">B</text>
+  <path d="M282 150 H330 M322 142 L330 150 L322 158" stroke-width="3"/>
+  <text x="306" y="134" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">기억해서</text>
+  <path d="M348 99 L374 96 L400 100 L424 97 L427 146 L424 196 L398 193 L372 197 L350 194 Z" fill="#ced4da" stroke-width="1.5"/>
+  <path d="M360 112 L370 126 M406 110 L398 124 M408 172 L416 182" stroke="#868e96" stroke-width="1.2"/>
+  <text x="387" y="184" text-anchor="middle" font-size="16" font-weight="700" fill="#343a40" stroke="none">a</text>
+  <path d="M440 99 L466 96 L492 100 L516 97 L519 146 L516 196 L490 193 L464 197 L442 194 Z" fill="#ced4da" stroke-width="1.5"/>
+  <path d="M452 112 L462 126 M498 110 L490 124 M500 172 L508 182" stroke="#868e96" stroke-width="1.2"/>
+  <text x="479" y="184" text-anchor="middle" font-size="16" font-weight="700" fill="#343a40" stroke="none">b</text>
+  <path d="M532 99 L558 96 L584 100 L608 97 L611 146 L608 196 L582 193 L556 197 L534 194 Z" fill="#ced4da" stroke-width="1.5"/>
+  <path d="M544 112 L554 126 M590 110 L582 124 M592 172 L600 182" stroke="#868e96" stroke-width="1.2"/>
+  <text x="571" y="184" text-anchor="middle" font-size="16" font-weight="700" fill="#343a40" stroke="none">c</text>
+  <path d="M466 24 L466 132 Q466 146 479 146 Q492 146 492 132 L492 24" fill="var(--card)" stroke-width="2"/>
+  <path d="M472 134 Q479 140 486 134 L486 122 Q479 118 472 122 Z" stroke-width="1.5"/>
+  <path d="M466 70 Q479 76 492 70" stroke-width="1.2" stroke-opacity="0.6"/>
+  <path d="M459 146 l-9 4 M499 146 l9 4 M464 156 l-6 7 M494 156 l6 7" stroke="#f08c00" stroke-width="2.5"/>
+  <rect x="348" y="290" width="128" height="40" rx="10" fill="#2f9e44" fill-opacity="0.16" stroke="#2f9e44" stroke-width="1.5"/>
+  <text x="412" y="306" text-anchor="middle" font-size="14" font-weight="700" fill="#2f9e44" stroke="none">다 맞으면 OK</text>
+  <text x="412" y="323" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">글자 하나 더</text>
+  <rect x="492" y="290" width="128" height="40" rx="10" fill="#e03131" fill-opacity="0.12" stroke="#e03131" stroke-width="1.5"/>
+  <text x="556" y="306" text-anchor="middle" font-size="14" font-weight="700" fill="#e03131" stroke="none">틀리면 END</text>
+  <text x="556" y="323" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">점수 보여 주기</text>
+</svg>

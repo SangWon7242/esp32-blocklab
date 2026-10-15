@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mglc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mglc-title">두 리스트 비교: 문제 리스트 problem [0, 2, 1] 과 입력 리스트 answer [0, 2, 1]. 1단계로 길이가 둘 다 3 인지 보고, 2단계로 0번 · 1번 · 2번 칸끼리 하나씩 비교해 같을 때마다 맞은 개수를 1 올린다. 3단계로 맞은 개수 3 이 길이 3 과 같으면 OK. 칸 번호는 0 부터 센다</title>
+  <circle cx="44" cy="44" r="12" fill="#4562f5" stroke="none"/>
+  <text x="44" y="49" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">1</text>
+  <text x="64" y="49" font-size="15" font-weight="700" fill="currentColor" stroke="none">길이부터</text>
+  <text x="138" y="49" font-size="14" fill="currentColor" stroke="none">len(problem) 3 개 = len(answer) 3 개</text>
+  <text x="150" y="98" text-anchor="end" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">칸 번호</text>
+  <text x="200.0" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">0</text>
+  <text x="280.0" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">1</text>
+  <text x="360.0" y="98" text-anchor="middle" font-size="14" font-weight="700" fill="#4562f5" stroke="none">2</text>
+  <text x="150" y="135" text-anchor="end" font-size="15" font-weight="700" fill="currentColor" stroke="none">problem</text>
+  <rect x="168" y="108" width="64" height="42" rx="6" fill="var(--card)" stroke-width="2"/>
+  <text x="200.0" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <rect x="248" y="108" width="64" height="42" rx="6" fill="var(--card)" stroke-width="2"/>
+  <text x="280.0" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">2</text>
+  <rect x="328" y="108" width="64" height="42" rx="6" fill="var(--card)" stroke-width="2"/>
+  <text x="360.0" y="135" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <path d="M160 104 L156 104 L156 154 L160 154" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M400 104 L404 104 L404 154 L400 154" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="150" y="233" text-anchor="end" font-size="15" font-weight="700" fill="currentColor" stroke="none">answer</text>
+  <rect x="168" y="206" width="64" height="42" rx="6" fill="var(--muted)" stroke-width="2"/>
+  <text x="200.0" y="233" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">0</text>
+  <rect x="248" y="206" width="64" height="42" rx="6" fill="var(--muted)" stroke-width="2"/>
+  <text x="280.0" y="233" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">2</text>
+  <rect x="328" y="206" width="64" height="42" rx="6" fill="var(--muted)" stroke-width="2"/>
+  <text x="360.0" y="233" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">1</text>
+  <path d="M160 202 L156 202 L156 252 L160 252" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M400 202 L404 202 L404 252 L400 252" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M200.0 154 V200" stroke="#2f9e44" stroke-width="2" stroke-dasharray="4 4"/>
+  <circle cx="200.0" cy="177" r="11" fill="var(--card)" stroke="#2f9e44" stroke-width="2"/>
+  <path d="M195.0 177 L199.0 181 L206.0 172" stroke="#2f9e44" stroke-width="2.5"/>
+  <path d="M280.0 154 V200" stroke="#2f9e44" stroke-width="2" stroke-dasharray="4 4"/>
+  <circle cx="280.0" cy="177" r="11" fill="var(--card)" stroke="#2f9e44" stroke-width="2"/>
+  <path d="M275.0 177 L279.0 181 L286.0 172" stroke="#2f9e44" stroke-width="2.5"/>
+  <path d="M360.0 154 V200" stroke="#2f9e44" stroke-width="2" stroke-dasharray="4 4"/>
+  <circle cx="360.0" cy="177" r="11" fill="var(--card)" stroke="#2f9e44" stroke-width="2"/>
+  <path d="M355.0 177 L359.0 181 L366.0 172" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="150" y="182" text-anchor="end" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">같은가?</text>
+  <circle cx="444" cy="120" r="12" fill="#4562f5" stroke="none"/>
+  <text x="444" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">2</text>
+  <text x="464" y="125" font-size="15" font-weight="700" fill="currentColor" stroke="none">칸끼리 하나씩</text>
+  <text x="464" y="147" font-size="13" fill="currentColor" stroke="none">0번, 1번, 2번 칸이</text>
+  <text x="464" y="165" font-size="13" fill="currentColor" stroke="none">같을 때마다 맞은 개수 + 1</text>
+  <circle cx="444" cy="210" r="12" fill="#4562f5" stroke="none"/>
+  <text x="444" y="215" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">3</text>
+  <text x="464" y="215" font-size="15" font-weight="700" fill="currentColor" stroke="none">맞은 개수 = 길이?</text>
+  <text x="464" y="237" font-size="13" fill="currentColor" stroke="none">correct 3 == 3</text>
+  <rect x="464" y="250" width="56" height="28" rx="8" fill="#2f9e44" fill-opacity="0.16" stroke="#2f9e44" stroke-width="1.5"/>
+  <text x="492" y="269" text-anchor="middle" font-size="15" font-weight="700" fill="#2f9e44" stroke="none">OK</text>
+  <text x="530" y="269" font-size="13" fill="currentColor" stroke="none">하나라도 다르면 END</text>
+  <rect x="32" y="300" width="576" height="40" rx="10" fill="var(--muted)" stroke="none"/>
+  <text x="320" y="325" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">칸 번호는 0 부터 세요. 칸이 3개면 번호는 0 · 1 · 2, 마지막 번호는 길이 − 1</text>
+</svg>

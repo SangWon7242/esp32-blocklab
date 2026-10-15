@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mgtp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mgtp-title">호일 터치 패드: 박스지에 감싼 호일 패드를 악어 클립으로 32번 핀 점퍼선에 잇는다. 손을 떼면 터치 값이 크고(예: 600), 손가락을 대면 몸이 전기를 조금 담아 가서 값이 작아진다(예: 120). 두 값 사이에 기준(예: 300)을 정하고, 패드 a · b · c 마다 손 뗀 값과 만진 값을 표에 적는다</title>
+  <rect x="28" y="70" width="168" height="128" rx="6" fill="#c8a165" fill-opacity="0.5" stroke-width="1.5"/>
+  <path d="M38 80 L80 77 L120 81 L186 78 L188 136 L185 190 L130 187 L84 191 L40 188 Z" fill="#ced4da" stroke-width="1.5"/>
+  <path d="M54 96 L66 112 M150 92 L140 108 M160 160 L170 172 M70 166 L60 176" stroke="#868e96" stroke-width="1.2"/>
+  <text x="160" y="118" text-anchor="middle" font-size="16" font-weight="700" fill="#343a40" stroke="none">a</text>
+  <text x="112" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">박스지 + 호일 패드</text>
+  <path d="M186 132 L214 128 L214 140 L186 136 Z" fill="#c92a2a" stroke-width="1.5"/>
+  <path d="M214 134 L262 134 L262 240" stroke-width="6"/>
+  <path d="M214 134 L262 134 L262 240" stroke="#f08c00" stroke-width="3.5"/>
+  <rect x="232" y="240" width="60" height="30" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <text x="262" y="260" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">32번</text>
+  <text x="262" y="290" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">ESP32 터치 핀</text>
+  <path d="M98 214 L98 150 Q98 138 110 138 Q122 138 122 150 L122 214" fill="var(--card)" stroke-width="2"/>
+  <path d="M104 148 Q110 142 116 148 L116 158 Q110 162 104 158 Z" stroke-width="1.5"/>
+  <path d="M88 140 l-8 -6 M132 140 l8 -6" stroke="#f08c00" stroke-width="2.5"/>
+  <text x="28" y="236" font-size="13" fill="currentColor" stroke="none">몸과 호일은 전기가 잘 통해요.</text>
+  <text x="28" y="256" font-size="13" fill="currentColor" stroke="none">만지면 몸이 전기를 조금</text>
+  <text x="28" y="276" font-size="13" fill="currentColor" stroke="none">담아 가서 값이 작아져요</text>
+  <path d="M330 70 V270 H500" stroke-width="1.5"/>
+  <rect x="350" y="99" width="56" height="171" rx="4" fill="#868e96" fill-opacity="0.35" stroke="#868e96" stroke-width="1.5"/>
+  <text x="378" y="91" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">600</text>
+  <text x="378" y="290" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">손 뗐을 때</text>
+  <rect x="426" y="236" width="56" height="34" rx="4" fill="#f08c00" fill-opacity="0.35" stroke="#f08c00" stroke-width="1.5"/>
+  <text x="454" y="228" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">120</text>
+  <text x="454" y="290" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">만졌을 때</text>
+  <path d="M330 184 H496" stroke="#4562f5" stroke-width="2" stroke-dasharray="6 5"/>
+  <text x="426" y="176" font-size="13" font-weight="700" fill="#4562f5" stroke="none">기준 300</text>
+  <text x="415" y="314" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">값은 예시예요. 내 패드는 직접 재요</text>
+  <text x="532" y="96" font-size="13" font-weight="700" fill="currentColor" stroke="none">내 패드 값</text>
+  <rect x="520" y="106" width="104" height="104" rx="6" fill="var(--card)" stroke-width="1.5"/>
+  <path d="M520 132 H624 M520 158 H624 M520 184 H624 M548 106 V210 M586 106 V210" stroke-width="1" stroke-opacity="0.6"/>
+  <g font-size="12" text-anchor="middle" fill="currentColor" stroke="none">
+  <text x="534" y="123">패드</text><text x="567" y="123">뗀 값</text><text x="605" y="123">만진</text>
+  <text x="534" y="149" font-weight="700">a</text>
+  <text x="534" y="175" font-weight="700">b</text>
+  <text x="534" y="201" font-weight="700">c</text>
+  </g>
+</svg>
