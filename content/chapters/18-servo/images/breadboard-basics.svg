@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="bbb-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="bbb-title">브레드보드 읽는 법: 같은 번호의 a부터 e까지 다섯 칸은 서로 이어져 있고, 가운데 홈 건너편(f부터 j)은 이어져 있지 않다. + 줄과 − 줄은 가로로 끝까지 이어져 있다</title>
+  <rect x="36" y="20" width="212" height="338" rx="10" fill="var(--muted)"/>
+  <rect x="44" y="211" width="196" height="26" rx="4" fill="currentColor" fill-opacity="0.12" stroke="none"/>
+  <rect x="62" y="54" width="176" height="16" rx="8" fill="#1971c2" fill-opacity="0.2" stroke="#1971c2" stroke-width="2"/>
+  <rect x="62" y="32" width="176" height="16" rx="8" fill="#e03131" fill-opacity="0.22" stroke="#e03131" stroke-width="2"/>
+  <rect x="105" y="103" width="18" height="106" rx="9" fill="#2f9e44" fill-opacity="0.22" stroke="#2f9e44" stroke-width="2"/>
+  <rect x="105" y="239" width="18" height="106" rx="9" fill="#f76707" fill-opacity="0.18" stroke="#f76707" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M62 27 H238" stroke="#e03131" stroke-width="2.5"/>
+  <path d="M62 75 H238" stroke="#1971c2" stroke-width="2.5"/>
+  <path d="M70 112h0 M92 112h0 M114 112h0 M136 112h0 M158 112h0 M180 112h0 M202 112h0 M224 112h0 M70 134h0 M92 134h0 M114 134h0 M136 134h0 M158 134h0 M180 134h0 M202 134h0 M224 134h0 M70 156h0 M92 156h0 M114 156h0 M136 156h0 M158 156h0 M180 156h0 M202 156h0 M224 156h0 M70 178h0 M92 178h0 M114 178h0 M136 178h0 M158 178h0 M180 178h0 M202 178h0 M224 178h0 M70 200h0 M92 200h0 M114 200h0 M136 200h0 M158 200h0 M180 200h0 M202 200h0 M224 200h0 M70 248h0 M92 248h0 M114 248h0 M136 248h0 M158 248h0 M180 248h0 M202 248h0 M224 248h0 M70 270h0 M92 270h0 M114 270h0 M136 270h0 M158 270h0 M180 270h0 M202 270h0 M224 270h0 M70 292h0 M92 292h0 M114 292h0 M136 292h0 M158 292h0 M180 292h0 M202 292h0 M224 292h0 M70 314h0 M92 314h0 M114 314h0 M136 314h0 M158 314h0 M180 314h0 M202 314h0 M224 314h0 M70 336h0 M92 336h0 M114 336h0 M136 336h0 M158 336h0 M180 336h0 M202 336h0 M224 336h0 M77.0 40h0 M99.0 40h0 M121.0 40h0 M143.0 40h0 M165.0 40h0 M187.0 40h0 M209.0 40h0 M231.0 40h0 M77.0 62h0 M99.0 62h0 M121.0 62h0 M143.0 62h0 M165.0 62h0 M187.0 62h0 M209.0 62h0 M231.0 62h0" stroke-width="7" stroke-opacity="0.45"/>
+  <g fill="currentColor" stroke="none" font-size="13" text-anchor="middle" fill-opacity="0.65">
+  <text x="51" y="116.5">a</text>
+  <text x="51" y="138.5">b</text>
+  <text x="51" y="160.5">c</text>
+  <text x="51" y="182.5">d</text>
+  <text x="51" y="204.5">e</text>
+  <text x="51" y="252.5">f</text>
+  <text x="51" y="274.5">g</text>
+  <text x="51" y="296.5">h</text>
+  <text x="51" y="318.5">i</text>
+  <text x="51" y="340.5">j</text>
+  </g>
+  <text x="51" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#e03131" stroke="none">+</text>
+  <text x="51" y="67" text-anchor="middle" font-size="16" font-weight="700" fill="#1971c2" stroke="none">−</text>
+  <text x="114" y="98" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.65" stroke="none">3</text>
+  <circle cx="114" cy="224.0" r="12" fill="#e03131" stroke="none"/><path d="M109.5 219.5 L118.5 228.5 M118.5 219.5 L109.5 228.5" stroke="#ffffff" stroke-width="2.5"/>
+  <path d="M242 40 L266 40 L278 51" stroke-width="1.5" stroke-dasharray="3 4" stroke-opacity="0.7"/>
+  <circle cx="294" cy="51" r="12" fill="#2f9e44" stroke="none"/><path d="M288.5 51.5 L292.5 55.5 L300 47" stroke="#ffffff" stroke-width="2.5"/>
+  <text x="314" y="52" font-size="16" font-weight="700" fill="currentColor" stroke="none">긴 줄은 끝까지 이어져요</text>
+  <text x="314" y="73" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">+ 줄, − 줄은 가로로 길게 하나</text>
+  <path d="M127 156.0 L266 156.0 L278 156.0" stroke-width="1.5" stroke-dasharray="3 4" stroke-opacity="0.7"/>
+  <circle cx="294" cy="156.0" r="12" fill="#2f9e44" stroke="none"/><path d="M288.5 156.5 L292.5 160.5 L300 152.0" stroke="#ffffff" stroke-width="2.5"/>
+  <text x="314" y="157.0" font-size="16" font-weight="700" fill="currentColor" stroke="none">이 다섯 칸은 서로 이어져 있어요</text>
+  <text x="314" y="178.0" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">같은 번호 a·b·c·d·e 는 한 줄</text>
+  <path d="M127 224.0 L266 224.0 L278 224.0" stroke-width="1.5" stroke-dasharray="3 4" stroke-opacity="0.7"/>
+  <circle cx="294" cy="224.0" r="12" fill="#e03131" stroke="none"/><path d="M289.5 219.5 L298.5 228.5 M298.5 219.5 L289.5 228.5" stroke="#ffffff" stroke-width="2.5"/>
+  <text x="314" y="225.0" font-size="16" font-weight="700" fill="currentColor" stroke="none">가운데 홈 건너편은 안 이어져요</text>
+  <text x="314" y="246.0" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">e 와 f 는 따로 — f~j 는 다른 줄</text>
+</svg>

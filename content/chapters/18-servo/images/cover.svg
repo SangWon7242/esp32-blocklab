@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sv-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sv-cover-title">서보 모터: 건널목 차단기의 팔이 서보 모터에 달려 있다. 팔은 0도(누워 길을 막음)에서 90도(곧게 서서 길을 엶)까지 돌아 정확히 그 자리에 멈춘다. 옆에는 신호등과 자동차가 있다</title>
+  <text x="300" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">서보 모터</text>
+  <text x="300" y="68" text-anchor="middle" font-size="14" fill="currentColor" fill-opacity="0.7" stroke="none">숫자 하나로 팔을 원하는 각도에 멈춰요</text>
+  <!-- 길 -->
+  <path d="M24 296 H616"/>
+  <path d="M60 322 H110 M160 322 H210 M260 322 H310 M360 322 H410 M460 322 H510 M560 322 H600" stroke-opacity="0.5" stroke-width="3"/>
+  <!-- 차단기 기둥 + 서보 -->
+  <rect x="120" y="214" width="40" height="82" rx="4" fill="var(--card)"/>
+  <rect x="88" y="182" width="82" height="40" rx="6" fill="#c92a2a"/>
+  <text x="120" y="207" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">서보</text>
+  <!-- 닫힌 자리 (0도, 점선) -->
+  <rect x="152" y="196" width="230" height="14" rx="4" stroke-dasharray="6 6" opacity="0.45"/>
+  <text x="300" y="236" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">0° 닫힌 자리</text>
+  <!-- 열린 자리 (90도) -->
+  <g transform="rotate(-90 158 203)">
+    <rect x="158" y="196" width="150" height="14" rx="4" fill="var(--card)"/>
+    <path d="M190 196 v14 M230 196 v14 M270 196 v14" stroke="#c92a2a" stroke-width="7"/>
+  </g>
+  <circle cx="158" cy="203" r="7" fill="var(--card)"/>
+  <!-- 각도 호 -->
+  <path d="M238 203 A80 80 0 0 0 158 123" stroke="#4562f5" stroke-width="3"/>
+  <text x="222" y="146" font-size="18" font-weight="700" fill="#4562f5" stroke="none">90°</text>
+  <!-- 신호등 -->
+  <path d="M470 296 V170"/>
+  <rect x="448" y="92" width="44" height="100" rx="8" fill="var(--card)"/>
+  <circle cx="470" cy="114" r="11" fill="var(--muted)"/>
+  <circle cx="470" cy="142" r="11" fill="var(--muted)"/>
+  <circle cx="470" cy="170" r="11" fill="#2f9e44"/>
+  <!-- 자동차 -->
+  <path d="M300 286 V266 L320 246 H380 L400 266 H420 V286 Z" fill="var(--muted)"/>
+  <path d="M330 252 H372 L386 266 H318 Z" fill="var(--card)"/>
+  <circle cx="330" cy="290" r="11" fill="var(--card)" stroke-width="3"/>
+  <circle cx="392" cy="290" r="11" fill="var(--card)" stroke-width="3"/>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sv-pulse-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sv-pulse-title">서보 신호: 보드는 20 ms 마다(1초에 50번) 신호를 보낸다. 신호가 켜진 길이가 0.5 ms(duty_u16 1638)이면 0도, 1.5 ms(4869)이면 90도, 2.5 ms(8100)이면 180도로 서보 팔이 돈다</title>
+  <text x="290" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">켜진 길이가 각도를 정해요</text>
+  <path d="M100 58 V50 H260 V58" stroke-opacity="0.7"/>
+  <text x="180" y="45" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none">20 ms (1초에 50번)</text>
+  <path d="M92 122 H100 V82 H112 V122 H260 V82 H272 V122 H412" stroke="#4562f5" stroke-width="3"/>
+  <text x="20" y="100" font-size="15" font-weight="700" fill="currentColor" stroke="none">0.5 ms</text>
+  <text x="20" y="120" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">duty_u16</text>
+  <text x="20" y="136" font-size="13" font-weight="600" fill="currentColor" stroke="none">1638</text>
+  <path d="M424 102 H446 M438 95 L446 102 L438 109" stroke-opacity="0.7"/>
+  <path d="M472 122 A34 34 0 0 1 540 122 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M534.0 122.0 L540.0 122.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M506.0 94.0 L506.0 88.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M478.0 122.0 L472.0 122.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M506 122 L536.0 122.0" stroke="#4562f5" stroke-width="5"/>
+  <circle cx="506" cy="122" r="4" fill="var(--card)"/>
+  <text x="560" y="114" font-size="20" font-weight="700" fill="#4562f5" stroke="none">0°</text>
+  <path d="M92 212 H100 V172 H136 V212 H260 V172 H296 V212 H412" stroke="#2f9e44" stroke-width="3"/>
+  <text x="20" y="190" font-size="15" font-weight="700" fill="currentColor" stroke="none">1.5 ms</text>
+  <text x="20" y="210" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">duty_u16</text>
+  <text x="20" y="226" font-size="13" font-weight="600" fill="currentColor" stroke="none">4869</text>
+  <path d="M424 192 H446 M438 185 L446 192 L438 199" stroke-opacity="0.7"/>
+  <path d="M472 212 A34 34 0 0 1 540 212 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M534.0 212.0 L540.0 212.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M506.0 184.0 L506.0 178.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M478.0 212.0 L472.0 212.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M506 212 L506.0 182.0" stroke="#2f9e44" stroke-width="5"/>
+  <circle cx="506" cy="212" r="4" fill="var(--card)"/>
+  <text x="560" y="204" font-size="20" font-weight="700" fill="#2f9e44" stroke="none">90°</text>
+  <path d="M92 302 H100 V262 H160 V302 H260 V262 H320 V302 H412" stroke="#e8590c" stroke-width="3"/>
+  <text x="20" y="280" font-size="15" font-weight="700" fill="currentColor" stroke="none">2.5 ms</text>
+  <text x="20" y="300" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">duty_u16</text>
+  <text x="20" y="316" font-size="13" font-weight="600" fill="currentColor" stroke="none">8100</text>
+  <path d="M424 282 H446 M438 275 L446 282 L438 289" stroke-opacity="0.7"/>
+  <path d="M472 302 A34 34 0 0 1 540 302 Z" fill="var(--muted)" stroke-width="1.5"/>
+  <path d="M534.0 302.0 L540.0 302.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M506.0 274.0 L506.0 268.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M478.0 302.0 L472.0 302.0" stroke-width="1.5" stroke-opacity="0.6"/>
+  <path d="M506 302 L476.0 302.0" stroke="#e8590c" stroke-width="5"/>
+  <circle cx="506" cy="302" r="4" fill="var(--card)"/>
+  <text x="560" y="294" font-size="20" font-weight="700" fill="#e8590c" stroke="none">180°</text>
+  <text x="320" y="336" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">duty_u16 는 20 ms 전체를 0~65535 로 나눈 숫자예요. 1638 ≈ 0.5 ms, 8100 ≈ 2.5 ms</text>
+  <text x="320" y="354" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.65" stroke="none">(잘 보이도록 켜진 길이를 실제보다 길게 그렸어요)</text>
+</svg>

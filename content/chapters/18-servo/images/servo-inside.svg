@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sv-in-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sv-in-title">서보 속: 보드가 보낸 신호 길이로 목표 각도를 알고, 서보 속 가변저항으로 지금 각도를 잰다. 두 각도를 비교해 다르면 모터를 돌리고, 같아지면 멈춘다. 그래서 팔이 정확히 90도에서 멈춘다</title>
+  <text x="300" y="34" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">서보 속에서는 계속 비교해요</text>
+  <defs>
+    <marker id="sv-in-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/>
+    </marker>
+  </defs>
+  <!-- 서보 몸통 -->
+  <rect x="150" y="62" width="460" height="246" rx="14" fill="#c92a2a" fill-opacity="0.08" stroke="#c92a2a" stroke-dasharray="8 6"/>
+  <text x="168" y="84" font-size="13" font-weight="700" fill="#c92a2a" stroke="none">서보 모터 속</text>
+  <!-- 신호 -->
+  <rect x="20" y="118" width="110" height="56" rx="10" fill="var(--card)"/>
+  <text x="75" y="142" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">보드 신호</text>
+  <text x="75" y="162" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">1.5 ms</text>
+  <path d="M130 146 H178" marker-end="url(#sv-in-arrow)"/>
+  <!-- 목표 각도 -->
+  <rect x="184" y="118" width="120" height="56" rx="10" fill="var(--card)"/>
+  <text x="244" y="142" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">목표 각도</text>
+  <text x="244" y="162" text-anchor="middle" font-size="13" font-weight="600" fill="#4562f5" stroke="none">90°</text>
+  <path d="M304 146 H346" marker-end="url(#sv-in-arrow)"/>
+  <!-- 비교 -->
+  <path d="M400 106 L452 146 L400 186 L348 146 Z" fill="#4562f5" fill-opacity="0.15" stroke="#4562f5"/>
+  <text x="400" y="151" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">같은가?</text>
+  <!-- 다르면 → 모터 -->
+  <path d="M452 146 H488" marker-end="url(#sv-in-arrow)"/>
+  <text x="470" y="136" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">다르면</text>
+  <rect x="494" y="118" width="96" height="56" rx="10" fill="var(--card)"/>
+  <text x="542" y="142" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">모터·톱니</text>
+  <text x="542" y="162" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">팔을 돌려요</text>
+  <!-- 같으면 멈춤 -->
+  <path d="M400 186 V214" marker-end="url(#sv-in-arrow)"/>
+  <text x="410" y="204" font-size="12" fill="currentColor" stroke="none">같으면</text>
+  <rect x="352" y="220" width="96" height="40" rx="10" fill="#2f9e44" fill-opacity="0.2" stroke="#2f9e44"/>
+  <text x="400" y="245" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">멈춰요</text>
+  <!-- 되먹임: 가변저항 -->
+  <path d="M542 174 V294 H255 V282" marker-end="url(#sv-in-arrow)" stroke-dasharray="6 5"/>
+  <rect x="190" y="220" width="130" height="56" rx="10" fill="var(--card)"/>
+  <text x="255" y="244" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">지금 각도</text>
+  <text x="255" y="264" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">속 가변저항이 재요</text>
+  <path d="M320 248 H330 Q338 248 342 200 L360 176" marker-end="url(#sv-in-arrow)"/>
+  <text x="446" y="286" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">팔이 돌면 지금 각도도 바뀌어요</text>
+  <text x="320" y="336" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">목표에 닿을 때까지 돌고, 닿으면 멈춰요. 닿지 못하면 계속 힘을 쓰며 떨어요</text>
+</svg>
