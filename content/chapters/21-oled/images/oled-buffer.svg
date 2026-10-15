@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="od-buf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="od-buf-title">적어 두기와 내보내기: ESP32 보드 안의 그림판(버퍼)에 지우기(oled.fill(0)) → 적어 두기(oled.text · oled.rect) 를 하는 동안 OLED 화면은 그대로다. oled.show() 를 부르는 순간 그림판 전체가 SCL(22번) · SDA(21번) 두 선(I2C)을 타고 화면으로 한꺼번에 간다</title>
+  <defs><marker id="od-buf-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="currentColor" stroke-width="2"/></marker></defs>
+  <text x="24" y="34" font-size="16" font-weight="700" fill="currentColor" stroke="none">적어 두기 → 내보내기</text>
+  <!-- ESP32 와 그림판 -->
+  <rect x="24" y="58" width="236" height="208" rx="10" fill="var(--card)"/>
+  <text x="142" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">ESP32 보드 안</text>
+  <rect x="46" y="96" width="192" height="96" rx="4" fill="var(--muted)" stroke-dasharray="5 4"/>
+  <g fill="currentColor" stroke="none" opacity="0.7">
+    <rect x="62" y="112" width="6" height="30"/><rect x="80" y="112" width="6" height="30"/><rect x="68" y="124" width="12" height="6"/>
+    <rect x="96" y="112" width="6" height="6"/><rect x="96" y="124" width="6" height="18"/>
+  </g>
+  <rect x="62" y="156" width="160" height="24" stroke-width="2.5" opacity="0.7"/>
+  <text x="142" y="212" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">그림판(버퍼)</text>
+  <text x="142" y="232" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" opacity="0.8">text · rect 는 여기에만 그려요</text>
+  <text x="142" y="252" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" opacity="0.8">아직 화면에는 안 보여요</text>
+  <!-- 두 선 -->
+  <path d="M260 150 H404" stroke="#1971c2" stroke-width="5"/>
+  <path d="M260 196 H404" stroke="#7048e8" stroke-width="5"/>
+  <g font-size="13" font-weight="700" stroke="none">
+    <text x="268" y="142" fill="#1971c2">SCL · 22번</text>
+    <text x="268" y="188" fill="#7048e8">SDA · 21번</text>
+  </g>
+  <path d="M276 112 H392" stroke-width="3" marker-end="url(#od-buf-arrow)"/>
+  <text x="328" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">show() 때 한꺼번에</text>
+  <text x="332" y="226" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" opacity="0.8">I2C: 선 두 개로 대화</text>
+  <!-- OLED -->
+  <rect x="404" y="84" width="212" height="172" rx="10" fill="#1d4ed8"/>
+  <rect x="418" y="98" width="184" height="108" rx="3" fill="#0b1b4d" stroke="none"/>
+  <g fill="#7dd3fc" stroke="none">
+    <rect x="434" y="114" width="6" height="30"/><rect x="452" y="114" width="6" height="30"/><rect x="440" y="126" width="12" height="6"/>
+    <rect x="468" y="114" width="6" height="6"/><rect x="468" y="126" width="6" height="18"/>
+  </g>
+  <rect x="434" y="158" width="152" height="30" stroke="#7dd3fc" stroke-width="3"/>
+  <text x="510" y="232" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">OLED 화면 128×64</text>
+  <!-- 순서 -->
+  <g stroke="none">
+    <circle cx="44" cy="314" r="13" fill="#4562f5"/>
+    <circle cx="246" cy="314" r="13" fill="#4562f5"/>
+    <circle cx="452" cy="314" r="13" fill="#4562f5"/>
+  </g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">
+    <text x="44" y="319">1</text><text x="246" y="319">2</text><text x="452" y="319">3</text>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <text x="64" y="310" font-size="15" font-weight="700">지우기</text>
+    <text x="64" y="330" font-size="13" opacity="0.8">oled.fill(0)</text>
+    <text x="266" y="310" font-size="15" font-weight="700">적어 두기</text>
+    <text x="266" y="330" font-size="13" opacity="0.8">oled.text · oled.rect</text>
+    <text x="472" y="310" font-size="15" font-weight="700">내보내기</text>
+    <text x="472" y="330" font-size="13" opacity="0.8">oled.show()</text>
+  </g>
+  <path d="M190 314 H224" stroke-width="2" marker-end="url(#od-buf-arrow)"/>
+  <path d="M398 314 H430" stroke-width="2" marker-end="url(#od-buf-arrow)"/>
+</svg>
