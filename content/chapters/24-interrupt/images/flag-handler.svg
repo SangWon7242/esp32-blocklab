@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="irf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="irf-title">깃발 나누기: 버튼을 누르는 순간 on_press 함수가 깃발 pressed 를 올리고 바로 끝난다. 반복은 돌다가 깃발이 올라가 있으면 LED 를 바꾸고 깃발을 내린다</title>
+  <defs><marker id="irf-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="20" y="150" width="62" height="56" rx="8" fill="#495057" stroke-width="1.5"/>
+  <circle cx="51" cy="178" r="16" fill="#212529" stroke="#adb5bd" stroke-width="2"/>
+  <text x="51" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼</text>
+  <path d="M88 178 L146 178" stroke-width="2.5" marker-end="url(#irf-arrow)"/>
+  <text x="117" y="166" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" fill-opacity="0.75">누르는 순간</text>
+  <rect x="152" y="112" width="160" height="132" rx="12" fill="var(--card)" stroke="#4562f5" stroke-width="2.5"/>
+  <text x="232" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">on_press(pin)</text>
+  <path d="M164 152 H300" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="232" y="176" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">깃발 올리기</text>
+  <text x="232" y="198" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">그리고 바로 끝</text>
+  <text x="232" y="230" text-anchor="middle" font-size="12" fill="#4562f5" stroke="none" font-weight="700">짧게</text>
+  <path d="M316 178 L346 178" stroke-width="2.5" marker-end="url(#irf-arrow)"/>
+  <path d="M370 118 V250" stroke-width="3"/>
+  <path d="M372 120 L420 136 L372 152 Z" fill="#e03131" stroke-width="1.5"/>
+  <text x="370" y="274" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">pressed</text>
+  <text x="370" y="294" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" fill-opacity="0.75">깃발 변수</text>
+  <rect x="440" y="112" width="166" height="132" rx="12" fill="var(--card)" stroke-width="2"/>
+  <text x="523" y="140" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">반복 (while)</text>
+  <path d="M452 152 H594" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="523" y="176" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">깃발이 올라가 있으면</text>
+  <text x="523" y="198" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">LED 를 바꾸고</text>
+  <text x="523" y="220" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">깃발 내리기</text>
+  <path d="M436 196 L398 196" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#irf-arrow)"/>
+  <text x="418" y="214" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" fill-opacity="0.75">보기</text>
+  <circle cx="523" cy="300" r="22" fill="#ffd43b" fill-opacity="0.45" stroke="none"/>
+  <path d="M511 314 H535 V309 H511 Z" fill="#e03131" stroke-width="1.5"/>
+  <path d="M513 309 V292 A10 10 0 0 1 533 292 V309 Z" fill="#ff6b6b" stroke-width="1.5"/>
+  <path d="M523 248 L523 272" stroke-width="2" marker-end="url(#irf-arrow)"/>
+  <text x="24" y="44" font-size="15" font-weight="700" fill="currentColor" stroke="none">일을 둘로 나눠요: 알아차리기는 함수, 오래 걸리는 일은 반복</text>
+  <text x="24" y="340" font-size="13" fill="currentColor" stroke="none" fill-opacity="0.8">함수 안에서 기다리면 그동안 보드가 멈춰요</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="irb-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="irb-title">버튼 떨림: 한 번 눌렀는데 금속 접점이 튀어서 핀 값이 1에서 0으로 세 번 떨어진다. 떨어질 때마다 함수가 불려 세 번 센다. 처음 떨어진 때부터 200 ms 안의 신호는 무시하면 한 번만 센다</title>
+  <defs><marker id="irb-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#e03131" stroke="none"/></marker></defs>
+  <text x="24" y="40" font-size="15" font-weight="700" fill="currentColor" stroke="none">한 번 눌렀는데, 핀 값은 여러 번 떨어져요 (버튼 떨림)</text>
+  <text x="70" y="134" text-anchor="end" font-size="13" fill="currentColor" stroke="none">1 (뗌)</text>
+  <text x="70" y="214" text-anchor="end" font-size="13" fill="currentColor" stroke="none">0 (누름)</text>
+  <rect x="220" y="96" width="170" height="124" fill="#4562f5" fill-opacity="0.12" stroke="none"/>
+  <path d="M220 96 V220 M390 96 V220" stroke="#4562f5" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="305" y="240" text-anchor="middle" font-size="13" font-weight="700" fill="#4562f5" stroke="none">200 ms 안: 무시</text>
+  <path d="M80 130 H220 V210 H236 V130 H250 V210 H264 V130 H276 V210 H480 V130 H600" stroke-width="3"/>
+  <path d="M220 72 V118" stroke="#e03131" stroke-width="2.5" marker-end="url(#irb-arrow)"/>
+  <path d="M250 72 V118" stroke="#e03131" stroke-width="2.5" marker-end="url(#irb-arrow)"/>
+  <path d="M276 72 V118" stroke="#e03131" stroke-width="2.5" marker-end="url(#irb-arrow)"/>
+  <text x="220" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">1</text>
+  <text x="250" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">2</text>
+  <text x="276" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">3</text>
+  <text x="300" y="80" font-size="13" fill="#e03131" stroke="none">떨어질 때마다 함수가 불려요</text>
+  <text x="600" y="234" text-anchor="end" font-size="12" fill="currentColor" stroke="none" fill-opacity="0.6">시간 →</text>
+  <text x="480" y="122" text-anchor="middle" font-size="12" fill="currentColor" stroke="none" fill-opacity="0.7">손 뗌</text>
+  <rect x="24" y="270" width="592" height="62" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="40" y="296" font-size="14" fill="currentColor" stroke="none">처음 불린 때를 기억해 두고, 그때부터 지난 시간이</text>
+  <text x="40" y="318" font-size="14" fill="currentColor" stroke="none">200 ms 보다 짧으면 못 본 척해요. 그러면 한 번 누름에 한 번만 세요</text>
+</svg>

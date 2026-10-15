@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="irc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="irc-title">인터럽트 표지: ESP32 는 LED 를 2초씩 깜박이는 반복을 하고 있다. 버튼을 누르는 순간 번개 화살표가 끼어들어 on_press 함수가 바로 실행된다</title>
+  <defs><marker id="irc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/></marker></defs>
+  <rect x="250" y="120" width="140" height="140" rx="14" fill="var(--card)" stroke-width="2"/>
+  <rect x="270" y="138" width="100" height="70" rx="6" fill="var(--muted)"/>
+  <text x="320" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <text x="320" y="238" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" fill-opacity="0.75">반복: 깜박이기</text>
+  <path d="M286 104 A44 22 0 1 1 354 104" stroke-width="2.5" marker-end="url(#irc-arrow)"/>
+  <text x="320" y="56" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" fill-opacity="0.75">2초 켜고 · 2초 끄고</text>
+  <rect x="58" y="150" width="96" height="76" rx="10" fill="#495057" stroke-width="1.5"/>
+  <circle cx="106" cy="188" r="20" fill="#212529" stroke="#adb5bd" stroke-width="2"/>
+  <text x="106" y="254" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">버튼 누르기</text>
+  <path d="M160 168 L196 160 L186 184 L240 176" stroke="#f59f00" stroke-width="4" marker-end="url(#irc-arrow)"/>
+  <text x="198" y="214" text-anchor="middle" font-size="14" font-weight="700" fill="#f59f00" stroke="none">끼어들기!</text>
+  <path d="M396 190 L452 190" stroke-width="2.5" marker-end="url(#irc-arrow)"/>
+  <rect x="462" y="168" width="140" height="44" rx="22" fill="#4562f5" stroke="none"/>
+  <text x="532" y="195" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" stroke="none">on_press 실행</text>
+  <circle cx="532" cy="282" r="30" fill="#ffd43b" fill-opacity="0.4" stroke="none"/>
+  <path d="M518 300 H546 V294 H518 Z" fill="#e03131" stroke-width="1.5"/>
+  <path d="M520 294 V274 A12 12 0 0 1 544 274 V294 Z" fill="#ff6b6b" stroke-width="1.5"/>
+  <text x="532" y="336" text-anchor="middle" font-size="13" fill="currentColor" stroke="none" fill-opacity="0.75">2번 LED</text>
+  <text x="24" y="36" font-size="16" font-weight="700" fill="currentColor" stroke="none">버튼이 끼어들기 — 인터럽트</text>
+</svg>
