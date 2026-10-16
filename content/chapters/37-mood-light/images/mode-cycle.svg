@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mlm-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mlm-title">모드 순환 그림: 모드 0 끄기, 모드 1 손잡이 색, 모드 2 내가 고른 색이 원 세 개로 있고, 버튼을 누를 때마다 0 에서 1, 1 에서 2, 2 에서 다시 0 으로 화살표가 돈다. 아래 표는 mode 변수가 0, 1, 2, 3 이 될 때 3 은 0 으로 되돌린다는 것을 보여 준다</title>
+  <defs>
+    <marker id="mlm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <text x="320" y="34" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">버튼 한 번 = 다음 모드</text>
+  <!-- 세 원 -->
+  <circle cx="130" cy="150" r="52" fill="#495057" stroke="none"/>
+  <circle cx="320" cy="150" r="52" fill="#1c7ed6" stroke="none"/>
+  <circle cx="510" cy="150" r="52" fill="#f06595" stroke="none"/>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff" stroke="none">
+    <text x="130" y="140">모드 0</text><text x="130" y="162">끄기</text>
+    <text x="320" y="140">모드 1</text><text x="320" y="162">손잡이 색</text>
+    <text x="510" y="140">모드 2</text><text x="510" y="162">내가 고른 색</text>
+  </g>
+  <!-- 화살표 0→1→2 -->
+  <path d="M186 150 L262 150" stroke-width="2.5" marker-end="url(#mlm-arrow)"/>
+  <path d="M376 150 L452 150" stroke-width="2.5" marker-end="url(#mlm-arrow)"/>
+  <!-- 2→0 되돌아오는 큰 화살표 -->
+  <path d="M510 206 C 510 260, 130 260, 130 208" stroke-width="2.5" marker-end="url(#mlm-arrow)"/>
+  <rect x="268" y="226" width="104" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="320" y="243" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">3 이면 다시 0</text>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="224" y="140">누름</text>
+    <text x="414" y="140">누름</text>
+  </g>
+  <!-- 표 -->
+  <rect x="60" y="276" width="520" height="64" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <path d="M60 300 H580" stroke-width="1.5" stroke-opacity="0.5"/>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="130" y="293" font-weight="700">누른 횟수</text>
+    <text x="250" y="293" font-weight="700">mode + 1</text>
+    <text x="400" y="293" font-weight="700">되돌리기</text>
+    <text x="520" y="293" font-weight="700">실제 mode</text>
+    <text x="130" y="326">1 · 2 · 3 · 4</text>
+    <text x="250" y="326">1 · 2 · 3 · 1</text>
+    <text x="400" y="326">3 은 0 으로</text>
+    <text x="520" y="326">1 · 2 · 0 · 1</text>
+  </g>
+</svg>

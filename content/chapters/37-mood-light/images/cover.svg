@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mlc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mlc-title">감성 스마트 무드등: 종이컵을 덮은 RGB LED 가 보라색으로 빛나고, 손잡이와 모드 버튼이 옆에 있다. 폰 화면의 빨강·초록·파랑·끄기 버튼에서 보드로 /cmd?c=blue 요청이 날아가고, 10분 뒤 저절로 꺼지는 수면 타이머가 적혀 있다</title>
+  <defs>
+    <radialGradient id="mlc-glow" cx="0.5" cy="0.55" r="0.6">
+      <stop offset="0" stop-color="#c084fc" stop-opacity="0.95"/>
+      <stop offset="0.6" stop-color="#a855f7" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- 밤 창문 배경 -->
+  <rect x="24" y="24" width="300" height="312" rx="16" fill="#1b1b2f" stroke="none"/>
+  <g fill="#ffffff" stroke="none" opacity="0.7">
+    <circle cx="60" cy="56" r="1.6"/><circle cx="120" cy="44" r="1.2"/><circle cx="200" cy="60" r="1.5"/><circle cx="270" cy="40" r="1.2"/><circle cx="300" cy="90" r="1.4"/>
+  </g>
+  <text x="174" y="56" text-anchor="middle" font-size="14" fill="#ffffff" fill-opacity="0.8" stroke="none">잠들기 전, 은은한 빛 하나</text>
+  <!-- 빛 번짐 + 종이컵 -->
+  <circle cx="150" cy="200" r="110" fill="url(#mlc-glow)" stroke="none"/>
+  <path d="M112 150 L188 150 L176 262 L124 262 Z" fill="#f3e8ff" stroke="#c084fc" stroke-width="2"/>
+  <path d="M118 184 H182 M121 214 H179" stroke="#c084fc" stroke-width="1.5" stroke-opacity="0.6"/>
+  <text x="150" y="246" text-anchor="middle" font-size="12" fill="#6b21a8" stroke="none">종이컵</text>
+  <!-- 받침(브레드보드 느낌) -->
+  <rect x="80" y="262" width="140" height="22" rx="4" fill="#2d2d44" stroke="#ffffff" stroke-opacity="0.35"/>
+  <!-- 손잡이 -->
+  <circle cx="246" cy="236" r="18" fill="#1c7ed6" stroke="#ffffff" stroke-opacity="0.8"/>
+  <path d="M246 236 L256 222" stroke="#ffffff" stroke-width="3"/>
+  <text x="246" y="276" text-anchor="middle" font-size="12" fill="#ffffff" fill-opacity="0.85" stroke="none">손잡이</text>
+  <!-- 모드 버튼 -->
+  <rect x="270" y="222" width="34" height="28" rx="5" fill="#495057" stroke="#ffffff" stroke-opacity="0.8"/>
+  <circle cx="287" cy="236" r="7" fill="#e03131" stroke="none"/>
+  <text x="287" y="276" text-anchor="middle" font-size="12" fill="#ffffff" fill-opacity="0.85" stroke="none">모드</text>
+  <!-- 모드 표시 -->
+  <g font-size="12" fill="#ffffff" stroke="none" fill-opacity="0.85">
+    <text x="48" y="306">모드 0 끄기</text>
+    <text x="134" y="306">1 손잡이 색</text>
+    <text x="226" y="306">2 폰이 고른 색</text>
+  </g>
+  <text x="174" y="328" text-anchor="middle" font-size="12" fill="#c084fc" stroke="none">켠 뒤 10분이 지나면 저절로 꺼져요</text>
+  <!-- 폰 -->
+  <rect x="440" y="52" width="150" height="270" rx="18" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="452" y="78" width="126" height="222" rx="8" fill="var(--muted)" stroke="none"/>
+  <path d="M495 65 H535" stroke-width="2" stroke-opacity="0.5"/>
+  <text x="515" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">Mood Light</text>
+  <g stroke="none" font-size="13" font-weight="700" text-anchor="middle" fill="#ffffff">
+    <rect x="466" y="114" width="98" height="30" rx="8" fill="#e03131"/><text x="515" y="134">빨강</text>
+    <rect x="466" y="152" width="98" height="30" rx="8" fill="#2f9e44"/><text x="515" y="172">초록</text>
+    <rect x="466" y="190" width="98" height="30" rx="8" fill="#1971c2" stroke="#ffffff" stroke-width="3"/><text x="515" y="210">파랑</text>
+    <rect x="466" y="228" width="98" height="30" rx="8" fill="#495057"/><text x="515" y="248">끄기</text>
+  </g>
+  <text x="515" y="284" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7" stroke="none">모드 2 · 파랑</text>
+  <!-- 요청 화살표 -->
+  <path d="M438 206 C 400 206, 380 150, 332 150" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <path d="M342 143 L330 150 L342 157" stroke-width="2.5"/>
+  <rect x="340" y="110" width="98" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="389" y="127" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">/cmd?c=blue</text>
+</svg>

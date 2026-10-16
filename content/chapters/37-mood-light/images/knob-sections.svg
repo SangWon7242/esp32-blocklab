@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mlk-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mlk-title">손잡이 값 0~4095 를 다섯 구간으로 나누기: 0~799 빨강, 800~1599 초록, 1600~2399 파랑, 2400~3199 보라, 3200~4095 흰색. 경계 800·1600·2400·3200 은 원본 0~1023 표의 경계 200·400·600·800 에 4 를 곱한 값이다. 아래에는 if value 가 800 보다 작으면, elif 1600 보다 작으면 순서로 묻는 사다리가 있다</title>
+  <text x="320" y="36" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">손잡이 값 0~4095 를 다섯 구간으로</text>
+  <!-- 색 띠 -->
+  <g stroke="none">
+    <rect x="60" y="64" width="104" height="40" fill="#e03131"/>
+    <rect x="164" y="64" width="104" height="40" fill="#2f9e44"/>
+    <rect x="268" y="64" width="104" height="40" fill="#1971c2"/>
+    <rect x="372" y="64" width="104" height="40" fill="#be4bdb"/>
+    <rect x="476" y="64" width="104" height="40" fill="#f8f9fa"/>
+  </g>
+  <rect x="60" y="64" width="520" height="40" rx="4" stroke-width="1.5"/>
+  <g font-size="13" font-weight="700" text-anchor="middle" stroke="none">
+    <text x="112" y="89" fill="#ffffff">빨강</text>
+    <text x="216" y="89" fill="#ffffff">초록</text>
+    <text x="320" y="89" fill="#ffffff">파랑</text>
+    <text x="424" y="89" fill="#ffffff">보라</text>
+    <text x="528" y="89" fill="#1b1b1f">흰색</text>
+  </g>
+  <!-- 눈금 -->
+  <g stroke-width="1.5">
+    <path d="M60 104 V118 M164 104 V118 M268 104 V118 M372 104 V118 M476 104 V118 M580 104 V118"/>
+  </g>
+  <g font-size="12" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="60" y="134">0</text>
+    <text x="164" y="134" font-weight="700">800</text>
+    <text x="268" y="134" font-weight="700">1600</text>
+    <text x="372" y="134" font-weight="700">2400</text>
+    <text x="476" y="134" font-weight="700">3200</text>
+    <text x="580" y="134">4095</text>
+  </g>
+  <!-- 원본 표 ×4 -->
+  <rect x="60" y="150" width="250" height="88" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="185" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">원래 표는 0~1023 이었어요</text>
+  <g font-size="12" fill="currentColor" stroke="none">
+    <text x="76" y="196">경계 200 · 400 · 600 · 800</text>
+    <text x="76" y="222">4095 ÷ 1023 ≈ 4 이니 경계마다 × 4</text>
+  </g>
+  <path d="M310 194 L348 194" stroke-width="2.5"/>
+  <path d="M340 188 L350 194 L340 200" stroke-width="2.5"/>
+  <rect x="356" y="150" width="224" height="88" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="468" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">우리 보드는 0~4095</text>
+  <g font-size="12" fill="currentColor" stroke="none">
+    <text x="372" y="196">경계 800 · 1600 · 2400 · 3200</text>
+    <text x="372" y="222">한 구간 너비는 약 800 이에요</text>
+  </g>
+  <!-- if/elif 사다리 -->
+  <text x="60" y="268" font-size="13" font-weight="700" fill="currentColor" stroke="none">위에서부터 차례로 물어요</text>
+  <g font-size="12" fill="currentColor" stroke="none">
+    <text x="60" y="292">if  값 &lt; 800 → 빨강</text>
+    <text x="60" y="312">elif  값 &lt; 1600 → 초록</text>
+    <text x="60" y="332">elif  값 &lt; 2400 → 파랑</text>
+    <text x="330" y="292">elif  값 &lt; 3200 → 보라</text>
+    <text x="330" y="312">else → 흰색</text>
+    <text x="330" y="332" fill-opacity="0.75">2400 은 "2400 보다 작다" 가 거짓이라 보라예요</text>
+  </g>
+</svg>

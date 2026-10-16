@@ -1,0 +1,581 @@
+# 교과 융합 F10 · 감성 스마트 무드등 — 원본: 아두이노 심화 W07 스마트 컬러 무드등, 마이크로비트 심화 W05 무드등(SDG 11). 형식 설명은 src/track/README.md
+# RGB LED(27·25·26, 공통 음극) + 가변저항(39) + 모드 버튼(14) + WiFi 웹서버. 2부 끝에 app 단계(AI 로 폰 앱 만들기). 아날로그는 WiFi 때문에 32~39 번 핀
+id: 37-mood-light
+order: 37
+track: fusion
+label: F10
+prerequisites: [05-rgb-led, 13-clap-dial, 25-web-led]
+subjects: [미술, 과학, 수학]
+sdg: [11]
+sessions: 2
+teacherNotes: |
+  **RGB LED 를 맨눈으로 오래 보지 않게 해 주세요.** 흰색(255, 255, 255)은 꽤 눈부십니다. 처음부터 **종이컵**을 거꾸로 씌워 덮개로 쓰면 눈도 보호되고 빛이 컵 안에서 섞여 무드등답게 보입니다. 종이컵에 한지 · 색종이 · 형광펜으로 꾸미기는 미술 시간과 연결됩니다.
+
+  - **공통 음극 · 공통 양극** 키트의 RGB LED 는 가장 긴 다리가 GND(공통 음극)입니다. 다른 RGB LED 를 쓰면 공통 양극일 수 있는데, 그때는 긴 다리를 3V3 에 잇고 색이 **반대로**(255 가 꺼짐, 0 이 가장 밝음) 나옵니다. 색이 거꾸로 나오면 이것부터 봅니다.
+  - **구간 경계는 예시입니다.** 코드의 800 · 1600 · 2400 · 3200 은 0~4095 를 다섯 칸으로 나눈 값일 뿐이에요. 가변저항을 끝까지 돌려도 4095 가 안 나오거나 0 아래로 안 내려가는 보드가 있으니, 1부 실행에서 손잡이 양 끝 값을 출력해 보고 경계를 고치게 해도 좋습니다. 경계값에서는 손잡이가 조금만 떨려도 색이 번갈아 바뀝니다(정상).
+  - **색 범위 활동지(미술 · 수학)** 색과 감정을 짝지은 표(예: 빨강 힘 · 초록 안정 · 파랑 차분 · 보라 신비 · 흰색 집중)를 먼저 만들고, 그 다섯 색을 손잡이 구간에 배치하게 하면 1부 미션의 색 숫자가 학생마다 달라집니다. 판정은 세 숫자가 모두 0 만 아니면 통과합니다.
+  - **16진수(수학)** 폰 앱의 색은 `#ff8800` 처럼 16진수 두 자리씩 빨강 · 초록 · 파랑입니다. `ff` = 255, `88` = 136, `00` = 0. 2부 실행 뒤 "16진수 ↔ 10진수" 변환 표를 채우는 활동을 넣을 수 있습니다(16 × 앞자리 + 뒷자리).
+  - **WiFi** 코드의 `"MyWiFi"` · `"12345678"` 은 예시입니다. 폰과 보드가 같은 WiFi 에 있어야 하고, 학교 WiFi 가 막혀 있으면 공유기 모드 블록(`ip = wifi_ap("ESP32-LAB", "12345678")`)으로 바꾸고 폰을 그 WiFi 에 붙여 `192.168.4.1` 을 엽니다. WiFi 를 쓰는 동안 아날로그는 32~39 번 핀만 됩니다(가변저항이 39 번인 까닭).
+  - **수면 타이머(설계)** 보드는 요청이 올 때만 반복 한 바퀴를 돌아 시간을 확인합니다. 폰 앱이 2초마다 `/data` 를 읽어 주면 그때마다 확인하고, 앱을 닫아 두면 다음 요청이 올 때 꺼집니다. 10분은 `600000` ms 로, 시험할 때는 `10000`(10초)으로 줄여 보게 하세요.
+  - **앱 단계(2부 끝, 20분)** 학생 AI 계정 · 연령 정책이 걸리면 교사가 프롬프트를 넣어 시연하고 결과 HTML 을 나눠 줘도 됩니다. AI 결과에 외부 CDN · 글꼴 · 절대 주소가 섞이면 검사가 걸러 주니 "외부 라이브러리 없이, 상대 주소로" 라고 다시 부탁하게 합니다. 보드에 `index.html` 을 저장한 뒤 폰에서 보드 주소 `/` 를 다시 열면 내 앱이 나옵니다.
+  - **차시 나누기** 1부(문제 만나기 ~ 미션, 약 35분): 손잡이 색 · 모드 버튼. 2부(실행 2 ~ 성찰, 약 50분): 폰으로 색 고르기 · 디버깅 · 수면 타이머 설계 · 앱 만들기.
+
+  **교과 연결**
+  - 미술: 색과 감정(색채 심리), 조명 디자인 — 종이컵 꾸미기, 나만의 다섯 색 팔레트 정하기.
+  - 과학: 빛의 삼원색과 가산 혼합(빨강 + 초록 = 노랑, 셋 다 = 흰색), 수면과 빛 — 잠들기 전 파란빛은 잠을 쫓고 붉고 어두운 빛이 잠에 좋다는 연구를 소개합니다.
+  - 수학: 0~4095 를 다섯 구간으로 나누기(원본 0~1023 표의 경계 × 4, 비례), 16진수 ↔ 10진수.
+  - 사회(SDG 11): 필요한 만큼만 켜고 저절로 꺼지는 조명 — 에너지 절약과 빛 공해.
+title: 감성 스마트 무드등
+subtitle: 손잡이로, 버튼으로, 폰으로 고르는 나만의 빛
+summary: |
+  잠들기 힘든 친구에게 **빛 하나**를 선물해요. 5장의 RGB LED 에 **가변저항**(손잡이)과 **모드 버튼**을 붙여 손잡이로 다섯 색을 고르고, 버튼으로 끄기 → 손잡이 색 → 내가 고른 색 모드를 돌려요.
+  2부에서는 25장의 **웹서버**를 붙여 폰 버튼으로 색을 바꾸고, 켠 뒤 10분이 지나면 저절로 꺼지는 **수면 타이머**를 설계해요. 마지막엔 AI 와 함께 내 폰 앱도 만들어요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: Micro USB 선으로 노트북과 연결. WiFi 가 들어 있어요 }
+  - { name: 브레드보드, note: "RGB LED · 가변저항 · 버튼을 한 판에 꽂아요. − 줄은 GND, + 줄은 3V3" }
+  - { name: RGB LED, note: "다리 4개. 가장 긴 다리가 GND(공통 음극). 순서는 빨강 · GND · 초록 · 파랑" }
+  - { name: 220Ω 저항, note: "3개. 빨강-빨강-갈색 띠. 빨강 · 초록 · 파랑 다리에 하나씩" }
+  - { name: 가변저항(손잡이), note: "다리 3개. 양 끝은 + 줄과 − 줄, 가운데 다리가 39번으로" }
+  - { name: 버튼(푸시 버튼), note: "모드 버튼. 다리 넷을 가운데 홈에 걸쳐 꽂아요" }
+  - { name: 점퍼선(M-M), note: "12개 (27 · 25 · 26번 3, RGB 긴 다리 → − 줄 1, 가변저항 3, 버튼 2, GND 2, 3V3 1)" }
+  - { name: 종이컵, note: "RGB LED 에 거꾸로 씌우는 덮개. 눈부심을 막고 빛을 섞어 줘요. 꾸미기는 자유" }
+  - { name: 스마트폰, note: 보드와 같은 WiFi 에 붙여요. 브라우저만 있으면 돼요 (2부) }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "RGB LED 다리를 d 칸 14 · 16 · 18 · 20번 줄에(빨강 · GND · 초록 · 파랑). 세 색 줄마다 220Ω 저항이 가운데 홈을 건너고 27번 → 14번 줄, 25번 → 18번 줄, 26번 → 20번 줄, 가장 긴 다리(16번 줄) → 위쪽 − 줄. 가변저항은 f 칸 23 · 24 · 25번 줄: 23번 줄 → 아래쪽 − 줄, 가운데 24번 줄 → 39번, 25번 줄 → 아래쪽 + 줄. 버튼은 가운데 홈에 걸쳐 28 · 30번 줄: 14번 → 28번 줄 b 칸, 대각선 다리(30번 줄 j 칸) → 아래쪽 − 줄. GND → 위 · 아래 − 줄, 3V3 → 아래쪽 + 줄"
+principle:
+  image: images/colour-mixing.svg
+  body: |
+    **빛의 삼원색(과학)** 빨강 · 초록 · 파랑 빛을 겹치면 **더 밝은 새 색**이 돼요. 물감과 달리 빛은 더할수록 밝아져서 **가산 혼합**이라고 해요. 빨강 + 초록 = 노랑, 초록 + 파랑 = 하늘, 빨강 + 파랑 = 보라, 셋 다 가득이면 흰색이에요. RGB LED 안의 작은 LED 세 개가 종이컵 안에서 섞여 한 색으로 보여요.
+
+    **색을 숫자로(수학)** 코드는 색을 `set_color(빨강, 초록, 파랑)` 세 숫자(0~255)로 적어요. 폰 앱은 같은 색을 `#ff8800` 처럼 **16진수** 두 자리씩 적어요. `ff` 는 15 × 16 + 15 = 255, `88` 은 8 × 16 + 8 = 136 이에요. 손잡이 값 0~4095 를 **다섯 구간**으로 나누는 것도 수학이에요. 원래 표(0~1023)의 경계 200 · 400 · 600 · 800 에 4 를 곱하면 우리 보드의 경계 800 · 1600 · 2400 · 3200 이 돼요.
+
+    **잠과 빛** 잠들기 전의 **파란빛**은 몸에게 "아직 낮이야" 라고 말해 잠을 쫓고, **붉고 어두운 빛**은 잠을 도와요. 그래서 수면 무드등은 색을 고를 수 있어야 하고, 켠 뒤 저절로 꺼지는 **타이머**가 있으면 에너지도 아껴요(SDG 11).
+goals:
+  content: 가변저항 값을 다섯 구간으로 나눠 RGB 색을 고르고, 버튼으로 모드(0 끄기 · 1 손잡이 · 2 고른 색)를 순환시키고, 웹 요청의 질의 값으로 색을 바꾸는 무드등을 만든다
+  thinking: 하나의 장치를 입력(손잡이 · 버튼 · 폰) · 상태(모드) · 출력(RGB)으로 나눠 설계하고, 숫자 범위(0~1023 → 0~4095, 10진수 ↔ 16진수)가 바뀌어도 규칙을 옮길 수 있다
+successCriteria:
+  - 빨강 255 와 초록 255 를 섞으면 어떤 색이 되는지 말하고, 색 하나를 세 숫자로 적을 수 있다
+  - 손잡이 값 0~4095 를 다섯 구간으로 나누는 경계를 계산하고 if · elif 사다리로 적을 수 있다
+  - 버튼을 누를 때마다 모드가 0 → 1 → 2 → 0 으로 돌아가는 코드를 짜고, 되돌리기가 빠지면 어떤 일이 생기는지 설명할 수 있다
+  - 폰이 보내는 질의 c 의 값으로 색을 바꾸고, 약속표의 주소를 AI 프롬프트에 그대로 쓸 수 있다
+parts:
+  - id: part1
+    title: 1부 · 손잡이와 버튼으로 색 고르기
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 잠들기 힘든 친구에게 어떤 빛을 선물할까?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 종이컵 안에서 빛이 섞여요. 손잡이로, 버튼으로, 폰으로 색을 고르고 10분 뒤엔 저절로 꺼지는 무드등
+        body: |
+          밤에 잠이 잘 안 온다는 친구가 있어요. 방 불을 다 켜면 눈부시고, 다 끄면 무서워요. 은은한 **무드등** 하나면 어떨까요? 조명 하나만 바꿔도 방 분위기가 달라지고, 잠들기 전 어떤 색의 빛을 보느냐가 잠에도 영향을 준다고 해요.
+
+          필요한 만큼만 켜고 잠들면 저절로 꺼지는 조명은 전기도 아껴요. 이건 유엔 지속가능발전목표 **SDG 11**(지속가능한 도시와 공동체)과도 이어져요. 코드를 보기 전에 내 생각부터 적어 봐요. 정답은 없어요.
+        todo:
+          - 준비물(RGB LED, 저항 3개, 가변저항, 버튼, 종이컵, 선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장으로 쓰기
+          - 잠들기 전에 보고 싶은 색을 하나 고르고 그 까닭도 적기
+        questions:
+          - 빨강 빛 255 와 초록 빛 255 를 한 곳에 겹치면 무슨 색으로 보일까요? 물감을 섞을 때와 같을까요?
+          - 손잡이를 돌려 다섯 색 가운데 하나를 고르게 하려면, 손잡이 값(0~4095)을 어떻게 나누면 좋을까요?
+          - 폰 화면에서 "파랑" 버튼을 누르면 그 색이 그대로 보드에 나오게 하려면, 폰과 보드는 무엇을 약속해야 할까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 세 칸 보드
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          무드등은 입력이 셋이에요. **손잡이**(가변저항)는 0~4095 값을, **버튼**은 눌림을, **폰 앱**은 질의 `c` 의 글을 보내요. 출력은 **RGB LED** 하나예요. 셋이 한 LED 를 두고 다투지 않게 "지금 누구 말을 들을지" 를 정하는 숫자가 **모드**예요.
+
+          세 칸에 각각 한 가지 이상 적어 보세요. 다섯 색을 어떤 구간에 둘지, 모드 숫자에 무엇을 짝지을지는 사람이 정하는 약속이에요. 미술 시간에 만든 색과 감정 표가 있다면 그 다섯 색을 구간에 배치해 보자. 세 칸을 다 쓰면 **예시 답 보기**가 열려요.
+        todo:
+          - "**알아야 할 것**: 보드가 읽어야 하는 값 세 가지 적기"
+          - "**정해야 할 것**: 색 구간 · 모드 숫자 · 폰과의 약속 적기"
+          - "**해야 할 것**: RGB LED 가 실제로 하는 일 적기"
+        answer:
+          know: ["손잡이 값 0~4095", "버튼이 눌렸는지(누르면 0)", "폰이 보낸 질의 c 의 글(red · green · blue · off)", "지금 모드가 몇인지"]
+          decide: ["다섯 색 구간: 0~799 빨강, 800~1599 초록, 1600~2399 파랑, 2400~3199 보라, 3200~4095 흰색", "모드 0 끄기 · 1 손잡이 색 · 2 고른 색, 버튼마다 0 → 1 → 2 → 0", "폰 버튼 글은 c=red, c=green, c=blue, c=off", "켠 뒤 몇 분 지나면 저절로 끌지(예: 10분)"]
+          act: ["세 숫자(빨강 · 초록 · 파랑 0~255)로 RGB LED 색 켜기", "모드 0 이면 세 숫자 모두 0 으로 끄기", "모드 1 이면 손잡이 값을 읽어 구간에 맞는 색 켜기", "질의 c 를 읽어 그 색 켜고 페이지로 답하기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 손잡이 값 2000 은 무슨 색?
+        minutes: 4
+        scene:
+          image: images/knob-sections.svg
+          caption: 0~4095 를 다섯 구간으로. 경계는 원래 표(0~1023)의 200 · 400 · 600 · 800 에 4 를 곱한 값이에요
+        body: |
+          아직 실행하지 않아요. 5장에서 쓴 `set_color(빨강, 초록, 파랑)` 와 13장의 `knob.read()` 가 그대로 있어요. 새로운 건 `if` · `elif` · `else` 가 위에서부터 **차례로 묻는 사다리**예요.
+
+          `elif value < 1600:` 은 "앞 조건(800 보다 작다)이 거짓이었고, 1600 보다 작으면" 이라는 뜻이에요. 그래서 800~1599 가 초록이 돼요. 그림의 구간 띠를 보며 빈칸에 내 예측을 적어요.
+        todo:
+          - "`while True:` 아래를 한 줄씩 읽고 구간마다 어떤 색인지 그림과 맞춰 보기"
+          - 손잡이 값 2000 이 어느 줄에서 참이 되는지 손가락으로 짚기
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_knob_colors.py
+        blanks:
+          - q: 손잡이를 가운데쯤 돌려 값이 2000 이면 어떤 색이 켜질까요? 어느 줄에서 참이 되나요?
+          - q: 첫 경계가 800 인 까닭은 무엇일까요? 원래 표(0~1023)의 경계 200 과 어떤 관계일까요?
+          - q: 손잡이를 끝까지 돌려 4095 가 되면 어느 줄이 실행될까요? 그 줄에는 비교가 없는데 왜일까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 손잡이로 다섯 색 고르기
+        minutes: 8
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "RGB LED 는 5장과 같은 자리(27 · 25 · 26), 가변저항은 39번, 버튼은 14번. 오늘은 버튼까지 함께 꽂아 두어요"
+        body: |
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**대로 꽂아요. RGB LED 의 가장 긴 다리가 GND 예요. 가변저항은 양 끝 다리가 + 줄 · − 줄, 가운데 다리가 **39번**이에요(WiFi 를 쓸 2부를 위해 32~39번을 써요). 버튼은 1부 미션에서 쓰니 지금 함께 꽂아요.
+
+          실행한 뒤 종이컵을 씌우고 손잡이를 천천히 끝에서 끝까지 돌려 보세요. 색이 몇 번 바뀌나요? 바뀌는 순간 손잡이를 아주 조금만 움직이면 어떻게 되나요?
+        todo:
+          - "**부품과 배선**대로 RGB LED · 저항 3 · 가변저항 · 버튼 꽂기"
+          - "**보드 연결** → **실행**, 종이컵을 씌우고 손잡이를 끝에서 끝까지 돌리기"
+          - 색이 바뀌는 순간의 손잡이 위치를 공책에 표시하기
+        code: step1_knob_colors.py
+        expected: 코드를 실행하고 손잡이를 한쪽 끝에서 다른 끝으로 천천히 돌리면 **빨강 → 초록 → 파랑 → 보라 → 흰색** 순서로 다섯 색이 차례로 바뀌어요. 경계에서는 손잡이가 조금만 떨려도 두 색이 번갈아 보여요.
+        codeNotes:
+          - { line: 4, note: "RGB LED 세 핀(27 · 25 · 26)을 PWM 으로 준비해요. 5장과 같아요 (4~9번 줄)" }
+          - { line: 10, note: "가변저항을 39번 아날로그 핀에 준비하고 `knob` 이라고 불러요 (10~12번 줄)" }
+          - { line: 15, note: "`set_color(r, g, b)`: 0~255 세 숫자를 PWM 세기 0~1023 으로 바꿔 세 핀에 보내는 도우미" }
+          - { line: 22, note: "손잡이 값을 읽어 `value` 에 담아요. 0~4095" }
+          - { line: 23, note: "800 보다 작으면 빨강. 0~799 구간이에요" }
+          - { line: 25, note: "`elif`: 앞 조건이 거짓일 때만 물어요. 800~1599 초록" }
+          - { line: 31, note: "`else`: 위의 네 조건이 모두 거짓이면(3200 이상) 흰색" }
+          - { line: 33, note: "0.05초 쉬고 다시 읽어요. 손잡이를 돌리면 바로 따라와요" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 — 구간 사다리
+        minutes: 4
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요. 위에서부터 차례로 묻는 사다리를 따라가요
+        body: |
+          `if` · `elif` 사다리는 **위에서부터** 묻고, 참이 되는 첫 줄 하나만 실행한 뒤 사다리를 빠져나와요. 그래서 2000 은 "800 보다 작다"(거짓) → "1600 보다 작다"(거짓) → "2400 보다 작다"(참) 순서로 내려가요.
+
+          답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - 경계 숫자(800 · 1600 · 2400 · 3200)에 손가락을 짚으며 구간 세기
+          - 손잡이 값을 읽는 줄 찾기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_knob_colors.py
+        questions:
+          - { kind: choice, q: "손잡이 값이 2000 이면 켜지는 색은?", options: ["초록", "파랑", "보라"], answer: 1, hint: "1600 보다 작은가요? 2400 보다 작은가요?" }
+          - { kind: number, q: "다섯 색을 나누는 경계 숫자는 모두 몇 개인가요?", answer: 4, hint: "if 와 elif 에 적힌 숫자를 세어요" }
+          - { kind: line, q: "손잡이 값을 읽어 value 에 담는 줄의 줄 번호를 클릭하세요", answer: 22 }
+        codeNotes:
+          - { line: 15, note: "색을 켜는 도우미 함수의 정의예요. 여기서는 만들어 두기만 해요" }
+          - { line: 21, note: "`while True:` 아래 들여 쓴 줄들이 한 바퀴예요" }
+          - { line: 27, note: "2400 보다 작으면 파랑. 앞의 두 조건이 거짓일 때만 여기까지 와요" }
+          - { line: 33, note: "한 바퀴 끝에 잠깐 쉬어요" }
+
+      - id: mission
+        type: mission
+        title: 미션 — 모드 버튼으로 끄기 → 손잡이 → 내 색
+        minutes: 10
+        scene:
+          image: images/mode-cycle.svg
+          caption: 버튼 한 번에 다음 모드로. 모드 0 끄기 · 1 손잡이 색 · 2 내가 고른 색. 3 이 되면 다시 0
+        body: |
+          활동 칸에는 **1부 코드**가 깔려 있어요. 여기에 **모드 버튼**(14번)을 더해요. 변수 `mode` 를 0 으로 시작하고, 버튼을 누를 때마다 1 씩 키워요. 2 다음은 다시 0 이어야 하니 3 이 되면 0 으로 되돌려요.
+
+          모드 0 이면 세 숫자를 모두 0 으로 꺼요. 모드 1 이면 1부처럼 손잡이 값으로 색을 골라요(이 사다리를 `knob_color` 라는 **함수**로 묶으면 깔끔해요). 모드 2 는 내가 고른 **감정 색** 하나를 세 숫자로 켜요. 버튼을 한 번 눌렀는데 모드가 두 번 바뀌면, 누른 뒤 잠깐 기다리는 줄이 있는지 봐요. 판정 목록을 하나씩 채워 가요.
+        todo:
+          - 버튼 준비(14번, 이름 `button`)와 `mode = 0` 을 반복 밖에 두기
+          - 누르면 `mode` 1 키우고 3 이면 0 으로, 잠깐 기다리기 · 모드 0 끄기 · 1 손잡이 색 · 2 내 색
+          - 실행해 버튼을 네 번 눌러 보며 확인한 뒤 **판정** 누르기
+        instructions: "1부 코드에서 시작해 모드 버튼(14번, 이름 button)을 더하세요. (1) mode 는 0 으로 시작 (2) 버튼을 누르면 mode 를 1 키우고, 3 이 되면 0 으로 되돌리기, 그 뒤 0.3초쯤 기다리기 (3) mode 0 이면 set_color(0, 0, 0) 으로 끄기 (4) mode 1 이면 손잡이 값으로 다섯 색 고르기 (5) mode 2 이면 내가 고른 색 하나를 세 숫자로 켜기 (0, 0, 0 은 안 돼요)"
+        hint: "버튼 준비 블록(14번, button). 손잡이 색 사다리는 함수 블록 knob_color 로 묶어요. 반복 안: 만약 button.value() == 0 → mode 를 1 만큼 바꾸기 → 만약 mode == 3 → mode 를 0 으로 → 0.3초 기다리기. 그 아래 만약 mode == 0 → RGB 끄기 / 아니면 만약 mode == 1 → knob_color() / 아니면 → RGB 색 정하기(내 색). 끝에 50 ms 기다리기"
+        code: step1_knob_colors.py
+        rules:
+          - pinIs: { name: button, pin: 14 }
+            fail: 모드 버튼은 몇 번 핀에 이었나요? 버튼 준비에 이름 button 과 핀 14 가 있나요?
+          - codeMatches: 'if button\.value\(\) == 0:\n\s+mode (= mode \+ 1|\+= 1)$'
+            fail: 버튼을 누르면(값 0) 모드가 1 커지나요? 누름을 묻는 조건 바로 아래에 모드를 키우는 줄이 있나요?
+          - codeMatches: '(if mode (== 3|> 2|>= 3):\n\s+mode = 0|mode = \(mode \+ 1\) % 3|mode % 3)'
+            fail: 모드가 2 다음에는 어디로 가야 할까요? 3 이 되면 되돌리는 줄이 있나요? 없으면 모드는 4, 5 로 계속 커져요
+          - codeMatches: 'if button\.value\(\) == 0:\n(?:\s+\S[^\n]*\n)*?\s+time\.sleep\(0?\.\d+\)'
+            fail: 버튼을 한 번 눌렀는데 모드가 두세 번 바뀌지 않나요? 누른 뒤 잠깐(0.3초쯤) 기다리는 줄이 조건 안에 있나요?
+          - codeMatches: 'if mode == 0:\n\s+set_color\(0, 0, 0\)'
+            fail: 모드 0 에서 LED 가 꺼지나요? 세 숫자가 모두 0 이어야 꺼져요
+          - codeMatches: 'mode == 1:\n\s+(knob_color\(\)|\w+ = knob\.read\(\))'
+            fail: 모드 1 에서 손잡이 값을 읽어 색을 고르나요? 손잡이 사다리를 함수로 묶어 부르거나, 손잡이 값을 읽는 줄이 그 안에 있나요?
+          - codeMatches: 'mode == 1:[\s\S]*?\n    (else|elif mode == 2):\n        set_color\((?!0, 0, 0\))\d+, \d+, \d+\)'
+            fail: 모드 2 에서 내가 고른 감정 색이 켜지나요? 세 숫자가 모두 0 이면 꺼진 것과 같아요
+        answerCode: mission_mode.py
+
+  - id: part2
+    title: 2부 · 폰으로 색 고르고 앱 만들기
+    steps:
+      - id: run2
+        type: run
+        title: 실행 2 — 폰 버튼으로 색 바꾸기
+        minutes: 7
+        scene:
+          image: images/web-flow.svg
+          caption: 폰이 /cmd?c=blue 를 보내면 보드는 질의 c 의 값 blue 를 읽어 파랑을 켜고 페이지로 답해요
+        body: |
+          이번엔 25장의 **웹서버**를 붙여요. 코드가 길어 보이지만 위쪽 `def` 들은 WiFi 와 웹서버 도우미라 블록에서는 준비 블록으로 접혀요. 읽을 곳은 `ip = ...` 부터예요. `"MyWiFi"` 와 `"12345678"` 을 교실 WiFi 로 고쳐요.
+
+          페이지의 버튼 글 `c=red,c=green,c=blue,c=off` 가 **약속**이에요. 빨강 버튼을 누르면 폰이 `/cmd?c=red` 를 보내고, 보드는 질의 `c` 의 값 `red` 를 읽어 `set_color(255, 0, 0)` 을 켜요. 폰 앱에서는 이 색을 `#ff0000` 이라고 적는데, `ff` 가 16진수 255 예요.
+        todo:
+          - WiFi 이름과 비밀번호를 고치고 **실행**, 출력 창의 IP 를 폰 주소 창에 넣기
+          - 폰에서 네 버튼을 번갈아 누르며 종이컵 색 보기
+          - 주소 창에 직접 `/cmd?c=green` 을 적어 열어도 바뀌는지 해 보기
+        code: step2_web_color.py
+        expected: 폰 브라우저에 보드 주소를 넣으면 제목 **Mood Light** 와 버튼 `c=red` · `c=green` · `c=blue` · `c=off` 네 개가 보여요. 버튼을 누르면 주소가 `/cmd?c=red` 처럼 바뀌며 종이컵이 그 색으로 켜지고, 페이지 아래에 지금 보낸 글(`red`)이 보여요. `c=off` 를 누르면 꺼져요.
+        codeNotes:
+          - { line: 14, note: "5장의 색 도우미. 세 숫자(0~255)로 RGB 를 켜요" }
+          - { line: 73, note: "WiFi 에 연결하고 받은 IP 주소를 `ip` 에 담아요. 이름과 비밀번호를 교실 것으로" }
+          - { line: 74, note: "80번 포트로 웹서버를 열어요" }
+          - { line: 76, note: "IP 주소를 출력 창에 찍어요. 이 숫자를 폰 주소 창에 넣어요" }
+          - { line: 78, note: "폰이 요청을 보낼 때까지 기다렸다가 받아요. 반복 안에 있어야 다음 손님도 받아요" }
+          - { line: 79, note: "질의 `c` 의 값을 꺼내 `c` 에 담아요. 주소에 `c` 가 없으면 빈 글" }
+          - { line: 80, note: "`c` 가 `red` 와 같으면 빨강. 버튼 글과 글자가 똑같아야 해요" }
+          - { line: 86, note: "`off` 면 세 숫자 모두 0 으로 꺼요" }
+          - { line: 88, note: "제목 Mood Light, 버튼 네 개, 값 칸에 지금 받은 `c` 를 넣은 페이지로 한 번 답해요" }
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 — 질의 c 의 값
+        minutes: 4
+        scene:
+          image: images/read-code.svg
+          caption: 요청 하나가 들어왔을 때 어느 줄을 지나가는지 따라가며 읽어요. 맨 아래 열두 줄만 보면 돼요
+        body: |
+          도우미 함수는 접어 두고 `ip = ...` 부터 읽어요. 보드는 **받기 → 질의 읽기 → 색 켜기 → 한 번 답하기**를 한 바퀴로 되풀이해요.
+
+          `/cmd?c=green` 이 왔을 때 `c` 에 무엇이 담기고 어느 `elif` 가 참이 되는지 손가락으로 따라가 보세요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - "`/cmd?c=green` 이 왔을 때 참이 되는 줄 찾기"
+          - 페이지 버튼 글에서 쉼표로 나뉜 조각 세기
+          - 세 문제에 답하고 **확인** 누르기
+        code: step2_web_color.py
+        questions:
+          - { kind: choice, q: "폰이 /cmd?c=green 을 보냈을 때 변수 c 에 담기는 글은?", options: ["/cmd", "green", "c=green"], answer: 1, hint: "질의 값 블록은 이름=값 에서 값만 꺼내요" }
+          - { kind: number, q: "페이지에 만들어지는 버튼은 모두 몇 개인가요?", answer: 4, hint: "버튼 글을 쉼표로 나눠 세어요" }
+          - { kind: line, q: "질의 c 의 값을 꺼내 변수 c 에 담는 줄의 줄 번호를 클릭하세요", answer: 79 }
+        codeNotes:
+          - { line: 73, note: "WiFi 에 붙고 IP 주소를 `ip` 에 담아요" }
+          - { line: 77, note: "`while True:` 아래 들여 쓴 줄들이 한 바퀴예요" }
+          - { line: 84, note: "`blue` 면 파랑. 앞의 두 비교가 거짓일 때만 여기까지 와요" }
+          - { line: 88, note: "`if` 밖, 반복의 맨 끝에서 한 번 답해요" }
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 모드가 4 가 되고, 위쪽이 다 흰색이에요
+        minutes: 7
+        scene:
+          image: images/mode-cycle.svg
+          caption: "되돌리기가 빠지면 누른 횟수 1 · 2 · 3 · 4 가 그대로 모드가 돼요. 3 은 0 으로 되돌려야 1 · 2 · 0 · 1 이 돼요"
+        body: |
+          고장 난 코드 세 개가 있어요. 셋 다 빨간 글씨(에러)는 안 나요. 출력 창의 숫자, 손잡이를 돌릴 때 색이 바뀌는 자리, 폰 버튼을 눌렀을 때 바뀌는지가 단서예요.
+
+          바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 모드가 커지기만 하면 되돌리기를, 색이 한쪽에 몰리면 경계 숫자를, 폰 버튼이 안 먹으면 비교하는 글자를 봐요. 셋째 코드의 도우미 함수는 그대로 두고 맨 아래만 고치면 돼요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: 버튼을 누를수록 출력 창에 3, 4, 5 가 찍히고 LED 는 계속 내 색만 켜져 있어요
+            code: |
+              from machine import Pin, PWM, ADC
+              import time
+
+              red = PWM(Pin(27))
+              green = PWM(Pin(25))
+              blue = PWM(Pin(26))
+              red.freq(1000)
+              green.freq(1000)
+              blue.freq(1000)
+              knob = ADC(Pin(39))
+              knob.atten(ADC.ATTN_11DB)
+              knob.width(ADC.WIDTH_12BIT)
+              button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+
+              def set_color(r, g, b):
+                  red.duty(r * 1023 // 255)
+                  green.duty(g * 1023 // 255)
+                  blue.duty(b * 1023 // 255)
+
+
+              def knob_color():
+                  value = knob.read()
+                  if value < 800:
+                      set_color(255, 0, 0)
+                  elif value < 1600:
+                      set_color(0, 255, 0)
+                  elif value < 2400:
+                      set_color(0, 0, 255)
+                  elif value < 3200:
+                      set_color(255, 0, 255)
+                  else:
+                      set_color(255, 255, 255)
+
+
+              mode = 0
+              while True:
+                  if button.value() == 0:
+                      mode = mode + 1
+                      print(mode)
+                      time.sleep(0.3)
+                  if mode == 0:
+                      set_color(0, 0, 0)
+                  elif mode == 1:
+                      knob_color()
+                  else:
+                      set_color(255, 105, 180)
+                  time.sleep_ms(50)
+            question: 버튼을 세 번 누르면 mode 는 몇이 되나요? 그때 세 갈래(0 · 1 · 그 밖) 가운데 어디로 가나요? 2 다음에 0 으로 가게 하려면 어떤 줄이 필요할까요?
+            rules:
+              - codeMatches: '(if mode (== 3|> 2|>= 3):\n\s+mode = 0|mode = \(mode \+ 1\) % 3|mode % 3)'
+                fail: 모드를 키운 뒤 3 이 되었는지 확인하는 줄이 있나요? 3 이면 몇으로 되돌려야 다시 끄기 모드가 될까요?
+          - title: 손잡이를 돌리면 맨 앞 조금에서만 네 색이 휙 지나가고, 나머지 넓은 자리는 모두 흰색이에요
+            code: |
+              from machine import Pin, PWM, ADC
+              import time
+
+              red = PWM(Pin(27))
+              green = PWM(Pin(25))
+              blue = PWM(Pin(26))
+              red.freq(1000)
+              green.freq(1000)
+              blue.freq(1000)
+              knob = ADC(Pin(39))
+              knob.atten(ADC.ATTN_11DB)
+              knob.width(ADC.WIDTH_12BIT)
+
+
+              def set_color(r, g, b):
+                  red.duty(r * 1023 // 255)
+                  green.duty(g * 1023 // 255)
+                  blue.duty(b * 1023 // 255)
+
+
+              while True:
+                  value = knob.read()
+                  if value < 200:
+                      set_color(255, 0, 0)
+                  elif value < 400:
+                      set_color(0, 255, 0)
+                  elif value < 600:
+                      set_color(0, 0, 255)
+                  elif value < 800:
+                      set_color(255, 0, 255)
+                  else:
+                      set_color(255, 255, 255)
+                  time.sleep_ms(50)
+            question: 이 경계(200 · 400 · 600 · 800)는 손잡이 값이 0~1023 일 때 표예요. 우리 보드의 손잡이 값은 몇까지 올라가나요? 경계마다 몇을 곱해야 다섯 구간이 고르게 될까요?
+            rules:
+              - codeMatches: 'if value < 800:[\s\S]*elif value < 1600:[\s\S]*elif value < 2400:[\s\S]*elif value < 3200:'
+                fail: 우리 보드의 손잡이 값은 0~4095 예요. 0~1023 표의 경계 200 · 400 · 600 · 800 에 4 를 곱하면 각각 얼마가 되나요?
+          - title: 폰 페이지는 잘 뜨는데 빨강 · 초록 · 파랑 버튼을 눌러도 색이 안 바뀌고, 끄기만 돼요
+            code: |
+              from machine import Pin, PWM
+              import time
+              import network
+              import socket
+
+              red = PWM(Pin(27))
+              green = PWM(Pin(25))
+              blue = PWM(Pin(26))
+              red.freq(1000)
+              green.freq(1000)
+              blue.freq(1000)
+
+
+              def set_color(r, g, b):
+                  red.duty(r * 1023 // 255)
+                  green.duty(g * 1023 // 255)
+                  blue.duty(b * 1023 // 255)
+
+
+              def wifi_connect(ssid, password):
+                  wlan = network.WLAN(network.STA_IF)
+                  wlan.active(True)
+                  wlan.connect(ssid, password)
+                  while not wlan.isconnected():
+                      time.sleep(0.5)
+                  print("IP:", wlan.ifconfig()[0])
+                  return wlan.ifconfig()[0]
+
+
+              def web_start(port):
+                  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                  s.bind(("", port))
+                  s.listen(5)
+                  return s
+
+
+              def web_accept(s):
+                  conn, addr = s.accept()
+                  request = conn.recv(1024).decode()
+                  line = request.split("\r\n")[0]
+                  target = line.split(" ")[1] if " " in line else "/"
+                  path, _, qs = target.partition("?")
+                  query = {}
+                  for part in qs.split("&"):
+                      if "=" in part:
+                          k, v = part.split("=", 1)
+                          query[k] = v
+                  return conn, path, query
+
+
+              def web_send(conn, body, ctype="text/html"):
+                  conn.send("HTTP/1.1 200 OK\r\n")
+                  conn.send("Content-Type: " + ctype + "\r\n")
+                  conn.send("Connection: close\r\n\r\n")
+                  conn.sendall(body)
+                  conn.close()
+
+
+              def web_page(title, buttons, values, refresh):
+                  html = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
+                  if refresh > 0:
+                      html += "<meta http-equiv='refresh' content='" + str(refresh) + "'>"
+                  html += "<title>" + title + "</title></head><body><h1>" + title + "</h1>"
+                  for b in buttons.split(","):
+                      if b:
+                          html += "<p><a href='/cmd?" + b + "'><button>" + b + "</button></a></p>"
+                  for v in values.split(","):
+                      if v:
+                          html += "<p>" + v + "</p>"
+                  return html + "</body></html>"
+
+
+              ip = wifi_connect("MyWiFi", "12345678")
+              server = web_start(80)
+
+              print(ip)
+              while True:
+                  conn, path, query = web_accept(server)
+                  c = query.get("c", "")
+                  if c == "RED":
+                      set_color(255, 0, 0)
+                  elif c == "GREEN":
+                      set_color(0, 255, 0)
+                  elif c == "BLUE":
+                      set_color(0, 0, 255)
+                  elif c == "off":
+                      set_color(0, 0, 0)
+                  web_send(conn, web_page("Mood Light", "c=red,c=green,c=blue,c=off", c, 0))
+            question: 빨강 버튼을 누르면 폰은 c 에 어떤 글을 담아 보내나요(버튼 글을 보세요)? 보드는 그 글을 무엇과 비교하나요? 컴퓨터에게 RED 와 red 는 같은 글일까요?
+            rules:
+              - codeMatches: '(?=[\s\S]*c == "red":\n\s+set_color\(255, 0, 0\))(?=[\s\S]*c == "green":)(?=[\s\S]*c == "blue":)'
+                fail: 버튼 글 c=red 가 보내는 값은 소문자 red 예요. 비교하는 글자가 버튼 글과 똑같은가요? 세 색 모두 확인했나요?
+
+      - id: design
+        type: design
+        title: 설계 — 켠 뒤 10분이 지나면 저절로 꺼지는 무드등
+        minutes: 6
+        scene:
+          image: images/cover.svg
+          caption: "손잡이 · 버튼 대신 폰이 모드를 바꿔요: c=off 끄기, c=knob 손잡이 색, 그 밖의 c 는 그 색. 켠 뒤 10분이 지나면 모드 0"
+        body: |
+          친구가 잠든 뒤에도 무드등이 밤새 켜져 있으면 전기가 아깝죠. 켠 뒤 **10분**이 지나면 저절로 꺼지는 **수면 타이머**를 더해요. 켠 시각을 `start` 에 담아 두고, 바퀴마다 `start` 부터 지난 시간(ms)이 600000 을 넘으면 모드를 0 으로 돌려요.
+
+          이번 코드는 폰이 모드까지 바꿔요. 질의 `c` 가 `off` 면 모드 0, `knob` 이면 모드 1(손잡이 색), 다른 글이면 모드 2 와 그 색이에요. 경로 `/data` 에는 지금 모드와 색을 JSON 으로, `/cmd` 에는 글 `OK` 로, 그 밖(`/`)에는 다음 단계에서 만들 `index.html` 파일로 답해요. 설계도의 빈칸을 채우고, 섞인 블록을 설계도 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 "start 부터 지난 시간" 이 어떤 코드인지 찾아보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: RGB(27 · 25 · 26), 가변저항 __번, WiFi 연결, 웹서버(80)를 준비한다
+            blank: { answer: 39 }
+          - text: "함수 knob_color: 손잡이 값을 다섯 구간으로 나눠 색을 켠다"
+          - text: "함수 web_color(name): red · green · blue 글에 맞는 색을 켠다"
+          - text: 모드를 __ 으로, 색 이름을 off 로 정한다
+            blank: { answer: 0 }
+          - text: 켠 시각 start 에 지금 시각을 담고, IP 주소를 찍는다
+          - text: 계속 반복한다
+          - text: "  ↳ 요청을 받고 질의 c 의 값을 꺼낸다"
+          - text: "  ↳ c 가 off 면 모드 0, knob 이면 모드 __ 과 start 다시 담기, 다른 글이면 모드 2 와 그 색"
+            blank: { answer: 1 }
+          - text: "  ↳ start 부터 지난 시간이 __ 분(600000 ms)을 넘으면 모드 0, 색 off"
+            blank: { answer: 10 }
+          - text: "  ↳ 모드 0 이면 끄기, 1 이면 knob_color, 아니면 web_color(색)"
+          - text: "  ↳ 경로가 /data 면 mode 와 c 를 JSON 으로, /cmd 면 OK 로, 아니면 __ 파일로 답한다"
+            blank: { answer: index.html }
+        translation:
+          - ["지금 시각을 담는다", "start = time.ticks_ms()"]
+          - ["start 부터 지난 시간(ms)", "time.ticks_diff(time.ticks_ms(), start)"]
+          - ["10분", "600000"]
+          - ["질의 c 의 값", 'query.get("c", "")']
+          - ["경로가 /data 인가", 'path == "/data"']
+          - ["글 OK 로 답한다", 'web_send(conn, "OK")']
+          - ["파일로 답한다", 'web_send_file(conn, "index.html")']
+        targetCode: design_sleep_timer.py
+
+      - id: app
+        type: app
+        title: 폰 앱 만들기 — AI 와 함께 색 고르기 앱
+        minutes: 20
+        scene:
+          image: images/web-flow.svg
+          caption: 화면 설계 → 약속표 → 프롬프트 → AI 결과 붙여넣기 · 검사 → 보드에 저장 → 읽기 체크
+        body: |
+          25장 페이지는 버튼 글이 `c=red` 처럼 보여 친구에게 주기엔 멋이 없어요. 이제 **내 폰 앱**을 만들어요. 먼저 화면에 **보여 줄 값** · **누를 버튼** · **바뀌는 모습**을 설계 칸에 적어요. 약속표에는 설계 코드가 내는 주소가 있어요: 읽기 `/data`(mode, c), 명령 `/cmd?c=red` 처럼 색 이름 하나.
+
+          프롬프트를 복사해 AI 에 넣고, 돌아온 HTML 을 그대로 붙여 **검사**를 눌러요. 외부 스크립트 · 절대 주소가 섞이면 검사가 알려 주니 AI 에게 "외부 라이브러리 없이, 상대 주소로" 라고 다시 부탁해요. 통과하면 설계 코드를 보드에서 실행한 채 `index.html` 로 저장하고, 폰에서 보드 주소 `/` 를 다시 열어요.
+
+          미술 시간의 색과 감정 표를 떠올려 봐요. 버튼 글을 "빨강" 대신 "힘내" · "차분" 처럼 감정으로 적고, 고른 색이 폰 배경에도 그대로 번지게 부탁할 수 있어요.
+        todo:
+          - 설계 칸 세 개에 한 줄씩 적고 프롬프트 복사하기
+          - AI 가 준 HTML 을 붙여 넣고 **검사** 통과시키기 (걸리면 AI 에게 고쳐 달라고 하기)
+          - 보드에 저장한 뒤 폰에서 열어 보고, 읽기 체크에 답하기
+        api:
+          - { path: "/data", method: "읽기", fields: ["mode", "c"], note: "2초마다 읽기. mode 는 0(끄기) · 1(손잡이) · 2(고른 색) 숫자, c 는 off · knob · red · green · blue 가운데 하나(글)" }
+          - { path: "/cmd?c=red", method: "명령", note: "빨강 켜기" }
+          - { path: "/cmd?c=green", method: "명령", note: "초록 켜기" }
+          - { path: "/cmd?c=blue", method: "명령", note: "파랑 켜기" }
+          - { path: "/cmd?c=knob", method: "명령", note: "손잡이 색 모드로" }
+          - { path: "/cmd?c=off", method: "명령", note: "끄기" }
+        design:
+          show: ["지금 색", "모드"]
+          buttons: ["빨강", "초록", "파랑", "끄기"]
+          changes: ["고른 색으로 배경 바꾸기", "모드 0 이면 어둡게"]
+        promptTemplate: |
+          ESP32 주소 {{ip}} 에서 {{data}} 를 2초마다 읽어 {{show}} 을(를) 폰 화면에 크게 보여 주고,
+          버튼 {{buttons}} 을(를) 누르면 {{commands}} 를 요청하는 한 파일짜리 HTML 을 만들어 줘.
+          {{changes}} 처럼 c 값에 따라 화면 배경색을 바꿔 줘. 버튼은 손가락으로 누르기 좋게 크게.
+          외부 라이브러리 · 외부 스크립트 · 절대 주소 없이, 폰 화면에 맞게.
+        checks:
+          maxBytes: 12000
+          mustUse: ["c=red", "c=off"]
+        readcheck:
+          - { kind: choice, q: "/data 에서 값을 가져오는 줄에 쓰인 것은?", options: ["fetch", "print", "import"], answer: 0, hint: "주소에 요청을 보내 답을 받는 자바스크립트 함수" }
+          - { kind: choice, q: "끄기 버튼을 누르면 어느 주소로 요청을 보내야 하나요?", options: ["/cmd?c=off", "/data", "/index.html"], answer: 0, hint: "약속표의 명령 주소" }
+          - { kind: text, q: "c 가 blue 일 때 배경색을 바꾸는 줄을 찾아 적어 보세요. AI 결과에 틀린 곳이 있었다면 어떻게 찾았나요?" }
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 5
+        scene:
+          image: images/colour-mixing.svg
+          caption: 빨강과 노랑 사이의 주황은 세 숫자로 얼마일까요? 두 색에서 다른 숫자는 하나뿐이에요
+        body: |
+          오늘은 손잡이 · 버튼 · 폰 세 입력을 **모드**라는 숫자 하나로 정리해 RGB LED 하나를 다루었고, AI 와 함께 폰 앱까지 만들었어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          먼저 모드 순환 코드의 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요. 미술 시간에는 다섯 감정과 다섯 색을 짝지은 팔레트를 그리고 그 색을 세 숫자로 적어 보자. 수학 시간에는 `#ff8800` 같은 16진수 색 다섯 개를 10진수 세 숫자로 바꾸는 표를 만들어 보자.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 모드가 0 → 1 → 2 → 0 으로 도는 까닭을 설명하기
+        lineExplain: reflect_mode.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 손잡이 · 버튼 · 폰이 한 LED 를 두고 다투지 않게 모드를 둔 까닭은 무엇일까요? 모드가 없으면 어떤 일이 생길까요?
+          - AI 가 만든 앱에서 틀린 곳이나 약속과 다른 곳을 어떻게 찾았나요? 검사가 걸러 준 것과 내가 직접 찾은 것을 나눠 적어요
+          - "다음엔 여기부터 본다: 한 줄로"

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="mlf-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="mlf-title">폰과 보드가 주고받는 글: 폰이 /cmd?c=blue 를 보내면 보드는 경로 /cmd 와 질의 c=blue 로 나누어 색을 바꾸고 OK 로 답한다. 폰이 /data 를 보내면 보드는 {"mode": 2, "c": "blue"} JSON 으로 답한다. 보드는 요청이 올 때까지 기다리므로, 폰이 2초마다 /data 를 읽어 주면 보드도 2초마다 한 번 깨어나 수면 타이머를 확인한다</title>
+  <defs>
+    <marker id="mlf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <!-- 폰 -->
+  <rect x="40" y="60" width="120" height="220" rx="16" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="50" y="82" width="100" height="176" rx="6" fill="var(--muted)" stroke="none"/>
+  <text x="100" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">폰 앱</text>
+  <g stroke="none" font-size="11" text-anchor="middle" fill="#ffffff">
+    <rect x="62" y="124" width="76" height="22" rx="6" fill="#e03131"/><text x="100" y="139">빨강</text>
+    <rect x="62" y="152" width="76" height="22" rx="6" fill="#1971c2"/><text x="100" y="167">파랑</text>
+    <rect x="62" y="180" width="76" height="22" rx="6" fill="#495057"/><text x="100" y="195">끄기</text>
+  </g>
+  <text x="100" y="232" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.75" stroke="none">모드 2 · 파랑</text>
+  <!-- 보드 -->
+  <rect x="470" y="60" width="130" height="220" rx="12" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="490" y="76" width="90" height="60" rx="6" fill="var(--muted)" stroke="none"/>
+  <text x="535" y="112" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <circle cx="535" cy="190" r="28" fill="#1971c2" fill-opacity="0.85" stroke="none"/>
+  <text x="535" y="195" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">파랑</text>
+  <text x="535" y="250" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.75" stroke="none">요청이 올 때까지 기다려요</text>
+  <!-- 명령 요청 -->
+  <path d="M170 110 L460 110" stroke-width="2.5" marker-end="url(#mlf-arrow)"/>
+  <rect x="236" y="86" width="158" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="315" y="103" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">/cmd?c=blue</text>
+  <g font-size="11" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="315" y="128">경로 path = "/cmd"  ·  질의 c = "blue"</text>
+  </g>
+  <path d="M460 150 L170 150" stroke-width="2.5" marker-end="url(#mlf-arrow)" stroke-dasharray="6 5"/>
+  <rect x="290" y="138" width="50" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="315" y="155" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">OK</text>
+  <!-- 읽기 요청 -->
+  <path d="M170 200 L460 200" stroke-width="2.5" marker-end="url(#mlf-arrow)"/>
+  <rect x="280" y="176" width="70" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="315" y="193" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">/data</text>
+  <text x="315" y="218" text-anchor="middle" font-size="11" fill="currentColor" stroke="none">2초마다 한 번</text>
+  <path d="M460 244 L170 244" stroke-width="2.5" marker-end="url(#mlf-arrow)" stroke-dasharray="6 5"/>
+  <rect x="226" y="232" width="178" height="24" rx="12" fill="var(--card)" stroke-width="1.5"/>
+  <text x="315" y="249" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor" stroke="none">{"mode": 2, "c": "blue"}</text>
+  <!-- 아래 설명 -->
+  <rect x="40" y="298" width="560" height="44" rx="10" fill="var(--card)" stroke-width="1.5"/>
+  <text x="320" y="316" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">보드는 손님이 올 때만 한 바퀴 돌아요</text>
+  <text x="320" y="333" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">폰이 2초마다 /data 를 읽으면 보드도 2초마다 깨어나 타이머를 확인해요</text>
+</svg>
