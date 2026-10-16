@@ -59,7 +59,8 @@ export function DeviceBar(props: Props): ReactNode {
   return (
     <div className="flex items-center gap-1">
       <Badge variant="outline" className={cn("mr-1 gap-1", s.className)} data-testid="device-status" aria-live="polite">
-        <StatusIcon className={cn(s.spin && "animate-spin")} />{s.label}
+        {/* 아주 좁은 화면(sm 미만)은 아이콘만 — 머리줄에 「작품으로 저장」까지 들어가게. 글은 화면 읽기 프로그램에 남는다 */}
+        <StatusIcon className={cn(s.spin && "animate-spin")} /><span className="max-sm:sr-only">{s.label}</span>
       </Badge>
       {connected ? (
         <BarButton icon={Unplug} label="연결 끊기" tip="보드와의 연결을 끊어요" disabled={!props.canToggleConnection} onClick={props.onDisconnect} />

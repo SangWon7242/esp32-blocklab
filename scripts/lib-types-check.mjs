@@ -53,7 +53,7 @@ try {
   writeFileSync(path.join(hub, "tsconfig.json"), JSON.stringify({ compilerOptions: strict, files: ["consumer.ts"] }, null, 2));
   writeFileSync(
     path.join(hub, "consumer.ts"),
-    `import type { StepRecord, Progress, Chapter, Step, StepType, LoadedChapter, ChapterSnapshot, HostProps } from "./vendor/blocklab";
+    `import type { StepRecord, Progress, Chapter, Step, StepType, LoadedChapter, ChapterSnapshot, HostProps, LabViewProps, LabInitialProgram } from "./vendor/blocklab";
 type IsAny<T> = 0 extends 1 & T ? true : false;
 type NotAny<T> = IsAny<T> extends true ? false : true;
 const checks: [NotAny<StepRecord>, NotAny<Progress>, NotAny<Chapter>, NotAny<Step>, NotAny<StepType>, NotAny<LoadedChapter>, NotAny<ChapterSnapshot>, NotAny<HostProps["store"]>, NotAny<StepRecord["status"]>] =
@@ -71,7 +71,15 @@ const type: StepType = "mission";
 const badType: StepType = "nope";
 const track: Chapter["track"] = "sensor";
 const firstStep = (c: Chapter): Step | undefined => c.parts[0]?.steps[0];
-export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep };
+// lib-v1.0.3: LabViewProps.initialProgram (허브가 ?project= 작품을 싣는다)
+const labChecks: [NotAny<LabViewProps>, NotAny<NonNullable<LabViewProps["initialProgram"]>>, NotAny<LabInitialProgram["code"]>] = [true, true, true];
+const sameProgram: LabInitialProgram = { code: "print(1)", blocksJson: { blocks: {} }, title: "깜빡이" } satisfies NonNullable<LabViewProps["initialProgram"]>;
+const codeOnly: LabViewProps = { initialProgram: { code: "" }, codeRef: null };
+// @ts-expect-error code 는 꼭 있어야 한다
+const noCode: LabViewProps = { initialProgram: { blocksJson: {} } };
+// @ts-expect-error title 은 글
+const badTitle: LabViewProps = { initialProgram: { code: "", title: 1 } };
+export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle };
 `,
   );
   tscIn(hub, "zod 없는 폴더");

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
 } from "lucide-react";
@@ -17,6 +17,7 @@ import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { Step } from "@/track/schema";
 import { useSettings } from "../settings/settings";
 import { ReviewBadge } from "./ReviewBadge";
+import { ProjectSaveTargetContext, projectSaveTarget } from "./TrackSaveButton";
 import { GuideBody } from "./GuideBody";
 import { useGuideCollapsed } from "./guidePanel";
 import { Illustration } from "./Illustration";
@@ -132,6 +133,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
     toast.success(extra?.skipped ? "건너뛰었어요. 다음 단계가 열렸어요" : "완료했어요. 다음 단계가 열렸어요", { id: "step-done" });
   };
 
+  const saveTarget = useMemo(() => projectSaveTarget(chapter, step), [chapter, step]);
   const props = { chapter, input, onInput, teacherMode, attempts, onComplete: complete, readOnly };
   let activity: ReactNode;
   switch (step.type) {
@@ -146,6 +148,8 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
     case "design": activity = <DesignStep step={step} {...props} />; break;
     case "app": activity = <AppStep step={step} {...props} />; break;
   }
+  // 편집기 단계의 「작품으로 저장」이 이 챕터·단계를 알도록 (TrackEditor 가 읽는다)
+  activity = <ProjectSaveTargetContext.Provider value={saveTarget}>{activity}</ProjectSaveTargetContext.Provider>;
 
   const ready = canComplete(step, input, { explainGate });
   /** 판정은 통과했는데 교사 "설명 확인"만 남았다 */

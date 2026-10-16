@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, type Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, type ReactNode, type Ref } from "react";
 import {
   AlertTriangle, Blocks, Code2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
 } from "lucide-react";
@@ -84,6 +84,8 @@ export type EditorWorkbenchProps = {
   onProgram?(program: EditorProgram): void;
   /** 실행이 끝날 때: 결과와 그 실행의 보드 출력(stdout) */
   onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
+  /** 머리줄 보드 버튼 앞에 둘 단추 (「작품으로 저장」 — lib-v1.0.3) */
+  actions?: ReactNode;
   ref?: Ref<EditorWorkbenchHandle>;
 };
 
@@ -94,7 +96,7 @@ export type EditorWorkbenchProps = {
 /** 설계 조립에서 빼는 검사 규칙 */
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
-export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
+export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, actions, ref }: EditorWorkbenchProps) {
   /** 핸들의 openExample 이 최신 openExample 을 부르게 (useImperativeHandle 의존성에 넣지 않으려고) */
   const openExampleRef = useRef<(code: string) => void>(() => undefined);
   const [state, dispatch] = useReducer(
@@ -386,14 +388,16 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
       <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
         <Tabs value={state.source} onValueChange={(v) => switchSource(v as Source)}>
           <TabsList>
-            <TabsTrigger value="blocks"><Blocks className="size-4" />블록</TabsTrigger>
-            <TabsTrigger value="code" disabled={assemblyMode} title={assemblyMode ? "조립은 블록으로만 해요" : undefined}><Code2 className="size-4" />코드</TabsTrigger>
+            {/* 아주 좁은 화면(sm 미만)은 아이콘만 — 머리줄에 보드 단추와 「작품으로 저장」이 다 들어가게. 이름은 화면 읽기 프로그램에 남는다 */}
+            <TabsTrigger value="blocks"><Blocks className="size-4" /><span className="max-sm:sr-only">블록</span></TabsTrigger>
+            <TabsTrigger value="code" disabled={assemblyMode} title={assemblyMode ? "조립은 블록으로만 해요" : undefined}><Code2 className="size-4" /><span className="max-sm:sr-only">코드</span></TabsTrigger>
           </TabsList>
         </Tabs>
         <span className="hidden truncate text-sm text-muted-foreground lg:inline">
           {assemblyMode ? "블록을 이어 붙이면 코드가 바로 바뀝니다" : codeMode ? "코드를 고치면 블록이 따라옵니다" : "블록을 놓으면 코드가 바로 바뀝니다"}
         </span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {actions}
           <DeviceBar
             status={device.status}
             canToggleConnection={device.canToggleConnection}

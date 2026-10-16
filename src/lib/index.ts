@@ -26,7 +26,7 @@ export {
 export { DEFAULT_BLOCKLY_MEDIA_PATH, blocklyMediaPath, setBlocklyMediaPath } from "@/host/mediaPath";
 
 /* 화면 */
-export { ChapterView, LabView, StepView, TrackListView, type ChapterViewProps, type LabViewProps, type StepViewProps, type TrackListViewProps } from "./views";
+export { ChapterView, LabView, StepView, TrackListView, type ChapterViewProps, type LabInitialProgram, type LabViewProps, type StepViewProps, type TrackListViewProps } from "./views";
 /* 제출·열람 화면 — Blockly·CodeMirror 를 바로 불러오지 않으므로 lazy 없이 내보낸다 (ProjectPreview 의 블록 그림은 useEffect 안 동적 import) */
 export { ChapterReviewView } from "@/app/review/ChapterReviewView";
 export { CodeView, ProjectPreview } from "@/app/review/ProjectPreview";

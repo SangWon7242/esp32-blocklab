@@ -27,7 +27,16 @@ export type LabViewProps = {
   codeRef?: string | null;
   /** 예시를 실은 뒤 호스트가 주소에서 example 을 지울 수 있게 알린다 */
   onExampleLoaded?(): void;
+  /**
+   * 호스트가 불러온 작품 (lib-v1.0.3). 처음 열 때 한 번만 싣는다 — exampleType·codeRef 보다 먼저.
+   * blocksJson 이 있으면 작업판 JSON 으로, 없으면 code 를 블록으로 바꿔 싣는다. title 은 「작품으로 저장」의 기본 제목.
+   * 값이 바뀌어도 다시 싣지 않는다(학생 편집을 덮지 않게). 다른 작품을 열려면 LabView 의 key 를 바꾼다
+   */
+  initialProgram?: LabInitialProgram | null;
 };
+
+/** LabViewProps.initialProgram 의 꼴 */
+export type LabInitialProgram = { code: string; blocksJson?: unknown; title?: string };
 
 function Loading({ children }: { children: ReactNode }) {
   return <Suspense fallback={<div className="p-8 text-muted-foreground">불러오는 중…</div>}>{children}</Suspense>;

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useImperativeHandle, useRef, type Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, type Ref } from "react";
 import { useReadOnly } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { EditorWorkbench, type EditorProgram, type EditorWorkbenchHandle } from "../lab/EditorWorkbench";
 import { useSettings } from "../settings/settings";
 import { ReadOnlyCode } from "./steps/ReadOnlyCode";
+import { TrackSaveButton } from "./TrackSaveButton";
 
 export type { EditorProgram };
 export type TrackEditorHandle = EditorWorkbenchHandle;
@@ -67,6 +68,10 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   // 화면을 떠날 때 기다리던 저장을 마친다
   useEffect(() => flush, [flush]);
 
+  // 「작품으로 저장」 (lib-v1.0.3): 단계 화면 안 + 호스트 onSaveProject 가 있을 때만 그려진다
+  const getProgram = useCallback(() => inner.current?.getProgram() ?? { code: initialCode, blocksJson: null }, [initialCode]);
+  const actions = useMemo(() => <TrackSaveButton getProgram={getProgram} />, [getProgram]);
+
   if (readOnly) {
     return <ReadOnlyCode code={initialCode} name="저장한 프로그램" panelClassName={compact ? "h-56" : "h-72"} className="min-w-0" />;
   }
@@ -81,7 +86,7 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
       )}
       data-testid="track-editor"
     >
-      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} assemblyMode={assemblyMode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
+      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} assemblyMode={assemblyMode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} actions={actions} />
     </div>
   );
 }
