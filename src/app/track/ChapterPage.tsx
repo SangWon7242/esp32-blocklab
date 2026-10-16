@@ -1,5 +1,5 @@
 import { Link, Navigate, useParams } from "react-router";
-import { ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Lightbulb, Lock, NotebookPen, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Hourglass, Lightbulb, Lock, NotebookPen, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -17,8 +17,14 @@ import { STEP_TYPE_LABEL } from "./stepMeta";
 import { StepTypeIcon } from "./StepTypeIcon";
 import { DraftBadge, PrerequisiteList, Sessions, SubjectChips } from "./TrackMeta";
 
-const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, done: CheckCircle2 };
-const STATE_LABEL: Record<StepState, string> = { locked: "잠김", open: "열림", done: "완료" };
+const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, awaiting: Hourglass, done: CheckCircle2 };
+const STATE_LABEL: Record<StepState, string> = { locked: "잠김", open: "열림", awaiting: "확인 대기", done: "완료" };
+const STATE_COLOR: Record<StepState, string> = {
+  locked: "text-muted-foreground",
+  open: "text-muted-foreground",
+  awaiting: "text-amber-700 dark:text-amber-400",
+  done: "text-primary",
+};
 
 /**
  * #/track/:chapter — 트랙 배지·번호·교과·차시·먼저 할 챕터 → 표지·목표(hero) → 준비물·배선 → 원리 → 단계 카드 격자(진행표)
@@ -28,15 +34,15 @@ export function ChapterPage() {
   const { chapter: chapterId = "" } = useParams();
   const chapter = getChapter(chapterId);
   const progress = useProgress();
-  const { teacherMode } = useSettings();
+  const { teacherMode, explainGate } = useSettings();
   if (!chapter) return <Navigate to="/track" replace />;
   if (!progress) return null;
 
   const steps = allSteps(chapter);
-  const states = stepStates(chapter, progress.chapters[chapter.id] ?? {}, teacherMode);
+  const states = stepStates(chapter, progress.chapters[chapter.id] ?? {}, teacherMode, { explainGate });
   const done = steps.filter((s) => states[s.id] === "done").length;
-  // 이어서 하기: 아직 끝내지 않은 열린 단계 중 첫 번째 (다 끝냈으면 마지막 단계)
-  const resume = steps.find((s) => states[s.id] === "open") ?? steps[steps.length - 1];
+  // 이어서 하기: 아직 끝내지 않은 열린(확인 대기 포함) 단계 중 첫 번째 (다 끝냈으면 마지막 단계)
+  const resume = steps.find((s) => states[s.id] === "open" || states[s.id] === "awaiting") ?? steps[steps.length - 1];
   const minutes = steps.reduce((n, s) => n + (s.minutes ?? 0), 0);
   let index = 0;
 
@@ -190,7 +196,14 @@ export function ChapterPage() {
                       </span>
                       <span className="mt-1 block font-medium break-keep">{step.title}</span>
                     </span>
-                    <Icon className={cn("size-5 shrink-0", state === "done" ? "text-primary" : "text-muted-foreground")} aria-label={STATE_LABEL[state]} />
+                    {state === "awaiting" ? (
+                      // 설명 관문: 판정은 통과, 교사 확인만 남음 — 아이콘에 짧은 글을 붙인다
+                      <span className={cn("flex shrink-0 items-center gap-1 text-xs whitespace-nowrap", STATE_COLOR[state])}>
+                        <Icon className="size-5" aria-hidden />{STATE_LABEL[state]}
+                      </span>
+                    ) : (
+                      <Icon className={cn("size-5 shrink-0", STATE_COLOR[state])} aria-label={STATE_LABEL[state]} />
+                    )}
                   </>
                 );
                 const box = "flex h-full items-center gap-3 rounded-xl border bg-card p-3";
@@ -201,7 +214,7 @@ export function ChapterPage() {
                     ) : (
                       <Link
                         to={`/track/${chapter.id}/${step.id}`}
-                        className={cn(box, "transition-colors hover:bg-muted", step.id === resume.id && state === "open" && "border-primary/60")}
+                        className={cn(box, "transition-colors hover:bg-muted", step.id === resume.id && state !== "done" && "border-primary/60")}
                       >
                         {inner}
                       </Link>

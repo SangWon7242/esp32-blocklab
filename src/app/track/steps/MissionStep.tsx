@@ -5,16 +5,18 @@ import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { onEditedProgram, type MissionInput } from "@/track/completion";
 import { judge } from "@/track/judge";
+import { useSettings } from "../../settings/settings";
 import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { JudgePanel } from "./JudgePanel";
 import type { StepProps } from "./types";
 import { useStepInput } from "./useStepInput";
 
-/** 미션: 지시문 → 편집기에서 고치기 → 판정 (실패하면 되묻기 문장, 그 뒤에 힌트) */
+/** 미션: 지시문 → 편집기에서 고치기 → 판정 (실패하면 되묻기 문장, 그 뒤에 힌트). 설정 explainGate 면 교사 "설명 확인" 뒤 완료 */
 export function MissionStep({ step, chapter, input, onInput, teacherMode }: StepProps<"mission">) {
   const m = input as MissionInput;
   const update = useStepInput<MissionInput>(input, onInput);
+  const { explainGate } = useSettings();
   const editor = useRef<TrackEditorHandle>(null);
   /** 마지막 실행의 보드 출력 (outputIncludes 판정용) */
   const output = useRef("");
@@ -53,7 +55,14 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
           </Button>
         )}
       </section>
-      <JudgePanel onJudge={onJudge} failures={m.failures} passed={m.passed} passText="통과했어요. 아래 완료를 누르세요." notes={m.notes} />
+      <JudgePanel
+        onJudge={onJudge}
+        failures={m.failures}
+        passed={m.passed}
+        passText="통과했어요. 아래 완료를 누르세요."
+        notes={m.notes}
+        explainGate={explainGate ? { teacherMode, explained: m.explained === true, onConfirm: () => update(() => ({ explained: true })) } : undefined}
+      />
       <TrackEditor
         fill
         ref={editor}

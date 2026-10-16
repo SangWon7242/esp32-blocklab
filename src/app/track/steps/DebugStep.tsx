@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { debugMessage } from "@/ai/claude";
 import { filled, judgeIsStale, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
+import { useSettings } from "../../settings/settings";
 import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { AiCheck } from "./AiCheck";
@@ -25,11 +26,12 @@ function setAt<T>(list: readonly T[] | undefined, i: number, value: T, fill: T):
 
 /**
  * 디버깅: 증상마다 ① 증상 카드(고장 코드·되묻기) ② "왜 이런 증상일까?" 설명 저장 → 그 전에는 편집기 잠김
- * ③ 고장 코드가 실린 편집기에서 고치고 판정. 모든 증상을 통과하면 완료할 수 있다.
+ * ③ 고장 코드가 실린 편집기에서 고치고 판정. 모든 증상을 통과하면 완료할 수 있다 (설정 explainGate 면 교사 "설명 확인" 뒤에).
  */
 export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepProps<"debug">) {
   const d = input as DebugInput;
   const update = useStepInput<DebugInput>(input, onInput);
+  const { explainGate } = useSettings();
   const firstOpen = step.symptoms.findIndex((_, i) => d.passed?.[i] !== true);
   const [current, setCurrent] = useState(firstOpen < 0 ? 0 : firstOpen);
   const editor = useRef<TrackEditorHandle>(null);
@@ -39,6 +41,8 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
   const explanation = d.explanations?.[current] ?? "";
   const saved = d.saved?.[current] === true;
   const passed = d.passed?.[current] === true;
+  /** 모든 증상을 고쳤다 → 설명 관문은 이때부터 (단계에 확인 하나) */
+  const allPassed = step.symptoms.every((_, i) => d.passed?.[i] === true);
 
   const onJudge = () => {
     const program = editor.current?.getProgram();
@@ -126,8 +130,13 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
             onJudge={onJudge}
             failures={d.failures?.[current]}
             passed={passed}
-            passText={step.symptoms.every((_, i) => d.passed?.[i]) ? "모든 증상을 고쳤어요. 아래 완료를 누르세요." : "이 증상은 고쳤어요. 다음 증상으로 가 보세요."}
+            passText={allPassed ? "모든 증상을 고쳤어요. 아래 완료를 누르세요." : "이 증상은 고쳤어요. 다음 증상으로 가 보세요."}
             notes={d.notes?.[current]}
+            explainGate={
+              explainGate && allPassed
+                ? { teacherMode, explained: d.explained === true, onConfirm: () => update(() => ({ explained: true })) }
+                : undefined
+            }
           />
           <TrackEditor
             fill
@@ -136,13 +145,14 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
             initialCode={d.programs?.[current]?.code ?? symptom.code}
             onProgram={(code, blocksJson) => update((cur) => ({
               programs: setAt(cur.programs, current, { code, blocksJson }, null),
-              // 판정한 뒤 코드를 바꾸면 그 판정(통과·실패 문장)은 낡았다
+              // 판정한 뒤 코드를 바꾸면 그 판정(통과·실패 문장)과 교사 확인은 낡았다
               ...(judgeIsStale(cur.judgedCodes?.[current], code)
                 ? {
                     passed: setAt(cur.passed, current, false, false),
                     failures: setAt(cur.failures, current, null, null),
                     notes: setAt(cur.notes, current, null, null),
                     judgedCodes: setAt(cur.judgedCodes, current, null, null),
+                    explained: undefined,
                   }
                 : {}),
             }))}

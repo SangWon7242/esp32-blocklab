@@ -47,3 +47,61 @@ describe("JudgePanel 화면", () => {
     expect(render({ passed: true })).not.toContain("judge-notes");
   });
 });
+
+describe("JudgePanel — 1분 설명 관문", () => {
+  const GATE = "통과했어요. 선생님께 1분 설명을 하고 확인을 받아요";
+  const gate = (teacherMode: boolean, explained: boolean) => ({ teacherMode, explained, onConfirm: () => {} });
+
+  it("관문이 없으면(설정 꺼짐) 통과 문구 그대로, 확인 배지·버튼 없음", () => {
+    const html = render({ passed: true });
+    expect(html).toContain("통과했어요. 아래 완료를 누르세요.");
+    expect(html).not.toContain(GATE);
+    expect(html).not.toContain("explain-gate");
+    expect(html).not.toContain("설명 확인");
+  });
+
+  it("학생(교사 모드 아님): 통과 문구가 관문 문구로 바뀌고 '선생님 확인 대기' 배지만 보인다", () => {
+    const html = render({ passed: true, explainGate: gate(false, false) });
+    expect(html).toContain(GATE);
+    expect(html).not.toContain("아래 완료를 누르세요");
+    expect(html).toContain('data-testid="explain-gate"');
+    expect(html).toContain("선생님 확인 대기");
+    expect(html).toContain("lucide-hourglass");
+    expect(html).not.toContain("설명 확인");
+    expect(html).not.toContain("lucide-badge-check");
+  });
+
+  it("교사 모드: '설명 확인' 버튼(BadgeCheck)이 보이고 대기 배지는 없다", () => {
+    const html = render({ passed: true, explainGate: gate(true, false) });
+    expect(html).toContain(GATE);
+    expect(html).toContain("설명 확인");
+    expect(html).toContain("lucide-badge-check");
+    expect(html).not.toContain("선생님 확인 대기");
+  });
+
+  it("확인을 받은 뒤: 원래 통과 문구 + '선생님 확인 완료' 배지, 버튼·대기 배지 없음", () => {
+    const html = render({ passed: true, explainGate: gate(true, true) });
+    expect(html).toContain("통과했어요. 아래 완료를 누르세요.");
+    expect(html).not.toContain(GATE);
+    expect(html).toContain('data-testid="explain-confirmed"');
+    expect(html).toContain("선생님 확인 완료");
+    expect(html).not.toContain("설명 확인</button>");
+    expect(html).not.toContain("선생님 확인 대기");
+  });
+
+  it("통과하지 않았으면 관문이 있어도 아무것도 보이지 않는다", () => {
+    const html = render({ passed: false, failures: ["if 줄이 있나요?"], explainGate: gate(true, false) });
+    expect(html).not.toContain(GATE);
+    expect(html).not.toContain("explain-gate");
+    expect(html).not.toContain("설명 확인");
+    expect(html).toContain('data-testid="judge-failures"');
+  });
+
+  it("통과 + 관문 + 주의: 관문 문구와 주의 목록이 함께 보인다", () => {
+    const html = render({ passed: true, explainGate: gate(false, false), notes: [NOTE] });
+    expect(html).toContain(GATE);
+    expect(html).toContain("선생님 확인 대기");
+    expect(html).toContain('data-testid="judge-notes"');
+    expect(html).toContain(`<li>${NOTE}</li>`);
+  });
+});

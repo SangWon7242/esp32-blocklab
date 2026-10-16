@@ -1,20 +1,22 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const KEY = "esp32-blocklab:v1";
+const SETTINGS = "esp32-blocklab:settings";
 const CHAPTER = "10-auto-door";
 
-/** 앞 단계들을 끝낸 기록으로 시작한다 (첫 로드 때만 깐다 — 화면에서 저장한 것을 덮지 않게) */
-async function seedDone(page: Page, stepIds: string[]) {
+/** 앞 단계들을 끝낸 기록(과 설정)으로 시작한다 (첫 로드 때만 깐다 — 화면에서 저장한 것을 덮지 않게) */
+async function seedDone(page: Page, stepIds: string[], settings?: Record<string, unknown>) {
   const records = Object.fromEntries(
     stepIds.map((id) => [id, { status: "done", input: {}, attempts: 0, updatedAt: "2026-10-14T00:00:00.000Z" }]),
   );
   const progress = JSON.stringify({ version: 1, chapters: { [CHAPTER]: records } });
-  await page.addInitScript(([key, value]) => {
+  await page.addInitScript(([key, value, settingsKey, settingsValue]) => {
     if (!sessionStorage.getItem("seeded")) {
       localStorage.setItem(key, value);
+      if (settingsValue) localStorage.setItem(settingsKey, settingsValue);
       sessionStorage.setItem("seeded", "1");
     }
-  }, [KEY, progress] as const);
+  }, [KEY, progress, SETTINGS, settings ? JSON.stringify(settings) : ""] as const);
 }
 
 /** 가짜 보드로 단계를 연다 */
@@ -129,4 +131,42 @@ test("디버깅 단계: 설명을 저장하기 전에는 잠겨 있고, 저장�
   await expect(page.getByText("모든 증상을 고쳤어요")).toBeVisible();
   await button(page, "완료").click();
   await expect(page.getByText("완료한 단계예요")).toBeVisible();
+});
+
+test("미션 단계 + 설명 관문: 설정을 켜면 판정 통과만으로는 완료되지 않고(확인 대기), 교사 모드에서 설명 확인을 누르면 완료된다", async ({ page }) => {
+  await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1"], { explainGate: true });
+  await openStep(page, "mission1");
+  await replaceCode(page, 'd = 20\nif d < 15:\n    print("가까워요!")\n');
+  await button(page, "판정").click();
+
+  // 통과 문구가 관문 문구로 바뀌고, 학생에게는 대기 배지만 보인다. 완료는 아직 못 누른다
+  const gateText = page.getByText("통과했어요. 선생님께 1분 설명을 하고 확인을 받아요");
+  await expect(gateText).toBeVisible();
+  await expect(page.getByTestId("judge-failures")).toHaveCount(0);
+  await expect(page.getByTestId("explain-gate")).toContainText("선생님 확인 대기");
+  await expect(button(page, "설명 확인")).toHaveCount(0);
+  await expect(button(page, "완료")).toBeDisabled();
+  await expect(page.getByTestId("step-awaiting")).toHaveText("확인 대기");
+
+  // 챕터 단계 목록에서도 "확인 대기" 로 구분된다
+  await page.goto(`/#/track/${CHAPTER}`);
+  const row = page.getByTestId("step-row-mission1");
+  await expect(row).toHaveAttribute("data-state", "awaiting");
+  await expect(row).toContainText("확인 대기");
+
+  // 교사 모드를 켜고 돌아오면 "설명 확인" 버튼이 보인다
+  await page.goto("/#/settings");
+  await page.getByLabel("교사 모드").click();
+  await openStep(page, "mission1");
+  await expect(gateText).toBeVisible();
+  await button(page, "설명 확인").click();
+  await expect(page.getByTestId("explain-confirmed")).toContainText("선생님 확인 완료");
+  await expect(page.getByText("통과했어요. 아래 완료를 누르세요.")).toBeVisible();
+  await expect(page.getByTestId("step-awaiting")).toHaveCount(0);
+  await expect(button(page, "완료")).toBeEnabled();
+  await button(page, "완료").click();
+  await expect(page.getByText("완료한 단계예요")).toBeVisible();
+
+  await page.goto(`/#/track/${CHAPTER}`);
+  await expect(row).toHaveAttribute("data-state", "done");
 });

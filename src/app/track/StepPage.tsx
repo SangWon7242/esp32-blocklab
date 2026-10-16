@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import {
-  ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
+  ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { canComplete, isEditorStep } from "@/track/completion";
+import { awaitingExplain, canComplete, isEditorStep } from "@/track/completion";
 import { getChapter, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates } from "@/track/gating";
 import type { StepRecord } from "@/track/progress";
@@ -43,12 +43,12 @@ export function StepPage() {
   const navigate = useNavigate();
   const chapter = getChapter(chapterId);
   const progress = useProgress();
-  const { teacherMode } = useSettings();
+  const { teacherMode, explainGate } = useSettings();
 
   const steps = chapter ? allSteps(chapter) : [];
   const index = steps.findIndex((s) => s.id === stepId);
   const records = (chapter && progress?.chapters[chapter.id]) || {};
-  const states = chapter ? stepStates(chapter, records, teacherMode) : {};
+  const states = chapter ? stepStates(chapter, records, teacherMode, { explainGate }) : {};
   const state = states[stepId];
 
   // 없는 챕터·단계, 잠긴 단계는 챕터(또는 목록)로 돌려보낸다
@@ -74,6 +74,7 @@ export function StepPage() {
       record={records[step.id]}
       states={states}
       teacherMode={teacherMode}
+      explainGate={explainGate}
     />
   );
 }
@@ -86,9 +87,11 @@ type ViewProps = {
   record: StepRecord | undefined;
   states: Record<string, string>;
   teacherMode: boolean;
+  /** 설정: 미션·디버깅은 교사 "설명 확인" 뒤 완료 */
+  explainGate: boolean;
 };
 
-function StepView({ chapter, step, index, steps, record, states, teacherMode }: ViewProps) {
+function StepView({ chapter, step, index, steps, record, states, teacherMode, explainGate }: ViewProps) {
   const [input, setInput] = useState<Record<string, unknown>>(record?.input ?? {});
   const [attempts, setAttempts] = useState(record?.attempts ?? 0);
   const done = states[step.id] === "done";
@@ -131,7 +134,9 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
     case "app": activity = <AppStep step={step} {...props} />; break;
   }
 
-  const ready = canComplete(step, input);
+  const ready = canComplete(step, input, { explainGate });
+  /** 판정은 통과했는데 교사 "설명 확인"만 남았다 */
+  const awaiting = !done && awaitingExplain(step, input, { explainGate });
   const part = chapter.parts.find((p) => p.steps.some((s) => s.id === step.id));
 
   return (
@@ -173,7 +178,7 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
           data-testid="step-guide"
           className={cn("border-b p-4 sm:p-6 lg:overflow-y-auto lg:border-r lg:border-b-0", guideCollapsed && "lg:hidden")}
         >
-          <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} />
+          <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} awaiting={awaiting} />
         </aside>
         {/* 활동 칸: 세로로 꽉 차게 (편집기·입력 칸이 남는 높이를 채운다). 칸 폭에 따라 안쪽 배치가 바뀐다(@container) */}
         <section className="@container flex min-h-0 flex-col p-4 sm:p-6 lg:overflow-y-auto" aria-label="활동" data-testid="step-activity">
@@ -192,9 +197,18 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
             <span className="hidden items-center gap-1 text-sm text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
           ) : (
             <>
+              {awaiting && (
+                <span className="hidden items-center gap-1 text-sm text-amber-700 sm:flex dark:text-amber-400" data-testid="step-awaiting">
+                  <Hourglass className="size-4" />확인 대기
+                </span>
+              )}
               {/* 건너뛰기는 선택 단계만 (§8.3). 필수 편집기 단계는 실행·판정을 통과해야 끝난다 */}
               {editor && step.optional && <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>}
-              <Button onClick={() => complete()} disabled={!ready} title={ready ? undefined : "활동을 마치면 누를 수 있어요"}>
+              <Button
+                onClick={() => complete()}
+                disabled={!ready}
+                title={ready ? undefined : awaiting ? "선생님 확인을 받으면 누를 수 있어요" : "활동을 마치면 누를 수 있어요"}
+              >
                 <Check className="size-4" />완료
               </Button>
             </>
@@ -215,7 +229,9 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode }: 
 }
 
 /** 왼쪽 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → 이렇게 되면 성공(run 의 expected) → (접힘) 부품과 배선 → 시간·완료 */
-function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean }) {
+function StepGuide({
+  chapter, step, partTitle, done, awaiting,
+}: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean; awaiting: boolean }) {
   const hasKit = Boolean(chapter.materials?.length || chapter.wiring);
   return (
     <>
@@ -223,6 +239,8 @@ function StepGuide({ chapter, step, partTitle, done }: { chapter: LoadedChapter;
       <div className="mt-1 flex flex-wrap items-center gap-2">
         <Badge variant="secondary"><StepTypeIcon type={step.type} />{STEP_TYPE_LABEL[step.type]}</Badge>
         {step.optional && <Badge variant="outline">선택</Badge>}
+        {/* 설명 관문: 판정은 통과, 교사 확인만 남음 (좁은 화면에서도 보이는 자리) */}
+        {awaiting && <Badge variant="outline" className="border-amber-500/40 text-amber-700 dark:text-amber-400"><Hourglass />확인 대기</Badge>}
       </div>
       <h1 className="mt-3 text-xl font-bold">{step.title}</h1>
 
