@@ -57,7 +57,7 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
   let index = 0;
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto bg-background text-foreground">
       <div className="mx-auto max-w-5xl p-4 sm:p-8">
         <Button variant="ghost" size="sm" asChild className="-ml-2">
           <HostLink to={withQuery(nav.href.track(), { track: chapter.track })}><ArrowLeft className="size-4" />챕터 목록</HostLink>

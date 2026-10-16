@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { CODE_FONT_TEXT, CodeFontSizeAdjuster } from "@/components/editor/CodeFontSize";
 import { DEFAULT_MODEL } from "@/ai/claude";
 import { useHost } from "@/host/HostContext";
 import { reloadProgress } from "../track/progressState";
@@ -107,6 +108,16 @@ export function SettingsPage() {
               </div>
               <Switch id="fake-board" checked={settings.fakeBoard} onCheckedChange={(v) => updateSettings({ fakeBoard: v })} />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>코드 보기</CardTitle>
+            <CardDescription>{CODE_FONT_TEXT.description} 코드 칸 머리줄의 글자 크기 단추와 같은 값이에요.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CodeFontSizeAdjuster />
           </CardContent>
         </Card>
 

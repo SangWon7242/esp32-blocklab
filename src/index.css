@@ -4,10 +4,26 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * 코드 글꼴 D2Coding (lib-v1.0.5, NAVER, SIL OFL 1.1 — public/blocklab/fonts/OFL.txt). 공식 배포 TTF 를 글자 손대지 않고 WOFF2 로만 바꿨다.
+ * 주소는 절대 경로 "/blocklab/fonts/" — 체험판은 public/ 의 파일이라 Vite 가 빌드 때 base(/esp32-blocklab/)를 붙이고,
+ * 라이브러리(publicDir 없음)는 그대로 둔다 → 호스트가 dist-lib/fonts/ 를 /blocklab/fonts/ 에서 서빙한다 (media 와 같은 방식).
+ * 이미 설치된 D2Coding 이 있으면 그것을 먼저 쓴다(local). 받는 동안은 대체 글꼴로 보인다(swap).
+ */
+@font-face {
+  font-family: "D2Coding";
+  src: local("D2Coding"), url("/blocklab/fonts/D2Coding-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
     /* 글꼴: 호스트가 --host-font-sans 를 주면 그것. 루트(html·body)의 font-family 는 라이브러리 빌드에서 빠져 호스트 글꼴을 상속한다 */
     --font-sans: var(--host-font-sans, "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif);
+    /* 코드 글꼴 (font-mono 유틸·code·pre): D2Coding 먼저 (lib-v1.0.5) */
+    --font-mono: var(--blocklab-font-code);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -53,6 +69,9 @@
  * 라이브러리 빌드에서는 :root 가 .blocklab 으로 바뀐다 (scripts/postcss-blocklab-scope.ts)
  */
 :root {
+    /* 코드 글꼴·글자 크기 (lib-v1.0.5). 글자 크기는 BlocklabProvider 가 학생이 고른 값으로 덮는다 (src/host/codeFontSize.ts) */
+    --blocklab-font-code: "D2Coding", "D2Coding ligature", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --blocklab-code-font-size: 16px;
     --background: var(--host-background, oklch(1 0 0));
     --foreground: var(--host-foreground, oklch(0.145 0 0));
     --card: var(--host-card, oklch(1 0 0));
@@ -64,7 +83,8 @@
     --secondary: var(--host-secondary, oklch(0.97 0 0));
     --secondary-foreground: var(--host-secondary-foreground, oklch(0.205 0 0));
     --muted: var(--host-muted, oklch(0.97 0 0));
-    --muted-foreground: var(--host-muted-foreground, oklch(0.556 0 0));
+    /* 0.556(shadcn 기본)은 흰 바탕 4.7:1 이지만 muted 바탕(0.97) 위 4.3:1 로 AA(4.5:1)에 못 미쳐 조금 진하게: 흰 바탕 5.5:1, muted 5.1:1 */
+    --muted-foreground: var(--host-muted-foreground, oklch(0.52 0 0));
     --accent: var(--host-accent, oklch(0.97 0 0));
     --accent-foreground: var(--host-accent-foreground, oklch(0.205 0 0));
     --destructive: var(--host-destructive, oklch(0.577 0.245 27.325));
@@ -133,6 +153,12 @@
     }
   html {
     @apply font-sans;
+    }
+  /* 코드 글꼴: 리가처를 끈다 (D2Coding 은 리가처 없는 판이지만 대체 글꼴·설치 글꼴도 같게) */
+  code, kbd, samp, pre, .font-mono {
+    font-family: var(--blocklab-font-code);
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
     }
   /* Blockly 는 숨길 요소에 display="none" 속성을 두는데 preflight 의 svg { display: block } 이 이긴다 */
   svg[display="none"], g[display="none"] {

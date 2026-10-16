@@ -5,6 +5,8 @@ import type { TrackId } from "@/track/schema";
  * 라이브러리 화면 (계획 13 인터페이스 계약). 화면 컴포넌트는 Blockly·CodeMirror 를 끌고 오므로 lazy 로 받아,
  * dist-lib/index.js 를 Node(허브 서버)에서 import 해 순수 API(judge·loadChapters…)만 써도 DOM 을 건드리지 않는다.
  * 호스트 쪽에서도 화면을 처음 열 때만 그 조각을 받는다.
+ * 화면 뿌리(트랙·챕터·단계·자유 코딩)는 bg-background(기본 흰색)를 칠한다 (lib-v1.0.5) — `.blocklab` 루트가 display:contents 라
+ * 칠하지 않으면 호스트 body 색(허브 #fffaf1 크림색)이 비친다. 호스트가 --host-background 를 주면 그 색.
  */
 
 const TrackPage = lazy(() => import("@/app/track/TrackPage").then((m) => ({ default: m.TrackPage })));

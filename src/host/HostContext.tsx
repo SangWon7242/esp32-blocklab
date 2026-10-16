@@ -1,10 +1,11 @@
-import { createContext, useContext, useMemo, useState, type ComponentProps, type MouseEvent, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, type ComponentProps, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import type { AiReview, DebugRequest, ReflectRequest } from "@/ai/claude";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { ChapterSnapshot } from "@/track/snapshot";
 import { setBlocklyMediaPath } from "./mediaPath";
+import { CODE_FONT_SIZE_VAR, useCodeFontSize } from "./codeFontSize";
 import { ChromeContext, type Chrome } from "./chrome";
 
 /*
@@ -70,9 +71,12 @@ export function BlocklabProvider({ children, ...host }: HostProps & { children: 
 function BlocklabChrome({ children }: { children: ReactNode }) {
   const [portal, setPortal] = useState<HTMLElement | null>(null);
   const chrome = useMemo<Chrome>(() => ({ portal }), [portal]);
+  // 코드 글자 크기 (lib-v1.0.5): 모든 코드 칸·포털 안 칸이 이 변수를 따른다
+  const codeFontSize = useCodeFontSize();
+  const style = { display: "contents", [CODE_FONT_SIZE_VAR]: `${codeFontSize}px` } as CSSProperties;
   return (
     // display:contents — 호스트 배치(flex 등)를 그대로 흘려보낸다. 토큰·글자색은 display:contents 여도 상속된다
-    <div className="blocklab" style={{ display: "contents" }}>
+    <div className="blocklab" style={style}>
       <ChromeContext.Provider value={chrome}>
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster />

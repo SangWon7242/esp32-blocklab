@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { CODE_FONT_SIZE_DEFAULT, CODE_FONT_SIZE_VAR, CODE_LINE_HEIGHT } from "@/host/codeFontSize";
 import type { BlockState } from "@/docs/types";
 import { topBlockStates } from "./blockStates";
 
@@ -14,11 +15,16 @@ export function CodeView({ code, name, className }: { code: string; name?: strin
   return (
     <figure className={cn("min-w-0", className)}>
       {name && <figcaption className="mb-1 font-mono text-xs text-muted-foreground">{name}</figcaption>}
-      <pre className="overflow-x-auto rounded-md border bg-muted/40 p-3 text-xs leading-5" data-testid="code-view">
+      {/* 글자 크기는 코드 칸과 같은 값 (--blocklab-code-font-size, lib-v1.0.5). 줄 번호 칸 폭은 글자 폭(ch)으로 따라 커진다 */}
+      <pre
+        className="overflow-x-auto rounded-md border bg-muted/40 p-3"
+        style={{ fontSize: `var(${CODE_FONT_SIZE_VAR}, ${CODE_FONT_SIZE_DEFAULT}px)`, lineHeight: CODE_LINE_HEIGHT }}
+        data-testid="code-view"
+      >
         <code>
           {lines.map((line, i) => (
             <span key={i} className="block whitespace-pre">
-              <span className="mr-3 inline-block w-6 text-right text-muted-foreground select-none" aria-hidden>{i + 1}</span>
+              <span className="mr-[1.5ch] inline-block text-right text-muted-foreground select-none" style={{ minWidth: `${String(lines.length).length}ch` }} aria-hidden>{i + 1}</span>
               {line === "" ? " " : line}
             </span>
           ))}

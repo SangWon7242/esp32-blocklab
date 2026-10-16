@@ -157,7 +157,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   const part = chapter.parts.find((p) => p.steps.some((s) => s.id === step.id));
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background text-foreground">
       <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
         <Button variant="ghost" size="sm" asChild>
           <HostLink to={nav.href.chapter(chapter.id)}><ArrowLeft className="size-4" /><span className="hidden sm:inline">{chapter.title}</span><span className="sm:hidden">단계 목록</span></HostLink>

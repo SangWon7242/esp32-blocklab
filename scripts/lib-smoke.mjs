@@ -188,9 +188,30 @@ assert.ok(css.includes(".blocklab"), "style.css 에 .blocklab 범위가 없어�
 assert.ok(!/(^|[}{;,])(html|body|:root|:host)[\s,{]/.test(css), "style.css 에 범위 밖 루트 선택자가 있어요");
 assert.ok(css.includes("var(--host-primary"), "호스트 토큰 상속(--host-primary)이 없어요");
 
+// lib-v1.0.5: 코드 글꼴 D2Coding — dist-lib/fonts/ 에 woff2·OFL.txt, style.css 에 @font-face(/blocklab/fonts/)·글꼴 스택·리가처 끄기
+const fontsDir = path.join(dist, "fonts");
+const fontFiles = existsSync(fontsDir) ? readdirSync(fontsDir) : [];
+const woff2 = fontFiles.filter((f) => f.endsWith(".woff2"));
+assert.ok(woff2.length >= 1, "dist-lib/fonts/ 에 woff2 가 없어요");
+assert.ok(fontFiles.includes("OFL.txt"), "dist-lib/fonts/OFL.txt (SIL OFL 1.1) 가 없어요");
+assert.match(readFileSync(path.join(fontsDir, "OFL.txt"), "utf8"), /SIL OPEN FONT LICENSE Version 1\.1/i);
+const fontFaces = [...css.matchAll(/@font-face\s*\{([^}]*)\}/g)].map((m) => m[1]);
+const d2Face = fontFaces.find((f) => /font-family:\s*["']?D2Coding["']?\s*;/.test(f));
+assert.ok(d2Face, "style.css 에 D2Coding @font-face 가 없어요");
+assert.match(d2Face, /font-display:\s*swap/, "D2Coding @font-face 에 font-display: swap 이 없어요");
+const faceUrls = [...d2Face.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)].map((m) => m[1]);
+assert.ok(faceUrls.length > 0, "D2Coding @font-face 에 url 이 없어요");
+for (const u of faceUrls) {
+  assert.ok(u.startsWith("/blocklab/fonts/"), `글꼴 주소가 /blocklab/fonts/ 가 아니에요: ${u}`);
+  assert.ok(existsSync(path.join(fontsDir, u.slice("/blocklab/fonts/".length))), `style.css 가 부르는 ${u} 가 dist-lib/fonts/ 에 없어요`);
+}
+assert.ok(css.includes('"D2Coding", "D2Coding ligature", ui-monospace, "SF Mono", Menlo, Consolas, monospace') || css.includes('"D2Coding","D2Coding ligature",ui-monospace,"SF Mono",Menlo,Consolas,monospace'), "style.css 에 코드 글꼴 스택이 없어요");
+assert.ok(/font-variant-ligatures:\s*none/.test(css), "style.css 에 리가처 끄기(font-variant-ligatures: none)가 없어요");
+assert.ok(css.includes("--blocklab-code-font-size"), "style.css 에 --blocklab-code-font-size 가 없어요");
+
 console.log(
   `dist-lib 연기 검사 통과: v${lib.LIB_VERSION}, 챕터 ${chapters.length}개, 01-led 미션 판정 ${verdict.pass ? "통과" : `실패(${verdict.failures.length})`}, ` +
-    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, d.ts zod 0\n` +
+    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, 글꼴 ${woff2.join("·")} + OFL.txt, d.ts zod 0\n` +
     `core 입구 통과: judgeSnapshot ${coreSummary.passed}/${coreSummary.missions}, 정적 조각 ${coreReached.size}개(${(coreBytes / 1024).toFixed(1)} kB), ` +
     `외부 import 0, "use client"·React·Blockly·CodeMirror·CSS 0, 함수 ${CORE_FUNCTIONS.length}개 index 와 같음, 문장 상수 ${CORE_STRINGS.length}개`,
 );

@@ -5,6 +5,7 @@
  *   2. tsc -p tsconfig.lib.json           → types/**.d.ts (@/ 별칭을 상대 경로로 고쳐 쓴다) + index.d.ts·core.d.ts
  *      zod 를 import 하는 d.ts 는 펼친 평범한 타입으로 다시 쓴다 (scripts/dts-strip-zod.mjs — 허브에는 zod 가 없다)
  *   3. public/lib/*.py                    → lib/ (보드에 올리는 라이브러리. 호스트가 /lib/<이름> 으로 서빙해야 한다 — src/device/libs.ts)
+ *      public/blocklab/fonts/            → fonts/ (코드 글꼴 D2Coding woff2 + OFL.txt, lib-v1.0.5. style.css 가 /blocklab/fonts/ 로 부른다 — 호스트가 그 주소에서 서빙)
  *   4. package.json                       → 이름·version·exports
  *   5. scripts/lib-smoke.mjs              → window 없는 Node 에서 import 해 순수 API 를 부른다
  *      scripts/lib-types-check.mjs        → zod 없는 폴더에서 d.ts 를 tsc 로 읽어 StepRecord 등이 any 가 아닌지, 원래 zod 타입과 같은지
@@ -52,6 +53,8 @@ writeFileSync(path.join(out, "core.d.ts"), 'export * from "./types/lib/core";\n'
 
 // 3. 보드 라이브러리
 cpSync(path.join(root, "public/lib"), path.join(out, "lib"), { recursive: true, filter: (src) => !src.endsWith("README.md") });
+// 코드 글꼴 (lib-v1.0.5): style.css 의 @font-face 가 절대 경로 /blocklab/fonts/ 로 부른다 (vite.lib.config.ts 는 publicDir:false 라 주소를 그대로 둔다)
+cpSync(path.join(root, "public/blocklab/fonts"), path.join(out, "fonts"), { recursive: true });
 
 // 4. package.json
 const libPkg = {
@@ -80,7 +83,7 @@ run(process.execPath, [path.join(root, "scripts/lib-types-check.mjs")]);
 
 // 6. 크기
 const sizes = walk(out)
-  .filter((f) => /\.(js|css)$/.test(f))
+  .filter((f) => /\.(js|css|woff2)$/.test(f))
   .map((f) => [path.relative(out, f), statSync(f).size])
   .sort((a, b) => b[1] - a[1]);
 console.log("\ndist-lib/ 크기:");

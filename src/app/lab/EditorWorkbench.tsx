@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
+import { CodeFontSizeButton } from "@/components/editor/CodeFontSize";
 import { BlockDocDialog } from "@/components/editor/BlockDocDialog";
 import type { BlockDocRequest } from "@/components/editor/blockDocMenu";
 import { findDoc } from "@/docs/catalog";
@@ -389,7 +390,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
   const unconvertedCount = codeMode ? state.unparsed.length : countCodeBlocks(state.blocks);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background text-foreground">
       <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
         <Tabs value={state.source} onValueChange={(v) => switchSource(v as Source)}>
           <TabsList>
@@ -479,11 +480,10 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
                   <AlertTriangle className="size-3" />{state.parseError.line}줄 {state.parseError.message}
                 </Badge>
               )}
-              {!narrow && (
-                <div className="ml-auto flex items-center">
-                  <PanelToggle label="코드 패널 접기" icon={PanelRightClose} onClick={() => setSidePanel("code", false)} />
-                </div>
-              )}
+              <div className="ml-auto flex shrink-0 items-center gap-1">
+                <CodeFontSizeButton />
+                {!narrow && <PanelToggle label="코드 패널 접기" icon={PanelRightClose} onClick={() => setSidePanel("code", false)} />}
+              </div>
             </div>
             <div className="min-h-0 flex-1">
               <CodePanel

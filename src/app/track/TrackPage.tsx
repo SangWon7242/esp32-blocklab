@@ -64,7 +64,7 @@ export function TrackPage({ track: fromHost, onTrackChange }: Props = {}) {
   };
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto bg-background text-foreground">
       <div className="mx-auto max-w-5xl p-4 sm:p-8">
         <h1 className="text-2xl font-bold">트랙</h1>
         <p className="mt-2 text-muted-foreground">챕터를 골라 단계를 차례대로 풀어 갑니다. 챕터 안에서는 앞 단계를 끝내야 다음 단계가 열려요.</p>
