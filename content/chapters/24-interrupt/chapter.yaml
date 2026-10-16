@@ -241,7 +241,7 @@ parts:
             fail: LED 가 꺼져 있을 때와 켜져 있을 때 각각 무엇을 해야 하나요? 지금 LED 가 켜져 있는지는 무엇으로 알 수 있나요?
           - codeMatches: '^\s{8,}pressed\s*=\s*False$'
             fail: LED 를 바꾼 뒤 깃발은 어떻게 되나요? 다음 누름을 기다리려면 반복이 깃발에 무엇을 해야 할까요?
-          - codeMatches: '(?<![\s\S])(?![\s\S]*time\.sleep\(2\))'
+          - notHas: time.sleep(2)
             fail: 반복 안에 깜박이던 줄(켜기 → 2초 → 끄기 → 2초)이 아직 남아 있지 않나요?
           - codeMatches: '^    time\.sleep\(0\.05\)$'
             fail: 반복 끝에서 쉬는 시간은 지시와 같나요? 그 줄은 반복의 어느 자리에 있나요?

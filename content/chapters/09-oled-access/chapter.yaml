@@ -275,7 +275,7 @@ parts:
             fail: 카운트다운이 시작될 때 문은 이미 열려 있나요? 문을 여는 줄과 반복 줄 가운데 무엇이 먼저인가요?
           - codeMatches: '^(\s+)for t in range\(3, 0, -1\):\n(?:\1\s+.*\n)+(?:\1\S.*\n)*?\1servo\.duty_u16\(1638\)'
             fail: 반복이 모두 끝난 뒤에 문을 닫나요? 닫는 줄이 반복 안에 들어가 있으면 몇 번 닫힐까요?
-          - codeMatches: '^(?<![\s\S])(?![\s\S]*"ACCESS OK")'
+          - notHas: 'show("ACCESS OK", "Door open")'
             fail: 등록된 카드일 때 화면에는 카운트다운만 보여야 해요. 예전 ACCESS OK 화면이 아직 남아 있지 않나요?
           - codeMatches: 'show\("DENIED", "Unknown card"\)\n\s+time\.sleep\(3\)'
             fail: 모르는 카드일 때 DENIED 화면은 몇 초 동안 보여야 하나요? 그만큼 기다리는 줄이 DENIED 다음에 있나요?
@@ -427,7 +427,7 @@ parts:
             fail: 화면에 번호를 보여 주나요? 숫자 count 를 "No. " 뒤에 붙이려면 무엇으로 바꿔야 할까요?
           - codeMatches: 'if uid in allowed:\n\s+count\s*(?:=\s*count\s*\+\s*1|\+=\s*1)\n\s+show\("OPEN", "No\. "\s*\+\s*str\(count\)\)'
             fail: 등록된 카드일 때 맨 먼저 하는 일이 무엇인가요? 번호를 화면에 보여 주기 전에 하나 더해 두었나요?
-          - codeMatches: '^(?<![\s\S])(?![\s\S]*"ACCESS OK")'
+          - notHas: 'show("ACCESS OK", "Door open")'
             fail: 화면에 OPEN 과 번호가 보이나요? 예전 ACCESS OK 화면이 아직 남아 있지 않나요?
         answerCode: extra1_count.py
 

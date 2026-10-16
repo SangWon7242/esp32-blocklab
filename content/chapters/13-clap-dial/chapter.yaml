@@ -256,7 +256,7 @@ parts:
             fail: 바꾼 숫자를 LED 세기로 보냈나요?
           - codeMatches: '^\s+time\.sleep_ms\(\s*20\s*\)|^\s+time\.sleep\(\s*0\.02\s*\)'
             fail: LED 세기를 정한 뒤 얼마나 기다리나요? 지시에서 정한 시간은 몇 밀리초였나요?
-          - codeMatches: '^(?<![\s\S])(?![\s\S]*time\.sleep\(0\.5\))'
+          - notHas: time.sleep(0.5)
             fail: 다이얼을 돌리면 LED 가 바로 따라오나요? 반복 한 바퀴에 기다리는 시간이 20밀리초뿐인가요?
         answerCode: mission_dimmer.py
 

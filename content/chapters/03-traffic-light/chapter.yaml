@@ -170,7 +170,7 @@ parts:
             fail: 노란불을 몇 번 되풀이하기로 했나요? 반복 블록의 횟수를 다시 보세요
           - codeMatches: '^(\w+)\s*=\s*Pin\(\s*14\s*,[\s\S]*^( +)for \w+ in range\([^)]*\)\s*:\n\2( +)\1\.value\(1\)\n\2\3time\.sleep\(0?\.5\)\n\2\3\1\.value\(0\)\n\2\3time\.sleep\(0?\.5\)'
             fail: 반복 안쪽에 노란불 한 번 깜빡임(켜기 · 기다리기 · 끄기 · 기다리기) 네 줄이 들어 있나요?
-          - codeMatches: '(?<![\s\S])(?![\s\S]*(?:\.value\(1\)[\s\S]*){4})'
+          - count: { text: "led_yellow.value(1)", max: 1 }
             fail: 같은 줄을 여러 번 붙여 쓴 노란불이 아직 남아 있지 않나요? 켜는 줄이 모두 몇 개인지 세어 보세요
           - codeMatches: '^(\w+)\s*=\s*Pin\(\s*13\s*,[\s\S]*^( +)\1\.value\(1\)\n\2time\.sleep\(5(?:\.0)?\)\n\2\1\.value\(0\)\n\2for \w+ in range\('
             fail: 빨간불 켜기 · 기다리기 · 끄기 묶음은 그대로이고, 그 바로 다음에 노란불 반복이 오나요?
