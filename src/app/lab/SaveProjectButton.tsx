@@ -1,12 +1,12 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { CheckCircle2, FolderPlus, LoaderCircle, XCircle } from "lucide-react";
+import { CheckCircle2, FolderPlus, Info, LoaderCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useHost } from "@/host/HostContext";
-import { checkProjectTitle, fitTitle, PROJECT_TITLE_MAX, runSaveProject, SAVE_PROJECT_TEXT, tidyTitle, titleLength, type SaveProjectStatus } from "./saveProject";
+import { checkProjectTitle, fitTitle, PROJECT_TITLE_MAX, runSaveProject, SAVE_PROJECT_TEXT, tidyTitle, titleLength, type SaveProjectProgram, type SaveProjectStatus } from "./saveProject";
 
 /*
  * 「작품으로 저장」 단추와 제목 대화상자 (lib-v1.0.3). 자유 코딩(LabPage)과 트랙 편집기 단계(TrackEditor)가 함께 쓴다.
@@ -22,13 +22,15 @@ type FormProps = {
   status: SaveProjectStatus;
   /** 제목 검사에 걸린 까닭 (저장을 누른 뒤에만) */
   invalid: "empty" | "long" | null;
+  /** 블록으로 바꿀 수 없어 코드 글로만 저장한다 (안내 한 줄, lib-v1.0.4) */
+  codeOnly?: boolean;
   onTitleChange(title: string): void;
   onSubmit(): void;
   onCancel(): void;
 };
 
 /** 대화상자 속 (제목 칸·실패 문구·단추). 상태는 밖에서 받는다 — 테스트가 그대로 그릴 수 있게 */
-export function SaveProjectForm({ title, status, invalid, onTitleChange, onSubmit, onCancel }: FormProps) {
+export function SaveProjectForm({ title, status, invalid, codeOnly, onTitleChange, onSubmit, onCancel }: FormProps) {
   const id = useId();
   const saving = status === "saving";
   const count = titleLength(tidyTitle(title));
@@ -58,6 +60,11 @@ export function SaveProjectForm({ title, status, invalid, onTitleChange, onSubmi
           </p>
         )}
       </div>
+      {codeOnly && (
+        <p className="flex items-start gap-2 text-sm text-muted-foreground" data-testid="save-project-code-only">
+          <Info className="mt-0.5 size-4 shrink-0" />{SAVE_PROJECT_TEXT.codeOnly}
+        </p>
+      )}
       {status === "failed" && (
         <p className="flex items-start gap-2 text-sm text-destructive" role="alert">
           <XCircle className="mt-0.5 size-4 shrink-0" />{SAVE_PROJECT_TEXT.failed}
@@ -76,7 +83,7 @@ export function SaveProjectForm({ title, status, invalid, onTitleChange, onSubmi
 
 type Props = {
   /** 저장을 누른 순간의 프로그램 (편집기 핸들의 getProgram — debounce 중인 코드까지) */
-  getProgram(): { code: string; blocksJson: unknown };
+  getProgram(): SaveProjectProgram;
   /** 대화상자에 미리 채울 제목. 한 번 저장한 뒤로는 그 제목을 다시 채운다 */
   defaultTitle: string;
   /** 트랙 단계에서 저장하면 그 챕터 id (호스트가 출처를 챕터로 남긴다) */
@@ -90,6 +97,8 @@ export function SaveProjectButton({ getProgram, defaultTitle, chapterId }: Props
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<SaveProjectStatus>("idle");
   const [invalid, setInvalid] = useState<"empty" | "long" | null>(null);
+  /** 대화상자를 연 순간 프로그램이 블록으로 바뀌지 않는 상태였는가 (안내 문구) */
+  const [codeOnly, setCodeOnly] = useState(false);
   /** 마지막으로 저장한 제목 (같은 작품을 계속 저장할 때 다시 묻지 않아도 되게) */
   const [lastTitle, setLastTitle] = useState<string | null>(null);
   const noteTimer = useRef<number | undefined>(undefined);
@@ -104,6 +113,7 @@ export function SaveProjectButton({ getProgram, defaultTitle, chapterId }: Props
     setTitle(lastTitle ?? fitTitle(defaultTitle));
     setInvalid(null);
     setStatus("idle");
+    setCodeOnly(getProgram().unconvertible === true);
     setOpen(true);
   };
 
@@ -159,6 +169,7 @@ export function SaveProjectButton({ getProgram, defaultTitle, chapterId }: Props
             title={title}
             status={status}
             invalid={invalid}
+            codeOnly={codeOnly}
             onTitleChange={(t) => {
               setTitle(t);
               if (invalid) setInvalid(null);

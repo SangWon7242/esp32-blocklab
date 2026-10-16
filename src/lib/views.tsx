@@ -30,6 +30,8 @@ export type LabViewProps = {
   /**
    * 호스트가 불러온 작품 (lib-v1.0.3). 처음 열 때 한 번만 싣는다 — exampleType·codeRef 보다 먼저.
    * blocksJson 이 있으면 작업판 JSON 으로, 없으면 code 를 블록으로 바꿔 싣는다. title 은 「작품으로 저장」의 기본 제목.
+   * code 를 블록으로 바꾸지 못하면(문법 오류) blocksJson 은 쓰지 않고 코드 모드로 열어 친 글을 그대로 둔다 (lib-v1.0.4).
+   * 「작품으로 저장」은 코드 모드에서 code 가 블록과 맞지 않으면 blocksJson 을 null 로 넘긴다 (lib-v1.0.4)
    * 값이 바뀌어도 다시 싣지 않는다(학생 편집을 덮지 않게). 다른 작품을 열려면 LabView 의 key 를 바꾼다
    */
   initialProgram?: LabInitialProgram | null;

@@ -39,7 +39,7 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   const { fakeBoard: fake } = useSettings();
   const readOnly = useReadOnly();
   const inner = useRef<EditorWorkbenchHandle>(null);
-  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), openExample: (code: string) => inner.current?.openExample(code) }), []);
+  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), getSaveProgram: () => inner.current!.getSaveProgram(), openExample: (code: string) => inner.current?.openExample(code) }), []);
 
   const onProgramRef = useRef(onProgram);
   onProgramRef.current = onProgram;
@@ -69,7 +69,7 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   useEffect(() => flush, [flush]);
 
   // 「작품으로 저장」 (lib-v1.0.3): 단계 화면 안 + 호스트 onSaveProject 가 있을 때만 그려진다
-  const getProgram = useCallback(() => inner.current?.getProgram() ?? { code: initialCode, blocksJson: null }, [initialCode]);
+  const getProgram = useCallback(() => inner.current?.getSaveProgram() ?? { code: initialCode, blocksJson: null }, [initialCode]);
   const actions = useMemo(() => <TrackSaveButton getProgram={getProgram} />, [getProgram]);
 
   if (readOnly) {

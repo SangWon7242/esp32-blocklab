@@ -67,6 +67,14 @@ describe("SaveProjectForm 상태", () => {
     expect(html).not.toContain('disabled=""');
   });
 
+  it("블록으로 바꿀 수 없으면 코드 글로 저장한다는 안내 (lib-v1.0.4)", () => {
+    expect(form()).not.toContain("save-project-code-only");
+    const html = form({ codeOnly: true });
+    expect(html).toContain('data-testid="save-project-code-only"');
+    expect(html).toContain(SAVE_PROJECT_TEXT.codeOnly);
+    expect(SAVE_PROJECT_TEXT.codeOnly).toBe("블록으로 바꿀 수 없는 줄이 있어 코드 글로 저장해요.");
+  });
+
   it("제목 검사에 걸리면 칸이 aria-invalid 이고 까닭 문구", () => {
     const empty = form({ title: "  ", invalid: "empty" });
     expect(empty).toContain('aria-invalid="true"');

@@ -17,7 +17,7 @@ import type { BlockDocRequest } from "@/components/editor/blockDocMenu";
 import { findDoc } from "@/docs/catalog";
 import type { LineMap, WorkspaceJson } from "@/codegen";
 import type { ConsoleEntry, Issue } from "@/lint";
-import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateFromBlocks, type EditorState, type Source } from "./editorSync";
+import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateFromBlocks, programForSave, type EditorState, type SaveProgram, type Source } from "./editorSync";
 import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { DeviceBar } from "./DeviceBar";
@@ -57,6 +57,8 @@ export type EditorProgram = { code: string; blocksJson: WorkspaceJson | null };
 export type EditorWorkbenchHandle = {
   /** debounce 중인 코드까지 반영한 지금 프로그램 */
   getProgram(): EditorProgram;
+  /** 「작품으로 저장」에 넘길 프로그램: 코드 모드에서 code 가 블록과 맞지 않으면 blocksJson 은 null (lib-v1.0.4) */
+  getSaveProgram(): SaveProgram;
   /** 예시 프로그램(코드)을 블록·코드 패널·검사에 함께 싣는다 (?example= 이 화면 안에서 바뀔 때) */
   openExample(code: string): void;
 };
@@ -71,6 +73,8 @@ export type EditorWorkbenchProps = {
   initialExample?: string;
   /** 코드 대신 처음 실을 블록 JSON (있으면 initialCode 보다 먼저. 설계 조립 작업판) */
   initialBlocks?: WorkspaceJson | null;
+  /** "code" 면 initialCode 를 코드 모드로 연다 (블록으로 바꾸지 못하는 작품, lib-v1.0.4). 설계 조립에서는 무시 */
+  initialSource?: Source;
   /** 가짜 보드 (?device=fake 또는 설정) */
   fake: boolean;
   /** "보드에 저장" 버튼을 숨긴다 (트랙 단계) */
@@ -96,13 +100,13 @@ export type EditorWorkbenchProps = {
 /** 설계 조립에서 빼는 검사 규칙 */
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
-export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, actions, ref }: EditorWorkbenchProps) {
+export function EditorWorkbench({ initialCode, initialExample, initialBlocks, initialSource, fake, hideSave, assemblyMode, onProgram, onRunEnd, actions, ref }: EditorWorkbenchProps) {
   /** 핸들의 openExample 이 최신 openExample 을 부르게 (useImperativeHandle 의존성에 넣지 않으려고) */
   const openExampleRef = useRef<(code: string) => void>(() => undefined);
   const [state, dispatch] = useReducer(
     editorReducer,
     null,
-    () => (initialBlocks ? initialEditorStateFromBlocks(initialBlocks) : initialEditorState(initialCode)),
+    () => (initialBlocks ? initialEditorStateFromBlocks(initialBlocks) : initialEditorState(initialCode, assemblyMode ? "blocks" : initialSource)),
   );
   const blocklyRef = useRef<BlocklyHandle>(null);
   const debounceRef = useRef<number | undefined>(undefined);
@@ -322,6 +326,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
       const current = flushPendingCode();
       return { code: current.code, blocksJson: current.blocks };
     },
+    getSaveProgram: () => programForSave(flushPendingCode()),
     openExample: (code: string) => openExampleRef.current(code),
   }), [flushPendingCode]);
 

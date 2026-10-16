@@ -33,8 +33,12 @@ function fromCode(code: string, prev: EditorState): EditorState {
   return { ...prev, code, blocks: r.json, unparsed: r.unparsed, parseError: null, map: null };
 }
 
-export function initialEditorState(code: string): EditorState {
-  const base: EditorState = { source: "blocks", code, blocks: null, unparsed: [], parseError: null, map: null };
+/**
+ * 코드로 시작한다. source 가 "code" 면 코드 모드로 연다 (lib-v1.0.4: 블록으로 바꾸지 못하는 작품을 다시 열 때 —
+ * 친 글을 코드 편집기에 그대로 두고 오류 줄을 보여 준다)
+ */
+export function initialEditorState(code: string, source: Source = "blocks"): EditorState {
+  const base: EditorState = { source, code, blocks: null, unparsed: [], parseError: null, map: null };
   return fromCode(code, base);
 }
 
@@ -80,4 +84,31 @@ export function countCodeBlocks(json: WorkspaceJson | null): number {
   };
   for (const top of (json.blocks?.blocks ?? []) as BlockJson[]) visit(top);
   return n;
+}
+
+/** 「작품으로 저장」에 넘길 프로그램 (lib-v1.0.4) */
+export type SaveProgram = {
+  code: string;
+  blocksJson: WorkspaceJson | null;
+  /** 코드 모드 문법 오류로 블록으로 바꾸지 못해 코드 글만 저장한다 (대화상자 안내) */
+  unconvertible: boolean;
+};
+
+/** 줄 끝 빈칸·끝 빈 줄 차이는 같은 코드로 본다 */
+function sameCode(a: string, b: string): boolean {
+  const tidy = (s: string) => s.replace(/\r\n?/g, "\n").split("\n").map((l) => l.trimEnd()).join("\n").trimEnd();
+  return tidy(a) === tidy(b);
+}
+
+/**
+ * 저장할 프로그램. 학생이 친 code 가 기준이다: 코드 모드에서 code 가 지금 블록과 맞지 않으면
+ * (문법 오류로 블록이 마지막 성공 파싱에 머물러 있거나, code 가 그 블록에서 다시 만든 코드와 다르면) blocksJson 은 null.
+ * 그래야 다시 열 때 오류 전 블록이 친 글을 덮지 않는다. 블록 모드는 작업판이 기준이라 그대로 둔다.
+ */
+export function programForSave(state: EditorState): SaveProgram {
+  if (state.source === "code") {
+    if (state.parseError) return { code: state.code, blocksJson: null, unconvertible: true };
+    if (!state.blocks || !sameCode(state.code, workspaceJsonToCode(state.blocks))) return { code: state.code, blocksJson: null, unconvertible: false };
+  }
+  return { code: state.code, blocksJson: state.blocks, unconvertible: false };
 }

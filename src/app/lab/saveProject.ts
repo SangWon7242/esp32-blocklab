@@ -23,10 +23,16 @@ export const SAVE_PROJECT_TEXT = {
   emptyTitle: "제목을 한 글자 이상 써 주세요.",
   longTitle: `제목은 ${PROJECT_TITLE_MAX}자까지 쓸 수 있어요.`,
   labPrefix: "자유 코딩",
+  codeOnly: "블록으로 바꿀 수 없는 줄이 있어 코드 글로 저장해요.",
 } as const;
 
 export type SaveProjectStatus = "idle" | "saving" | "saved" | "failed";
 export type SaveProjectInput = Parameters<NonNullable<HostProps["onSaveProject"]>>[0];
+/**
+ * 저장을 누른 순간의 프로그램 (편집기 핸들의 getSaveProgram). unconvertible 이면 코드 모드 문법 오류로
+ * blocksJson 없이 코드 글만 저장한다 — 대화상자가 그 안내를 보인다 (lib-v1.0.4)
+ */
+export type SaveProjectProgram = { code: string; blocksJson: unknown; unconvertible?: boolean };
 
 /** 글자 수 (서로게이트 쌍도 한 자) */
 export function titleLength(title: string): number {

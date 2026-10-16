@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import { SaveProjectButton } from "../lab/SaveProjectButton";
-import { stepDefaultTitle } from "../lab/saveProject";
+import { stepDefaultTitle, type SaveProjectProgram } from "../lab/saveProject";
 
 /*
  * 트랙 편집기 단계의 「작품으로 저장」 (lib-v1.0.3). 단계 화면(StepBody)이 어느 챕터·단계인지 알려 주고,
@@ -17,7 +17,7 @@ export function projectSaveTarget(chapter: { id: string; title: string }, step: 
 }
 
 /** 단계 화면 안이고, 호스트 onSaveProject 가 있고, 열람 모드가 아닐 때만 보인다 */
-export function TrackSaveButton({ getProgram }: { getProgram(): { code: string; blocksJson: unknown } }) {
+export function TrackSaveButton({ getProgram }: { getProgram(): SaveProjectProgram }) {
   const target = useContext(ProjectSaveTargetContext);
   if (!target) return null;
   return <SaveProjectButton getProgram={getProgram} defaultTitle={target.defaultTitle} chapterId={target.chapterId} />;

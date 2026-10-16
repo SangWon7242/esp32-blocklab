@@ -49,7 +49,7 @@ export function LabPage({ exampleType, codeRef, onExampleLoaded, initialProgram 
   );
   // 저장 대화상자의 기본 제목: 불러온 작품의 제목, 없으면 "자유 코딩 <날짜>" (처음 연 때 정한다)
   const [defaultTitle] = useState(() => initialProgram?.title?.trim() || labDefaultTitle());
-  const getProgram = useCallback(() => workbench.current?.getProgram() ?? { code: "", blocksJson: null }, []);
+  const getProgram = useCallback(() => workbench.current?.getSaveProgram() ?? { code: "", blocksJson: null }, []);
   const actions = useMemo(() => <SaveProjectButton getProgram={getProgram} defaultTitle={defaultTitle} />, [getProgram, defaultTitle]);
   return (
     <EditorWorkbench
@@ -57,6 +57,7 @@ export function LabPage({ exampleType, codeRef, onExampleLoaded, initialProgram 
       initialExample={start.initialExample}
       initialCode={start.initialCode}
       initialBlocks={start.initialBlocks}
+      initialSource={start.initialSource}
       // 호스트 설정의 "가짜 보드" (체험판은 ?device=fake 도 섞어 넘긴다)
       fake={fakeBoard}
       // 「작품으로 저장」: 호스트 onSaveProject 가 없거나(체험판) 열람 모드면 단추가 그려지지 않는다
