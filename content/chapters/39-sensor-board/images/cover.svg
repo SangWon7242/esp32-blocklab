@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sb-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sb-cover-title">우리 반 센서 상황판: 교실의 센서 여섯 개(빛 · 소리 · 손잡이 · 온습도 · 틸트 · 사람)가 ESP32 로 모이고, ESP32 는 OLED 두 페이지와 WiFi 로 폰의 표에 값을 보여 준다. 기준을 넘은 소리 칸은 빨갛다</title>
+  <defs>
+    <marker id="sb-cover-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <text x="24" y="36" font-size="16" font-weight="700" fill="currentColor" stroke="none">우리 반 센서 상황판</text>
+  <text x="24" y="56" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">교실 밖에서도 교실의 온도 · 밝기 · 소음을 한눈에</text>
+  <!-- 센서 여섯 개 -->
+  <g stroke="none" fill="currentColor" font-size="12" font-weight="700" text-anchor="middle">
+    <rect x="24" y="80" width="78" height="34" rx="8" fill="#2f9e44" fill-opacity="0.18"/>
+    <text x="63" y="102">빛 34</text>
+    <rect x="24" y="122" width="78" height="34" rx="8" fill="#0c8599" fill-opacity="0.18"/>
+    <text x="63" y="144">소리 35</text>
+    <rect x="24" y="164" width="78" height="34" rx="8" fill="#f59f00" fill-opacity="0.18"/>
+    <text x="63" y="186">손잡이 39</text>
+    <rect x="24" y="206" width="78" height="34" rx="8" fill="#1c7ed6" fill-opacity="0.18"/>
+    <text x="63" y="228">온습도 13</text>
+    <rect x="24" y="248" width="78" height="34" rx="8" fill="#ae3ec9" fill-opacity="0.18"/>
+    <text x="63" y="270">틸트 14</text>
+    <rect x="24" y="290" width="78" height="34" rx="8" fill="#c92a2a" fill-opacity="0.18"/>
+    <text x="63" y="312">사람 23</text>
+  </g>
+  <g stroke="currentColor" stroke-width="2" stroke-opacity="0.75" marker-end="url(#sb-cover-arrow)">
+    <path d="M104 97 C150 97 150 190 186 190"/>
+    <path d="M104 139 C150 139 150 190 186 190"/>
+    <path d="M104 181 C150 181 150 190 186 190"/>
+    <path d="M104 223 C150 223 150 190 186 190"/>
+    <path d="M104 265 C150 265 150 190 186 190"/>
+    <path d="M104 307 C150 307 150 190 186 190"/>
+  </g>
+  <!-- ESP32 -->
+  <rect x="190" y="140" width="110" height="100" rx="10" fill="var(--card)"/>
+  <rect x="214" y="166" width="62" height="48" rx="4" fill="var(--muted)"/>
+  <text x="245" y="196" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor" stroke="none">ESP32</text>
+  <path d="M232 160 q13 -12 26 0 M238 154 q7 -6 14 0" stroke-width="1.8" stroke-opacity="0.7"/>
+  <!-- OLED 두 페이지 -->
+  <path d="M300 170 L338 120" stroke-width="2" stroke-opacity="0.75" marker-end="url(#sb-cover-arrow)"/>
+  <path d="M300 210 L338 262" stroke-width="2" stroke-opacity="0.75" marker-end="url(#sb-cover-arrow)"/>
+  <rect x="342" y="80" width="118" height="68" rx="6" fill="#0b1b4d" stroke="#1d4ed8" stroke-width="2.5"/>
+  <g fill="#7dd3fc" stroke="none" font-size="12" font-family="ui-monospace, monospace">
+    <text x="352" y="100">L: 1234</text>
+    <text x="352" y="118">S: 2300 !</text>
+    <text x="352" y="136">K: 2048</text>
+  </g>
+  <text x="401" y="166" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">OLED 페이지 1</text>
+  <rect x="342" y="232" width="118" height="80" rx="6" fill="#0b1b4d" stroke="#1d4ed8" stroke-width="2.5"/>
+  <g fill="#7dd3fc" stroke="none" font-size="12" font-family="ui-monospace, monospace">
+    <text x="352" y="252">T: 25C</text>
+    <text x="352" y="268">H: 40%</text>
+    <text x="352" y="284">TILT: 0</text>
+    <text x="352" y="300">PIR: 1</text>
+  </g>
+  <text x="401" y="330" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">OLED 페이지 2</text>
+  <!-- WiFi 로 폰에 -->
+  <path d="M470 190 L500 190" stroke-width="2" stroke-opacity="0.75" stroke-dasharray="5 4" marker-end="url(#sb-cover-arrow)"/>
+  <text x="485" y="178" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7" stroke="none">WiFi</text>
+  <rect x="508" y="92" width="108" height="212" rx="14" fill="var(--card)" stroke-width="2.5"/>
+  <rect x="520" y="110" width="84" height="176" rx="4" fill="var(--muted)"/>
+  <circle cx="562" cy="298" r="3" fill="currentColor" stroke="none"/>
+  <g stroke="none" fill="currentColor" font-size="11" font-weight="700">
+    <text x="526" y="126">Sensor Board</text>
+  </g>
+  <g stroke="none" font-size="11" fill="currentColor">
+    <rect x="526" y="134" width="72" height="22" rx="4" fill="currentColor" fill-opacity="0.08"/>
+    <text x="532" y="149">L: 1234</text>
+    <rect x="526" y="160" width="72" height="22" rx="4" fill="#e03131" fill-opacity="0.85"/>
+    <text x="532" y="175" fill="#ffffff" font-weight="700">S: 2300 !</text>
+    <rect x="526" y="186" width="72" height="22" rx="4" fill="currentColor" fill-opacity="0.08"/>
+    <text x="532" y="201">T: 25C</text>
+    <rect x="526" y="212" width="72" height="22" rx="4" fill="currentColor" fill-opacity="0.08"/>
+    <text x="532" y="227">H: 40%</text>
+    <rect x="526" y="246" width="34" height="18" rx="4" fill="#4562f5" fill-opacity="0.85"/>
+    <text x="543" y="259" fill="#ffffff" text-anchor="middle" font-size="9" font-weight="700">page=1</text>
+    <rect x="564" y="246" width="34" height="18" rx="4" fill="#4562f5" fill-opacity="0.85"/>
+    <text x="581" y="259" fill="#ffffff" text-anchor="middle" font-size="9" font-weight="700">page=2</text>
+  </g>
+  <text x="562" y="326" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">폰 브라우저 (2초마다 새로)</text>
+</svg>

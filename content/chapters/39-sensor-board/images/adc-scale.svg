@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sb-scale-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sb-scale-title">기준값 비례식: 아두이노의 0~1023 자에서 500 이던 기준은 ESP32 의 0~4095 자에서 같은 자리인 약 2000 이다 (500 × 4095 ÷ 1023 ≈ 2001). 값이 기준보다 크면 느낌표를 붙인다</title>
+  <text x="24" y="34" font-size="16" font-weight="700" fill="currentColor" stroke="none">같은 자리, 다른 숫자 — 기준값 옮기기</text>
+  <!-- 위 자: 0~1023 -->
+  <text x="24" y="84" font-size="13" font-weight="700" fill="currentColor" stroke="none">아두이노 0~1023</text>
+  <path d="M170 96 H590" stroke-width="3"/>
+  <g stroke-width="2">
+    <path d="M170 88 V104"/><path d="M380 88 V104"/><path d="M590 88 V104"/>
+  </g>
+  <g stroke="none" fill="currentColor" font-size="12" text-anchor="middle">
+    <text x="170" y="122">0</text>
+    <text x="380" y="122">512</text>
+    <text x="590" y="122">1023</text>
+  </g>
+  <circle cx="375" cy="96" r="7" fill="#e03131" stroke="none"/>
+  <text x="375" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">기준 500</text>
+  <!-- 대응 점선 -->
+  <path d="M375 104 L375 196" stroke-dasharray="5 4" stroke-opacity="0.6"/>
+  <text x="392" y="156" font-size="12" fill="currentColor" fill-opacity="0.75" stroke="none">같은 자리(약 49%)</text>
+  <!-- 아래 자: 0~4095 -->
+  <text x="24" y="208" font-size="13" font-weight="700" fill="currentColor" stroke="none">ESP32 0~4095</text>
+  <path d="M170 204 H590" stroke-width="3"/>
+  <g stroke-width="2">
+    <path d="M170 196 V212"/><path d="M380 196 V212"/><path d="M590 196 V212"/>
+  </g>
+  <g stroke="none" fill="currentColor" font-size="12" text-anchor="middle">
+    <text x="170" y="230">0</text>
+    <text x="380" y="230">2048</text>
+    <text x="590" y="230">4095</text>
+  </g>
+  <circle cx="375" cy="204" r="7" fill="#e03131" stroke="none"/>
+  <text x="375" y="250" text-anchor="middle" font-size="13" font-weight="700" fill="#e03131" stroke="none">기준 약 2000</text>
+  <!-- 식 -->
+  <rect x="24" y="272" width="330" height="64" rx="10" fill="var(--card)"/>
+  <g stroke="none" fill="currentColor" font-size="13">
+    <text x="40" y="296" font-weight="700">비례식: 500 : 1023 = ? : 4095</text>
+    <text x="40" y="320">? = 500 × 4095 ÷ 1023 ≈ 2001 → 약 2000 (4배쯤)</text>
+  </g>
+  <!-- 판단 -->
+  <rect x="374" y="272" width="242" height="64" rx="10" fill="var(--card)"/>
+  <g stroke="none" fill="currentColor" font-size="13">
+    <text x="390" y="296" font-weight="700">값 &gt; 기준 → 느낌표 !</text>
+    <text x="390" y="320">2300 &gt; 2000 → !   /   1200 &gt; 2000 → 없음</text>
+  </g>
+</svg>

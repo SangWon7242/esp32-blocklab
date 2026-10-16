@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sb-ticks-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sb-ticks-title">멈추기와 지난 시간 재기: time.sleep(3) 으로 3초 멈추면 그동안 폰의 요청은 기다려야 한다. 지난 시간(ticks)을 재면 0.1초마다 한 바퀴 돌며 요청에 바로 답하고, 지난 시간이 3000 이상이 된 순간에만 페이지를 바꾼다</title>
+  <defs>
+    <marker id="sb-ticks-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <!-- 시간 축 -->
+  <g stroke="none" fill="currentColor" font-size="12" text-anchor="middle" fill-opacity="0.75">
+    <text x="130" y="24">0초</text><text x="280" y="24">3초</text><text x="430" y="24">6초</text><text x="580" y="24">9초</text>
+  </g>
+  <g stroke-opacity="0.25" stroke-dasharray="3 4">
+    <path d="M130 30 V340"/><path d="M280 30 V340"/><path d="M430 30 V340"/><path d="M580 30 V340"/>
+  </g>
+  <!-- 위: sleep(3) -->
+  <text x="24" y="70" font-size="14" font-weight="700" fill="currentColor" stroke="none">time.sleep(3)</text>
+  <text x="24" y="88" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">멈춰서 기다리기</text>
+  <g stroke="none">
+    <rect x="130" y="56" width="150" height="26" rx="5" fill="#e03131" fill-opacity="0.75"/>
+    <rect x="280" y="56" width="150" height="26" rx="5" fill="#e03131" fill-opacity="0.5"/>
+    <rect x="430" y="56" width="150" height="26" rx="5" fill="#e03131" fill-opacity="0.75"/>
+  </g>
+  <g stroke="none" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">
+    <text x="205" y="74">페이지 1 · 멈춤</text>
+    <text x="355" y="74">페이지 2 · 멈춤</text>
+    <text x="505" y="74">페이지 1 · 멈춤</text>
+  </g>
+  <!-- 폰 요청 1초에 -->
+  <path d="M180 128 V90" stroke="#4562f5" stroke-width="2.5" marker-end="url(#sb-ticks-arrow)"/>
+  <g stroke="none" fill="currentColor" font-size="12">
+    <text x="160" y="146">폰: 값 보여 줘!</text>
+  </g>
+  <path d="M188 112 H276" stroke="#4562f5" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="232" y="106" text-anchor="middle" font-size="11" fill="#4562f5" stroke="none">2초 기다림</text>
+  <path d="M280 94 L280 126" stroke="#4562f5" stroke-width="2.5" marker-end="url(#sb-ticks-arrow)"/>
+  <text x="300" y="146" font-size="12" fill="currentColor" stroke="none">3초가 끝나야 답</text>
+  <!-- 아래: ticks -->
+  <path d="M24 178 H616" stroke-opacity="0.3"/>
+  <text x="24" y="214" font-size="14" font-weight="700" fill="currentColor" stroke="none">지난 시간 재기</text>
+  <text x="24" y="232" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">0.1초마다 한 바퀴</text>
+  <g stroke="#2f9e44" stroke-width="2">
+    <path d="M130 222 V234 M145 222 V234 M160 222 V234 M175 222 V234 M190 222 V234 M205 222 V234 M220 222 V234 M235 222 V234 M250 222 V234 M265 222 V234 M280 222 V234 M295 222 V234 M310 222 V234 M325 222 V234 M340 222 V234 M355 222 V234 M370 222 V234 M385 222 V234 M400 222 V234 M415 222 V234 M430 222 V234 M445 222 V234 M460 222 V234 M475 222 V234 M490 222 V234 M505 222 V234 M520 222 V234 M535 222 V234 M550 222 V234 M565 222 V234 M580 222 V234"/>
+  </g>
+  <path d="M130 228 H580" stroke="#2f9e44" stroke-width="2" stroke-opacity="0.6"/>
+  <g stroke="none" fill="#2f9e44" font-size="11" text-anchor="middle">
+    <text x="205" y="250">지난 시간 ≥ 3000?  아니오 … 아니오</text>
+  </g>
+  <!-- 페이지 바꾸는 순간 -->
+  <g stroke="none">
+    <rect x="262" y="262" width="36" height="22" rx="5" fill="#1d4ed8"/>
+    <rect x="412" y="262" width="36" height="22" rx="5" fill="#1d4ed8"/>
+    <rect x="562" y="262" width="36" height="22" rx="5" fill="#1d4ed8"/>
+  </g>
+  <g stroke="none" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">
+    <text x="280" y="278">2쪽</text><text x="430" y="278">1쪽</text><text x="580" y="278">2쪽</text>
+  </g>
+  <text x="24" y="278" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">3000 이상이 된 순간에만 페이지 바꾸기</text>
+  <!-- 폰 요청 바로 답 -->
+  <path d="M180 332 V300" stroke="#4562f5" stroke-width="2.5" marker-end="url(#sb-ticks-arrow)"/>
+  <path d="M192 300 V332" stroke="#4562f5" stroke-width="2.5" marker-end="url(#sb-ticks-arrow)"/>
+  <text x="206" y="322" font-size="12" fill="currentColor" stroke="none">폰이 물으면 그 바퀴에 바로 답</text>
+</svg>

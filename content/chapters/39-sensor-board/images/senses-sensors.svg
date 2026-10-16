@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sb-senses-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sb-senses-title">오감과 센서 짝짓기: 눈은 빛(조도 센서 34)과 움직임(PIR 23), 귀는 소리(소리 센서 35), 피부는 온도와 습기(DHT11 13), 몸의 균형은 기울기(틸트 14), 손은 돌리기(가변저항 39). 감각 기관의 자극은 신경을 따라 뇌로, 센서의 전기 신호는 숫자(0~4095 또는 0 · 1)로 보드에 간다</title>
+  <defs>
+    <marker id="sb-senses-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <g stroke="none" fill="currentColor" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="110" y="30">사람의 감각 기관</text>
+    <text x="320" y="30">자극</text>
+    <text x="530" y="30">보드의 센서 (핀)</text>
+  </g>
+  <!-- 여섯 줄 -->
+  <g stroke="none" font-size="12" fill="currentColor">
+    <rect x="30" y="46" width="160" height="34" rx="17" fill="var(--muted)"/>
+    <text x="110" y="68" text-anchor="middle" font-weight="700">눈 — 밝기를 본다</text>
+    <rect x="30" y="94" width="160" height="34" rx="17" fill="var(--muted)"/>
+    <text x="110" y="116" text-anchor="middle" font-weight="700">귀 — 소리를 듣는다</text>
+    <rect x="30" y="142" width="160" height="34" rx="17" fill="var(--muted)"/>
+    <text x="110" y="164" text-anchor="middle" font-weight="700">피부 — 덥고 끈적함</text>
+    <rect x="30" y="190" width="160" height="34" rx="17" fill="var(--muted)"/>
+    <text x="110" y="212" text-anchor="middle" font-weight="700">몸의 균형 — 기울어짐</text>
+    <rect x="30" y="238" width="160" height="34" rx="17" fill="var(--muted)"/>
+    <text x="110" y="260" text-anchor="middle" font-weight="700">눈 — 움직임을 본다</text>
+    <rect x="30" y="286" width="160" height="34" rx="17" fill="var(--muted)"/>
+    <text x="110" y="308" text-anchor="middle" font-weight="700">손 — 돌린 정도</text>
+  </g>
+  <g stroke="none" font-size="12" fill="currentColor" fill-opacity="0.8" text-anchor="middle">
+    <text x="320" y="68">빛의 세기</text>
+    <text x="320" y="116">소리의 크기</text>
+    <text x="320" y="164">온도 · 습도</text>
+    <text x="320" y="212">기울기</text>
+    <text x="320" y="260">적외선(체온) 변화</text>
+    <text x="320" y="308">회전 → 전압</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.8" stroke-opacity="0.6" marker-end="url(#sb-senses-arrow)">
+    <path d="M196 63 H270"/><path d="M370 63 H444"/>
+    <path d="M196 111 H270"/><path d="M370 111 H444"/>
+    <path d="M196 159 H270"/><path d="M370 159 H444"/>
+    <path d="M196 207 H270"/><path d="M370 207 H444"/>
+    <path d="M196 255 H270"/><path d="M370 255 H444"/>
+    <path d="M196 303 H270"/><path d="M370 303 H444"/>
+  </g>
+  <g stroke="none" font-size="12" font-weight="700" fill="currentColor">
+    <rect x="450" y="46" width="160" height="34" rx="8" fill="#2f9e44" fill-opacity="0.2"/>
+    <text x="530" y="68" text-anchor="middle">조도 센서 (34)</text>
+    <rect x="450" y="94" width="160" height="34" rx="8" fill="#0c8599" fill-opacity="0.2"/>
+    <text x="530" y="116" text-anchor="middle">소리 센서 (35)</text>
+    <rect x="450" y="142" width="160" height="34" rx="8" fill="#1c7ed6" fill-opacity="0.2"/>
+    <text x="530" y="164" text-anchor="middle">DHT11 (13)</text>
+    <rect x="450" y="190" width="160" height="34" rx="8" fill="#ae3ec9" fill-opacity="0.2"/>
+    <text x="530" y="212" text-anchor="middle">틸트 스위치 (14)</text>
+    <rect x="450" y="238" width="160" height="34" rx="8" fill="#c92a2a" fill-opacity="0.2"/>
+    <text x="530" y="260" text-anchor="middle">PIR 센서 (23)</text>
+    <rect x="450" y="286" width="160" height="34" rx="8" fill="#f59f00" fill-opacity="0.2"/>
+    <text x="530" y="308" text-anchor="middle">가변저항 (39)</text>
+  </g>
+  <g stroke="none" font-size="12" fill="currentColor" fill-opacity="0.75" text-anchor="middle">
+    <text x="110" y="342">신경을 따라 뇌로</text>
+    <text x="320" y="342">자극을 전기 신호로</text>
+    <text x="530" y="342">숫자 0~4095 또는 0 · 1 로 보드에</text>
+  </g>
+</svg>

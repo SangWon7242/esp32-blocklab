@@ -1,0 +1,556 @@
+# 교과 융합 트랙 F12 · 우리 반 센서 상황판 — 원본: 아두이노 심화 W02(센서 값 확인 앱: 센서 7개를 LCD 두 화면과 앱으로, delay 대신 millis, 임계값 빨간 칸, 감지 알림 숙제), 센서 트랙 S10(13-clap-dial) · S11(14-light-sensor) · S12(15-temp-humidity) · S13(16-tilt-pir) · S22(25-web-led) · S23(26-web-sensors). 형식 설명은 src/track/README.md
+id: 39-sensor-board
+order: 39
+track: fusion
+label: F12
+prerequisites: [13-clap-dial, 14-light-sensor, 15-temp-humidity, 16-tilt-pir, 25-web-led, 26-web-sensors]
+subjects: [과학, 수학, 정보]
+sdg: [4, 11]
+sessions: 2
+teacherNotes: |
+  **핀 번호** 조도 S **34번**, 소리 S **35번**, 가변저항 가운데 다리 **39번** — 2부에서 WiFi 를 켜면 ADC2 쪽 핀(0 · 2 · 4 · 12~15 · 25~27)은 아날로그 값을 못 읽으므로 1부부터 32~39 가운데 골랐다(디버깅 증상 2). DHT11 S 13번(S12 와 같음), 틸트 S 14번(S13 과 같음), PIR S 23번(S13 과 같음), OLED SCL 22 · SDA 21(S18 과 같음). 일곱 장치의 핀이 겹치지 않는다. 모듈 핀이 브레드보드에 잘 안 맞으면 M-F 듀폰선으로 ESP32 에 바로 이어도 된다.
+
+  **기준값은 예시** 기준 2000 은 예시다. 원본(아두이노)은 0~1023 자에서 500 을 썼고, ESP32 는 0~4095 자라 같은 자리는 500 × 4095 ÷ 1023 ≈ 2000 이다(수학 비례식, 원리 그림 adc-scale). 1차시 실행에서 평소 빛 값 · 손으로 가렸을 때 값, 조용할 때 소리 값 · 박수 쳤을 때 값을 공책에 적고 그 **둘 사이**로 기준을 다시 정하게 한다. 미션 · 디버깅 판정은 기준이 1000~3999 면 통과하므로 교실에서 정한 값으로 바꿔도 된다. 조도 모듈은 종류에 따라 밝을수록 값이 커지기도, 작아지기도 하니 실행 1 에서 방향을 확인한다.
+
+  **DHT11** `measure()` 는 1초에 한 번보다 자주 부르면 `OSError: [Errno 116] ETIMEDOUT` 이 난다(디버깅 증상 3). 1부 코드는 지난 시간이 2000ms 넘을 때만 재고, 2부는 요청이 올 때 같은 조건으로 잰다. 값은 정수 · 오차 ±2℃.
+
+  **PIR** 켠 뒤 30~60초는 값이 제멋대로 나온다. 시야가 넓어 다른 모둠의 움직임도 잡으니 센서를 벽 쪽으로 돌리거나 종이컵 고깔로 시야를 좁힌다. 틸트 모듈은 기울면 1 인 것을 기준으로 썼다(반대 모듈은 S13 처럼 확인).
+
+  **sleep 과 지난 시간** 1부의 핵심은 `time.sleep(3)` 대신 `time.ticks_ms()` 와 지난 시간 비교로 페이지를 바꾸는 것이다. 예측 단계 그림(delay-vs-ticks)으로 "3초 멈추는 동안 폰의 요청은 기다린다" 를 먼저 이야기한다. 2부 코드는 `web_accept` 에서 폰 요청을 기다리므로 **폰이 페이지를 읽을 때(2초마다)만 한 바퀴** 돈다 — OLED 도 그때 바뀐다. 폰 페이지를 닫으면 상황판이 멈춘다는 점을 학생과 이야기해 볼 거리다. 새로고침을 2초보다 짧게 하면 보드가 답을 다 못 보내 느려진다(원본 수업의 주의와 같음).
+
+  **WiFi** 2부 코드의 `"MyWiFi"` · `"12345678"` 을 교실 공유기 이름 · 비밀번호로 바꾼다. 학교 WiFi 가 폰 ↔ 보드 통신을 막으면 WiFi 준비 블록을 **공유기 모드**(`ip = wifi_ap("ESP32-LAB", "12345678")`)로 바꾸고 폰을 그 WiFi 에 붙인다. 보드가 출력하는 `IP: 192.168.x.x` 를 폰 브라우저 주소창에 친다. 폰 브라우저에 `주소/data` 를 치면 JSON 글이 그대로 보여 "앱이 읽는 글" 을 눈으로 확인할 수 있다.
+
+  **앱 만들기(AI)** 학생 AI 계정 · 연령 정책에 따라 교사가 프롬프트를 복사해 AI 에 넣고 결과를 보여 주는 시연으로 바꿀 수 있다. AI 결과에 외부 CDN · 스크립트 · 보드 IP 를 박은 절대 주소가 섞이면 붙여넣기 검사가 걸러 준다. 보드 저장은 보드가 없어도 건너뛸 수 있다(미리 보기로 모양만 확인). 보드에 `index.html` 을 저장한 뒤에는 실행 3 코드(`step3_app_server.py`)가 돌아야 `/` 에서 앱이 열린다.
+
+  **교과 · 단원 연결**
+
+  - 과학: 감각 기관과 자극의 전달(눈 · 귀 · 피부 ↔ 조도 · 소리 · 온습도 센서), 빛의 세기와 소리의 크기, 자극을 전기 신호로 바꾸기
+  - 수학: 비례식(0~1023 → 0~4095, 500 → 약 2000), 부등호로 기준 정하기, 하루 측정값을 표와 꺾은선그래프로
+  - 정보: 데이터 형식(사람이 보는 페이지 HTML 과 앱이 읽는 JSON), 데이터 수집과 주기(2초)
+  - SDG 4(양질의 교육) · SDG 11(지속가능한 도시와 공동체): 교실 환경(밝기 · 소음 · 온습도)을 재서 더 좋은 배움터 만들기
+
+  **활동** 하루 동안(아침 · 점심 · 하교) 교실 온도 · 빛 값을 폰 상황판에서 읽어 표에 적고 꺾은선그래프를 그린다(과학 탐구 보고서). 소리 값은 쉬는 시간과 수업 시간을 비교해 "우리 반 소음 기준" 을 수학 시간에 정한다.
+
+  **메이킹** 박스지로 작은 교실 모형을 만들어 조도 센서는 "창가", 소리 센서는 "교탁 앞", PIR 은 "출입문" 에 붙인다. OLED 는 "교실 안 게시판", 폰은 "복도의 선생님" 역할이다. 종이컵 고깔로 PIR 시야를 좁힌다.
+
+  **차시 나누기**
+
+  - 1차시: 문제 · 조건 분석 · 예측(멈추기와 지난 시간) · 실행 1(OLED 두 페이지) · 읽기 체크 1 · 통합 미션(기준 넘으면 느낌표)
+  - 2차시: 실행 2(폰 상황판 + JSON) · 읽기 체크 2 · 디버깅 · 설계(감지 배너) · 실행 3(앱용 서버) · 앱 만들기 · 성찰
+  - 시간이 모자라면 디버깅 증상 3 과 설계를 앱 만들기 뒤로 미루거나 숙제로 돌린다
+title: 우리 반 센서 상황판
+subtitle: 센서 여섯 개를 OLED 두 페이지와 폰 상황판으로 한눈에 보기
+summary: |
+  교실 밖에서도 교실의 온도 · 밝기 · 소음을 한눈에 볼 수 있을까요? 오늘은 **조도 · 소리 · 가변저항 · DHT11 · 틸트 · PIR** 여섯 입력을 2초마다 읽어 **OLED 두 페이지**에 번갈아 보여 줘요. 3초 멈추기 대신 **지난 시간을 재서** 페이지를 바꾸는 것이 핵심이에요.
+  2부에서는 **WiFi 웹서버**로 폰에 값 표를 보내고, 앱이 읽을 **JSON** 주소를 열어요. 마지막에는 AI 와 함께 기준을 넘은 칸이 빨개지는 내 폰 앱을 만들어 보드에 올려요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결. WiFi 가 들어 있어요 }
+  - { name: "OLED(SSD1306 · I2C)", note: "다리 4개: GND · VCC · SCL · SDA. SCL 은 22번, SDA 는 21번" }
+  - { name: 조도 센서 모듈, note: "다리 3개: S(신호) · +(3V3) · −(GND). S 는 34번" }
+  - { name: 소리 센서 모듈, note: "다리 3개: S · + · −. S 는 35번" }
+  - { name: 가변저항(포텐셔미터) 모듈, note: "다리 3개. 가운데 다리(신호)는 39번, 양쪽은 + 줄 · − 줄" }
+  - { name: 온습도 센서(DHT11 모듈), note: "다리 3개: S · + · −. S 는 13번" }
+  - { name: 틸트 스위치 모듈, note: "다리 3개: S · + · −. 기울면 1. S 는 14번" }
+  - { name: PIR 인체감지 센서, note: "다리 3개: S · + · −. 움직임이 보이면 1. S 는 23번" }
+  - { name: 브레드보드, note: "위쪽 + 줄(3V3)과 − 줄(GND)을 모듈 일곱이 함께 써요" }
+  - { name: 점퍼선(M-M), note: "24개 (신호 8: 22 · 21 · 34 · 35 · 39 · 13 · 14 · 23, 모듈 + · − 14, 3V3 · GND 2)" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+  - { name: WiFi 공유기 또는 폰 핫스팟, note: 2부에서 보드와 폰이 같은 WiFi 에 있어야 해요 }
+  - { name: 폰 또는 태블릿, note: 2부에서 브라우저 주소창에 보드의 IP 주소를 쳐요 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "위쪽 + 줄 ← 3V3, − 줄 ← GND. OLED: GND → − 줄, VCC → + 줄, SCL ← 22, SDA ← 21. 조도 S ← 34, 소리 S ← 35, 가변저항 가운데 다리 ← 39 (WiFi 를 쓰니 아날로그는 32~39번). DHT11 S ← 13, 틸트 S ← 14, PIR S ← 23. 모든 모듈의 + 는 + 줄, − 는 − 줄"
+principle:
+  image: images/senses-sensors.svg
+  body: |
+    사람은 **눈 · 귀 · 피부** 같은 감각 기관으로 빛 · 소리 · 온도 같은 **자극**을 받아 신경으로 뇌에 보내요. 보드의 센서도 같은 일을 해요. 조도 센서는 빛의 세기를, 소리 센서는 소리의 크기를, DHT11 은 온도와 습기를 **전기 신호**로 바꾸고, ESP32 는 그 신호를 **0~4095** 숫자로 읽어요(아날로그). 틸트 · PIR 은 0 과 1 만 알려 줘요(디지털).
+
+    아두이노의 자는 0~1023, ESP32 의 자는 0~4095 라 같은 밝기라도 숫자가 네 배쯤 커요. 그래서 원본 수업의 기준 500 은 비례식으로 **약 2000** 으로 옮겨요. 기준을 넘었는지는 부등호(`>`)로 물어요.
+
+    여섯 값을 한 화면에 다 쓰기엔 OLED 가 작아요. 그래서 두 페이지로 나누고, 3초 **멈추는** 대신 **지난 시간을 재서** 페이지를 바꿔요. 멈추지 않아야 폰의 요청에도 바로 답할 수 있어요.
+goals:
+  content: 조도 · 소리 · 가변저항 · DHT11 · 틸트 · PIR 여섯 입력을 지난 시간 비교로 2초마다 읽어 OLED 두 페이지에 번갈아 보여 주고, WiFi 웹서버로 폰에 값 표와 JSON 을 보내며 폰 명령으로 OLED 페이지를 바꾼다
+  thinking: 상황판을 알아야 할 것 · 정해야 할 것 · 움직여야 할 것으로 나누고, 멈추기(sleep) 대신 지난 시간을 재는 까닭과 0~1023 기준을 0~4095 로 옮기는 비례식을 코드와 숫자로 설명한다
+successCriteria:
+  - 여섯 센서가 사람의 어느 감각 기관과 짝인지, 아날로그(0~4095)와 디지털(0 · 1)의 차이가 무엇인지 말할 수 있다
+  - 3초 멈추기 대신 지난 시간 비교로 페이지를 바꾸면 무엇이 좋아지는지(폰 요청에 바로 답) 설명할 수 있다
+  - 기준 500 이 ESP32 에서 약 2000 이 되는 까닭을 비례식으로 쓰고, 기준을 넘으면 느낌표가 보이게 코드를 고칠 수 있다
+  - 폰 브라우저로 상황판 표를 열어 값을 읽고, /data 의 JSON 과 페이지의 차이를 말할 수 있다
+  - AI 가 만든 앱 코드에서 /data · /light · /cmd?page=1 을 쓰는 줄을 찾고 틀린 곳을 검사로 잡을 수 있다
+parts:
+  - id: part1
+    title: 1부 · 센서 여섯 개를 OLED 로
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 교실 밖에서도 교실을 볼 수 있을까?
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 센서 여섯 개의 값이 ESP32 로 모여 OLED 두 페이지와 폰의 표에 보여요
+        body: |
+          교실이 너무 덥거나, 너무 어둡거나, 너무 시끄러우면 공부가 잘 안 돼요. 그런데 교실의 온도 · 밝기 · 소음을 **숫자로** 재 본 적이 있나요? 더 좋은 배움터를 만들려면 먼저 재야 해요. 오늘 만들 상황판은 센서 여섯 개로 교실을 재서 OLED 와 폰에 보여 줘요.
+
+          값이 여섯이라 작은 OLED 한 화면에 다 안 들어가요. 두 페이지로 나눠 3초마다 번갈아 보여 주려고 해요. 그런데 `time.sleep(3)` 으로 3초 기다리는 동안 폰이 "값 보여 줘" 하고 물으면 어떻게 될까요? 코드를 보기 전에 질문마다 내 생각을 적어 봐요.
+        todo:
+          - 준비물(ESP32 보드, OLED, 조도 · 소리 · 가변저항 · DHT11 · 틸트 · PIR 모듈, 브레드보드, 선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장씩 쓰기
+          - 다 적으면 **완료** 누르기
+        questions:
+          - 교실의 온도 · 밝기 · 소음 가운데 공부에 가장 크게 영향을 주는 것은 무엇이라고 생각하나요? 그것을 어떤 센서로 잴 수 있을까요?
+          - 보드가 3초 동안 멈춰서(sleep) 기다리는 사이에 폰이 값을 물어보면 폰 화면은 어떻게 될까요?
+          - 교실 밖에 있는 선생님 폰에 교실 값이 보이려면 보드와 폰 사이에 무엇이 필요할까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 센서별 세 칸 보드
+        minutes: 5
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 움직여야 할 것 순서로 센서마다 나눠요
+        body: |
+          상황판에는 입력이 여섯(빛 · 소리 · 손잡이 · 온습도 · 기울어짐 · 사람), 출력이 둘(OLED · 폰 화면)이에요. 센서가 **알아내고**, 사람이 **읽는 주기와 기준을 정해 주면**, 화면이 **움직여요**. 센서마다 어느 칸에 들어갈지 생각하며 나눠 봐요.
+
+          - **알아야 할 것**: 센서 여섯이 각각 알려 주는 값과 그 범위
+          - **정해야 할 것**: 몇 초마다 읽을지, 기준값, 페이지를 바꾸는 시간
+          - **움직여야 할 것**: OLED 두 페이지, 폰의 표가 보여 줄 것
+
+          과학 시간에 배운 감각 기관을 떠올려 센서 여섯을 눈 · 귀 · 피부 · 몸의 균형 가운데 어디에 짝지을지 짝과 이야기해 봐요.
+        todo:
+          - "**알아야 할 것**: 센서 여섯이 알아내는 값을 하나씩 적기"
+          - "**정해야 할 것**: 읽는 주기 · 기준값 · 페이지 바꾸는 시간 적기"
+          - "**움직여야 할 것**: OLED 두 페이지와 폰 표가 보여 줄 것 적기"
+        answer:
+          know: ["조도 값(0~4095, 34번)과 소리 값(0~4095, 35번) — 아날로그", "가변저항 값(0~4095, 39번) — 돌린 정도", "DHT11 온도(℃) · 습도(%) — 13번, 재기 전에 measure 부탁, 2초에 한 번", "틸트 값(기울면 1, 14번)과 PIR 값(움직임이 보이면 1, 23번) — 디지털", "WiFi 를 쓰면 아날로그는 32~39번 핀"]
+          decide: ["읽는 주기: 2초마다(지난 시간 ≥ 2000ms)", "기준값: 아두이노 0~1023 의 500 → ESP32 0~4095 의 약 2000(비례식)", "페이지 바꾸는 시간: 3초(지난 시간 ≥ 3000ms), 멈추기(sleep) 로 기다리지 않기", "페이지 1 은 빛 · 소리 · 손잡이, 페이지 2 는 온도 · 습도 · 틸트 · PIR"]
+          act: ["OLED 페이지 1 · 2 를 3초마다 번갈아 그리기", "기준을 넘은 값 옆에 느낌표(!) 보이기", "폰 페이지에 L · S · T · H 값 표 보내기(2초마다 새로고침)", "앱이 읽을 /data(온도 · 습도) · /light(빛) JSON 주소 열기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 멈추기와 지난 시간 재기
+        minutes: 4
+        scene:
+          image: images/delay-vs-ticks.svg
+          caption: sleep(3) 은 3초 동안 아무것도 못 해요. 지난 시간을 재면 0.1초마다 한 바퀴 돌며 3000 이 된 순간에만 페이지를 바꿔요
+        body: |
+          활동 칸의 코드는 센서 여섯을 준비하고, `show_page` 함수로 OLED 에 페이지 1 또는 2 를 그려요. 반복 안에는 `time.sleep(3)` 이 없어요. 대신 `time.ticks_ms()` 로 잰 시각을 `last` · `start` 에 담아 두고, **지난 시간**이 2000 을 넘으면 값을 새로 재고, 3000 을 넘으면 페이지를 바꿔요. 아직 실행하지 않아요.
+
+          코드를 한 줄씩 읽고, 어떤 순서로 무엇이 보일지 먼저 적어 봐요. **내 예측을 먼저 적는 것**이 중요해요.
+        todo:
+          - "`show_page` 함수에서 페이지 1 과 페이지 2 에 그리는 값 읽기"
+          - "`while True:` 아래에서 2000 과 3000 이 쓰인 줄 찾기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_board_oled.py
+        blanks:
+          - q: 실행하면 OLED 에 처음 보이는 페이지는 1 일까요, 2 일까요? 몇 초 뒤에 바뀔까요? 코드의 어느 줄을 보고 알았나요?
+          - q: 반복 맨 끝의 `time.sleep(0.1)` 을 `time.sleep(3)` 으로 바꾸면 출력과 페이지 바꾸기는 어떻게 달라질까요?
+          - q: 온습도는 2초마다 새로 재는데 빛 · 소리 값은 그릴 때마다 읽어요. 왜 DHT11 만 2초 간격을 둘까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 여섯 값을 OLED 두 페이지로
+        minutes: 10
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "OLED SCL ← 22 · SDA ← 21, 조도 S ← 34, 소리 S ← 35, 가변저항 ← 39, DHT11 S ← 13, 틸트 S ← 14, PIR S ← 23. 모듈 + → + 줄(3V3), − → − 줄(GND)"
+        body: |
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 위쪽 + 줄(3V3) · − 줄(GND)을 먼저 보드와 이어요. 그다음 OLED 와 모듈 여섯을 꽂아요. 아날로그 셋(조도 34 · 소리 35 · 가변저항 39)은 2부에서 WiFi 와 함께 쓸 수 있는 **32~39번** 핀이에요.
+
+          실행되면 출력 칸에 두 줄(빛 · 소리 · 손잡이 / 온도 · 습도 · 틸트 · PIR)이 2초마다 찍히고, OLED 는 3초마다 페이지 1 과 2 를 번갈아 보여 줘요. **평소 빛 값과 손으로 가렸을 때 값, 조용할 때와 박수 쳤을 때 소리 값**을 공책에 적어 두세요. 미션과 디버깅에서 기준값을 정할 때 써요.
+        todo:
+          - "**부품과 배선**대로 + 줄 · − 줄, OLED, 모듈 여섯 꽂기"
+          - "**보드 연결** → **실행** 누르기"
+          - 평소 · 가렸을 때 빛 값, 조용할 때 · 박수 소리 값, 손잡이를 끝까지 돌렸을 때 값을 공책에 적기
+        code: step1_board_oled.py
+        expected: "코드를 실행하면 출력 칸에 `L: 1234 S: 300 K: 2048` 과 `T: 25 H: 40 TILT: 0 PIR: 0` 두 줄이 2초마다 찍혀요. OLED 에는 페이지 1(L · S · K)이 보이다가 3초 뒤 페이지 2(T · H · TILT · PIR)로 바뀌고, 다시 3초 뒤 페이지 1 로 돌아와요. 손으로 조도 센서를 가리면 L 값이, 박수를 치면 S 값이, 손잡이를 돌리면 K 값이 바뀌어요."
+        codeNotes:
+          - { line: 1, note: "핀 · I2C · 아날로그(ADC) 기능을 가져와요. OLED 는 `ssd1306`, 온습도는 `dht`" }
+          - { line: 6, note: "34번 핀에 조도 센서를 준비해요 (6~8번 줄). 2부에서 WiFi 와 함께 쓸 수 있는 32~39번 가운데 골랐어요" }
+          - { line: 9, note: "35번 소리 센서, 12번 줄은 39번 가변저항. 셋 다 0~4095 로 읽어요" }
+          - { line: 15, note: "13번 DHT11, 14번 틸트, 23번 PIR, 21 · 22번 OLED 를 준비해요 (15~19번 줄)" }
+          - { line: 22, note: "페이지 번호 `n` 과 온도 `t` · 습도 `h` 를 받아 OLED 에 그리는 함수예요. 반복 안에서 불러요" }
+          - { line: 25, note: "페이지 1: 빛 · 소리 · 손잡이 값을 글로 이어 세 줄에 써요 (25~27번 줄)" }
+          - { line: 29, note: "페이지 2: 온도 · 습도 · 틸트 · PIR 네 줄 (29~32번 줄)" }
+          - { line: 36, note: "처음 한 번 재 두어요. 그래야 첫 페이지 2 에 온도가 보여요" }
+          - { line: 39, note: "지금 시각(ms)을 `last` 와 `start` 에 담아요 — 지난 시간을 재는 출발점" }
+          - { line: 43, note: "`last` 부터 지난 시간이 2000ms 를 넘으면 온습도를 새로 재고 여섯 값을 찍어요. 그리고 `last` 를 다시 지금으로" }
+          - { line: 50, note: "`start` 부터 3000ms 가 지났으면 페이지를 바꿔요 (50~56번 줄). 멈추지 않고 지난 시간만 봐요" }
+          - { line: 57, note: "0.1초만 쉬어요. 3초 멈추면 폰의 요청에 답하지 못해요" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 1
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          반복 안에는 `if` 가 둘이에요. 하나는 `last` 부터 지난 시간, 하나는 `start` 부터 지난 시간을 물어요. 숫자는 ms(1000분의 1초)라 1000 을 1초로 바꿔 읽으면 돼요.
+
+          답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - 준비 줄(6~19번 줄)에서 핀 번호 여덟 개 찾기
+          - "`show_page` 함수에서 페이지 2 에 쓰는 값 넷 찾기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_board_oled.py
+        questions:
+          - { kind: number, q: "OLED 페이지는 몇 초마다 바뀌나요?", answer: 3, hint: "start 부터 지난 시간을 묻는 줄의 숫자를 1000 으로 나눠요" }
+          - { kind: choice, q: "OLED 페이지 2 에 보이는 값은?", options: ["빛 · 소리 · 손잡이", "온도 · 습도 · 틸트 · PIR", "IP 주소", "빛 · 온도"], answer: 1, hint: "show_page 함수의 else 쪽" }
+          - { kind: line, q: "페이지를 바꿀 때가 됐는지 지난 시간을 묻는 줄의 번호를 클릭하세요", answer: 50 }
+        codeNotes:
+          - { line: 22, note: "OLED 에 페이지를 그리는 함수" }
+          - { line: 43, note: "값을 새로 잴 때가 됐는지 묻는 줄" }
+          - { line: 56, note: "바뀐 페이지를 그려요" }
+
+      - id: mission
+        type: mission
+        title: 통합 미션 — 기준을 넘으면 느낌표
+        minutes: 10
+        scene:
+          image: images/adc-scale.svg
+          caption: 아두이노 0~1023 의 500 은 ESP32 0~4095 에서 약 2000 이에요. 기준을 넘으면 값 옆에 느낌표를 보여요
+        body: |
+          원본 수업의 앱은 값이 기준 500 을 넘으면 칸을 빨갛게 칠했어요. 우리 OLED 는 색이 없으니 값 옆에 **느낌표**를 그려요. 그런데 ESP32 의 자는 0~4095 라 500 을 그대로 쓰면 늘 느낌표가 보여요. 비례식으로 기준을 옮겨 `limit` 변수에 담고, 빛과 소리 값이 `limit` 를 넘으면 그 줄 끝(x 112)에 `!` 를 써요.
+
+          미션은 기능 체크리스트로 판정해요. 기준을 더하면서 페이지를 지난 시간으로 바꾸는 꼴이 그대로 잘 있는지도 함께 봐요. 판정에서 걸린 항목은 되묻는 질문을 읽고 그 부분만 고쳐요.
+        todo:
+          - "`limit` 변수를 만들고 비례식으로 옮긴 기준(1000~3999 사이, 예 2000)을 담기"
+          - "`show_page` 의 페이지 1 에서 빛 값 · 소리 값이 `limit` 를 넘으면 `oled.text(\"!\", 112, 줄)` 더하기"
+          - 실행해서 박수를 칠 때 S 줄에 느낌표가 보이는지 확인하고 **판정** 누르기
+        instructions: "실행 1 코드에 기준값을 더해 상황판을 완성하세요. 체크리스트: (1) 기준값 변수 limit 를 만들고 ESP32 자(0~4095)에 맞게 옮긴 값(1000~3999)을 담기 (2) 페이지는 멈추기(sleep) 가 아니라 start 부터 지난 시간이 3000 이상일 때 바꾸고 그 순간 start 를 다시 재기 (3) 페이지 1 에서 빛 값이 limit 보다 크면 느낌표, 소리 값이 limit 보다 크면 느낌표를 그 줄에 쓰기 (4) 2초마다 여섯 값을 찍는 print 줄은 그대로 두기"
+        hint: "변수 블록으로 limit 를 정해요(준비 줄 아래, 반복 위). show_page 함수 안 페이지 1 의 L 줄 아래에 '만약 light.read() > limit 이면 oled.text(\"!\", 112, 0)' 을, S 줄 아래에 '만약 sound.read() > limit 이면 oled.text(\"!\", 112, 16)' 을 넣어요. 비교 블록의 오른쪽 칸에는 숫자 대신 변수 limit 를 끼워요"
+        code: step1_board_oled.py
+        rules:
+          - codeMatches: 'limit\s*=\s*[1-3]\d{3}'
+            fail: (1) 기준값 변수 limit 가 있나요? ESP32 의 자는 0~4095 예요. 아두이노의 500 은 이 자에서 어디쯤일까요? (비례식)
+          - codeMatches: 'if\s+time\.ticks_diff\(time\.ticks_ms\(\),\s*start\)\s*>=\s*\d+\s*:\n\s+start\s*=\s*time\.ticks_ms\(\)'
+            fail: (2) 페이지는 멈추기(sleep) 가 아니라 start 부터 지난 시간을 비교해 바꾸나요? 바꾼 순간에 start 를 다시 지금 시각으로 두나요?
+          - codeMatches: 'if\s+light\.read\(\)\s*>\s*limit\s*:\n\s+oled\.text\("!",\s*\d+,\s*\d+\)'
+            fail: (3) 빛 값이 기준을 넘으면 페이지 1 에 느낌표가 보이나요? 비교의 오른쪽에 숫자 대신 변수 limit 를 썼나요?
+          - codeMatches: 'if\s+sound\.read\(\)\s*>\s*limit\s*:\n\s+oled\.text\("!",\s*\d+,\s*\d+\)'
+            fail: (3) 소리 값이 기준을 넘으면 느낌표가 보이나요? 빛과 같은 꼴로 소리에도 if 를 넣었나요?
+          - codeMatches: 'print\("L: "\s*\+\s*str\(light\.read\(\)\)'
+            fail: (4) 2초마다 여섯 값을 찍는 print 줄이 그대로 있나요? 공책에 적을 숫자는 이 줄이 보여 줘요
+        answerCode: mission_alert_mark.py
+
+  - id: part2
+    title: 2부 · 폰 상황판과 앱
+    steps:
+      - id: run2
+        type: run
+        title: 복사 · 실행 2 — 폰으로 보는 상황판과 JSON
+        minutes: 8
+        scene:
+          image: images/pages-and-web.svg
+          caption: 같은 값을 OLED 페이지, 폰의 표(HTML), 앱이 읽는 글(JSON) 세 가지 모양으로 보여 줘요
+        body: |
+          이번 코드는 S22 · S23 의 **WiFi 연결 · 웹서버** 블록을 더해요. 코드의 `"MyWiFi"` 와 `"12345678"` 을 교실 WiFi 이름 · 비밀번호로 바꾼 뒤 실행하면 출력 칸에 `IP: 192.168.x.x` 가 찍혀요. 그 주소를 **같은 WiFi 에 붙인 폰** 브라우저에 쳐요.
+
+          폰에는 `page=1` · `page=2` 버튼과 L · S · T · H 값 네 줄이 보이고 **2초마다** 새로고침돼요. 버튼을 누르면 `?page=2` 가 보드로 가서 OLED 페이지가 바뀌어요. 주소 끝에 `/data` 를 붙이면 앱이 읽는 **JSON** `{"temp": 25, "hum": 40}` 이, `/light` 를 붙이면 `{"light": 1234}` 가 글로 보여요. 요청이 올 때마다 한 바퀴 돌기 때문에, 폰 페이지를 닫으면 OLED 도 멈춰요.
+        todo:
+          - "코드의 WiFi 이름 · 비밀번호를 교실 것으로 바꾸고 **실행** 누르기"
+          - 출력 칸의 IP 주소를 폰 브라우저 주소창에 치고, page=2 버튼으로 OLED 페이지가 바뀌는지 보기
+          - "주소 뒤에 `/data` 와 `/light` 를 붙여 JSON 글을 확인하기"
+        code: step2_web_board.py
+        expected: "코드를 실행하면 출력 칸에 `IP: 192.168.0.23` 처럼 보드 주소가 찍혀요. 폰 브라우저에 그 주소를 치면 **Sensor Board** 제목, `page=1` · `page=2` 버튼, `L: 1234` `S: 300` `T: 25C` `H: 40%` 네 줄이 보이고 2초마다 새로고침돼요. `page=2` 를 누르면 OLED 가 페이지 2 로 바뀌어요. `주소/data` 를 열면 `{\"temp\": 25, \"hum\": 40}`, `주소/light` 를 열면 `{\"light\": 1234}` 가 보여요."
+        codeNotes:
+          - { line: 5, note: "WiFi 를 다루는 `network` 와 웹서버의 `socket` 기능을 가져와요 (5~6번 줄)" }
+          - { line: 24, note: "WiFi 에 붙을 때까지 기다리고 IP 주소를 돌려주는 도우미 함수예요 (블록이 만들어 줘요)" }
+          - { line: 41, note: "손님(폰)의 요청에서 경로 `path` 와 물음표 뒤 질의 `query` 를 꺼내는 도우미예요" }
+          - { line: 63, note: "제목 · 버튼 · 값 · 새로고침으로 페이지 HTML 을 만드는 도우미예요" }
+          - { line: 91, note: "교실 WiFi 이름 · 비밀번호로 바꿔요. 받은 IP 주소를 `ip` 에 담아요" }
+          - { line: 92, note: "80번 포트로 웹서버를 열어요" }
+          - { line: 100, note: "폰이 요청할 때까지 **기다렸다가** 한 바퀴 돌아요. 그래서 2초마다 새로고침하는 폰이 상황판의 시계가 돼요" }
+          - { line: 101, note: "1부처럼 last 부터 2000ms 가 지났을 때만 온습도를 새로 재요 (DHT11 은 자주 못 재요)" }
+          - { line: 106, note: "질의 `page` 가 `1` 이면 페이지 1, `2` 면 페이지 2 — 폰 버튼이 OLED 를 바꿔요 (106~109번 줄)" }
+          - { line: 111, note: "경로가 `/data` 이면 온도 · 습도를 JSON 으로 답해요. 앱이 읽는 약속 주소예요" }
+          - { line: 113, note: "경로가 `/light` 이면 빛 값 하나를 JSON 으로" }
+          - { line: 116, note: "그 밖의 경로에는 제목 · 버튼 `page=1,page=2` · 값 네 칸(쉼표로 나눔) · 새로고침 2초가 든 페이지로 답해요. 응답은 한 번만" }
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 2
+        minutes: 5
+        scene:
+          image: images/pages-and-web.svg
+          caption: 폰 → 보드로 가는 것은 주소(경로 · 질의), 보드 → 폰으로 오는 것은 페이지나 JSON 이에요
+        body: |
+          웹서버 코드는 길지만, 위쪽 도우미 함수들은 블록이 만들어 준 것이라 그대로 두면 돼요. 학생이 보는 곳은 `while True:` 아래 한 바퀴예요.
+
+          경로(`path`)에 따라 답이 셋으로 갈라져요. 어느 줄이 JSON 을 답하고, 어느 줄이 페이지를 답하는지 찾아요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - "`while True:` 아래에서 질의(`query`)를 읽는 줄 둘 찾기"
+          - "`path` 를 묻는 `if` · `elif` · `else` 세 갈래 찾기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step2_web_board.py
+        questions:
+          - { kind: choice, q: "폰에서 page=2 버튼을 누르면 보드로 가는 주소에 무엇이 붙나요?", options: ["?page=2", "/light", "?led=on", "/data"], answer: 0, hint: "페이지 응답 블록의 버튼 칸 글이 /cmd? 뒤에 붙어요" }
+          - { kind: number, q: "폰의 상황판 페이지는 몇 초마다 새로고침되나요?", answer: 2, hint: "페이지 응답 블록의 마지막 칸" }
+          - { kind: line, q: "경로가 /data 일 때 온도 · 습도를 JSON 으로 답하는 줄의 번호를 클릭하세요", answer: 112 }
+        codeNotes:
+          - { line: 100, note: "요청을 받아 `conn` · `path` · `query` 를 정해요" }
+          - { line: 110, note: "요청이 올 때마다 OLED 를 다시 그려요" }
+          - { line: 116, note: "사람이 보는 페이지로 답해요" }
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 상황판이 이상해요
+        minutes: 6
+        scene:
+          image: images/adc-scale.svg
+          caption: 늘 느낌표면 기준값의 자를, 값이 안 바뀌면 핀 번호와 WiFi 를, OSError 면 DHT11 을 재는 간격을 봐요
+        body: |
+          고장 난 상황판 세 개가 있어요. 바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 늘 느낌표가 보이면 기준값이 어느 자(0~1023 / 0~4095)에 맞는지, WiFi 를 켠 뒤 아날로그 값이 안 바뀌면 핀 번호를, `OSError` 가 나면 DHT11 을 얼마나 자주 재는지 봐요.
+
+          도우미 함수는 그대로 두고 준비 줄과 `while True:` 아래 몇 줄만 보면 돼요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: "교실이 어두워도 밝아도 빛 값 옆에 늘 느낌표가 찍혀요"
+            code: |
+              from machine import Pin, ADC
+              import time
+
+              light = ADC(Pin(34))
+              light.atten(ADC.ATTN_11DB)
+              light.width(ADC.WIDTH_12BIT)
+
+              limit = 500
+              last = time.ticks_ms()
+              while True:
+                  if time.ticks_diff(time.ticks_ms(), last) >= 2000:
+                      last = time.ticks_ms()
+                      if light.read() > limit:
+                          print("L: " + str(light.read()) + " !")
+                      else:
+                          print("L: " + str(light.read()))
+                  time.sleep(0.1)
+            question: 출력을 보니 평소 빛 값이 1500쯤이고 가려도 900 아래로는 안 내려가요. 기준 500 은 아두이노의 0~1023 자에서 가져온 숫자예요. ESP32 의 0~4095 자에서 같은 자리는 몇쯤일까요? (500 × 4095 ÷ 1023)
+            rules:
+              - codeMatches: 'limit\s*=\s*[1-3]\d{3}'
+                fail: 기준이 ESP32 의 자(0~4095)에 맞나요? 평소 값(수백~천몇백)과 가장 밝을 때 값 사이의 네 자리 숫자여야 해요
+          - title: "WiFi 를 켠 뒤로 폰 페이지의 빛 값이 항상 같은 숫자예요. 손으로 가려도 안 바뀌어요"
+            code: |
+              from machine import Pin, ADC
+              import time
+              import network
+              import socket
+
+              light = ADC(Pin(25))
+              light.atten(ADC.ATTN_11DB)
+              light.width(ADC.WIDTH_12BIT)
+
+
+              def wifi_connect(ssid, password):
+                  wlan = network.WLAN(network.STA_IF)
+                  wlan.active(True)
+                  wlan.connect(ssid, password)
+                  while not wlan.isconnected():
+                      time.sleep(0.5)
+                  print("IP:", wlan.ifconfig()[0])
+                  return wlan.ifconfig()[0]
+
+
+              def web_start(port):
+                  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                  s.bind(("", port))
+                  s.listen(5)
+                  return s
+
+
+              def web_accept(s):
+                  conn, addr = s.accept()
+                  request = conn.recv(1024).decode()
+                  line = request.split("\r\n")[0]
+                  target = line.split(" ")[1] if " " in line else "/"
+                  path, _, qs = target.partition("?")
+                  query = {}
+                  for part in qs.split("&"):
+                      if "=" in part:
+                          k, v = part.split("=", 1)
+                          query[k] = v
+                  return conn, path, query
+
+
+              def web_send(conn, body, ctype="text/html"):
+                  conn.send("HTTP/1.1 200 OK\r\n")
+                  conn.send("Content-Type: " + ctype + "\r\n")
+                  conn.send("Connection: close\r\n\r\n")
+                  conn.sendall(body)
+                  conn.close()
+
+
+              def web_page(title, buttons, values, refresh):
+                  html = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
+                  if refresh > 0:
+                      html += "<meta http-equiv='refresh' content='" + str(refresh) + "'>"
+                  html += "<title>" + title + "</title></head><body><h1>" + title + "</h1>"
+                  for b in buttons.split(","):
+                      if b:
+                          html += "<p><a href='/cmd?" + b + "'><button>" + b + "</button></a></p>"
+                  for v in values.split(","):
+                      if v:
+                          html += "<p>" + v + "</p>"
+                  return html + "</body></html>"
+
+
+              ip = wifi_connect("MyWiFi", "12345678")
+              server = web_start(80)
+
+              while True:
+                  conn, path, query = web_accept(server)
+                  web_send(conn, web_page("Sensor Board", "", "L: " + str(light.read()), 2))
+            question: 검사 칸의 주의 글을 읽어 봐요. WiFi 를 켜면 ESP32 는 어느 핀들의 아날로그 값을 못 읽나요? 조도 센서를 어느 핀(32~39)으로 옮기고 코드의 숫자를 바꿔야 할까요?
+            rules:
+              - codeMatches: 'light\s*=\s*ADC\(Pin\(3[2-9]\)\)'
+                fail: 조도 센서 핀이 WiFi 와 함께 쓸 수 있는 32~39번인가요? 25번은 WiFi 를 켜면 아날로그 값을 못 읽어요
+          - title: "몇 초 못 가서 OSError: [Errno 116] ETIMEDOUT 이 나며 멈춰요"
+            code: |
+              from machine import Pin
+              import time
+              import dht
+
+              dht11 = dht.DHT11(Pin(13))
+
+              while True:
+                  dht11.measure()
+                  t = dht11.temperature()
+                  h = dht11.humidity()
+                  print("T: " + str(t) + " H: " + str(h))
+                  time.sleep(0.1)
+            question: 이 코드는 DHT11 에게 얼마나 자주 재 달라고 하나요? DHT11 은 1초에 한 번보다 자주 부르면 답을 못 해요. 기다리는 시간을 늘리거나, 1부처럼 지난 시간이 2000 이상일 때만 재게 하려면 어디를 고칠까요?
+            rules:
+              - codeMatches: '(time\.sleep\((?:[2-9]|[1-9]\d+)(?:\.\d+)?\)|time\.ticks_diff\(time\.ticks_ms\(\),\s*last\)\s*>=\s*[2-9]\d{3}\s*:\n\s+last\s*=\s*time\.ticks_ms\(\)\n\s+dht11\.measure\(\))'
+                fail: DHT11 을 2초에 한 번만 재나요? 기다리기를 2초 이상으로 늘리거나, last 부터 지난 시간이 2000 이상일 때만 measure 를 부르게 해요
+
+      - id: design
+        type: design
+        title: 설계 — 들어오는 순간에만 배너
+        minutes: 5
+        scene:
+          image: images/state-change.svg
+          caption: PIR 값이 1 일 때마다 알리면 사람이 서 있는 동안 계속 울려요. 이전 값이 0 이고 지금 값이 1 인 순간만 잡아요
+        body: |
+          원본 수업의 숙제는 "적외선이 감지되면 '감지됐습니다' 알림, 단 연속으로 울리지 않게" 였어요. 사람이 서 있는 동안 PIR 은 계속 1 이라, **이전 값**을 변수 `last` 에 기억해 두고 `last` 가 0 이면서 지금 값 `now` 가 1 인 순간에만 배너 `DETECTED` 를 보여요. 이것을 **상태 변화 감지**라고 해요.
+
+          먼저 우리말 설계도의 빈칸을 채우고, 번역표로 우리말 한 줄이 어떤 코드가 되는지 짝지어 봐요. 그다음 섞인 블록을 설계도 순서대로 이어 붙여요. **요청 받기 → 지금 값 읽기 → 비교 → last 갱신 → 응답** 순서가 어긋나면 배너가 계속 보이거나 한 번도 안 보여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 우리말 한 줄이 어떤 코드가 되는지 짝지어 보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: PIR 센서를 __번 핀에 준비한다
+            blank: { answer: 23 }
+          - text: WiFi 에 연결하고 웹서버를 켠다
+          - text: 이전 값 last 를 __ 으로, 배너를 빈 글로 정한다
+            blank: { answer: 0 }
+          - text: 끝없이 되풀이한다
+          - text: "  ↳ 폰의 요청을 받는다 (경로는 path, 질의는 query 에)"
+          - text: "  ↳ 지금 값 now 에 PIR 값을 담는다"
+          - text: "  ↳ now 가 1 이고 last 가 __ 이면 배너를 DETECTED 로, 아니면 빈 글로"
+            blank: { answer: 0 }
+          - text: "  ↳ last 에 __ 를 담아 다음 바퀴의 이전 값으로 쓴다"
+            blank: { answer: now }
+          - text: "  ↳ 배너를 값 칸에 넣은 페이지로 답한다 (__초마다 새로고침)"
+            blank: { answer: 2 }
+        translation:
+          - ["PIR 준비 (23번)", "pir = Pin(23, Pin.IN)"]
+          - ["폰의 요청을 받는다", "conn, path, query = web_accept(server)"]
+          - ["지금 값 now 에 PIR 값을 담는다", "now = pir.value()"]
+          - ["now 가 1 이고 last 가 0 이면", "if now == 1 and last == 0:"]
+          - ["배너를 DETECTED 로", "banner = \"DETECTED\""]
+          - ["last 에 now 를 담는다", "last = now"]
+          - ["배너를 넣은 페이지로 답한다 (2초 새로고침)", "web_send(conn, web_page(\"Sensor Board\", \"\", banner, 2))"]
+        targetCode: design_pir_banner.py
+
+      - id: run3
+        type: run
+        title: 복사 · 실행 3 — 앱이 쓸 서버 코드
+        minutes: 4
+        scene:
+          image: images/pages-and-web.svg
+          caption: 앱은 /data 와 /light 로 값을 읽고, /cmd?page=1 · /cmd?page=2 로 OLED 페이지를 바꿔요. 나머지 주소는 index.html 을 보내요
+        body: |
+          앱 만들기 전에 보드 코드를 **앱용**으로 바꿔요. 페이지 응답 대신 주소를 넷으로 나눠요: `/data` 는 온도 · 습도 **JSON**, `/light` 는 빛 값 JSON, `/cmd` 는 질의 `page` 로 OLED 페이지를 바꾼 뒤 `OK` 라는 글로, 나머지(`/`)는 보드에 저장한 `index.html` 파일로 답해요.
+
+          실행한 뒤 폰 브라우저에 `주소/data` 를 치면 `{"temp": 25, "hum": 40}` 처럼, `주소/cmd?page=2` 를 치면 `OK` 가 보이면서 OLED 가 페이지 2 로 바뀌어요. 아직 `index.html` 이 없어서 `/` 는 not found 가 보이는 게 정상이에요.
+        todo:
+          - "WiFi 이름 · 비밀번호를 바꾸고 **실행** 누르기"
+          - "폰 브라우저에 `IP주소/data` 와 `IP주소/light` 를 쳐서 JSON 글 확인하기"
+          - "폰 브라우저에 `IP주소/cmd?page=2` 를 쳐서 OK 가 보이고 OLED 페이지가 바뀌는지 확인하기"
+        code: step3_app_server.py
+        expected: "폰 브라우저에서 `/data` 를 열면 `{\"temp\": 25, \"hum\": 40}`, `/light` 를 열면 `{\"light\": 1234}` 처럼 JSON 글이 보여요. `/cmd?page=2` 를 열면 OLED 가 페이지 2 로 바뀌고 `OK` 가 보여요. `/` 를 열면 아직 `index.html not found` 가 보여요(앱 만들기에서 저장하면 바뀌어요)."
+        codeNotes:
+          - { line: 63, note: "보드에 저장한 파일을 읽어 답하는 도우미예요. 파일이 없으면 not found 를 보여 줘요" }
+          - { line: 95, note: "요청을 받아 경로 `path` 와 질의 `query` 를 꺼내요" }
+          - { line: 101, note: "질의 `page` 가 `1` 이면 페이지 1, `2` 면 페이지 2 로 OLED 를 바꿔요 (101~105번 줄)" }
+          - { line: 106, note: "경로가 `/data` 이면 온도 · 습도 JSON. 앱이 2초마다 읽어 가는 약속 주소예요" }
+          - { line: 108, note: "경로가 `/light` 이면 빛 값 JSON (한 쌍)" }
+          - { line: 110, note: "경로가 `/cmd` 이면 명령. 페이지는 위에서 이미 바꿨으니 `OK` 라고만 답해요" }
+          - { line: 113, note: "그 밖의 경로(`/`)에는 보드에 저장한 `index.html` 을 보내요 — 앱 만들기에서 저장할 파일이에요" }
+
+      - id: app
+        type: app
+        title: 폰 앱 만들기 — AI 와 함께 상황판 앱
+        minutes: 20
+        scene:
+          image: images/cover.svg
+          caption: 화면 설계 → 약속표 → 프롬프트 → AI 결과 붙여넣기 · 검사 → 보드에 저장 → 읽기 체크
+        body: |
+          이제 내 폰 앱을 만들어요. 먼저 화면에 **보여 줄 값**, **누를 버튼**, **바뀌는 모습**을 설계 칸에 적어요. 약속표에는 실행 3 코드가 내는 주소 넷이 있어요: 읽기 `/data`(temp, hum) · `/light`(light), 명령 `/cmd?page=1` · `/cmd?page=2`.
+
+          프롬프트를 복사해 AI 에 넣고, 돌아온 HTML 을 그대로 붙여 **검사**를 눌러요. 외부 스크립트 · 절대 주소가 섞이면 검사가 알려 주니 AI 에게 "외부 라이브러리 없이, 상대 주소로" 라고 다시 부탁해요. 통과하면 보드에 `index.html` 로 저장하고 폰에서 `/` 를 열어요.
+
+          원본 수업의 앱처럼 기준을 넘은 칸을 빨갛게 하고 싶다면 바뀌는 모습 칸에 "빛 2000 넘으면 칸을 빨강" 처럼 적어요. 기준은 1부에서 정한 내 교실 값으로 바꿔도 돼요.
+        todo:
+          - 설계 칸 세 개에 한 줄씩 적고 프롬프트 복사하기
+          - AI 가 준 HTML 을 붙여 넣고 **검사** 통과시키기 (걸리면 AI 에게 고쳐 달라고 하기)
+          - 보드에 저장한 뒤 폰에서 열어 보고, 읽기 체크에 답하기
+        api:
+          - { path: "/data", method: "읽기", fields: ["temp", "hum"], note: "2초마다 읽기. temp 는 온도(℃), hum 은 습도(%) 숫자" }
+          - { path: "/light", method: "읽기", fields: ["light"], note: "2초마다 읽기. light 는 빛 값 0~4095 숫자" }
+          - { path: "/cmd?page=1", method: "명령", note: "OLED 페이지 1(빛 · 소리 · 손잡이) 보이기" }
+          - { path: "/cmd?page=2", method: "명령", note: "OLED 페이지 2(온도 · 습도 · 틸트 · PIR) 보이기" }
+        design:
+          show: ["온도", "습도", "빛"]
+          buttons: ["페이지 1", "페이지 2"]
+          changes: ["빛 2000 넘으면 칸을 빨강"]
+        promptTemplate: |
+          ESP32 주소 {{ip}} 에서 {{data}} 를 2초마다 읽어 {{show}} 을(를) 폰 화면에 표로 크게 보여 주고,
+          버튼 {{buttons}} 을(를) 누르면 {{commands}} 를 요청하는 한 파일짜리 HTML 을 만들어 줘.
+          {{changes}} 처럼 값이 기준을 넘으면 그 칸의 배경색을 바꿔 줘.
+          외부 라이브러리 · 외부 스크립트 · 절대 주소 없이, 폰 화면에 맞게.
+        checks:
+          maxBytes: 12000
+          mustUse: ["page=1", "page=2"]
+        readcheck:
+          - { kind: choice, q: "/data 에서 값을 가져오는 줄에 쓰인 것은?", options: ["fetch", "print", "import"], answer: 0, hint: "주소에 요청을 보내 답을 받는 자바스크립트 함수" }
+          - { kind: choice, q: "/light 가 주는 JSON 에서 빛 값의 이름(키)은?", options: ["light", "temp", "page"], answer: 0, hint: "약속표의 /light 줄 fields" }
+          - { kind: text, q: "빛 값이 기준을 넘으면 칸 색을 바꾸는 줄을 찾아 적어 보세요. AI 결과에 틀린 곳이 있었다면 어떻게 찾았나요?" }
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 4
+        scene:
+          image: images/senses-sensors.svg
+          caption: 눈 · 귀 · 피부가 자극을 신경으로 보내듯, 센서는 자극을 전기 신호와 숫자로 보드에 보내요
+        body: |
+          오늘은 센서 여섯을 묶어 OLED 두 페이지와 폰 상황판으로 교실을 재는 상황판을 만들었어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          활동 칸의 짧은 코드(빛 값과 기준 비교) 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+
+          과학 시간처럼 센서 여섯을 사람의 감각 기관(눈 · 귀 · 피부 · 몸의 균형)과 표로 짝지어 보세요. 수학 시간에는 평소 · 가렸을 때 · 가장 밝을 때 빛 값 셋을 적고 0~4095 자에서 각각 몇 퍼센트인지 비례식으로 구해 보세요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 상황판 한 바퀴를 설명하기
+        lineExplain: reflect_ticks.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 3초 멈추기(sleep) 대신 지난 시간을 재서 페이지를 바꾼 까닭을 폰의 요청이라는 말을 넣어 설명해 보세요. 기준 500 이 우리 보드에서 약 2000 이 된 까닭도 한 줄로.
+          - AI 가 만든 앱 코드에서 틀렸거나 검사에 걸린 곳이 있었나요? 어떻게 찾았고 어떻게 고쳤나요?
+          - "다음엔 여기부터 본다: 한 줄로"
