@@ -54,13 +54,13 @@ export function StepPage({ chapterId, stepId }: { chapterId: string; stepId: str
   const states = chapter ? stepStates(chapter, records ?? {}, teacherMode || review, { explainGate }) : {};
   const state = states[stepId];
 
-  // 없는 챕터·단계, 잠긴 단계는 챕터(또는 목록)로 돌려보낸다
+  // 없는 챕터·단계, 잠긴 단계는 챕터(또는 목록)로 돌려보낸다. replace 로 바꿔 넣어 뒤로 가기가 다시 여기로 오지 않게
   useEffect(() => {
-    if (!chapter) nav.go(nav.href.track());
-    else if (index < 0) nav.go(nav.href.chapter(chapter.id));
+    if (!chapter) nav.go(nav.href.track(), { replace: true });
+    else if (index < 0) nav.go(nav.href.chapter(chapter.id), { replace: true });
     else if (records && state === "locked") {
       toast.warning(LOCKED_MESSAGE, { id: "step-locked" });
-      nav.go(nav.href.chapter(chapter.id));
+      nav.go(nav.href.chapter(chapter.id), { replace: true });
     }
   }, [chapter, index, records, state, nav]);
 

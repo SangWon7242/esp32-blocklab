@@ -1,7 +1,10 @@
-import { createContext, useContext, type ComponentProps, type MouseEvent, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, type ComponentProps, type MouseEvent, type ReactNode } from "react";
 import type { AiReview, DebugRequest, ReflectRequest } from "@/ai/claude";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { ChapterSnapshot } from "@/track/snapshot";
+import { ChromeContext, type Chrome } from "./chrome";
 
 /*
  * 호스트 어댑터 (계획 13 인터페이스 계약). 블록랩 화면은 진행 저장소·설정·AI·주소 이동을 모두 여기서 받는다.
@@ -12,9 +15,20 @@ export type HostUser = { id: string; name: string; grade?: string | null };
 export type HostMode = "student" | "review" | "demo";
 export type SettingsSource = { teacherMode: boolean; fakeBoard: boolean; explainGate: boolean };
 export type AiClient = { reflect(req: ReflectRequest): Promise<AiReview>; debug(req: DebugRequest): Promise<AiReview> };
+export type NavigateOptions = {
+  /** 지금 항목을 바꿔 넣어 뒤로 가기에 남기지 않는다 (잠긴·없는 단계를 돌려보낼 때) */
+  replace?: boolean;
+};
 export type Navigator = {
-  href: { track(): string; chapter(id: string): string; step(id: string, step: string): string; lab(): string };
-  go(href: string): void;
+  href: {
+    track(): string;
+    chapter(id: string): string;
+    step(id: string, step: string): string;
+    lab(): string;
+    /** 블록 사전 화면 (선택). 호스트에 사전이 없으면 비워 두면 "블록 사전에서 보기" 링크가 숨는다 */
+    docs?(block: string): string;
+  };
+  go(href: string, opts?: NavigateOptions): void;
 };
 export type HostProps = {
   user: HostUser | null;
@@ -33,13 +47,31 @@ const HostContext = createContext<HostProps | null>(null);
 
 export const MISSING_HOST_MESSAGE = "BlocklabProvider 가 없어요. 블록랩 화면은 BlocklabProvider 안에서만 그릴 수 있어요";
 
-/** 호스트가 블록랩 화면을 감싼다. 라이브러리 CSS 는 `.blocklab` 아래에서만 작동하므로 루트 div 를 함께 그린다 */
+/**
+ * 호스트가 블록랩 화면을 감싼다. 라이브러리 CSS 는 `.blocklab` 아래에서만 작동하므로 루트 div 와 함께
+ * 화면이 기대는 틀(TooltipProvider·토스트·Radix 포털 상자)도 여기서 그린다.
+ * 이미 Provider 안이면(열람 화면이 review 로 다시 감쌀 때) 호스트 값만 바꾸고 틀은 바깥 것을 쓴다.
+ */
 export function BlocklabProvider({ children, ...host }: HostProps & { children: ReactNode }) {
+  const outer = useContext(ChromeContext);
   return (
-    <HostContext.Provider value={host}>
-      {/* display:contents — 호스트 배치(flex 등)를 그대로 흘려보낸다 */}
-      <div className="blocklab" style={{ display: "contents" }}>{children}</div>
-    </HostContext.Provider>
+    <HostContext.Provider value={host}>{outer ? children : <BlocklabChrome>{children}</BlocklabChrome>}</HostContext.Provider>
+  );
+}
+
+function BlocklabChrome({ children }: { children: ReactNode }) {
+  const [portal, setPortal] = useState<HTMLElement | null>(null);
+  const chrome = useMemo<Chrome>(() => ({ portal }), [portal]);
+  return (
+    // display:contents — 호스트 배치(flex 등)를 그대로 흘려보낸다. 토큰·글자색은 display:contents 여도 상속된다
+    <div className="blocklab" style={{ display: "contents" }}>
+      <ChromeContext.Provider value={chrome}>
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster />
+      </ChromeContext.Provider>
+      {/* Dialog·Tooltip 포털이 body 대신 여기 붙어 `.blocklab` 범위 CSS 를 받는다 */}
+      <div ref={setPortal} data-slot="blocklab-portal" style={{ display: "contents" }} />
+    </div>
   );
 }
 

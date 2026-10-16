@@ -8,8 +8,8 @@ import { TrackPage } from "@/app/track/TrackPage";
 import { getChapter } from "@/track/content";
 import { allSteps } from "@/track/gating";
 import type { StepRecord } from "@/track/progress";
-import { MISSING_HOST_MESSAGE, useHost, withQuery, type AiClient } from "./HostContext";
-import { MemoryProgressStore, renderWithHost } from "./testHost";
+import { BlocklabProvider, MISSING_HOST_MESSAGE, useHost, withQuery, type AiClient } from "./HostContext";
+import { fakeHost, MemoryProgressStore, renderWithHost } from "./testHost";
 
 /*
  * 호스트 어댑터: Provider 가 없으면 바로 알리고, review(열람) 모드는 학생 기록을 저장 없이 모든 단계를 열어 보여 준다.
@@ -39,6 +39,19 @@ describe("BlocklabProvider 가 없을 때", () => {
     }
     expect(() => renderToStaticMarkup(createElement(Probe))).toThrow(MISSING_HOST_MESSAGE);
     expect(() => renderToStaticMarkup(createElement(TrackPage))).toThrow(MISSING_HOST_MESSAGE);
+  });
+});
+
+describe("BlocklabProvider 틀", () => {
+  function ModeProbe() {
+    return createElement("span", null, `mode:${useHost().mode}`);
+  }
+  it(".blocklab 루트와 포털 상자를 한 번만 그리고, 안쪽 Provider 는 호스트 값만 바꾼다", () => {
+    const inner = createElement(BlocklabProvider, { ...fakeHost({ mode: "review" }), children: createElement(ModeProbe) });
+    const html = renderWithHost(inner, { mode: "student" });
+    expect(html.match(/class="blocklab"/g)).toHaveLength(1);
+    expect(html.match(/data-slot="blocklab-portal"/g)).toHaveLength(1);
+    expect(html).toContain("mode:review");
   });
 });
 
