@@ -10,6 +10,7 @@ import {
 import { BlockDocBody, CategoryBadge, titleText } from "@/app/docs/BlockDocCard";
 import { BlockImage } from "@/app/docs/BlockImage";
 import type { BlockDoc } from "@/docs/catalog";
+import { useHost } from "@/host/HostContext";
 import type { BlockDocRequest } from "./blockDocMenu";
 
 type Props = {
@@ -24,6 +25,8 @@ type Props = {
 
 /** 블록 우클릭 → "이 블록 설명 보기" 팝업: 그 블록이 만드는 코드·뜻·예시 프로그램 */
 export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) {
+  // 블록 사전 화면은 호스트가 주소를 줄 때만 있다 (체험판은 #/docs, 허브는 없음 → 링크 숨김)
+  const { docs } = useHost().nav.href;
   return (
     <Dialog open={request !== null} onOpenChange={(open) => !open && onClose()}>
       {request && (
@@ -50,10 +53,10 @@ export function BlockDocDialog({ request, doc, onClose, onOpenExample }: Props) 
           </div>
 
           <DialogFooter className="flex-wrap">
-            {doc && (
+            {doc && docs && (
               // 새 탭으로: 같은 창에서 옮기면 자유 코딩 작업판이 사라지고 보드 연결이 끊긴다
               <Button variant="outline" asChild>
-                <a href={`#/docs?block=${encodeURIComponent(request.type)}`} target="_blank" rel="noopener">
+                <a href={docs(request.type)} target="_blank" rel="noopener">
                   <BookOpen className="size-4" />블록 사전에서 보기
                 </a>
               </Button>

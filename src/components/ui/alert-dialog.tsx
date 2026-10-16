@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "cn"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
+import { usePortalContainer } from "@/host/chrome"
 
 import { Button } from "@/components/ui/button"
 
@@ -22,7 +23,8 @@ function AlertDialogPortal({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
   return (
-    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+    // BlocklabProvider 안이면 `.blocklab` 의 포털 상자로 (범위 CSS 를 받도록), 밖이면 body
+    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" container={usePortalContainer()} {...props} />
   )
 }
 

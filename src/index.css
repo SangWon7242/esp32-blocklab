@@ -6,7 +6,8 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif;
+    /* 글꼴: 호스트가 --host-font-sans 를 주면 그것. 루트(html·body)의 font-family 는 라이브러리 빌드에서 빠져 호스트 글꼴을 상속한다 */
+    --font-sans: var(--host-font-sans, "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,73 +48,77 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * shadcn 토큰. 호스트(허브)가 --host-<이름> 을 주면 그 값을, 없으면 기본값을 쓴다.
+ * 라이브러리 빌드에서는 :root 가 .blocklab 으로 바뀐다 (scripts/postcss-blocklab-scope.ts)
+ */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --background: var(--host-background, oklch(1 0 0));
+    --foreground: var(--host-foreground, oklch(0.145 0 0));
+    --card: var(--host-card, oklch(1 0 0));
+    --card-foreground: var(--host-card-foreground, oklch(0.145 0 0));
+    --popover: var(--host-popover, oklch(1 0 0));
+    --popover-foreground: var(--host-popover-foreground, oklch(0.145 0 0));
+    --primary: var(--host-primary, oklch(0.205 0 0));
+    --primary-foreground: var(--host-primary-foreground, oklch(0.985 0 0));
+    --secondary: var(--host-secondary, oklch(0.97 0 0));
+    --secondary-foreground: var(--host-secondary-foreground, oklch(0.205 0 0));
+    --muted: var(--host-muted, oklch(0.97 0 0));
+    --muted-foreground: var(--host-muted-foreground, oklch(0.556 0 0));
+    --accent: var(--host-accent, oklch(0.97 0 0));
+    --accent-foreground: var(--host-accent-foreground, oklch(0.205 0 0));
+    --destructive: var(--host-destructive, oklch(0.577 0.245 27.325));
+    --border: var(--host-border, oklch(0.922 0 0));
+    --input: var(--host-input, oklch(0.922 0 0));
+    --ring: var(--host-ring, oklch(0.708 0 0));
+    --chart-1: var(--host-chart-1, oklch(0.87 0 0));
+    --chart-2: var(--host-chart-2, oklch(0.556 0 0));
+    --chart-3: var(--host-chart-3, oklch(0.439 0 0));
+    --chart-4: var(--host-chart-4, oklch(0.371 0 0));
+    --chart-5: var(--host-chart-5, oklch(0.269 0 0));
+    --radius: var(--host-radius, 0.625rem);
+    --sidebar: var(--host-sidebar, oklch(0.985 0 0));
+    --sidebar-foreground: var(--host-sidebar-foreground, oklch(0.145 0 0));
+    --sidebar-primary: var(--host-sidebar-primary, oklch(0.205 0 0));
+    --sidebar-primary-foreground: var(--host-sidebar-primary-foreground, oklch(0.985 0 0));
+    --sidebar-accent: var(--host-sidebar-accent, oklch(0.97 0 0));
+    --sidebar-accent-foreground: var(--host-sidebar-accent-foreground, oklch(0.205 0 0));
+    --sidebar-border: var(--host-sidebar-border, oklch(0.922 0 0));
+    --sidebar-ring: var(--host-sidebar-ring, oklch(0.708 0 0));
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --background: var(--host-background, oklch(0.145 0 0));
+    --foreground: var(--host-foreground, oklch(0.985 0 0));
+    --card: var(--host-card, oklch(0.205 0 0));
+    --card-foreground: var(--host-card-foreground, oklch(0.985 0 0));
+    --popover: var(--host-popover, oklch(0.205 0 0));
+    --popover-foreground: var(--host-popover-foreground, oklch(0.985 0 0));
+    --primary: var(--host-primary, oklch(0.922 0 0));
+    --primary-foreground: var(--host-primary-foreground, oklch(0.205 0 0));
+    --secondary: var(--host-secondary, oklch(0.269 0 0));
+    --secondary-foreground: var(--host-secondary-foreground, oklch(0.985 0 0));
+    --muted: var(--host-muted, oklch(0.269 0 0));
+    --muted-foreground: var(--host-muted-foreground, oklch(0.708 0 0));
+    --accent: var(--host-accent, oklch(0.269 0 0));
+    --accent-foreground: var(--host-accent-foreground, oklch(0.985 0 0));
+    --destructive: var(--host-destructive, oklch(0.704 0.191 22.216));
+    --border: var(--host-border, oklch(1 0 0 / 10%));
+    --input: var(--host-input, oklch(1 0 0 / 15%));
+    --ring: var(--host-ring, oklch(0.556 0 0));
+    --chart-1: var(--host-chart-1, oklch(0.87 0 0));
+    --chart-2: var(--host-chart-2, oklch(0.556 0 0));
+    --chart-3: var(--host-chart-3, oklch(0.439 0 0));
+    --chart-4: var(--host-chart-4, oklch(0.371 0 0));
+    --chart-5: var(--host-chart-5, oklch(0.269 0 0));
+    --sidebar: var(--host-sidebar, oklch(0.205 0 0));
+    --sidebar-foreground: var(--host-sidebar-foreground, oklch(0.985 0 0));
+    --sidebar-primary: var(--host-sidebar-primary, oklch(0.488 0.243 264.376));
+    --sidebar-primary-foreground: var(--host-sidebar-primary-foreground, oklch(0.985 0 0));
+    --sidebar-accent: var(--host-sidebar-accent, oklch(0.269 0 0));
+    --sidebar-accent-foreground: var(--host-sidebar-accent-foreground, oklch(0.985 0 0));
+    --sidebar-border: var(--host-sidebar-border, oklch(1 0 0 / 10%));
+    --sidebar-ring: var(--host-sidebar-ring, oklch(0.556 0 0));
 }
 
 @layer base {

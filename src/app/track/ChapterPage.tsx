@@ -44,7 +44,7 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
 
   // 없는 챕터는 목록으로 돌려보낸다
   useEffect(() => {
-    if (!chapter) nav.go(nav.href.track());
+    if (!chapter) nav.go(nav.href.track(), { replace: true });
   }, [chapter, nav]);
   if (!chapter || !progress || !records) return null;
 

@@ -3,8 +3,6 @@ import { HashRouter, Link, NavLink, Route, Routes, useLocation, useNavigate, use
 import { Blocks, BookOpen, Cpu, Route as RouteIcon, Settings } from "lucide-react";
 import { askClaude, debugMessage, reflectMessage } from "@/ai/claude";
 import { Badge } from "@/components/ui/badge";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { BlocklabProvider, type AiClient, type Navigator, type SettingsSource } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { LocalProgressStore } from "@/track/progress";
@@ -44,6 +42,7 @@ const demoHref: Navigator["href"] = {
   chapter: (id) => `#/track/${id}`,
   step: (id, step) => `#/track/${id}/${step}`,
   lab: () => "#/lab",
+  docs: (block) => `#/docs?block=${encodeURIComponent(block)}`,
 };
 
 /** 교사 키가 있을 때만 Claude 를 브라우저에서 바로 부른다 (설정 §10) */
@@ -66,7 +65,10 @@ function DemoHost({ children }: { children: ReactNode }) {
     [local.teacherMode, local.fakeBoard, local.explainGate, deviceFake],
   );
   const ai = useMemo(() => (local.claudeApiKey ? claudeClient(local.claudeApiKey, local.claudeModel) : undefined), [local.claudeApiKey, local.claudeModel]);
-  const nav = useMemo<Navigator>(() => ({ href: demoHref, go: (href) => void navigate(href.replace(/^#/, "")) }), [navigate]);
+  const nav = useMemo<Navigator>(
+    () => ({ href: demoHref, go: (href, opts) => void navigate(href.replace(/^#/, ""), { replace: opts?.replace }) }),
+    [navigate],
+  );
 
   return (
     <BlocklabProvider user={null} mode="demo" store={demoStore} settings={settings} ai={ai} nav={nav}>
@@ -148,44 +150,42 @@ function Screens() {
 export function App() {
   return (
     <HashRouter>
+      {/* TooltipProvider·Toaster 는 BlocklabProvider(DemoHost) 가 그린다 */}
       <DemoHost>
-        <TooltipProvider>
-          <div className="flex h-screen flex-col">
-            <header className="flex h-12 shrink-0 items-center gap-4 overflow-hidden border-b px-4 whitespace-nowrap">
-              <Link to="/" className="flex items-center gap-2 font-semibold" aria-label="ESP32 블록랩">
-                <Cpu className="size-5" />
-                <span className="hidden sm:inline">ESP32 블록랩</span>
-              </Link>
-              <nav className="flex items-center gap-1 text-sm">
-                {navItems.map(({ to, label, icon: Icon, soon }) => (
-                  <NavLink
-                    key={to}
-                    to={soon ? "#" : to}
-                    aria-disabled={soon}
-                    aria-label={label}
-                    title={label}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground",
-                        isActive && !soon && "bg-muted text-foreground",
-                        soon && "pointer-events-none opacity-60",
-                      )
-                    }
-                  >
-                    <Icon className="size-4" />
-                    {/* 좁은 화면에서는 아이콘만 보인다 */}
-                    <span className="hidden md:inline">{label}</span>
-                    {soon && <Badge variant="outline" className="hidden md:inline-flex">준비 중</Badge>}
-                  </NavLink>
-                ))}
-              </nav>
-            </header>
-            <main className="min-h-0 flex-1">
-              <Screens />
-            </main>
-          </div>
-          <Toaster />
-        </TooltipProvider>
+        <div className="flex h-screen flex-col">
+          <header className="flex h-12 shrink-0 items-center gap-4 overflow-hidden border-b px-4 whitespace-nowrap">
+            <Link to="/" className="flex items-center gap-2 font-semibold" aria-label="ESP32 블록랩">
+              <Cpu className="size-5" />
+              <span className="hidden sm:inline">ESP32 블록랩</span>
+            </Link>
+            <nav className="flex items-center gap-1 text-sm">
+              {navItems.map(({ to, label, icon: Icon, soon }) => (
+                <NavLink
+                  key={to}
+                  to={soon ? "#" : to}
+                  aria-disabled={soon}
+                  aria-label={label}
+                  title={label}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground",
+                      isActive && !soon && "bg-muted text-foreground",
+                      soon && "pointer-events-none opacity-60",
+                    )
+                  }
+                >
+                  <Icon className="size-4" />
+                  {/* 좁은 화면에서는 아이콘만 보인다 */}
+                  <span className="hidden md:inline">{label}</span>
+                  {soon && <Badge variant="outline" className="hidden md:inline-flex">준비 중</Badge>}
+                </NavLink>
+              ))}
+            </nav>
+          </header>
+          <main className="min-h-0 flex-1">
+            <Screens />
+          </main>
+        </div>
       </DemoHost>
     </HashRouter>
   );

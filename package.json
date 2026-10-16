@@ -1,14 +1,30 @@
 {
   "name": "esp32-blocklab",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist-lib/index.d.ts",
+      "default": "./dist-lib/index.js"
+    },
+    "./style.css": "./dist-lib/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist-lib"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:lib": "node scripts/build-lib.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
+    "test:lib": "node scripts/lib-smoke.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "slides": "tsx scripts/export-slides.ts"
@@ -55,5 +71,6 @@
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.4"
-  }
+  },
+  "description": "ESP32 블록랩 — 체험판(GitHub Pages)과 허브에 심는 라이브러리(dist-lib)"
 }
