@@ -17,6 +17,7 @@ import { useChapterRecords, useProgress } from "./progressState";
 import { ReviewBadge } from "./ReviewBadge";
 import { STEP_TYPE_LABEL } from "./stepMeta";
 import { StepTypeIcon } from "./StepTypeIcon";
+import { SubmitCard } from "./SubmitCard";
 import { DraftBadge, PrerequisiteList, Sessions, SubjectChips } from "./TrackMeta";
 
 const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, awaiting: Hourglass, done: CheckCircle2 };
@@ -235,6 +236,11 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
             </ol>
           </section>
         ))}
+
+        {/* 제출: 필수 단계를 모두 끝냈고 호스트가 onSubmit 을 줬을 때만 (SubmitCard 가 스스로 숨는다) */}
+        <div className="mt-8 empty:hidden">
+          <SubmitCard chapter={chapter} states={states} progress={progress} />
+        </div>
 
         {/* 교사 메모: 교사 모드에서만 */}
         {teacherMode && chapter.teacherNotes && (
