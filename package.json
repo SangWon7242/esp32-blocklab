@@ -1,12 +1,16 @@
 {
   "name": "esp32-blocklab",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist-lib/index.d.ts",
       "default": "./dist-lib/index.js"
+    },
+    "./core": {
+      "types": "./dist-lib/core.d.ts",
+      "default": "./dist-lib/core.js"
     },
     "./style.css": "./dist-lib/style.css",
     "./package.json": "./package.json"

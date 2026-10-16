@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /*
  * 라이브러리 빌드 (npm run build:lib). 결과는 dist-lib/ 하나로, 허브가 vendor/blocklab/ 으로 복사한다.
- *   1. vite build -c vite.lib.config.ts   → index.js, chunks/*.js, style.css
- *   2. tsc -p tsconfig.lib.json           → types/**.d.ts (@/ 별칭을 상대 경로로 고쳐 쓴다) + index.d.ts
+ *   1. vite build -c vite.lib.config.ts   → index.js, core.js(서버 입구), chunks/*.js, style.css
+ *   2. tsc -p tsconfig.lib.json           → types/**.d.ts (@/ 별칭을 상대 경로로 고쳐 쓴다) + index.d.ts·core.d.ts
  *      zod 를 import 하는 d.ts 는 펼친 평범한 타입으로 다시 쓴다 (scripts/dts-strip-zod.mjs — 허브에는 zod 가 없다)
  *   3. public/lib/*.py                    → lib/ (보드에 올리는 라이브러리. 호스트가 /lib/<이름> 으로 서빙해야 한다 — src/device/libs.ts)
  *   4. package.json                       → 이름·version·exports
@@ -48,6 +48,7 @@ for (const r of stripZodFromDts(zodFiles)) {
   console.log(`zod 를 걷어 냄: ${path.relative(out, r.file)} (타입 ${r.aliases}개, 스키마 ${r.consts}개)`);
 }
 writeFileSync(path.join(out, "index.d.ts"), 'export * from "./types/lib/index";\n');
+writeFileSync(path.join(out, "core.d.ts"), 'export * from "./types/lib/core";\n');
 
 // 3. 보드 라이브러리
 cpSync(path.join(root, "public/lib"), path.join(out, "lib"), { recursive: true, filter: (src) => !src.endsWith("README.md") });
@@ -63,6 +64,8 @@ const libPkg = {
   types: "./index.d.ts",
   exports: {
     ".": { types: "./index.d.ts", default: "./index.js" },
+    // 서버 입구 (lib-v1.0.2): React·DOM·Blockly·CodeMirror·CSS 없음 — Next 라우트 핸들러가 정적으로 import 한다
+    "./core": { types: "./core.d.ts", import: "./core.js", default: "./core.js" },
     "./style.css": "./style.css",
     "./package.json": "./package.json",
   },

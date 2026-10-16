@@ -3,9 +3,11 @@
  * dist-lib/index.js 연기 검사 (npm run test:lib, build:lib 끝에도 돈다).
  * 허브 서버(Node, window 없음)가 index.js 를 import 해 순수 API(loadChapters·judge·codeToBlocks)를 쓸 수 있어야 한다.
  * 화면(Blockly·CodeMirror)은 lazy 조각이라 import 때 끌려오지 않아야 한다.
+ * lib-v1.0.2: 서버 입구 core.js 는 정적으로 닿는 조각 전체에 React·DOM UI·Blockly·CodeMirror·CSS·"use client" 가 없어야 한다
+ * (Next 라우트 핸들러가 react-server 층에서 정적 import 한다). 콘텐츠 조각은 index·core 가 같은 파일을 함께 쓴다.
  */
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -85,6 +87,69 @@ assert.equal(empty.missions, summary.missions);
 assert.equal(empty.passed, 0);
 assert.ok(empty.steps.every((s) => s.passed === null));
 
+// lib-v1.0.2: 서버 입구 core.js
+const coreJs = path.join(dist, "core.js");
+assert.ok(existsSync(coreJs), "dist-lib/core.js 가 없어요");
+assert.ok(existsSync(path.join(dist, "core.d.ts")), "dist-lib/core.d.ts 가 없어요");
+const coreReached = staticClosure("core.js");
+const BANNED_SPEC = /^(react|react-dom|radix-ui|@radix-ui\/|lucide|lucide-react|sonner|next-themes|blockly|@blockly\/|codemirror|@codemirror\/)(\/|$)|\.css$/;
+const coreExternal = [];
+for (const f of coreReached) {
+  const t = readFileSync(path.join(dist, f), "utf8");
+  for (const spec of importSpecs(t)) {
+    if (!spec.startsWith(".")) coreExternal.push(`${f} → ${spec}`);
+    else assert.ok(!BANNED_SPEC.test(spec), `${f} 가 ${spec} 를 import 해요`);
+  }
+  // 동적 import 도 없어야 한다 (번들러가 서버 묶음에 화면 조각을 끌어오지 않게)
+  assert.ok(!/\bimport\(\s*["']/.test(t), `${f} 에 동적 import 가 있어요`);
+  assert.ok(!/^\s*["']use client["']/m.test(t), `${f} 에 "use client" 가 있어요`);
+  for (const word of ["createContext", "useState", "useEffect", "react/jsx-runtime", "react.element", "Blockly.inject", "EditorView"]) {
+    assert.ok(!t.includes(word), `${f} 에 ${word} 가 있어요 (React·화면 코드)`);
+  }
+}
+// 외부 패키지 import 가 하나도 없다 — react·react-dom·radix·lucide·sonner·blockly·codemirror 모두 포함
+assert.deepEqual(coreExternal, [], `core 경로가 외부 패키지를 import 해요: ${coreExternal.join(", ")}`);
+const coreHeavy = [...coreReached].filter((f) => /(^|\/)(blockly|codemirror|renderBlock|codegen|EditorWorkbench|button|dialog|tabs|SubmitCard|AiCheck|StepTypeIcon|card|mediaPath)-/.test(f));
+assert.deepEqual(coreHeavy, [], `core 경로가 화면 조각에 닿아요: ${coreHeavy.join(", ")}`);
+// 콘텐츠(약 3MB)는 한 조각뿐이고 index·core 가 같은 것을 쓴다
+const contentChunks = readdirSync(path.join(dist, "chunks")).filter((f) => /^content-.*\.js$/.test(f));
+assert.equal(contentChunks.length, 1, `콘텐츠 조각이 ${contentChunks.length}개예요`);
+assert.ok(coreReached.has(`chunks/${contentChunks[0]}`) && reached.has(`chunks/${contentChunks[0]}`), "index·core 가 같은 콘텐츠 조각을 쓰지 않아요");
+const coreBytes = [...coreReached].reduce((a, f) => a + statSync(path.join(dist, f)).size, 0);
+
+const core = await import(pathToFileURL(coreJs).href);
+assert.equal(core.LIB_VERSION, pkg.version);
+const CORE_FUNCTIONS = ["loadChapters", "getChapter", "judge", "codeToBlocks", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "allSteps", "stepStates", "emptyProgress", "parseProgress", "chaptersInTrack", "isTrackId", "reflectMessage", "debugMessage", "parseReview", "savedPrograms", "isJudgedStep", "isSkipped", "hasRun"];
+for (const name of CORE_FUNCTIONS) {
+  assert.equal(typeof core[name], "function", `core.${name} 이 함수가 아니에요`);
+  assert.equal(lib[name], core[name], `index.${name} 과 core.${name} 이 같은 함수가 아니에요 (조각 공유가 깨짐)`);
+}
+const CORE_STRINGS = ["NOTE_SKIPPED", "NOTE_NO_PROGRAM", "NOTE_OUTPUT_RULES", "NOTE_SCREEN_PASSED", "NOTE_SCREEN_FAILED", "EXPLAIN_MEMO_PROMPT", "SYSTEM_PROMPT"];
+for (const name of CORE_STRINGS) {
+  assert.ok(typeof core[name] === "string" && core[name].length > 0, `core.${name} 이 글이 아니에요`);
+  assert.equal(lib[name], core[name], `index.${name} 이 core 와 달라요`);
+}
+assert.equal(core.NOTE_SCREEN_PASSED, "학생 화면의 마지막 판정은 통과였어요");
+assert.ok(Array.isArray(core.TRACKS) && core.TRACK_NAME.sensor, "TRACKS·TRACK_NAME 이 없어요");
+for (const name of ["BlocklabProvider", "SubmitCard", "ChapterView", "LocalProgressStore", "loadBlockTools", "setBlocklyMediaPath"]) {
+  assert.equal(core[name], undefined, `core 가 화면·브라우저 API ${name} 을 내보내요`);
+}
+const coreLed = core.getChapter("01-led");
+const coreSummary = core.judgeSnapshot(coreLed, core.chapterSnapshot(progress, coreLed.id));
+assert.equal(coreSummary.passed, coreSummary.missions);
+assert.equal(coreSummary.missions, summary.missions);
+// 건너뛴 단계는 NOTE_SKIPPED 로 적힌다
+const skippedProgress = core.emptyProgress();
+const firstJudged = judged[0];
+skippedProgress.chapters[coreLed.id] = { [firstJudged.id]: { status: "done", input: { skipped: true }, attempts: 0, updatedAt: now } };
+const skippedSummary = core.judgeSnapshot(coreLed, core.chapterSnapshot(skippedProgress, coreLed.id));
+const skippedStep = skippedSummary.steps.find((s) => s.stepId === firstJudged.id);
+assert.ok(skippedStep, `건너뛴 단계 ${firstJudged.id} 판정 줄이 없어요`);
+assert.equal(skippedStep.passed, null);
+assert.deepEqual(skippedStep.notes, [core.NOTE_SKIPPED]);
+const distPkg = JSON.parse(readFileSync(path.join(dist, "package.json"), "utf8"));
+assert.deepEqual(distPkg.exports["./core"], { types: "./core.d.ts", import: "./core.js", default: "./core.js" });
+
 // import 뒤에도 DOM 흔적이 없어야 한다
 assert.equal(typeof globalThis.window, "undefined");
 assert.equal(typeof globalThis.document, "undefined");
@@ -125,7 +190,9 @@ assert.ok(css.includes("var(--host-primary"), "호스트 토큰 상속(--host-pr
 
 console.log(
   `dist-lib 연기 검사 통과: v${lib.LIB_VERSION}, 챕터 ${chapters.length}개, 01-led 미션 판정 ${verdict.pass ? "통과" : `실패(${verdict.failures.length})`}, ` +
-    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, d.ts zod 0`,
+    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, d.ts zod 0\n` +
+    `core 입구 통과: judgeSnapshot ${coreSummary.passed}/${coreSummary.missions}, 정적 조각 ${coreReached.size}개(${(coreBytes / 1024).toFixed(1)} kB), ` +
+    `외부 import 0, "use client"·React·Blockly·CodeMirror·CSS 0, 함수 ${CORE_FUNCTIONS.length}개 index 와 같음, 문장 상수 ${CORE_STRINGS.length}개`,
 );
 
 /** index.js 에서 정적 import 로 닿는 dist-lib 안 파일들 (동적 import 는 빼고) */
@@ -136,13 +203,16 @@ function staticClosure(entry) {
     const file = queue.pop();
     if (seen.has(file)) continue;
     seen.add(file);
-    const src = readFileSync(path.join(dist, file), "utf8");
-    for (const m of src.matchAll(/^import\b[^;]*?from\s*["']([^"']+)["']|^import\s*["']([^"']+)["']/gm)) {
-      const spec = m[1] ?? m[2];
+    for (const spec of importSpecs(readFileSync(path.join(dist, file), "utf8"))) {
       if (spec.startsWith(".")) queue.push(path.posix.normalize(path.posix.join(path.posix.dirname(file), spec)));
     }
   }
   return seen;
+}
+
+/** 정적 import·export from 의 대상 (동적 import 는 빼고) */
+function importSpecs(src) {
+  return [...src.matchAll(/^(?:import|export)\b[^;]*?from\s*["']([^"']+)["']|^import\s*["']([^"']+)["']/gm)].map((m) => m[1] ?? m[2]);
 }
 
 function walk(dir) {

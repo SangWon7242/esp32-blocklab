@@ -7,7 +7,12 @@ import type { LineMap } from "./linemap";
 export { collectImports } from "./imports";
 export { MicroPythonGenerator };
 export { emptyLineMap, type LineMap } from "./linemap";
-export type WorkspaceJson = ReturnType<typeof Blockly.serialization.workspaces.save>;
+import type { WorkspaceJson } from "@/parser/types";
+export type { WorkspaceJson };
+/* 파서 쪽 WorkspaceJson(blockly 없는 선언)이 Blockly 의 save 반환 꼴과 같은지 — 다르면 tsc 가 멈춘다 */
+type BlocklyWorkspaceJson = ReturnType<typeof Blockly.serialization.workspaces.save>;
+type SameType<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+export const WORKSPACE_JSON_MATCHES_BLOCKLY: SameType<WorkspaceJson, BlocklyWorkspaceJson> = true;
 
 export function createGenerator(): MicroPythonGenerator {
   registerBlocks();
