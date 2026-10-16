@@ -89,6 +89,15 @@ export function SettingsPage() {
             </div>
             <div className="flex items-start justify-between gap-4">
               <div>
+                <Label htmlFor="explain-gate">미션은 교사 확인 뒤 완료</Label>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  미션·디버깅은 판정을 통과한 뒤 선생님께 1분 설명을 하고 "설명 확인"을 받아야 완료됩니다. 확인 버튼은 교사 모드에서 보여요.
+                </p>
+              </div>
+              <Switch id="explain-gate" checked={settings.explainGate} onCheckedChange={(v) => updateSettings({ explainGate: v })} />
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <div>
                 <Label htmlFor="fake-board">가짜 보드</Label>
                 <p className="mt-1 text-sm text-muted-foreground">보드가 없어도 자유 코딩에서 실행해 볼 수 있게 가짜 장치를 씁니다. 자유 코딩 화면을 다시 열면 적용돼요.</p>
               </div>

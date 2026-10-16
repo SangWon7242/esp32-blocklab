@@ -43,3 +43,41 @@ describe("stepStates — 관문", () => {
     expect(stepStates(chapter, done("a", "b"))).toMatchObject({ b: "done", c: "open" });
   });
 });
+
+describe("stepStates — 1분 설명 관문 (awaiting: 확인 대기)", () => {
+  const mission: Step = { id: "m", type: "mission", title: "m", instructions: "하세요", rules: [{ codeMatches: "x", fail: "x?" }] };
+  const debug: Step = {
+    id: "dbg", type: "debug", title: "d", rules: [],
+    symptoms: [{ title: "a", code: "x = 1", question: "왜?", rules: [] }, { title: "b", code: "y = 1", question: "왜?", rules: [] }],
+  };
+  const gated: Chapter = { ...chapter, parts: [{ id: "part1", title: "1부", steps: [p("a"), mission, debug, p("z")] }] };
+  const open = (input: Record<string, unknown>) => ({ status: "open" as const, input });
+
+  it("관문이 꺼져 있으면(기본) 판정을 통과해도 open 그대로", () => {
+    const records = { ...done("a"), m: open({ passed: true }) };
+    expect(stepStates(gated, records)).toMatchObject({ m: "open", dbg: "locked" });
+    expect(stepStates(gated, records, false, { explainGate: false })).toMatchObject({ m: "open" });
+  });
+  it("관문이 켜져 있으면 판정 통과 + 확인 전 mission 은 awaiting, 그다음은 여전히 locked", () => {
+    const records = { ...done("a"), m: open({ passed: true }) };
+    expect(stepStates(gated, records, false, { explainGate: true })).toEqual({ a: "done", m: "awaiting", dbg: "locked", z: "locked" });
+  });
+  it("확인을 받으면(explained) open 으로 돌아오고, done 으로 기록하면 done", () => {
+    expect(stepStates(gated, { ...done("a"), m: open({ passed: true, explained: true }) }, false, { explainGate: true })).toMatchObject({ m: "open" });
+    expect(stepStates(gated, { ...done("a"), m: { status: "done", input: { passed: true } } }, false, { explainGate: true })).toMatchObject({ m: "done", dbg: "open" });
+  });
+  it("판정을 통과하지 않았거나 기록이 없으면 open", () => {
+    expect(stepStates(gated, { ...done("a"), m: open({ passed: false }) }, false, { explainGate: true })).toMatchObject({ m: "open" });
+    expect(stepStates(gated, done("a"), false, { explainGate: true })).toMatchObject({ m: "open" });
+  });
+  it("debug 는 모든 증상을 통과했을 때만 awaiting", () => {
+    expect(stepStates(gated, { ...done("a", "m"), dbg: open({ passed: [true, false] }) }, false, { explainGate: true })).toMatchObject({ dbg: "open" });
+    expect(stepStates(gated, { ...done("a", "m"), dbg: open({ passed: [true, true] }) }, false, { explainGate: true })).toMatchObject({ dbg: "awaiting" });
+  });
+  it("교사 모드에서도 awaiting 은 구분한다 (잠긴 단계는 열린다)", () => {
+    expect(stepStates(gated, { m: open({ passed: true }) }, true, { explainGate: true })).toEqual({ a: "open", m: "awaiting", dbg: "open", z: "open" });
+  });
+  it("잠긴 단계는 판정 기록이 있어도 locked", () => {
+    expect(stepStates(gated, { m: open({ passed: true }) }, false, { explainGate: true })).toMatchObject({ a: "open", m: "locked" });
+  });
+});

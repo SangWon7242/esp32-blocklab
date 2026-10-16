@@ -9,13 +9,15 @@ export type Settings = {
   teacherMode: boolean;
   /** 보드 없이 가짜 장치로 실행한다 (?device=fake 와 같음) */
   fakeBoard: boolean;
+  /** 1분 설명 관문: 미션·디버깅은 판정 통과 뒤 교사가 "설명 확인"을 눌러야 완료된다 */
+  explainGate: boolean;
   /** 교사용 Claude API 키 (이 브라우저에만 저장, 비어 있으면 AI 점검 버튼을 숨긴다) */
   claudeApiKey: string;
   /** AI 점검 모델 */
   claudeModel: string;
 };
 
-const DEFAULTS: Settings = { teacherMode: false, fakeBoard: false, claudeApiKey: "", claudeModel: DEFAULT_MODEL };
+const DEFAULTS: Settings = { teacherMode: false, fakeBoard: false, explainGate: false, claudeApiKey: "", claudeModel: DEFAULT_MODEL };
 
 function read(): Settings {
   try {
@@ -25,6 +27,7 @@ function read(): Settings {
     return {
       teacherMode: data.teacherMode === true,
       fakeBoard: data.fakeBoard === true,
+      explainGate: data.explainGate === true,
       claudeApiKey: typeof data.claudeApiKey === "string" ? data.claudeApiKey : "",
       claudeModel: typeof data.claudeModel === "string" && data.claudeModel.trim() ? data.claudeModel : DEFAULT_MODEL,
     };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canComplete, explainableLines, gradeReadCheck, isEditorStep, parseGiven } from "./completion";
+import { awaitingExplain, canComplete, explainableLines, gradeReadCheck, isEditorStep, judgePassed, onEditedProgram, parseGiven, type MissionInput } from "./completion";
 import type { ReadQuestion, Step, StepOf } from "./schema";
 
 const problem: StepOf<"problem"> = { id: "p", type: "problem", title: "p", questions: ["a?", "b?"] };
@@ -66,5 +66,73 @@ describe("gradeReadCheck", () => {
 describe("explainableLines", () => {
   it("빈 줄과 주석 줄은 뺀다", () => {
     expect(explainableLines("import time\n\n# 주석\n  x = 1\n")).toEqual([1, 4]);
+  });
+});
+
+describe("1분 설명 관문 (explainGate)", () => {
+  const mission: Step = { id: "m", type: "mission", title: "m", instructions: "하세요", rules: [{ codeMatches: "x", fail: "x?" }] };
+  const debug: Step = {
+    id: "d",
+    type: "debug",
+    title: "d",
+    symptoms: [
+      { title: "a", code: "x = 1", question: "왜?", rules: [] },
+      { title: "b", code: "y = 1", question: "왜?", rules: [] },
+    ],
+    rules: [],
+  };
+  const on = { explainGate: true };
+  const off = { explainGate: false };
+
+  it("mission: 관문이 꺼져 있으면 판정 통과만으로 완료 (explained 는 보지 않는다)", () => {
+    expect(canComplete(mission, { passed: true })).toBe(true);
+    expect(canComplete(mission, { passed: true }, off)).toBe(true);
+    expect(canComplete(mission, { passed: true, explained: false }, off)).toBe(true);
+    expect(canComplete(mission, { passed: false, explained: true }, off)).toBe(false);
+  });
+  it("mission: 관문이 켜져 있으면 passed 와 explained === true 가 모두 있어야 한다", () => {
+    expect(canComplete(mission, { passed: true }, on)).toBe(false);
+    expect(canComplete(mission, { passed: true, explained: false }, on)).toBe(false);
+    expect(canComplete(mission, { passed: true, explained: true }, on)).toBe(true);
+    // 교사 확인만 있고 판정은 통과하지 않았다면 완료 불가
+    expect(canComplete(mission, { passed: false, explained: true }, on)).toBe(false);
+  });
+  it("debug: 모든 증상 통과 + (관문이 켜져 있으면) 단계 하나의 explained", () => {
+    expect(canComplete(debug, { passed: [true, true] }, off)).toBe(true);
+    expect(canComplete(debug, { passed: [true, true] }, on)).toBe(false);
+    expect(canComplete(debug, { passed: [true, true], explained: true }, on)).toBe(true);
+    expect(canComplete(debug, { passed: [true, false], explained: true }, on)).toBe(false);
+  });
+  it("다른 유형은 관문과 무관하다", () => {
+    expect(canComplete(run, { ran: true }, on)).toBe(true);
+    expect(canComplete(problem, { answers: ["가", "나"] }, on)).toBe(true);
+  });
+
+  it("judgePassed: mission·debug 의 판정 통과만 본다", () => {
+    expect(judgePassed(mission, { passed: true })).toBe(true);
+    expect(judgePassed(mission, {})).toBe(false);
+    expect(judgePassed(debug, { passed: [true, true] })).toBe(true);
+    expect(judgePassed(debug, { passed: [true] })).toBe(false);
+    expect(judgePassed(run, { ran: true })).toBe(false);
+  });
+  it("awaitingExplain(확인 대기): 관문이 켜져 있고 판정은 통과했는데 explained 가 없을 때만", () => {
+    expect(awaitingExplain(mission, { passed: true }, on)).toBe(true);
+    expect(awaitingExplain(mission, { passed: true, explained: true }, on)).toBe(false);
+    expect(awaitingExplain(mission, { passed: false }, on)).toBe(false);
+    expect(awaitingExplain(mission, { passed: true }, off)).toBe(false);
+    expect(awaitingExplain(mission, { passed: true })).toBe(false);
+    expect(awaitingExplain(debug, { passed: [true, true] }, on)).toBe(true);
+    expect(awaitingExplain(debug, { passed: [true, false] }, on)).toBe(false);
+    expect(awaitingExplain(run, { ran: true }, on)).toBe(false);
+  });
+  it("onEditedProgram: 교사 확인을 받은 뒤 코드를 바꾸면 explained 도 지운다", () => {
+    const confirmed: MissionInput = { passed: true, failures: [], judgedCode: "ok\n", explained: true };
+    expect(canComplete(mission, confirmed, on)).toBe(true);
+    const same = { ...confirmed, ...onEditedProgram(confirmed, { code: "ok\n" }) };
+    expect(same.explained).toBe(true);
+    const edited = { ...confirmed, ...onEditedProgram(confirmed, { code: "changed\n" }) };
+    expect(edited.explained).toBeUndefined();
+    expect(edited.passed).toBe(false);
+    expect(canComplete(mission, edited, on)).toBe(false);
   });
 });
