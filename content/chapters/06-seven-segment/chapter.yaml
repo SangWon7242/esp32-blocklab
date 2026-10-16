@@ -180,8 +180,14 @@ parts:
         hint: range(시작, 끝, 걸음) 에서 끝 숫자는 세지 않아요. 0 까지 보이려면 끝은 몇이어야 할까요? 하나씩 줄어들려면 걸음은요?
         code: step1_digits_0_9.py
         rules:
-          - codeEquals: { file: mission_countdown.py }
+          - codeMatches: '^ *for \w+ in (?:range\(\s*9\s*,\s*-\s*1\s*,\s*-\s*1\s*\)|reversed\(\s*range\(\s*(?:10|0\s*,\s*10)\s*\)\s*\))\s*:'
             fail: 지금 range 는 몇에서 시작해서 몇에서 멈추나요? 0 도 보이려면 끝 숫자는 무엇이어야 할까요? 거꾸로 가려면 걸음은요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*for \w+ in range\(\s*(?:10|0\s*,\s*10)\s*\)\s*:)'
+            fail: 0 부터 차례로 세는 range 가 아직 남아 있지 않나요?
+          - codeMatches: 'for \w+ in range\(\s*7\s*,\s*-\s*1\s*,\s*-\s*1\s*\)\s*:'
+            fail: 칩에 여덟 칸을 밀어 넣는 hc595_shift 안의 range 는 그대로 두었나요?
+          - codeMatches: '^( +)for (\w+) in (?:range\(\s*9|reversed)[^\n]*:\n\1( +)show_digit\(\2,\s*False\)\n\1\3time\.sleep_ms\(\s*500\s*\)'
+            fail: 꺼낸 숫자를 튜브에 보여 주는 줄과 0.5초 기다리는 줄은 그대로인가요?
         answerCode: mission_countdown.py
 
       - id: extra1
@@ -204,8 +210,12 @@ parts:
         hint: "show_digit(숫자, 점) 의 두 번째 값이 False 면 점을 끄고, True 면 켜요. 블록에서는 점 칸을 \"켜기\" 로 고르면 돼요"
         code: step1_digits_0_9.py
         rules:
-          - codeEquals: { file: extra1_with_dot.py }
-            fail: 칩으로 보내는 코드에 점 칸이 들어 있나요? 숫자 코드와 점 코드를 무엇으로 합쳤나요? 다른 줄은 그대로인가요?
+          - codeMatches: '^( +)for (\w+) in range\(\s*(?:10|0\s*,\s*10)\s*\)\s*:\n\1( +)show_digit\(\2,\s*True\)\n\1\3time\.sleep_ms\(\s*500\s*\)'
+            fail: 숫자를 보여 주는 줄에서 점 칸은 어떻게 되어 있나요? 점을 켜려면 두 번째 값이 무엇이어야 할까요? 0~9 반복과 0.5초 기다리기는 그대로인가요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*show_digit\(\w+,\s*False\))'
+            fail: 점을 끄는 쪽으로 보여 주는 줄이 아직 남아 있지 않나요?
+          - codeMatches: 'hc595_shift\(\s*SEGCODE\[\w+\]\s*\|\s*\(\s*0x80 if \w+ else 0\s*\)\s*\)'
+            fail: 숫자 코드와 점 코드를 합치는 show_digit 안은 그대로인가요?
         answerCode: extra1_with_dot.py
 
       - id: extra2

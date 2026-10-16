@@ -159,8 +159,15 @@ parts:
         hint: 바꿀 곳은 "초 기다리기"(time.sleep) 두 군데예요. 둘 중 어느 쪽이 LED가 켜진 채로 기다리는 곳일까요? 바로 위가 켜기인지 끄기인지 보세요
         code: step4_blink_loop.py
         rules:
-          - codeEquals: { file: mission1_slow_blink.py }
+          - codeMatches: '^ +(\w+)\.value\(1\)\n +time\.sleep\(2(?:\.0)?\)'
             fail: 켜진 시간과 꺼진 시간이 다른가요? time.sleep 숫자를 다시 보세요
+          - codeMatches: '^ +(\w+)\.value\(0\)\n +time\.sleep\(1(?:\.0)?\)'
+            fail: LED 를 끈 바로 다음에 기다리는 시간은 지시문과 같나요?
+          - codeMatches: '^while True\s*:'
+            fail: 켜고 끄기가 계속 되풀이되나요? 끝없이 반복하는 블록 안에 들어 있나요?
+          - codeMatches: 'Pin\(\s*26\s*,\s*Pin\.OUT\s*\)'
+            fail: LED 핀을 출력으로 준비하는 줄이 그대로 있나요?
+        answerCode: mission1_slow_blink.py
 
       - id: design
         type: design

@@ -227,8 +227,12 @@ parts:
         hint: 다섯 번을 정하는 줄은 어디에 있나요? 1장에서 LED를 끝없이 깜빡이게 할 때 쓴 반복을 떠올려 보세요
         code: step2_sequence.py
         rules:
-          - codeEquals: { file: mission_forever.py }
-            fail: 선풍기가 아직 정해진 횟수만큼만 돌고 끝나지 않나요? test() 안은 그대로 두었나요?
+          - codeMatches: '^while True\s*:\n +test\(\)'
+            fail: test() 를 횟수 없이 계속 되풀이하는 반복이 있나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*for \w+ in range\([^)]*\)\s*:\n +test\(\))'
+            fail: 선풍기가 아직 정해진 횟수만큼만 돌고 끝나는 반복이 남아 있지 않나요?
+          - codeMatches: 'def test\(\)\s*:\n( +)forward\(\)\n\1time\.sleep\(5(?:\.0)?\)\n\1stop\(\)\n\1time\.sleep\(2(?:\.0)?\)\n\1backward\(\)\n\1time\.sleep\(5(?:\.0)?\)\n\1stop\(\)\n\1time\.sleep\(2(?:\.0)?\)'
+            fail: test() 안은 그대로 두었나요?
         answerCode: mission_forever.py
 
       - id: extra1
@@ -250,8 +254,12 @@ parts:
         instructions: test() 안에서 뒤로 도는 부분을 지워, 앞으로 5초 돌고 2초 쉬기만 계속 되풀이하게 해 주세요
         code: mission_forever.py
         rules:
-          - codeEquals: { file: extra1_one_way.py }
-            fail: test() 안에 뒤로 도는 부분이 남아 있지 않나요? 앞으로 돌고 쉬는 줄은 남겨 두었나요?
+          - codeMatches: 'def test\(\)\s*:\n( +)forward\(\)\n\1time\.sleep\(5(?:\.0)?\)\n\1stop\(\)\n\1time\.sleep\(2(?:\.0)?\)(?:\n(?!\1)|(?![\s\S]))'
+            fail: test() 안에 앞으로 돌기 · 기다리기 · 멈추기 · 기다리기 네 줄만 남아 있나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*^ +backward\(\))'
+            fail: test() 안에 뒤로 도는 부분이 남아 있지 않나요?
+          - codeMatches: '^while True\s*:\n +test\(\)'
+            fail: 계속 되풀이하는 반복은 그대로인가요?
         answerCode: extra1_one_way.py
 
       - id: extra2
