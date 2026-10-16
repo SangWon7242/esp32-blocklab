@@ -5,6 +5,7 @@ import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { onEditedProgram, type MissionInput } from "@/track/completion";
 import { judge } from "@/track/judge";
+import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { JudgePanel } from "./JudgePanel";
 import type { StepProps } from "./types";
@@ -22,16 +23,20 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
     const program = editor.current?.getProgram();
     if (!program) return;
     const result = judge(step.rules, { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    // 주의(검사 warning·준비만 한 장치·시작 코드 그대로)는 통과했을 때만 모은다. 완료를 막지 않는다
+    const notes = result.pass ? judgeNotes({ program, startCode, rules: step.rules }) : undefined;
     update((cur) => ({
       program: { code: program.code, blocksJson: program.blocksJson },
       passed: result.pass,
       failures: result.failures,
       failedOnce: cur.failedOnce || !result.pass,
       judgedCode: program.code,
+      notes,
     }), { attempt: true });
   };
 
-  const initial = m.program?.code ?? (step.code ? chapter.files[step.code] : undefined) ?? "";
+  const startCode = step.code ? chapter.files[step.code] : undefined;
+  const initial = m.program?.code ?? startCode ?? "";
   return (
     <div className="flex flex-1 flex-col gap-4">
       <section className="rounded-lg border p-4">
@@ -48,7 +53,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
           </Button>
         )}
       </section>
-      <JudgePanel onJudge={onJudge} failures={m.failures} passed={m.passed} passText="통과했어요. 아래 완료를 누르세요." />
+      <JudgePanel onJudge={onJudge} failures={m.failures} passed={m.passed} passText="통과했어요. 아래 완료를 누르세요." notes={m.notes} />
       <TrackEditor
         fill
         ref={editor}

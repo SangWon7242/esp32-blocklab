@@ -78,6 +78,23 @@ test("미션 단계: 판정 실패 → 힌트 → 코드 모드에서 고치기 
   await expect(page.getByTestId("code-panel")).toContainText('print("가까워요!")');
 });
 
+test("미션 단계: 통과한 판정에 주의(기다리기 없는 반복·준비만 한 장치)가 붙어도 완료는 그대로 된다", async ({ page }) => {
+  await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1"]);
+  await openStep(page, "mission1");
+  await expect(page.getByTestId("judge-notes")).toHaveCount(0);
+
+  // 규칙은 통과하지만 trig 를 준비만 하고, 반복 안에 기다리기가 없다
+  await replaceCode(page, 'from machine import Pin\ntrig = Pin(13, Pin.OUT)\nd = 20\nwhile True:\n    if d < 15:\n        print("가까워요!")\n');
+  await button(page, "판정").click();
+  await expect(page.getByText("통과했어요")).toBeVisible();
+  await expect(page.getByTestId("judge-failures")).toHaveCount(0);
+  const notes = page.getByTestId("judge-notes");
+  await expect(notes).toContainText("주의 (통과에는 영향 없음)");
+  await expect(notes).toContainText("반복 안에 기다리기가 없으면 보드가 바빠져요");
+  await expect(notes).toContainText("trig 는 준비만 하고 쓰지 않았어요");
+  await expect(button(page, "완료")).toBeEnabled();
+});
+
 test("디버깅 단계: 설명을 저장하기 전에는 잠겨 있고, 저장하면 고장 코드가 실린 편집기로 고쳐서 통과한다", async ({ page }) => {
   await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1", "mission1"]);
   await page.goto(`/#/track/${CHAPTER}/debug1?device=fake`);
