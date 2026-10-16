@@ -204,12 +204,20 @@ parts:
             fail: 경고 LED는 몇 번 핀에 꽂았나요? 코드에 그 핀을 LED(led)로 준비하는 줄이 있나요?
           - codeMatches: '^\s+d\s*=\s*get_distance\(\)$'
             fail: 거리를 한 번 재서 d 에 담아 두었나요? 그래야 출력과 판단에 같은 숫자를 쓸 수 있어요
-          - codeMatches: '^\s+if d\s*<\s*15\s*:$'
+          - codeMatches: '^\s+if (?:d\s*<\s*15|15\s*>\s*d)\s*:$'
             fail: LED를 켤지 정하는 if 줄이 있나요? 15 보다 작을 때예요
           - codeMatches: '^\s+else\s*:$'
             fail: 손이 15cm 밖으로 나가면 LED는 어떻게 되어야 할까요? 한 번 켠 LED는 누가 끌까요?
-          - codeEquals: { file: mission_near_led.py }
-            fail: 지시와 하나씩 비교해 보세요. d 와 "cm" 를 함께 찍나요? 기다리는 시간은 0.5초 그대로인가요? 켜기와 끄기가 맞는 쪽에 있나요?
+          - codeMatches: '^led\s*=\s*Pin\(\s*26\s*,\s*Pin\.OUT\s*\)'
+            fail: LED 는 보드가 신호를 내보내는 쪽인가요, 받는 쪽인가요? 준비하는 줄에 그것이 적혀 있나요?
+          - codeMatches: 'print\(\s*d\s*,\s*"cm"\s*\)'
+            fail: 잰 거리 d 와 "cm" 를 함께 찍고 있나요?
+          - codeMatches: 'if (?:d\s*<\s*15|15\s*>\s*d)\s*:\n\s+led\.value\(1\)'
+            fail: 15 보다 가까울 때 LED 는 켜져야 할까요, 꺼져야 할까요? if 안에서 LED 에게 무엇을 시키나요?
+          - codeMatches: 'else\s*:\n\s+led\.value\(0\)'
+            fail: 15 이상일 때 LED 에게 무엇을 시키나요? else 안에 켜기와 끄기 가운데 어느 것이 있나요?
+          - codeMatches: '^\s+time\.sleep_ms\(\s*500\s*\)|^\s+time\.sleep\(\s*0\.5\s*\)'
+            fail: 0.5초 기다리기는 지금처럼 남아 있나요?
         answerCode: mission_near_led.py
 
       - id: debug

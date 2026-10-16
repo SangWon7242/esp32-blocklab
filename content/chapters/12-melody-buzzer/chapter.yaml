@@ -246,12 +246,20 @@ parts:
         hint: "기다리는 시간도 계산할 수 있어요. 한 박이 0.4초면 beats[i] 박은 몇 초일까요? 진동수 자리에는 hz 대신 무엇이 들어가야 할까요?"
         code: step2_notes.py
         rules:
-          - codeMatches: 'beats = \['
+          - codeMatches: '^notes\s*=\s*\[\s*262\s*,\s*262\s*,\s*392\s*,\s*392\s*,\s*440\s*,\s*440\s*,\s*392\s*\]'
+            fail: notes 의 일곱 칸이 도 도 솔 솔 라 라 솔의 진동수인가요? 주파수표와 한 칸씩 맞춰 보세요
+          - codeMatches: '^beats\s*=\s*\['
             fail: 박자를 담을 목록을 만들었나요? 이름은 무엇으로 하기로 했나요?
+          - codeMatches: '^beats\s*=\s*\[\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*1\s*,\s*2\s*\]'
+            fail: beats 의 칸 수가 notes 와 같나요? 마지막 솔은 몇 박인가요?
           - codeMatches: 'for i in range\(len\(notes\)\):'
             fail: 음과 박자를 같은 칸 번호로 함께 꺼내려면, for 가 숫자를 꺼내야 할까요, 칸 번호를 꺼내야 할까요?
-          - codeEquals: { file: mission_twinkle.py }
-            fail: 일곱 음의 진동수가 주파수표와 맞나요? notes 와 beats 의 칸 수가 같나요? 기다리는 시간에 박자를 넣었나요?
+          - codeMatches: '\w+\.freq\(\s*notes\[\s*i\s*\]\s*\)'
+            fail: 진동수 자리에 들어가는 것이 i번째 음인가요? 목록의 i번째 칸은 어떻게 꺼내나요?
+          - codeMatches: 'time\.sleep\(\s*(?:beats\[\s*i\s*\]\s*\*\s*0\.4|0\.4\s*\*\s*beats\[\s*i\s*\])\s*\)'
+            fail: 음마다 울리는 시간이 박자에 따라 달라지나요? 한 박이 0.4초면 i번째 음은 몇 초 울려야 할까요?
+          - codeMatches: '^\s+time\.sleep\(0\.1\)'
+            fail: 음과 음 사이의 0.1초 쉼은 그대로 남아 있나요?
         answerCode: mission_twinkle.py
 
       - id: extra1

@@ -246,12 +246,18 @@ parts:
             fail: LED 는 몇 번 핀에 꽂았나요? 그 핀을 led 라는 이름으로 준비했나요?
           - codeMatches: '^led = PWM\(Pin\(26\)\)$'
             fail: 켜기·끄기만 하는 핀으로 밝기를 여러 단계로 바꿀 수 있을까요? 2장에서는 어떻게 준비했나요?
-          - codeMatches: '\(\(knob\.read\(\)\s*-\s*0\)\s*\*\s*\(1023\s*-\s*0\)\s*//\s*\(4095\s*-\s*0\)\s*\+\s*0\)'
+          - codeMatches: '^led\.freq\(\s*1000\s*\)'
+            fail: 밝기 조절 LED 는 1초에 몇 번 켜고 끄게 준비했나요? 2장의 숨쉬는 LED 는 어떻게 했나요?
+          - codeMatches: '\(\((?:knob\.read\(\)|\w+)\s*-\s*0\)\s*\*\s*\(1023\s*-\s*0\)\s*//\s*\(4095\s*-\s*0\)\s*\+\s*0\)'
             fail: 다이얼 값의 범위와 LED 세기의 범위는 각각 어디부터 어디까지인가요? 범위 바꾸기의 네 칸에 그 숫자가 들어갔나요?
+          - codeMatches: '^\s+duty\s*=\s*\(\('
+            fail: 범위를 바꾼 숫자를 duty 라는 이름에 담아 두었나요?
           - codeMatches: '^\s+led\.duty\(duty\)$'
             fail: 바꾼 숫자를 LED 세기로 보냈나요?
-          - codeEquals: { file: mission_dimmer.py }
-            fail: 반복 안에 남은 줄을 하나씩 세어 보세요. 바꾸기 → 세기 정하기 → 기다리기 말고 다른 줄이 남아 있지 않나요? 기다리는 시간은 몇 밀리초인가요?
+          - codeMatches: '^\s+time\.sleep_ms\(\s*20\s*\)|^\s+time\.sleep\(\s*0\.02\s*\)'
+            fail: LED 세기를 정한 뒤 얼마나 기다리나요? 지시에서 정한 시간은 몇 밀리초였나요?
+          - codeMatches: '^(?<![\s\S])(?![\s\S]*time\.sleep\(0\.5\))'
+            fail: 다이얼을 돌리면 LED 가 바로 따라오나요? 반복 한 바퀴에 기다리는 시간이 20밀리초뿐인가요?
         answerCode: mission_dimmer.py
 
       - id: debug

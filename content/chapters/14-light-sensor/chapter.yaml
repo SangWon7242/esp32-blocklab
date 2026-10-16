@@ -244,8 +244,20 @@ parts:
             fail: 갈림길이 세 개라면 if 와 else 사이에 무엇이 하나 더 필요할까요?
           - useBlock: ["judge_between"]
             fail: "\"보통\"은 1000 과 2500 사이의 값이에요. 두 숫자 사이에 있는지 한 번에 묻는 판단 블록이 있었나요?"
-          - codeEquals: { file: mission_three_levels.py }
-            fail: 구간마다 출력하는 글자와 LED가 하는 일이 지시와 같나요? 보통일 때 LED는 몇 초 켜져 있나요? 경계 숫자 1000 과 2500 은 그대로인가요?
+          - codeMatches: 'if\s+(?:\w+\s*>\s*2500|2500\s*<\s*\w+)\s*:\n(?:\s+print\("어두움"\)\n\s+led\.value\(1\)|\s+led\.value\(1\)\n\s+print\("어두움"\))'
+            fail: 값이 2500 보다 클 때 무엇을 출력하고 LED 는 어떻게 하나요? 그 두 줄이 그 갈림길 안에 있나요?
+          - codeMatches: 'elif\s+(?:1000\s*<=\s*\w+\s*<=\s*2500|2500\s*>=\s*\w+\s*>=\s*1000|\w+\s*>=\s*1000\s+and\s+\w+\s*<=\s*2500|\w+\s*<=\s*2500\s+and\s+\w+\s*>=\s*1000)\s*:'
+            fail: 보통 구간은 어느 숫자부터 어느 숫자까지인가요? elif 의 조건이 그 사이를 묻고 있나요?
+          - codeMatches: '^\s+print\("보통"\)'
+            fail: 1000 이상 2500 이하일 때 출력하는 말은 무엇인가요?
+          - codeMatches: 'print\("보통"\)\n\s+led\.value\(1\)\n\s+time\.sleep\(0\.2\)\n\s+led\.value\(0\)|led\.value\(1\)\n\s+time\.sleep\(0\.2\)\n\s+led\.value\(0\)\n\s+print\("보통"\)'
+            fail: 보통일 때 LED 는 몇 초 켜졌다가 꺼지나요? 켜기와 끄기 사이에 무엇이 있어야 깜빡일까요?
+          - codeMatches: 'else\s*:\n(?:\s+print\("밝음"\)\n\s+led\.value\(0\)|\s+led\.value\(0\)\n\s+print\("밝음"\))'
+            fail: 그 밖(밝을 때)에는 무엇을 출력하고 LED 는 어떻게 하나요? 그 두 줄이 else 안에 있나요?
+          - codeMatches: '^\s+print\(\w+\)$'
+            fail: 센서 값을 그대로 찍는 줄은 지금처럼 남아 있나요?
+          - codeMatches: '^\s+time\.sleep\(0\.5\)'
+            fail: 반복 한 바퀴 끝의 0.5초 기다리기는 지금처럼 남아 있나요?
         answerCode: mission_three_levels.py
 
       - id: debug

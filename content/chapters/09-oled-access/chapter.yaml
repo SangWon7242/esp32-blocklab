@@ -1,5 +1,5 @@
 # 챕터 9 · OLED 출입 화면 — 수업 저장소 09_OLED출입화면. 형식 설명은 src/track/README.md
-# 미션 판정의 codeEquals 는 tolerance 255: 학생마다 카드 번호(0~255 숫자 넷)가 달라도 통과하게. 카운트다운의 숫자는 따로 규칙으로 본다
+# 미션 판정은 codeMatches 규칙만 쓴다(정답 파일과 통째로 비교하지 않음): 학생마다 카드 번호(allowed)가 달라도, 여분의 줄이 있어도 지시한 일만 맞으면 통과한다
 id: 09-oled-access
 order: 9
 track: fusion
@@ -271,8 +271,16 @@ parts:
             fail: '반복 안에서 남은 시간을 화면에 보여 주나요? 숫자 t 를 "Close: " 뒤에 붙이려면 무엇으로 바꿔야 할까요?'
           - codeMatches: 'str\(t\)\)\n\s+time\.sleep\(1\)'
             fail: 숫자 하나를 보여 준 뒤 얼마나 기다려야 세 번 합쳐 3초가 될까요?
-          - codeEquals: { file: mission_countdown.py, tolerance: 255 }
-            fail: 남은 곳이 있어요. 반복이 끝난 뒤 문을 닫나요? 모르는 카드일 때 3초 기다리나요? 맨 아래 time.sleep(3) 줄은 어떻게 했나요?
+          - codeMatches: 'servo\.duty_u16\(8100\)\n\s+for t in range\(3, 0, -1\):'
+            fail: 카운트다운이 시작될 때 문은 이미 열려 있나요? 문을 여는 줄과 반복 줄 가운데 무엇이 먼저인가요?
+          - codeMatches: '^(\s+)for t in range\(3, 0, -1\):\n(?:\1\s+.*\n)+(?:\1\S.*\n)*?\1servo\.duty_u16\(1638\)'
+            fail: 반복이 모두 끝난 뒤에 문을 닫나요? 닫는 줄이 반복 안에 들어가 있으면 몇 번 닫힐까요?
+          - codeMatches: '^(?<![\s\S])(?![\s\S]*"ACCESS OK")'
+            fail: 등록된 카드일 때 화면에는 카운트다운만 보여야 해요. 예전 ACCESS OK 화면이 아직 남아 있지 않나요?
+          - codeMatches: 'show\("DENIED", "Unknown card"\)\n\s+time\.sleep\(3\)'
+            fail: 모르는 카드일 때 DENIED 화면은 몇 초 동안 보여야 하나요? 그만큼 기다리는 줄이 DENIED 다음에 있나요?
+          - codeMatches: '^(\s+)\s+\S.*\n\1show\("Tag your", "card\.\.\."\)'
+            fail: 두 갈림길이 각자 기다린 뒤에는 바로 대기 화면으로 돌아가야 해요. 맨 아래 time.sleep(3) 줄은 어떻게 했나요?
         answerCode: mission_countdown.py
 
       - id: debug
@@ -413,12 +421,14 @@ parts:
         rules:
           - codeMatches: '^count = 0'
             fail: 열린 횟수를 세어 둘 이름을 처음에 무엇으로 정해 두었나요?
-          - codeMatches: 'count = count \+ 1'
+          - codeMatches: 'count\s*(?:=\s*count\s*\+\s*1|\+=\s*1)'
             fail: 문이 열릴 때마다 count 가 하나씩 늘어나나요?
           - codeMatches: 'show\("OPEN", "No\. "\s*\+\s*str\(count\)\)'
             fail: 화면에 번호를 보여 주나요? 숫자 count 를 "No. " 뒤에 붙이려면 무엇으로 바꿔야 할까요?
-          - codeEquals: { file: extra1_count.py, tolerance: 255 }
-            fail: 남은 곳이 있어요. count 에 1 을 더하는 줄은 화면에 보여 주는 줄보다 앞에 있나요? ACCESS OK 줄은 지웠나요?
+          - codeMatches: 'if uid in allowed:\n\s+count\s*(?:=\s*count\s*\+\s*1|\+=\s*1)\n\s+show\("OPEN", "No\. "\s*\+\s*str\(count\)\)'
+            fail: 등록된 카드일 때 맨 먼저 하는 일이 무엇인가요? 번호를 화면에 보여 주기 전에 하나 더해 두었나요?
+          - codeMatches: '^(?<![\s\S])(?![\s\S]*"ACCESS OK")'
+            fail: 화면에 OPEN 과 번호가 보이나요? 예전 ACCESS OK 화면이 아직 남아 있지 않나요?
         answerCode: extra1_count.py
 
       - id: reflect

@@ -258,8 +258,12 @@ parts:
             fail: 부저를 켜기만 하면 소리가 끊어지지 않아요. "삐삐"가 되려면 켜기와 끄기 사이, 끄기 다음에 무엇이 있어야 할까요?
           - codeMatches: 'else:\n\s+led\.value\(0\)\n\s+buzzer\.value\(0\)'
             fail: 바로 세웠을 때 부저에게 무엇을 시키나요? 아무것도 안 시키면 부저는 어떤 상태로 남을까요?
-          - codeEquals: { file: mission_fall_alarm.py }
-            fail: 지시와 줄 순서가 같은가요? 부저 준비는 LED 준비 다음 줄인가요? 출력 줄과 0.1초 쉬기는 그대로 남아 있나요?
+          - codeMatches: '^buzzer\s*=\s*Pin\(\s*15\s*,\s*Pin\.OUT\s*\)'
+            fail: 부저는 보드가 신호를 내보내는 쪽인가요, 받는 쪽인가요? 준비하는 줄에 그것이 적혀 있나요?
+          - codeMatches: 'led\.value\(1\)\n\s+buzzer\.value\(1\)'
+            fail: 기울었을 때 LED 와 부저 가운데 무엇을 먼저 하기로 했나요? 그 둘이 같은 갈림길 안에 있나요?
+          - codeMatches: '^\s+print\(\w+\.value\(\)\)[\s\S]*^\s+time\.sleep\(0\.1\)'
+            fail: 틸트 값 출력과 0.1초 쉬기는 그대로 남아 있나요?
         answerCode: mission_fall_alarm.py
 
       - id: debug
