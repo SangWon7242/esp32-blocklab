@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cwp-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cwp-title">오늘 기계의 핀 표: RGB LED 빨강 red 27번(빨간불), 초록 green 25번(초록불), 파랑 blue 26번(오늘은 안 켬), 수동 부저 beeper 15번(건너라는 소리), 초음파 Trig trig 13번(소리 쏘기), 초음파 Echo echo 12번(메아리 듣기), 서보 모터 servo 4번(차단기, 주황 신호선). 준비하는 줄의 Pin( ) 안 숫자가 핀 번호다</title>
+  <text x="40" y="38" font-size="16" font-weight="700" fill="currentColor" stroke="none">오늘 기계의 핀 표</text>
+  <rect x="40" y="56" width="560" height="248" rx="10" fill="var(--card)"/>
+  <rect x="40" y="56" width="560" height="30" rx="10" fill="currentColor" fill-opacity="0.08" stroke="none"/>
+  <g font-size="13" font-weight="700" fill="currentColor" stroke="none">
+    <text x="56" y="77">부품</text>
+    <text x="236" y="77">코드 이름</text>
+    <text x="352" y="77">핀</text>
+    <text x="424" y="77">하는 일</text>
+  </g>
+  <path d="M40 86 H600" stroke-opacity="0.6"/>
+  <path d="M40 117 H600 M40 148 H600 M40 179 H600 M40 210 H600 M40 241 H600 M40 272 H600" stroke-opacity="0.2"/>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <circle cx="62" cy="103" r="5" fill="#e03131"/><text x="76" y="107">RGB LED 빨강</text><text x="236" y="107" font-weight="700">red</text><text x="352" y="107" font-weight="700">27</text><text x="424" y="107">빨간불</text>
+    <circle cx="62" cy="134" r="5" fill="#2f9e44"/><text x="76" y="138">RGB LED 초록</text><text x="236" y="138" font-weight="700">green</text><text x="352" y="138" font-weight="700">25</text><text x="424" y="138">초록불</text>
+    <circle cx="62" cy="165" r="5" fill="#1971c2"/><text x="76" y="169">RGB LED 파랑</text><text x="236" y="169" font-weight="700">blue</text><text x="352" y="169" font-weight="700">26</text><text x="424" y="169" fill-opacity="0.7">오늘은 안 켬</text>
+    <circle cx="62" cy="196" r="5" fill="#9c36b5"/><text x="76" y="200">수동 부저</text><text x="236" y="200" font-weight="700">beeper</text><text x="352" y="200" font-weight="700">15</text><text x="424" y="200">건너라는 소리</text>
+    <circle cx="62" cy="227" r="5" fill="#2f9e44" fill-opacity="0.5"/><text x="76" y="231">초음파 Trig</text><text x="236" y="231" font-weight="700">trig</text><text x="352" y="231" font-weight="700">13</text><text x="424" y="231">소리 쏘기</text>
+    <circle cx="62" cy="258" r="5" fill="#1971c2" fill-opacity="0.5"/><text x="76" y="262">초음파 Echo</text><text x="236" y="262" font-weight="700">echo</text><text x="352" y="262" font-weight="700">12</text><text x="424" y="262">메아리 듣기</text>
+    <circle cx="62" cy="289" r="5" fill="#f76707"/><text x="76" y="293">서보 모터</text><text x="236" y="293" font-weight="700">servo</text><text x="352" y="293" font-weight="700">4</text><text x="424" y="293">차단기 (주황 신호선)</text>
+  </g>
+  <text x="320" y="334" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">준비하는 줄 이름 = PWM(Pin(번호)) 의 번호가 핀이에요. 5V · GND 선은 표에 없어요</text>
+</svg>

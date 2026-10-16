@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="cwc-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="cwc-title">보행자 신호등: 횡단보도 앞 신호등 기둥의 초음파 센서가 다가오는 보행자를 알아채 초록불을 켜고, 건너라는 소리를 내고, 차단기를 올린다</title>
+  <defs>
+    <marker id="cwc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
+    </marker>
+  </defs>
+  <text x="36" y="46" font-size="16" font-weight="700" fill="currentColor" stroke="none">보행자 신호등</text>
+  <text x="36" y="68" font-size="13" fill="currentColor" fill-opacity="0.7" stroke="none">가까이 오면 초록불 · 소리 · 차단기</text>
+  <!-- 길과 횡단보도 -->
+  <path d="M24 304 H616" stroke-width="2.5"/>
+  <g fill="currentColor" fill-opacity="0.14" stroke="none">
+    <rect x="340" y="252" width="22" height="52" rx="3"/>
+    <rect x="378" y="252" width="22" height="52" rx="3"/>
+    <rect x="416" y="252" width="22" height="52" rx="3"/>
+    <rect x="454" y="252" width="22" height="52" rx="3"/>
+    <rect x="492" y="252" width="22" height="52" rx="3"/>
+    <rect x="530" y="252" width="22" height="52" rx="3"/>
+  </g>
+  <text x="446" y="326" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">횡단보도</text>
+  <!-- 차단기 -->
+  <rect x="58" y="246" width="12" height="58" rx="3" fill="var(--muted)"/>
+  <path d="M64 248 L112 176" stroke="#e03131" stroke-width="8"/>
+  <path d="M64 248 L112 176" stroke="var(--card)" stroke-width="5" stroke-dasharray="12 12"/>
+  <text x="24" y="160" font-size="12" fill="currentColor" stroke="none">차단기 90도</text>
+  <!-- 신호등 기둥 -->
+  <rect x="146" y="166" width="8" height="138" fill="var(--muted)"/>
+  <rect x="126" y="70" width="48" height="100" rx="8" fill="#343a40" stroke-width="1.5"/>
+  <circle cx="150" cy="96" r="14" fill="#e03131" fill-opacity="0.25" stroke="#e03131" stroke-opacity="0.5" stroke-width="1.5"/>
+  <circle cx="150" cy="140" r="20" fill="#2f9e44" fill-opacity="0.25" stroke="none"/>
+  <circle cx="150" cy="140" r="14" fill="#2f9e44" stroke-width="1.5"/>
+  <!-- 소리 말풍선 -->
+  <rect x="196" y="92" width="118" height="30" rx="15" fill="var(--card)" stroke-width="1.5"/>
+  <text x="255" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">삐 — 건너세요</text>
+  <path d="M202 120 L182 134" stroke-width="1.5" stroke-opacity="0.6"/>
+  <!-- 초음파 센서 -->
+  <rect x="156" y="186" width="34" height="20" rx="3" fill="#2f9e44" fill-opacity="0.25" stroke-width="1.5"/>
+  <circle cx="165" cy="196" r="5" fill="var(--card)" stroke-width="1.5"/>
+  <circle cx="181" cy="196" r="5" fill="var(--card)" stroke-width="1.5"/>
+  <path d="M206 182 A20 20 0 0 1 206 210" stroke="#1971c2"/>
+  <path d="M226 174 A32 32 0 0 1 226 218" stroke="#1971c2"/>
+  <path d="M246 166 A44 44 0 0 1 246 226" stroke="#1971c2"/>
+  <path d="M270 190 H384" stroke="#1971c2" stroke-dasharray="6 6" marker-end="url(#cwc-arrow)"/>
+  <path d="M384 208 H290" stroke="#1971c2" stroke-dasharray="2 6" marker-end="url(#cwc-arrow)"/>
+  <text x="330" y="176" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">10cm 안에 왔나?</text>
+  <text x="330" y="232" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.7" stroke="none">메아리</text>
+  <!-- 보행자 -->
+  <circle cx="412" cy="150" r="16" fill="var(--card)"/>
+  <path d="M412 166 V232"/>
+  <path d="M412 232 L392 300 M412 232 L436 300" stroke-width="2.5"/>
+  <path d="M412 184 L384 214 M412 184 L444 206" stroke-width="2.5"/>
+  <text x="412" y="130" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">보행자</text>
+  <!-- 기능 칩 -->
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <rect x="356" y="36" width="56" height="24" rx="12" fill="#1971c2" fill-opacity="0.18"/>
+    <text x="384" y="52">거리</text>
+    <rect x="420" y="36" width="48" height="24" rx="12" fill="#2f9e44" fill-opacity="0.2"/>
+    <text x="444" y="52">색</text>
+    <rect x="476" y="36" width="56" height="24" rx="12" fill="#9c36b5" fill-opacity="0.18"/>
+    <text x="504" y="52">소리</text>
+    <rect x="540" y="36" width="68" height="24" rx="12" fill="#f76707" fill-opacity="0.2"/>
+    <text x="574" y="52">차단기</text>
+  </g>
+</svg>
