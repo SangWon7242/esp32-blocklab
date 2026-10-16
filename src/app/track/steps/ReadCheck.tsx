@@ -18,7 +18,7 @@ function answerText(q: ReadQuestion): string {
   return String(q.answer);
 }
 
-export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts }: StepProps<"readcheck">) {
+export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts, readOnly }: StepProps<"readcheck">) {
   const rc = input as ReadCheckInput;
   const answers = rc.answers ?? [];
   const results = rc.results ?? [];
@@ -96,7 +96,7 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
                     <span className={cn("rounded-md border px-2 py-1", activeLine === i && "border-primary")} data-testid={`line-answer-${i}`}>
                       {answers[i] ? `고른 줄: ${answers[i]}번` : "아직 고르지 않았어요"}
                     </span>
-                    {activeLine === i ? (
+                    {readOnly ? null : activeLine === i ? (
                       <span className="flex items-center gap-1 text-muted-foreground"><MousePointerClick className="size-4" />코드의 줄 번호를 눌러 고르세요</span>
                     ) : (
                       <Button variant="outline" size="sm" onClick={() => setActiveLine(i)}>코드에서 줄 고르기</Button>
@@ -118,7 +118,7 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
           })}
         </ol>
         <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={check} disabled={allRight || !allAnswered}>확인</Button>
+          {!readOnly && <Button onClick={check} disabled={allRight || !allAnswered}>확인</Button>}
           {allRight ? (
             <span className="text-sm text-primary">모두 맞았어요. 아래 완료를 누르세요.</span>
           ) : !allAnswered ? (

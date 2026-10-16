@@ -16,7 +16,7 @@ const BOXES = [
   { key: "act", label: "해야 할 것", help: "결국 무엇을 움직이거나 보여 주나요?" },
 ] as const;
 
-export function Analysis({ step, chapter, input, onInput, teacherMode }: StepProps<"analysis">) {
+export function Analysis({ step, chapter, input, onInput, teacherMode, readOnly }: StepProps<"analysis">) {
   const a = input as AnalysisInput;
   const filled = analysisFilled(a);
   const showAnswer = a.revealed === true || teacherMode;
@@ -56,7 +56,7 @@ export function Analysis({ step, chapter, input, onInput, teacherMode }: StepPro
         ))}
       </div>
 
-      {!a.revealed && !teacherMode && (
+      {!a.revealed && !teacherMode && !readOnly && (
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" disabled={!filled} onClick={() => onInput({ ...a, revealed: true })}>
             <Eye className="size-4" />예시 답 보기
@@ -96,7 +96,7 @@ export function Analysis({ step, chapter, input, onInput, teacherMode }: StepPro
             <span>{total}개 중 {matchedCount}개가 내 답에도 있어요.</span>
             {a.revealed && analysisCompared(a) ? (
               <span className="flex items-center gap-1 text-primary"><Check className="size-4" />대조를 마쳤어요. 아래 완료를 누르세요.</span>
-            ) : (
+            ) : readOnly ? null : (
               <>
                 {/* 겹치는 항목이 하나도 없을 때도 대조를 마칠 수 있게 (교사 모드에선 예시 답 보기 버튼 대신) */}
                 <Button size="sm" variant="secondary" disabled={!filled} onClick={() => onInput({ ...a, revealed: true, compared: true })}>

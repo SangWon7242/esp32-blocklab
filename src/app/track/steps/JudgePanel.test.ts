@@ -1,6 +1,6 @@
 import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { renderWithHost } from "@/host/testHost";
 import { JudgePanel } from "./JudgePanel";
 
 /*
@@ -10,8 +10,8 @@ import { JudgePanel } from "./JudgePanel";
 
 const NOTE = "반복 안에 기다리기가 없으면 보드가 바빠져요";
 
-function render(props: Partial<Parameters<typeof JudgePanel>[0]>) {
-  return renderToStaticMarkup(createElement(JudgePanel, { onJudge: () => {}, failures: null, passed: undefined, passText: "통과했어요. 아래 완료를 누르세요.", ...props }));
+function render(props: Partial<Parameters<typeof JudgePanel>[0]>, mode: "student" | "review" = "student") {
+  return renderWithHost(createElement(JudgePanel, { onJudge: () => {}, failures: null, passed: undefined, passText: "통과했어요. 아래 완료를 누르세요.", ...props }), { mode });
 }
 
 describe("JudgePanel 화면", () => {
@@ -103,5 +103,15 @@ describe("JudgePanel — 1분 설명 관문", () => {
     expect(html).toContain("선생님 확인 대기");
     expect(html).toContain('data-testid="judge-notes"');
     expect(html).toContain(`<li>${NOTE}</li>`);
+  });
+});
+
+describe("JudgePanel 열람 모드", () => {
+  it("판정·설명 확인 버튼은 숨고 마지막 결과만 보인다", () => {
+    const html = render({ passed: true, explainGate: { teacherMode: true, explained: false, onConfirm: () => {} }, notes: [NOTE] }, "review");
+    expect(html).not.toContain("판정</button>");
+    expect(html).not.toContain("설명 확인</button>");
+    expect(html).toContain("선생님께 1분 설명을 하고 확인을 받아요");
+    expect(html).toContain('data-testid="judge-notes"');
   });
 });

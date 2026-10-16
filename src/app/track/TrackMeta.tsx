@@ -1,6 +1,6 @@
-import { Link } from "react-router";
 import { BookOpen, CalendarClock, CheckCircle2, Circle, Globe2, Hourglass } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { HostLink, useHost } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import type { Chapter } from "@/track/schema";
 import { prerequisiteViews } from "@/track/tracks";
@@ -54,6 +54,7 @@ export function PrerequisiteList({
   progressChapters: Parameters<typeof prerequisiteViews>[2];
   className?: string;
 }) {
+  const { nav } = useHost();
   const views = prerequisiteViews(chapter, chapters, progressChapters);
   if (!views.length) return null;
   return (
@@ -76,8 +77,8 @@ export function PrerequisiteList({
                   <Badge variant="secondary" className="font-normal">준비 중</Badge>
                 </span>
               ) : (
-                <Link
-                  to={`/track/${p.id}`}
+                <HostLink
+                  to={nav.href.chapter(p.id)}
                   className={cn(
                     "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 transition-colors hover:bg-muted",
                     p.state === "done" && "border-primary/40",
@@ -89,7 +90,7 @@ export function PrerequisiteList({
                     <Circle className="size-3.5 text-muted-foreground" aria-label="아직" />
                   )}
                   {name}
-                </Link>
+                </HostLink>
               )}
             </li>
           );

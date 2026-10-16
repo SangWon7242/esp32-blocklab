@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { reflectMessage } from "@/ai/claude";
 import { explainableLines, type ReflectInput } from "@/track/completion";
 import { AiCheck } from "./AiCheck";
 import type { StepProps } from "./types";
@@ -64,7 +63,7 @@ export function Reflect({ step, chapter, input, onInput }: StepProps<"reflect">)
       </section>
       <AiCheck
         label="내 설명 점검 받기"
-        buildMessage={() => reflectMessage({ code, lines, reflections: step.prompts.map((prompt, i) => ({ prompt, answer: prompts[i] ?? "" })) })}
+        ask={(ai) => ai.reflect({ code, lines, reflections: step.prompts.map((prompt, i) => ({ prompt, answer: prompts[i] ?? "" })) })}
         review={r.ai}
         onReview={(ai) => update(() => ({ ai }))}
       />

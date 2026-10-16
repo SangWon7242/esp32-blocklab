@@ -1,8 +1,8 @@
 import { Fragment, useRef, useState } from "react";
 import { canonicalLines } from "../canonical";
-import { Link } from "react-router";
 import { CheckCircle2, ListChecks, Lock, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { Input } from "@/components/ui/input";
 import { onEditedProgram, type DesignInput } from "@/track/completion";
 import { DESIGN_FAIL, gradeBlanks, scatterStartBody } from "@/track/design";
@@ -23,7 +23,8 @@ function scatteredBlocks(code: string): EditorProgram["blocksJson"] {
  * 설계(Parsons): ① 의사코드 빈칸 → ② 번역표 확인 → ③ 흩어진 블록을 시작 블록에 이어 조립하고 판정.
  * 조립 판정(codeEquals targetCode)을 통과하면 완료할 수 있다.
  */
-export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepProps<"design">) {
+export function DesignStep({ step, chapter, input, onInput, teacherMode, readOnly }: StepProps<"design">) {
+  const { nav } = useHost();
   const d = input as DesignInput;
   const update = useStepInput<DesignInput>(input, onInput);
   const editor = useRef<TrackEditorHandle>(null);
@@ -92,7 +93,7 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
           </ol>
           {d.blanksDone ? (
             <p className="mt-3 flex items-center gap-1 text-sm text-primary"><CheckCircle2 className="size-4" />빈칸을 모두 채웠어요</p>
-          ) : (
+          ) : readOnly ? null : (
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <Button onClick={checkBlanks}><ListChecks className="size-4" />빈칸 확인</Button>
               {results && results.some((r) => r === false) && <span className="text-sm text-destructive" role="status">표시한 빈칸을 다시 생각해 보세요</span>}
@@ -121,7 +122,7 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
             </table>
             {d.tableDone ? (
               <p className="mt-3 flex items-center gap-1 text-sm text-primary"><CheckCircle2 className="size-4" />번역표를 확인했어요</p>
-            ) : (
+            ) : readOnly ? null : (
               <Button className="mt-3" onClick={() => update(() => ({ tableDone: true }))}><CheckCircle2 className="size-4" />확인했어요</Button>
             )}
           </section>
@@ -130,7 +131,7 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
 
       {teacherMode && (
         <Button asChild variant="outline" size="sm">
-          <Link to={`/lab?code=${chapter.id}/${step.targetCode}`}>정답 코드 열기 ({step.targetCode})</Link>
+          <HostLink to={withQuery(nav.href.lab(), { code: `${chapter.id}/${step.targetCode}` })}>정답 코드 열기 ({step.targetCode})</HostLink>
         </Button>
       )}
 
@@ -144,7 +145,8 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode }: StepP
           <TrackEditor
             fill
             ref={editor}
-            initialCode=""
+            // 열람 모드는 편집기 대신 저장한 코드를 보여 주므로 그 코드를 넘긴다
+            initialCode={readOnly ? d.program?.code ?? "" : ""}
             initialBlocks={initialBlocks}
             assemblyMode
             onProgram={(code, blocksJson) => update((cur) => onEditedProgram(cur, { code, blocksJson }))}
