@@ -45,7 +45,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
     if (!program) return;
     const rules = [...symptom.rules, ...step.rules];
     const result = judge(rules, { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
-    // 통과했을 때만 주의를 모은다 (증상 코드는 한두 줄만 고치는 것이라 "거의 바꾸지 않았어요" 는 보지 않는다)
+    // 통과했을 때만 주의를 모은다 (증상 코드는 한두 줄만 고치는 것이라 "바꾸지 않았어요" 는 보지 않는다)
     const notes = result.pass ? judgeNotes({ program, rules }) : null;
     update((cur) => ({
       programs: setAt(cur.programs, current, { code: program.code, blocksJson: program.blocksJson }, null),

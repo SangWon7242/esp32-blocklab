@@ -26,17 +26,18 @@ describe("unusedSetup — 준비만 하고 안 쓴 장치 변수", () => {
   });
 });
 
-describe("leftoverFromStart — 시작 코드를 거의 바꾸지 않았다", () => {
+describe("leftoverFromStart — 시작 코드를 한 줄도 바꾸지 않았다", () => {
   const start = "from machine import Pin\nimport time\nled = Pin(26, Pin.OUT)\nwhile True:\n    led.value(1)\n    time.sleep(1)\n    led.value(0)\n    time.sleep(1)\n    print(1)\n    print(2)\n";
   it("그대로면 주의", () => {
     expect(leftoverFromStart(start, start)).toHaveLength(1);
-    expect(leftoverFromStart(start, start)[0]).toContain("거의 바꾸지 않았어요");
+    expect(leftoverFromStart(start, start)[0]).toContain("바꾸지 않았어요");
   });
-  it("열 줄 가운데 한 줄만 바꿔도(90%) 주의, 두 줄 바꾸면(80%) 없음", () => {
+  it("한 줄만 바꿔도 주의 없음 (지시문이 한 줄만 바꾸라는 미션이 많다)", () => {
     const one = start.replace("time.sleep(1)\n    led.value(0)", "time.sleep(2)\n    led.value(0)");
-    expect(leftoverFromStart(start, one)).toHaveLength(1);
-    const two = one.replace("print(1)", "print(3)");
-    expect(leftoverFromStart(start, two)).toEqual([]);
+    expect(leftoverFromStart(start, one)).toEqual([]);
+  });
+  it("줄을 더하기만 해도 바꾼 것이다", () => {
+    expect(leftoverFromStart(start, start + "    print(3)\n")).toEqual([]);
   });
   it("주석·빈 줄·들여쓰기 차이는 바꾼 것이 아니다", () => {
     const same = start.replace("import time", "import time  # 시간\n\n").replace("    led.value(1)", "        led.value(1)");
@@ -45,7 +46,8 @@ describe("leftoverFromStart — 시작 코드를 거의 바꾸지 않았다", ()
   it("같은 줄이 여럿이면 개수만큼만 짝 지운다 (한 줄만 남기면 바꾼 것)", () => {
     const s = "a()\na()\na()\na()\na()\na()\na()\na()\na()\na()\n";
     expect(leftoverFromStart(s, "a()\n")).toEqual([]);
-    expect(leftoverFromStart(s, "a()\n".repeat(9))).toHaveLength(1);
+    expect(leftoverFromStart(s, "a()\n".repeat(9))).toEqual([]);
+    expect(leftoverFromStart(s, "a()\n".repeat(10))).toHaveLength(1);
   });
   it("규칙에 notHas 가 있으면 그 규칙이 보므로 주의를 내지 않는다", () => {
     const rules = [{ notHas: "time.sleep(1)", fail: "바꿨나요?" }] as unknown as Rule[];

@@ -45,9 +45,9 @@ describe("judgeNotes", () => {
     const notes = judgeNotes({ program: { code }, startCode: code, rules: [{ codeMatches: "x", fail: "x?" }] });
     expect(notes).toEqual([
       "buzzer 는 준비만 하고 쓰지 않았어요. 이 장치가 필요한가요?",
-      "시작 코드를 거의 바꾸지 않았어요. 지시문이 바꾸라고 한 줄은 어디인가요?",
+      "시작 코드를 바꾸지 않았어요. 지시문이 바꾸라고 한 줄은 어디인가요?",
     ]);
-    // 시작 코드가 없으면(디버깅 증상) "거의 바꾸지 않았어요" 는 보지 않는다
+    // 시작 코드가 없으면(디버깅 증상) "바꾸지 않았어요" 는 보지 않는다
     expect(judgeNotes({ program: { code }, rules: [] })).toHaveLength(1);
   });
 });
