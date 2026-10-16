@@ -24,11 +24,29 @@ export {
 
 /* 화면 */
 export { ChapterView, LabView, StepView, TrackListView, type ChapterViewProps, type LabViewProps, type StepViewProps, type TrackListViewProps } from "./views";
-// TODO(A2): 제출·열람 화면과 스냅숏 함수는 A2 가 만든다. 파일이 생기면 주석을 푼다.
-// export { ChapterReviewView } from "@/app/track/ChapterReviewView";
-// export { ProjectPreview } from "@/app/track/ProjectPreview";
-// export { chapterSnapshot, textAnswersOf, judgeSnapshot, type TextAnswer, type JudgeSummary } from "@/track/snapshot";
-export type { ChapterSnapshot } from "@/track/snapshot";
+/* 제출·열람 화면 — Blockly·CodeMirror 를 바로 불러오지 않으므로 lazy 없이 내보낸다 (ProjectPreview 의 블록 그림은 useEffect 안 동적 import) */
+export { ChapterReviewView } from "@/app/review/ChapterReviewView";
+export { CodeView, ProjectPreview } from "@/app/review/ProjectPreview";
+export { SubmitCard, SubmitCardView, canSubmitChapter, SUBMIT_TEXT, type SubmitStatus } from "@/app/track/SubmitCard";
+
+/* 제출 스냅숏·글 답·다시 판정 (순수 — 허브 서버가 judgeSnapshot 으로 결과를 다시 계산한다) */
+export {
+  chapterSnapshot,
+  judgeSnapshot,
+  textAnswersOf,
+  type ChapterSnapshot,
+  type JudgeSnapshotOptions,
+  type JudgeStepSummary,
+  type JudgeSummary,
+  type TextAnswer,
+} from "@/track/snapshot";
+
+/*
+ * Blockly 가 필요한 도구 (canonicalLines·blocksToCode·renderBlockSvg). 순수 경로에 실으면 Node import 가 Blockly 를 끌고 오므로
+ * 브라우저에서만 이 함수로 불러온다: `const { canonicalLines } = await loadBlockTools()`.
+ */
+export const loadBlockTools = (): Promise<typeof import("./blockTools")> => import("./blockTools");
+export type BlockTools = typeof import("./blockTools");
 
 /* 콘텐츠·판정·진행 (순수) */
 export { getChapter, loadChapters, type LoadedChapter } from "@/track/content";

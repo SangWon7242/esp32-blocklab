@@ -36,7 +36,9 @@ export default defineConfig({
             // 콘텐츠(YAML·코드·그림 원문, 약 3MB)는 이름을 붙여 둔다 — 순수 API(loadChapters)가 쓰므로 index.js 가 바로 import 한다
             { name: "content", test: /[\\/]content[\\/]chapters[\\/]/ },
             { name: "blockly", test: /node_modules[\\/](blockly|@blockly)[\\/]/ },
-            { name: "codemirror", test: /node_modules[\\/](codemirror|@codemirror|@lezer)[\\/]/ },
+            // 파서(@lezer)는 순수 API(codeToBlocks·judge)가 쓰므로 편집기(@codemirror)와 떼어 둔다 — 서버 import 에 @codemirror/view 가 안 실리게
+            { name: "lezer", test: /node_modules[\\/]@lezer[\\/]/ },
+            { name: "codemirror", test: /node_modules[\\/](codemirror|@codemirror)[\\/]/ },
           ],
         },
       },
