@@ -376,8 +376,8 @@ parts:
         instructions: 문이 열리면 LED도 같이 켜고, 문이 닫히면 꺼 주세요 (LED 는 26번 핀)
         code: step3_auto_door.py
         rules:
-          - useBlock: ["esp_pin_write"]
-            fail: LED를 켜고 끄는 블록이 들어갔나요?
+          - codeMatches: 'led\.value\(1\)[\s\S]*led\.value\(0\)'
+            fail: LED를 켜는 줄과 끄는 줄이 모두 들어갔나요?
           - pinIs: { name: led, pin: 26 }
             fail: LED 핀은 26번이에요
         answerCode: extra1_led.py

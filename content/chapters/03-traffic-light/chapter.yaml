@@ -166,8 +166,6 @@ parts:
         hint: 노란불 한 번 깜빡임은 켜기 · 기다리기 · 끄기 · 기다리기 4줄이에요. 이 4줄을 반복 안에 넣으면, 나머지 8줄은 아직 필요할까요?
         code: step1_traffic_light.py
         rules:
-          - useBlock: ["flow_repeat_n"]
-            fail: 같은 줄을 여러 번 붙여 쓰지 않고 한 번에 묶어 주는 블록이 들어 있나요?
           - codeMatches: '^ *for \w+ in range\(\s*(?:5|0\s*,\s*5)\s*\)\s*:'
             fail: 노란불을 몇 번 되풀이하기로 했나요? 반복 블록의 횟수를 다시 보세요
           - codeMatches: '^(\w+)\s*=\s*Pin\(\s*14\s*,[\s\S]*^( +)for \w+ in range\([^)]*\)\s*:\n\2( +)\1\.value\(1\)\n\2\3time\.sleep\(0?\.5\)\n\2\3\1\.value\(0\)\n\2\3time\.sleep\(0?\.5\)'

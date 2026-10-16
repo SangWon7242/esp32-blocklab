@@ -195,8 +195,6 @@ parts:
         rules:
           - codeMatches: '^allowed = \[\[\d+, \d+, \d+, \d+\], \[\d+, \d+, \d+, \d+\]\]'
             fail: allowed 의 한 칸이 카드 한 장(숫자 넷)인가요? 카드 두 장이면 칸은 몇 개여야 할까요?
-          - useBlock: ["judge_contains"]
-            fail: 번호가 목록 "안에" 있는지 한 번에 묻는 판단 블록이 있었나요?
           - codeMatches: 'print\("OPEN"\)\n\s*else:\n\s*print\("DENY"\)'
             fail: 목록에 있을 때와 없을 때 각각 무엇을 출력하나요? 글자는 대문자 그대로인가요?
           - codeMatches: '^\s+uid\s*=\s*card_uid\(\)$[\s\S]*?^\s+print\(uid\)$'

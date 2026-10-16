@@ -216,8 +216,6 @@ parts:
             fail: (1) 버튼을 누르면 어떤 변수가 True 가 되어야 하나요? 그 줄이 반복 안에 그대로 있나요?
           - codeMatches: '^\s+if started:\n\s+dht11\.measure\(\)'
             fail: (1) 재고 보여 주는 일은 언제만 해야 하나요? started 를 묻는 if 안에 measure 가 있나요?
-          - useBlock: ["judge_between"]
-            fail: (2) 20~28 처럼 두 숫자 사이에 있는지 한 번에 묻는 판단 블록이 있었어요. 찾아봤나요?
           - codeMatches: 'if (20 <= t <= 28 and 40 <= h <= 70|40 <= h <= 70 and 20 <= t <= 28):'
             fail: (2) 온도 범위와 습도 범위를 둘 다 만족해야 알맞아요. 두 범위를 무엇으로 이었나요? 숫자는 지시와 같나요?
           - codeMatches: 'state = "SMILE"\n\s+else:\n\s+state = "BAD"'

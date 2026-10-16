@@ -231,8 +231,6 @@ parts:
         hint: "함수 몸통: 전역 변수 pressed 쓰기 → pressed 를 True 로 정하기. 반복 몸통: 만약 pressed 이면 → (만약 LED 값이 0 이면 켜기, 아니면 끄기) → pressed 를 False 로. 그 뒤 0.05초 기다리기"
         code: step2_irq.py
         rules:
-          - useBlock: ["var_global"]
-            fail: 함수 안에서 바깥 변수 pressed 를 바꾸면, 보드는 그것을 함수 안에서만 쓰는 새 변수로 여겨요. 바깥 것을 바꾸겠다고 먼저 알리는 블록이 있나요?
           - codeMatches: '^pressed = False$'
             fail: 프로그램이 시작할 때 깃발은 올라가 있나요, 내려가 있나요? 반복이 깃발을 처음 볼 때 pressed 는 무엇이어야 할까요?
           - codeMatches: '^def on_press\(\w+\):\n\s+global pressed\n\s+pressed\s*=\s*True(\n\S|(?![\s\S]))'
