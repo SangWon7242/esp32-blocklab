@@ -125,6 +125,70 @@ describe("챕터 YAML", () => {
   });
 });
 
+/** 모든 챕터를 폴더에서 읽어 검사한다 (beforeAll 뒤에 불러야 codeToBlocks 가 된다) */
+function loadAll(): LoadedChapter[] {
+  return chapterDirs().map((dir) => {
+    const { yaml, files, images } = readDir(dir);
+    return parseChapter(yaml, files, dir, images);
+  });
+}
+
+/** 글 코드를 블록 JSON 으로 (못 바꾸면 undefined — 판정은 code 만으로) */
+function blocksOf(code: string): unknown {
+  const r = codeToBlocks(code);
+  return r.ok ? r.json : undefined;
+}
+
+/** fail 문장이 "정답을 말하지 않는 되묻기" 꼴인가: 물음표로 끝나거나 "…나요?"·"…가요?"·"…까요?" 같은 물음("요?")을 담는다 */
+const asksBack = (fail: string) => /\?\s*$/.test(fail) || /요\?/.test(fail);
+
+describe("저장소 전체 보호: 미션·디버깅 규칙", () => {
+  it("정답 코드(answerCode)는 자기 규칙을 모두 통과한다", () => {
+    for (const ch of loadAll()) {
+      for (const step of allSteps(ch)) {
+        if ((step.type !== "mission" && step.type !== "debug") || !step.answerCode) continue;
+        const code = ch.files[step.answerCode];
+        const rules = step.type === "mission" ? step.rules : [...step.rules, ...step.symptoms.flatMap((s) => s.rules)];
+        expect(judge(rules, { code, blocksJson: blocksOf(code) }, ch.files), `${ch.id}/${step.id}`).toEqual({ pass: true, failures: [] });
+      }
+    }
+  });
+
+  it("시작 코드(code)는 적어도 한 규칙에 실패한다 (startPasses: true 인 미션만 예외)", () => {
+    const passing: string[] = [];
+    for (const ch of loadAll()) {
+      for (const step of allSteps(ch)) {
+        if (step.type !== "mission" || !step.code) continue;
+        const code = ch.files[step.code];
+        const r = judge(step.rules, { code, blocksJson: blocksOf(code) }, ch.files);
+        if (step.startPasses) expect(r.pass, `${ch.id}/${step.id} 는 startPasses 인데 시작 코드가 실패한다`).toBe(true);
+        else if (r.pass) passing.push(`${ch.id}/${step.id}`);
+      }
+    }
+    expect(passing, "시작 코드가 이미 통과하는 미션 (의도한 것이면 startPasses: true)").toEqual([]);
+  });
+
+  it("규칙의 fail 문장은 정답을 말하지 않는 되묻기 꼴이다 (물음표로 끝나거나 …요? 물음 포함)", () => {
+    const bad: string[] = [];
+    for (const ch of loadAll()) {
+      for (const step of allSteps(ch)) {
+        if (step.type !== "mission" && step.type !== "debug") continue;
+        const rules = step.type === "mission" ? step.rules : [...step.rules, ...step.symptoms.flatMap((s) => s.rules)];
+        for (const r of rules) if (!asksBack(r.fail)) bad.push(`${ch.id}/${step.id}: ${r.fail}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("asksBack: 물음표 끝 · 중간의 요? 물음만 되묻기로 본다", () => {
+    expect(asksBack("몇 초인가요?")).toBe(true);
+    expect(asksBack("아직 남아 있지 않나요? 세어 보세요")).toBe(true);
+    expect(asksBack("어느 쪽이 13번이죠?")).toBe(true);
+    expect(asksBack("2초 기다리세요")).toBe(false);
+    expect(asksBack("LED 핀은 26번이에요")).toBe(false);
+  });
+});
+
 describe("parseChapter 는 잘못된 YAML 을 거부한다", () => {
   const files = { "a.py": "print(1)\n" };
   const base = (step: string) => `id: x\norder: 1\ntitle: x\ntrack: sensor\nlabel: S1\nparts:\n  - id: p\n    title: p\n    steps:\n${step}`;
@@ -140,6 +204,18 @@ describe("parseChapter 는 잘못된 YAML 을 거부한다", () => {
   });
   it("폴더 이름과 다른 id", () => {
     expect(() => parseChapter(base("      - { id: r, type: run, title: r, code: a.py }\n"), files, "y")).toThrow(/y/);
+  });
+  it("줄 규칙: count 에 min·max 가 둘 다 없거나, 빈 글이거나, 모르는 inside 면 걸린다. startPasses 는 참·거짓만", () => {
+    const mission = (rules: string, extra = "") => base(`      - { id: m, type: mission, title: m, instructions: i, rules: [${rules}]${extra} }\n`);
+    expect(() => parseChapter(mission('{ count: { text: "a()" }, fail: f }'), files, "x")).toThrow(/count/);
+    expect(() => parseChapter(mission('{ count: { text: "a()", max: 1 }, fail: f }'), files, "x")).not.toThrow();
+    expect(() => parseChapter(mission('{ notHas: "  ", fail: f }'), files, "x")).toThrow();
+    expect(() => parseChapter(mission('{ hasLine: { text: "a()", inside: while }, fail: f }'), files, "x")).toThrow();
+    expect(() => parseChapter(mission('{ hasLine: { text: "a()", inside: loop }, fail: f }'), files, "x")).not.toThrow();
+    expect(() => parseChapter(mission('{ order: ["a()"], fail: f }'), files, "x")).toThrow();
+    expect(() => parseChapter(mission('{ order: ["a()", "b()"], fail: f }'), files, "x")).not.toThrow();
+    expect(() => parseChapter(mission('{ notHas: "a()", fail: f }', ", startPasses: true"), files, "x")).not.toThrow();
+    expect(() => parseChapter(mission('{ notHas: "a()", fail: f }', ", startPasses: yes_please"), files, "x")).toThrow();
   });
   it("정규식이 틀린 codeMatches, 범위 밖 선택지 답, 파일 밖 줄 번호", () => {
     expect(() => parseChapter(base('      - { id: m, type: mission, title: m, instructions: i, rules: [{ codeMatches: "(", fail: f }] }\n'), files, "x")).toThrow();

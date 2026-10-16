@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { checkAnswer, countBlocks, judge } from "./judge";
+import { checkAnswer, countBlocks, insideOf, judge, lineKey } from "./judge";
+import { normalizeCode } from "@/parser/normalize";
 import type { Rule } from "./schema";
 
 const blink = "from machine import Pin\nimport time\n\nled = Pin(26, Pin.OUT)\n\nwhile True:\n    led.value(1)\n    time.sleep(2)\n    led.value(0)\n    time.sleep(1)\n";
@@ -115,6 +116,100 @@ describe("judge — 6가지 규칙", () => {
     ];
     expect(judge(rules, { code: blink, output: "" })).toEqual({ pass: false, failures: ["a", "c"] });
     expect(judge([], {})).toEqual({ pass: true, failures: [] });
+  });
+});
+
+describe("judge — 줄 규칙 (hasLine · notHas · order · count)", () => {
+  // 함수 · 조건 · 반복이 섞인 코드 (주석·빈 줄은 정규화에서 빠진다)
+  const code = [
+    "from machine import Pin",
+    "import time",
+    "led = Pin(26, Pin.OUT)",
+    "pressed = False",
+    "",
+    "def on_press(pin):",
+    "    global pressed",
+    "    pressed = True   # 깃발",
+    "",
+    "while True:",
+    "    if pressed:",
+    "        if led.value() == 0:",
+    "            led.value(1)",
+    "        else:",
+    "            led.value(0)",
+    "        pressed = False",
+    "    time.sleep(0.05)",
+    "print('end')",
+    "",
+  ].join("\n");
+
+  it("lineKey: 앞뒤 공백·공백 묶음·따옴표 종류를 무시한다", () => {
+    expect(lineKey("  show( 'OPEN',  \"a\" )  ")).toBe('show( "OPEN", "a" )');
+    expect(lineKey("led.value(1)")).toBe(lineKey("\tled.value(1)   "));
+    // 공백이 있고 없고는 다르다 (한 칸으로 줄일 뿐)
+    expect(lineKey("led.value( 1 )")).not.toBe(lineKey("led.value(1)"));
+  });
+
+  it("hasLine: 그 줄이 있으면 통과, 없으면 fail 문장", () => {
+    expect(judge([{ hasLine: { text: "time.sleep(0.05)" }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ hasLine: { text: "led  =  Pin(26,   Pin.OUT)" }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ hasLine: { text: 'print("end")' }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ hasLine: { text: "time.sleep(2)" }, fail: "2초 기다리는 줄이 있나요?" }], { code })).toEqual({ pass: false, failures: ["2초 기다리는 줄이 있나요?"] });
+    // 줄의 일부만 같은 것은 아니다, 주석은 안 본다, 코드가 없으면 실패
+    expect(judge([{ hasLine: { text: "led.value" }, fail: "x" }], { code }).pass).toBe(false);
+    expect(judge([{ hasLine: { text: "깃발" }, fail: "x" }], { code }).pass).toBe(false);
+    expect(judge([{ hasLine: { text: "import time" }, fail: "x" }], {}).pass).toBe(false);
+  });
+
+  it("hasLine inside: 가장 가까운 블록 머리를 들여쓰기로 판단한다", () => {
+    const has = (text: string, inside: "loop" | "def" | "if" | "top") => judge([{ hasLine: { text, inside }, fail: "x" }], { code }).pass;
+    expect(has("pressed = False", "top")).toBe(true); // 4번 줄
+    expect(has("pressed = False", "if")).toBe(true); // else 뒤의 16번 줄 → 가장 가까운 머리는 if pressed:
+    expect(has("pressed = False", "loop")).toBe(false);
+    expect(has("pressed = True", "def")).toBe(true);
+    expect(has("pressed = True", "top")).toBe(false);
+    expect(has("global pressed", "def")).toBe(true);
+    expect(has("time.sleep(0.05)", "loop")).toBe(true);
+    expect(has("time.sleep(0.05)", "if")).toBe(false);
+    expect(has("led.value(1)", "if")).toBe(true);
+    expect(has("led.value(0)", "if")).toBe(true); // else: 도 if 로 본다
+    expect(has("if pressed:", "loop")).toBe(true); // if 줄 자체는 while 안
+    expect(has("def on_press(pin):", "top")).toBe(true);
+  });
+
+  it("insideOf: for 는 loop, try 처럼 모르는 머리는 undefined", () => {
+    const lines = normalizeCode("for i in range(3):\n    led.value(1)\ntry:\n    x()\nexcept:\n    y()\n");
+    expect(insideOf(lines, 1)).toBe("loop");
+    expect(insideOf(lines, 3)).toBeUndefined();
+    expect(insideOf(lines, 0)).toBe("top");
+  });
+
+  it("notHas: 그 줄이 없어야 통과 (공백·따옴표 차이도 같은 줄로 본다)", () => {
+    expect(judge([{ notHas: "time.sleep(2)", fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ notHas: "print('end')", fail: "아직 남아 있지 않나요?" }], { code })).toEqual({ pass: false, failures: ["아직 남아 있지 않나요?"] });
+    expect(judge([{ notHas: 'print( "end" )', fail: "x" }], { code }).pass).toBe(true); // 괄호 안 공백은 다른 줄
+    expect(judge([{ notHas: "  time.sleep(0.05)  ", fail: "x" }], { code }).pass).toBe(false);
+    expect(judge([{ notHas: "import time", fail: "x" }], {}).pass).toBe(true);
+  });
+
+  it("order: 첫 등장 순서가 그 차례여야 통과, 하나라도 없으면 실패", () => {
+    expect(judge([{ order: ["global pressed", "while True:", "time.sleep(0.05)"], fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ order: ["led.value(1)", "led.value(0)"], fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ order: ["led.value(0)", "led.value(1)"], fail: "순서가 맞나요?" }], { code })).toEqual({ pass: false, failures: ["순서가 맞나요?"] });
+    expect(judge([{ order: ["import time", "time.sleep(2)"], fail: "x" }], { code }).pass).toBe(false);
+    // 같은 줄이 여러 번 있으면 첫 등장으로 본다
+    expect(judge([{ order: ["pressed = False", "def on_press(pin):"], fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ order: ["def on_press(pin):", "pressed = False"], fail: "x" }], { code }).pass).toBe(false);
+  });
+
+  it("count: 줄 개수가 min 이상 · max 이하", () => {
+    expect(judge([{ count: { text: "pressed = False", max: 2 }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ count: { text: "pressed = False", max: 1 }, fail: "몇 번 쓰였나요?" }], { code })).toEqual({ pass: false, failures: ["몇 번 쓰였나요?"] });
+    expect(judge([{ count: { text: "pressed = False", min: 2 }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ count: { text: "pressed = False", min: 3 }, fail: "x" }], { code }).pass).toBe(false);
+    expect(judge([{ count: { text: "led.value(1)", min: 1, max: 1 }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ count: { text: "time.sleep(2)", max: 0 }, fail: "x" }], { code }).pass).toBe(true);
+    expect(judge([{ count: { text: "time.sleep(2)", min: 1 }, fail: "x" }], {}).pass).toBe(false);
   });
 });
 

@@ -26,6 +26,12 @@ const regex = z.string().min(1).refine((s) => {
   }
 }, "정규식이 올바르지 않습니다");
 
+/** 코드 한 줄 (hasLine·notHas·order·count 가 비교하는 글. 앞뒤 공백·공백 수·따옴표 종류는 무시) */
+const lineText = z.string().trim().min(1);
+/** 그 줄이 속한 가장 가까운 블록 머리: while/for → loop, def → def, if/elif/else → if, 들여쓰기 0 → top */
+export const LineInside = z.enum(["loop", "def", "if", "top"]);
+export type LineInside = z.infer<typeof LineInside>;
+
 /** 판정 규칙 하나. 실패하면 fail 문장(정답을 말하지 않는 되묻기)을 보여 준다 */
 export const RuleSchema = z.union([
   z.object({ useBlock: z.array(z.string().min(1)).min(1), fail }).strict(),
@@ -34,6 +40,14 @@ export const RuleSchema = z.union([
   z.object({ pinIs: z.object({ name: z.string().regex(/^[A-Za-z_]\w*$/), pin: z.number().int().nonnegative() }).strict(), fail }).strict(),
   z.object({ maxBlocks: z.number().int().positive(), fail }).strict(),
   z.object({ outputIncludes: z.string().min(1), fail }).strict(),
+  z.object({ hasLine: z.object({ text: lineText, inside: LineInside.optional() }).strict(), fail }).strict(),
+  z.object({ notHas: lineText, fail }).strict(),
+  z.object({ order: z.array(lineText).min(2), fail }).strict(),
+  z.object({
+    count: z.object({ text: lineText, max: z.number().int().nonnegative().optional(), min: z.number().int().nonnegative().optional() }).strict()
+      .refine((c) => c.max !== undefined || c.min !== undefined, "count 에는 max 나 min 가운데 하나는 있어야 합니다"),
+    fail,
+  }).strict(),
 ]);
 export type Rule = z.infer<typeof RuleSchema>;
 
@@ -112,6 +126,8 @@ export const MissionStep = z.object({
   rules: z.array(RuleSchema).min(1),
   /** 정답 코드 (스스로 해 본 뒤 비교용) */
   answerCode: FileRef.optional(),
+  /** 시작 코드(code)가 이미 규칙을 모두 통과하는 미션임을 밝힌다 (content 테스트의 "시작 코드는 한 규칙은 실패" 보호에서 예외) */
+  startPasses: z.boolean().optional(),
 }).strict();
 
 /** debug 는 mission 의 변형: 증상마다 고장 코드(글로 직접 적음)와 질문, 그 증상을 고친 코드에 걸 규칙 */

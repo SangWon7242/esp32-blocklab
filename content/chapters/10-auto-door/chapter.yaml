@@ -379,7 +379,7 @@ parts:
           - codeMatches: 'led\.value\(1\)[\s\S]*led\.value\(0\)'
             fail: LED를 켜는 줄과 끄는 줄이 모두 들어갔나요?
           - pinIs: { name: led, pin: 26 }
-            fail: LED 핀은 26번이에요
+            fail: LED 는 몇 번 핀에 꽂았나요? 그 핀을 led 라는 이름으로 준비했나요?
         answerCode: extra1_led.py
 
       - id: reflect

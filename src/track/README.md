@@ -162,7 +162,7 @@ todo: [보드를 USB 로 연결하기, "`26`번 핀에 LED 꽂기"]
 | `predict` | `code`, `blanks: [{ q, unit? }]` — 빈칸 하나에 질문 하나 |
 | `run` | `code`, `expected?`(실행 결과), `codeNotes?`(코드 설명) |
 | `readcheck` | `code`, `questions: [...]` (아래), `codeNotes?`(코드 설명) |
-| `mission` | `instructions`, `code?`(미리 깔 코드), `hint?`, `rules`(1개 이상), `answerCode?` |
+| `mission` | `instructions`, `code?`(미리 깔 코드), `hint?`, `rules`(1개 이상), `answerCode?`, `startPasses?`(아래 "규칙 유지 장치") |
 | `debug` | `symptoms: [{ title, code(코드 조각), question, rules? }]`, `rules?`(전체 규칙), `answerCode?` |
 | `design` | `pseudocode: [{ text, blank?: { answer, tolerance? } }]`, `translation: [[우리말, 코드], ...]`, `targetCode` |
 | `reflect` | `lineExplain`(줄마다 "이 줄은 ___" 을 쓸 코드), `prompts`: 정확히 4개 |
@@ -262,5 +262,33 @@ AI 바이브 코딩으로 폰 앱(웹 페이지 한 장)을 만드는 단계. �
 | `pinIs: { name, pin }` | `name = ...Pin(pin, ...)` 줄이 있다 (`led = Pin(26, Pin.OUT)`, `servo = PWM(Pin(4))`) |
 | `maxBlocks: n` | 그림자 아닌 블록이 n개 이하 |
 | `outputIncludes: 글` | 실행 출력에 그 글이 들어 있다 |
+| `hasLine: { text, inside? }` | 정규화 코드에 **그 줄**이 있다(아래 "줄 비교"). `inside` 를 주면 그 줄이 속한 가장 가까운 블록 머리가 `loop`(`while`/`for`) · `def` · `if`(`if`/`elif`/`else`) · `top`(들여쓰기 0) 인 줄이 하나라도 있어야 한다. 들여쓰기로 판단: 위로 올라가며 처음 만나는 더 얕은 줄이 머리 |
+| `notHas: 줄` | 그 줄이 **없다** (같은 줄 비교). 시작 코드에서 지워야 하는 줄에 쓴다 |
+| `order: [줄, 줄, ...]` | 각 줄이 모두 있고 **첫 등장** 순서가 이 차례다 (2개 이상) |
+| `count: { text, min?, max? }` | 그 줄의 개수가 `min` 이상 · `max` 이하 (둘 중 하나는 꼭). 같은 줄을 여러 번 붙여 쓴 것을 잡거나(`max: 1`), 지워야 하는 줄은 `max: 0` |
+
+**줄 비교**(`hasLine`·`notHas`·`order`·`count`): 정규화 코드(주석·빈 줄 제거)의 줄과 `text` 를 각각 앞뒤 공백을 떼고, 공백 묶음은 한 칸으로, `'` 는 `"` 로 바꾼 뒤 **줄 전체**가 같은지 본다.
+그래서 들여쓰기·주석·따옴표 종류는 상관없고(`show('OPEN', 'a')` = `show("OPEN", "a")`), 줄의 일부만 같은 것(`led.value` ↔ `led.value(1)`)이나 괄호 안 공백 차이(`led.value( 1 )`)는 다른 줄이다.
+줄의 일부·숫자 범위·여러 줄 모양을 봐야 하면 `codeMatches` 를 쓴다. `notHas`·`hasLine.text` 에 따옴표가 든 줄은 YAML 작은따옴표로 감싼다(`notHas: 'show("ACCESS OK", "Door open")'`).
+
+```yaml
+rules:
+  - hasLine: { text: "time.sleep(0.05)", inside: loop }
+    fail: 반복 끝에서 쉬는 줄은 반복 안에 있나요?
+  - notHas: time.sleep(2)
+    fail: 반복 안에 깜박이던 줄이 아직 남아 있지 않나요?
+  - order: ["led.value(1)", "time.sleep(2)", "led.value(0)"]
+    fail: 켜기 → 기다리기 → 끄기 차례가 맞나요?
+  - count: { text: "led_yellow.value(1)", max: 1 }
+    fail: 같은 줄을 여러 번 붙여 쓴 노란불이 아직 남아 있지 않나요?
+```
 
 YAML에서 정규식은 작은따옴표로 감싼다(`'print\("가까워요!"\)'`) — 역슬래시가 그대로 들어간다.
+
+### 규칙 유지 장치 (content 테스트)
+
+`npm test` 가 모든 챕터의 `mission`·`debug` 규칙을 보호한다 (`src/track/content.test.ts`):
+
+- `answerCode` 가 있으면 그 코드는 자기 규칙(debug 는 전체 규칙 + 증상 규칙)을 **모두 통과**해야 한다.
+- `mission` 에 `code:`(시작 코드)가 있으면 그 코드는 **적어도 한 규칙에 실패**해야 한다 — 시작 코드가 그대로 통과하면 미션이 아니다. 시작 코드가 이미 정답인 미션(예: 선을 고치는 미션)은 `startPasses: true` 를 적어 예외로 둔다(그러면 반대로 시작 코드가 통과하는지 검사).
+- 모든 규칙의 `fail` 은 **정답을 말하지 않는 되묻기** 꼴이어야 한다: 물음표로 끝나거나 중간에 `…요?` 물음(`…나요?`·`…인가요?`·`…까요?`)이 있어야 한다. "LED 핀은 26번이에요" 처럼 답을 말하는 문장은 걸린다.
