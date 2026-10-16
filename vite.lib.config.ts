@@ -4,18 +4,21 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { blocklabScope } from "./scripts/postcss-blocklab-scope.ts";
+import { blocklyMedia, blocklyNoAmd } from "./scripts/vite-blockly.ts";
 
 /*
  * 라이브러리 빌드 (npm run build:lib → dist-lib/). 허브(dlab-learning-hub)가 vendor/blocklab/ 으로 복사해 쓴다.
  *   - ESM 하나(index.js) + 화면 조각(chunks/*.js). react·react-dom 은 호스트 것을 쓴다 (external)
  *   - CSS 는 style.css 하나로 (cssCodeSplit:false), 모든 선택자가 `.blocklab` 아래 (scripts/postcss-blocklab-scope.ts)
  *   - Blockly·CodeMirror 는 따로 조각으로 (크고 거의 안 바뀜). 화면 컴포넌트는 lazy 라서 index.js 를 Node 에서 import 해도 DOM 을 건드리지 않는다
+ *   - Blockly UMD 의 AMD 갈래를 끈다(blocklyNoAmd — 허브 Turbopack 이 define([...]) 의존을 풀다 멈춤). dist-lib 에 define.amd 가 없어야 한다
+ *   - Blockly media(효과음·sprites.svg 등)를 dist-lib/media/ 로 낸다(blocklyMedia). 호스트가 /blocklab/media/ 로 서빙한다
  *   - 선언 파일(index.d.ts)·package.json 은 scripts/build-lib.mjs 가 뒤에 만든다
  */
 const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string };
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [blocklyNoAmd(), react(), tailwindcss(), blocklyMedia({ dir: "media" })],
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "./src") } },
   css: { postcss: { plugins: [blocklabScope()] } },
   // public/ (favicon, 보드 라이브러리)은 체험판 것. 보드 라이브러리는 build-lib.mjs 가 lib/ 로 따로 복사한다

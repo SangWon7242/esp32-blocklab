@@ -5,7 +5,7 @@
  * 화면(Blockly·CodeMirror)은 lazy 조각이라 import 때 끌려오지 않아야 한다.
  */
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -38,7 +38,7 @@ const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
 assert.equal(lib.LIB_VERSION, pkg.version);
 assert.equal(JSON.parse(readFileSync(path.join(dist, "package.json"), "utf8")).version, pkg.version);
 
-for (const name of ["ChapterReviewView", "ProjectPreview", "CodeView", "SubmitCard", "SubmitCardView", "canSubmitChapter", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "loadBlockTools", "BlocklabProvider", "useHost", "TrackListView", "ChapterView", "StepView", "LabView", "loadChapters", "getChapter", "judge", "codeToBlocks", "stepStates", "allSteps", "LocalProgressStore", "reflectMessage", "debugMessage", "parseReview"]) {
+for (const name of ["setBlocklyMediaPath", "blocklyMediaPath", "ChapterReviewView", "ProjectPreview", "CodeView", "SubmitCard", "SubmitCardView", "canSubmitChapter", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "loadBlockTools", "BlocklabProvider", "useHost", "TrackListView", "ChapterView", "StepView", "LabView", "loadChapters", "getChapter", "judge", "codeToBlocks", "stepStates", "allSteps", "LocalProgressStore", "reflectMessage", "debugMessage", "parseReview"]) {
   assert.equal(typeof lib[name], "function", `${name} 이 함수가 아니에요`);
 }
 
@@ -89,6 +89,32 @@ assert.ok(empty.steps.every((s) => s.passed === null));
 assert.equal(typeof globalThis.window, "undefined");
 assert.equal(typeof globalThis.document, "undefined");
 
+// lib-v1.0.1: Blockly UMD 의 AMD 갈래가 없다 (허브 Turbopack 이 define([...]) 의존을 풀다 멈춤 — scripts/vite-blockly.ts)
+const jsFiles = walk(dist).filter((f) => f.endsWith(".js"));
+const amd = jsFiles.filter((f) => readFileSync(f, "utf8").includes("define.amd")).map((f) => path.relative(dist, f));
+assert.deepEqual(amd, [], `dist-lib 에 define.amd 가 남아 있어요: ${amd.join(", ")}`);
+
+// lib-v1.0.1: Blockly media 가 dist-lib/media/ 에 있고, 번들은 static.blockly.com 대신 /blocklab/media/ 를 쓴다
+const mediaDir = path.join(dist, "media");
+for (const name of ["sprites.svg", "click.mp3", "delete.mp3", "disconnect.mp3", "drop.mp3", "handopen.cur", "delete-icon.svg", "foldout-icon.svg", "resize-handle.svg"]) {
+  assert.ok(existsSync(path.join(mediaDir, name)), `dist-lib/media/${name} 이 없어요`);
+}
+assert.equal(lib.DEFAULT_BLOCKLY_MEDIA_PATH, "/blocklab/media/");
+assert.equal(lib.blocklyMediaPath(), "/blocklab/media/");
+lib.setBlocklyMediaPath("/x/media");
+assert.equal(lib.blocklyMediaPath(), "/x/media/");
+lib.setBlocklyMediaPath(undefined);
+assert.equal(lib.blocklyMediaPath(), "/blocklab/media/");
+// Blockly.inject({ media: blocklyMediaPath(), … }) — 압축된 이름이라 "media: <함수>()" 꼴로 센다 (편집기·숨긴 렌더 작업판)
+const injectsWithMedia = jsFiles.filter((f) => !/(^|\/)blockly-[^/]*\.js$/.test(f) && /\bmedia:\s*[\w$]+\(\)/.test(readFileSync(f, "utf8")));
+assert.ok(injectsWithMedia.length >= 2, `media 를 넘기는 Blockly.inject 가 ${injectsWithMedia.length}곳뿐이에요 (편집기·숨긴 렌더 작업판)`);
+
+// lib-v1.0.1: 선언 파일에 zod 가 없다 (허브에는 zod 가 없어 StepRecord·Progress 가 any 로 풀렸다 — scripts/dts-strip-zod.mjs)
+const dtsZod = walk(dist)
+  .filter((f) => f.endsWith(".d.ts") && /from\s+["']zod["']|import\(["']zod["']\)/.test(readFileSync(f, "utf8")))
+  .map((f) => path.relative(dist, f));
+assert.deepEqual(dtsZod, [], `d.ts 에 zod import 가 남아 있어요: ${dtsZod.join(", ")}`);
+
 // 선언 파일·CSS 가 함께 있다
 assert.ok(existsSync(path.join(dist, "index.d.ts")));
 assert.ok(existsSync(path.join(dist, "style.css")));
@@ -99,7 +125,7 @@ assert.ok(css.includes("var(--host-primary"), "호스트 토큰 상속(--host-pr
 
 console.log(
   `dist-lib 연기 검사 통과: v${lib.LIB_VERSION}, 챕터 ${chapters.length}개, 01-led 미션 판정 ${verdict.pass ? "통과" : `실패(${verdict.failures.length})`}, ` +
-    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개`,
+    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, d.ts zod 0`,
 );
 
 /** index.js 에서 정적 import 로 닿는 dist-lib 안 파일들 (동적 import 는 빼고) */
@@ -117,4 +143,14 @@ function staticClosure(entry) {
     }
   }
   return seen;
+}
+
+function walk(dir) {
+  const files = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...walk(p));
+    else files.push(p);
+  }
+  return files;
 }

@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import * as Blockly from "blockly";
+import { blocklyMediaPath } from "@/host/mediaPath";
 import { entryTheme, registerBlocks, registerEntryToolbox, registerVariableFlyout, toolbox } from "@/blocks";
 import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
 import type { Issue } from "@/lint";
@@ -108,6 +109,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     // 메뉴 항목은 전역에 한 번만 등록되고, 콜백은 지금 마운트된 작업판의 것으로 바뀐다
     registerBlockDocMenu((req) => onDocRequestRef.current?.(req));
     const ws = Blockly.inject(host, {
+      // 효과음·sprites.svg 를 자기 주소에서 (기본 static.blockly.com 은 허브 CSP 에 막힘)
+      media: blocklyMediaPath(),
       toolbox,
       theme: entryTheme,
       renderer: "zelos",

@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { ChapterSnapshot } from "@/track/snapshot";
+import { setBlocklyMediaPath } from "./mediaPath";
 import { ChromeContext, type Chrome } from "./chrome";
 
 /*
@@ -41,6 +42,11 @@ export type HostProps = {
   onSaveProject?: (p: { title: string; code: string; blocksJson: unknown; chapterId?: string }) => Promise<void>;
   /** review 모드에서 보여 줄 학생 기록 (stepId → 기록). 저장하지 않는다 */
   reviewRecords?: Record<string, StepRecord>;
+  /**
+   * Blockly media(효과음 mp3·sprites.svg·아이콘·커서) 주소 (lib-v1.0.1, 선택). 기본 "/blocklab/media/".
+   * 호스트는 dist-lib/media/ 의 파일을 이 주소에서 서빙한다. 끝 "/" 는 없어도 붙인다
+   */
+  blocklyMediaPath?: string;
 };
 
 const HostContext = createContext<HostProps | null>(null);
@@ -54,6 +60,8 @@ export const MISSING_HOST_MESSAGE = "BlocklabProvider 가 없어요. 블록랩 �
  */
 export function BlocklabProvider({ children, ...host }: HostProps & { children: ReactNode }) {
   const outer = useContext(ChromeContext);
+  // 자식 편집기의 useEffect(Blockly.inject)가 이 Provider 의 effect 보다 먼저 돌므로 그리는 동안 정한다 (같은 값을 다시 넣는 것뿐)
+  if (host.blocklyMediaPath !== undefined) setBlocklyMediaPath(host.blocklyMediaPath);
   return (
     <HostContext.Provider value={host}>{outer ? children : <BlocklabChrome>{children}</BlocklabChrome>}</HostContext.Provider>
   );

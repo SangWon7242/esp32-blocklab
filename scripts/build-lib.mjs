@@ -3,14 +3,18 @@
  * 라이브러리 빌드 (npm run build:lib). 결과는 dist-lib/ 하나로, 허브가 vendor/blocklab/ 으로 복사한다.
  *   1. vite build -c vite.lib.config.ts   → index.js, chunks/*.js, style.css
  *   2. tsc -p tsconfig.lib.json           → types/**.d.ts (@/ 별칭을 상대 경로로 고쳐 쓴다) + index.d.ts
+ *      zod 를 import 하는 d.ts 는 펼친 평범한 타입으로 다시 쓴다 (scripts/dts-strip-zod.mjs — 허브에는 zod 가 없다)
  *   3. public/lib/*.py                    → lib/ (보드에 올리는 라이브러리. 호스트가 /lib/<이름> 으로 서빙해야 한다 — src/device/libs.ts)
  *   4. package.json                       → 이름·version·exports
  *   5. scripts/lib-smoke.mjs              → window 없는 Node 에서 import 해 순수 API 를 부른다
+ *      scripts/lib-types-check.mjs        → zod 없는 폴더에서 d.ts 를 tsc 로 읽어 StepRecord 등이 any 가 아닌지, 원래 zod 타입과 같은지
+ *   (Blockly media 는 vite 플러그인이 dist-lib/media/ 로 낸다 — scripts/vite-blockly.ts)
  */
 import { execFileSync } from "node:child_process";
 import { cpSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { stripZodFromDts } from "./dts-strip-zod.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "dist-lib");
@@ -39,6 +43,10 @@ for (const file of walk(typesDir)) {
     .replace(/^import\s+["'][^"']+\.css["'];\s*$/gm, "");
   if (fixed !== text) writeFileSync(file, fixed);
 }
+const zodFiles = walk(typesDir).filter((f) => f.endsWith(".d.ts") && /from\s+["']zod["']/.test(readFileSync(f, "utf8")));
+for (const r of stripZodFromDts(zodFiles)) {
+  console.log(`zod 를 걷어 냄: ${path.relative(out, r.file)} (타입 ${r.aliases}개, 스키마 ${r.consts}개)`);
+}
 writeFileSync(path.join(out, "index.d.ts"), 'export * from "./types/lib/index";\n');
 
 // 3. 보드 라이브러리
@@ -65,6 +73,7 @@ writeFileSync(path.join(out, "package.json"), `${JSON.stringify(libPkg, null, 2)
 
 // 5. 연기 검사
 run(process.execPath, [path.join(root, "scripts/lib-smoke.mjs")]);
+run(process.execPath, [path.join(root, "scripts/lib-types-check.mjs")]);
 
 // 6. 크기
 const sizes = walk(out)

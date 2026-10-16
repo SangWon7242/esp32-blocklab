@@ -4,6 +4,7 @@
  * 주입 div 아래에만 먹으므로, 복제한 <svg> 에 주입 div 와 그 안 svg 의 클래스를 그대로 붙인다.
  */
 import * as Blockly from "blockly";
+import { blocklyMediaPath } from "@/host/mediaPath";
 import { entryTheme, registerBlocks } from "@/blocks";
 import type { BlockState } from "./types";
 
@@ -35,6 +36,8 @@ function hiddenWorkspace(): Blockly.WorkspaceSvg {
   // inject 는 새 작업판을 주 작업판으로 삼는다: 편집기 팝업에서 그릴 때 편집기의 것을 되돌린다
   const main = Blockly.getMainWorkspace() as Blockly.WorkspaceSvg | null;
   const ws = Blockly.inject(host, {
+      // 효과음·sprites.svg 를 자기 주소에서 (기본 static.blockly.com 은 허브 CSP 에 막힘)
+      media: blocklyMediaPath(),
     renderer: "zelos",
     theme: entryTheme,
     readOnly: true,

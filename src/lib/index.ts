@@ -21,6 +21,8 @@ export {
   type Navigator,
   type SettingsSource,
 } from "@/host/HostContext";
+/* Blockly media 주소 (기본 "/blocklab/media/"). Provider 밖에서 loadBlockTools·ProjectPreview 를 쓸 때 먼저 부른다 */
+export { DEFAULT_BLOCKLY_MEDIA_PATH, blocklyMediaPath, setBlocklyMediaPath } from "@/host/mediaPath";
 
 /* 화면 */
 export { ChapterView, LabView, StepView, TrackListView, type ChapterViewProps, type LabViewProps, type StepViewProps, type TrackListViewProps } from "./views";
