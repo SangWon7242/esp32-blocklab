@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { canonicalLines } from "../canonical";
+import { judgeInputOf } from "../judgeInput";
 import { Link } from "react-router";
 import { CheckCircle2, Lock, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
   const onJudge = () => {
     const program = editor.current?.getProgram();
     if (!program) return;
-    const result = judge([...symptom.rules, ...step.rules], { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    const result = judge([...symptom.rules, ...step.rules], judgeInputOf(program, output.current), chapter.files);
     update((cur) => ({
       programs: setAt(cur.programs, current, { code: program.code, blocksJson: program.blocksJson }, null),
       passed: setAt(cur.passed, current, result.pass, false),

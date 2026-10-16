@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { canonicalLines } from "../canonical";
+import { judgeInputOf } from "../judgeInput";
 import { Link } from "react-router";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
   const onJudge = () => {
     const program = editor.current?.getProgram();
     if (!program) return;
-    const result = judge(step.rules, { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    const result = judge(step.rules, judgeInputOf(program, output.current), chapter.files);
     update((cur) => ({
       program: { code: program.code, blocksJson: program.blocksJson },
       passed: result.pass,

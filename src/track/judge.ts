@@ -1,6 +1,6 @@
 import { normalizeCode } from "@/parser/normalize";
 import type { BlockJson } from "@/parser/types";
-import type { LineInside, ReadQuestion, Rule } from "./schema";
+import type { BlockPattern, BlocksRule, LineInside, ReadQuestion, Rule } from "./schema";
 
 export type JudgeInput = {
   /** 학생 코드 (파이썬 글) */
@@ -58,6 +58,7 @@ function passes(rule: Rule, input: JudgeInput, files: Readonly<Record<string, st
     const n = findLines(lines(), text).length;
     return (min === undefined || n >= min) && (max === undefined || n <= max);
   }
+  if ("blocks" in rule) return hasBlock(input.blocksJson, rule.blocks);
   return (input.output ?? "").includes(rule.outputIncludes);
 }
 
@@ -152,18 +153,26 @@ function topBlocks(json: unknown): BlockJson[] {
   return typeof (json as BlockJson).type === "string" ? [json as BlockJson] : [];
 }
 
-/** 그림자가 아닌 블록을 모두 (입력·다음 블록을 따라 재귀) */
-function walk(block: BlockJson | undefined, out: BlockJson[]): void {
+/** 블록 하나와 그 자리: 감싸는 블록들(바깥 → 안), 같은 몸통에서 바로 앞 형제 */
+type Placed = { block: BlockJson; parents: readonly BlockJson[]; prev?: BlockJson };
+
+/** 그림자가 아닌 블록을 모두 (입력·다음 블록을 따라 재귀). 입력으로 내려가면 그 블록이 감싸는 블록, next 는 같은 몸통의 형제 */
+function walk(block: BlockJson | undefined, parents: readonly BlockJson[], prev: BlockJson | undefined, out: Placed[]): void {
   if (!block) return;
-  out.push(block);
-  for (const input of Object.values(block.inputs ?? {})) walk(input.block, out);
-  walk(block.next?.block, out);
+  out.push({ block, parents, prev });
+  const inner = [...parents, block];
+  for (const input of Object.values(block.inputs ?? {})) walk(input.block, inner, undefined, out);
+  walk(block.next?.block, parents, block, out);
+}
+
+function placedBlocks(json: unknown): Placed[] {
+  const out: Placed[] = [];
+  for (const b of topBlocks(json)) walk(b, [], undefined, out);
+  return out;
 }
 
 function realBlocks(json: unknown): BlockJson[] {
-  const out: BlockJson[] = [];
-  for (const b of topBlocks(json)) walk(b, out);
-  return out;
+  return placedBlocks(json).map((p) => p.block);
 }
 
 export function blockTypes(json: unknown): string[] {
@@ -173,6 +182,88 @@ export function blockTypes(json: unknown): string[] {
 /** 그림자 블록을 뺀 블록 수 */
 export function countBlocks(json: unknown): number {
   return realBlocks(json).length;
+}
+
+/* ---------- blocks 규칙 ---------- */
+
+/** inside 별칭 loop: 되풀이하는 블록들 */
+const isLoop = (type: string) => type === "flow_repeat_forever" || type === "flow_repeat_n" || type === "controls_whileUntil" || type.startsWith("flow_for_");
+/** inside 별칭 def: 함수 정의 블록들 */
+const isDef = (type: string) => type.startsWith("procedures_def");
+/** 작업판의 시작 블록 — top 은 이 블록 몸통 바로 아래(다른 감싸는 블록이 없음) */
+const START = "start_program";
+
+/** 작업판 JSON 의 변수 표 (id → 이름). codeToBlocks 는 변수 칸에 id 만 적고 이름은 여기에 둔다 */
+function variableNames(json: unknown): Map<string, string> {
+  const map = new Map<string, string>();
+  const vars = (json as { variables?: unknown })?.variables;
+  if (Array.isArray(vars)) for (const v of vars as { id?: string; name?: string }[]) if (v?.id && v.name) map.set(v.id, v.name);
+  return map;
+}
+
+/** 필드 값을 비교용 글로. 변수 칸({id, name?})은 변수 이름, 그 밖(글·수·참거짓)은 String() */
+function fieldText(value: unknown, vars: ReadonlyMap<string, string>): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === "object") {
+    const v = value as { id?: string; name?: string };
+    return v.name ?? (v.id !== undefined ? vars.get(v.id) : undefined);
+  }
+  return String(value);
+}
+
+/** 수로 읽히는 글·수 ("2.0", 26, "0.10") */
+const isNumeric = (v: unknown) => typeof v === "number" ? Number.isFinite(v) : typeof v === "string" && v.trim() !== "" && Number.isFinite(Number(v));
+
+/** 필드 값 비교: 둘 다 수면 수로(2 = "2.0"), 아니면 글로 */
+function sameField(actual: string | undefined, want: string | number | boolean): boolean {
+  if (actual === undefined) return false;
+  const w = String(want);
+  return actual === w || (isNumeric(actual) && isNumeric(w) && Number(actual) === Number(w));
+}
+
+/**
+ * 코드 모드에서 블록으로 안 바뀐 수 글(time.sleep(2.0) 의 "2.0" 은 code_expr 로 남는다)은 그 수의 math_number 로 본다.
+ * 블록 모드에서는 수 칸에 2.0 을 적어도 2 가 되므로 코드 모드만 달라지는 것을 막는다.
+ */
+function asNumberBlock(block: BlockJson): BlockJson | undefined {
+  const code = block.fields?.CODE;
+  return block.type === "code_expr" && isNumeric(code) ? { type: "math_number", fields: { NUM: Number(code) } } : undefined;
+}
+
+/** 블록이 모양(type · 적은 fields · 중첩 inputs)과 맞는가. 값 입력에 블록이 없으면 그림자(수 칸 기본값)를 본다 */
+function matchesPattern(block: BlockJson, pattern: BlockPattern, vars: ReadonlyMap<string, string>): boolean {
+  if (block.type !== pattern.type) {
+    const num = pattern.type === "math_number" ? asNumberBlock(block) : undefined;
+    return num !== undefined && matchesPattern(num, pattern, vars);
+  }
+  for (const [name, want] of Object.entries(pattern.fields ?? {})) {
+    if (!sameField(fieldText(block.fields?.[name], vars), want)) return false;
+  }
+  for (const [name, sub] of Object.entries(pattern.inputs ?? {})) {
+    const input = block.inputs?.[name];
+    const child = input?.block ?? input?.shadow;
+    if (!child || !matchesPattern(child, sub, vars)) return false;
+  }
+  return true;
+}
+
+/** 감싸는 블록들이 inside 조건을 만족하는가 (loop · def · top 별칭, 아니면 블록 type 그대로) */
+function insideMatches(parents: readonly BlockJson[], inside: string): boolean {
+  if (inside === "top") return parents.every((p) => p.type === START);
+  if (inside === "loop") return parents.some((p) => isLoop(p.type));
+  if (inside === "def") return parents.some((p) => isDef(p.type));
+  return parents.some((p) => p.type === inside);
+}
+
+/** blocks 규칙: 모양·inside·after 를 모두 만족하는 블록이 하나라도 있는가 */
+export function hasBlock(json: unknown, rule: BlocksRule): boolean {
+  const vars = variableNames(json);
+  const { inside, after, ...pattern } = rule;
+  return placedBlocks(json).some(({ block, parents, prev }) =>
+    matchesPattern(block, pattern, vars)
+    && (inside === undefined || insideMatches(parents, inside))
+    && (after === undefined || (prev !== undefined && matchesPattern(prev, after, vars))),
+  );
 }
 
 /* ---------- 읽기 체크 ---------- */

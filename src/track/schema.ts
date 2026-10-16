@@ -32,6 +32,34 @@ const lineText = z.string().trim().min(1);
 export const LineInside = z.enum(["loop", "def", "if", "top"]);
 export type LineInside = z.infer<typeof LineInside>;
 
+/** 블록 필드 값 (YAML 에 적은 글·수·참거짓을 글로 바꿔 비교한다. 변수 칸(VAR)은 변수 이름) */
+const fieldValue = z.union([z.string(), z.number(), z.boolean()]);
+/**
+ * 블록 모양: type 은 꼭, fields 는 적은 칸만 비교, inputs 는 값 입력 이름 → 그 자리에 꽂힌 블록의 모양(중첩).
+ * 작업판 JSON(Blockly 직렬화)의 블록 하나와 견준다. 코드 모드는 codeToBlocks 로 만든 JSON.
+ */
+export type BlockPattern = { type: string; fields?: Record<string, string | number | boolean>; inputs?: Record<string, BlockPattern> };
+export const BlockPatternSchema: z.ZodType<BlockPattern> = z.lazy(() =>
+  z.object({
+    type: z.string().min(1),
+    fields: z.record(z.string().min(1), fieldValue).optional(),
+    inputs: z.record(z.string().min(1), BlockPatternSchema).optional(),
+  }).strict(),
+);
+/**
+ * blocks 규칙: 그런 블록이 작업판에 있는가. inside 는 조상(감싸는 블록) 중 그 타입이 있는가 —
+ * loop(flow_repeat_forever·flow_repeat_n·flow_for_*·controls_whileUntil) · def(procedures_def*) · top(시작 블록 몸통 바로 아래, 감싸는 블록 없음) 별칭도 된다.
+ * after 는 같은 몸통에서 바로 앞 형제 블록의 모양.
+ */
+export const BlocksRule = z.object({
+  type: z.string().min(1),
+  fields: z.record(z.string().min(1), fieldValue).optional(),
+  inputs: z.record(z.string().min(1), BlockPatternSchema).optional(),
+  inside: z.string().min(1).optional(),
+  after: BlockPatternSchema.optional(),
+}).strict();
+export type BlocksRule = z.infer<typeof BlocksRule>;
+
 /** 판정 규칙 하나. 실패하면 fail 문장(정답을 말하지 않는 되묻기)을 보여 준다 */
 export const RuleSchema = z.union([
   z.object({ useBlock: z.array(z.string().min(1)).min(1), fail }).strict(),
@@ -48,6 +76,7 @@ export const RuleSchema = z.union([
       .refine((c) => c.max !== undefined || c.min !== undefined, "count 에는 max 나 min 가운데 하나는 있어야 합니다"),
     fail,
   }).strict(),
+  z.object({ blocks: BlocksRule, fail }).strict(),
 ]);
 export type Rule = z.infer<typeof RuleSchema>;
 
