@@ -80,12 +80,14 @@ describe("챕터 YAML", () => {
     }
   });
 
-  it("챕터 1 미션은 정답 파일과 같은 코드면 통과, 처음 코드면 실패", () => {
+  it("챕터 1 미션(blocks 규칙)은 정답 파일과 같은 코드면 통과, 처음 코드면 켜진 시간 규칙만 실패", () => {
     const ch1 = chapters["01-led"];
     const m = allSteps(ch1).find((s) => s.id === "mission");
     if (m?.type !== "mission") throw new Error("mission 없음");
-    expect(judge(m.rules, { code: ch1.files["mission1_slow_blink.py"] }, ch1.files).pass).toBe(true);
-    expect(judge(m.rules, { code: ch1.files["step4_blink_loop.py"] }, ch1.files).failures).toEqual(["켜진 시간과 꺼진 시간이 다른가요? time.sleep 숫자를 다시 보세요"]);
+    const answer = ch1.files["mission1_slow_blink.py"];
+    const start = ch1.files["step4_blink_loop.py"];
+    expect(judge(m.rules, { code: answer, blocksJson: blocksOf(answer) }, ch1.files).pass).toBe(true);
+    expect(judge(m.rules, { code: start, blocksJson: blocksOf(start) }, ch1.files).failures).toEqual(["켜진 시간과 꺼진 시간이 다른가요? time.sleep 숫자를 다시 보세요"]);
   });
 
   it("디버깅 증상 코드는 고치기 전엔 규칙에 걸린다", () => {

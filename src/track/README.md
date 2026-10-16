@@ -266,6 +266,7 @@ AI 바이브 코딩으로 폰 앱(웹 페이지 한 장)을 만드는 단계. �
 | `notHas: 줄` | 그 줄이 **없다** (같은 줄 비교). 시작 코드에서 지워야 하는 줄에 쓴다 |
 | `order: [줄, 줄, ...]` | 각 줄이 모두 있고 **첫 등장** 순서가 이 차례다 (2개 이상) |
 | `count: { text, min?, max? }` | 그 줄의 개수가 `min` 이상 · `max` 이하 (둘 중 하나는 꼭). 같은 줄을 여러 번 붙여 쓴 것을 잡거나(`max: 1`), 지워야 하는 줄은 `max: 0` |
+| `blocks: { type, fields?, inputs?, inside?, after? }` | 그런 모양의 **블록**이 작업판에 있다(아래 "블록 모양"). 코드 모드 학생도 코드를 블록으로 바꾼 작업판으로 같은 기준으로 판정된다(`src/app/track/judgeInput.ts`) |
 
 **줄 비교**(`hasLine`·`notHas`·`order`·`count`): 정규화 코드(주석·빈 줄 제거)의 줄과 `text` 를 각각 앞뒤 공백을 떼고, 공백 묶음은 한 칸으로, `'` 는 `"` 로 바꾼 뒤 **줄 전체**가 같은지 본다.
 그래서 들여쓰기·주석·따옴표 종류는 상관없고(`show('OPEN', 'a')` = `show("OPEN", "a")`), 줄의 일부만 같은 것(`led.value` ↔ `led.value(1)`)이나 괄호 안 공백 차이(`led.value( 1 )`)는 다른 줄이다.
@@ -284,6 +285,31 @@ rules:
 ```
 
 YAML에서 정규식은 작은따옴표로 감싼다(`'print\("가까워요!"\)'`) — 역슬래시가 그대로 들어간다.
+
+**블록 모양**(`blocks`): 작업판 JSON(Blockly 직렬화)의 그림자 아닌 블록을 모두 훑어, 다음을 모두 만족하는 블록이 하나라도 있으면 통과한다. 블록 type 이름은 `src/blocks/definitions/`(`esp_pin_write`·`flow_wait`·`variables_set`·`controls_if`·`dev_button_pressed` …).
+
+| 키 | 뜻 |
+|---|---|
+| `type` | 블록 type (꼭) |
+| `fields` | 적은 칸만 비교. 수는 수로(`NUM: 2` = `2.0`), 그 밖은 글로(`VALUE: "1"`, `MODE: OUT`) 같은지 본다. **변수 칸(`VAR`)은 변수 이름**으로 적는다(`VAR: led`) — 적지 않으면 이름이 달라도 된다 |
+| `inputs` | 값 입력 이름 → 그 자리에 꽂힌 블록의 모양 `{ type, fields?, inputs? }` (중첩). 블록이 안 꽂혀 있으면 그림자(수 칸 기본값)를 본다. 코드 모드에서 블록으로 안 바뀐 수 글(`time.sleep(2.0)` 의 `2.0` 은 코드 블록 `code_expr` 로 남는다)은 그 수의 `math_number` 로 본다 |
+| `inside` | 감싸는 블록(조상, 몇 겹이든) 중 그 type 이 있다. 별칭 `loop`(`flow_repeat_forever`·`flow_repeat_n`·`flow_for_*`·`controls_whileUntil`) · `def`(`procedures_def*`) · `top`(시작 블록 몸통 바로 아래 — 감싸는 블록이 없음). 아래 이어진 블록(next)은 조상이 아니다 |
+| `after` | 같은 몸통에서 **바로 앞** 형제 블록의 모양 `{ type, fields?, inputs? }`. 몸통의 첫 블록은 앞 형제가 없다 |
+
+```yaml
+rules:
+  # 켜기 바로 다음에 2초 기다리기
+  - blocks: { type: flow_wait, inputs: { SEC: { type: math_number, fields: { NUM: 2 } } }, after: { type: esp_pin_write, fields: { VALUE: "1" } } }
+    fail: 켜진 시간과 꺼진 시간이 다른가요? time.sleep 숫자를 다시 보세요
+  # 켜기가 반복 안에
+  - blocks: { type: esp_pin_write, fields: { VAR: led, VALUE: "1" }, inside: loop }
+    fail: 켜고 끄기가 계속 되풀이되나요?
+  # 상태 변수를 0 으로 시작 (반복 밖, 변수 이름은 아무것이나)
+  - blocks: { type: variables_set, inputs: { VALUE: { type: math_number, fields: { NUM: 0 } } }, inside: top }
+    fail: 시작할 때 꺼져 있다고 기억해 두는 변수가 있나요?
+```
+
+줄 규칙은 글의 모양(이름·공백)에 묶이고 `blocks` 는 구조(어느 블록 안·바로 앞)에 묶인다. 변수 이름을 바꿔도 되고 숫자 꼴(`2`·`2.0`)이 달라도 되는 미션은 `blocks` 가 낫고, 함수 이름·문자열 글자처럼 글 자체를 봐야 하면 줄 규칙·`codeMatches` 를 쓴다. 코드 모드에서 블록으로 바뀌지 않는 코드(코드 블록 `code_stmt` 로 남는 줄)는 `blocks` 로 볼 수 없다.
 
 ### 규칙 유지 장치 (content 테스트)
 

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { canonicalLines } from "../canonical";
+import { judgeInputOf } from "../judgeInput";
 import { Link } from "react-router";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
   const onJudge = () => {
     const program = editor.current?.getProgram();
     if (!program) return;
-    const result = judge(step.rules, { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    const result = judge(step.rules, judgeInputOf(program, output.current), chapter.files);
     // 주의(검사 warning·준비만 한 장치·시작 코드 그대로)는 통과했을 때만 모은다. 완료를 막지 않는다
     const notes = result.pass ? judgeNotes({ program, startCode, rules: step.rules }) : undefined;
     update((cur) => ({

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { canonicalLines } from "../canonical";
+import { judgeInputOf } from "../judgeInput";
 import { Link } from "react-router";
 import { CheckCircle2, Lock, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
     const program = editor.current?.getProgram();
     if (!program) return;
     const rules = [...symptom.rules, ...step.rules];
-    const result = judge(rules, { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    const result = judge(rules, judgeInputOf(program, output.current), chapter.files);
     // 통과했을 때만 주의를 모은다 (증상 코드는 한두 줄만 고치는 것이라 "바꾸지 않았어요" 는 보지 않는다)
     const notes = result.pass ? judgeNotes({ program, rules }) : null;
     update((cur) => ({
