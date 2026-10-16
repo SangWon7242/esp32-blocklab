@@ -55,6 +55,8 @@ export type MissionInput = EditorInput & {
   passed?: boolean;
   /** 마지막으로 판정한 코드 (코드가 바뀌면 판정 결과를 지운다) */
   judgedCode?: string;
+  /** 통과한 판정에 덧붙인 주의 (검사 warning·notes.ts). 완료를 막지 않는다 */
+  notes?: string[];
 };
 export type DebugInput = EditorInput & {
   /** 증상마다 "왜 이런 증상일까?" 설명 */
@@ -71,6 +73,8 @@ export type DebugInput = EditorInput & {
   failures?: (string[] | null)[];
   /** 증상마다 판정 통과 */
   passed?: boolean[];
+  /** 증상마다 통과한 판정에 덧붙인 주의. 완료를 막지 않는다 */
+  notes?: (string[] | null)[];
 };
 
 /** 설계: ① 빈칸 ② 번역표 ③ 조립 판정 */
@@ -100,12 +104,12 @@ export function judgeIsStale(judgedCode: string | null | undefined, code: string
 }
 
 /** 미션·설계: 코드가 바뀌었을 때의 입력 변경 (프로그램 저장 + 낡은 판정 지우기) */
-export function onEditedProgram<T extends { passed?: boolean; failures?: string[] | null; judgedCode?: string }>(
+export function onEditedProgram<T extends { passed?: boolean; failures?: string[] | null; judgedCode?: string; notes?: string[] }>(
   cur: T,
   program: SavedProgram,
 ): Partial<T> {
   if (!judgeIsStale(cur.judgedCode, program.code)) return { program } as unknown as Partial<T>;
-  return { program, passed: false, failures: null, judgedCode: undefined } as unknown as Partial<T>;
+  return { program, passed: false, failures: null, judgedCode: undefined, notes: undefined } as unknown as Partial<T>;
 }
 
 export const EDITOR_STEP_TYPES = ["run", "mission", "debug", "design"] as const;

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { debugMessage } from "@/ai/claude";
 import { filled, judgeIsStale, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
+import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { AiCheck } from "./AiCheck";
 import { JudgePanel } from "./JudgePanel";
@@ -42,11 +43,15 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
   const onJudge = () => {
     const program = editor.current?.getProgram();
     if (!program) return;
-    const result = judge([...symptom.rules, ...step.rules], { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    const rules = [...symptom.rules, ...step.rules];
+    const result = judge(rules, { code: program.code, blocksJson: program.blocksJson, output: output.current , canonical: canonicalLines }, chapter.files);
+    // 통과했을 때만 주의를 모은다 (증상 코드는 한두 줄만 고치는 것이라 "거의 바꾸지 않았어요" 는 보지 않는다)
+    const notes = result.pass ? judgeNotes({ program, rules }) : null;
     update((cur) => ({
       programs: setAt(cur.programs, current, { code: program.code, blocksJson: program.blocksJson }, null),
       passed: setAt(cur.passed, current, result.pass, false),
       failures: setAt(cur.failures, current, result.failures, null),
+      notes: setAt(cur.notes, current, notes, null),
       judgedCodes: setAt(cur.judgedCodes, current, program.code, null),
     }), { attempt: true });
   };
@@ -122,6 +127,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
             failures={d.failures?.[current]}
             passed={passed}
             passText={step.symptoms.every((_, i) => d.passed?.[i]) ? "모든 증상을 고쳤어요. 아래 완료를 누르세요." : "이 증상은 고쳤어요. 다음 증상으로 가 보세요."}
+            notes={d.notes?.[current]}
           />
           <TrackEditor
             fill
@@ -135,6 +141,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
                 ? {
                     passed: setAt(cur.passed, current, false, false),
                     failures: setAt(cur.failures, current, null, null),
+                    notes: setAt(cur.notes, current, null, null),
                     judgedCodes: setAt(cur.judgedCodes, current, null, null),
                   }
                 : {}),
