@@ -197,8 +197,12 @@ parts:
             fail: 1 이 나왔을 때 출력 창에 무엇을 찍기로 했나요?
           - codeMatches: '^\s+else:$'
             fail: 1 이 아니면(2 가 나오면) 어떻게 해야 하나요? "아니면"을 코드로 쓰면 무엇일까요?
-          - codeEquals: { file: practice_win_fail.py }
-            fail: 수를 뽑는 줄과 알려 주는 줄은 버튼을 눌렀을 때만 지나가나요? if 와 else 는 어느 줄 아래로 들여 써야 할까요? 0.5초 쉬는 줄은 그대로 있나요?
+          - codeMatches: '^    if (button\.value\(\)\s*==\s*0|not button\.value\(\))\s*:\n        \w+\s*=\s*random\.randint\(\s*1\s*,\s*2\s*\)'
+            fail: 수를 뽑는 줄은 버튼을 눌렀을 때만 지나가나요? 어느 줄 아래로 들여 써야 할까요?
+          - codeMatches: '^        if (\w+)\s*==\s*1\s*:\n            print\("당첨"\)\n        else:\n            print\("꽝"\)'
+            fail: 1 인지 묻는 if 와 else 는 버튼 if 안에 있나요? 당첨과 꽝을 찍는 줄은 각각 어느 줄 아래에 있나요?
+          - codeMatches: '^        time\.sleep\(0\.5\)$'
+            fail: 0.5초 쉬는 줄은 처음 자리 그대로 있나요? 버튼을 눌렀을 때만 지나가나요?
         answerCode: practice_win_fail.py
 
   - id: part2

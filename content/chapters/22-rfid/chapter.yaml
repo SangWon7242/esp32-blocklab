@@ -1,5 +1,5 @@
 # 센서 트랙 S19 · RFID 카드 읽기 — 08(F1 출입 통제)의 1부(카드 번호 읽기·목록 비교)를 센서 트랙으로 뗀 챕터. Keyestudio KS5020 RFID 프로젝트 구조(13.56 MHz, UID 4바이트). 형식 설명은 src/track/README.md
-# 미션 판정의 codeEquals 는 tolerance 255: 학생마다 카드 번호(0~255 숫자 넷)가 달라도 통과하게. 목록 꼴·OPEN/DENY 는 따로 규칙으로 본다
+# 미션 판정은 카드 번호를 \d+ 로 보아 학생마다 카드 번호(0~255 숫자 넷)가 달라도 통과한다. 목록 꼴·in 질문·OPEN/DENY·uid·0.5초 자리를 규칙 하나씩으로 본다
 id: 22-rfid
 order: 22
 track: sensor
@@ -199,8 +199,14 @@ parts:
             fail: 번호가 목록 "안에" 있는지 한 번에 묻는 판단 블록이 있었나요?
           - codeMatches: 'print\("OPEN"\)\n\s*else:\n\s*print\("DENY"\)'
             fail: 목록에 있을 때와 없을 때 각각 무엇을 출력하나요? 글자는 대문자 그대로인가요?
-          - codeEquals: { file: mission_open_deny.py, tolerance: 255 }
-            fail: 남은 곳이 있어요. 읽은 번호를 uid 에 담아 출력했나요? allowed 는 반복 전에 한 번만 만들었나요? 0.5초 기다리기는 제자리에 있나요?
+          - codeMatches: '^\s+uid\s*=\s*card_uid\(\)$[\s\S]*?^\s+print\(uid\)$'
+            fail: 읽은 번호를 uid 라는 이름에 담았나요? 담은 번호를 출력 칸에 보여 주나요?
+          - codeMatches: '^\s+if uid in allowed\s*:'
+            fail: 목록 안에 있는지 묻는 줄에서 무엇이 무엇 안에 있는지 묻나요? 담은 이름과 목록 이름이 그대로인가요?
+          - codeMatches: '^allowed\s*=[\s\S]*^while True:'
+            fail: allowed 목록은 반복이 시작되기 전에 한 번만 만들었나요?
+          - codeMatches: '^    time\.sleep\(0\.5\)$'
+            fail: 0.5초 기다리는 줄은 처음 자리 그대로 있나요? 카드가 없을 때도 그 줄을 지나가나요?
         answerCode: mission_open_deny.py
 
       - id: debug

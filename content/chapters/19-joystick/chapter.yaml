@@ -246,8 +246,14 @@ parts:
             fail: 조이스틱 X 값의 범위와 서보 각도의 범위는 각각 어디부터 어디까지인가요? 범위 바꾸기의 첫 칸에 조이스틱 X 값이 들어갔나요?
           - codeMatches: '^\s+servo\.duty_u16\(1638\s*\+\s*angle\s*\*\s*6462\s*//\s*180\)$'
             fail: 바꾼 각도를 서보에게 보냈나요? 서보 각도 블록의 칸에 무엇이 들어 있나요?
-          - codeEquals: { file: mission_joystick_servo.py }
-            fail: 반복 안에 남은 줄을 하나씩 세어 보세요. 바꾸기 → 각도 보내기 → 기다리기 말고 찍는 줄이 남아 있지 않나요? 기다리는 시간은 몇 밀리초인가요? 서보 준비는 조이스틱 준비 다음에 있나요?
+          - codeMatches: '^rocker_x\s*=\s*ADC\(Pin\(36\)\)[\s\S]*^servo\s*=\s*PWM\(Pin\(4\)\)'
+            fail: 서보 준비와 조이스틱 준비는 어느 순서로 있나요? 둘 다 반복 밖에 있나요?
+          - codeMatches: '^\s+angle\s*=\s*.*rocker_x\.read\(\).*\n(\s*print\(.*\)\n)*\s+servo\.duty_u16\(1638\s*\+\s*angle\b'
+            fail: 조이스틱 값을 바꿔 담은 이름과 서보에게 보내는 이름이 같나요? 담은 줄 바로 다음에 서보에게 보내나요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*(print\(\s*x\s*,\s*y\s*\)|print\("Button"\)|^\s+time\.sleep\(0\.2\)))'
+            fail: 반복 안에 처음 코드의 줄이 아직 남아 있지 않나요? 값을 찍던 줄과 0.2초 기다리던 줄을 찾아 보세요
+          - codeMatches: '^\s+time\.sleep(_ms\(20\)|\(0?\.02\))$'
+            fail: 한 바퀴마다 얼마나 기다리나요? 지시의 밀리초와 같은가요? 그 줄은 반복 안에 있나요?
         answerCode: mission_joystick_servo.py
 
       - id: debug

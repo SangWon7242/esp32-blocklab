@@ -235,8 +235,18 @@ parts:
             fail: 함수 안에서 바깥 변수 pressed 를 바꾸면, 보드는 그것을 함수 안에서만 쓰는 새 변수로 여겨요. 바깥 것을 바꾸겠다고 먼저 알리는 블록이 있나요?
           - codeMatches: '^pressed = False$'
             fail: 프로그램이 시작할 때 깃발은 올라가 있나요, 내려가 있나요? 반복이 깃발을 처음 볼 때 pressed 는 무엇이어야 할까요?
-          - codeEquals: { file: mission_flag.py }
-            fail: 핸들러 안에서 LED 를 바꾸거나 sleep 으로 기다리면 왜 안 될까요? 함수는 깃발만 올리고, LED 를 바꾸고 깃발을 내리는 일은 반복이 하고 있나요? 반복 끝의 쉬는 시간은 지시와 같나요?
+          - codeMatches: '^def on_press\(\w+\):\n\s+global pressed\n\s+pressed\s*=\s*True(\n\S|(?![\s\S]))'
+            fail: 함수 on_press 안에는 어떤 줄이 몇 개 있나요? 깃발을 올리는 일 말고 LED 를 바꾸거나 기다리는 일이 들어 있지 않나요?
+          - codeMatches: '^\s+if pressed\s*:'
+            fail: 반복은 깃발이 올라갔는지 어떻게 확인하나요?
+          - codeMatches: 'if led\.value\(\)\s*==\s*0\s*:\n\s+led\.value\(1\)\n\s+else:\n\s+led\.value\(0\)|if led\.value\(\)\s*==\s*1\s*:\n\s+led\.value\(0\)\n\s+else:\n\s+led\.value\(1\)|led\.value\((1 - |not )led\.value\(\)\)'
+            fail: LED 가 꺼져 있을 때와 켜져 있을 때 각각 무엇을 해야 하나요? 지금 LED 가 켜져 있는지는 무엇으로 알 수 있나요?
+          - codeMatches: '^\s{8,}pressed\s*=\s*False$'
+            fail: LED 를 바꾼 뒤 깃발은 어떻게 되나요? 다음 누름을 기다리려면 반복이 깃발에 무엇을 해야 할까요?
+          - codeMatches: '(?<![\s\S])(?![\s\S]*time\.sleep\(2\))'
+            fail: 반복 안에 깜박이던 줄(켜기 → 2초 → 끄기 → 2초)이 아직 남아 있지 않나요?
+          - codeMatches: '^    time\.sleep\(0\.05\)$'
+            fail: 반복 끝에서 쉬는 시간은 지시와 같나요? 그 줄은 반복의 어느 자리에 있나요?
         answerCode: mission_flag.py
 
       - id: extra
