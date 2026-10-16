@@ -59,6 +59,8 @@ export type MissionInput = EditorInput & {
   notes?: string[];
   /** 1분 설명 관문(설정 explainGate): 교사가 "설명 확인"을 눌렀는지. 코드를 바꾸면 판정과 함께 지운다 */
   explained?: boolean;
+  /** 1분 설명 메모 (교사가 들은 설명을 적어 두는 칸, 선택). 제출 글 답(textAnswersOf)에 들어간다 */
+  explainMemo?: string;
 };
 export type DebugInput = EditorInput & {
   /** 증상마다 "왜 이런 증상일까?" 설명 */
@@ -79,6 +81,8 @@ export type DebugInput = EditorInput & {
   notes?: (string[] | null)[];
   /** 1분 설명 관문: 모든 증상을 고친 뒤 교사가 "설명 확인"을 눌렀는지 (단계에 하나) */
   explained?: boolean;
+  /** 1분 설명 메모 (교사가 들은 설명을 적어 두는 칸, 선택). 제출 글 답(textAnswersOf)에 들어간다 */
+  explainMemo?: string;
 };
 
 /** 설계: ① 빈칸 ② 번역표 ③ 조립 판정 */
