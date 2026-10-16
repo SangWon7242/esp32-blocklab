@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ck-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ck-cover-title">병아리 키우기. 박스지로 만든 병아리 집 앞에 OLED 화면이 있고, 화면에는 S: SMILE, T: 24C, H: 50% 글자와 웃는 병아리 얼굴이 보인다. 옆에서 손이 집을 살살 흔들고, 사람이 다가오자 PIR 센서가 반응한다. 온도계와 물방울이 온도와 습도를 나타낸다. 말풍선: 병아리는 말을 못 해요. 춥다, 덥다, 심심하다를 화면으로 어떻게 알려 줄까?</title>
+  <rect x="0" y="0" width="640" height="360" fill="var(--muted)" stroke="none"/>
+  <rect x="0" y="296" width="640" height="64" fill="currentColor" fill-opacity="0.07" stroke="none"/>
+  <path d="M0 296 H640"/>
+  <!-- 말풍선 -->
+  <rect x="26" y="22" width="370" height="60" rx="14" fill="var(--card)"/>
+  <path d="M84 82 L74 100 L108 82" fill="var(--card)"/>
+  <path d="M108 82 L74 100" stroke="var(--card)" stroke-width="3"/>
+  <text x="211" y="46" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor" stroke="none">병아리는 말을 못 해요.</text>
+  <text x="211" y="68" text-anchor="middle" font-size="14" fill="currentColor" stroke="none">춥다 · 덥다 · 심심하다를 화면으로 어떻게 알려 줄까?</text>
+  <!-- 병아리 집 (박스지) -->
+  <path d="M60 296 V180 L150 120 L240 180 V296 Z" fill="#e9c46a" fill-opacity="0.45" stroke-width="2.5"/>
+  <path d="M60 180 H240" stroke-width="1.5" stroke-opacity="0.5"/>
+  <rect x="96" y="214" width="108" height="82" rx="4" fill="currentColor" fill-opacity="0.12"/>
+  <!-- 병아리 (집 안) -->
+  <ellipse cx="150" cy="262" rx="30" ry="24" fill="#ffd43b" stroke-width="2"/>
+  <circle cx="150" cy="232" r="18" fill="#ffd43b" stroke-width="2"/>
+  <circle cx="144" cy="229" r="2.5" fill="currentColor" stroke="none"/>
+  <circle cx="156" cy="229" r="2.5" fill="currentColor" stroke="none"/>
+  <path d="M146 238 L150 243 L154 238 Z" fill="#f76707" stroke="#f76707"/>
+  <path d="M140 284 L136 294 M160 284 L164 294" stroke="#f76707" stroke-width="2.5"/>
+  <!-- OLED 화면 -->
+  <rect x="268" y="150" width="190" height="112" rx="8" fill="#1d4ed8"/>
+  <rect x="278" y="160" width="170" height="92" rx="4" fill="#0b1b4d" stroke="none"/>
+  <g font-size="13" font-weight="700" fill="#7dd3fc" stroke="none" font-family="monospace">
+    <text x="286" y="178">S: SMILE</text>
+    <text x="286" y="200">T: 24C</text>
+    <text x="286" y="222">H: 50%</text>
+  </g>
+  <rect x="384" y="172" width="52" height="52" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+  <rect x="396" y="184" width="7" height="7" fill="#7dd3fc" stroke="none"/>
+  <rect x="417" y="184" width="7" height="7" fill="#7dd3fc" stroke="none"/>
+  <path d="M396 206 L410 213 L424 206" stroke="#7dd3fc" stroke-width="2.5"/>
+  <text x="363" y="282" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">얼굴 · 수치 · 소리로 알려요</text>
+  <!-- 손 (흔들기, 틸트) -->
+  <path d="M216 150 c-6 -14 4 -22 10 -10 l4 10 c2 -10 12 -10 12 0 l0 10 c4 -8 12 -6 12 2 l-2 16 c-2 10 -10 14 -18 14 c-10 0 -16 -6 -18 -16 Z" fill="#f8c9a0" stroke-width="1.8"/>
+  <path d="M196 128 c-8 8 -8 20 0 28 M190 120 c-14 12 -14 32 0 44" stroke-width="2" stroke-opacity="0.7"/>
+  <text x="214" y="112" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">흔들어 주기</text>
+  <!-- 사람 + PIR -->
+  <circle cx="560" cy="150" r="16" fill="var(--card)"/>
+  <path d="M560 166 V226 M560 186 L536 206 M560 186 L584 206 M560 226 L542 266 M560 226 L578 266" stroke-width="3"/>
+  <rect x="484" y="226" width="30" height="40" rx="4" fill="#591ec4" fill-opacity="0.3"/>
+  <circle cx="499" cy="240" r="9" fill="var(--card)"/>
+  <path d="M520 236 c8 -4 8 -12 0 -16 M520 252 c14 -8 14 -28 0 -36" stroke="#591ec4" stroke-width="2"/>
+  <text x="499" y="284" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.8" stroke="none">PIR 센서</text>
+  <!-- 온도계와 물방울 -->
+  <rect x="478" y="56" width="14" height="70" rx="7" fill="var(--card)"/>
+  <circle cx="485" cy="132" r="11" fill="#e03131" stroke="none"/>
+  <rect x="482" y="86" width="6" height="42" fill="#e03131" stroke="none"/>
+  <text x="520" y="80" font-size="13" fill="currentColor" stroke="none">온도 20~28℃</text>
+  <path d="M532 96 c-9 14 -9 24 0 24 c9 0 9 -10 0 -24 Z" fill="#1c7ed6" fill-opacity="0.5" stroke="#1c7ed6" stroke-width="1.5"/>
+  <text x="548" y="116" font-size="13" fill="currentColor" stroke="none">습도 40~70%</text>
+</svg>

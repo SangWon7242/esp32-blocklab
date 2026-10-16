@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ck-states-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ck-states-title">병아리 상태 세 가지와 판단 규칙. 위: 온도 막대 20~28℃ 와 습도 막대 40~70% 가 알맞은 범위로 칠해져 있다. 아래: BAD(온습도가 범위 밖, 우는 입), BLANK(온습도 알맞음, 일자 입), SMILE(온습도 알맞고 틸트 또는 PIR 이 1, 웃는 입). 바뀌는 순간 부저가 울린다</title>
+  <text x="320" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">알맞은 범위와 병아리 상태 세 가지</text>
+  <!-- 온도 막대 -->
+  <text x="40" y="76" font-size="13" font-weight="700" fill="currentColor" stroke="none">온도</text>
+  <rect x="84" y="64" width="230" height="16" rx="8" fill="var(--card)"/>
+  <rect x="150" y="64" width="88" height="16" rx="8" fill="#2f9e44" fill-opacity="0.45" stroke="none"/>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="84" y="96">10℃</text><text x="150" y="96">20℃</text><text x="238" y="96">28℃</text><text x="314" y="96">35℃</text>
+  </g>
+  <text x="194" y="59" text-anchor="middle" font-size="12" fill="#2f9e44" stroke="none" font-weight="700">알맞음</text>
+  <!-- 습도 막대 -->
+  <text x="350" y="76" font-size="13" font-weight="700" fill="currentColor" stroke="none">습도</text>
+  <rect x="394" y="64" width="210" height="16" rx="8" fill="var(--card)"/>
+  <rect x="478" y="64" width="63" height="16" rx="8" fill="#1c7ed6" fill-opacity="0.45" stroke="none"/>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="394" y="96">0%</text><text x="478" y="96">40%</text><text x="541" y="96">70%</text><text x="604" y="96">100%</text>
+  </g>
+  <text x="510" y="59" text-anchor="middle" font-size="12" fill="#1c7ed6" stroke="none" font-weight="700">알맞음</text>
+  <!-- 세 화면 -->
+  <g id="ck-states-screens">
+    <!-- BAD -->
+    <rect x="34" y="104" width="170" height="104" rx="8" fill="#0b1b4d" stroke="#1d4ed8" stroke-width="3"/>
+    <text x="46" y="124" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none" font-family="monospace">S: BAD</text>
+    <rect x="128" y="130" width="60" height="60" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+    <rect x="142" y="144" width="8" height="8" fill="#7dd3fc" stroke="none"/>
+    <rect x="166" y="144" width="8" height="8" fill="#7dd3fc" stroke="none"/>
+    <path d="M142 180 L158 170 L174 180" stroke="#7dd3fc" stroke-width="2.5"/>
+    <text x="46" y="150" font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace">T: 31C</text>
+    <text x="46" y="170" font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace">H: 50%</text>
+    <!-- BLANK -->
+    <rect x="235" y="104" width="170" height="104" rx="8" fill="#0b1b4d" stroke="#1d4ed8" stroke-width="3"/>
+    <text x="247" y="124" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none" font-family="monospace">S: BLANK</text>
+    <rect x="329" y="130" width="60" height="60" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+    <rect x="343" y="144" width="8" height="8" fill="#7dd3fc" stroke="none"/>
+    <rect x="367" y="144" width="8" height="8" fill="#7dd3fc" stroke="none"/>
+    <path d="M343 176 H375" stroke="#7dd3fc" stroke-width="2.5"/>
+    <text x="247" y="150" font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace">T: 24C</text>
+    <text x="247" y="170" font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace">H: 50%</text>
+    <!-- SMILE -->
+    <rect x="436" y="104" width="170" height="104" rx="8" fill="#0b1b4d" stroke="#1d4ed8" stroke-width="3"/>
+    <text x="448" y="124" font-size="12" font-weight="700" fill="#7dd3fc" stroke="none" font-family="monospace">S: SMILE</text>
+    <rect x="530" y="130" width="60" height="60" fill="none" stroke="#7dd3fc" stroke-width="2"/>
+    <rect x="544" y="144" width="8" height="8" fill="#7dd3fc" stroke="none"/>
+    <rect x="568" y="144" width="8" height="8" fill="#7dd3fc" stroke="none"/>
+    <path d="M544 170 L560 180 L576 170" stroke="#7dd3fc" stroke-width="2.5"/>
+    <text x="448" y="150" font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace">T: 24C</text>
+    <text x="448" y="170" font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace">H: 50%</text>
+  </g>
+  <!-- 규칙 글 -->
+  <g font-size="13" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="119" y="232" font-weight="700">BAD</text>
+    <text x="119" y="252">온도나 습도가</text>
+    <text x="119" y="270">범위 밖</text>
+    <text x="320" y="232" font-weight="700">BLANK</text>
+    <text x="320" y="252">온도 · 습도 둘 다</text>
+    <text x="320" y="270">알맞음</text>
+    <text x="521" y="232" font-weight="700">SMILE</text>
+    <text x="521" y="252">알맞음 + 흔들어 주기</text>
+    <text x="521" y="270">또는 사람이 다가옴</text>
+  </g>
+  <!-- 바뀌는 순간 소리 -->
+  <path d="M212 156 H228 M424 156 H440" stroke-width="2.5" stroke-dasharray="4 3"/>
+  <rect x="150" y="296" width="340" height="40" rx="10" fill="var(--card)"/>
+  <path d="M170 310 l6 6 l-6 6 M176 306 c6 6 6 14 0 20 M181 300 c10 8 10 24 0 32" stroke="#c2255c" stroke-width="2"/>
+  <text x="330" y="321" text-anchor="middle" font-size="13" fill="currentColor" stroke="none">상태가 바뀌는 순간에만 부저가 한 번 울려요 (state != prev)</text>
+</svg>

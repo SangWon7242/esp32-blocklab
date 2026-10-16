@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ck-change-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ck-change-title">반복이 한 바퀴 돌 때마다 state 와 prev 를 비교한다. 1~2바퀴 BLANK, 3바퀴에서 SMILE 로 바뀌며 부저가 울리고 prev 가 SMILE 이 된다. 4~5바퀴는 SMILE 그대로라 조용하다. 6바퀴에서 BAD 로 바뀌며 다시 한 번 울린다. 아래: state != prev 가 참일 때만 소리 내고 prev = state 로 적어 둔다</title>
+  <text x="320" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">바뀐 순간에만 소리 내기: state 와 prev 비교</text>
+  <!-- 표 머리 -->
+  <g font-size="13" font-weight="700" fill="currentColor" stroke="none">
+    <text x="40" y="70">바퀴</text>
+    <text x="40" y="110">state</text>
+    <text x="40" y="150">prev</text>
+    <text x="40" y="190">state != prev</text>
+    <text x="40" y="230">소리</text>
+  </g>
+  <path d="M150 50 V246" stroke-opacity="0.4"/>
+  <path d="M32 84 H610 M32 124 H610 M32 164 H610 M32 204 H610" stroke-opacity="0.25"/>
+  <!-- 열 -->
+  <g font-size="13" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="195" y="70">1</text><text x="275" y="70">2</text><text x="355" y="70">3</text><text x="435" y="70">4</text><text x="515" y="70">5</text><text x="595" y="70">6</text>
+    <text x="195" y="110">BLANK</text><text x="275" y="110">BLANK</text><text x="355" y="110" font-weight="700">SMILE</text><text x="435" y="110">SMILE</text><text x="515" y="110">SMILE</text><text x="595" y="110" font-weight="700">BAD</text>
+    <text x="195" y="150">BLANK</text><text x="275" y="150">BLANK</text><text x="355" y="150">BLANK</text><text x="435" y="150">SMILE</text><text x="515" y="150">SMILE</text><text x="595" y="150">SMILE</text>
+    <text x="195" y="190">거짓</text><text x="275" y="190">거짓</text><text x="355" y="190" font-weight="700" fill="#c2255c">참</text><text x="435" y="190">거짓</text><text x="515" y="190">거짓</text><text x="595" y="190" font-weight="700" fill="#c2255c">참</text>
+    <text x="195" y="230">조용</text><text x="275" y="230">조용</text><text x="435" y="230">조용</text><text x="515" y="230">조용</text>
+  </g>
+  <!-- 소리 아이콘 -->
+  <g stroke="#c2255c" stroke-width="2">
+    <path d="M340 222 l6 6 l-6 6 M346 218 c6 6 6 14 0 20 M352 213 c9 8 9 22 0 30"/>
+    <path d="M582 222 l6 6 l-6 6 M588 218 c6 6 6 14 0 20 M594 213 c9 8 9 22 0 30"/>
+  </g>
+  <rect x="320" y="52" width="70" height="194" rx="8" stroke="#c2255c" stroke-width="2" stroke-dasharray="5 4"/>
+  <rect x="560" y="52" width="70" height="194" rx="8" stroke="#c2255c" stroke-width="2" stroke-dasharray="5 4"/>
+  <!-- 아래 설명: 코드 흐름 -->
+  <rect x="40" y="266" width="560" height="76" rx="10" fill="var(--card)"/>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="60" y="290" font-family="monospace">if state != prev:</text>
+    <text x="60" y="310" font-family="monospace" xml:space="preserve">    부저 울리기</text>
+    <text x="60" y="330" font-family="monospace" xml:space="preserve">    prev = state</text>
+    <text x="300" y="290">바뀐 순간이면</text>
+    <text x="300" y="310">한 번 울리고</text>
+    <text x="300" y="330">지금 상태를 "바로 전 상태"로 적어 둬요</text>
+  </g>
+  <path d="M250 300 H286 M280 294 L286 300 L280 306" stroke-width="2.5"/>
+</svg>

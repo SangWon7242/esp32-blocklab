@@ -1,0 +1,477 @@
+# 교과 융합 트랙 F16 · 병아리 키우기 (OLED 다마고치) — 원본: 아두이노 기본 W06 병아리 게임(You Like Chick?: 자석 센서로 시작, 온습도 + 기울기 or 적외선으로 상태 BLANK · SMILE · BAD, LCD 사용자 문자, 숙제 "효과음 넣기"), 센서 트랙 S12(15-temp-humidity) · S13(16-tilt-pir) · S18(21-oled) · F6(33-room-climate). 형식 설명은 src/track/README.md
+# 자석 센서 시작 조건은 버튼(27번)으로, 적외선 반사 센서는 PIR(23번)로, LCD 사용자 문자는 OLED 의 rect · fill_rect · line 얼굴로 바꿨다
+id: 43-chick
+order: 43
+track: fusion
+label: F16
+prerequisites: [15-temp-humidity, 16-tilt-pir, 21-oled, 33-room-climate]
+subjects: [과학, 기술가정, 미술]
+sdg: [15]
+sessions: 2
+teacherNotes: |
+  **핀 번호** DHT11 S 13번(S12 와 같음), 틸트 S 14번, PIR S 23번(S13 과 같음), OLED SCL 22 · SDA 21(S18), 시작 **버튼 27번**(S8 의 14번은 틸트가 쓰므로 옮김), 수동 부저 15번(S9). 여섯 장치의 핀이 겹치지 않는다. F6 을 한 모둠은 DHT11 S 선을 4번에서 13번으로 되돌려 꽂게 한다.
+
+  **원본과 다른 점** 원본 W06 은 "자석 센서 값이 0 이 되면 시작"이었다. 키트에 자석 센서가 없고 "정확히 0" 조건은 센서 편차에 약하므로 **버튼을 누르면 시작**으로 바꿨다. 적외선 반사 센서(놀아 주기)는 **PIR(사람이 다가옴)** 로, LCD 사용자 문자는 OLED 에 rect · fill_rect · line 으로 그리는 얼굴로 바꿨다. OLED 글자는 영문만 되므로 화면 글은 `You Like Chick?` · `PRESS START` · `S: SMILE` 처럼 영어다.
+
+  **기준값은 예시** 알맞은 범위 20~28℃ · 40~70% 는 **예시**다(실제 병아리 사육 적정 온도는 첫 주 32~35℃ 로 훨씬 높다 — 과학 시간에 "왜 우리 교실 기준과 다를까"를 이야기할 거리). 1차시 실행에서 교실 온도 · 습도를 공책에 적고, 교실 값이 범위 밖이면 판정을 받은 뒤 범위를 "지금 값 ±2" 로 고쳐 SMILE 과 BAD 를 모두 보게 한다(미션 · 디버깅 판정은 지시의 숫자 그대로). 손으로 센서를 감싸고 입김을 불면 습도가 70 을 넘어 BAD 가 된다.
+
+  **센서 성질** PIR 은 켠 뒤 30~60초 예열이 필요하고 교실에서는 다른 모둠의 움직임도 잡는다(S13 과 같음, 종이컵 고깔로 시야를 좁힌다). 틸트 모듈은 흔들면 1 이지만 반대인 모듈이 있으니 출력으로 먼저 확인한다. `pir.value() == 1` 과 `tilt.value() == 1` 은 글자가 같은 코드라 블록 화면에서는 둘 다 "기울었는가" 블록으로 보인다. DHT11 은 2초보다 자주 재면 `OSError` 가 난다. 보드에 `ssd1306.py` 가 있어야 화면이 켜진다. 1부(실행 1 · 미션)는 DHT11 · 버튼 · OLED 만 꽂아도 되고, 틸트 · PIR · 부저는 2부에서 더 꽂아도 된다.
+
+  **효과음** 수동 부저(초록 판)를 쓴다. 능동 부저(검은 스티커)를 꽂았으면 `beeper.freq()` 가 소용없고 켜는 동안 한 음만 난다. 2부 추가 미션(상태마다 다른 음)은 선택이다.
+
+  **교과 · 단원 연결**
+
+  - 과학: 동물의 생활과 환경(적정 온도 · 습도, 변온 · 정온 동물), 열과 적외선(PIR 은 몸에서 나오는 적외선의 변화를 느낀다), 생물과 환경의 관계
+  - 기술가정: 반려동물 · 가축의 사육 환경과 책임, 생활 속 자동화 기기
+  - 미술: 128 × 64 점 화면에 표정 도트 디자인(모눈종이에 먼저 그리고 좌표로 옮기기)
+  - SDG 15(육상 생태계 보호): 동물이 살기 좋은 환경을 수치로 살피고 돌보기
+
+  **안전과 메이킹** 배선은 늘 USB 를 뺀 채로 한다. 박스지로 병아리 집(OLED 창, PIR 구멍, 버튼 자리)을 접어 붙이고, DHT11 은 상자 밖 공기가 통하는 곳에 둔다. 틸트 모듈은 집 바닥에 붙여 집을 살살 흔들면 1 이 되게 한다. 종이컵을 거꾸로 세워 OLED 받침으로 써도 좋다.
+
+  - 1차시: 문제 만나기 ~ 미션(시작 버튼 · 온습도 · 상태 글자)
+  - 2차시: 실행 2 · 읽기 체크 2(얼굴 · 놀아 주기 · 효과음) · (추가 미션) · 디버깅 · 설계(배고픔 수치) · 성찰
+  - 시간이 모자라면 추가 미션은 건너뛰고 디버깅 증상 3 을 다음 시간으로 미룬다
+title: 병아리 키우기
+subtitle: 춥다 · 덥다 · 심심하다를 얼굴과 소리로 알려 주는 OLED 다마고치
+summary: |
+  병아리는 말을 못 해요. 춥거나 덥거나 심심해도 "삐약" 뿐이에요. 오늘은 **DHT11** 로 온도 · 습도를 재고, **틸트 스위치**와 **PIR 센서**로 놀아 주는지 알아채서, **OLED 화면**에 병아리 얼굴과 수치를 보여 주는 다마고치를 만들어요.
+  1부에서는 버튼으로 시작해 온습도와 상태 글자를 띄우고, 2부에서는 함수로 얼굴을 그리고 상태가 바뀔 때 **부저**가 한 번 울리게 해요. 동물이 살기 좋은 환경을 숫자로 살피는 연습이기도 해요.
+cover: images/cover.svg
+materials:
+  - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
+  - { name: 온습도 센서(DHT11 모듈), note: "다리 3개: S(신호) · +(3V3) · −(GND). S 는 13번 핀으로" }
+  - { name: 틸트 스위치 모듈, note: "다리 3개: S · + · −. S 는 14번. 흔들면 안에서 구슬이 굴러요" }
+  - { name: PIR 센서(인체감지) 모듈, note: "다리 3개: S · + · −. S 는 23번. 둥근 렌즈가 앞을 봐요" }
+  - { name: OLED 화면 (128×64), note: "핀 4개: GND · VCC · SCL(22) · SDA(21). 보드에 ssd1306.py 를 먼저 올려 두기" }
+  - { name: 버튼(택트 스위치), note: "다리 4개. 가운데 홈에 걸쳐 꽂고 한쪽은 27번, 반대쪽은 − 줄" }
+  - { name: 수동 부저(초록 판), note: "+ 다리는 15번, − 다리는 − 줄. 음 높이를 바꿀 수 있는 부저" }
+  - { name: 브레드보드, note: "위쪽 + 줄(3V3)과 − 줄(GND)을 여섯 부품이 함께 써요" }
+  - { name: M-F 듀폰선, note: "9가닥. 보드 핀(3V3 · GND · 22 · 21 · 13 · 14 · 23 · 27 · 15) → 브레드보드" }
+  - { name: 점퍼선(M-M), note: "10개. 브레드보드 안에서 + 줄 · − 줄로 (OLED 2, DHT11 2, 틸트 2, PIR 2, 버튼 1, 부저 1)" }
+  - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
+wiring:
+  image: images/wiring-breadboard.svg
+  caption: "위쪽 + 줄 ← 3V3, − 줄 ← GND. OLED(2~5번 줄: GND · VCC · SCL · SDA): GND → − 줄, VCC → + 줄, SCL ← 22, SDA ← 21. DHT11(8~10번 줄: S · + · −): S ← 13, + → + 줄, − → − 줄. 틸트 모듈(13~15번 줄): S ← 14, + → + 줄, − → − 줄. PIR 모듈(18~20번 줄): S ← 23, + → + 줄, − → − 줄. 버튼은 가운데 홈에 걸쳐 23 · 25번 줄에: 23번 줄 j 칸 ← 27, 25번 줄 c 칸 → − 줄. 수동 부저(28 · 30번 줄): + 다리 28번 줄 ← 15, − 다리 30번 줄 → − 줄"
+principle:
+  image: images/chick-states.svg
+  body: |
+    동물마다 **살기 좋은 온도와 습도**가 있어요. 병아리는 스스로 체온을 지키는 힘이 약해서 어미 품(약 32~35℃)처럼 따뜻해야 하고, 너무 습하면 병에 걸리기 쉬워요. 그래서 사육장은 온도계와 습도계를 보며 돌봐요. 이 챕터의 20~28℃ · 40~70% 는 **교실에서 시험하기 위한 예시 범위**예요.
+
+    병아리의 기분은 세 가지 **상태**로 나타내요. 온도나 습도가 범위 밖이면 `BAD`, 둘 다 알맞으면 `BLANK`, 알맞은 데다 집을 흔들어 주거나(틸트) 사람이 다가오면(PIR) `SMILE` 이에요. **PIR 센서**는 사람 몸에서 나오는 **적외선(열)** 의 변화를 느껴서 "놀아 주러 왔다"를 알아채요.
+
+    화면에는 상태 글자와 수치, 그리고 **얼굴**을 그려요. 얼굴은 128 × 64 점 화면에 네모 · 채운 네모 · 선으로 그리는 **도트 디자인**이에요. 상태가 **바뀌는 순간**에만 부저가 한 번 울리도록, 바로 전 상태를 `prev` 에 기억해 두고 비교해요.
+goals:
+  content: DHT11 · 틸트 · PIR 세 센서의 값을 범위 판단과 and · or 로 묶어 병아리 상태 세 가지를 정하고, 매개변수를 받는 함수로 OLED 에 얼굴을 그리며, 상태가 바뀔 때만 부저를 울린다
+  thinking: 센서 여러 개를 알아야 · 정해야 · 움직여야 로 나누고, "상태" 라는 변수 하나로 기계의 기분을 정리한 뒤 바뀐 순간을 잡아내는 방법(이전 값 기억)을 설명한다
+successCriteria:
+  - 병아리에게 알맞은 온도 · 습도 범위가 왜 필요한지 말하고, 교실에서 잰 값으로 범위를 고칠 수 있다
+  - 두 범위 판단을 and 로, 틸트와 PIR 을 or 로 묶어 SMILE · BLANK · BAD 세 상태를 정할 수 있다
+  - 상태 글자를 매개변수로 받는 함수로 얼굴을 다르게 그릴 수 있다
+  - 바로 전 상태를 기억해 두고 비교해서, 상태가 바뀌는 순간에만 소리가 나게 할 수 있다
+parts:
+  - id: part1
+    title: 1부 · 시작 버튼과 온습도 화면
+    steps:
+      - id: problem
+        type: problem
+        title: 문제 만나기 — 병아리는 말을 못 해요
+        minutes: 4
+        scene:
+          image: images/cover.svg
+          caption: 춥다 · 덥다 · 심심하다를 병아리 대신 화면이 알려 주면 어떨까요?
+        body: |
+          병아리는 말을 못 해요. 춥거나 덥거나 심심해도 "삐약" 뿐이에요. 사람이 매번 온도계를 보고 손을 대 보지 않으면 병아리가 힘든 줄 몰라요. 동물이 살기 좋은 환경을 지켜 주는 것은 생태계를 돌보는 첫걸음이에요.
+
+          오늘은 센서로 병아리의 환경을 재고, 화면의 **얼굴**과 **소리**로 기분을 알려 주는 다마고치를 만들어요. 코드를 보기 전에 질문마다 내 생각을 한두 문장으로 적어 봐요. 틀려도 괜찮아요.
+        todo:
+          - 준비물(ESP32 보드, DHT11, 틸트 모듈, PIR 모듈, OLED, 버튼, 수동 부저, 브레드보드, 선)을 책상에 꺼내 놓기
+          - 질문마다 내 생각을 한두 문장씩 쓰기
+          - 다 적으면 **완료** 누르기
+        questions:
+          - 병아리가 춥거나 더운 것을 기계가 알아채려면 무엇을 재야 할까요? 그 값이 얼마일 때 "알맞다"고 할까요?
+          - 병아리가 심심한 것은 어떻게 알 수 있을까요? 누가 놀아 주러 왔다는 것을 센서로 어떻게 알아챌까요?
+          - 병아리의 기분을 화면 하나로 한눈에 알려 주려면 무엇을 보여 주면 좋을까요?
+
+      - id: analysis
+        type: analysis
+        title: 조건 분석 — 센서별 세 칸 보드
+        minutes: 6
+        scene:
+          image: images/three-boxes.svg
+          caption: 알아야 할 것 → 정해야 할 것 → 해야 할 것 순서로 나눠요
+        body: |
+          다마고치에는 장치가 여섯이에요. 센서 셋(DHT11 · 틸트 · PIR)이 **알아내고**, 사람이 **시작 여부와 범위, 상태 세 가지를 정해 주면**, 화면과 부저가 **움직여요**. 센서마다 어느 칸에 들어갈지 생각하며 나눠 봐요.
+
+          - **알아야 할 것**: DHT11 의 온도 · 습도, 틸트가 흔들렸는지, PIR 에 사람이 왔는지, 버튼이 눌렸는지
+          - **정해야 할 것**: 시작은 언제, 알맞은 범위는 얼마부터 얼마까지, 상태는 몇 가지
+          - **해야 할 것**: 얼굴 · 수치 · 소리
+
+          과학 시간에는 동물마다 알맞은 온도가 왜 다른지(정온 동물 · 변온 동물, 새끼와 어른) 조사해서 표로 적어 보고, 그 표에서 우리 병아리의 범위를 골라 보세요.
+        todo:
+          - "**알아야 할 것**: 센서 셋과 버튼이 알아내는 값 적기"
+          - "**정해야 할 것**: 사람이 골라 줘야 하는 것(시작 · 범위 · 상태) 적기"
+          - "**해야 할 것**: 화면과 부저가 할 일을 하나씩 적기"
+        answer:
+          know: ["DHT11 이 잰 온도(℃)와 습도(%)", "틸트 스위치 값(흔들면 1)과 PIR 값(사람이 움직이면 1)", "버튼이 눌렸는지(누르면 0)", "DHT11 13, 틸트 14, PIR 23, 버튼 27, OLED 22 · 21, 부저 15"]
+          decide: ["언제 시작할지 (버튼을 누르면)", "알맞은 온도 범위 (예: 20~28℃)와 습도 범위 (예: 40~70%)", "상태 세 가지 (BLANK · SMILE · BAD)와 각각의 조건", "몇 초마다 잴지 (예: 2초)"]
+          act: ["시작 전에는 대기 화면 보여 주기", "온도 · 습도 · 상태 글자를 화면에 적기", "상태에 맞는 얼굴 그리기", "상태가 바뀌면 부저 한 번 울리기"]
+
+      - id: predict
+        type: predict
+        title: 예측하기 — 버튼을 누르기 전과 후
+        minutes: 4
+        scene:
+          image: images/chick-states.svg
+          caption: 시작 전에는 대기 화면, 시작 뒤에는 온도와 습도. 그 사이를 가르는 것이 `started` 예요
+        body: |
+          활동 칸의 코드는 처음에 `You Like Chick?` 대기 화면을 띄우고, 버튼을 누르면 `started` 가 `True` 가 되어 그때부터 2초마다 온도와 습도를 화면에 적어요. 아직 실행하지 않아요.
+
+          `started` 는 처음에 `False` 예요. 반복 안에서 `if started:` 는 "시작했나요?" 라고 묻는 거예요. 코드를 한 줄씩 읽고 무엇이 보일지 먼저 적어 봐요. **내 예측을 먼저 적는 것**이 중요해요.
+        todo:
+          - 코드를 위에서부터 한 줄씩 소리 내어 읽기
+          - "`started` 가 나오는 줄 세 개 찾기"
+          - 빈칸 세 개에 내 예측 쓰기
+        code: step1_wait_start.py
+        blanks:
+          - q: 실행하자마자 화면에는 무엇이 보일까요?
+          - q: 버튼을 한 번 누르고 손을 떼면 화면은 어떻게 될까요? 다시 대기 화면으로 돌아갈까요?
+          - q: 버튼을 누른 뒤 화면 숫자는 몇 초마다 바뀔까요?
+
+      - id: run
+        type: run
+        title: 복사 · 실행 — 버튼으로 시작하는 온습도 화면
+        minutes: 12
+        scene:
+          image: images/wiring-breadboard.svg
+          caption: "1부에서는 OLED(22 · 21), DHT11(S ← 13), 버튼(27)만 먼저 꽂아요. + 줄은 3V3, − 줄은 GND"
+        body: |
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 먼저 위쪽 + 줄(3V3) · − 줄(GND)을 보드와 이어요. 그다음 OLED(GND · VCC · SCL · SDA), DHT11(S · + · −), 버튼을 꽂아요. 버튼은 가운데 홈에 걸쳐 꽂고 한쪽 다리는 27번, 반대쪽 다리는 − 줄로 가요. 틸트 · PIR · 부저는 2부에서 꽂아요.
+
+          실행되면 대기 화면이 보여요. 버튼을 누른 뒤 화면의 온도와 습도를 **공책에 적어** 두세요. 센서를 손으로 감싸고 입김도 불어 보며 숫자가 어떻게 바뀌는지 봐요. 미션에서 이 숫자로 알맞은 범위를 따져요.
+        todo:
+          - "**부품과 배선**대로 + 줄 · − 줄, OLED, DHT11, 버튼 꽂기"
+          - "**보드 연결** → **실행** 누르고 대기 화면 확인하기"
+          - 버튼을 누른 뒤 온도 · 습도와, 입김을 불었을 때 숫자를 공책에 적기
+        code: step1_wait_start.py
+        expected: "코드를 실행하면 OLED 에 `You Like Chick?` 와 `PRESS START` 두 줄이 보여요. 버튼을 한 번 누르면 화면이 `T: 24C` · `H: 50%` 처럼 바뀌고 2초마다 새 값으로 바뀌어요. 버튼에서 손을 떼도 대기 화면으로 돌아가지 않아요."
+        codeNotes:
+          - { line: 6, note: "13번 핀에 DHT11 을 준비하고 이름을 `dht11` 로 붙여요" }
+          - { line: 7, note: "27번 핀에 풀업 버튼을 준비해요. 누르면 0, 떼면 1 이에요" }
+          - { line: 9, note: "128 × 64 점짜리 OLED 화면을 `oled` 로 준비해요 (8번 줄의 두 선 SCL 22 · SDA 21)" }
+          - { line: 11, note: "`started` 는 '시작했는가' 를 담는 변수예요. 처음엔 `False`" }
+          - { line: 12, note: "대기 화면: 지우고 두 줄을 적어 내보내요 (12~15번 줄)" }
+          - { line: 17, note: "버튼이 눌렸으면(값 0) 바로 아래 줄을 실행해요" }
+          - { line: 19, note: "`started` 가 `True` 일 때만 아래 들여 쓴 줄들을 실행해요" }
+          - { line: 20, note: "센서에게 **지금 재 달라고** 부탁하고, 21 · 22번 줄에서 온도 · 습도를 `t` · `h` 에 담아요" }
+          - { line: 24, note: "`str(t)` 로 숫자를 글자로 바꿔 `\"T: \"` · `\"C\"` 와 이어 (0, 16) 자리에 적어요" }
+          - { line: 27, note: "DHT11 은 한 번 잰 뒤 1초 넘게 쉬어야 해요" }
+          - { line: 28, note: "시작 전에는 0.1초마다 버튼만 살펴요" }
+
+      - id: readcheck
+        type: readcheck
+        title: 읽기 체크 1
+        minutes: 5
+        scene:
+          image: images/read-code.svg
+          caption: 세 문제의 답은 모두 활동 칸의 코드 안에 있어요
+        body: |
+          화면에 보인 글이 코드의 어디에서 나왔는지 확인해요. 대기 화면을 만드는 줄들과 `while True:` 안에서 `started` 를 묻는 줄을 나눠 읽으면 쉬워요.
+
+          답을 공책에 먼저 적은 뒤 **확인**을 눌러요. 틀린 문항은 그 줄을 다시 읽으면 돼요.
+        todo:
+          - 장치를 준비하는 네 줄(6~9번 줄) 읽기
+          - "`while True:` 안에서 `started` 가 바뀌는 곳과 묻는 곳 찾기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step1_wait_start.py
+        questions:
+          - { kind: number, q: "시작 버튼은 몇 번 핀에 꽂아야 하나요?", answer: 27, hint: "button = Pin(...) 괄호 안 첫 숫자를 봐요" }
+          - { kind: choice, q: "버튼을 누르기 전에 화면에 보이는 것은?", options: ["You Like Chick? 와 PRESS START", "T: 와 H: 수치", "아무것도 보이지 않는다"], answer: 0, hint: "while True: 위에서 미리 적어 둔 두 줄을 봐요" }
+          - { kind: line, q: "started 를 True 로 바꾸는 줄의 번호를 클릭하세요", answer: 18 }
+        codeNotes:
+          - { line: 8, note: "화면이 쓸 두 선(SCL 22번, SDA 21번)을 정해요" }
+          - { line: 11, note: "처음에는 시작 전이라 `False`" }
+          - { line: 20, note: "센서에게 새로 재 달라고 부탁해요" }
+          - { line: 26, note: "적어 둔 두 줄을 화면에 내보내요" }
+
+      - id: mission
+        type: mission
+        title: 통합 미션 — 알맞은 범위면 SMILE, 아니면 BAD
+        minutes: 12
+        scene:
+          image: images/chick-states.svg
+          caption: 온도 20~28℃ 와 습도 40~70% 가 둘 다 알맞으면 SMILE, 하나라도 벗어나면 BAD
+        body: |
+          이제 병아리의 **상태**를 정해요. 온도가 20~28 사이 **그리고** 습도가 40~70 사이면 `state` 에 `"SMILE"` 을, 아니면 `"BAD"` 를 담고, 화면 첫 줄에 `S: SMILE` 처럼 적어요. 두 숫자 사이에 있는지 묻는 판단 블록이 있었어요(S11 가로등).
+
+          미션은 기능 체크리스트로 판정해요. 시작 버튼 · 온습도 화면이 그대로 잘 되는지도 함께 봐요. 판정에서 걸린 항목은 되묻는 질문을 읽고 그 부분만 고쳐요. 판정을 받은 뒤에는 공책에 적은 교실 값으로 범위를 바꿔 SMILE 과 BAD 를 모두 만들어 봐요.
+        todo:
+          - "`if started:` 안에서 온도 · 습도를 담은 다음에 범위 판단 if · else 넣기"
+          - '상태 글자를 `state` 에 담고, 화면 (0, 0) 자리에 `"S: " + state` 적기'
+          - 실행해서 입김을 불어 상태가 바뀌는지 보고 **판정** 누르기
+        instructions: "실행 1 코드에 상태 판단을 더하세요. 체크리스트: (1) 버튼을 누르면 started 가 True 가 되고, started 일 때만 재고 보여 주기 (2) 온도가 20~28 사이 and 습도가 40~70 사이이면 state 에 \"SMILE\", 아니면 \"BAD\" 담기 (두 숫자 사이 판단 블록 사용) (3) 화면 첫 줄 (0, 0) 에 \"S: \" + state 를 적고, 온도 줄 · 습도 줄 · 내보내기는 그대로 두기"
+        hint: "두 숫자 사이 판단 블록 두 개를 '그리고' 블록으로 이으면 `20 <= t <= 28 and 40 <= h <= 70` 이 돼요. 참이면 state 를 \"SMILE\" 로, 거짓(else)이면 \"BAD\" 로 정해요. 글자는 큰따옴표 안에 대문자로. 화면 첫 줄은 `\"S: \" + state` 를 (0, 0) 에 적는 블록이에요"
+        code: step1_wait_start.py
+        rules:
+          - codeMatches: '^\s+if button\.value\(\) == 0:\n\s+started = True'
+            fail: (1) 버튼을 누르면 어떤 변수가 True 가 되어야 하나요? 그 줄이 반복 안에 그대로 있나요?
+          - codeMatches: '^\s+if started:\n\s+dht11\.measure\(\)'
+            fail: (1) 재고 보여 주는 일은 언제만 해야 하나요? started 를 묻는 if 안에 measure 가 있나요?
+          - useBlock: ["judge_between"]
+            fail: (2) 20~28 처럼 두 숫자 사이에 있는지 한 번에 묻는 판단 블록이 있었어요. 찾아봤나요?
+          - codeMatches: 'if (20 <= t <= 28 and 40 <= h <= 70|40 <= h <= 70 and 20 <= t <= 28):'
+            fail: (2) 온도 범위와 습도 범위를 둘 다 만족해야 알맞아요. 두 범위를 무엇으로 이었나요? 숫자는 지시와 같나요?
+          - codeMatches: 'state = "SMILE"\n\s+else:\n\s+state = "BAD"'
+            fail: (2) 알맞으면 어떤 상태, 아니면 어떤 상태인가요? 상태 글자를 state 에 담았나요? 큰따옴표와 대문자도 확인해요
+          - codeMatches: 'oled\.text\("S: " \+ state, 0, 0\)[\s\S]*oled\.text\("T: "[\s\S]*oled\.text\("H: "[\s\S]*oled\.show\(\)'
+            fail: "(3) 화면 첫 줄에 S: 와 상태 글자를 이어서 적었나요? 온도 줄 · 습도 줄 · 내보내기는 그 아래 그대로 있나요?"
+        answerCode: mission_chick_mood.py
+
+  - id: part2
+    title: 2부 · 얼굴 그리기와 놀아 주기, 효과음
+    steps:
+      - id: run2
+        type: run
+        title: 복사 · 실행 2 — 얼굴 함수와 놀아 주기, 효과음
+        minutes: 12
+        scene:
+          image: images/face-grid.svg
+          caption: 얼굴은 네모(테두리) · 채운 네모(눈) · 선(입)으로. 입만 상태마다 다르게 그려요
+        body: |
+          **USB 를 뺀 채로** 틸트 모듈(S ← 14), PIR 모듈(S ← 23), 수동 부저(+ ← 15)를 꽂아요. 이번 코드는 세 가지를 더해요. 첫째, `draw_face(state)` **함수**가 상태 글자를 **매개변수**로 받아 얼굴을 그려요. 둘째, 온습도가 알맞고(`ok`) **틸트 또는 PIR** 이 1 이면 `SMILE`, 알맞기만 하면 `BLANK`, 아니면 `BAD` 예요. 셋째, 상태가 바로 전 상태(`prev`)와 **다를 때만** 부저가 0.2초 울려요.
+
+          실행한 뒤 집을 살살 흔들거나 PIR 앞에서 손을 흔들어 얼굴이 웃는지, 그 순간 한 번만 소리가 나는지 봐요. PIR 은 켠 뒤 30초쯤 지나야 제대로 느껴요.
+        todo:
+          - 틸트 · PIR · 부저를 배선도대로 꽂기
+          - "**실행** 누르고 버튼으로 시작한 뒤, 흔들기 · 다가가기로 얼굴과 소리 확인하기"
+          - 소리가 몇 번 나는지 세어 보기 (상태가 바뀔 때마다 한 번)
+        code: step2_face_sound.py
+        expected: "코드를 실행하고 버튼을 누르면 화면에 `S: BLANK` · `T: 24C` · `H: 50%` 와 일자 입 얼굴이 보여요. 집을 흔들거나 PIR 앞에서 움직이면 `S: SMILE` 로 바뀌며 웃는 입이 되고 그 순간 부저가 한 번 울려요. 입김을 불어 습도가 70 을 넘으면 `S: BAD` 와 우는 입이 되며 다시 한 번 울려요. 상태가 그대로면 조용해요."
+        codeNotes:
+          - { line: 8, note: "틸트 스위치를 14번, PIR 을 23번에 준비해요 (8 · 9번 줄). 둘 다 값이 0 또는 1" }
+          - { line: 12, note: "수동 부저를 15번 PWM 으로 준비하고 처음엔 조용히 둬요 (12~14번 줄)" }
+          - { line: 17, note: "`draw_face` 함수는 `state` 라는 **매개변수**로 상태 글자를 받아요. 부를 때 넣어 준 글자가 들어와요" }
+          - { line: 18, note: "(72, 16) 에서 48 × 48 테두리, 눈은 채운 네모 둘 (18~20번 줄)" }
+          - { line: 21, note: "받은 글자가 \"SMILE\" 이면 웃는 입, \"BAD\" 면 우는 입, 아니면 일자 입 (21~28번 줄)" }
+          - { line: 33, note: "`prev` 는 **바로 전 상태**를 기억하는 변수예요. 처음엔 BLANK" }
+          - { line: 45, note: "두 범위 판단을 and 로 묶은 결과(참 · 거짓)를 `ok` 에 담아요" }
+          - { line: 46, note: "`ok` 이고 (틸트 또는 PIR 이 1) 이면 SMILE. 괄호가 or 를 먼저 묶어요" }
+          - { line: 48, note: "앞이 거짓이고 `ok` 이면 BLANK, 둘 다 아니면 BAD (48~51번 줄)" }
+          - { line: 56, note: "함수를 부르며 지금 상태 글자를 넣어 줘요. 그다음 57번 줄에서 한꺼번에 내보내요" }
+          - { line: 58, note: "지금 상태가 바로 전 상태와 **다르면**(바뀐 순간) 아래 줄들을 실행해요" }
+          - { line: 59, note: "523 Hz(높은 도)를 0.2초 울려요 (59~62번 줄)" }
+          - { line: 63, note: "지금 상태를 '바로 전 상태' 로 적어 둬요. 다음 바퀴부터는 같으니 조용해요" }
+
+      - id: readcheck2
+        type: readcheck
+        title: 읽기 체크 2
+        minutes: 5
+        scene:
+          image: images/state-change.svg
+          caption: 바퀴마다 state 와 prev 를 비교해요. 다른 순간에만 소리가 나고 prev 가 새로 적혀요
+        body: |
+          `if ok and (tilt.value() == 1 or pir.value() == 1):` 은 괄호 안을 먼저 따져요. 괄호가 없으면 `and` 가 `or` 보다 먼저 묶여서 뜻이 달라져요. 값을 하나씩 넣어 보며 세 갈래 가운데 어디로 가는지 따라가요.
+
+          함수 `draw_face(state)` 는 56번 줄에서 불릴 때 그 순간의 `state` 글자를 받아요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
+        todo:
+          - "온도 25 · 습도 50 · 틸트 0 · PIR 1 을 45 · 46번 줄에 넣어 보기"
+          - "`state != prev` 가 참이 되는 순간이 언제인지 그림에서 찾기"
+          - 세 문제에 답하고 **확인** 누르기
+        code: step2_face_sound.py
+        questions:
+          - { kind: choice, q: "온도 25, 습도 50, 틸트 0, PIR 1 이면 state 는?", options: ["SMILE", "BLANK", "BAD"], answer: 0, hint: "ok 가 참인지 먼저, 그다음 괄호 안의 or 를 따져요" }
+          - { kind: number, q: "상태가 바뀔 때 부저가 내는 음의 주파수(Hz)는?", answer: 523, hint: "beeper.freq(...) 괄호 안 숫자" }
+          - { kind: line, q: "지금 상태가 바로 전 상태와 다른지 묻는 줄의 번호를 클릭하세요", answer: 58 }
+        codeNotes:
+          - { line: 17, note: "매개변수 `state` 로 상태 글자를 받는 함수" }
+          - { line: 45, note: "온습도가 둘 다 알맞은지를 `ok` 에 담아요" }
+          - { line: 46, note: "괄호 안의 or 를 먼저 따진 뒤 `ok` 와 and 로 묶어요" }
+          - { line: 63, note: "비교가 끝난 뒤 지금 상태를 기억해 둬요" }
+
+      - id: extra
+        type: mission
+        title: 추가 미션 — 상태마다 다른 효과음
+        optional: true
+        minutes: 6
+        scene:
+          image: images/state-change.svg
+          caption: 바뀐 순간에 울리는 것은 같지만, 어떤 상태로 바뀌었는지에 따라 음을 다르게
+        body: |
+          먼저 끝낸 사람을 위한 미션이에요. 지금은 어떤 상태로 바뀌어도 같은 음(523 Hz)이 나요. 바뀐 상태가 `SMILE` 이면 높은 도(523 Hz), `BAD` 면 낮은 도(262 Hz), 그 밖(`BLANK`)이면 솔(392 Hz)이 나게 해 봐요.
+
+          `if state != prev:` 안에서 다시 `state` 를 묻는 if · elif · else 를 넣고, 갈래마다 음 울리기 블록을 하나씩 두면 돼요. `prev = state` 는 그대로 마지막에 남겨요.
+        todo:
+          - "`if state != prev:` 안에 상태를 묻는 if · elif · else 넣기"
+          - 갈래마다 다른 주파수로 음 울리기
+          - 실행해서 세 소리를 듣고 **판정** 누르기
+        instructions: "상태가 바뀐 순간, 새 상태가 SMILE 이면 523 Hz, BAD 면 262 Hz, 그 밖이면 392 Hz 음이 나게 하세요. prev = state 는 그대로 두세요"
+        code: step2_face_sound.py
+        rules:
+          - codeMatches: 'if state != prev:\n\s+if state == "SMILE":\n\s+beeper\.freq\(523\)'
+            fail: 바뀐 순간(state != prev) 안에서 새 상태가 SMILE 인지 먼저 물었나요? 그때 음은 몇 Hz 인가요?
+          - codeMatches: 'elif state == "BAD":\n\s+beeper\.freq\(262\)'
+            fail: BAD 로 바뀌었을 때는 어떤 음이어야 하나요? elif 로 물었나요?
+          - codeMatches: 'else:\n\s+beeper\.freq\(392\)'
+            fail: SMILE 도 BAD 도 아닌 상태로 바뀌면 어떤 음이 나야 하나요? else 갈래가 있나요?
+          - codeMatches: 'beeper\.duty\(0\)\n\s+prev = state'
+            fail: 소리를 낸 뒤 지금 상태를 바로 전 상태로 적어 두는 줄이 남아 있나요?
+        answerCode: extra_state_tones.py
+
+      - id: debug
+        type: debug
+        title: 디버깅 — 병아리가 이상해요
+        minutes: 9
+        scene:
+          image: images/state-change.svg
+          caption: 시작이 안 되면 변수가 어디서 바뀌는지, 상태가 엉뚱하면 and · or 묶음을, 깜박이면 다시 그리는 때를 봐요
+        body: |
+          고장 난 병아리 세 마리가 있어요. 바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 버튼을 눌러도 시작이 안 되면 `started` 를 바꾸는 곳, 온습도가 나쁜데도 웃으면 조건의 `and` · `or`, 화면이 깜박이면 화면을 다시 그리는 때를 봐요.
+
+          셋 다 빨간 글씨(에러)는 뜨지 않아요. 에러 없이 이상하게만 구는 버그가 더 찾기 어려워요. 최소 4분은 혼자 해 봐요.
+        todo:
+          - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
+          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 세 증상을 모두 고치기
+        symptoms:
+          - title: "버튼을 누르면 start! 는 찍히는데, playing 은 끝내 안 찍혀요"
+            code: |
+              from machine import Pin
+              import time
+
+              button = Pin(27, Pin.IN, Pin.PULL_UP)
+
+
+              def start_game():
+                  started = True
+                  print("start!")
+
+
+              started = False
+              while True:
+                  if button.value() == 0:
+                      start_game()
+                  if started:
+                      print("playing")
+                  time.sleep(0.1)
+            question: "함수 안에서 started = True 라고 썼는데, 함수 밖의 started 는 왜 그대로 False 일까요? 함수 안에서 바꾼 변수와 밖의 변수가 같은 변수일까요? 밖의 변수를 바꾸려면 함수에게 먼저 무엇을 알려 줘야 할까요?"
+            rules:
+              - codeMatches: 'def start_game\(\):\n\s+global started\n\s+started = True'
+                fail: 함수 안에서 바깥 변수를 바꾸려면 먼저 "이 이름은 바깥 것" 이라고 알려 줘야 해요. 변수 꾸러미에서 그 블록을 찾아 함수 맨 위에 넣었나요?
+          - title: "온도가 31도라 BAD 여야 하는데, 사람이 다가가면 SMILE 로 웃어요"
+            code: |
+              from machine import Pin
+              import time
+              import dht
+
+              dht11 = dht.DHT11(Pin(13))
+              tilt = Pin(14, Pin.IN)
+              pir = Pin(23, Pin.IN)
+
+              state = "BLANK"
+              while True:
+                  dht11.measure()
+                  t = dht11.temperature()
+                  h = dht11.humidity()
+                  ok = 20 <= t <= 28 and 40 <= h <= 70
+                  if ok and tilt.value() == 1 or pir.value() == 1:
+                      state = "SMILE"
+                  elif ok:
+                      state = "BLANK"
+                  else:
+                      state = "BAD"
+                  print(state)
+                  time.sleep(2)
+            question: "ok 가 거짓인데 어떻게 SMILE 이 될까요? and 와 or 가 한 줄에 있으면 파이썬은 어느 것을 먼저 묶을까요? 'ok 이고 (틸트 또는 PIR)' 이 되려면 무엇으로 묶어야 할까요?"
+            rules:
+              - codeMatches: 'if ok and \((tilt|pir)\.value\(\) == 1 or (tilt|pir)\.value\(\) == 1\):'
+                fail: 틸트 or PIR 을 한 덩어리로 먼저 묶으려면 어떤 블록으로 감싸야 할까요? 괄호 블록을 찾아봤나요?
+          - title: "화면이 자꾸 깜박거려서 글자를 읽기 힘들어요"
+            code: |
+              from machine import Pin, SoftI2C
+              import ssd1306
+              import time
+
+              tilt = Pin(14, Pin.IN)
+              pir = Pin(23, Pin.IN)
+              i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
+              oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+              state = "BLANK"
+              prev = "BLANK"
+              while True:
+                  if tilt.value() == 1 or pir.value() == 1:
+                      state = "SMILE"
+                  else:
+                      state = "BLANK"
+                  oled.fill(0)
+                  oled.text("S: " + state, 0, 0)
+                  oled.show()
+                  time.sleep(0.05)
+            question: "0.05초마다 지우고 다시 내보내면 화면은 어떻게 보일까요? 상태가 그대로일 때도 다시 그릴 필요가 있을까요? prev 가 준비되어 있는데 쓰이지 않아요. 언제만 다시 그리면 될까요?"
+            rules:
+              - codeMatches: 'if (state != prev|prev != state):\n[\s\S]*?oled\.fill\(0\)[\s\S]*?oled\.show\(\)[\s\S]*?prev = state'
+                fail: 화면은 상태가 바뀐 순간에만 다시 그리면 돼요. 바로 전 상태와 비교하는 if 안에 지우기 · 적기 · 내보내기를 넣고, 그 뒤에 지금 상태를 기억해 두었나요?
+
+      - id: design
+        type: design
+        title: 설계 — 배고픔 수치 더하기
+        minutes: 9
+        scene:
+          image: images/face-grid.svg
+          caption: 이번에는 화면에 먹이 막대를 그려요. 시간이 지나면 줄고, 버튼을 누르면 먹이를 줘요
+        body: |
+          진짜 다마고치는 **배고픔**이 있어요. 먹이 수치 `food` 가 10초마다 1 씩 줄고, 버튼을 누르면 1 씩 늘어요(최대 10). 화면에는 `FOOD: 5` 와 먹이 막대(너비 `food * 12`)를 그리고, 3 보다 작으면 `HUNGRY!` 를 적어요. 센서 없이 **버튼과 OLED** 만으로 처음부터 설계해요.
+
+          "10초가 지났는지" 는 S13 복도 등처럼 `last` 에 시각을 담아 두고 **지난 시간** 블록으로 재요. 먼저 우리말 설계도의 빈칸을 채우고, 번역표로 우리말 한 줄이 어떤 코드가 되는지 짝지어 봐요. 그다음 섞인 블록을 순서대로 이어 붙여요.
+        todo:
+          - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
+          - 번역표에서 우리말 한 줄이 어떤 코드가 되는지 짝지어 보기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+        pseudocode:
+          - text: 버튼을 __번 핀에, OLED 화면을 준비한다
+            blank: { answer: 27 }
+          - text: 먹이 수치 food 를 __ 로 시작한다
+            blank: { answer: 5 }
+          - text: 화면을 지우고 FEED ME 를 적어 내보내고 1초 기다린다
+          - text: 지금 시각을 last 에 담는다
+          - text: 끝없이 되풀이한다
+          - text: "  ↳ 버튼이 눌렸으면 food 를 1 올리고(최대 __) 0.3초 기다린다"
+            blank: { answer: 10 }
+          - text: "  ↳ last 부터 __ ms 가 지났으면 food 를 1 내리고(최소 0) last 를 지금 시각으로"
+            blank: { answer: 10000 }
+          - text: "  ↳ 화면을 지우고 FOOD: 와 food 를 적고, 너비 food × 12 의 먹이 막대를 그린다"
+          - text: "  ↳ food 가 __ 보다 작으면 HUNGRY! 를 적는다"
+            blank: { answer: 3 }
+          - text: "  ↳ 화면에 내보내고 0.1초 기다린다"
+        translation:
+          - ["버튼 준비 (27번)", "button = Pin(27, Pin.IN, Pin.PULL_UP)"]
+          - ["지금 시각을 last 에", "last = time.ticks_ms()"]
+          - ["food 를 1 올리고 최대 10", "food = min(food + 1, 10)"]
+          - ["last 부터 10000 ms 지났으면", "if time.ticks_diff(time.ticks_ms(), last) > 10000:"]
+          - ["food 를 1 내리고 최소 0", "food = max(food - 1, 0)"]
+          - ["먹이 막대 그리기", "oled.fill_rect(0, 20, food * 12, 12, 1)"]
+          - ["초 기다린다", "time.sleep(초)"]
+        targetCode: design_hunger.py
+
+      - id: reflect
+        type: reflect
+        title: 성찰 — 오늘 한 생각 쓰기
+        minutes: 6
+        scene:
+          image: images/cover.svg
+          caption: 센서 셋과 상태 변수 하나로 병아리의 기분을 보여 줬어요. 이 생각을 또 어디에 쓸 수 있을까요?
+        body: |
+          오늘은 센서 셋의 값을 범위 판단과 and · or 로 묶어 **상태** 하나로 정리하고, 함수로 얼굴을 그리고, 바로 전 상태와 비교해 바뀐 순간에만 소리를 냈어요. 잘 된 순간보다 **막혔던 순간**이 더 중요해요.
+
+          코드 줄마다 "이 줄은 ___"을 내 말로 채우고, 네 칸에 오늘 있었던 일을 솔직하게 적어요.
+
+          과학 시간에는 병아리 · 햄스터 · 금붕어 · 거북이처럼 기르는 동물의 알맞은 온도와 습도를 조사해 표로 적고, 우리 교실 값과 비교해 어떤 동물을 교실에서 기를 수 있을지 이야기해 보세요. 미술 시간에는 모눈종이 128 × 64 칸에 나만의 병아리 표정(놀람 · 졸림)을 그리고 네모 · 선의 좌표로 옮겨 `draw_face` 에 갈래를 하나 더해 봐요.
+        todo:
+          - 코드 줄마다 "이 줄은 ___" 한 문장씩 쓰기 (할 수 있는 만큼)
+          - 네 칸을 모두 채우기
+          - 짝에게 1분 동안 상태가 정해지는 순서를 설명하기
+        lineExplain: step1_wait_start.py
+        prompts:
+          - 오늘 가장 오래 막혔던 곳은 어디였고, 어떻게 풀었나요?
+          - 알맞은 범위 20~28℃ · 40~70% 를 우리 교실 값에 맞게 바꾼다면 몇으로 하고 싶나요? 진짜 병아리에게 알맞은 온도와는 왜 다를까요?
+          - 상태가 바뀌는 순간에만 소리를 내려고 prev 를 썼어요. 이 방법을 또 어디에 쓸 수 있을까요? (예를 하나 적어 보세요)
+          - "다음엔 여기부터 본다: 한 줄로"

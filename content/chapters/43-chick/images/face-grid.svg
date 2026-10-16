@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ck-face-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="ck-face-title">OLED 128×64 화면에 그리는 병아리 얼굴의 좌표. 왼쪽 세 줄에 S, T, H 글자. 얼굴 테두리는 rect(72, 16, 48, 48), 눈은 fill_rect(84, 28, 6, 6) 과 fill_rect(102, 28, 6, 6), 웃는 입은 line(84, 48, 96, 54) 과 line(96, 54, 108, 48). 오른쪽에 BLANK, BAD 입 모양도 보인다</title>
+  <text x="320" y="22" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" stroke="none">OLED 128 × 64 에 그리는 병아리 얼굴</text>
+  <!-- 화면 (x 40..424 = 128*3, y 40..232 = 64*3) -->
+  <rect x="40" y="40" width="384" height="192" fill="#0b1b4d" stroke="#1d4ed8" stroke-width="3"/>
+  <path d="M40 88 H424 M40 136 H424 M40 184 H424 M136 40 V232 M232 40 V232 M328 40 V232" stroke="#7dd3fc" stroke-width="1" stroke-opacity="0.25"/>
+  <g font-size="12" fill="#7dd3fc" stroke="none" font-family="monospace" font-weight="700">
+    <text x="46" y="60">S: SMILE</text>
+    <text x="46" y="108">T: 24C</text>
+    <text x="46" y="156">H: 50%</text>
+  </g>
+  <!-- 얼굴: rect(72,16,48,48) → x 256..400, y 88..232 -->
+  <rect x="256" y="88" width="144" height="144" stroke="#7dd3fc" stroke-width="2.5"/>
+  <rect x="292" y="124" width="18" height="18" fill="#7dd3fc" stroke="none"/>
+  <rect x="346" y="124" width="18" height="18" fill="#7dd3fc" stroke="none"/>
+  <path d="M292 184 L328 202 L364 184" stroke="#7dd3fc" stroke-width="3"/>
+  <!-- 좌표 눈금 -->
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle" fill-opacity="0.8">
+    <text x="40" y="248">x 0</text><text x="256" y="248">72</text><text x="292" y="260">84</text><text x="328" y="248">96</text><text x="364" y="260">108</text><text x="400" y="248">120</text><text x="424" y="260">127</text>
+  </g>
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="end" fill-opacity="0.8">
+    <text x="34" y="44">y 0</text><text x="34" y="92">16</text><text x="34" y="128">28</text><text x="34" y="188">48</text><text x="34" y="206">54</text><text x="34" y="236">63</text>
+  </g>
+  <!-- 설명 -->
+  <g font-size="12" fill="currentColor" stroke="none">
+    <text x="446" y="80" font-weight="700">얼굴 그리기 코드</text>
+    <text x="446" y="100" font-family="monospace">rect(72, 16, 48, 48)</text>
+    <text x="446" y="116">테두리 (x, y, 너비, 높이)</text>
+    <text x="446" y="140" font-family="monospace">fill_rect(84, 28, 6, 6)</text>
+    <text x="446" y="156" font-family="monospace">fill_rect(102, 28, 6, 6)</text>
+    <text x="446" y="172">눈 둘 (채운 네모)</text>
+    <text x="446" y="196" font-family="monospace">line(84, 48, 96, 54)</text>
+    <text x="446" y="212" font-family="monospace">line(96, 54, 108, 48)</text>
+    <text x="446" y="228">웃는 입 (두 선)</text>
+  </g>
+  <!-- 다른 입 모양 -->
+  <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
+    <text x="110" y="286" font-weight="700">BLANK</text>
+    <text x="250" y="286" font-weight="700">BAD</text>
+    <text x="390" y="286" font-weight="700">SMILE</text>
+    <text x="110" y="340" font-family="monospace" font-size="12">line(84,52,108,52)</text>
+    <text x="250" y="340" font-family="monospace" font-size="12">line(84,54,96,48) …</text>
+    <text x="390" y="340" font-family="monospace" font-size="12">line(84,48,96,54) …</text>
+    <text x="536" y="286" font-weight="700">나만의 표정?</text>
+    <text x="536" y="340" font-size="12">모눈종이에 먼저 그려요</text>
+  </g>
+  <g stroke="#1d4ed8" stroke-width="2">
+    <rect x="80" y="296" width="60" height="32" fill="#0b1b4d"/>
+    <rect x="220" y="296" width="60" height="32" fill="#0b1b4d"/>
+    <rect x="360" y="296" width="60" height="32" fill="#0b1b4d"/>
+    <rect x="506" y="296" width="60" height="32" fill="#0b1b4d" stroke-dasharray="4 3"/>
+  </g>
+  <path d="M92 314 H128" stroke="#7dd3fc" stroke-width="2.5"/>
+  <path d="M232 320 L250 308 L268 320" stroke="#7dd3fc" stroke-width="2.5"/>
+  <path d="M372 308 L390 320 L408 308" stroke="#7dd3fc" stroke-width="2.5"/>
+  <text x="536" y="317" text-anchor="middle" font-size="14" fill="#7dd3fc" stroke="none">?</text>
+</svg>
