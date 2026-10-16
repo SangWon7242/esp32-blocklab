@@ -234,11 +234,13 @@ parts:
         hint: 상태 변수 state 를 0(꺼짐)으로 시작해요. 눌렸을 때 state 가 0 이면 1 로 바꾸고 LED 를 켜고, 아니면 0 으로 바꾸고 LED 를 꺼요. 그다음 버튼 값이 0 인 동안 기다리는 작은 반복을 넣어요
         code: step1_button_led.py
         rules:
-          - codeMatches: '^\w+ = 0$'
+          # 블록 모양 규칙(blocks). 상태 변수 이름은 보지 않는다(state 가 아니어도 됨)
+          - blocks: { type: variables_set, inputs: { VALUE: { type: math_number, fields: { NUM: 0 } } }, inside: top }
             fail: 시작할 때 "지금은 꺼져 있다"를 기억해 두는 변수가 있나요? 반복 안에서 정하면 바퀴마다 처음으로 돌아가지 않을까요?
-          - codeMatches: '^\s+(\w+) = (1|1 - \1|not \1)$'
+          - blocks: { type: variables_set, inside: loop }
             fail: 누를 때마다 상태 변수의 값이 바뀌나요? 꺼짐에서 누르면 무엇이 되고, 켜짐에서 누르면 무엇이 될까요?
-          - codeMatches: 'while (\w+\.value\(\) == 0|not \w+\.value\(\)):'
+          # 손을 뗄 때까지 기다리는 작은 반복: 바깥 반복 안의 while (button.value() == 0 → dev_button_pressed, not button.value() → until esp_pin_read 두 꼴이라 조건은 보지 않는다)
+          - blocks: { type: controls_whileUntil, inside: loop }
             fail: 버튼을 0.3초 누르고 있으면 바깥 반복은 몇 바퀴 돌까요? 그동안 상태는 몇 번 바뀔까요? 손을 뗄 때까지 기다리는 곳이 있나요?
         answerCode: mission_toggle.py
 
