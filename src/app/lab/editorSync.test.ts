@@ -1,7 +1,10 @@
-import { describe, expect, it, beforeAll } from "vitest";
+import { describe, expect, it, beforeAll, vi } from "vitest";
 import { registerBlocks } from "@/blocks";
 import { codeToBlocks } from "@/parser";
-import { countCodeBlocks, editorReducer, initialEditorState } from "./editorSync";
+import { workspaceJsonToCode } from "@/codegen";
+import { runSaveProject, type SaveProjectInput } from "./saveProject";
+import { countCodeBlocks, editorReducer, initialEditorState, programForSave } from "./editorSync";
+import { labStart } from "./labStart";
 import { SAMPLE_CODE } from "./sample";
 
 beforeAll(() => registerBlocks());
@@ -92,5 +95,64 @@ describe("countCodeBlocks", () => {
   it("예시 코드와 빈 작업판은 0", () => {
     expect(countCodeBlocks(json(SAMPLE_CODE))).toBe(0);
     expect(countCodeBlocks(null)).toBe(0);
+  });
+});
+
+/*
+ * lib-v1.0.4: 코드 모드에서 code 가 블록과 맞지 않은 채 「작품으로 저장」하면 blocksJson 은 null — 학생이 친 code 가 기준.
+ * 그렇게 저장한 작품을 다시 열면(blocksJson 없음 + 블록으로 못 바꿈) 코드 모드로 열고 친 글을 그대로 둔다.
+ */
+describe("programForSave (작품으로 저장)", () => {
+  const BROKEN = LED + "led.value(\n";
+  const codeMode = () => editorReducer(initialEditorState(LED), { type: "switchSource", source: "code" });
+
+  it("블록 모드: 작업판 블록을 그대로 넘긴다", () => {
+    const s = initialEditorState(LED);
+    expect(programForSave(s)).toEqual({ code: LED, blocksJson: s.blocks, unconvertible: false });
+  });
+
+  it("코드 모드 문법 오류: blocksJson 은 null, 친 글을 code 로, 안내 표시", () => {
+    const s = editorReducer(codeMode(), { type: "codeChanged", code: BROKEN });
+    expect(s.parseError).not.toBeNull();
+    expect(s.blocks).not.toBeNull(); // 마지막 성공 블록이 남아 있다
+    expect(programForSave(s)).toEqual({ code: BROKEN, blocksJson: null, unconvertible: true });
+  });
+
+  it("코드 모드에서 code 가 블록이 만드는 코드와 같으면 블록도 넘긴다 (줄 끝 빈칸 차이는 같다고 본다)", () => {
+    const generated = workspaceJsonToCode(initialEditorState(LED).blocks!);
+    const s = editorReducer(codeMode(), { type: "codeChanged", code: generated.replace(/\n/g, "  \n") + "\n\n" });
+    expect(programForSave(s).blocksJson).toBe(s.blocks);
+  });
+
+  it("코드 모드에서 code 가 블록이 만드는 코드와 다르면 blocksJson 은 null (안내는 없다)", () => {
+    const s = editorReducer(codeMode(), { type: "codeChanged", code: "from machine import Pin\nled=Pin(26,Pin.OUT)\nled.value(1)\n" });
+    expect(s.parseError).toBeNull();
+    expect(programForSave(s)).toMatchObject({ blocksJson: null, unconvertible: false });
+  });
+
+  it("저장 인자: 문법 오류면 호스트에 blocksJson null 로 간다", async () => {
+    const save = vi.fn(async (_p: SaveProjectInput) => {});
+    const p = programForSave(editorReducer(codeMode(), { type: "codeChanged", code: BROKEN }));
+    await runSaveProject(save, { title: "깜빡이", code: p.code, blocksJson: p.blocksJson });
+    expect(save).toHaveBeenCalledWith({ title: "깜빡이", code: BROKEN, blocksJson: null });
+  });
+
+  it("다시 열기: 그 작품은 코드 모드로, 친 글이 편집기에 그대로, 오류 줄 표시", () => {
+    const start = labStart({ initialProgram: { code: BROKEN, blocksJson: null } });
+    expect(start).toEqual({ initialCode: BROKEN, initialSource: "code" });
+    const s = initialEditorState(start.initialCode, start.initialSource);
+    expect(s.source).toBe("code");
+    expect(s.code).toBe(BROKEN);
+    expect(s.blocks).toBeNull();
+    expect(s.parseError?.line).toBeGreaterThan(0);
+    // 고치면 블록이 따라오고 블록 모드로 돌아갈 수 있다
+    const fixed = editorReducer(s, { type: "codeChanged", code: LED });
+    expect(fixed.parseError).toBeNull();
+    expect(editorReducer(fixed, { type: "switchSource", source: "blocks" }).source).toBe("blocks");
+  });
+
+  it("lib-v1.0.3 이 오류 전 블록을 함께 저장한 작품도 친 글을 코드 모드로 연다", () => {
+    const old = initialEditorState(LED).blocks;
+    expect(labStart({ initialProgram: { code: BROKEN, blocksJson: old } })).toEqual({ initialCode: BROKEN, initialSource: "code" });
   });
 });

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "cn"
 import { Dialog as DialogPrimitive } from "radix-ui"
+import { usePortalContainer } from "@/host/chrome"
 
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
@@ -20,7 +21,8 @@ function DialogTrigger({
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  // BlocklabProvider 안이면 `.blocklab` 의 포털 상자로 (범위 CSS 를 받도록), 밖이면 body
+  return <DialogPrimitive.Portal data-slot="dialog-portal" container={usePortalContainer()} {...props} />
 }
 
 function DialogClose({

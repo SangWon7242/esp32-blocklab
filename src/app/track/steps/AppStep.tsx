@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router";
 import {
   CheckCircle2, ClipboardCopy, Eye, EyeOff, Lock, MonitorSmartphone, MousePointerClick, Palette, ShieldCheck, Upload, Usb, Unplug, XCircle,
 } from "lucide-react";
@@ -15,7 +14,7 @@ import {
   type AppDesignKey, type AppInput,
 } from "@/track/appCheck";
 import type { AppReadQuestion } from "@/track/schema";
-import { readSettings } from "../../settings/settings";
+import { useSettings } from "../../settings/settings";
 import { GuideInline } from "../GuideBody";
 import { useAppBoard } from "./appUpload";
 import type { StepProps } from "./types";
@@ -47,7 +46,7 @@ function Locked({ text, testId }: { text: string; testId: string }) {
  * 앱 만들기(AI 바이브 코딩): ① 화면 설계 세 칸 → ② 약속표 → ③ 프롬프트 복사 → ④ AI 결과 붙여넣기·검사
  * → ⑤ 보드에 index.html 저장(선택)·미리 보기 → ⑥ 읽기 체크. 검사와 읽기 체크를 통과하면 완료할 수 있다.
  */
-export function AppStep({ step, input, onInput, teacherMode, attempts }: StepProps<"app">) {
+export function AppStep({ step, input, onInput, teacherMode, attempts, readOnly }: StepProps<"app">) {
   const a = input as AppInput;
   const update = useStepInput<AppInput>(input, onInput);
   const design = a.design ?? {};
@@ -115,12 +114,14 @@ export function AppStep({ step, input, onInput, teacherMode, attempts }: StepPro
       <section className="space-y-3 rounded-lg border p-4" data-testid="app-prompt">
         <Head n={3} title="프롬프트" help="설계와 약속표로 채운 부탁 글이에요. 복사해서 쓰는 AI(ChatGPT, Claude 등)에 붙여 넣으세요." />
         <p className="rounded-md bg-muted/50 p-3 text-sm leading-relaxed whitespace-pre-wrap break-words" data-testid="app-prompt-text">{prompt.text}</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={copy} disabled={prompt.missing.length > 0}><ClipboardCopy className="size-4" />복사</Button>
-          {prompt.missing.length > 0 && (
-            <span className="text-sm text-muted-foreground">{missingLabels.join(", ")} 칸을 채우면 복사할 수 있어요</span>
-          )}
-        </div>
+        {!readOnly && (
+          <div className="flex flex-wrap items-center gap-3">
+            <Button onClick={copy} disabled={prompt.missing.length > 0}><ClipboardCopy className="size-4" />복사</Button>
+            {prompt.missing.length > 0 && (
+              <span className="text-sm text-muted-foreground">{missingLabels.join(", ")} 칸을 채우면 복사할 수 있어요</span>
+            )}
+          </div>
+        )}
       </section>
 
       {/* ④ 붙여넣기 · 검사 */}
@@ -135,9 +136,11 @@ export function AppStep({ step, input, onInput, teacherMode, attempts }: StepPro
           className="min-h-48 resize-y font-mono text-xs"
         />
         <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={() => update(() => ({ checkedHtml: html }), { attempt: true })} disabled={!html.trim() || checked}>
-            <ShieldCheck className="size-4" />검사
-          </Button>
+          {!readOnly && (
+            <Button onClick={() => update(() => ({ checkedHtml: html }), { attempt: true })} disabled={!html.trim() || checked}>
+              <ShieldCheck className="size-4" />검사
+            </Button>
+          )}
           <span className={cn("text-xs", bytes > opts.maxBytes ? "text-destructive" : "text-muted-foreground")}>{bytes} / {opts.maxBytes} 바이트</span>
           {!checked && a.checkedHtml && html.trim() && <span className="text-sm text-muted-foreground">글이 바뀌었어요. 다시 검사하세요</span>}
           {attempts > 0 && <span className="text-xs text-muted-foreground">시도 {attempts}번</span>}
@@ -158,13 +161,13 @@ export function AppStep({ step, input, onInput, teacherMode, attempts }: StepPro
         {passed && <p className="flex items-center gap-1 text-sm text-primary" role="status"><CheckCircle2 className="size-4" />검사를 모두 통과했어요</p>}
       </section>
 
-      {/* ⑤ 보드 저장 · 미리 보기 */}
-      {passed ? <BoardAndPreview html={stripCodeFence(html)} saved={a.savedHtml === html} onSaved={() => update(() => ({ savedHtml: html }))} /> : (
+      {/* ⑤ 보드 저장 · 미리 보기 (열람 모드에는 없다 — 보드가 없고 저장도 하지 않는다) */}
+      {readOnly ? null : passed ? <BoardAndPreview html={stripCodeFence(html)} saved={a.savedHtml === html} onSaved={() => update(() => ({ savedHtml: html }))} /> : (
         <Locked testId="app-board-locked" text="검사를 통과하면 보드 저장과 미리 보기가 열려요" />
       )}
 
       {/* ⑥ 읽기 체크 */}
-      {passed ? <AppReadCheck questions={step.readcheck} input={a} update={update} teacherMode={teacherMode} /> : (
+      {passed ? <AppReadCheck questions={step.readcheck} input={a} update={update} teacherMode={teacherMode} readOnly={readOnly} /> : (
         <Locked testId="app-readcheck-locked" text="검사를 통과하면 읽기 체크가 열려요" />
       )}
     </div>
@@ -173,9 +176,8 @@ export function AppStep({ step, input, onInput, teacherMode, attempts }: StepPro
 
 /** ⑤ 보드에 index.html 저장(보드 연결 필요, 선택) + 미리 보기(sandbox — 스크립트·요청 없이 모양만) */
 function BoardAndPreview({ html, saved, onSaved }: { html: string; saved: boolean; onSaved(): void }) {
-  const [searchParams] = useSearchParams();
-  const fake = searchParams.get("device") === "fake" || readSettings().fakeBoard;
-  const board = useAppBoard(fake);
+  const { fakeBoard } = useSettings();
+  const board = useAppBoard(fakeBoard);
   const [preview, setPreview] = useState(false);
   const linked = board.status !== "disconnected" && board.status !== "connecting";
 
@@ -239,10 +241,11 @@ type ReadCheckProps = {
   input: AppInput;
   update: ReturnType<typeof useStepInput<AppInput>>;
   teacherMode: boolean;
+  readOnly?: boolean;
 };
 
 /** ⑥ 결과 HTML 읽기 체크: choice 는 채점, text 는 쓰면 통과 (선생님이 확인) */
-function AppReadCheck({ questions, input, update, teacherMode }: ReadCheckProps) {
+function AppReadCheck({ questions, input, update, teacherMode, readOnly }: ReadCheckProps) {
   const answers = input.answers ?? [];
   const results = input.results ?? [];
   const setAnswer = (i: number, text: string) =>
@@ -301,7 +304,7 @@ function AppReadCheck({ questions, input, update, teacherMode }: ReadCheckProps)
         })}
       </ol>
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={check} disabled={allRight || !allAnswered}>확인</Button>
+        {!readOnly && <Button onClick={check} disabled={allRight || !allAnswered}>확인</Button>}
         {allRight ? (
           <span className="text-sm text-primary">모두 마쳤어요. 완료를 누르세요.</span>
         ) : !allAnswered ? (

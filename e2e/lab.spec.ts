@@ -11,6 +11,8 @@ test("블록이 코드로, 코드가 블록으로 바뀐다", async ({ page }) =
   const code = page.getByTestId("code-panel");
   await expect(code).toContainText("led = Pin(26, Pin.OUT)");
   await expect(code).toContainText("while True:");
+  // 체험판에는 호스트 onSaveProject 가 없어 「작품으로 저장」이 없다 (lib-v1.0.3)
+  await expect(page.getByTestId("save-project-button")).toHaveCount(0);
 
   await page.getByRole("tab", { name: "코드" }).click();
   await expect(page.getByTestId("blocks-overlay")).toBeVisible();

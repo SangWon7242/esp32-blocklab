@@ -1,0 +1,101 @@
+#!/usr/bin/env node
+/*
+ * 라이브러리 빌드 (npm run build:lib). 결과는 dist-lib/ 하나로, 허브가 vendor/blocklab/ 으로 복사한다.
+ *   1. vite build -c vite.lib.config.ts   → index.js, core.js(서버 입구), chunks/*.js, style.css
+ *   2. tsc -p tsconfig.lib.json           → types/**.d.ts (@/ 별칭을 상대 경로로 고쳐 쓴다) + index.d.ts·core.d.ts
+ *      zod 를 import 하는 d.ts 는 펼친 평범한 타입으로 다시 쓴다 (scripts/dts-strip-zod.mjs — 허브에는 zod 가 없다)
+ *   3. public/lib/*.py                    → lib/ (보드에 올리는 라이브러리. 호스트가 /lib/<이름> 으로 서빙해야 한다 — src/device/libs.ts)
+ *      public/blocklab/fonts/            → fonts/ (코드 글꼴 D2Coding woff2 + OFL.txt, lib-v1.0.5. style.css 가 /blocklab/fonts/ 로 부른다 — 호스트가 그 주소에서 서빙)
+ *   4. package.json                       → 이름·version·exports
+ *   5. scripts/lib-smoke.mjs              → window 없는 Node 에서 import 해 순수 API 를 부른다
+ *      scripts/lib-types-check.mjs        → zod 없는 폴더에서 d.ts 를 tsc 로 읽어 StepRecord 등이 any 가 아닌지, 원래 zod 타입과 같은지
+ *   (Blockly media 는 vite 플러그인이 dist-lib/media/ 로 낸다 — scripts/vite-blockly.ts)
+ */
+import { execFileSync } from "node:child_process";
+import { cpSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { stripZodFromDts } from "./dts-strip-zod.mjs";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const out = path.join(root, "dist-lib");
+const bin = (name) => path.join(root, "node_modules/.bin", name);
+const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: "inherit" });
+const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
+
+// 1. JS + CSS
+run(bin("vite"), ["build", "-c", "vite.lib.config.ts"]);
+
+// 2. 선언 파일
+const typesDir = path.join(out, "types");
+rmSync(typesDir, { recursive: true, force: true });
+run(bin("tsc"), ["-p", "tsconfig.lib.json"]);
+for (const file of walk(typesDir)) {
+  if (!file.endsWith(".d.ts")) continue;
+  const text = readFileSync(file, "utf8");
+  const fixed = text
+    // "@/x/y" → 이 파일에서 types/x/y 로 가는 상대 경로
+    .replace(/(["'])@\/([^"']+)\1/g, (_m, q, spec) => {
+      let rel = path.relative(path.dirname(file), path.join(typesDir, spec)).split(path.sep).join("/");
+      if (!rel.startsWith(".")) rel = `./${rel}`;
+      return `${q}${rel}${q}`;
+    })
+    // CSS 부수 효과 import 는 선언에 필요 없다 (허브에는 vite/client 타입이 없다)
+    .replace(/^import\s+["'][^"']+\.css["'];\s*$/gm, "");
+  if (fixed !== text) writeFileSync(file, fixed);
+}
+const zodFiles = walk(typesDir).filter((f) => f.endsWith(".d.ts") && /from\s+["']zod["']/.test(readFileSync(f, "utf8")));
+for (const r of stripZodFromDts(zodFiles)) {
+  console.log(`zod 를 걷어 냄: ${path.relative(out, r.file)} (타입 ${r.aliases}개, 스키마 ${r.consts}개)`);
+}
+writeFileSync(path.join(out, "index.d.ts"), 'export * from "./types/lib/index";\n');
+writeFileSync(path.join(out, "core.d.ts"), 'export * from "./types/lib/core";\n');
+
+// 3. 보드 라이브러리
+cpSync(path.join(root, "public/lib"), path.join(out, "lib"), { recursive: true, filter: (src) => !src.endsWith("README.md") });
+// 코드 글꼴 (lib-v1.0.5): style.css 의 @font-face 가 절대 경로 /blocklab/fonts/ 로 부른다 (vite.lib.config.ts 는 publicDir:false 라 주소를 그대로 둔다)
+cpSync(path.join(root, "public/blocklab/fonts"), path.join(out, "fonts"), { recursive: true });
+
+// 4. package.json
+const libPkg = {
+  name: "@dlab/esp32-blocklab",
+  version: pkg.version,
+  description: "ESP32 블록랩 — 허브에 심는 라이브러리 (BlocklabProvider·화면·순수 판정 API)",
+  type: "module",
+  main: "./index.js",
+  module: "./index.js",
+  types: "./index.d.ts",
+  exports: {
+    ".": { types: "./index.d.ts", default: "./index.js" },
+    // 서버 입구 (lib-v1.0.2): React·DOM·Blockly·CodeMirror·CSS 없음 — Next 라우트 핸들러가 정적으로 import 한다
+    "./core": { types: "./core.d.ts", import: "./core.js", default: "./core.js" },
+    "./style.css": "./style.css",
+    "./package.json": "./package.json",
+  },
+  sideEffects: ["*.css"],
+  peerDependencies: { react: "^19.0.0", "react-dom": "^19.0.0" },
+};
+writeFileSync(path.join(out, "package.json"), `${JSON.stringify(libPkg, null, 2)}\n`);
+
+// 5. 연기 검사
+run(process.execPath, [path.join(root, "scripts/lib-smoke.mjs")]);
+run(process.execPath, [path.join(root, "scripts/lib-types-check.mjs")]);
+
+// 6. 크기
+const sizes = walk(out)
+  .filter((f) => /\.(js|css|woff2)$/.test(f))
+  .map((f) => [path.relative(out, f), statSync(f).size])
+  .sort((a, b) => b[1] - a[1]);
+console.log("\ndist-lib/ 크기:");
+for (const [name, size] of sizes) console.log(`  ${name.padEnd(44)} ${(size / 1024).toFixed(1).padStart(8)} kB`);
+console.log(`  ${"합계".padEnd(44)} ${(sizes.reduce((a, [, s]) => a + s, 0) / 1024).toFixed(1).padStart(8)} kB`);
+
+function walk(dir) {
+  const files = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...walk(p));
+    else files.push(p);
+  }
+  return files;
+}

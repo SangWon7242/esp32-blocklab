@@ -1,5 +1,9 @@
-import type { WorkspaceJson } from "@/codegen";
-export type { WorkspaceJson };
+/**
+ * Blockly 작업판 JSON (`Blockly.serialization.workspaces.save` 의 반환 꼴과 같다 — src/codegen/index.ts 가 같은지 지킨다).
+ * 파서는 Blockly 없이 도는 순수 경로라서(서버 입구 core, lib-v1.0.2) 선언에서도 blockly 를 import 하지 않는다.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Blockly 의 선언 그대로
+export type WorkspaceJson = { [key: string]: any };
 
 export type BlockJson = {
   type: string;

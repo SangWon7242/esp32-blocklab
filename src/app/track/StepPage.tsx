@@ -1,5 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
 } from "lucide-react";
@@ -9,18 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
+import { HostLink, useHost } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { awaitingExplain, canComplete, isEditorStep } from "@/track/completion";
 import { getChapter, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates } from "@/track/gating";
-import type { StepRecord } from "@/track/progress";
+import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { Step } from "@/track/schema";
 import { useSettings } from "../settings/settings";
+import { ReviewBadge } from "./ReviewBadge";
+import { ProjectSaveTargetContext, projectSaveTarget } from "./TrackSaveButton";
 import { GuideBody } from "./GuideBody";
 import { useGuideCollapsed } from "./guidePanel";
 import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
-import { saveStepRecord, useProgress } from "./progressState";
+import { saveStepRecord, useChapterRecords } from "./progressState";
 import { STEP_TYPE_GUIDE, STEP_TYPE_LABEL } from "./stepMeta";
 import { StepTypeIcon } from "./StepTypeIcon";
 import { AppStep } from "./steps/AppStep";
@@ -37,35 +39,37 @@ import type { StepProps } from "./steps/types";
 
 export const LOCKED_MESSAGE = "앞 단계를 먼저 끝내 주세요";
 
-/** #/track/:chapter/:step — 왼쪽 안내, 오른쪽 활동, 위 진행, 아래 이전·완료·다음 */
-export function StepPage() {
-  const { chapter: chapterId = "", step: stepId = "" } = useParams();
-  const navigate = useNavigate();
+/**
+ * 단계 화면 — 왼쪽 안내, 오른쪽 활동, 위 진행, 아래 이전·완료·다음.
+ * 열람(review) 모드는 호스트가 넘긴 학생 기록을 저장 없이 보여 준다: 모든 단계 열림, 입력·판정·저장·AI·완료 숨김.
+ */
+export function StepPage({ chapterId, stepId }: { chapterId: string; stepId: string }) {
+  const { nav, mode, store } = useHost();
   const chapter = getChapter(chapterId);
-  const progress = useProgress();
+  const records = useChapterRecords(chapterId);
   const { teacherMode, explainGate } = useSettings();
+  const review = mode === "review";
 
   const steps = chapter ? allSteps(chapter) : [];
   const index = steps.findIndex((s) => s.id === stepId);
-  const records = (chapter && progress?.chapters[chapter.id]) || {};
-  const states = chapter ? stepStates(chapter, records, teacherMode, { explainGate }) : {};
+  const states = chapter ? stepStates(chapter, records ?? {}, teacherMode || review, { explainGate }) : {};
   const state = states[stepId];
 
-  // 없는 챕터·단계, 잠긴 단계는 챕터(또는 목록)로 돌려보낸다
+  // 없는 챕터·단계, 잠긴 단계는 챕터(또는 목록)로 돌려보낸다. replace 로 바꿔 넣어 뒤로 가기가 다시 여기로 오지 않게
   useEffect(() => {
-    if (!chapter) navigate("/track", { replace: true });
-    else if (index < 0) navigate(`/track/${chapter.id}`, { replace: true });
-    else if (progress && state === "locked") {
+    if (!chapter) nav.go(nav.href.track(), { replace: true });
+    else if (index < 0) nav.go(nav.href.chapter(chapter.id), { replace: true });
+    else if (records && state === "locked") {
       toast.warning(LOCKED_MESSAGE, { id: "step-locked" });
-      navigate(`/track/${chapter.id}`, { replace: true });
+      nav.go(nav.href.chapter(chapter.id), { replace: true });
     }
-  }, [chapter, index, progress, state, navigate]);
+  }, [chapter, index, records, state, nav]);
 
-  if (!chapter || index < 0 || !progress || state === "locked") return null;
+  if (!chapter || index < 0 || !records || state === "locked") return null;
   const step = steps[index];
   // 단계가 바뀌면 입력 상태를 새로 만든다
   return (
-    <StepView
+    <StepBody
       key={`${chapter.id}/${step.id}`}
       chapter={chapter}
       step={step}
@@ -75,11 +79,13 @@ export function StepPage() {
       states={states}
       teacherMode={teacherMode}
       explainGate={explainGate}
+      readOnly={review}
+      store={store}
     />
   );
 }
 
-type ViewProps = {
+type BodyProps = {
   chapter: LoadedChapter;
   step: Step;
   index: number;
@@ -89,9 +95,13 @@ type ViewProps = {
   teacherMode: boolean;
   /** 설정: 미션·디버깅은 교사 "설명 확인" 뒤 완료 */
   explainGate: boolean;
+  /** 열람 모드: 저장하지 않고 입력·판정·완료를 숨긴다 */
+  readOnly: boolean;
+  store: ProgressStore;
 };
 
-function StepView({ chapter, step, index, steps, record, states, teacherMode, explainGate }: ViewProps) {
+function StepBody({ chapter, step, index, steps, record, states, teacherMode, explainGate, readOnly, store }: BodyProps) {
+  const { nav } = useHost();
   const [input, setInput] = useState<Record<string, unknown>>(record?.input ?? {});
   const [attempts, setAttempts] = useState(record?.attempts ?? 0);
   const done = states[step.id] === "done";
@@ -102,10 +112,13 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode, ex
   const doneCount = steps.filter((s) => states[s.id] === "done").length;
   const [guideCollapsed, setGuideCollapsed] = useGuideCollapsed();
 
-  const save = (nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") =>
-    void saveStepRecord(chapter.id, step.id, { status, input: nextInput, attempts: nextAttempts, updatedAt: new Date().toISOString() });
+  const save = (nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") => {
+    if (readOnly) return; // 열람 모드는 학생 기록을 바꾸지 않는다
+    void saveStepRecord(store, chapter.id, step.id, { status, input: nextInput, attempts: nextAttempts, updatedAt: new Date().toISOString() });
+  };
 
   const onInput: StepProps<never>["onInput"] = (nextInput, opts) => {
+    if (readOnly) return;
     const nextAttempts = attempts + (opts?.attempt ? 1 : 0);
     setInput(nextInput);
     setAttempts(nextAttempts);
@@ -113,13 +126,15 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode, ex
   };
 
   const complete = (extra?: Record<string, unknown>) => {
+    if (readOnly) return;
     const finalInput = extra ? { ...input, ...extra } : input;
     setInput(finalInput);
     save(finalInput, attempts, "done");
     toast.success(extra?.skipped ? "건너뛰었어요. 다음 단계가 열렸어요" : "완료했어요. 다음 단계가 열렸어요", { id: "step-done" });
   };
 
-  const props = { chapter, input, onInput, teacherMode, attempts, onComplete: complete };
+  const saveTarget = useMemo(() => projectSaveTarget(chapter, step), [chapter, step]);
+  const props = { chapter, input, onInput, teacherMode, attempts, onComplete: complete, readOnly };
   let activity: ReactNode;
   switch (step.type) {
     case "problem": activity = <Problem step={step} {...props} />; break;
@@ -133,6 +148,8 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode, ex
     case "design": activity = <DesignStep step={step} {...props} />; break;
     case "app": activity = <AppStep step={step} {...props} />; break;
   }
+  // 편집기 단계의 「작품으로 저장」이 이 챕터·단계를 알도록 (TrackEditor 가 읽는다)
+  activity = <ProjectSaveTargetContext.Provider value={saveTarget}>{activity}</ProjectSaveTargetContext.Provider>;
 
   const ready = canComplete(step, input, { explainGate });
   /** 판정은 통과했는데 교사 "설명 확인"만 남았다 */
@@ -140,11 +157,12 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode, ex
   const part = chapter.parts.find((p) => p.steps.some((s) => s.id === step.id));
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background text-foreground">
       <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
         <Button variant="ghost" size="sm" asChild>
-          <Link to={`/track/${chapter.id}`}><ArrowLeft className="size-4" /><span className="hidden sm:inline">{chapter.title}</span><span className="sm:hidden">단계 목록</span></Link>
+          <HostLink to={nav.href.chapter(chapter.id)}><ArrowLeft className="size-4" /><span className="hidden sm:inline">{chapter.title}</span><span className="sm:hidden">단계 목록</span></HostLink>
         </Button>
+        {readOnly && <ReviewBadge />}
         <Button
           variant="ghost"
           size="icon"
@@ -182,19 +200,28 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode, ex
         </aside>
         {/* 활동 칸: 세로로 꽉 차게 (편집기·입력 칸이 남는 높이를 채운다). 칸 폭에 따라 안쪽 배치가 바뀐다(@container) */}
         <section className="@container flex min-h-0 flex-col p-4 sm:p-6 lg:overflow-y-auto" aria-label="활동" data-testid="step-activity">
-          {activity}
+          {readOnly ? (
+            // 열람 모드: 안의 입력·버튼을 모두 끈다 (display:contents 로 배치는 그대로)
+            <fieldset disabled className="min-w-0 border-0 p-0 [display:contents]" data-testid="review-activity">
+              {activity}
+            </fieldset>
+          ) : (
+            activity
+          )}
         </section>
       </div>
 
       <div className="flex shrink-0 items-center gap-2 border-t px-3 py-2">
         {prev ? (
-          <Button variant="outline" asChild><Link to={`/track/${chapter.id}/${prev.id}`}><ArrowLeft className="size-4" />이전</Link></Button>
+          <Button variant="outline" asChild><HostLink to={nav.href.step(chapter.id, prev.id)}><ArrowLeft className="size-4" />이전</HostLink></Button>
         ) : (
           <Button variant="outline" disabled><ArrowLeft className="size-4" />이전</Button>
         )}
         <div className="ml-auto flex items-center gap-2">
           {done ? (
             <span className="hidden items-center gap-1 text-sm text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
+          ) : readOnly ? (
+            <span className="hidden items-center gap-1 text-sm text-muted-foreground sm:flex" data-testid="step-not-done">아직 끝내지 않은 단계예요</span>
           ) : (
             <>
               {awaiting && (
@@ -215,12 +242,12 @@ function StepView({ chapter, step, index, steps, record, states, teacherMode, ex
           )}
           {next ? (
             nextOpen ? (
-              <Button variant={done ? "default" : "outline"} asChild><Link to={`/track/${chapter.id}/${next.id}`}>다음<ArrowRight className="size-4" /></Link></Button>
+              <Button variant={done ? "default" : "outline"} asChild><HostLink to={nav.href.step(chapter.id, next.id)}>다음<ArrowRight className="size-4" /></HostLink></Button>
             ) : (
               <Button variant="outline" disabled>다음<ArrowRight className="size-4" /></Button>
             )
           ) : (
-            <Button variant={done ? "default" : "outline"} asChild><Link to={`/track/${chapter.id}`}>단계 목록<ArrowRight className="size-4" /></Link></Button>
+            <Button variant={done ? "default" : "outline"} asChild><HostLink to={nav.href.chapter(chapter.id)}>단계 목록<ArrowRight className="size-4" /></HostLink></Button>
           )}
         </div>
       </div>

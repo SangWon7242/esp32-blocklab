@@ -1,8 +1,7 @@
 import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 import { FakeDevice } from "@/device";
+import { renderWithHost } from "@/host/testHost";
 import type { AppInput } from "@/track/appCheck";
 import type { LoadedChapter } from "@/track/content";
 import { StepSchema, type StepOf } from "@/track/schema";
@@ -34,9 +33,7 @@ const chapter = { id: "test-app", files: {} } as unknown as LoadedChapter;
 const GOOD = `<html><body><button onclick="fetch('/cmd?led=on')">켜기</button><script>fetch('/data')</script></body></html>`;
 
 function render(input: AppInput, teacherMode = false) {
-  return renderToStaticMarkup(
-    createElement(MemoryRouter, null, createElement(AppStep, { step, chapter, input, onInput: () => {}, teacherMode, attempts: 0, onComplete: () => {} })),
-  );
+  return renderWithHost(createElement(AppStep, { step, chapter, input, onInput: () => {}, teacherMode, attempts: 0, onComplete: () => {} }));
 }
 
 describe("AppStep 화면", () => {

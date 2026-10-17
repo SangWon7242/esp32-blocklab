@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
-import { useSearchParams } from "react-router";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { textColourOn } from "@/lib/contrast";
@@ -60,14 +59,23 @@ function CategoryHeading({ category }: { category: DocCategory }) {
   );
 }
 
+type Props = {
+  /** 강조할 블록 종류 (체험판은 ?block=) */
+  block?: string | null;
+  /** 고른 카테고리 (체험판은 ?cat=) */
+  category?: string | null;
+  /** 카테고리를 고르면 호스트가 주소에 남긴다 (push — 뒤로 가기로 앞 카테고리로). 없으면 화면 안에서만 바뀐다 */
+  onCategoryChange?(id: string): void;
+};
+
 /**
- * 블록 사전: 카테고리마다 한 페이지(?cat=<id>, 없으면 첫 카테고리). 검색어가 있으면 카테고리와 상관없이
- * 전체에서 찾아 카테고리별로 묶어 보여 준다. ?block=<type> 은 그 블록의 카테고리를 열고 카드를 강조한다
+ * 블록 사전: 카테고리마다 한 페이지(category, 없으면 첫 카테고리). 검색어가 있으면 카테고리와 상관없이
+ * 전체에서 찾아 카테고리별로 묶어 보여 준다. block 은 그 블록의 카테고리를 열고 카드를 강조한다
  */
-export function DocsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const target = searchParams.get("block");
-  const catParam = searchParams.get("cat");
+export function DocsPage({ block, category, onCategoryChange }: Props = {}) {
+  const [localCat, setLocalCat] = useState<string | null>(null);
+  const target = block ?? null;
+  const catParam = category ?? localCat;
   const [query, setQuery] = useState("");
   const searching = query.trim() !== "";
   const catalog = useMemo(() => getCatalog(), []);
@@ -126,7 +134,8 @@ export function DocsPage() {
   const goToCategory = (id: string) => {
     setQuery("");
     if (id === activeId && !target && catParam === id) return;
-    setSearchParams({ cat: id });
+    setLocalCat(id);
+    onCategoryChange?.(id);
   };
 
   const buttons = (chip: boolean) =>

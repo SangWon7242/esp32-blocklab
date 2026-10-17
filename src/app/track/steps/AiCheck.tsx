@@ -3,14 +3,14 @@ import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { askClaude, type SavedAiReview } from "@/ai/claude";
-import { useSettings } from "../../settings/settings";
+import type { SavedAiReview } from "@/ai/claude";
+import { useHost, type AiClient } from "@/host/HostContext";
 
 type Props = {
   /** 버튼 글 ("내 설명 점검 받기", "질문 3개만 받기") */
   label: string;
-  /** 누를 때 보낼 사용자 메시지 */
-  buildMessage(): string;
+  /** 누를 때 호스트 AI 에 보낸다 (성찰은 reflect, 디버깅은 debug) */
+  ask(ai: AiClient): ReturnType<AiClient["reflect"]>;
   /** 저장해 둔 지난 결과 */
   review: SavedAiReview | null | undefined;
   /** 받은 결과를 단계 기록에 저장한다 */
@@ -21,15 +21,16 @@ type Props = {
   disabledTitle?: string;
 };
 
-/** AI 점검 버튼 + 결과 카드. 설정에 API 키가 없으면 버튼을 숨긴다. 실패는 알림만 띄우고 진행을 막지 않는다 */
-export function AiCheck({ label, buildMessage, review, onReview, questionsOnly, disabled, disabledTitle }: Props) {
-  const { claudeApiKey, claudeModel } = useSettings();
+/** AI 점검 버튼 + 결과 카드. 호스트가 AI 를 주지 않았거나 열람 모드면 버튼을 숨긴다. 실패는 알림만 띄우고 진행을 막지 않는다 */
+export function AiCheck({ label, ask, review, onReview, questionsOnly, disabled, disabledTitle }: Props) {
+  const { ai, mode } = useHost();
   const [busy, setBusy] = useState(false);
 
   const run = async () => {
+    if (!ai) return;
     setBusy(true);
     try {
-      const result = await askClaude({ apiKey: claudeApiKey, model: claudeModel, message: buildMessage() });
+      const result = await ask(ai);
       onReview({ ...result, at: new Date().toISOString() });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "AI 점검에 실패했어요", { id: "ai-check" });
@@ -40,7 +41,7 @@ export function AiCheck({ label, buildMessage, review, onReview, questionsOnly, 
 
   return (
     <div className="space-y-3">
-      {claudeApiKey && (
+      {ai && mode !== "review" && (
         <Button variant="outline" onClick={() => void run()} disabled={busy || disabled} title={disabled ? disabledTitle : undefined}>
           {busy ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
           {busy ? "AI 가 읽는 중…" : label}

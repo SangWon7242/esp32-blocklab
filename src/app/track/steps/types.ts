@@ -12,4 +12,6 @@ export type StepProps<T extends StepType> = {
   attempts: number;
   /** 단계를 완료로 기록한다 (extra 는 입력에 합친다). 편집기 단계가 스스로 끝낼 때 (실행 성공) */
   onComplete(extra?: Record<string, unknown>): void;
+  /** 열람 모드: 기록을 보여 주기만 한다 (입력은 꺼지고 판정·저장·확인 버튼은 숨긴다) */
+  readOnly?: boolean;
 };

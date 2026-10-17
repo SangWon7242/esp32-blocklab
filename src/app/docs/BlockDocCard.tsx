@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { ChevronDown, FileCode2 } from "lucide-react";
-import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { categoryColourStyle } from "@/lib/contrast";
 import { cn } from "@/lib/utils";
 import type { BlockDoc, TitlePart } from "@/docs/catalog";
@@ -104,6 +104,7 @@ export function BlockDocBody({ code, codeTitle, doc, collapsibleExample, example
 
 /** 블록 사전의 블록 하나. ?block= 으로 들어오면 이 카드에 포커스를 옮긴다 (tabIndex -1) */
 export function BlockDocCard({ doc, highlighted }: { doc: BlockDoc; highlighted?: boolean }) {
+  const { nav } = useHost();
   return (
     <Card
       data-testid="block-doc-card"
@@ -138,9 +139,9 @@ export function BlockDocCard({ doc, highlighted }: { doc: BlockDoc; highlighted?
           collapsibleExample
           exampleAction={
             <Button variant="outline" size="sm" className="w-fit" asChild>
-              <Link to={`/lab?example=${encodeURIComponent(doc.type)}`}>
+              <HostLink to={withQuery(nav.href.lab(), { example: doc.type })}>
                 <FileCode2 className="size-4" />편집기에서 열어 보기
-              </Link>
+              </HostLink>
             </Button>
           }
         />

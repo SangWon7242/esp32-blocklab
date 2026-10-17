@@ -1,9 +1,10 @@
-import { Link } from "react-router";
 import { ArrowRight, Blocks, Route as RouteIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HostLink, useHost } from "@/host/HostContext";
 
 export function HomePage() {
+  const { nav } = useHost();
   return (
     <div className="mx-auto max-w-4xl p-8">
       <h1 className="text-2xl font-bold">블록으로 만들고, 코드로 읽는 ESP32</h1>
@@ -17,7 +18,7 @@ export function HomePage() {
             <CardDescription>블록과 코드를 나란히 놓고 바로 써 봅니다.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild><Link to="/lab">열기 <ArrowRight className="size-4" /></Link></Button>
+            <Button asChild><HostLink to={nav.href.lab()}>열기 <ArrowRight className="size-4" /></HostLink></Button>
           </CardContent>
         </Card>
         <Card>
@@ -26,7 +27,7 @@ export function HomePage() {
             <CardDescription>센서 트랙과 교과 융합 트랙의 챕터를 단계별로 풀어 갑니다.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild><Link to="/track">열기 <ArrowRight className="size-4" /></Link></Button>
+            <Button asChild><HostLink to={nav.href.track()}>열기 <ArrowRight className="size-4" /></HostLink></Button>
           </CardContent>
         </Card>
       </div>

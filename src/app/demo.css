@@ -1,0 +1,11 @@
+/*
+ * 체험판 전용 — `.blocklab` 범위 밖(html·body)에 두어야 하는 것.
+ * 블록랩 CSS(index.css)는 빌드에서 `.blocklab` 아래로 옮겨지고 루트 글꼴은 빠지므로(호스트 글꼴 상속), 체험판은 여기서 루트를 채운다.
+ * 이 파일은 scripts/postcss-blocklab-scope.ts 가 건드리지 않는다.
+ */
+html {
+  font-family: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif;
+}
+body {
+  margin: 0;
+}

@@ -12,7 +12,8 @@ export function MaterialChips({ chapterId, materials }: { chapterId: string; mat
           ) : (
             <span className="ml-1 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
           )}
-          <span>{m.name}</span>
+          {/* 부품 이름은 한 덩어리로 (좁은 폰에서 「브레드보 / 드」처럼 끊기지 않게). 줄바꿈은 칩 목록이 한다 */}
+          <span className="whitespace-nowrap">{m.name}</span>
           {m.note && <span className="text-xs text-muted-foreground">{m.note}</span>}
         </li>
       ))}

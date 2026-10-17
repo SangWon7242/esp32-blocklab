@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { judgeInputOf } from "../judgeInput";
-import { Link } from "react-router";
 import { Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { onEditedProgram, type MissionInput } from "@/track/completion";
 import { judge } from "@/track/judge";
 import { useSettings } from "../../settings/settings";
@@ -14,6 +14,7 @@ import { useStepInput } from "./useStepInput";
 
 /** 미션: 지시문 → 편집기에서 고치기 → 판정 (실패하면 되묻기 문장, 그 뒤에 힌트). 설정 explainGate 면 교사 "설명 확인" 뒤 완료 */
 export function MissionStep({ step, chapter, input, onInput, teacherMode }: StepProps<"mission">) {
+  const { nav } = useHost();
   const m = input as MissionInput;
   const update = useStepInput<MissionInput>(input, onInput);
   const { explainGate } = useSettings();
@@ -51,7 +52,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode }: Step
         )}
         {teacherMode && step.answerCode && (
           <Button asChild variant="outline" size="sm" className="mt-3">
-            <Link to={`/lab?code=${chapter.id}/${step.answerCode}`}>정답 코드 열기 ({step.answerCode})</Link>
+            <HostLink to={withQuery(nav.href.lab(), { code: `${chapter.id}/${step.answerCode}` })}>정답 코드 열기 ({step.answerCode})</HostLink>
           </Button>
         )}
       </section>

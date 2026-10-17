@@ -1,11 +1,11 @@
-import { useEffect } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useState } from "react";
 import { ArrowRight, Clock, ListOrdered } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HostLink, useHost } from "@/host/HostContext";
 import { loadChapters, type LoadedChapter } from "@/track/content";
 import { allSteps } from "@/track/gating";
 import type { Progress as ProgressData } from "@/track/progress";
@@ -37,31 +37,34 @@ function storeTrack(track: TrackId) {
   }
 }
 
+type Props = {
+  /** 호스트가 주소(?track=)에서 읽은 탭. 없거나 모르는 값이면 마지막으로 본 탭(없으면 센서 트랙) */
+  track?: string | null;
+  /** 탭을 바꾸면 호스트가 주소에 남긴다. 없으면 화면 안에서만 바뀐다 */
+  onTrackChange?(track: TrackId): void;
+};
+
 /**
- * #/track?track=sensor|fusion — 두 탭(센서 트랙 / 교과 융합 트랙), 탭마다 챕터 카드 목록.
- * 주소에 track 이 없으면 마지막으로 본 탭(없으면 센서 트랙). 초안(draft) 챕터는 교사 모드에서만 "초안" 배지와 함께 보인다.
+ * 트랙 목록 — 두 탭(센서 트랙 / 교과 융합 트랙), 탭마다 챕터 카드 목록.
+ * 초안(draft) 챕터는 교사 모드에서만 "초안" 배지와 함께 보인다.
  */
-export function TrackPage() {
+export function TrackPage({ track: fromHost, onTrackChange }: Props = {}) {
   const progress = useProgress();
   const { teacherMode } = useSettings();
   const chapters = loadChapters();
-  const [params, setParams] = useSearchParams();
-  const fromUrl = params.get("track");
-  const track: TrackId = isTrackId(fromUrl) ? fromUrl : readStoredTrack();
+  const [local, setLocal] = useState<TrackId>(readStoredTrack);
+  const track: TrackId = isTrackId(fromHost) ? fromHost : local;
 
   useEffect(() => storeTrack(track), [track]);
 
   const select = (value: string) => {
     if (!isTrackId(value)) return;
-    setParams((p) => {
-      const next = new URLSearchParams(p);
-      next.set("track", value);
-      return next;
-    }, { replace: true });
+    setLocal(value);
+    onTrackChange?.(value);
   };
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto bg-background text-foreground">
       <div className="mx-auto max-w-5xl p-4 sm:p-8">
         <h1 className="text-2xl font-bold">트랙</h1>
         <p className="mt-2 text-muted-foreground">챕터를 골라 단계를 차례대로 풀어 갑니다. 챕터 안에서는 앞 단계를 끝내야 다음 단계가 열려요.</p>
@@ -93,6 +96,7 @@ export function TrackPage() {
 }
 
 function ChapterCard({ chapter: ch, chapters, progress }: { chapter: LoadedChapter; chapters: LoadedChapter[]; progress: ProgressData | null }) {
+  const { nav } = useHost();
   const steps = allSteps(ch);
   const records = progress?.chapters[ch.id] ?? {};
   const done = steps.filter((s) => records[s.id]?.status === "done").length;
@@ -126,7 +130,7 @@ function ChapterCard({ chapter: ch, chapters, progress }: { chapter: LoadedChapt
           <span className="shrink-0">{done} / {steps.length}</span>
         </div>
         <Button asChild className="self-start">
-          <Link to={`/track/${ch.id}`}>{done > 0 ? "이어서 하기" : "시작하기"} <ArrowRight className="size-4" /></Link>
+          <HostLink to={nav.href.chapter(ch.id)}>{done > 0 ? "이어서 하기" : "시작하기"} <ArrowRight className="size-4" /></HostLink>
         </Button>
       </CardContent>
     </Card>

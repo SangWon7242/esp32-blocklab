@@ -10,9 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { progressStore, reloadProgress } from "../track/progressState";
+import { CODE_FONT_TEXT, CodeFontSizeAdjuster } from "@/components/editor/CodeFontSize";
 import { DEFAULT_MODEL } from "@/ai/claude";
-import { updateSettings, useSettings } from "./settings";
+import { useHost } from "@/host/HostContext";
+import { reloadProgress } from "../track/progressState";
+import { updateSettings, useLocalSettings } from "./localSettings";
 
 function downloadText(name: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
@@ -27,9 +29,12 @@ function downloadText(name: string, text: string) {
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
-/** #/settings — 교사 모드·가짜 보드·진행 기록 내보내기/불러오기/초기화 */
+/** #/settings (체험판 전용) — 교사 모드·가짜 보드·진행 기록 내보내기/불러오기/초기화. 설정은 localStorage, 기록은 호스트 저장소 */
 export function SettingsPage() {
-  const settings = useSettings();
+  const settings = useLocalSettings();
+  const { store: progressStore } = useHost();
+  // LocalProgressStore 가 "저장이 막혔다"고 밝힌 경우만 경고한다 (다른 저장소는 영구 저장으로 본다)
+  const persistent = (progressStore as { persistent?: boolean }).persistent !== false;
   const fileRef = useRef<HTMLInputElement>(null);
 
   const exportProgress = async () => {
@@ -46,7 +51,7 @@ export function SettingsPage() {
     if (!file) return;
     try {
       await progressStore.importJson(await file.text());
-      await reloadProgress();
+      await reloadProgress(progressStore);
       toast.success("진행 기록을 불러왔어요");
     } catch (e) {
       toast.error(`불러오지 못했어요: ${message(e)}`);
@@ -58,7 +63,7 @@ export function SettingsPage() {
   const resetProgress = async () => {
     try {
       await progressStore.clear();
-      await reloadProgress();
+      await reloadProgress(progressStore);
       toast.success("진행 기록을 지웠어요");
     } catch (e) {
       toast.error(`지우지 못했어요: ${message(e)}`);
@@ -70,7 +75,7 @@ export function SettingsPage() {
       <div className="mx-auto max-w-2xl space-y-4 p-4 sm:p-8">
         <h1 className="text-2xl font-bold">설정</h1>
         <p className="text-sm text-muted-foreground">
-          {progressStore.persistent
+          {persistent
             ? "이 설정과 진행 기록은 이 브라우저에만 저장됩니다."
             : "이 브라우저는 저장이 막혀 있어 설정과 진행 기록이 새로 고치면 사라집니다. 내보내기로 파일에 남겨 두세요."}
         </p>
@@ -103,6 +108,16 @@ export function SettingsPage() {
               </div>
               <Switch id="fake-board" checked={settings.fakeBoard} onCheckedChange={(v) => updateSettings({ fakeBoard: v })} />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>코드 보기</CardTitle>
+            <CardDescription>{CODE_FONT_TEXT.description} 코드 칸 머리줄의 글자 크기 단추와 같은 값이에요.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CodeFontSizeAdjuster />
           </CardContent>
         </Card>
 

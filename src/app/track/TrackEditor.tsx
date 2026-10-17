@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useImperativeHandle, useRef, type Ref } from "react";
-import { useSearchParams } from "react-router";
+import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, type Ref } from "react";
+import { useReadOnly } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { EditorWorkbench, type EditorProgram, type EditorWorkbenchHandle } from "../lab/EditorWorkbench";
-import { readSettings } from "../settings/settings";
+import { useSettings } from "../settings/settings";
+import { ReadOnlyCode } from "./steps/ReadOnlyCode";
+import { TrackSaveButton } from "./TrackSaveButton";
 
 export type { EditorProgram };
 export type TrackEditorHandle = EditorWorkbenchHandle;
@@ -30,13 +32,14 @@ type Props = {
 
 /**
  * 트랙 편집기 단계(실행·미션·디버깅)의 편집기. 자유 코딩 화면과 같은 편집기(EditorWorkbench)에
- * "보드에 저장"만 숨기고, 가짜 보드(?device=fake·설정)를 따른다.
+ * "보드에 저장"만 숨기고, 가짜 보드(호스트 설정 fakeBoard; 체험판은 ?device=fake 도 여기에 섞는다)를 따른다.
+ * 열람 모드면 편집기 대신 저장한 코드를 읽기 전용으로 보여 준다.
  */
 export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgram, onRunEnd, compact, fill, ref }: Props) {
-  const [searchParams] = useSearchParams();
-  const fake = searchParams.get("device") === "fake" || readSettings().fakeBoard;
+  const { fakeBoard: fake } = useSettings();
+  const readOnly = useReadOnly();
   const inner = useRef<EditorWorkbenchHandle>(null);
-  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), openExample: (code: string) => inner.current?.openExample(code) }), []);
+  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), getSaveProgram: () => inner.current!.getSaveProgram(), openExample: (code: string) => inner.current?.openExample(code) }), []);
 
   const onProgramRef = useRef(onProgram);
   onProgramRef.current = onProgram;
@@ -65,6 +68,14 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   // 화면을 떠날 때 기다리던 저장을 마친다
   useEffect(() => flush, [flush]);
 
+  // 「작품으로 저장」 (lib-v1.0.3): 단계 화면 안 + 호스트 onSaveProject 가 있을 때만 그려진다
+  const getProgram = useCallback(() => inner.current?.getSaveProgram() ?? { code: initialCode, blocksJson: null }, [initialCode]);
+  const actions = useMemo(() => <TrackSaveButton getProgram={getProgram} />, [getProgram]);
+
+  if (readOnly) {
+    return <ReadOnlyCode code={initialCode} name="저장한 프로그램" panelClassName={compact ? "h-56" : "h-72"} className="min-w-0" />;
+  }
+
   return (
     <div
       className={cn(
@@ -75,7 +86,7 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
       )}
       data-testid="track-editor"
     >
-      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} assemblyMode={assemblyMode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} />
+      <EditorWorkbench ref={inner} initialCode={initialCode} initialBlocks={initialBlocks} assemblyMode={assemblyMode} fake={fake} hideSave onProgram={onChange} onRunEnd={onRunEnd} actions={actions} />
     </div>
   );
 }

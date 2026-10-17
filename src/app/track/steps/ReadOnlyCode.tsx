@@ -1,4 +1,5 @@
 import { CodePanel, type LineHighlight } from "@/components/editor/CodePanel";
+import { CodeFontSizeButton } from "@/components/editor/CodeFontSize";
 import { cn } from "@/lib/utils";
 
 const noop = () => {};
@@ -14,7 +15,10 @@ export function ReadOnlyCode({ code, name, highlightLines, onLineClick, classNam
 }) {
   return (
     <figure className={className}>
-      <figcaption className="mb-1 font-mono text-xs text-muted-foreground">{name}</figcaption>
+      <figcaption className="mb-1 flex min-w-0 items-center gap-2 font-mono text-xs text-muted-foreground">
+        <span className="min-w-0 truncate">{name}</span>
+        <CodeFontSizeButton className="ml-auto" />
+      </figcaption>
       <div className={cn("h-72 overflow-hidden rounded-md border", panelClassName)}>
         <CodePanel value={code} readOnly onChange={noop} highlightLines={highlightLines} onLineClick={onLineClick} />
       </div>

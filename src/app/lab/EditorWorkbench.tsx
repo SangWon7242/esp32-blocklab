@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, type Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useReducer, useRef, useState, type ReactNode, type Ref } from "react";
 import {
   AlertTriangle, Blocks, Code2, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
 } from "lucide-react";
@@ -12,12 +12,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { BlocklyWorkspace, type BlocklyHandle } from "@/components/editor/BlocklyWorkspace";
 import { CodePanel } from "@/components/editor/CodePanel";
+import { CodeFontSizeButton } from "@/components/editor/CodeFontSize";
 import { BlockDocDialog } from "@/components/editor/BlockDocDialog";
 import type { BlockDocRequest } from "@/components/editor/blockDocMenu";
 import { findDoc } from "@/docs/catalog";
 import type { LineMap, WorkspaceJson } from "@/codegen";
 import type { ConsoleEntry, Issue } from "@/lint";
-import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateFromBlocks, type EditorState, type Source } from "./editorSync";
+import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateFromBlocks, programForSave, type EditorState, type SaveProgram, type Source } from "./editorSync";
 import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { DeviceBar } from "./DeviceBar";
@@ -57,6 +58,8 @@ export type EditorProgram = { code: string; blocksJson: WorkspaceJson | null };
 export type EditorWorkbenchHandle = {
   /** debounce 중인 코드까지 반영한 지금 프로그램 */
   getProgram(): EditorProgram;
+  /** 「작품으로 저장」에 넘길 프로그램: 코드 모드에서 code 가 블록과 맞지 않으면 blocksJson 은 null (lib-v1.0.4) */
+  getSaveProgram(): SaveProgram;
   /** 예시 프로그램(코드)을 블록·코드 패널·검사에 함께 싣는다 (?example= 이 화면 안에서 바뀔 때) */
   openExample(code: string): void;
 };
@@ -71,6 +74,8 @@ export type EditorWorkbenchProps = {
   initialExample?: string;
   /** 코드 대신 처음 실을 블록 JSON (있으면 initialCode 보다 먼저. 설계 조립 작업판) */
   initialBlocks?: WorkspaceJson | null;
+  /** "code" 면 initialCode 를 코드 모드로 연다 (블록으로 바꾸지 못하는 작품, lib-v1.0.4). 설계 조립에서는 무시 */
+  initialSource?: Source;
   /** 가짜 보드 (?device=fake 또는 설정) */
   fake: boolean;
   /** "보드에 저장" 버튼을 숨긴다 (트랙 단계) */
@@ -84,6 +89,8 @@ export type EditorWorkbenchProps = {
   onProgram?(program: EditorProgram): void;
   /** 실행이 끝날 때: 결과와 그 실행의 보드 출력(stdout) */
   onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
+  /** 머리줄 보드 버튼 앞에 둘 단추 (「작품으로 저장」 — lib-v1.0.3) */
+  actions?: ReactNode;
   ref?: Ref<EditorWorkbenchHandle>;
 };
 
@@ -94,13 +101,13 @@ export type EditorWorkbenchProps = {
 /** 설계 조립에서 빼는 검사 규칙 */
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
-export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fake, hideSave, assemblyMode, onProgram, onRunEnd, ref }: EditorWorkbenchProps) {
+export function EditorWorkbench({ initialCode, initialExample, initialBlocks, initialSource, fake, hideSave, assemblyMode, onProgram, onRunEnd, actions, ref }: EditorWorkbenchProps) {
   /** 핸들의 openExample 이 최신 openExample 을 부르게 (useImperativeHandle 의존성에 넣지 않으려고) */
   const openExampleRef = useRef<(code: string) => void>(() => undefined);
   const [state, dispatch] = useReducer(
     editorReducer,
     null,
-    () => (initialBlocks ? initialEditorStateFromBlocks(initialBlocks) : initialEditorState(initialCode)),
+    () => (initialBlocks ? initialEditorStateFromBlocks(initialBlocks) : initialEditorState(initialCode, assemblyMode ? "blocks" : initialSource)),
   );
   const blocklyRef = useRef<BlocklyHandle>(null);
   const debounceRef = useRef<number | undefined>(undefined);
@@ -320,6 +327,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
       const current = flushPendingCode();
       return { code: current.code, blocksJson: current.blocks };
     },
+    getSaveProgram: () => programForSave(flushPendingCode()),
     openExample: (code: string) => openExampleRef.current(code),
   }), [flushPendingCode]);
 
@@ -382,18 +390,20 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
   const unconvertedCount = codeMode ? state.unparsed.length : countCodeBlocks(state.blocks);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background text-foreground">
       <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
         <Tabs value={state.source} onValueChange={(v) => switchSource(v as Source)}>
           <TabsList>
-            <TabsTrigger value="blocks"><Blocks className="size-4" />블록</TabsTrigger>
-            <TabsTrigger value="code" disabled={assemblyMode} title={assemblyMode ? "조립은 블록으로만 해요" : undefined}><Code2 className="size-4" />코드</TabsTrigger>
+            {/* 아주 좁은 화면(sm 미만)은 아이콘만 — 머리줄에 보드 단추와 「작품으로 저장」이 다 들어가게. 이름은 화면 읽기 프로그램에 남는다 */}
+            <TabsTrigger value="blocks"><Blocks className="size-4" /><span className="max-sm:sr-only">블록</span></TabsTrigger>
+            <TabsTrigger value="code" disabled={assemblyMode} title={assemblyMode ? "조립은 블록으로만 해요" : undefined}><Code2 className="size-4" /><span className="max-sm:sr-only">코드</span></TabsTrigger>
           </TabsList>
         </Tabs>
         <span className="hidden truncate text-sm text-muted-foreground lg:inline">
           {assemblyMode ? "블록을 이어 붙이면 코드가 바로 바뀝니다" : codeMode ? "코드를 고치면 블록이 따라옵니다" : "블록을 놓으면 코드가 바로 바뀝니다"}
         </span>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {actions}
           <DeviceBar
             status={device.status}
             canToggleConnection={device.canToggleConnection}
@@ -470,11 +480,10 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, fa
                   <AlertTriangle className="size-3" />{state.parseError.line}줄 {state.parseError.message}
                 </Badge>
               )}
-              {!narrow && (
-                <div className="ml-auto flex items-center">
-                  <PanelToggle label="코드 패널 접기" icon={PanelRightClose} onClick={() => setSidePanel("code", false)} />
-                </div>
-              )}
+              <div className="ml-auto flex shrink-0 items-center gap-1">
+                <CodeFontSizeButton />
+                {!narrow && <PanelToggle label="코드 패널 접기" icon={PanelRightClose} onClick={() => setSidePanel("code", false)} />}
+              </div>
             </div>
             <div className="min-h-0 flex-1">
               <CodePanel

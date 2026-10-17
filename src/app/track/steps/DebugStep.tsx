@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
 import { judgeInputOf } from "../judgeInput";
-import { Link } from "react-router";
 import { CheckCircle2, Lock, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { debugMessage } from "@/ai/claude";
+import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { filled, judgeIsStale, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
 import { useSettings } from "../../settings/settings";
@@ -28,7 +27,8 @@ function setAt<T>(list: readonly T[] | undefined, i: number, value: T, fill: T):
  * 디버깅: 증상마다 ① 증상 카드(고장 코드·되묻기) ② "왜 이런 증상일까?" 설명 저장 → 그 전에는 편집기 잠김
  * ③ 고장 코드가 실린 편집기에서 고치고 판정. 모든 증상을 통과하면 완료할 수 있다 (설정 explainGate 면 교사 "설명 확인" 뒤에).
  */
-export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepProps<"debug">) {
+export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly }: StepProps<"debug">) {
+  const { nav } = useHost();
   const d = input as DebugInput;
   const update = useStepInput<DebugInput>(input, onInput);
   const { explainGate } = useSettings();
@@ -97,29 +97,31 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
           onChange={(e) => update((cur) => ({ explanations: setAt(cur.explanations, current, e.target.value, "") }))}
           placeholder="고치기 전에 내 생각을 먼저 적어 보세요"
         />
-        <div className="flex items-center gap-3">
-          <Button
-            variant={saved ? "outline" : "default"}
-            disabled={!filled(explanation)}
-            onClick={() => update((cur) => ({ saved: setAt(cur.saved, current, true, false) }))}
-          >
-            <Save className="size-4" />설명 저장
-          </Button>
-          {saved && <span className="text-sm text-muted-foreground">저장했어요. 이제 아래에서 고쳐 보세요</span>}
-        </div>
+        {!readOnly && (
+          <div className="flex items-center gap-3">
+            <Button
+              variant={saved ? "outline" : "default"}
+              disabled={!filled(explanation)}
+              onClick={() => update((cur) => ({ saved: setAt(cur.saved, current, true, false) }))}
+            >
+              <Save className="size-4" />설명 저장
+            </Button>
+            {saved && <span className="text-sm text-muted-foreground">저장했어요. 이제 아래에서 고쳐 보세요</span>}
+          </div>
+        )}
         <AiCheck
           key={`ai-${current}`}
           label="질문 3개만 받기"
           questionsOnly
           disabled={!filled(explanation)}
           disabledTitle="내 생각을 먼저 적어 보세요"
-          buildMessage={() => debugMessage({ code: symptom.code, symptom: symptom.title, explanation })}
+          ask={(ai) => ai.debug({ code: symptom.code, symptom: symptom.title, explanation })}
           review={d.ai?.[current]}
           onReview={(ai) => update((cur) => ({ ai: setAt(cur.ai, current, ai, null) }))}
         />
       </section>
 
-      {!saved ? (
+      {!saved && !readOnly ? (
         <div className="flex min-h-40 flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-muted-foreground" data-testid="editor-locked">
           <Lock className="size-5" />
           설명을 저장하면 편집기가 열려요
@@ -163,7 +165,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode }: StepPr
 
       {teacherMode && step.answerCode && (
         <Button asChild variant="outline" size="sm">
-          <Link to={`/lab?code=${chapter.id}/${step.answerCode}`}>정답 코드 열기 ({step.answerCode})</Link>
+          <HostLink to={withQuery(nav.href.lab(), { code: `${chapter.id}/${step.answerCode}` })}>정답 코드 열기 ({step.answerCode})</HostLink>
         </Button>
       )}
     </div>

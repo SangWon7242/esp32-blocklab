@@ -42,6 +42,8 @@ test("실행 단계: 지정 코드가 실려 있고, 가짜 보드에서 실행�
   await expect(page.getByTestId("code-panel")).toContainText("def get_distance():");
   // 트랙에서는 보드에 저장하지 않는다
   await expect(button(page, "보드에 저장")).toHaveCount(0);
+  // 체험판에는 「작품으로 저장」도 없다 (호스트 onSaveProject 없음, lib-v1.0.3)
+  await expect(page.getByTestId("save-project-button")).toHaveCount(0);
   await expect(button(page, "완료")).toBeDisabled();
 
   await button(page, "보드 연결").click();

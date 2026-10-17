@@ -5,6 +5,7 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirro
 import { python } from "@codemirror/lang-python";
 import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirror/language";
 import { cn } from "@/lib/utils";
+import { codeFontSize, CODE_FONT_FAMILY, CODE_FONT_SIZE_DEFAULT, CODE_FONT_SIZE_VAR, CODE_LINE_HEIGHT, useCodeFontSize } from "@/host/codeFontSize";
 import { createEchoGuard } from "./echoGuard";
 
 type Props = {
@@ -59,8 +60,10 @@ const errorLineField = StateField.define<DecorationSet>({
 });
 
 const theme = EditorView.theme({
-  "&": { height: "100%", fontSize: "13px" },
-  ".cm-scroller": { fontFamily: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace', lineHeight: "1.6" },
+  // 글자 크기는 .blocklab 루트의 CSS 변수 (학생이 고른 값, src/host/codeFontSize.ts). 줄 번호 칸도 같은 크기·줄 높이를 따른다
+  "&": { height: "100%", fontSize: `var(${CODE_FONT_SIZE_VAR}, ${CODE_FONT_SIZE_DEFAULT}px)` },
+  // 글꼴은 D2Coding (index.css @font-face). 리가처는 끈다 (학생이 != 를 한 글자로 잘못 읽지 않게)
+  ".cm-scroller": { fontFamily: CODE_FONT_FAMILY, lineHeight: String(CODE_LINE_HEIGHT), fontVariantLigatures: "none", fontFeatureSettings: '"liga" 0, "calt" 0' },
   ".cm-error-line": { backgroundColor: "rgba(239, 68, 68, 0.12)" },
   ".cm-lint-info": { backgroundColor: "rgba(148, 163, 184, 0.12)" },
   ".cm-lint-warning": { backgroundColor: "rgba(245, 158, 11, 0.12)" },
@@ -71,10 +74,14 @@ const theme = EditorView.theme({
   "&.cm-focused": { outline: "none" },
 });
 
+/** 학생이 고른 글자 크기 (px). 기본 테마의 CSS 변수보다 앞선다 */
+const fontSizeTheme = (px: number) => EditorView.theme({ "&": { fontSize: `${px}px` } });
+
 export function CodePanel({ value, readOnly, onChange, errorLine = null, highlightLines = NO_HIGHLIGHTS, onLineClick, className }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyComp = useRef(new Compartment());
+  const fontSizeComp = useRef(new Compartment());
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const onLineClickRef = useRef(onLineClick);
@@ -103,7 +110,7 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
       highlightActiveLine(), history(), python(), indentUnit.of("    "),
       syntaxHighlighting(defaultHighlightStyle), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       readOnlyComp.current.of(EditorState.readOnly.of(readOnly)),
-      errorLineField, highlightField, theme,
+      errorLineField, highlightField, theme, fontSizeComp.current.of(fontSizeTheme(codeFontSize())),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged || applyingRef.current) return;
         const text = u.state.doc.toString();
@@ -146,6 +153,13 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
   useEffect(() => {
     viewRef.current?.dispatch({ effects: setHighlights.of(highlightLines) });
   }, [highlightLines, value]);
+
+  // 글자 크기를 바꾸면 크기 테마를 바꿔 끼운다. CSS 변수만 바뀌면 편집기가 줄 높이를 다시 재지 않아 줄 번호가 어긋난다
+  // (테마가 바뀌면 CodeMirror 가 줄 높이·글자 폭을 다시 잰다)
+  const fontSize = useCodeFontSize();
+  useEffect(() => {
+    viewRef.current?.dispatch({ effects: fontSizeComp.current.reconfigure(fontSizeTheme(fontSize)) });
+  }, [fontSize]);
 
   // 새로 강조한 줄이 화면 밖이면 보이게 스크롤한다
   const firstFocus = highlightLines.find((h) => h.kind === "focus")?.line ?? null;
