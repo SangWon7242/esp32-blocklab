@@ -80,7 +80,8 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
     <div
       className={cn(
         "overflow-hidden rounded-lg border",
-        compact ? "h-[420px]" : "h-[min(640px,70vh)] min-h-[440px]",
+        // 쌓인 배치(태블릿 세로 md)는 터치로 블록을 끌 자리가 넉넉하게 화면 높이의 72%까지 (lib-v1.0.6)
+        compact ? "h-[420px]" : "h-[min(640px,70vh)] min-h-[440px] md:h-[min(800px,72vh)]",
         // 남은 높이를 채운다(최소 440px). contain:size — 편집기 속 내용 크기가 활동 칸 높이를 밀어 올리지 않게
         fill && "lg:h-0 lg:min-h-[440px] lg:flex-1 lg:[contain:size]",
       )}

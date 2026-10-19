@@ -119,7 +119,7 @@ const coreBytes = [...coreReached].reduce((a, f) => a + statSync(path.join(dist,
 
 const core = await import(pathToFileURL(coreJs).href);
 assert.equal(core.LIB_VERSION, pkg.version);
-const CORE_FUNCTIONS = ["loadChapters", "getChapter", "judge", "codeToBlocks", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "allSteps", "stepStates", "emptyProgress", "parseProgress", "chaptersInTrack", "isTrackId", "reflectMessage", "debugMessage", "parseReview", "savedPrograms", "isJudgedStep", "isSkipped", "hasRun"];
+const CORE_FUNCTIONS = ["loadChapters", "getChapter", "judge", "codeToBlocks", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "allSteps", "stepStates", "emptyProgress", "parseProgress", "chaptersInTrack", "isTrackId", "reflectMessage", "debugMessage", "parseReview", "savedPrograms", "isJudgedStep", "isSkipped", "hasRun", "searchChapters", "buildChapterSearchIndex", "matchChapter", "chapterDevices"];
 for (const name of CORE_FUNCTIONS) {
   assert.equal(typeof core[name], "function", `core.${name} 이 함수가 아니에요`);
   assert.equal(lib[name], core[name], `index.${name} 과 core.${name} 이 같은 함수가 아니에요 (조각 공유가 깨짐)`);
@@ -134,6 +134,11 @@ assert.ok(Array.isArray(core.TRACKS) && core.TRACK_NAME.sensor, "TRACKS·TRACK_N
 for (const name of ["BlocklabProvider", "SubmitCard", "ChapterView", "LocalProgressStore", "loadBlockTools", "setBlocklyMediaPath"]) {
   assert.equal(core[name], undefined, `core 가 화면·브라우저 API ${name} 을 내보내요`);
 }
+// lib-v1.0.6: 챕터 찾기 (순수 — 서버에서도)
+const found = core.searchChapters(core.loadChapters(), "초음파");
+assert.equal(found[0]?.id, "17-ultrasonic", "searchChapters(\"초음파\") 첫 결과가 17-ultrasonic 이 아니에요");
+assert.ok(found[0].matchedIn.includes("제목") && found[0].snippets.length > 0, "찾기 결과에 matchedIn·snippets 가 없어요");
+assert.equal(core.searchChapters(core.buildChapterSearchIndex(core.loadChapters()), "ㅊㅇㅍ")[0]?.id, "17-ultrasonic");
 const coreLed = core.getChapter("01-led");
 const coreSummary = core.judgeSnapshot(coreLed, core.chapterSnapshot(progress, coreLed.id));
 assert.equal(coreSummary.passed, coreSummary.missions);

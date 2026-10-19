@@ -79,7 +79,7 @@ export function AiReviewCard({ review, questionsOnly }: { review: SavedAiReview;
             {review.questions.map((q, i) => <li key={i}>{q}</li>)}
           </ol>
         </div>
-        <p className="text-xs text-muted-foreground">AI 는 틀릴 수 있어요. 답은 직접 코드와 보드로 확인해 보세요.</p>
+        <p className="text-sm text-muted-foreground">AI 는 틀릴 수 있어요. 답은 직접 코드와 보드로 확인해 보세요.</p>
       </CardContent>
     </Card>
   );

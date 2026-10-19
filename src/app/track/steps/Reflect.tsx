@@ -50,7 +50,7 @@ export function Reflect({ step, chapter, input, onInput }: StepProps<"reflect">)
         <div className="grid flex-1 auto-rows-fr grid-cols-1 gap-4 @lg:grid-cols-2">
           {step.prompts.map((p, i) => (
             <div key={i} className="flex flex-col gap-2 rounded-xl border bg-card p-4">
-              <Label htmlFor={`prompt-${i}`} className="leading-snug">{i + 1}. {p}</Label>
+              <Label htmlFor={`prompt-${i}`} className="text-base leading-snug break-keep md:text-md">{i + 1}. {p}</Label>
               <Textarea
                 id={`prompt-${i}`}
                 value={prompts[i] ?? ""}

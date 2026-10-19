@@ -17,9 +17,12 @@ type Props = {
   captionClassName?: string;
   /** 눌러서 크게 보기 (좁은 칸에서는 그림 속 글자가 작아진다) */
   zoomable?: boolean;
+  /** 그림을 figure 높이에 맞춘다 (className 에 높이를 준다, 예: h-40). 비율은 그대로, 가운데 정렬 — lib-v1.0.6 목록 카드 표지 */
+  fit?: boolean;
 };
 
 const SVG_BOX = "[&>svg]:block [&>svg]:h-auto [&>svg]:w-full [&>svg]:max-w-full";
+const SVG_FIT = "h-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full";
 
 /** SVG 의 <title> 글 (크게 보기 창의 제목) */
 function svgTitle(svg: string): string | undefined {
@@ -32,13 +35,13 @@ function svgTitle(svg: string): string | undefined {
  * 우리 파일만 쓰지만 script·on* 처리기는 한 번 더 거른 뒤 넣는다.
  * zoomable 이면 그림을 누를 때 큰 창(Dialog)에 같은 그림을 크게 보여 준다.
  */
-export function Illustration({ chapterId, image, caption, className, captionClassName, zoomable }: Props) {
+export function Illustration({ chapterId, image, caption, className, captionClassName, zoomable, fit }: Props) {
   const svg = useMemo(() => {
     const raw = chapterImage(chapterId, image);
     return raw ? sanitizeSvg(raw) : undefined;
   }, [chapterId, image]);
   if (!svg) return null;
-  const picture = <div className={SVG_BOX} dangerouslySetInnerHTML={{ __html: svg }} />;
+  const picture = <div className={fit ? SVG_FIT : SVG_BOX} dangerouslySetInnerHTML={{ __html: svg }} />;
   return (
     <figure className={cn("text-foreground", className)} data-testid="illustration" data-image={image}>
       {zoomable ? (
@@ -71,7 +74,7 @@ export function Illustration({ chapterId, image, caption, className, captionClas
       ) : (
         picture
       )}
-      {caption && <figcaption className={cn("mt-2 text-xs text-muted-foreground", captionClassName)}>{caption}</figcaption>}
+      {caption && <figcaption className={cn("mt-2 text-sm text-muted-foreground", captionClassName)}>{caption}</figcaption>}
     </figure>
   );
 }

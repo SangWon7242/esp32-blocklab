@@ -20,7 +20,7 @@ export function Predict({ step, chapter, input, onInput }: StepProps<"predict">)
         <ol className="space-y-3">
           {step.blanks.map((b, i) => (
             <li key={i} className="space-y-2 rounded-xl border bg-card p-4">
-              <Label htmlFor={`blank-${i}`} className="leading-snug">{i + 1}. {b.q}</Label>
+              <Label htmlFor={`blank-${i}`} className="text-base leading-snug break-keep md:text-md">{i + 1}. {b.q}</Label>
               <div className="flex items-center gap-2">
                 <Input id={`blank-${i}`} value={answers[i] ?? ""} onChange={(e) => set(i, e.target.value)} placeholder="내 예상" />
                 {b.unit && <span className="shrink-0 text-sm text-muted-foreground">{b.unit}</span>}

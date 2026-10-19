@@ -69,7 +69,7 @@ export function CodeNotesPanel({ notes, selected, onSelect, defaultOpen = false,
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-2 px-3 pt-1 pb-3">
-        <p className="text-xs text-muted-foreground">설명을 누르면 코드에서 그 줄이 표시돼요</p>
+        <p className="text-sm text-muted-foreground">설명을 누르면 코드에서 그 줄이 표시돼요</p>
         {children ? (
           <div className="grid min-w-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] @2xl:items-start">
             {children}

@@ -58,7 +58,7 @@ export function SubmitCardView({ status, submittedAt, onSubmit }: ViewProps) {
             <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
             <span>
               {SUBMIT_TEXT.done}
-              {submittedAt && <span className="ml-2 text-xs text-muted-foreground">{clock(submittedAt)}</span>}
+              {submittedAt && <span className="ml-2 text-sm text-muted-foreground">{clock(submittedAt)}</span>}
             </span>
           </p>
         ) : status === "failed" ? (

@@ -80,7 +80,7 @@ export function AppStep({ step, input, onInput, teacherMode, attempts, readOnly 
             const examples = step.design[b.key];
             return (
               <div key={b.key} className="flex flex-col gap-2">
-                <Label htmlFor={`app-${b.key}`} className="flex items-center gap-2"><Icon className="size-4 text-primary" />{b.label}</Label>
+                <Label htmlFor={`app-${b.key}`} className="flex items-center gap-2 text-base md:text-md"><Icon className="size-4 text-primary" />{b.label}</Label>
                 <Textarea
                   id={`app-${b.key}`}
                   value={design[b.key] ?? ""}
@@ -88,7 +88,7 @@ export function AppStep({ step, input, onInput, teacherMode, attempts, readOnly 
                   placeholder={examples.length ? `예:\n${examples.join("\n")}` : b.help}
                   className="min-h-28 resize-y"
                 />
-                <p className="text-xs text-muted-foreground">{b.help}</p>
+                <p className="text-sm text-muted-foreground">{b.help}</p>
               </div>
             );
           })}
@@ -141,9 +141,9 @@ export function AppStep({ step, input, onInput, teacherMode, attempts, readOnly 
               <ShieldCheck className="size-4" />검사
             </Button>
           )}
-          <span className={cn("text-xs", bytes > opts.maxBytes ? "text-destructive" : "text-muted-foreground")}>{bytes} / {opts.maxBytes} 바이트</span>
+          <span className={cn("text-sm", bytes > opts.maxBytes ? "text-destructive" : "text-muted-foreground")}>{bytes} / {opts.maxBytes} 바이트</span>
           {!checked && a.checkedHtml && html.trim() && <span className="text-sm text-muted-foreground">글이 바뀌었어요. 다시 검사하세요</span>}
-          {attempts > 0 && <span className="text-xs text-muted-foreground">시도 {attempts}번</span>}
+          {attempts > 0 && <span className="text-sm text-muted-foreground">시도 {attempts}번</span>}
         </div>
         {checks && (
           <ul className="space-y-2" data-testid="app-check">
@@ -221,7 +221,7 @@ function BoardAndPreview({ html, saved, onSaved }: { html: string; saved: boolea
       </div>
       {preview && (
         <div className="space-y-2">
-          <p className="flex items-start gap-1 text-xs text-muted-foreground"><MonitorSmartphone className="size-4 shrink-0" />미리 보기는 모양만 보여 줘요. 값 읽기와 버튼은 보드에 저장한 뒤 폰에서 확인하세요.</p>
+          <p className="flex items-start gap-1 text-sm text-muted-foreground"><MonitorSmartphone className="size-4 shrink-0" />미리 보기는 모양만 보여 줘요. 값 읽기와 버튼은 보드에 저장한 뒤 폰에서 확인하세요.</p>
           {/* sandbox="" : 스크립트·폼·요청을 모두 막는다 (붙여 넣은 HTML 이 이 사이트에서 돌지 않게) */}
           <iframe
             title="앱 미리 보기"
@@ -273,7 +273,7 @@ function AppReadCheck({ questions, input, update, teacherMode, readOnly }: ReadC
               className={cn("space-y-2 rounded-xl border bg-card p-4", result === true && "border-primary/50", result === false && "border-destructive/50")}
               data-testid={`app-readcheck-q-${i}`}
             >
-              <Label htmlFor={q.kind === "text" ? id : undefined} className="leading-snug">{i + 1}. {q.q}</Label>
+              <Label htmlFor={q.kind === "text" ? id : undefined} className="text-base leading-snug break-keep md:text-md">{i + 1}. {q.q}</Label>
               {q.kind === "choice" ? (
                 <RadioGroup value={answers[i] ?? ""} onValueChange={(v) => setAnswer(i, v)} aria-label={q.q}>
                   {q.options.map((opt, k) => (
@@ -297,8 +297,8 @@ function AppReadCheck({ questions, input, update, teacherMode, readOnly }: ReadC
                   {q.hint && <p className="mt-1 text-muted-foreground">힌트: {q.hint}</p>}
                 </div>
               )}
-              {teacherMode && q.kind === "choice" && <p className="text-xs text-muted-foreground">정답(교사 모드): {q.options[q.answer]}</p>}
-              {teacherMode && q.kind === "text" && <p className="text-xs text-muted-foreground">교사 확인 문항(채점하지 않음)</p>}
+              {teacherMode && q.kind === "choice" && <p className="text-sm text-muted-foreground">정답(교사 모드): {q.options[q.answer]}</p>}
+              {teacherMode && q.kind === "text" && <p className="text-sm text-muted-foreground">교사 확인 문항(채점하지 않음)</p>}
             </li>
           );
         })}

@@ -41,7 +41,7 @@ export function Analysis({ step, chapter, input, onInput, teacherMode, readOnly 
       <div className="grid flex-1 grid-cols-1 gap-4 @lg:grid-cols-3">
         {BOXES.map((b, i) => (
           <div key={b.key} className="flex flex-col gap-2">
-            <Label htmlFor={`box-${b.key}`} className="flex items-center gap-2">
+            <Label htmlFor={`box-${b.key}`} className="flex items-center gap-2 text-base md:text-md">
               <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-semibold" aria-hidden>{i + 1}</span>
               {b.label}
             </Label>
@@ -67,7 +67,7 @@ export function Analysis({ step, chapter, input, onInput, teacherMode, readOnly 
 
       {showAnswer && (
         <section className="rounded-lg border bg-muted/40 p-4" data-testid="analysis-answer">
-          <h3 className="font-semibold">예시 답 {teacherMode && !a.revealed && <span className="text-xs font-normal text-muted-foreground">(교사 모드)</span>}</h3>
+          <h3 className="font-semibold">예시 답 {teacherMode && !a.revealed && <span className="text-sm font-normal text-muted-foreground">(교사 모드)</span>}</h3>
           <p className="mt-1 text-sm text-muted-foreground">내 답에도 있는 항목에 체크해 보세요. 빠진 것이 있다면 내 칸에 덧붙여도 좋아요.</p>
           <div className="mt-3 grid gap-4 @lg:grid-cols-3">
             {BOXES.map((b) => (
@@ -84,7 +84,7 @@ export function Analysis({ step, chapter, input, onInput, teacherMode, readOnly 
                           onCheckedChange={(v) => onInput({ ...a, matched: { ...matched, [id]: v === true } })}
                           className="mt-0.5"
                         />
-                        <Label htmlFor={`match-${id}`} className="font-normal leading-snug">{item}</Label>
+                        <Label htmlFor={`match-${id}`} className="text-base font-normal leading-snug md:text-md">{item}</Label>
                       </li>
                     );
                   })}

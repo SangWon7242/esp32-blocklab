@@ -14,6 +14,25 @@ export { codeToBlocks } from "@/parser";
 export { emptyProgress, parseProgress, type Progress, type ProgressStore, type StepRecord } from "@/track/progress";
 export type { Chapter, Step, StepType, TrackId } from "@/track/schema";
 export { TRACKS, TRACK_NAME, chaptersInTrack, isTrackId } from "@/track/tracks";
+/* 챕터 찾기 (lib-v1.0.6): 제목·번호·장치·준비물·단계·원리… 한글 공백 무시·AND·초성, 맞은 자리와 강조 조각 */
+export {
+  DEVICE_TERMS,
+  FIELD_ORDER as SEARCH_FIELD_ORDER,
+  buildChapterSearchIndex,
+  chapterDevices,
+  chosungOf,
+  matchChapter,
+  normalizeSearchText,
+  parseSearchQuery,
+  searchChapters,
+  type ChapterSearchEntry,
+  type ChapterSearchField,
+  type ChapterSearchHit,
+  type ChapterSearchIndex,
+  type ChapterSearchSnippet,
+  type SearchSnippetPart,
+  type SearchableChapter,
+} from "@/track/search";
 
 /* 제출 스냅숏·글 답·다시 판정 (허브 서버가 judgeSnapshot 으로 결과를 다시 계산한다) */
 export {

@@ -141,6 +141,23 @@
     --sidebar-ring: var(--host-sidebar-ring, oklch(0.556 0 0));
 }
 
+/*
+ * 글자 크기 체계 (lib-v1.0.6). 이름은 Tailwind 크기 이름(xs·sm·md…)을 써서 cn() 이 글자색(text-muted-foreground 등)과 섞지 않게 한다.
+ *   text-xs   13px — 아주 작은 표시(배지·시간). 12px 이하는 쓰지 않는다 (Tailwind 기본 12px 을 덮어씀)
+ *   text-sm   14px — 보조 글(메타·캡션)
+ *   text-base 16px — 본문 (leading-relaxed 1.625 와 함께)
+ *   text-md   17px — 학생 안내 글·카드 제목 (줄 높이 1.7). 폰에서는 text-base
+ *   text-xl   20px — 구역 제목(h2) · text-2xl/3xl 24/30px — 화면 제목(h1, 폰/태블릿 이상)
+ *   max-w-measure — 안내 글 한 줄 최대 폭 44rem (17px 기준 한글 약 45~50자, 공백 포함 70자 안쪽)
+ */
+@theme inline {
+    --text-xs: 0.8125rem;
+    --text-xs--line-height: 1.4;
+    --text-md: 1.0625rem;
+    --text-md--line-height: 1.7;
+    --container-measure: 44rem;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

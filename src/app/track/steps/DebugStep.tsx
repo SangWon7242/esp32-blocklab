@@ -88,7 +88,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly
       </section>
 
       <section className="space-y-2">
-        <Label htmlFor={`explain-${current}`}>왜 이런 증상일까?</Label>
+        <Label htmlFor={`explain-${current}`} className="text-base md:text-md">왜 이런 증상일까?</Label>
         <Textarea
           id={`explain-${current}`}
           key={current}

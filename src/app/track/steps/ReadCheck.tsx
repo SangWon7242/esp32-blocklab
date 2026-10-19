@@ -77,7 +77,7 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
                 )}
                 data-testid={`readcheck-q-${i}`}
               >
-                <Label htmlFor={q.kind === "number" ? id : undefined} className="leading-snug">{i + 1}. {q.q}</Label>
+                <Label htmlFor={q.kind === "number" ? id : undefined} className="text-base leading-snug break-keep md:text-md">{i + 1}. {q.q}</Label>
                 {q.kind === "number" && (
                   <Input id={id} inputMode="decimal" className="max-w-40" value={answers[i] ?? ""} onChange={(e) => setAnswer(i, e.target.value)} placeholder="숫자" />
                 )}
@@ -112,7 +112,7 @@ export function ReadCheck({ step, chapter, input, onInput, teacherMode, attempts
                     {q.hint && <p className="mt-1 text-muted-foreground">힌트: {q.hint}</p>}
                   </div>
                 )}
-                {teacherMode && <p className="text-xs text-muted-foreground">정답(교사 모드): {answerText(q)}</p>}
+                {teacherMode && <p className="text-sm text-muted-foreground">정답(교사 모드): {answerText(q)}</p>}
               </li>
             );
           })}

@@ -111,7 +111,9 @@ try {
   emptyProgress, parseProgress, TRACKS, TRACK_NAME, chaptersInTrack, isTrackId,
   SYSTEM_PROMPT, reflectMessage, debugMessage, parseReview, savedPrograms, isJudgedStep, isSkipped, hasRun,
   NOTE_SKIPPED, NOTE_NO_PROGRAM, NOTE_OUTPUT_RULES, NOTE_SCREEN_PASSED, NOTE_SCREEN_FAILED, EXPLAIN_MEMO_PROMPT, LIB_VERSION,
+  searchChapters, buildChapterSearchIndex, matchChapter,
 } from "@blocklab/core";
+import type { ChapterSearchHit, ChapterSearchField } from "@blocklab/core";
 import type {
   LoadedChapter, ChapterSnapshot, TextAnswer, JudgeSummary, JudgeStepSummary, JudgeSnapshotOptions,
   Progress, ProgressStore, StepRecord, Chapter, Step, StepType, TrackId, AiReview, ReflectRequest, DebugRequest, SavedProgram,
@@ -138,7 +140,15 @@ judgeSnapshot(chapter!, { chapterId: 1 });
 const track: TrackId = "fusion";
 // @ts-expect-error 없는 트랙
 const badTrack: TrackId = "nope";
-export { types, values, notes, badNote, summary, passed, track, badTrack };
+// lib-v1.0.6: 챕터 찾기 — 결과의 chapter 는 넘긴 챕터 타입(LoadedChapter) 그대로
+const hits: ChapterSearchHit<LoadedChapter>[] = searchChapters(loadChapters(), "초음파");
+const hitFiles: Record<string, string> | undefined = hits[0]?.chapter.files;
+const field: ChapterSearchField | undefined = hits[0]?.matchedIn[0];
+const one = matchChapter(buildChapterSearchIndex(loadChapters()).entries[0], "LED");
+const snippetText: string | undefined = one?.snippets[0]?.parts.map((p) => (p.match ? p.text : "")).join("");
+// @ts-expect-error 없는 자리 이름
+const badField: ChapterSearchField = "nope";
+export { types, values, notes, badNote, summary, passed, track, badTrack, hitFiles, field, snippetText, badField };
 `,
   );
   tscIn(bare, "core.d.ts, zod·React 없는 폴더");

@@ -40,7 +40,10 @@ import type { StepProps } from "./steps/types";
 export const LOCKED_MESSAGE = "앞 단계를 먼저 끝내 주세요";
 
 /**
- * 단계 화면 — 왼쪽 안내, 오른쪽 활동, 위 진행, 아래 이전·완료·다음.
+ * 단계 화면 — 안내 칸 + 활동 칸, 진행 줄, 이전·완료·다음 줄.
+ * 배치 (lib-v1.0.6): lg(≥1024, 태블릿 가로·노트북) 두 칸 — 안내 칸 폭 clamp(320px, 34%, 520px), 나머지는 활동 칸, 칸마다 따로 스크롤.
+ * md(768~1023, 태블릿 세로) 이하는 안내 → 활동으로 쌓고 화면 전체가 스크롤된다. 안내 칸 접기는 md 이상에서 쓸 수 있다
+ * (태블릿 세로에서 접으면 편집기가 바로 위에 온다).
  * 열람(review) 모드는 호스트가 넘긴 학생 기록을 저장 없이 보여 준다: 모든 단계 열림, 입력·판정·저장·AI·완료 숨김.
  */
 export function StepPage({ chapterId, stepId }: { chapterId: string; stepId: string }) {
@@ -158,15 +161,15 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
 
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
-      <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
-        <Button variant="ghost" size="sm" asChild>
+      <div className="flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-2 whitespace-nowrap sm:gap-3 sm:px-3">
+        <Button variant="ghost" asChild className="h-11 px-3 text-sm">
           <HostLink to={nav.href.chapter(chapter.id)}><ArrowLeft className="size-4" /><span className="hidden sm:inline">{chapter.title}</span><span className="sm:hidden">단계 목록</span></HostLink>
         </Button>
         {readOnly && <ReviewBadge />}
         <Button
           variant="ghost"
           size="icon"
-          className="hidden lg:inline-flex"
+          className="hidden size-11 md:inline-flex"
           onClick={() => setGuideCollapsed(!guideCollapsed)}
           aria-controls="step-guide"
           aria-expanded={!guideCollapsed}
@@ -177,7 +180,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
           {guideCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
         </Button>
         {/* 안내 칸을 접으면 제목을 위 줄에 남긴다 */}
-        {guideCollapsed && <span className="hidden min-w-0 truncate text-sm font-medium lg:block">{step.title}</span>}
+        {guideCollapsed && <span className="hidden min-w-0 truncate text-base font-medium md:block">{step.title}</span>}
         <div className="ml-auto flex w-40 items-center gap-2 text-sm text-muted-foreground sm:w-64">
           <Progress value={(doneCount / steps.length) * 100} className="h-2" aria-label="챕터 진행률" />
           <span className="shrink-0" data-testid="step-position">{index + 1} / {steps.length}</span>
@@ -187,19 +190,19 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
       <div
         className={cn(
           "min-h-0 flex-1 overflow-y-auto lg:grid lg:overflow-hidden",
-          guideCollapsed ? "lg:grid-cols-1" : "lg:grid-cols-[minmax(320px,2fr)_minmax(0,3fr)]",
+          guideCollapsed ? "lg:grid-cols-1" : "lg:grid-cols-[clamp(320px,34%,520px)_minmax(0,1fr)]",
         )}
       >
         <aside
           id="step-guide"
           aria-label="안내"
           data-testid="step-guide"
-          className={cn("border-b p-4 sm:p-6 lg:overflow-y-auto lg:border-r lg:border-b-0", guideCollapsed && "lg:hidden")}
+          className={cn("border-b p-4 sm:p-6 lg:overflow-y-auto lg:border-r lg:border-b-0", guideCollapsed && "md:hidden")}
         >
           <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} awaiting={awaiting} />
         </aside>
-        {/* 활동 칸: 세로로 꽉 차게 (편집기·입력 칸이 남는 높이를 채운다). 칸 폭에 따라 안쪽 배치가 바뀐다(@container) */}
-        <section className="@container flex min-h-0 flex-col p-4 sm:p-6 lg:overflow-y-auto" aria-label="활동" data-testid="step-activity">
+        {/* 활동 칸 (기본 글자 16 → md 17px, lib-v1.0.6): 세로로 꽉 차게 (편집기·입력 칸이 남는 높이를 채운다). 칸 폭에 따라 안쪽 배치가 바뀐다(@container) */}
+        <section className="@container flex min-h-0 flex-col p-4 text-base sm:p-6 md:text-md lg:overflow-y-auto" aria-label="활동" data-testid="step-activity">
           {readOnly ? (
             // 열람 모드: 안의 입력·버튼을 모두 끈다 (display:contents 로 배치는 그대로)
             <fieldset disabled className="min-w-0 border-0 p-0 [display:contents]" data-testid="review-activity">
@@ -211,7 +214,8 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
         </section>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 border-t px-3 py-2">
+      {/* 이전·완료·다음: 터치 대상 44px (h-11) */}
+      <div className="flex shrink-0 items-center gap-2 border-t px-3 py-2 [&_[data-slot=button]]:h-11 [&_[data-slot=button]]:px-4 [&_[data-slot=button]]:text-base">
         {prev ? (
           <Button variant="outline" asChild><HostLink to={nav.href.step(chapter.id, prev.id)}><ArrowLeft className="size-4" />이전</HostLink></Button>
         ) : (
@@ -219,7 +223,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
         )}
         <div className="ml-auto flex items-center gap-2">
           {done ? (
-            <span className="hidden items-center gap-1 text-sm text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
+            <span className="hidden items-center gap-1 text-base text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
           ) : readOnly ? (
             <span className="hidden items-center gap-1 text-sm text-muted-foreground sm:flex" data-testid="step-not-done">아직 끝내지 않은 단계예요</span>
           ) : (
@@ -255,21 +259,21 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   );
 }
 
-/** 왼쪽 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → 이렇게 되면 성공(run 의 expected) → (접힘) 부품과 배선 → 시간·완료 */
+/** 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → 이렇게 되면 성공(run 의 expected) → (접힘) 부품과 배선 → 시간·완료 */
 function StepGuide({
   chapter, step, partTitle, done, awaiting,
 }: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean; awaiting: boolean }) {
   const hasKit = Boolean(chapter.materials?.length || chapter.wiring);
   return (
     <>
-      {partTitle && <p className="text-xs text-muted-foreground">{partTitle}</p>}
+      {partTitle && <p className="text-sm text-muted-foreground">{partTitle}</p>}
       <div className="mt-1 flex flex-wrap items-center gap-2">
         <Badge variant="secondary"><StepTypeIcon type={step.type} />{STEP_TYPE_LABEL[step.type]}</Badge>
         {step.optional && <Badge variant="outline">선택</Badge>}
         {/* 설명 관문: 판정은 통과, 교사 확인만 남음 (좁은 화면에서도 보이는 자리) */}
         {awaiting && <Badge variant="outline" className="border-amber-500/40 text-amber-700 dark:text-amber-400"><Hourglass />확인 대기</Badge>}
       </div>
-      <h1 className="mt-3 text-xl font-bold">{step.title}</h1>
+      <h1 className="mt-3 text-xl leading-snug font-bold tracking-tight break-keep sm:text-2xl xl:text-3xl xl:leading-tight">{step.title}</h1>
 
       {/* 조건 분석의 세 칸 그림은 활동 칸에서 입력 칸 바로 위에 보인다 (두 번 그리지 않게) */}
       {step.scene && !(step.type === "analysis" && step.scene.image === ANALYSIS_IMAGE) && (
@@ -277,7 +281,7 @@ function StepGuide({
           chapterId={chapter.id}
           image={step.scene.image}
           caption={step.scene.caption}
-          className="mt-4 rounded-lg border bg-muted/30 p-3"
+          className="mt-4 max-w-xl rounded-lg border bg-muted/30 p-3"
           zoomable
         />
       )}
@@ -287,7 +291,7 @@ function StepGuide({
       {step.todo && (
         <Card size="sm" className="mt-4" data-testid="step-todo">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold"><ListChecks className="size-4 text-primary" />지금 할 일</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-md font-semibold group-data-[size=sm]/card:text-md"><ListChecks className="size-4 text-primary" />지금 할 일</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -297,7 +301,7 @@ function StepGuide({
                   <span
                     aria-hidden
                     className={cn(
-                      "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded border",
+                      "mt-1 flex size-4 shrink-0 items-center justify-center rounded border",
                       done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40",
                     )}
                   >
@@ -315,7 +319,7 @@ function StepGuide({
       {step.type === "run" && step.expected && (
         <Card size="sm" className="mt-4" data-testid="step-expected">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-semibold"><CircleCheck className="size-4 text-primary" />이렇게 되면 성공</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-md font-semibold group-data-[size=sm]/card:text-md"><CircleCheck className="size-4 text-primary" />이렇게 되면 성공</CardTitle>
           </CardHeader>
           <CardContent>
             <GuideBody text={step.expected} />
@@ -326,7 +330,7 @@ function StepGuide({
       {hasKit && (
         <Collapsible className="mt-4 rounded-lg border" data-testid="step-kit">
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="group w-full justify-start rounded-lg">
+            <Button variant="ghost" className="group h-11 w-full justify-start rounded-lg text-base">
               <Cable className="size-4" />부품과 배선
               <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-180" />
             </Button>
@@ -341,7 +345,7 @@ function StepGuide({
       )}
 
       {(step.minutes || done) && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           {step.minutes && <span className="flex items-center gap-1"><Clock className="size-3" />{step.minutes}분</span>}
           {done && <span className="flex items-center gap-1 text-primary"><CheckCircle2 className="size-3" />완료함</span>}
         </div>

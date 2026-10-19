@@ -38,7 +38,7 @@ export function Problem({ step, input, onInput }: StepProps<"problem">) {
                 >
                   {i + 1}
                 </span>
-                <Label htmlFor={`q-${i}`} className="pt-0.5 leading-snug">{q}</Label>
+                <Label htmlFor={`q-${i}`} className="pt-0.5 text-base leading-snug break-keep md:text-md">{q}</Label>
               </div>
               <Textarea
                 id={`q-${i}`}
