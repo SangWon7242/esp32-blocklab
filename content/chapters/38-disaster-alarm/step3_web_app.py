@@ -1,8 +1,7 @@
 from machine import Pin, PWM, ADC
 import time
 import dht
-import network
-import socket
+from blocklab_net import *
 
 flame = ADC(Pin(34))
 flame.atten(ADC.ATTN_11DB)
@@ -13,55 +12,6 @@ button = Pin(27, Pin.IN, Pin.PULL_UP)
 beeper = PWM(Pin(25))
 beeper.freq(440)
 beeper.duty(0)
-
-
-def wifi_connect(ssid, password):
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(ssid, password)
-    while not wlan.isconnected():
-        time.sleep(0.5)
-    print("IP:", wlan.ifconfig()[0])
-    return wlan.ifconfig()[0]
-
-
-def web_start(port):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", port))
-    s.listen(5)
-    return s
-
-
-def web_accept(s):
-    conn, addr = s.accept()
-    request = conn.recv(1024).decode()
-    line = request.split("\r\n")[0]
-    target = line.split(" ")[1] if " " in line else "/"
-    path, _, qs = target.partition("?")
-    query = {}
-    for part in qs.split("&"):
-        if "=" in part:
-            k, v = part.split("=", 1)
-            query[k] = v
-    return conn, path, query
-
-
-def web_send(conn, body, ctype="text/html"):
-    conn.send("HTTP/1.1 200 OK\r\n")
-    conn.send("Content-Type: " + ctype + "\r\n")
-    conn.send("Connection: close\r\n\r\n")
-    conn.sendall(body)
-    conn.close()
-
-
-def web_send_file(conn, name):
-    try:
-        f = open(name)
-        web_send(conn, f.read())
-        f.close()
-    except OSError:
-        web_send(conn, "<h1>" + name + " not found</h1>")
-
 
 ip = wifi_connect("MyWiFi", "12345678")
 server = web_start(80)

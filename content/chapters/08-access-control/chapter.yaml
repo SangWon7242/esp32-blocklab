@@ -98,7 +98,7 @@ parts:
         body: |
           RFID 리더는 카드가 가까이 오면 카드 안의 **번호(UID)** 를 읽어요. 보드와는 **선 두 개**(SCL·SDA)로 이야기하고, `0x28` 이라는 이름표로 "너한테 하는 말이야"를 구분해요.
 
-          아직 실행하지 마세요. `step1_read_uid.py` 를 돌리고 카드를 대면 창에 무엇이 찍힐지 **먼저 예측**해 적어요. `card_present()` 는 "카드가 왔고 번호까지 읽었는지", `card_uid()` 는 "읽은 번호"를 알려 주는 함수예요.
+          아직 실행하지 마세요. `step1_read_uid.py` 를 돌리고 카드를 대면 창에 무엇이 찍힐지 **먼저 예측**해 적어요. `card_present(rc522)` 는 "카드가 왔고 번호까지 읽었는지", `card_uid(rc522)` 는 "읽은 번호"를 알려 주는 함수예요. 이 함수들은 `blocklab_rfid` 라이브러리 안에 들어 있어서, 맨 위의 `from blocklab_rfid import *` 한 줄로 가져와 써요.
         todo:
           - 그림을 보고 SCL·SDA 가 각각 몇 번 핀인지 코드에서 찾기
           - 세 빈칸에 내 예측 쓰기
@@ -122,7 +122,7 @@ parts:
         body: |
           **USB 를 뺀 채로** RFID 모듈을 F-F 듀폰선 4가닥으로 보드에 바로 이어요. SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 가요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요.
 
-          RFID 는 혼자 말하지 못해서 **라이브러리 파일 3개**(`mfrc522_i2c.py` · `mfrc522_config.py` · `soft_iic.py`)가 보드에 있어야 해요. 실행하면 블록랩이 함께 올려 줘요.
+          RFID 는 혼자 말하지 못해서 **라이브러리 파일**(`mfrc522_i2c.py` · `mfrc522_config.py` · `soft_iic.py`, 그리고 카드 읽기 함수가 든 `blocklab_rfid.py`)이 보드에 있어야 해요. 실행하거나 보드에 저장하면 블록랩이 함께 올려 줘요.
 
           실행하고 카드를 대 보세요. 찍힌 숫자를 **공책에 꼭 적어 두세요.** 2부에서 "내 카드"로 등록할 번호예요.
         todo:
@@ -133,12 +133,11 @@ parts:
         expected: 코드를 실행하고 카드를 리더에 대면 창에 `Card UID:` 와 함께 `[180, 180, 170, 219]` 처럼 숫자 4개가 든 번호가 찍혀요. 카드마다 숫자가 달라요.
         codeNotes:
           - { line: 1, note: "RFID 라이브러리(`mfrc522_i2c.py`)에서 `mfrc522` 를 가져와요" }
-          - { line: 3, note: "SCL 22번 · SDA 21번 · 이름표 0x28 로 리더를 준비하고 `rc522` 라고 이름 붙여요" }
-          - { line: 4, note: "`PCD_Init()`: 리더를 켜고 카드를 읽을 준비를 해요" }
-          - { line: 8, note: "새 카드가 왔고(`and`) 번호까지 읽었을 때만 참을 돌려줘요" }
-          - { line: 12, note: "읽은 번호 4개를 목록으로 꺼내 돌려줘요" }
-          - { line: 16, note: "`if card_present():` 카드가 닿았을 때만 아래 두 줄을 실행해요" }
-          - { line: 18, note: "`print(card_uid())`: 읽은 번호를 창에 찍어요" }
+          - { line: 2, note: "`blocklab_rfid` 라이브러리의 `card_present` · `card_uid` 를 가져와요. 카드가 왔는지 보고, 읽은 번호 4개를 꺼내 주는 함수예요" }
+          - { line: 4, note: "SCL 22번 · SDA 21번 · 이름표 0x28 로 리더를 준비하고 `rc522` 라고 이름 붙여요" }
+          - { line: 5, note: "`PCD_Init()`: 리더를 켜고 카드를 읽을 준비를 해요" }
+          - { line: 8, note: "`if card_present(rc522):` 카드가 닿았을 때만 아래 두 줄을 실행해요" }
+          - { line: 10, note: "`print(card_uid(rc522))`: 읽은 번호를 창에 찍어요" }
 
       - id: readcheck1
         type: readcheck
@@ -158,14 +157,14 @@ parts:
         code: step1_read_uid.py
         codeNotes:
           - { line: 1, note: "RFID 라이브러리(`mfrc522_i2c.py`)에서 `mfrc522` 를 가져와요" }
-          - { line: 4, note: "`PCD_Init()`: 리더를 켜고 카드를 읽을 준비를 해요" }
-          - { line: 12, note: "읽은 번호 4개를 목록으로 꺼내 돌려줘요" }
-          - { line: 15, note: "`while True:` 아래를 끝없이 되풀이하며 카드가 오는지 계속 봐요" }
-          - { line: 16, note: "`if card_present():` 카드가 닿았을 때만 아래 줄들을 실행해요" }
+          - { line: 2, note: "카드를 읽는 함수 `card_present` · `card_uid` 를 `blocklab_rfid` 라이브러리에서 가져와요" }
+          - { line: 5, note: "`PCD_Init()`: 리더를 켜고 카드를 읽을 준비를 해요" }
+          - { line: 7, note: "`while True:` 아래를 끝없이 되풀이하며 카드가 오는지 계속 봐요" }
+          - { line: 8, note: "`if card_present(rc522):` 카드가 닿았을 때만 아래 줄들을 실행해요" }
         questions:
           - { kind: number, q: "RFID 의 데이터선(SDA)은 몇 번 핀에 이어야 하나요? 코드에서 찾아보세요", answer: 21, hint: "괄호 안 순서는 (SCL 핀, SDA 핀, 이름표)예요" }
-          - { kind: number, q: "card_present() 가 참이 되려면 and 로 묶은 확인 몇 가지를 모두 통과해야 하나요?", answer: 2, hint: "카드가 왔는지, 번호를 읽었는지" }
-          - { kind: line, q: "카드 번호를 창에 보여 주는 줄의 줄 번호를 클릭하세요", answer: 18 }
+          - { kind: number, q: "card_present(rc522) 가 참이 되려면 and 로 묶은 확인 몇 가지를 모두 통과해야 하나요?", answer: 2, hint: "카드가 왔는지, 번호를 읽었는지" }
+          - { kind: line, q: "카드 번호를 창에 보여 주는 줄의 줄 번호를 클릭하세요", answer: 10 }
 
       - id: run2
         type: run
@@ -213,14 +212,15 @@ parts:
         code: step3_access_control.py
         expected: 코드를 실행하고 내 카드를 대면 창에 번호가 찍히고 서보가 열린 자리로 가요. 등록하지 않은 카드를 대면 서보가 닫힌 자리로 가요.
         codeNotes:
-          - { line: 5, note: "4번 핀의 서보를 준비해요 (다음 줄: 1초에 50번 신호)" }
-          - { line: 7, note: "RFID 리더를 준비해요 (SCL 22번, SDA 21번, 이름표 0x28)" }
-          - { line: 19, note: "`uid1`: 들여보낼 내 카드 번호 4개를 목록으로 적어 둬요" }
-          - { line: 20, note: "처음에는 문을 닫아 둬요" }
-          - { line: 24, note: "`uid = card_uid()`: 읽은 번호를 `uid` 에 담아요" }
-          - { line: 26, note: "`==`: 읽은 번호와 등록한 번호의 숫자 4개가 모두 같은지 비교해요" }
-          - { line: 27, note: "같으면 문을 열어요" }
-          - { line: 30, note: "다르면 문을 닫아요" }
+          - { line: 4, note: "`blocklab_rfid` 라이브러리의 카드 읽기 함수(`card_present` · `card_uid`)를 가져와요" }
+          - { line: 6, note: "4번 핀의 서보를 준비해요 (다음 줄: 1초에 50번 신호)" }
+          - { line: 8, note: "RFID 리더를 준비해요 (SCL 22번, SDA 21번, 이름표 0x28)" }
+          - { line: 11, note: "`uid1`: 들여보낼 내 카드 번호 4개를 목록으로 적어 둬요" }
+          - { line: 12, note: "처음에는 문을 닫아 둬요" }
+          - { line: 16, note: "`uid = card_uid(rc522)`: 읽은 번호를 `uid` 에 담아요" }
+          - { line: 18, note: "`==`: 읽은 번호와 등록한 번호의 숫자 4개가 모두 같은지 비교해요" }
+          - { line: 19, note: "같으면 문을 열어요" }
+          - { line: 22, note: "다르면 문을 닫아요" }
 
       - id: readcheck2
         type: readcheck
@@ -238,14 +238,14 @@ parts:
           - 세 문제에 답하고 **확인** 누르기
         code: step3_access_control.py
         codeNotes:
-          - { line: 5, note: "4번 핀의 서보를 준비해요 (다음 줄: 1초에 50번 신호)" }
-          - { line: 7, note: "RFID 리더를 준비해요 (SCL 22번, SDA 21번, 이름표 0x28)" }
-          - { line: 19, note: "`uid1`: 들여보낼 내 카드 번호 4개를 목록으로 적어 둬요" }
-          - { line: 23, note: "카드가 닿았을 때만 아래 줄들을 실행해요" }
-          - { line: 24, note: "`uid = card_uid()`: 읽은 번호를 `uid` 에 담아요" }
-          - { line: 25, note: "읽은 번호를 창에 찍어 확인해요" }
+          - { line: 6, note: "4번 핀의 서보를 준비해요 (다음 줄: 1초에 50번 신호)" }
+          - { line: 8, note: "RFID 리더를 준비해요 (SCL 22번, SDA 21번, 이름표 0x28)" }
+          - { line: 11, note: "`uid1`: 들여보낼 내 카드 번호 4개를 목록으로 적어 둬요" }
+          - { line: 15, note: "카드가 닿았을 때만 아래 줄들을 실행해요" }
+          - { line: 16, note: "`uid = card_uid(rc522)`: 읽은 번호를 `uid` 에 담아요" }
+          - { line: 17, note: "읽은 번호를 창에 찍어 확인해요" }
         questions:
-          - { kind: line, q: "읽은 카드 번호와 등록한 번호를 비교하는 줄의 줄 번호를 클릭하세요", answer: 26 }
+          - { kind: line, q: "읽은 카드 번호와 등록한 번호를 비교하는 줄의 줄 번호를 클릭하세요", answer: 18 }
           - { kind: choice, q: "등록하지 않은 카드를 대면 서보는 어느 자리로 가나요?", options: ["열린 자리 (8100)", "닫힌 자리 (1638)", "어느 쪽으로도 신호를 보내지 않는다"], answer: 1 }
           - { kind: number, q: "등록된 카드를 대면 문을 연 뒤 몇 초 동안 기다렸다가 다음 카드를 보나요?", answer: 1 }
 
@@ -335,22 +335,14 @@ parts:
           - title: 카드를 대도 창에 아무것도 안 찍혀요
             code: |
               from mfrc522_i2c import mfrc522
+              from blocklab_rfid import *
 
               rc522 = mfrc522(21, 22, 0x28)
               rc522.PCD_Init()
 
-
-              def card_present():
-                  return rc522.PICC_IsNewCardPresent() and rc522.PICC_ReadCardSerial()
-
-
-              def card_uid():
-                  return rc522.uid.uidByte[0:rc522.uid.size]
-
-
               while True:
-                  if card_present():
-                      print(card_uid())
+                  if card_present(rc522):
+                      print(card_uid(rc522))
             question: 선 두 개가 실제로 몇 번 핀에 꽂혀 있는지, 코드의 번호와 짝지어 보세요. 괄호 안 순서는 (SCL 핀, SDA 핀, 이름표)예요. 신호선(SCL)과 데이터선(SDA) 중 무엇이 바뀌었나요?
             rules:
               - codeMatches: '^rc522 = mfrc522\(22, 21, 0x28\)'
@@ -387,7 +379,7 @@ parts:
         body: |
           진짜 출입문은 사람이 지나가면 **저절로 닫혀요.** 등록된 카드를 대면 문을 열고, 3초 뒤 저절로 닫는 출입문을 설계해요. 코드를 쓰기 전에 **우리말로 먼저!**
 
-          블록 **RFID 준비하기** 는 카드가 왔는지 보는 `card_present()` 와 번호를 꺼내는 `card_uid()` 를 함께 만들어 줘요. 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
+          카드가 왔는지 보는 `card_present(rc522)` 와 번호를 꺼내는 `card_uid(rc522)` 는 `blocklab_rfid` 라이브러리 안의 함수예요. 코드 맨 위에서 `from blocklab_rfid import *` 로 가져와요. 설계도의 빈칸을 채우고, 번역표를 본 뒤, 섞인 블록을 그 순서대로 이어 붙여요.
         todo:
           - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
           - 번역표에서 "목록에 있으면"이 어떤 코드인지 찾아보기
@@ -408,9 +400,9 @@ parts:
             blank: { answer: 닫는다 }
           - text: 0.1 초 쉬었다가 다시 본다
         translation:
-          - ["카드가 리더에 있는가", "card_present()"]
-          - ["카드 번호", "card_uid()"]
-          - ["목록 안에 있으면", "if card_uid() in allowed:"]
+          - ["카드가 리더에 있는가", "card_present(rc522)"]
+          - ["카드 번호", "card_uid(rc522)"]
+          - ["목록 안에 있으면", "if card_uid(rc522) in allowed:"]
           - ["문을 연다", "servo.duty_u16(8100)"]
           - ["문을 닫는다", "servo.duty_u16(1638)"]
           - ["기다린다", "time.sleep(초)"]

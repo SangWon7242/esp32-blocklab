@@ -198,7 +198,7 @@ parts:
           image: images/i2c-shared.svg
           caption: "OLED 와 RFID 는 SCL(22번) · SDA(21번) 두 선을 나눠 써요. 주소 0x3C 는 화면, 0x28 은 리더라서 서로 헷갈리지 않아요"
         body: |
-          이제 8장의 출입 통제 코드에 화면을 더해요. `step3_access_display.py` 에는 두 줄 안내를 띄우는 **함수** `show(a, b)` 가 있어요. `show("DENIED", "Unknown card")` 처럼 부르면 지우기 → 첫 줄 → 둘째 줄 → 보여 주기를 한 번에 해 줘요.
+          이제 8장의 출입 통제 코드에 화면을 더해요. `step3_access_display.py` 에는 두 줄 안내를 띄우는 **함수** `show(a, b)` 가 있어요. `show("DENIED", "Unknown card")` 처럼 부르면 지우기 → 첫 줄 → 둘째 줄 → 보여 주기를 한 번에 해 줘요. 카드를 읽는 `card_present(rc522)` · `card_uid(rc522)` 는 8장처럼 `from blocklab_rfid import *` 한 줄로 가져와 써요.
 
           USB 를 뺀 채 RFID 와 서보가 모두 꽂혀 있는지 확인해요. 실행하기 전에 `allowed` 의 네 숫자를 **8장에서 적은 내 카드 번호**로 바꾸고, 내 카드와 짝의 카드를 번갈아 대 보세요.
         todo:
@@ -208,14 +208,15 @@ parts:
         code: step3_access_display.py
         expected: 코드를 실행하면 화면에 `Tag your` / `card...` 가 떠요. 내 카드를 대면 `ACCESS OK` / `Door open` 이 뜨며 문이 열리고, 모르는 카드를 대면 `DENIED` / `Unknown card` 가 떠요. 잠시 뒤 다시 대기 화면으로 돌아가요.
         codeNotes:
-          - { line: 6, note: "OLED 가 쓸 두 선(SCL 22번, SDA 21번)을 준비해요" }
-          - { line: 11, note: "RFID 도 같은 22 · 21번 선을 써요. 이름표 0x28 로 OLED 와 구분해요" }
-          - { line: 23, note: "`def show(a, b):` 두 줄 안내를 띄우는 함수를 만들어요" }
-          - { line: 25, note: "부를 때 넣은 첫째 글(a)을 (0, 20) 에 적어 둬요" }
-          - { line: 30, note: "`allowed`: 들여보낼 카드 번호 목록" }
-          - { line: 31, note: "맨 처음 대기 화면을 띄워요" }
-          - { line: 35, note: "읽은 번호가 목록 안에 있으면 통과 화면을 띄우고 문을 열어요" }
-          - { line: 41, note: "결과 화면을 3초 동안 보여 줘요" }
+          - { line: 5, note: "`blocklab_rfid` 라이브러리의 카드 읽기 함수(`card_present` · `card_uid`)를 가져와요" }
+          - { line: 7, note: "OLED 가 쓸 두 선(SCL 22번, SDA 21번)을 준비해요" }
+          - { line: 12, note: "RFID 도 같은 22 · 21번 선을 써요. 이름표 0x28 로 OLED 와 구분해요" }
+          - { line: 16, note: "`def show(a, b):` 두 줄 안내를 띄우는 함수를 만들어요" }
+          - { line: 18, note: "부를 때 넣은 첫째 글(a)을 (0, 20) 에 적어 둬요" }
+          - { line: 23, note: "`allowed`: 들여보낼 카드 번호 목록" }
+          - { line: 24, note: "맨 처음 대기 화면을 띄워요" }
+          - { line: 28, note: "읽은 번호가 목록 안에 있으면 통과 화면을 띄우고 문을 열어요" }
+          - { line: 34, note: "결과 화면을 3초 동안 보여 줘요" }
 
       - id: readcheck2
         type: readcheck
@@ -234,16 +235,16 @@ parts:
           - 세 문제에 답하고 **확인** 누르기
         code: step3_access_display.py
         codeNotes:
-          - { line: 6, note: "OLED 가 쓸 두 선(SCL 22번, SDA 21번)을 준비해요" }
-          - { line: 11, note: "RFID 도 같은 22 · 21번 선을 써요. 이름표 0x28 로 OLED 와 구분해요" }
-          - { line: 27, note: "`oled.show()`: 적어 둔 두 줄을 화면으로 보내요" }
-          - { line: 30, note: "`allowed`: 들여보낼 카드 번호 목록" }
-          - { line: 34, note: "`uid = card_uid()`: 읽은 번호를 `uid` 에 담아요" }
-          - { line: 35, note: "읽은 번호가 목록 안에 있는지 물어요" }
+          - { line: 7, note: "OLED 가 쓸 두 선(SCL 22번, SDA 21번)을 준비해요" }
+          - { line: 12, note: "RFID 도 같은 22 · 21번 선을 써요. 이름표 0x28 로 OLED 와 구분해요" }
+          - { line: 20, note: "`oled.show()`: 적어 둔 두 줄을 화면으로 보내요" }
+          - { line: 23, note: "`allowed`: 들여보낼 카드 번호 목록" }
+          - { line: 27, note: "`uid = card_uid(rc522)`: 읽은 번호를 `uid` 에 담아요" }
+          - { line: 28, note: "읽은 번호가 목록 안에 있는지 물어요" }
         questions:
           - { kind: choice, q: "show(\"DENIED\", \"Unknown card\") 를 부르면 함수 안의 a 에는 무엇이 들어가나요?", options: ["\"DENIED\"", "\"Unknown card\"", "0"], answer: 0, hint: "부를 때 넣은 순서와 def 줄의 순서를 맞춰 보세요" }
           - { kind: number, q: "결과 화면(ACCESS OK 또는 DENIED)은 몇 초 동안 보이다가 대기 화면으로 돌아가나요?", answer: 3 }
-          - { kind: line, q: "카드를 대기 전, 맨 처음 대기 화면을 띄우는 줄의 줄 번호를 클릭하세요", answer: 31 }
+          - { kind: line, q: "카드를 대기 전, 맨 처음 대기 화면을 띄우는 줄의 줄 번호를 클릭하세요", answer: 24 }
 
       - id: mission
         type: mission
@@ -323,19 +324,12 @@ parts:
               from machine import Pin, SoftI2C
               import ssd1306
               from mfrc522_i2c import mfrc522
+              from blocklab_rfid import *
 
               i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
               oled = ssd1306.SSD1306_I2C(128, 64, i2c)
               rc522 = mfrc522(22, 21, 0x3C)
               rc522.PCD_Init()
-
-
-              def card_present():
-                  return rc522.PICC_IsNewCardPresent() and rc522.PICC_ReadCardSerial()
-
-
-              def card_uid():
-                  return rc522.uid.uidByte[0:rc522.uid.size]
 
 
               def show(a, b):
@@ -347,8 +341,8 @@ parts:
 
               show("Tag your", "card...")
               while True:
-                  if card_present():
-                      print(card_uid())
+                  if card_present(rc522):
+                      print(card_uid(rc522))
             question: 두 장치는 같은 선을 쓰고 이름표(주소)로 구분돼요. 0x3C 는 누구의 이름표였나요? 그림에서 RFID 의 이름표를 찾아보세요
             rules:
               - codeMatches: '^rc522 = mfrc522\(22, 21, 0x28\)'

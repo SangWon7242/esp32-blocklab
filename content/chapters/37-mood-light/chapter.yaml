@@ -229,7 +229,7 @@ parts:
           image: images/web-flow.svg
           caption: 폰이 /cmd?c=blue 를 보내면 보드는 질의 c 의 값 blue 를 읽어 파랑을 켜고 페이지로 답해요
         body: |
-          이번엔 25장의 **웹서버**를 붙여요. 코드가 길어 보이지만 위쪽 `def` 들은 WiFi 와 웹서버 도우미라 블록에서는 준비 블록으로 접혀요. 읽을 곳은 `ip = ...` 부터예요. `"MyWiFi"` 와 `"12345678"` 을 교실 WiFi 로 고쳐요.
+          이번엔 25장의 **웹서버**를 붙여요. 둘째 줄 `from blocklab_net import *` 가 WiFi 와 웹서버 함수(`wifi_connect` · `web_start` · `web_accept` · `web_send` · `web_page`)가 든 **blocklab_net 라이브러리**를 가져와요. 보드에 저장하면 자동으로 같이 올라가요. 읽을 곳은 `ip = ...` 부터예요. `"MyWiFi"` 와 `"12345678"` 을 교실 WiFi 로 고쳐요.
 
           페이지의 버튼 글 `c=red,c=green,c=blue,c=off` 가 **약속**이에요. 빨강 버튼을 누르면 폰이 `/cmd?c=red` 를 보내고, 보드는 질의 `c` 의 값 `red` 를 읽어 `set_color(255, 0, 0)` 을 켜요. 폰 앱에서는 이 색을 `#ff0000` 이라고 적는데, `ff` 가 16진수 255 예요.
         todo:
@@ -239,15 +239,16 @@ parts:
         code: step2_web_color.py
         expected: 폰 브라우저에 보드 주소를 넣으면 제목 **Mood Light** 와 버튼 `c=red` · `c=green` · `c=blue` · `c=off` 네 개가 보여요. 버튼을 누르면 주소가 `/cmd?c=red` 처럼 바뀌며 종이컵이 그 색으로 켜지고, 페이지 아래에 지금 보낸 글(`red`)이 보여요. `c=off` 를 누르면 꺼져요.
         codeNotes:
-          - { line: 14, note: "5장의 색 도우미. 세 숫자(0~255)로 RGB 를 켜요" }
-          - { line: 73, note: "WiFi 에 연결하고 받은 IP 주소를 `ip` 에 담아요. 이름과 비밀번호를 교실 것으로" }
-          - { line: 74, note: "80번 포트로 웹서버를 열어요" }
-          - { line: 76, note: "IP 주소를 출력 창에 찍어요. 이 숫자를 폰 주소 창에 넣어요" }
-          - { line: 78, note: "폰이 요청을 보낼 때까지 기다렸다가 받아요. 반복 안에 있어야 다음 손님도 받아요" }
-          - { line: 79, note: "질의 `c` 의 값을 꺼내 `c` 에 담아요. 주소에 `c` 가 없으면 빈 글" }
-          - { line: 80, note: "`c` 가 `red` 와 같으면 빨강. 버튼 글과 글자가 똑같아야 해요" }
-          - { line: 86, note: "`off` 면 세 숫자 모두 0 으로 꺼요" }
-          - { line: 88, note: "제목 Mood Light, 버튼 네 개, 값 칸에 지금 받은 `c` 를 넣은 페이지로 한 번 답해요" }
+          - { line: 2, note: "WiFi 와 웹서버 함수가 든 blocklab_net 라이브러리를 가져와요. 보드에 저장하면 자동으로 같이 올라가요" }
+          - { line: 12, note: "5장의 색 도우미. 세 숫자(0~255)로 RGB 를 켜요" }
+          - { line: 18, note: "WiFi 에 연결하고 받은 IP 주소를 `ip` 에 담아요. 이름과 비밀번호를 교실 것으로" }
+          - { line: 19, note: "80번 포트로 웹서버를 열어요" }
+          - { line: 21, note: "IP 주소를 출력 창에 찍어요. 이 숫자를 폰 주소 창에 넣어요" }
+          - { line: 23, note: "폰이 요청을 보낼 때까지 기다렸다가 받아요. 반복 안에 있어야 다음 손님도 받아요" }
+          - { line: 24, note: "질의 `c` 의 값을 꺼내 `c` 에 담아요. 주소에 `c` 가 없으면 빈 글" }
+          - { line: 25, note: "`c` 가 `red` 와 같으면 빨강. 버튼 글과 글자가 똑같아야 해요" }
+          - { line: 31, note: "`off` 면 세 숫자 모두 0 으로 꺼요" }
+          - { line: 33, note: "제목 Mood Light, 버튼 네 개, 값 칸에 지금 받은 `c` 를 넣은 페이지로 한 번 답해요" }
 
       - id: readcheck2
         type: readcheck
@@ -257,7 +258,7 @@ parts:
           image: images/read-code.svg
           caption: 요청 하나가 들어왔을 때 어느 줄을 지나가는지 따라가며 읽어요. 맨 아래 열두 줄만 보면 돼요
         body: |
-          도우미 함수는 접어 두고 `ip = ...` 부터 읽어요. 보드는 **받기 → 질의 읽기 → 색 켜기 → 한 번 답하기**를 한 바퀴로 되풀이해요.
+          `ip = ...` 부터 읽어요. `wifi_connect` 같은 라이브러리 함수의 몸통은 안 봐도 돼요. 보드는 **받기 → 질의 읽기 → 색 켜기 → 한 번 답하기**를 한 바퀴로 되풀이해요.
 
           `/cmd?c=green` 이 왔을 때 `c` 에 무엇이 담기고 어느 `elif` 가 참이 되는지 손가락으로 따라가 보세요. 답을 공책에 먼저 적은 뒤 **확인**을 눌러요.
         todo:
@@ -268,12 +269,12 @@ parts:
         questions:
           - { kind: choice, q: "폰이 /cmd?c=green 을 보냈을 때 변수 c 에 담기는 글은?", options: ["/cmd", "green", "c=green"], answer: 1, hint: "질의 값 블록은 이름=값 에서 값만 꺼내요" }
           - { kind: number, q: "페이지에 만들어지는 버튼은 모두 몇 개인가요?", answer: 4, hint: "버튼 글을 쉼표로 나눠 세어요" }
-          - { kind: line, q: "질의 c 의 값을 꺼내 변수 c 에 담는 줄의 줄 번호를 클릭하세요", answer: 79 }
+          - { kind: line, q: "질의 c 의 값을 꺼내 변수 c 에 담는 줄의 줄 번호를 클릭하세요", answer: 24 }
         codeNotes:
-          - { line: 73, note: "WiFi 에 붙고 IP 주소를 `ip` 에 담아요" }
-          - { line: 77, note: "`while True:` 아래 들여 쓴 줄들이 한 바퀴예요" }
-          - { line: 84, note: "`blue` 면 파랑. 앞의 두 비교가 거짓일 때만 여기까지 와요" }
-          - { line: 88, note: "`if` 밖, 반복의 맨 끝에서 한 번 답해요" }
+          - { line: 18, note: "WiFi 에 붙고 IP 주소를 `ip` 에 담아요" }
+          - { line: 22, note: "`while True:` 아래 들여 쓴 줄들이 한 바퀴예요" }
+          - { line: 29, note: "`blue` 면 파랑. 앞의 두 비교가 거짓일 때만 여기까지 와요" }
+          - { line: 33, note: "`if` 밖, 반복의 맨 끝에서 한 번 답해요" }
 
       - id: debug
         type: debug
@@ -285,7 +286,7 @@ parts:
         body: |
           고장 난 코드 세 개가 있어요. 셋 다 빨간 글씨(에러)는 안 나요. 출력 창의 숫자, 손잡이를 돌릴 때 색이 바뀌는 자리, 폰 버튼을 눌렀을 때 바뀌는지가 단서예요.
 
-          바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 모드가 커지기만 하면 되돌리기를, 색이 한쪽에 몰리면 경계 숫자를, 폰 버튼이 안 먹으면 비교하는 글자를 봐요. 셋째 코드의 도우미 함수는 그대로 두고 맨 아래만 고치면 돼요.
+          바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 모드가 커지기만 하면 되돌리기를, 색이 한쪽에 몰리면 경계 숫자를, 폰 버튼이 안 먹으면 비교하는 글자를 봐요. 셋째 코드의 `set_color` 함수는 그대로 두고 맨 아래만 고치면 돼요.
         todo:
           - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
           - 편집기에서 고장 난 곳을 고치고 **판정**
@@ -387,9 +388,7 @@ parts:
           - title: 폰 페이지는 잘 뜨는데 빨강 · 초록 · 파랑 버튼을 눌러도 색이 안 바뀌고, 끄기만 돼요
             code: |
               from machine import Pin, PWM
-              import time
-              import network
-              import socket
+              from blocklab_net import *
 
               red = PWM(Pin(27))
               green = PWM(Pin(25))
@@ -403,59 +402,6 @@ parts:
                   red.duty(r * 1023 // 255)
                   green.duty(g * 1023 // 255)
                   blue.duty(b * 1023 // 255)
-
-
-              def wifi_connect(ssid, password):
-                  wlan = network.WLAN(network.STA_IF)
-                  wlan.active(True)
-                  wlan.connect(ssid, password)
-                  while not wlan.isconnected():
-                      time.sleep(0.5)
-                  print("IP:", wlan.ifconfig()[0])
-                  return wlan.ifconfig()[0]
-
-
-              def web_start(port):
-                  s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                  s.bind(("", port))
-                  s.listen(5)
-                  return s
-
-
-              def web_accept(s):
-                  conn, addr = s.accept()
-                  request = conn.recv(1024).decode()
-                  line = request.split("\r\n")[0]
-                  target = line.split(" ")[1] if " " in line else "/"
-                  path, _, qs = target.partition("?")
-                  query = {}
-                  for part in qs.split("&"):
-                      if "=" in part:
-                          k, v = part.split("=", 1)
-                          query[k] = v
-                  return conn, path, query
-
-
-              def web_send(conn, body, ctype="text/html"):
-                  conn.send("HTTP/1.1 200 OK\r\n")
-                  conn.send("Content-Type: " + ctype + "\r\n")
-                  conn.send("Connection: close\r\n\r\n")
-                  conn.sendall(body)
-                  conn.close()
-
-
-              def web_page(title, buttons, values, refresh):
-                  html = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
-                  if refresh > 0:
-                      html += "<meta http-equiv='refresh' content='" + str(refresh) + "'>"
-                  html += "<title>" + title + "</title></head><body><h1>" + title + "</h1>"
-                  for b in buttons.split(","):
-                      if b:
-                          html += "<p><a href='/cmd?" + b + "'><button>" + b + "</button></a></p>"
-                  for v in values.split(","):
-                      if v:
-                          html += "<p>" + v + "</p>"
-                  return html + "</body></html>"
 
 
               ip = wifi_connect("MyWiFi", "12345678")
