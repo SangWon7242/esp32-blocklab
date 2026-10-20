@@ -1,7 +1,7 @@
 from machine import Pin
 import time
 
-buzzer = Pin(15, Pin.OUT)  # 능동 부저를 15번 핀에
+buzzer = Pin(25, Pin.OUT)  # 능동 부저를 25번 핀에
 
 while True:
     buzzer.value(1)  # 삑 (켜기)

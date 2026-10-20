@@ -1,7 +1,7 @@
 from machine import Pin, PWM
 import time
 
-beeper = PWM(Pin(15))
+beeper = PWM(Pin(25))
 beeper.freq(440)
 beeper.duty(0)
 
