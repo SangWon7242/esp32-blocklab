@@ -241,18 +241,23 @@
   <rect x="138" y="544" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 632 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="650" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — RFID · 서보는 보드에 바로, LED 만 브레드보드에</text>
+  <rect x="16" y="667" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 673 h24" stroke="#343a40" stroke-width="4"/>
   <path d="M20 679 h24" stroke="#e03131" stroke-width="4"/>
   <text x="54" y="676" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">RFID GND · VCC</tspan> → I2C GND · 5V</text>
+  <rect x="16" y="691" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 697 h24" stroke="#1971c2" stroke-width="4"/>
   <path d="M20 703 h24" stroke="#7048e8" stroke-width="4"/>
   <text x="54" y="700" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">RFID SDA · SCL</tspan> → I2C SDA · SCL</text>
+  <rect x="16" y="712" width="32" height="24" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 718 h24" stroke="#8b5a2b" stroke-width="4"/>
   <path d="M20 724 h24" stroke="#e03131" stroke-width="4"/>
   <path d="M20 730 h24" stroke="#f76707" stroke-width="4"/>
   <text x="54" y="724" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">서보 플러그</tspan> → io4 줄 G · V · S</text>
+  <rect x="16" y="742" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 748 h24" stroke="#f76707" stroke-width="5"/>
   <text x="54" y="748" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">(미션) io26</tspan> → 22번 줄 → 220Ω 저항 → 17번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="766" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 772 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="772" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">LED 짧은 다리(−) 16번 줄</tspan> → − 줄 → GND</text>
   <rect x="20" y="795" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><text x="40" y="802" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">S 신호</text>

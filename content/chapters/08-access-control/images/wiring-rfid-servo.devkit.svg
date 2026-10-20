@@ -154,18 +154,24 @@
   <rect x="420" y="428" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 682 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="700" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — 5V 는 브레드보드 + 줄로 나눠 써요</text>
+  <rect x="16" y="720" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 726 h24" stroke="#e03131" stroke-width="5"/>
   <text x="54" y="726" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">VIN · 서보 빨강</tspan> → + 줄</text>
+  <rect x="16" y="744" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 750 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="750" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">GND · 서보 갈색 · LED 짧은 다리</tspan> → − 줄</text>
+  <rect x="16" y="768" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 774 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="54" y="774" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">서보 주황(신호)</tspan> → D4</text>
+  <rect x="16" y="789" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 795 h24" stroke="#e03131" stroke-width="4"/>
   <path d="M20 801 h24" stroke="#343a40" stroke-width="4"/>
   <text x="54" y="798" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">RFID VCC · GND</tspan> → 3V3 · GND</text>
+  <rect x="16" y="813" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 819 h24" stroke="#1971c2" stroke-width="4"/>
   <path d="M20 825 h24" stroke="#7048e8" stroke-width="4"/>
   <text x="54" y="822" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">RFID SDA · SCL</tspan> → D21 · D22</text>
+  <rect x="16" y="840" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 846 h24" stroke="#f76707" stroke-width="5"/>
   <text x="54" y="846" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">(미션) D26</tspan> → 11번 줄 → 220Ω 저항 → 6번 줄 LED 긴 다리(+), 짧은 다리 5번 줄</text>
   <rect x="20" y="868" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="44" y="876" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>

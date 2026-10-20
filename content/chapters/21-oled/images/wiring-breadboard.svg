@@ -181,9 +181,11 @@
   <rect x="286" y="220" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 362 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="380" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — F-F 듀폰선 4가닥, I2C 묶음 첫 줄에</text>
+  <rect x="16" y="397" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 403 h24" stroke="#343a40" stroke-width="4"/>
   <path d="M20 409 h24" stroke="#e03131" stroke-width="4"/>
   <text x="54" y="406" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED GND · VCC</tspan> → I2C GND · 5V</text>
+  <rect x="16" y="421" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 427 h24" stroke="#1971c2" stroke-width="4"/>
   <path d="M20 433 h24" stroke="#7048e8" stroke-width="4"/>
   <text x="54" y="430" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED SDA · SCL</tspan> → I2C SDA · SCL</text>

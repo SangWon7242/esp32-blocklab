@@ -91,12 +91,16 @@
   <rect x="200" y="182" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 352 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="370" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — F-F 듀폰선 4가닥</text>
+  <rect x="16" y="390" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 396 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="396" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 G</tspan> → GND</text>
+  <rect x="16" y="414" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 420 h24" stroke="#e03131" stroke-width="5"/>
   <text x="54" y="420" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 V</tspan> → VIN(5V)</text>
+  <rect x="326" y="390" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M330 396 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="364" y="396" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 IN+</tspan> → D13</text>
+  <rect x="326" y="414" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M330 420 h24" stroke="#2f9e44" stroke-width="5"/>
   <text x="364" y="420" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 IN−</tspan> → D12</text>
   <rect x="20" y="442" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="44" y="450" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>
