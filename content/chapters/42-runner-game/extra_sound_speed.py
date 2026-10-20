@@ -6,7 +6,7 @@ import random
 button = Pin(14, Pin.IN, Pin.PULL_UP)
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-beeper = PWM(Pin(15))  # 수동 부저 15번
+beeper = PWM(Pin(25))  # 수동 부저 25번
 beeper.freq(440)
 beeper.duty(0)
 knob = ADC(Pin(39))  # 가변저항 39번: 속도 조절

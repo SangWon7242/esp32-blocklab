@@ -9,7 +9,7 @@ tilt = Pin(14, Pin.IN)  # 틸트 스위치: 흔들면 1
 pir = Pin(23, Pin.IN)  # 인체감지 센서: 사람이 움직이면 1
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-beeper = PWM(Pin(15))  # 수동 부저: 효과음
+beeper = PWM(Pin(25))  # 수동 부저: 효과음
 beeper.freq(440)
 beeper.duty(0)
 
