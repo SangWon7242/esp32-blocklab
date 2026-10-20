@@ -8,7 +8,7 @@ flame.width(ADC.WIDTH_12BIT)
 dht11 = dht.DHT11(Pin(13))
 tilt = Pin(14, Pin.IN)
 button = Pin(27, Pin.IN, Pin.PULL_UP)
-beeper = PWM(Pin(15))  # 수동 부저: 처음에는 조용히
+beeper = PWM(Pin(25))  # 수동 부저: 처음에는 조용히
 beeper.freq(440)
 beeper.duty(0)
 

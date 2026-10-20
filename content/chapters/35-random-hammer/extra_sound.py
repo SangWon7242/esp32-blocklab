@@ -11,7 +11,7 @@ servo.duty_u16(1638)
 button = Pin(14, Pin.IN, Pin.PULL_UP)
 i2c = SoftI2C(scl=Pin(22), sda=Pin(21))
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-beeper = PWM(Pin(15))  # 15번 = 수동 부저
+beeper = PWM(Pin(25))  # 25번 = 수동 부저
 beeper.freq(440)
 beeper.duty(0)
 
