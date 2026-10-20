@@ -29,16 +29,17 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
-  - { name: HC-SR04 초음파 센서, note: "핀 4개: VCC · Trig · Echo · GND. 브레드보드에 꽂아요" }
+  - { name: HC-SR04 초음파 센서, note: "핀 4개: VCC · Trig · Echo · GND. 브레드보드 없이 F-F 듀폰선으로 보드 핀에 바로" }
   - { name: 빨강 LED, note: 긴 다리가 + }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
-  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판 }
-  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 핀(5V · GND · 13 · 12 · 26 · GND) → 브레드보드, 6개" }
-  - { name: 점퍼선(M-M), note: "양쪽 끝이 핀인 선. 브레드보드 안에서 센서 VCC → + 줄, GND → − 줄, LED 짧은 다리 줄 → − 줄, 3개" }
+  - { name: 브레드보드, note: LED 와 저항을 꽂는 판 }
+  - { name: F-F 듀폰선 4가닥, note: "양쪽 끝이 구멍인 선. 초음파 센서 핀 4개를 보드 핀에 바로 씌워요" }
+  - { name: M-F 듀폰선 2가닥, note: "한쪽은 핀, 한쪽은 구멍인 선. 26번 핀 → 브레드보드, LED 짧은 다리 줄 → 보드 GND" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
-  caption: "초음파 센서 핀 4개를 a 칸 14~17번 줄에(VCC · Trig · Echo · GND). VCC 줄 → 위쪽 + 줄 → 5V, GND 줄 → − 줄 → GND, Trig 줄 → 13번, Echo 줄 → 12번. LED: ESP32 26번 → 21번 줄 → 220Ω 저항 → 26번 줄의 긴 다리(+), 짧은 다리(−)는 27번 줄 → 아래 − 줄 → GND"
+  caption: "초음파 센서는 보드에 바로: VCC → 5V · GND → GND · Trig → io13 · Echo → io12 (위쪽 한 줄). LED 는 보드 위 브레드보드에: io26 → 9번 줄 → 220Ω 저항 → 15번 줄의 긴 다리(+), 짧은 다리(−)는 16번 줄 → io26 기둥 맨 아래 G"
+  captionDevkit: "초음파 센서는 보드에 바로: VCC → VIN(5V) · GND → GND(위 줄) · Trig → D13 · Echo → D12. LED 는 보드 위 브레드보드에: D26 → 3번 줄 → 220Ω 저항 → 8번 줄의 긴 다리(+), 짧은 다리(−)는 9번 줄 → GND(아래 줄)"
 principle:
   image: images/formula-steps.svg
   body: |
@@ -72,7 +73,7 @@ parts:
 
           자동차가 뒤로 갈 때 "삐- 삐-" 소리가 점점 빨라지는 것도 같은 비밀이에요. 코드를 보기 전에 내 생각부터 적어 봐요. 틀려도 괜찮아요.
         todo:
-          - 준비물(ESP32 보드, 초음파 센서, LED, 저항, 브레드보드, 듀폰선 · 점퍼선, USB 선)을 책상에 꺼내 놓기
+          - 준비물(ESP32 보드, 초음파 센서, LED, 저항, 브레드보드, 듀폰선, USB 선)을 책상에 꺼내 놓기
           - 질문마다 내 생각을 한두 문장으로 쓰기
           - 다 적으면 **완료** 누르기
         questions:
@@ -127,9 +128,10 @@ parts:
         minutes: 6
         scene:
           image: images/wiring-breadboard.svg
-          caption: "센서 a 칸 14~17번 줄: VCC → + 줄(5V), Trig → 13번, Echo → 12번, GND → − 줄. LED는 26번 → 저항 → 긴 다리"
+          caption: "초음파 VCC → 5V, GND → GND, Trig → io13, Echo → io12 에 바로. LED 는 io26 → 9번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → io26 기둥 G"
+          captionDevkit: "초음파 VCC → VIN(5V), GND → GND, Trig → D13, Echo → D12 에 바로. LED 는 D26 → 3번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → 아래 줄 GND"
         body: |
-          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**의 배선도를 보고 센서를 꽂아요. **GND 선을 가장 먼저** 꽂고, VCC 는 3V3 이 아니라 **5V** 에 이어요. LED도 지금 같이 꽂아 두면 미션에서 바로 쓸 수 있어요.
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**의 배선도를 보고 센서를 꽂아요. **GND 선을 가장 먼저** 꽂고, VCC 는 3V3 이 아니라 **5V**(VIN) 핀에 이어요. LED도 지금 같이 꽂아 두면 미션에서 바로 쓸 수 있어요.
 
           실행한 뒤 손을 센서 앞에서 앞뒤로 움직여 보세요. 숫자가 따라 바뀌나요? 자로 10cm · 20cm 에 손을 대고 찍힌 숫자를 예측과 비교해 공책에 적어요.
         todo:
@@ -226,7 +228,7 @@ parts:
         minutes: 6
         scene:
           image: images/breadboard-basics.svg
-          caption: 같은 번호 줄의 다섯 칸은 이어져요. 센서 다리와 선이 같은 번호 줄에 꽂혔는지부터 봐요
+          caption: 같은 번호 줄의 다섯 칸은 이어져요. LED 다리와 선이 같은 번호 줄에 꽂혔는지, 센서 선 네 가닥이 맞는 핀에 씌워졌는지부터 봐요
         body: |
           고장 난 거리 재기 세 개가 있어요. 바로 고치지 말고 **증상을 보고 어디부터 볼지** 먼저 정해요. 초음파 센서의 숫자 문제는 대부분 **선과 핀 번호**에서 시작해요.
 
@@ -252,7 +254,7 @@ parts:
                 fail: 듣는 선(Echo)은 몇 번에 꽂혀 있나요?
           - title: 숫자가 들쭉날쭉 튀어요 (8, 213, 15, 0 …)
             code: "trig = Pin(13, Pin.OUT)\necho = Pin(12, Pin.IN)"
-            question: 이번에는 코드가 맞아요. 센서 VCC 선이 꽂힌 + 줄은 보드의 몇 V 핀에 이어져 있나요? 이 센서는 5V 로 움직여요. 선을 옮긴 뒤 다시 실행하고, 코드는 그대로 둔 채 판정을 눌러요
+            question: 이번에는 코드가 맞아요. 센서 VCC 선은 보드의 몇 V 핀에 꽂혀 있나요? 이 센서는 5V 로 움직여요. 선을 옮긴 뒤 다시 실행하고, 코드는 그대로 둔 채 판정을 눌러요
             rules:
               - codeMatches: 'trig = Pin\(13, Pin\.OUT\)'
                 fail: 코드는 그대로 두고 선을 고쳐요. Trig 13번 줄이 그대로 있나요?
