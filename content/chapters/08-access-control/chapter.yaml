@@ -14,17 +14,21 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: Micro USB 선으로 노트북과 연결 }
-  - { name: RFID RC522 모듈, note: "I2C 방식. 핀 4개: SDA → 21 · SCL → 22 · G → GND · V → 5V" }
+  - { name: RFID RC522 모듈, note: "I2C 방식. 핀 4개: GND · VCC · SDA(21번) · SCL(22번)" }
   - { name: IC 카드 또는 열쇠고리 태그, note: 카드마다 번호가 달라요 }
-  - { name: 서보 모터, note: "문 역할. 주황 신호선 → 4 · 빨강 → 5V · 갈색 → GND" }
-  - { name: 브레드보드, note: "+ 줄(5V)·− 줄(GND)을 RFID 와 서보가 함께 쓰고, 미션 LED 도 여기에 꽂아요" }
-  - { name: F-F 듀폰선, note: "양쪽 끝이 구멍인 선. RFID SDA · SCL 처럼 모듈 핀과 보드 핀을 바로 이을 때" }
-  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 5V · GND 와 모듈 G · V 를 브레드보드 + 줄 · − 줄에 꽂을 때" }
-  - { name: (미션) 빨강 LED 1개 · 220Ω 저항 1개, note: "26번 → 저항 → LED 긴 다리, 짧은 다리 → − 줄" }
+  - { name: 서보 모터, note: "문 역할. 갈색 G(−) · 빨강 V(+) · 주황 S(신호, 4번 핀)" }
+  - { name: F-F 듀폰선 4가닥, note: "양쪽 끝이 구멍인 선. RFID 네 핀을 보드 핀에 바로 씌워요" }
+  - { name: 브레드보드, board: plus, note: "(미션) LED 와 저항만 꽂아요. RFID 와 서보는 보드에 바로, 서보는 플러그째" }
+  - { name: M-F 듀폰선 2가닥, board: plus, note: "(미션) 보드 26번 → 22번 줄, GND → − 줄" }
+  - { name: 브레드보드, board: devkit, note: "+ 줄(VIN 5V)·− 줄(GND)을 서보와 미션 LED 가 나눠 써요" }
+  - { name: M-F 듀폰선 4가닥, board: devkit, note: "보드 VIN · GND → + − 줄, D4 → 서보 주황, (미션) D26 → 11번 줄" }
+  - { name: 점퍼선(M-M) 2가닥, board: devkit, note: "서보 빨강 · 갈색 → + − 줄" }
+  - { name: (미션) LED · 220Ω 저항, note: "빨강 LED 1개와 저항 1개, 점퍼선(M-M) 1가닥. 26번 → 저항 → LED 긴 다리, 짧은 다리 → − 줄" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-rfid-servo.svg
-  caption: "RFID SDA → 21 · SCL → 22 · G → − 줄 · V → + 줄. 서보 주황 → 4 · 빨강 → + 줄 · 갈색 → − 줄. + 줄은 ESP32 5V, − 줄은 GND. (미션) 26번 → 220Ω → LED 긴 다리, 짧은 다리 → − 줄"
+  caption: "RFID 와 서보는 보드에 바로: RFID GND · VCC · SDA · SCL → I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22), 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S). (미션) 26번 → 22번 줄 → 220Ω → 17번 줄 LED 긴 다리, 짧은 다리 16번 줄 → − 줄 → GND"
+  captionDevkit: "보드 VIN(5V) · GND 를 브레드보드 + − 줄에 잇고 서보 빨강 → + 줄 · 갈색 → − 줄 · 주황 → D4. RFID VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22 (F-F 선으로 바로). (미션) D26 → 11번 줄 → 220Ω → 6번 줄 LED 긴 다리, 짧은 다리 5번 줄 → − 줄"
 principle:
   image: images/uid-compare.svg
   body: |
@@ -113,15 +117,16 @@ parts:
         minutes: 8
         scene:
           image: images/wiring-rfid-servo.svg
-          caption: "지금은 RFID 만: SDA → 21 · SCL → 22 · G → − 줄 · V → + 줄. + 줄은 5V, − 줄은 GND 에 이어요"
+          caption: "지금은 RFID 만: F-F 선 4가닥으로 I2C 묶음 첫 줄의 GND · 5V · SDA(21번) · SCL(22번)에"
+          captionDevkit: "지금은 RFID 만: F-F 선 4가닥으로 VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
         body: |
-          **USB 를 뺀 채로** RFID 모듈을 연결해요. SDA → 21번, SCL → 22번, G → GND(− 줄), V → 5V(+ 줄). 브레드보드의 + 줄은 ESP32 5V, − 줄은 GND 에 이어 두면 2부에서 서보도 같이 써요.
+          **USB 를 뺀 채로** RFID 모듈을 F-F 듀폰선 4가닥으로 보드에 바로 이어요. SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 가요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요.
 
           RFID 는 혼자 말하지 못해서 **라이브러리 파일 3개**(`mfrc522_i2c.py` · `mfrc522_config.py` · `soft_iic.py`)가 보드에 있어야 해요. 실행하면 블록랩이 함께 올려 줘요.
 
           실행하고 카드를 대 보세요. 찍힌 숫자를 **공책에 꼭 적어 두세요.** 2부에서 "내 카드"로 등록할 번호예요.
         todo:
-          - USB 를 뺀 채 RFID 4선(SDA · SCL · G · V) 연결하기
+          - USB 를 뺀 채 RFID 4선(GND · VCC · SDA · SCL) 연결하기
           - "**보드 연결** → **실행** 누르고 카드를 대 보기"
           - 찍힌 내 카드 번호를 공책에 적고, 예측과 비교하기
         code: step1_read_uid.py
@@ -172,7 +177,7 @@ parts:
         body: |
           이번에는 문 역할을 할 **서보 모터**만 따로 시험해요. 큰 장치는 부품마다 따로 확인한 뒤에 합쳐야, 고장 났을 때 어디가 문제인지 찾기 쉬워요.
 
-          USB 를 뺀 채 서보를 연결해요: 주황 신호선 → 4번, 빨강 → + 줄(5V), 갈색 → − 줄(GND). 실행하면 2초마다 닫힌 자리와 열린 자리를 오가요. 팔(혼)이 **닫힌 자리에서 문을 막는 방향**이 되도록 끼워 두세요.
+          USB 를 뺀 채 서보를 연결해요: 주황(S) 신호선 → 4번 핀, 빨강(V) → 5V, 갈색(G) → GND. 어디에 꽂는지는 **부품과 배선**의 그림과 표를 보세요. 실행하면 2초마다 닫힌 자리와 열린 자리를 오가요. 팔(혼)이 **닫힌 자리에서 문을 막는 방향**이 되도록 끼워 두세요.
         todo:
           - USB 를 뺀 채 서보 3선(주황 · 빨강 · 갈색) 연결하기
           - "**실행** 누르고 팔이 2초마다 움직이는지 보기"
@@ -195,7 +200,8 @@ parts:
         minutes: 7
         scene:
           image: images/wiring-rfid-servo.svg
-          caption: "RFID 와 서보가 브레드보드의 + 줄(5V)·− 줄(GND)을 함께 써요. 서보 신호는 4번, RFID 는 21·22번"
+          caption: "RFID 는 I2C 묶음 첫 줄, 서보 플러그는 ANALOG io4 줄에 바로. 서보 신호는 4번, RFID 는 21·22번"
+          captionDevkit: "서보 빨강 · 갈색은 브레드보드 + − 줄(VIN · GND), 주황은 D4. RFID 는 3V3 · GND · D21 · D22. 서보 신호는 4번, RFID 는 21·22번"
         body: |
           이제 1부의 두 코드를 합쳐요. `step3_access_control.py` 는 카드 번호를 읽어 `uid1` 과 **같으면** 문을 열고, 다르면 닫아 둬요.
 
