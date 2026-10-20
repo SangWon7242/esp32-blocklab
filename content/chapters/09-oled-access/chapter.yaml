@@ -24,7 +24,7 @@ materials:
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-oled-rfid.svg
-  caption: "브레드보드 없이 보드에 바로 꽂아요. RFID → I2C 묶음 첫 줄(8장과 같아요), OLED GND · VCC · SDA · SCL → 보드 위쪽 한 줄 왼쪽의 GND · 5V · SDA · SCL(I2C 묶음과 같은 21 · 22번 선), 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)"
+  caption: "브레드보드 없이 보드에 바로 꽂아요. RFID → I2C 묶음 첫 줄(8장과 같아요), OLED GND · VCC · SDA · SCL → 보드 위쪽 한 줄의 GND · 5V · SDA · SCL(I2C 묶음과 같은 21 · 22번 선), 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)"
   captionDevkit: "보드 아래 브레드보드에 모아요. 3V3 → + 줄, GND → − 줄, D21 → 14번 줄(SDA 줄), D22 → 9번 줄(SCL 줄). OLED · RFID 의 VCC → + 줄, GND → − 줄, SDA → 14번 줄, SCL → 9번 줄. 서보 빨강 → VIN · 갈색 → GND · 주황 → D4"
 principle:
   image: images/i2c-shared.svg
@@ -113,7 +113,7 @@ parts:
         minutes: 8
         scene:
           image: images/wiring-oled-rfid.svg
-          caption: "8장의 RFID · 서보는 그대로 두고 OLED 4선만 새로 꽂아요: 보드 위쪽 한 줄 왼쪽의 GND · 5V · SDA(21번) · SCL(22번)"
+          caption: "8장의 RFID · 서보는 그대로 두고 OLED 4선만 새로 꽂아요: 보드 위쪽 한 줄의 GND · 5V · SDA(21번) · SCL(22번)"
           captionDevkit: "OLED 4선: VCC → + 줄 · GND → − 줄 · SDA → 14번 줄 · SCL → 9번 줄. 브레드보드의 3V3 · GND · D21 · D22 선과 RFID 선도 배선 그림처럼"
         body: |
           **USB 를 뺀 채로** OLED 를 연결해요. SCL → `22`번, SDA → `21`번, VCC · GND 는 전원으로 가요. OLED 와 RFID 는 **같은 21 · 22번 두 선**을 나눠 써요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요.

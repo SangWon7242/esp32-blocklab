@@ -100,7 +100,7 @@ function devkit() {
 }
 
 const T = {
-  plus: "OLED 화면과 RFID 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): RFID GND · VCC · SDA · SCL 은 8장처럼 F-F 듀폰선으로 보드 I2C 묶음 첫 줄의 GND · 5V · SDA · SCL 에. OLED GND · VCC · SDA · SCL 은 보드 위쪽 한 줄 왼쪽의 GND · 5V · SDA · SCL 에 — 위쪽 SDA · SCL 도 I2C 묶음과 같은 21 · 22번 선이에요. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로",
+  plus: "OLED 화면과 RFID 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): RFID GND · VCC · SDA · SCL 은 8장처럼 F-F 듀폰선으로 보드 I2C 묶음 첫 줄의 GND · 5V · SDA · SCL 에. OLED GND · VCC · SDA · SCL 은 보드 위쪽 한 줄의 GND · 5V · SDA · SCL 에 — 위쪽 SDA · SCL 도 I2C 묶음과 같은 21 · 22번 선이에요. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로",
   devkit: "기본 보드(ESP32 DevKit V1 30핀) OLED 화면과 RFID 배선도: 보드 아래 브레드보드. 보드 3V3 은 + 줄, GND 는 − 줄, D21 은 14번 줄(SDA 줄), D22 는 9번 줄(SCL 줄). OLED 와 RFID 의 VCC 는 + 줄, GND 는 − 줄, SDA 는 14번 줄, SCL 은 9번 줄. 서보 빨강은 VIN, 갈색은 GND, 주황(신호)은 D4 에 M-F 듀폰선으로 바로",
 };
 
