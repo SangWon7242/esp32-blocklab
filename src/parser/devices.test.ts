@@ -31,9 +31,11 @@ describe("레지스트리 접기", () => {
     expect((r.json.blocks.blocks as BlockJson[]).map((b) => [b.type, b.fields?.NAME])).toEqual([["procedures_defreturn", "get_distance"], ["start_program", undefined]]);
     expect(body("trig = Pin(13, Pin.OUT)\necho = Pin(12, Pin.IN)\n").map((x) => x.type)).toEqual(["esp_ultrasonic_setup"]);
   });
-  it("pins = [...] 는 flow_leds 를 정의하거나 부를 때만 흐르는 LED 준비, 아니면 리스트 만들기", () => {
+  it("pins = [...] 는 flow_leds 를 정의·호출하거나 pins 를 다른 데서 안 쓸 때 흐르는 LED 준비, 아니면 리스트 만들기", () => {
     expect(body("pins = [18, 5]\nprint(pins)\n").map((x) => x.type)).toEqual(["list_create_from", "esp_print"]);
     expect(body("pins = [18, 5]\nflow_leds(100)\n")[0].type).toBe("dev_flow_setup");
+    // 준비 블록만 둔 프로그램(pins 를 아무도 읽지 않는다)도 흐르는 LED 준비로 돌아온다
+    expect(body("pins = [18, 5]\nprint(1)\n").map((x) => x.type)).toEqual(["dev_flow_setup", "esp_print"]);
   });
   it("접힌 장치의 준비 줄 주석은 준비 블록 코멘트로 남는다", () => {
     const { out } = roundtrip("servo = PWM(Pin(4))  # 문\nservo.freq(50)\nservo.duty_u16(1638)\n");

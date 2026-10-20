@@ -35,20 +35,32 @@ function markHelperCalls(line: string, helpers: string[], gen: MicroPythonGenera
   return helpers.reduce((l, name) => l.replace(new RegExp(String.raw`(?<![\w.])${name}\(`, "g"), `${gen.helperCall(name)}(`), line);
 }
 
+/** 도우미 매개변수 수 (`r, g, b` → 3) */
+const arity = (params: string): number => params.split(",").map((p) => p.trim()).filter(Boolean).length;
+
 /**
- * 작업판에 이 이름의 (켜진) 함수 정의 블록이 있는지. 있으면 그 블록이 도우미다: 생성기는 명세 몸통의 def 를 만들지 않고,
- * 장치 블록의 호출은 그 함수를 부른다 (수업 코드의 get_distance 를 함수 블록으로 보이고 고칠 수 있게).
+ * 작업판에서 이 도우미로 쓸 학생 함수 정의 블록: 이름이 같고, 켜져 있고, 매개변수 수가 같고, 값 블록(get_distance())이 부르면
+ * 값을 돌려주는 함수(procedures_defreturn)인 것. 있으면 그 블록이 도우미다: 생성기는 명세 몸통의 def 를 만들지 않고 장치 블록은
+ * 그 함수를 부른다 (수업 코드의 get_distance 를 함수 블록으로 보이고 고칠 수 있게). 이름만 같고 꼴이 다르면(7장 forward() 처럼
+ * 매개변수가 없는 학생 함수) 그 함수를 부르면 실행 오류가 나므로 쓰지 않는다 — 명세 도우미를 겹치지 않는 이름(forward2)으로 만든다.
  */
-function hasUserFunction(workspace: Blockly.Workspace, name: string): boolean {
-  return workspace.getTopBlocks(false).some((b) => (b.type === "procedures_defnoreturn" || b.type === "procedures_defreturn") && b.isEnabled() && b.getFieldValue("NAME") === name);
+function userHelperFunction(workspace: Blockly.Workspace, h: HelperSpec, needsValue: boolean): Blockly.Block | undefined {
+  return workspace.getTopBlocks(false).find((b) =>
+    (b.type === "procedures_defreturn" || (!needsValue && b.type === "procedures_defnoreturn")) &&
+    b.isEnabled() && b.getFieldValue("NAME") === h.name && b.getVarModels().length === arity(h.params));
 }
 
 /**
- * 장치 블록이 부르는 짧은 도우미 함수 정의 줄. 작업판에 같은 이름의 함수 블록이 있으면 만들지 않는다.
+ * 장치 블록이 부르는 짧은 도우미 함수 정의 줄. 작업판에 그 도우미로 쓸 학생 함수 블록이 있으면 만들지 않고, 호출은 그 함수의
+ * 코드 이름(변수와 겹쳐 바뀐 이름일 수 있다)을 쓴다. 도우미끼리 부르는 것(show_digit → hc595_shift)은 같은 장치의 같은 이름 도우미로 본다.
  * provideFunction_ 은 앞쪽 공백 2칸을 INDENT(4칸)로 바꾸므로 도우미 본문은 2칸 단위로 적는다
  */
-function provide(G: MicroPythonGenerator, block: Blockly.Block, h: HelperSpec, helpers: string[]): void {
-  if (hasUserFunction(block.workspace, h.name)) return;
+function provide(G: MicroPythonGenerator, block: Blockly.Block, h: HelperSpec, helpers: string[], needsValue: boolean): void {
+  const own = userHelperFunction(block.workspace, h, needsValue);
+  if (own) {
+    G.useUserHelper(h.name);
+    return;
+  }
   G.provideHelper(h.name, [`def ${G.FUNCTION_NAME_PLACEHOLDER_}(${h.params}):`, ...h.body.map((l) => "  " + markHelperCalls(l, helpers, G))]);
   // 코드 지도 장부: 도우미 함수 줄은 그것을 부른 장치 블록 것
   G.noteHelperOwner(h.name, block.id);
@@ -77,14 +89,15 @@ export function registerDeviceGenerators(gen: MicroPythonGenerator): void {
       gen.forBlock[a.blockType] = (block, g) => {
         const G = g as MicroPythonGenerator;
         // 도우미는 이 블록이 쓰일 때만 정의한다 (같은 이름은 provideFunction_ 이 한 번만 넣는다)
-        for (const h of a.helpers ?? []) provide(G, block, h, helpers);
+        for (const h of a.helpers ?? []) provide(G, block, h, helpers, false);
         return `${markLeadingHelper(a.code(readValues(block, G, a.parts)), helpers, G)}\n`;
       };
     }
     for (const v of d.values) {
       gen.forBlock[v.blockType] = (block, g) => {
         const G = g as MicroPythonGenerator;
-        for (const h of v.helpers ?? []) provide(G, block, h, helpers);
+        // 값 블록이 바로 부르는 도우미(맨 뒤)는 값을 돌려줘야 한다. 그 앞의 것(다른 도우미가 부르는 것)은 명령으로 불린다
+        (v.helpers ?? []).forEach((h, i, all) => provide(G, block, h, helpers, i === all.length - 1));
         return [markLeadingHelper(v.code(readValues(block, G, v.parts)), helpers, G), v.order ?? Order.FUNCTION_CALL];
       };
     }

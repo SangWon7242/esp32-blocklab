@@ -89,6 +89,8 @@ export class MicroPythonGenerator extends PythonGenerator {
     this.finished = null;
     this.setupOwners = [];
     this.helperOwners.clear();
+    this.userHelpers.clear();
+    this.collectGlobalVariables(workspace);
   }
 
   /** 준비 블록이 부르는 함수. 같은 줄은 한 번만 넣는다. 넣은(또는 이미 있던) 줄 번호들을 돌려준다 */
@@ -182,7 +184,28 @@ export class MicroPythonGenerator extends PythonGenerator {
    * 도우미는 같은 이름의 함수 블록이 있으면 만들지 않으므로(toCodegen.ts) 도우미와도 겹치지 않는다.
    */
   override getProcedureName(name: string): string {
-    return /^[A-Za-z_]\w*$/.test(name) && !PYTHON_KEYWORDS.includes(name) ? name : super.getProcedureName(name);
+    const plain = /^[A-Za-z_]\w*$/.test(name) && !PYTHON_KEYWORDS.includes(name) && !this.globalVariables.has(name);
+    return plain ? name : super.getProcedureName(name);
+  }
+
+  /**
+   * 함수 정의 블록 밖(시작 블록 몸통 등)에서 쓰이는 변수 이름. 이 이름과 같은 함수는 Blockly 처럼 blink2 로 바꾼다
+   * (`blink = 3` 이 함수 blink 를 덮으면 `blink()` 가 TypeError). 함수 안에서만 쓰는 변수(get_distance 의 stop)는 지역 변수라 겹쳐도 된다.
+   */
+  private globalVariables = new Set<string>();
+  private collectGlobalVariables(workspace: Blockly.Workspace): void {
+    this.globalVariables.clear();
+    for (const b of workspace.getAllBlocks(false)) {
+      const root = b.getRootBlock();
+      if (root.type === "procedures_defnoreturn" || root.type === "procedures_defreturn") continue;
+      for (const v of b.getVarModels()) this.globalVariables.add(v.getName());
+    }
+  }
+
+  /** 도우미 이름 → 그 도우미로 쓰는 학생 함수의 코드 이름 (toCodegen.ts provide). finish 가 도우미 호출 표시를 이 이름으로 바꾼다 */
+  private userHelpers = new Map<string, string>();
+  useUserHelper(name: string): void {
+    if (!this.userHelpers.has(name)) this.userHelpers.set(name, this.getProcedureName(name));
   }
 
   // definitions_ / provideFunction_ / scrub_ 는 protected 라서 forBlock.ts 가 쓸 공개 창구를 둔다
@@ -196,7 +219,7 @@ export class MicroPythonGenerator extends PythonGenerator {
    */
   helperCall(name: string): string { return `${HELPER_MARK}${name}${HELPER_MARK}`; }
   private resolveHelperCalls(text: string): string {
-    return text.replace(HELPER_CALL, (_, name: string) => this.functionNames_[name] ?? name);
+    return text.replace(HELPER_CALL, (_, name: string) => this.functionNames_[name] ?? this.userHelpers.get(name) ?? name);
   }
   scrubBlock(block: Blockly.Block, code: string): string { return this.scrub_(block, code, true); }
 

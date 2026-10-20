@@ -54,15 +54,17 @@ function inPlaceVarsKnown(spec: SetupSpec, fields: Values, ctx: ParseContext): b
 }
 
 /**
- * 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. foldOnlyWith 가 있는 선언은 코드가 그 함수 이름을 정의하거나 부를 때만(ctx.calledNames).
+ * 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. foldOnlyWith 가 있는 선언은 코드가 그 함수 이름을 정의하거나 부를 때(ctx.calledNames),
+ * 또는 준비가 만드는 이름을 다른 데서 쓰지 않을 때만.
  * inPlaceOnly 면(몸통 안) 제자리 준비만 본다. 제자리 준비는 변수 칸 이름이 아는 변수일 때만 맞는다.
  */
 export function matchSetupAt(texts: string[], i: number, ctx: ParseContext, inPlaceOnly = false): SetupMatch | null {
   for (const spec of setupSpecs()) {
     if (inPlaceOnly && !spec.inPlace) continue;
-    if (spec.foldOnlyWith && !spec.foldOnlyWith.some((n) => ctx.calledNames.has(n))) continue;
     const hit = setupLinesAt(spec, texts, i);
     if (!hit || (spec.inPlace && !inPlaceVarsKnown(spec, hit.fields, ctx))) continue;
+    // foldOnlyWith: 그 함수를 정의·호출하거나, 준비가 만드는 이름(pins)을 준비 줄 말고는 아무 데서도 쓰지 않을 때만 (준비 블록만 둔 프로그램)
+    if (spec.foldOnlyWith && !spec.foldOnlyWith.some((n) => ctx.calledNames.has(n)) && hit.vars.some((v) => (ctx.nameCounts.get(v) ?? 0) > 1)) continue;
     return { spec, ...hit, consumed: spec.pattern.lines.length };
   }
   return null;

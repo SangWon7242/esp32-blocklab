@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { arith, fromCode, num, toCode, v, type B } from "../testkit";
 import { DEVICES } from "../registry";
+import { codeToBlocks } from "@/parser";
 import { workspaceJsonToCode, type WorkspaceJson } from "@/codegen";
 import { deviceToolboxCategories } from "../toBlocks";
 
@@ -169,31 +170,84 @@ describe("도우미와 같은 이름의 사용자 함수 블록이 있으면 그
     expect(code).not.toContain("stop2");
     expect(code).not.toContain("\uE000");
   });
-  it("사용자 함수 hc595_shift + 7세그먼트 지우기: 지우기 블록은 그 함수를 부르고, 쓰지 않은 show_digit 은 만들지 않는다", () => {
+  /** 매개변수가 있는 함수 정의 블록 (값을 돌려주면 procedures_defreturn) */
+  const procWith = (name: string, params: string[], body: B[], ret?: B): B => ({
+    type: ret ? "procedures_defreturn" : "procedures_defnoreturn", fields: { NAME: name },
+    extraState: { params: params.map((p) => ({ name: p, id: `var_${p}` })) },
+    inputs: { ...(body.length ? { STACK: { block: chainOf(body) } } : {}), ...(ret ? { RETURN: { block: ret } } : {}) },
+  });
+  const printText = (t: string): B => ({ type: "esp_print", inputs: { VALUE: { block: { type: "text", fields: { TEXT: t } } } } });
+
+  it("사용자 함수 hc595_shift(dat) + 7세그먼트 지우기: 지우기 블록은 그 함수를 부르고, 쓰지 않은 show_digit 은 만들지 않는다", () => {
+    const code = workspaceJsonToCode(workspace([
+      procWith("hc595_shift", ["dat"], [printText("x")]),
+      start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_clear" }]),
+    ], ["dat"]));
+    expect(code.match(/def hc595_shift\w*\(/g)).toEqual(["def hc595_shift("]);
+    expect(code).not.toContain("def show_digit");
+    expect(code).toMatch(/\nhc595_shift\(0\)\n$/);
+  });
+  it("사용자 함수 hc595_shift(dat) + 7세그먼트 숫자: show_digit 도우미만 만들고 그 몸통은 사용자 hc595_shift 를 부른다", () => {
+    const code = workspaceJsonToCode(workspace([
+      procWith("hc595_shift", ["dat"], [printText("x")]),
+      start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_digit", inputs: { N: { block: { type: "math_number", fields: { NUM: 3 } } } }, fields: { DOT: "False" } }]),
+    ], ["dat"]));
+    expect(code).toContain("\ndef show_digit(n, dot):\n    code = SEGCODE[n]\n    if dot:\n        code = code | 128\n    hc595_shift(code)\n");
+    expect(code.match(/def hc595_shift\w*\(/g)).toEqual(["def hc595_shift("]);
+  });
+  it("매개변수 수가 다른 같은 이름 함수(hc595_shift())는 도우미가 아니다: 명세 도우미를 hc595_shift2 로 만들어 부른다 (실행 오류 없게)", () => {
     const code = workspaceJsonToCode(workspace([
       proc("hc595_shift", []),
       start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_clear" }, call("hc595_shift")]),
     ]));
-    expect(code.match(/def hc595_shift\(/g)).toHaveLength(1);
-    expect(code).not.toContain("def show_digit");
-    expect(code).toMatch(/\nhc595_shift\(0\)\nhc595_shift\(\)\n$/);
+    expect(code).toContain("\ndef hc595_shift2(dat):\n    rck.value(0)\n");
+    expect(code).toMatch(/\nhc595_shift2\(0\)\nhc595_shift\(\)\n$/);
   });
-  it("사용자 함수 hc595_shift + 7세그먼트 숫자: show_digit 도우미만 만들고 그 몸통은 사용자 hc595_shift 를 부른다", () => {
-    const code = workspaceJsonToCode(workspace([
-      proc("hc595_shift", []),
-      start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_digit", inputs: { N: { block: { type: "math_number", fields: { NUM: 3 } } } }, fields: { DOT: "False" } }]),
-    ]));
-    expect(code).toContain("\ndef show_digit(n, dot):\n    code = SEGCODE[n]\n    if dot:\n        code = code | 128\n    hc595_shift(code)\n");
-    expect(code.match(/def hc595_shift\(/g)).toHaveLength(1);
-  });
-  it("사용자 함수 show + OLED: 두 줄 보여주기는 그 show() 를 부르고 oled.show() 메서드 호출은 그대로", () => {
+  it("사용자 함수 show(a, b) + OLED: 두 줄 보여주기는 그 show() 를 부르고 oled.show() 메서드 호출은 그대로", () => {
     const text = (t: string): B => ({ type: "text", fields: { TEXT: t } });
     const code = workspaceJsonToCode(workspace([
-      proc("show", []),
+      procWith("show", ["a", "b"], [printText("x")]),
       start([{ type: "esp_oled_setup", fields: { SCL: 22, SDA: 21 } }, { type: "esp_oled_show", inputs: { A: { block: text("a") }, B: { block: text("b") } } }, { type: "dev_oled_update" }]),
-    ]));
-    expect(code.match(/def show\(/g)).toHaveLength(1);
+    ], ["a", "b"]));
+    expect(code.match(/def show\w*\(/g)).toEqual(["def show("]);
     expect(code).toMatch(/\nshow\("a", "b"\)\noled\.show\(\)\n$/);
+  });
+  it("매개변수가 하나뿐인 show(a) 는 도우미가 아니다: 명세 show2(a, b) 를 만들어 부른다", () => {
+    const text = (t: string): B => ({ type: "text", fields: { TEXT: t } });
+    const code = workspaceJsonToCode(workspace([
+      procWith("show", ["a"], [printText("x")]),
+      start([{ type: "esp_oled_setup", fields: { SCL: 22, SDA: 21 } }, { type: "esp_oled_show", inputs: { A: { block: text("a") }, B: { block: text("b") } } }]),
+    ], ["a"]));
+    expect(code).toContain("\ndef show(a):\n");
+    expect(code).toContain("\ndef show2(a, b):\n    oled.fill(0)\n");
+    expect(code).toMatch(/\nshow2\("a", "b"\)\n$/);
+  });
+  it("7장 선풍기: 매개변수 없는 학생 forward()·stop() + 모터 앞으로·정지 블록 → 앞으로는 명세 forward2(speed), 정지는 학생 stop(), 실행되는 코드", () => {
+    const pinW = (name: string, v: string): B => ({ type: "esp_pin_write", fields: { VAR: { id: `var_${name}` }, VALUE: v } });
+    const code = workspaceJsonToCode(workspace([
+      proc("forward", [pinW("led", "1")]),
+      proc("stop", [pinW("led", "0")]),
+      start([
+        { type: "esp_pin_setup", fields: { PIN: 26, MODE: "OUT", VAR: { id: "var_led" } } },
+        { type: "dev_motor_setup", fields: { A: 13, B: 12 } },
+        { type: "dev_motor_forward", inputs: { SPEED: { block: { type: "math_number", fields: { NUM: 50 } } } } },
+        { type: "dev_motor_stop" },
+        call("forward"),
+      ]),
+    ], ["led"]));
+    expect(code).toContain("\ndef forward2(speed):\n    motor1a.duty(speed)\n    motor1b.duty(0)\n");
+    expect(code).toContain("\ndef forward():\n    led.value(1)\n");
+    // stop() 은 매개변수 수가 같아(0) 학생 함수가 모터 정지 블록의 도우미가 된다
+    expect(code).not.toContain("def stop2");
+    expect(code).toMatch(/\nforward2\(50\)\nstop\(\)\nforward\(\)\n$/);
+  });
+  it("값 블록(거리)은 값을 돌려주지 않는 같은 이름 함수를 도우미로 쓰지 않는다", () => {
+    const code = workspaceJsonToCode(workspace([
+      proc("get_distance", [printText("x")]),
+      start([{ type: "esp_ultrasonic_setup", fields: { TRIG: 13, ECHO: 12 } }, { type: "esp_print", inputs: { VALUE: { block: { type: "esp_distance" } } } }]),
+    ]));
+    expect(code).toContain("\ndef get_distance2():\n    trig.value(1)\n");
+    expect(code).toMatch(/\nprint\(get_distance2\(\)\)\n$/);
   });
   it("꺼 둔 함수 블록은 도우미가 아니다 (생성기가 도우미를 겹치지 않는 이름으로 만들어 부른다)", () => {
     const off = { ...proc("stop", []), enabled: false };
@@ -217,6 +271,39 @@ describe("도우미와 같은 이름의 사용자 함수 블록이 있으면 그
     expect(code).toContain("\n\ndef measure():\n    stop = 1\n\n\ndef stop():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
     expect(code).toMatch(/\nstop\(\)\nmeasure\(\)\n$/);
     expect(code).not.toContain("stop2");
+  });
+  it("함수 밖에서 쓰는 변수와 이름이 같은 함수는 blink2 로 바꾼다 (def blink() / blink = 3 / blink() 가 TypeError 가 되지 않게)", () => {
+    const setBlink: B = { type: "variables_set", fields: { VAR: { id: "var_blink" } }, inputs: { VALUE: { block: { type: "math_number", fields: { NUM: 3 } } } } };
+    const code = workspaceJsonToCode(workspace([proc("blink", [printText("x")]), start([setBlink, call("blink")])], ["blink"]));
+    expect(code).toBe('def blink2():\n    print("x")\n\n\nblink = 3\nblink2()\n');
+    // 코드에서 온 같은 꼴도 블록 → 코드에서 실행되는 꼴로
+    const r = codeToBlocks("def blink():\n    print(1)\n\n\nblink = 3\nblink()\n");
+    if (!r.ok) throw new Error(r.error.message);
+    expect(workspaceJsonToCode(r.json)).toBe("def blink2():\n    print(1)\n\n\nblink = 3\nblink2()\n");
+  });
+  it("맨 위에서 stop = time.ticks_us() + 모터 정지: 학생 함수 stop 은 stop2 로, 모터 정지 블록도 stop2() 를 부른다", () => {
+    const src = [
+      "from machine import Pin, PWM",
+      "import time",
+      "",
+      "motor1a = PWM(Pin(13))", "motor1b = PWM(Pin(12))", "motor1a.freq(1000)", "motor1b.freq(1000)",
+      "", "",
+      "def stop():", "    motor1a.duty(0)", "    motor1b.duty(0)",
+      "", "",
+      "stop = time.ticks_us()", "stop()", "",
+    ].join("\n");
+    const r = codeToBlocks(src);
+    if (!r.ok) throw new Error(r.error.message);
+    const out = workspaceJsonToCode(r.json);
+    expect(out).toContain("\ndef stop2():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
+    expect(out).toMatch(/\nstop = time\.ticks_us\(\)\nstop2\(\)\n$/);
+    expect(out).not.toMatch(/def stop\(/);
+  });
+  it("맨 위 변수 stop 만 있고 학생 함수가 없으면 명세 도우미가 stop2 로 만들어진다", () => {
+    const setStop: B = { type: "variables_set", fields: { VAR: { id: "var_stop" } }, inputs: { VALUE: { block: { type: "calc_ticks", fields: { UNIT: "US" } } } } };
+    const code = workspaceJsonToCode(workspace([start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, setStop, { type: "dev_motor_stop" }])], ["stop"]));
+    expect(code).toContain("\ndef stop2():\n");
+    expect(code).toMatch(/\nstop = time\.ticks_us\(\)\nstop2\(\)\n$/);
   });
   it("겹치지 않으면 그대로 (stop)", () => {
     const code = workspaceJsonToCode(workspace([start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }])]));

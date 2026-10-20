@@ -259,10 +259,10 @@ export const coreContent: Record<string, BlockContent> = {
     ],
   },
   calc_ticks_diff: {
-    concept: "두 시각 사이에 걸린 시간을 알려 줘요. 시작할 때와 끝날 때 '지금까지 지난 시간' 값을 각각 변수에 적어 두고 두 변수를 끼우면 됩니다. 코드로는 time.ticks_diff(stop, start) 이고, 끝 - 시작 을 계산해요.",
+    concept: "두 시각 사이에 걸린 시간을 알려 줘요. 시작할 때와 끝날 때 '지금까지 지난 시간' 값을 각각 변수에 적어 두고 두 변수를 끼우면 됩니다. 코드로는 time.ticks_diff(end_t, start_t) 이고, 끝 - 시작 을 계산해요.",
     example: {
       title: "버튼을 누르고 있던 시간 재기",
-      code: "button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile button.value() == 1:\n    time.sleep_ms(1)\nstart = time.ticks_ms()\nwhile button.value() == 0:\n    time.sleep_ms(1)\nstop = time.ticks_ms()\nprint(time.ticks_diff(stop, start))",
+      code: "button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile button.value() == 1:\n    time.sleep_ms(1)\nstart_t = time.ticks_ms()\nwhile button.value() == 0:\n    time.sleep_ms(1)\nend_t = time.ticks_ms()\nprint(time.ticks_diff(end_t, start_t))",
     },
     tips: [
       "두 값의 단위가 같아야 해요. 초음파 거리 함수는 µs(마이크로초) 값 둘의 차이를 재요.",

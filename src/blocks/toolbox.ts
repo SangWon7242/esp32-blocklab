@@ -70,7 +70,8 @@ export const toolbox = {
         block("calc_ticks"),
         block("calc_elapsed", { inputs: { X: { block: { type: "variables_get", fields: { VAR: { name: "start" } } } } } }),
         block("calc_ticks_diff", {
-          inputs: { END: { block: { type: "variables_get", fields: { VAR: { name: "stop" } } } }, START: { block: { type: "variables_get", fields: { VAR: { name: "start" } } } } },
+          // stop 은 모터 도우미 이름이라 변수 이름으로 막혀 있으므로 start_t·end_t
+          inputs: { END: { block: { type: "variables_get", fields: { VAR: { name: "end_t" } } } }, START: { block: { type: "variables_get", fields: { VAR: { name: "start_t" } } } } },
         }),
         block("calc_map", { inputs: { X: num(2048), A: num(0), B: num(4095), C: num(0), D: num(100) } }),
       ],

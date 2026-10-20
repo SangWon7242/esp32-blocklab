@@ -29,6 +29,10 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
       const kids = children(node);
       if (kids[0]?.name === "for" && kids[1]?.name === "VariableName" && kids[2]?.name === "in") ctx.varId(ctx.src.slice(kids[1]));
     }
+    if (node.name === "VariableName") {
+      const name = ctx.src.slice(node);
+      ctx.nameCounts.set(name, (ctx.nameCounts.get(name) ?? 0) + 1);
+    }
     // 부르는 함수 이름 (준비의 foldOnlyWith: flow_leds 를 부를 때만 pins = [...] 를 흐르는 LED 준비로)
     if (node.name === "CallExpression") {
       const callee = node.firstChild;

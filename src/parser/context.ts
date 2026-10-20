@@ -18,6 +18,8 @@ export class ParseContext {
   readonly standardHelpers = new Set<string>();
   /** 코드의 최상위 def 이름과 어디서든 `name(…)` 으로 부르는 이름. 준비의 foldOnlyWith 가 본다 */
   readonly calledNames = new Set<string>();
+  /** 코드에 이름(VariableName)이 나온 횟수. 준비 줄의 대입 한 번뿐이면 그 이름은 다른 데서 쓰이지 않는다 (foldOnlyWith) */
+  readonly nameCounts = new Map<string, number>();
   readonly functions = new Map<string, FunctionInfo>();
   readonly unparsed: UnparsedItem[] = [];
   /** 같은 이름이 앞에 이미 있는 맨 바깥 def 의 시작 위치. code_stmt 로 남긴다 */
