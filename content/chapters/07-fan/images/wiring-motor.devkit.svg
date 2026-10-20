@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 466" role="img" aria-labelledby="fwk-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="fwk-title">기본 보드(ESP32 DevKit V1 30핀) 작은 선풍기 배선도: 130 모터(팬) 모듈의 G 는 GND, V 는 VIN(5V), IN+ 는 D13(motor1a), IN− 는 D12(motor1b) 에 F-F 듀폰선 네 가닥으로. 기본 보드에는 외부 전원 단자가 없어 USB 전원으로 돌려요. 팬 날개는 배선이 모두 끝난 뒤에 끼워요</title>
+  <rect x="110" y="176" width="470" height="150" rx="10" fill="#1b2b4b" stroke="currentColor"/>
+  <rect x="96" y="234" width="30" height="34" rx="4" fill="#ced4da" stroke="#868e96"/>
+  <rect x="466" y="206" width="104" height="90" rx="4" fill="#adb5bd" stroke="#e9ecef"/>
+  <path d="M552 218 h-10 v66 h10 M558 218 v66" stroke="#868e96" stroke-width="1.5"/>
+  <rect x="476" y="220" width="64" height="62" rx="3" fill="#ced4da" stroke="#868e96" stroke-width="1"/>
+  <text x="508" y="251" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#343a40" stroke="none">ESP32</text>
+  <g opacity="1"><rect x="137" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="144" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="1"><rect x="159" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="166" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="1"><rect x="181" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="188" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="1"><rect x="203" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="210" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="225" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="232" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="247" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="254" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="269" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="276" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="291" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="298" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="313" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="320" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="335" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="342" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="357" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="364" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="379" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="386" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="401" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="408" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="423" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="430" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="445" y="185" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="452" cy="192" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="137" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="144" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="159" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="166" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="181" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="188" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="203" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="210" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="225" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="232" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="247" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="254" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="269" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="276" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="291" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="298" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="313" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="320" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="335" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="342" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="357" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="364" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="379" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="386" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="401" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="408" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="423" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="430" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="445" y="303" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="452" cy="310" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <rect x="150" y="22" width="110" height="92" rx="7" fill="#1c7ed6" stroke="currentColor"/>
+  <circle cx="205" cy="56" r="24" fill="#e9ecef" stroke="#495057"/><ellipse cx="205" cy="42" rx="7" ry="14" fill="#74c0fc" stroke="none" transform="rotate(0 205 56)"/><ellipse cx="205" cy="42" rx="7" ry="14" fill="#74c0fc" stroke="none" transform="rotate(120 205 56)"/><ellipse cx="205" cy="42" rx="7" ry="14" fill="#74c0fc" stroke="none" transform="rotate(240 205 56)"/><circle cx="205" cy="56" r="5" fill="#495057" stroke="none"/>
+  <path d="M175 114 V126" stroke="#adb5bd" stroke-width="3"/><text x="175" y="108" transform="rotate(-90 175 108)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">G</text>
+  <path d="M195 114 V126" stroke="#adb5bd" stroke-width="3"/><text x="195" y="108" transform="rotate(-90 195 108)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">V</text>
+  <path d="M215 114 V126" stroke="#adb5bd" stroke-width="3"/><text x="215" y="108" transform="rotate(-90 215 108)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">IN+</text>
+  <path d="M235 114 V126" stroke="#adb5bd" stroke-width="3"/><text x="235" y="108" transform="rotate(-90 235 108)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">IN−</text>
+  <text x="138" y="54" text-anchor="end" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">팬 모듈</text>
+  <text x="310" y="46" text-anchor="start" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">기본 보드에는 외부 전원 단자가 없어요</text>
+  <text x="310" y="66" text-anchor="start" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">USB 전원으로 돌려요</text>
+  <path d="M175 126 C175 159 166 159 166 192" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M175 126 C175 159 166 159 166 192" stroke="#343a40" stroke-width="4"/>
+  <rect x="169" y="118" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/><rect x="160" y="184" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/>
+  <path d="M195 126 C195 159 144 159 144 192" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M195 126 C195 159 144 159 144 192" stroke="#e03131" stroke-width="4"/>
+  <rect x="189" y="118" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/><rect x="138" y="184" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/>
+  <path d="M215 126 C215 159 188 159 188 192" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M215 126 C215 159 188 159 188 192" stroke="#f59f00" stroke-width="4"/>
+  <rect x="209" y="118" width="12" height="16" rx="2" fill="#212529" stroke="#f59f00" stroke-width="2.5"/><rect x="182" y="184" width="12" height="16" rx="2" fill="#212529" stroke="#f59f00" stroke-width="2.5"/>
+  <path d="M235 126 C235 159 210 159 210 192" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M235 126 C235 159 210 159 210 192" stroke="#2f9e44" stroke-width="4"/>
+  <rect x="229" y="118" width="12" height="16" rx="2" fill="#212529" stroke="#2f9e44" stroke-width="2.5"/><rect x="204" y="184" width="12" height="16" rx="2" fill="#212529" stroke="#2f9e44" stroke-width="2.5"/>
+  <text x="92" y="251" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="currentColor" stroke="none">USB</text>
+  <text x="300" y="251" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">ESP32 DevKit V1 (30핀)</text>
+  <text x="144" y="205" transform="rotate(-90 144 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">VIN</text>
+  <text x="166" y="205" transform="rotate(-90 166 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">GND</text>
+  <text x="188" y="205" transform="rotate(-90 188 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">D13</text>
+  <text x="210" y="205" transform="rotate(-90 210 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">D12</text>
+  <text x="232" y="205" transform="rotate(-90 232 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D14</text>
+  <text x="254" y="205" transform="rotate(-90 254 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D27</text>
+  <text x="276" y="205" transform="rotate(-90 276 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D26</text>
+  <text x="298" y="205" transform="rotate(-90 298 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D25</text>
+  <text x="320" y="205" transform="rotate(-90 320 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D33</text>
+  <text x="342" y="205" transform="rotate(-90 342 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D32</text>
+  <text x="364" y="205" transform="rotate(-90 364 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D35</text>
+  <text x="386" y="205" transform="rotate(-90 386 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D34</text>
+  <text x="408" y="205" transform="rotate(-90 408 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">VN</text>
+  <text x="430" y="205" transform="rotate(-90 430 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">VP</text>
+  <text x="452" y="205" transform="rotate(-90 452 205)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">EN</text>
+  <text x="144" y="297" transform="rotate(-90 144 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">3V3</text>
+  <text x="166" y="297" transform="rotate(-90 166 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">GND</text>
+  <text x="188" y="297" transform="rotate(-90 188 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D15</text>
+  <text x="210" y="297" transform="rotate(-90 210 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D2</text>
+  <text x="232" y="297" transform="rotate(-90 232 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D4</text>
+  <text x="254" y="297" transform="rotate(-90 254 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">RX2</text>
+  <text x="276" y="297" transform="rotate(-90 276 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">TX2</text>
+  <text x="298" y="297" transform="rotate(-90 298 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D5</text>
+  <text x="320" y="297" transform="rotate(-90 320 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D18</text>
+  <text x="342" y="297" transform="rotate(-90 342 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D19</text>
+  <text x="364" y="297" transform="rotate(-90 364 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D21</text>
+  <text x="386" y="297" transform="rotate(-90 386 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">RX0</text>
+  <text x="408" y="297" transform="rotate(-90 408 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">TX0</text>
+  <text x="430" y="297" transform="rotate(-90 430 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D22</text>
+  <text x="452" y="297" transform="rotate(-90 452 297)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D23</text>
+  <rect x="156" y="182" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
+  <rect x="134" y="182" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
+  <rect x="178" y="182" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
+  <rect x="200" y="182" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
+  <path d="M20 352 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
+  <text x="20" y="370" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — F-F 듀폰선 4가닥</text>
+  <path d="M20 396 h24" stroke="#343a40" stroke-width="5"/>
+  <text x="54" y="396" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 G</tspan> → GND</text>
+  <path d="M20 420 h24" stroke="#e03131" stroke-width="5"/>
+  <text x="54" y="420" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 V</tspan> → VIN(5V)</text>
+  <path d="M330 396 h24" stroke="#f59f00" stroke-width="5"/>
+  <text x="364" y="396" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 IN+</tspan> → D13</text>
+  <path d="M330 420 h24" stroke="#2f9e44" stroke-width="5"/>
+  <text x="364" y="420" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">팬 IN−</tspan> → D12</text>
+  <rect x="20" y="442" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="44" y="450" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>
+</svg>
