@@ -14,13 +14,20 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 마이크로 USB 선으로 PC 와 연결 }
-  - { name: HC-SR04 초음파 센서, note: "핀 4개를 F-F 듀폰선으로 보드 위쪽 5V · GND · 13 · 12 에 바로. USB 를 뺀 채, GND 선부터" }
-  - { name: 서보 모터, note: "문 역할. 플러그를 ANALOG 묶음 io4 줄에 그대로 꽂기 (갈색 G · 빨강 V · 주황 S)" }
+  - { name: HC-SR04 초음파 센서, note: "VCC · Trig · Echo · GND 네 핀. USB 를 뺀 채, GND 선부터" }
+  - { name: 서보 모터, note: "문 역할. 갈색 G(−) · 빨강 V(+) · 주황 S(신호, 4번 핀)" }
   - { name: OLED 0.96" (SSD1306), note: "SDA 21 · SCL 22. 보드에 ssd1306.py 를 먼저 올려 두기" }
-  - { name: F-F 듀폰선 8가닥, note: "양쪽 끝이 구멍인 선. 모듈 핀과 보드 핀에 바로 씌워요 (초음파 4 · OLED 4)" }
-  - { name: (추가 미션) 브레드보드 · LED · 220Ω 저항 · 점퍼선(M-M), note: "LED 는 저항이 필요해서 브레드보드에 꽂아요. 챕터 1 배선과 같아요" }
+  - { name: F-F 듀폰선 8가닥, board: plus, note: "양쪽 끝이 구멍인 선. 모듈 핀과 보드 핀에 바로 씌워요 (초음파 4 · OLED 4). 서보는 플러그째 꽂아요" }
+  - { name: 브레드보드, board: devkit, note: "+ − 줄만 써요. 5V(VIN) 하나를 초음파와 서보가 나눠 쓰게" }
+  - { name: F-F 듀폰선 6가닥, board: devkit, note: "초음파 Trig · Echo, OLED 네 핀을 보드 핀에 바로" }
+  - { name: M-F 듀폰선 5가닥, board: devkit, note: "보드 VIN · GND, 초음파 VCC · GND 를 + − 줄로, 4번 핀을 서보 주황으로" }
+  - { name: 점퍼선(M-M) 2가닥, board: devkit, note: "서보 빨강 · 갈색을 + − 줄로" }
+  - { name: (추가 미션) LED · 220Ω 저항, note: "LED 는 저항과 함께 브레드보드에 꽂아요. 챕터 1 배선과 같아요" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
-wiring: { image: images/wiring-door.svg, caption: "브레드보드 없이 보드에 바로 꽂아요. 초음파 VCC → 5V · GND → GND · Trig → 13 · Echo → 12 (위쪽 한 줄), OLED GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL, 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)" }
+wiring:
+  image: images/wiring-door.svg
+  caption: "브레드보드 없이 보드에 바로 꽂아요. 초음파 VCC → 5V · GND → GND · Trig → 13 · Echo → 12 (위쪽 한 줄), OLED GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL, 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)"
+  captionDevkit: "보드 VIN(5V) · GND 를 브레드보드 + − 줄에 잇고 초음파 VCC · 서보 빨강은 + 줄, 초음파 GND · 서보 갈색은 − 줄에. 초음파 Trig → D13 · Echo → D12, 서보 주황 → D4, OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
 principle:
   image: images/ultrasonic-principle.svg
   body: |
@@ -103,15 +110,18 @@ parts:
         type: run
         title: 복사 · 실행 — 거리 재기
         minutes: 5
-        scene: { image: images/wiring-ultrasonic.svg, caption: "보드 위쪽 한 줄의 글자를 읽어요: 5V · GND 옆에 18 19 23 5 13 12. 센서 핀 4개를 F-F 듀폰선으로 바로 씌워요" }
+        scene:
+          image: images/wiring-ultrasonic.svg
+          caption: "보드 위쪽 한 줄의 글자를 읽어요: 5V · GND 옆에 18 19 23 5 13 12. 센서 핀 4개를 F-F 듀폰선으로 바로 씌워요"
+          captionDevkit: "보드 위 줄의 글자를 읽어요: VIN · GND · D13 · D12. 센서 핀 4개를 F-F 듀폰선으로 바로 씌워요"
         body: |
-          이제 센서를 보드에 **바로** 이어요. 브레드보드는 쓰지 않아요. F-F 듀폰선(양쪽 끝이 구멍인 선) 4가닥으로 센서 핀과 보드 위쪽 한 줄의 핀을 짝지어요: VCC → `5V`, GND → `GND`, Trig → `13`, Echo → `12`. 보드 핀 위에 적힌 글자를 손가락으로 짚으며 찾아요.
+          이제 센서를 보드에 **바로** 이어요. F-F 듀폰선(양쪽 끝이 구멍인 선) 4가닥으로 센서 핀과 보드 핀을 짝지어요: VCC → 5V(기본 보드는 `VIN`), GND → `GND`, Trig → `13`번, Echo → `12`번. 보드 핀 옆에 적힌 글자를 손가락으로 짚으며 그림 아래 표처럼 찾아요.
 
           **USB 를 뺀 상태에서** 꽂고, **GND 선을 가장 먼저** 꽂아요. 다 꽂으면 짝에게 "검사관"이 되어 달라고 해요.
 
           실행한 뒤에는 손을 센서 앞에서 앞뒤로 움직여 보세요. 창에 찍히는 숫자가 따라 바뀌나요? 아까 적은 예측과 비교해 봐요.
         todo:
-          - USB 를 뺀 채 F-F 듀폰선 4가닥으로 VCC → 5V · GND → GND · Trig → 13 · Echo → 12 잇기
+          - USB 를 뺀 채 F-F 듀폰선 4가닥으로 VCC → 5V · GND → GND · Trig → 13번 · Echo → 12번 잇기
           - "**보드 연결** → **실행** 누르기"
           - 손을 움직이며 숫자를 보고, 예측과 비교하기
         code: step1_distance.py
@@ -257,13 +267,16 @@ parts:
         type: run
         title: 복사 · 실행 — 완성 코드
         minutes: 4
-        scene: { image: images/wiring-door.svg, caption: "서보 플러그 → ANALOG io4 줄(갈색 G · 빨강 V · 주황 S), OLED → I2C 묶음(GND · 5V · SDA · SCL). 핀이 겹치지 않는지 확인!" }
+        scene:
+          image: images/wiring-door.svg
+          caption: "서보 플러그 → ANALOG io4 줄(갈색 G · 빨강 V · 주황 S), OLED → I2C 묶음(GND · 5V · SDA · SCL). 핀이 겹치지 않는지 확인!"
+          captionDevkit: "서보 빨강 · 갈색 → 브레드보드 + − 줄, 주황 → D4. OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22. 핀이 겹치지 않는지 확인!"
         body: |
-          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로**, 브레드보드 없이 보드에 바로 꽂아요. 서보는 세 색 선이 모인 **플러그**를 ANALOG 묶음의 `4` 줄에 그대로 꽂아요. 갈색이 `G`, 빨강이 `V`, 주황이 `S` 쪽이에요. OLED 는 F-F 듀폰선 4가닥으로 **I2C 묶음**에 이어요: GND → `GND`, VCC → `5V`, SDA → `SDA`(21번), SCL → `SCL`(22번). 핀이 겹치지 않는지 짝과 확인해요.
+          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로** 꽂아요. 서보는 세 색 선이 모인 **플러그**예요: 주황(S)은 신호라 `4`번 핀, 빨강(V)은 5V, 갈색(G)은 GND 로 가요. OLED 는 SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 이어요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요. 핀이 겹치지 않는지 짝과 확인해요.
 
           완성 코드 `step3_auto_door.py` 를 실행하고 손을 센서 앞 15cm 안으로 넣어 보세요. 화면이 `DOOR OPEN` 으로 바뀌고, 문이 열렸다가 잠시 뒤 닫히나요? 화면이 아예 안 켜지면 보드에 `ssd1306.py` 가 있는지 확인해요.
         todo:
-          - USB 를 뺀 채 서보 플러그를 io4 줄에, OLED 를 I2C 묶음에 꽂기
+          - USB 를 뺀 채 배선 그림대로 서보(주황 → 4번)와 OLED(SDA → 21번 · SCL → 22번)를 잇기
           - "**실행** 누르고 손을 15cm 안에 넣어 보기"
           - 화면 글씨가 바뀌고 문이 열렸다 닫히는지 보기
         code: step3_auto_door.py
