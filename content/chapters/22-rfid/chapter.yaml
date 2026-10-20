@@ -10,7 +10,7 @@ sessions: 1
 teacherNotes: |
   **카드 번호 먼저** 미션 전에 학생이 실행(step1)으로 **자기 카드(또는 열쇠고리 태그) 번호를 먼저 읽어 공책에 적게** 하세요. 코드의 `[180, 180, 170, 219]` · `[231, 185, 101, 101]` 은 예시 번호예요. 미션 판정은 숫자 차이를 255 까지 봐주므로 자기 번호로 바꿔도 통과해요. 카드가 한 장뿐인 모둠은 두 번째 칸에 예시 번호를 그대로 두고, 숫자 하나를 일부러 바꿔 DENY 를 시험하게 해요.
 
-  **배선** RFID SDA → 21, SCL → 22, G → GND, V → 5V. F1(08 출입 통제)과 같은 자리라 다음 챕터에서 그대로 서보만 더하면 돼요. 라이브러리 세 파일(`mfrc522_i2c.py` · `mfrc522_config.py` · `soft_iic.py`)은 실행할 때 블록랩이 함께 올려요. ImportError 가 뜨면 보드 파일 목록부터 봐요.
+  **배선** RFID SDA → 21, SCL → 22, G → GND, V → 5V(기본 보드는 3V3). ESP32 Plus 확장 보드는 I2C 묶음 첫 줄에 바로 꽂아요. F1(08 출입 통제)에서도 RFID 는 같은 핀(21 · 22)을 써서, 서보만 더하면 돼요. 라이브러리 세 파일(`mfrc522_i2c.py` · `mfrc522_config.py` · `soft_iic.py`)은 실행할 때 블록랩이 함께 올려요. ImportError 가 뜨면 보드 파일 목록부터 봐요.
 
   **읽히는 거리** 카드는 리더 위 1~3 cm. 금속 책상 위나 휴대폰 케이스 안의 카드는 잘 안 읽힐 수 있어요. 카드를 대고 있으면 같은 번호가 여러 번 찍히기도 해요(디버깅 증상 3: 읽은 뒤 1초 기다리기).
 
@@ -27,17 +27,21 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
-  - { name: RFID RC522 모듈, note: "I2C 방식. 핀 4개: SDA → 21 · SCL → 22 · G → GND · V → 5V" }
+  - { name: RFID RC522 모듈, note: "I2C 방식. 핀 4개: GND · VCC · SDA(21번) · SCL(22번)" }
   - { name: IC 카드 또는 열쇠고리 태그, note: 카드마다 번호가 달라요. 짝과 한 장씩 }
-  - { name: 브레드보드, note: "+ 줄(5V)·− 줄(GND)을 RFID 와 LED 가 함께 써요" }
-  - { name: F-F 듀폰선, note: "2개. 양쪽 끝이 구멍인 선. RFID SDA · SCL 을 보드 21 · 22번 핀에 바로 이을 때" }
-  - { name: M-F 듀폰선, note: "5개. 한쪽은 핀, 한쪽은 구멍인 선. RFID G · V 와 보드 5V · GND 를 브레드보드 − 줄 · + 줄에, 보드 2번을 7번 줄에 꽂을 때" }
-  - { name: 점퍼선(M-M), note: "1개. LED 짧은 다리 줄(13번) → − 줄" }
-  - { name: (설계) 빨강 LED 1개 · 220Ω 저항 1개, note: "2번 → 7번 줄 → 저항 → 12번 줄 LED 긴 다리, 짧은 다리 13번 줄 → − 줄" }
+  - { name: 브레드보드, board: plus, note: "(설계) LED 와 저항만 꽂아요. RFID 는 보드에 바로" }
+  - { name: 브레드보드, board: devkit, note: "+ 줄(3V3)·− 줄(GND)을 RFID 와 LED 가 함께 써요" }
+  - { name: F-F 듀폰선 4가닥, board: plus, note: "양쪽 끝이 구멍인 선. RFID 네 핀을 보드 I2C 묶음 첫 줄에 바로" }
+  - { name: F-F 듀폰선 2가닥, board: devkit, note: "양쪽 끝이 구멍인 선. RFID SDA · SCL 을 D21 · D22 에 바로" }
+  - { name: M-F 듀폰선 2가닥, board: plus, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 2번 → 6번 줄, 아래 줄 GND → − 줄" }
+  - { name: M-F 듀폰선 5가닥, board: devkit, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 3V3 · GND 와 RFID VCC · GND 를 + − 줄에, 보드 2번 → 6번 줄" }
+  - { name: 점퍼선(M-M) 1가닥, note: "LED 짧은 다리 줄(11번) → − 줄" }
+  - { name: (설계) LED · 220Ω 저항, note: "빨강 LED 1개와 저항 1개. 2번 → 6번 줄 → 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
-  caption: "RFID 모듈은 브레드보드 밖에: SDA → 21번 · SCL → 22번(F-F 선), G → − 줄 · V → + 줄(M-F 선). + 줄은 ESP32 5V, − 줄은 GND. (설계) 2번 → 7번 줄 → 220Ω 저항 → 12번 줄 LED 긴 다리, 짧은 다리 13번 줄 → − 줄"
+  caption: "RFID 는 보드에 바로: GND · VCC · SDA · SCL → I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22). (설계) ANALOG 묶음 io2 의 S → 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄, − 줄 → 아래 줄 GND"
+  captionDevkit: "보드 3V3 · GND 를 브레드보드 + − 줄에 잇고 RFID VCC → + 줄 · GND → − 줄, SDA → D21 · SCL → D22 (F-F 선으로 바로). (설계) D2 → 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄"
 principle:
   image: images/rf-principle.svg
   body: |
@@ -70,7 +74,7 @@ parts:
 
           리더는 카드에서 무엇을 알아낼까요? 아직 코드도 부품도 없어요. 활동 칸의 질문에 **내 생각을 한두 문장**으로 적어 보세요. 틀려도 괜찮아요.
         todo:
-          - 준비물(RFID 모듈, 카드, 선, 브레드보드)을 책상에 꺼내 놓기
+          - 준비물(RFID 모듈, 카드, 듀폰선, 브레드보드)을 책상에 꺼내 놓기
           - 질문마다 내 생각을 한두 문장씩 적기
           - 다 적으면 **완료** 누르기
         questions:
@@ -126,13 +130,14 @@ parts:
         minutes: 7
         scene:
           image: images/wiring-breadboard.svg
-          caption: "지금은 RFID 만: SDA → 21번 · SCL → 22번, G → − 줄 · V → + 줄. + 줄은 5V, − 줄은 GND"
+          caption: "지금은 RFID 만: F-F 선 4가닥으로 I2C 묶음 첫 줄의 GND · 5V · SDA(21번) · SCL(22번)에"
+          captionDevkit: "지금은 RFID 만: 3V3 · GND → 브레드보드 + − 줄, RFID VCC → + 줄 · GND → − 줄, SDA → D21 · SCL → D22"
         body: |
-          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 RFID 모듈을 이어요. SDA · SCL 은 F-F 선으로 보드 21 · 22번에 바로, G · V 는 M-F 선으로 브레드보드 − 줄 · + 줄에 꽂아요. LED 는 설계 단계에서 꽂아도 돼요.
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 RFID 모듈을 이어요. SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 가요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요. LED 는 설계 단계에서 꽂아도 돼요.
 
           RFID 는 혼자 말하지 못해서 **라이브러리 파일 3개**가 보드에 있어야 해요. 실행하면 블록랩이 함께 올려 줘요. 카드를 리더 위 1~3 cm 에 대 보고, 찍힌 숫자를 **공책에 꼭 적어 두세요.** 미션에서 쓸 내 카드 번호예요.
         todo:
-          - USB 를 뺀 채 RFID 4선(SDA · SCL · G · V) 잇기
+          - USB 를 뺀 채 RFID 4선(GND · VCC · SDA · SCL) 잇기
           - "**보드 연결** → **실행** 누르고 내 카드와 짝의 카드를 대 보기"
           - 찍힌 두 카드 번호를 공책에 적고 예측과 비교하기
         code: step1_read_uid.py
@@ -316,7 +321,7 @@ parts:
         minutes: 6
         scene:
           image: images/breadboard-basics.svg
-          caption: "LED 는 브레드보드에: 2번 → 7번 줄 → 220Ω 저항 → 12번 줄 긴 다리, 13번 줄 짧은 다리 → − 줄"
+          caption: "LED 는 브레드보드에: 2번 → 6번 줄 → 220Ω 저항 → 10번 줄 긴 다리, 11번 줄 짧은 다리 → − 줄. 같은 번호의 다섯 칸은 이어져 있어요"
         body: |
           출력 칸의 OPEN 은 화면을 보는 사람만 알 수 있어요. 이번에는 등록된 카드를 대면 **LED 가 1초 켜졌다 꺼지게** 설계해요. 문 옆의 초록 불처럼요. 코드를 쓰기 전에 **우리말로 먼저!**
 
