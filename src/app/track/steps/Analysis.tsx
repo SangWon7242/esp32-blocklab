@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useBoardChoice } from "@/app/board/boardChoice";
+import { figureCaption } from "@/track/board";
 import { analysisCompared, analysisFilled, type AnalysisInput } from "@/track/completion";
 import { Illustration } from "../Illustration";
 import type { StepProps } from "./types";
@@ -25,7 +27,8 @@ export function Analysis({ step, chapter, input, onInput, teacherMode, readOnly 
   const matchedCount = Object.values(matched).filter(Boolean).length;
 
   // 장면 그림이 세 칸 그림이면 그 설명을 함께 (안내 칸에서는 빼고 여기서만 그린다)
-  const caption = step.scene?.image === ANALYSIS_IMAGE ? step.scene.caption : undefined;
+  const board = useBoardChoice();
+  const caption = step.scene?.image === ANALYSIS_IMAGE ? figureCaption(step.scene, board) : undefined;
 
   return (
     <div className="flex flex-1 flex-col gap-5">

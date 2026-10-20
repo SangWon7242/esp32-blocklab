@@ -8,10 +8,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Progress } from "@/components/ui/progress";
 import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
+import { figureCaption, materialsForBoard } from "@/track/board";
 import { getChapter, loadChapters, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates, type StepState } from "@/track/gating";
 import type { Step } from "@/track/schema";
 import { TRACK_NAME } from "@/track/tracks";
+import { BoardSelect, chapterShowsBoardSelect } from "../board/BoardSelect";
+import { useBoardChoice } from "../board/boardChoice";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
 import { Illustration } from "./Illustration";
@@ -79,6 +82,9 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
             {review && <ReviewBadge />}
             {teacherMode && !review && <Badge variant="outline">교사 모드 — 모든 단계가 열려 있어요</Badge>}
           </div>
+          {/* 수업 보드 (배선이 있는 챕터만): 고르면 배선 그림·설명·준비물이 그 보드로 바뀌고 모든 챕터에 적용된다.
+              뒤로 가기 줄의 오른쪽에 두어 머리띠 높이를 늘리지 않는다 (첫 화면 단계 카드 수). 좁으면 다음 줄로 */}
+          {chapterShowsBoardSelect(chapter) && <BoardSelect className="sm:ml-auto" />}
         </div>
 
         <div className="mt-1 flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-8">
@@ -213,6 +219,7 @@ function StepCard({ chapterId, step, n, state, resume }: { chapterId: string; st
  * 칸이 넓으면(@2xl — 태블릿 세로에서 쌓였을 때) 앞 두 묶음을 두 열로 나란히.
  */
 function ChapterIntro({ chapter, progressChapters, teacherMode }: { chapter: LoadedChapter; progressChapters: ProgressChapters; teacherMode: boolean }) {
+  const board = useBoardChoice();
   return (
     <div className="space-y-5">
       <div className="grid gap-5 @2xl:grid-cols-2 @2xl:items-start">
@@ -248,10 +255,10 @@ function ChapterIntro({ chapter, progressChapters, teacherMode }: { chapter: Loa
               </div>
             </dl>
           )}
-          {chapter.materials && (
+          {materialsForBoard(chapter.materials, board).length > 0 && (
             <section aria-labelledby="materials-title">
               <h2 id="materials-title" className="mb-2 flex items-center gap-2 text-md font-semibold"><Package className="size-4 text-primary" />준비물</h2>
-              <MaterialChips chapterId={chapter.id} materials={chapter.materials} />
+              <MaterialChips chapterId={chapter.id} materials={chapter.materials!} board={board} />
             </section>
           )}
           <PrerequisiteList chapter={chapter} chapters={loadChapters()} progressChapters={progressChapters} />
@@ -270,7 +277,7 @@ function ChapterIntro({ chapter, progressChapters, teacherMode }: { chapter: Loa
             <Illustration
               chapterId={chapter.id}
               image={chapter.wiring.image}
-              caption={chapter.wiring.caption}
+              caption={figureCaption(chapter.wiring, board)}
               className="rounded-md bg-muted/30 p-2"
               zoomable
             />

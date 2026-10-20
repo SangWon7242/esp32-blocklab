@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BOARD_IDS } from "./board";
 
 /*
  * 트랙 콘텐츠(content/chapters/<id>/chapter.yaml) 형식. 키 설명은 src/track/README.md.
@@ -11,8 +12,18 @@ export const FileRef = z.string().regex(/^[\w.-]+\.py$/, "같은 폴더의 .py �
 /** 같은 폴더 images/ 의 .svg 파일 (예: images/wiring-led.svg) */
 export const ImageRef = z.string().regex(/^images\/[\w.-]+\.svg$/, "images/<이름>.svg 꼴이어야 합니다");
 
-/** 그림 하나 + 그 아래 설명 (선택) */
-export const FigureSchema = z.object({ image: ImageRef, caption: z.string().min(1).optional() }).strict();
+/** 수업 보드: plus(ESP32 Plus 확장 보드, 기본) · devkit(기본 보드 DevKit 30핀). 고르는 법은 src/track/board.ts */
+export const BoardIdSchema = z.enum(BOARD_IDS);
+
+/**
+ * 그림 하나 + 그 아래 설명 (선택). captionDevkit 은 학생이 기본 보드(devkit)를 골랐을 때 caption 대신 보인다.
+ * 기본 보드 그림은 같은 이름의 .devkit.svg (있으면 저절로 바뀐다 — YAML 에 적지 않는다)
+ */
+export const FigureSchema = z.object({
+  image: ImageRef,
+  caption: z.string().min(1).optional(),
+  captionDevkit: z.string().min(1).optional(),
+}).strict();
 export type Figure = z.infer<typeof FigureSchema>;
 
 const fail = z.string().min(1);
@@ -301,8 +312,13 @@ export const ChapterSchema = z.object({
   summary: z.string().min(1).optional(),
   /** 표지 그림 */
   cover: ImageRef.optional(),
-  /** 준비물(부품). image 는 작은 부품 그림 */
-  materials: z.array(z.object({ name: z.string().min(1), image: ImageRef.optional(), note: z.string().min(1).optional() }).strict()).min(1).optional(),
+  /** 준비물(부품). image 는 작은 부품 그림. board 를 적으면 그 보드를 골랐을 때만 보인다 (없으면 두 보드 모두) */
+  materials: z.array(z.object({
+    name: z.string().min(1),
+    image: ImageRef.optional(),
+    note: z.string().min(1).optional(),
+    board: BoardIdSchema.optional(),
+  }).strict()).min(1).optional(),
   /** 배선도 */
   wiring: FigureSchema.optional(),
   /** 원리 (Keyestudio 수업의 "원리"): 챕터 화면 hero 아래 카드. body 는 markdown, image 는 왼쪽 그림 */

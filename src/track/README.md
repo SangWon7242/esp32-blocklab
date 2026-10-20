@@ -10,6 +10,20 @@
 그림을 가리키는 키(`cover`, `materials[].image`, `wiring.image`, `principle.image`, `scene.image`)는 **챕터 폴더 기준 `images/<이름>.svg`** 만 쓴다
 (`image: images/wiring-led.svg`, 영문·숫자·`_`·`.`·`-` 이름). 없는 그림, 다른 모양(`.png`, 하위 폴더, `../`)은 테스트에서 걸린다.
 
+## 수업 보드 (plus · devkit)
+
+수업은 두 보드로 할 수 있다: **ESP32 Plus 확장 보드**(Keyestudio, `plus`, 기본)와 **기본 보드 (DevKit 30핀)**(ESP32 DevKit V1, `devkit`).
+학생이 챕터 화면 위(단계 화면 윗줄)에서 고르고, 고른 값은 그 기기(localStorage `esp32-blocklab:board`)에 남아 모든 챕터에 적용된다.
+보드 고르는 칸은 배선도(`wiring`)가 있거나 아래 셋 가운데 하나라도 있는 챕터에만 보인다. 콘텐츠의 기본은 늘 `plus` 이고, 다른 보드용은 덧붙이기만 한다.
+
+- **그림**: 기본 보드용 그림은 같은 이름에 `.devkit.svg` 를 붙여 같은 `images/` 폴더에 둔다 (`images/wiring-door.svg` → `images/wiring-door.devkit.svg`).
+  YAML 에는 적지 않는다 — `devkit` 을 고르면 화면(크게 보기 창 포함)이 그 그림이 있을 때 저절로 바꿔 그리고, 없으면 기본 그림을 쓴다.
+  표지·부품·배선·원리·장면 그림 모두 같다. 그림의 `<title>` 은 "기본 보드" 로 시작한다.
+- **설명**: 그림(`wiring`, `scene` — `{ image, caption?, captionDevkit? }`)에 `captionDevkit` 을 적으면 `devkit` 일 때 `caption` 대신 보인다 (없으면 `caption`).
+- **준비물**: `materials[]` 항목에 `board: plus` 또는 `board: devkit` 을 적으면 그 보드를 골랐을 때만 보인다 (없으면 두 보드 모두).
+
+슬라이드도 같은 규칙: `npm run slides -- 10-auto-door --board devkit` (scripts/README.md). 고르는 법(순수 함수)은 `src/track/board.ts`.
+
 ## 챕터
 
 ```yaml
@@ -31,7 +45,8 @@ cover: images/cover.svg   # 선택. 표지 그림
 materials:                # 선택. 준비물(부품) 칩
   - { name: ESP32 보드, image: images/part-esp32.svg }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 }      # image·note 는 선택
-wiring: { image: images/wiring-led.svg, caption: "LED 긴 다리 → 저항 → 26번" }   # 선택. 배선도
+  - { name: ESP32 DevKit 30핀, board: devkit }     # board 는 선택: plus | devkit — 그 보드를 골랐을 때만 (아래 "수업 보드")
+wiring: { image: images/wiring-led.svg, caption: "LED 긴 다리 → 저항 → 26번", captionDevkit: "LED 긴 다리 → 저항 → D26" }   # 선택. 배선도 (captionDevkit 선택)
 principle:                # 선택. 원리 카드 (아래 "Keyestudio 수업 구조")
   image: images/led-parts.svg   # 선택. 카드 왼쪽 그림
   body: |                 # markdown
@@ -115,7 +130,7 @@ Keyestudio 수업의 "2. 원리", "6. 실행 결과", "7. 코드 설명"을 담�
 | `type` | 아래 유형 (`problem`·`analysis`·`predict`·`run`·`readcheck`·`mission`·`debug`·`design`·`reflect`·`app`) |
 | `title` | 단계 제목 |
 | `minutes` | 선택. 기준 시간(분) |
-| `scene` | 선택. `{ image, caption? }` — 안내 칸 맨 위 장면 그림과 그 아래 설명 |
+| `scene` | 선택. `{ image, caption?, captionDevkit? }` — 안내 칸 맨 위 장면 그림과 그 아래 설명 (`captionDevkit` 은 기본 보드를 골랐을 때, 위 "수업 보드") |
 | `body` | 선택. 왼쪽 안내 칸 글 (아래 "안내 글 markdown"). 없으면 유형별 기본 안내 |
 | `todo` | 선택. "지금 할 일" 1~4개 (markdown 한 줄씩). 체크 표시는 장식이고 완료 조건은 유형별 규칙 그대로 |
 | `optional` | 선택. `true`면 건너뛸 수 있고, 마치지 않아도 다음 단계가 열린다 |

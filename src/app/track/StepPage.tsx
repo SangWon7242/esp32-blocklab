@@ -10,11 +10,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Progress } from "@/components/ui/progress";
 import { HostLink, useHost } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
+import { figureCaption, materialsForBoard } from "@/track/board";
 import { awaitingExplain, canComplete, isEditorStep } from "@/track/completion";
 import { getChapter, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates } from "@/track/gating";
 import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { Step } from "@/track/schema";
+import { BoardSelect, chapterShowsBoardSelect } from "../board/BoardSelect";
+import { useBoardChoice } from "../board/boardChoice";
 import { useSettings } from "../settings/settings";
 import { ReviewBadge } from "./ReviewBadge";
 import { ProjectSaveTargetContext, projectSaveTarget } from "./TrackSaveButton";
@@ -113,6 +116,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   const next = steps[index + 1];
   const nextOpen = next && states[next.id] !== "locked";
   const doneCount = steps.filter((s) => states[s.id] === "done").length;
+  const boardSelect = chapterShowsBoardSelect(chapter);
   const [guideCollapsed, setGuideCollapsed] = useGuideCollapsed();
 
   const save = (nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") => {
@@ -181,9 +185,13 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
         </Button>
         {/* 안내 칸을 접으면 제목을 위 줄에 남긴다 */}
         {guideCollapsed && <span className="hidden min-w-0 truncate text-base font-medium md:block">{step.title}</span>}
-        <div className="ml-auto flex w-40 items-center gap-2 text-sm text-muted-foreground sm:w-64">
-          <Progress value={(doneCount / steps.length) * 100} className="h-2" aria-label="챕터 진행률" />
-          <span className="shrink-0" data-testid="step-position">{index + 1} / {steps.length}</span>
+        <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
+          {/* 수업 보드 (배선이 있는 챕터만, 작은 모양): 챕터 화면의 고르는 칸과 같은 값 */}
+          {boardSelect && <BoardSelect compact />}
+          <div className={cn("flex items-center gap-2 text-sm text-muted-foreground", boardSelect ? "w-28 sm:w-48 lg:w-64" : "w-40 sm:w-64")}>
+            <Progress value={(doneCount / steps.length) * 100} className="h-2" aria-label="챕터 진행률" />
+            <span className="shrink-0" data-testid="step-position">{index + 1} / {steps.length}</span>
+          </div>
         </div>
       </div>
 
@@ -263,7 +271,8 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
 function StepGuide({
   chapter, step, partTitle, done, awaiting,
 }: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean; awaiting: boolean }) {
-  const hasKit = Boolean(chapter.materials?.length || chapter.wiring);
+  const board = useBoardChoice();
+  const hasKit = Boolean(materialsForBoard(chapter.materials, board).length || chapter.wiring);
   return (
     <>
       {partTitle && <p className="text-sm text-muted-foreground">{partTitle}</p>}
@@ -280,7 +289,7 @@ function StepGuide({
         <Illustration
           chapterId={chapter.id}
           image={step.scene.image}
-          caption={step.scene.caption}
+          caption={figureCaption(step.scene, board)}
           className="mt-4 max-w-xl rounded-lg border bg-muted/30 p-3"
           zoomable
         />
@@ -336,9 +345,9 @@ function StepGuide({
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 px-3 pt-1 pb-3">
-            {chapter.materials && <MaterialChips chapterId={chapter.id} materials={chapter.materials} />}
+            {chapter.materials && <MaterialChips chapterId={chapter.id} materials={chapter.materials} board={board} />}
             {chapter.wiring && (
-              <Illustration chapterId={chapter.id} image={chapter.wiring.image} caption={chapter.wiring.caption} className="rounded-md bg-muted/30 p-2" zoomable />
+              <Illustration chapterId={chapter.id} image={chapter.wiring.image} caption={figureCaption(chapter.wiring, board)} className="rounded-md bg-muted/30 p-2" zoomable />
             )}
           </CollapsibleContent>
         </Collapsible>

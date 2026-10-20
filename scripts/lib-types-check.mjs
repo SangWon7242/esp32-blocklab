@@ -53,7 +53,8 @@ try {
   writeFileSync(path.join(hub, "tsconfig.json"), JSON.stringify({ compilerOptions: strict, files: ["consumer.ts"] }, null, 2));
   writeFileSync(
     path.join(hub, "consumer.ts"),
-    `import type { StepRecord, Progress, Chapter, Step, StepType, LoadedChapter, ChapterSnapshot, HostProps, LabViewProps, LabInitialProgram } from "./vendor/blocklab";
+    `import type { StepRecord, Progress, Chapter, Step, StepType, LoadedChapter, ChapterSnapshot, HostProps, LabViewProps, LabInitialProgram, BoardId } from "./vendor/blocklab";
+import { BOARD_LABELS, BoardSelect, setBoardChoice, useBoardChoice } from "./vendor/blocklab";
 type IsAny<T> = 0 extends 1 & T ? true : false;
 type NotAny<T> = IsAny<T> extends true ? false : true;
 const checks: [NotAny<StepRecord>, NotAny<Progress>, NotAny<Chapter>, NotAny<Step>, NotAny<StepType>, NotAny<LoadedChapter>, NotAny<ChapterSnapshot>, NotAny<HostProps["store"]>, NotAny<StepRecord["status"]>] =
@@ -79,7 +80,15 @@ const codeOnly: LabViewProps = { initialProgram: { code: "" }, codeRef: null };
 const noCode: LabViewProps = { initialProgram: { blocksJson: {} } };
 // @ts-expect-error title 은 글
 const badTitle: LabViewProps = { initialProgram: { code: "", title: 1 } };
-export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle };
+// 수업 보드 고르기: BoardId 는 "plus" | "devkit", 준비물 board·그림 captionDevkit 이 Chapter 타입에 있다
+const boardChecks: [NotAny<BoardId>, NotAny<typeof useBoardChoice>, NotAny<typeof setBoardChoice>, NotAny<typeof BoardSelect>] = [true, true, true, true];
+const devkit: BoardId = "devkit";
+// @ts-expect-error 없는 보드
+const badBoard: BoardId = "uno";
+const boardOfFirst = (c: Chapter): BoardId | undefined => c.materials?.[0]?.board;
+const devkitCaption = (c: Chapter): string | undefined => c.wiring?.captionDevkit;
+const boardLabel: string = BOARD_LABELS.devkit;
+export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, badBoard, boardOfFirst, devkitCaption, boardLabel };
 `,
   );
   tscIn(hub, "zod 없는 폴더");
