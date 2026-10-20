@@ -162,6 +162,7 @@ export const coreContent: Record<string, BlockContent> = {
     tips: [
       "/ 로 나누면 7 / 2 가 3.5 처럼 소수가 나와요.",
       "^ 를 고르면 코드에는 ** 로 적혀요. 파이썬 코드에서 ^ 는 거듭제곱이 아니라 전혀 다른 계산이에요.",
+      "& | >> << 는 수를 0과 1 칸으로 보고 계산하는 비트 연산이에요. 1 & (dat >> bit) 는 dat 의 bit 번째 칸이 1 인지 0 인지 꺼내요 (7세그먼트).",
     ],
   },
   calc_paren: {
@@ -196,7 +197,7 @@ export const coreContent: Record<string, BlockContent> = {
     ],
   },
   calc_round: {
-    concept: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구해요. 코드로는 round(x), math.floor(x), math.ceil(x), abs(x), math.sqrt(x) 입니다. 내림·올림·제곱근을 고르면 import math 가 저절로 붙어요.",
+    concept: "수를 반올림·내림·올림하거나 절댓값·제곱근·자연로그를 구해요. 코드로는 round(x), math.floor(x), math.ceil(x), abs(x), math.sqrt(x), math.log(x) 입니다. 내림·올림·제곱근·자연로그를 고르면 import math 가 저절로 붙어요.",
     example: {
       title: "가변저항 전압을 반올림·내림해서 보기",
       code: `${adcSetup("knob")}\nwhile True:\n    volt = knob.read() * 3.3 / 4095\n    print(round(volt))\n    print(math.floor(volt))\n    time.sleep(0.5)`,
@@ -236,7 +237,7 @@ export const coreContent: Record<string, BlockContent> = {
     ],
   },
   calc_ticks: {
-    concept: "보드가 켜진 뒤 지난 시간을 밀리초(1000분의 1초)로 알려 줘요. 코드로는 time.ticks_ms() 입니다. 시작할 때 값을 변수에 적어 두고 나중 값에서 빼면 걸린 시간을 알 수 있어요.",
+    concept: "보드가 켜진 뒤 지난 시간을 밀리초(1000분의 1초)로 알려 줘요. 코드로는 time.ticks_ms() 이고, 단위를 µs 로 고르면 마이크로초(100만분의 1초)를 세는 time.ticks_us() 가 돼요. 시작할 때 값을 변수에 적어 두고 나중 값에서 빼면 걸린 시간을 알 수 있어요.",
     example: {
       title: "반응 속도 재기: LED 가 켜지면 버튼 누르기",
       code: "led = Pin(26, Pin.OUT)\nbutton = Pin(14, Pin.IN, Pin.PULL_UP)\ntime.sleep(random.randint(2, 5))\nled.value(1)\nstart = time.ticks_ms()\nwhile button.value() == 1:\n    time.sleep_ms(1)\nprint(time.ticks_ms() - start)\nled.value(0)",
@@ -255,6 +256,17 @@ export const coreContent: Record<string, BlockContent> = {
     tips: [
       "1000 이 1초예요. 반응 속도 게임이나 '3초 동안 누르기' 같은 시간 재기에 써요.",
       "그냥 빼도 되지만, ticks_diff 는 보드를 오래 켜 두어 시간 값이 다시 작은 수로 돌아가도 바르게 계산해요.",
+    ],
+  },
+  calc_ticks_diff: {
+    concept: "두 시각 사이에 걸린 시간을 알려 줘요. 시작할 때와 끝날 때 '지금까지 지난 시간' 값을 각각 변수에 적어 두고 두 변수를 끼우면 됩니다. 코드로는 time.ticks_diff(stop, start) 이고, 끝 - 시작 을 계산해요.",
+    example: {
+      title: "버튼을 누르고 있던 시간 재기",
+      code: "button = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile button.value() == 1:\n    time.sleep_ms(1)\nstart = time.ticks_ms()\nwhile button.value() == 0:\n    time.sleep_ms(1)\nstop = time.ticks_ms()\nprint(time.ticks_diff(stop, start))",
+    },
+    tips: [
+      "두 값의 단위가 같아야 해요. 초음파 거리 함수는 µs(마이크로초) 값 둘의 차이를 재요.",
+      "시작부터 지금까지를 재려면 '부터 지난 시간' 블록이 더 짧아요.",
     ],
   },
   calc_map: {

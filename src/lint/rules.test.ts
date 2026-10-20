@@ -69,7 +69,7 @@ describe("device-before-setup", () => {
   it("다른 kind 로 준비된 이름 → 오류", () => {
     const servo = { type: "esp_servo_setup", id: "sv", fields: { VAR: { id: "var_led" }, PIN: 4 } };
     const issues = only(run(program([servo, pinWrite("w", "led")], { vars: ["led"] })), "device-before-setup");
-    expect(issues.map((i) => [i.blockId, i.ko, i.en])).toEqual([["w", "led 는 서보 모터예요. 핀 블록으로 준비해 주세요", "TypeError: 'led' is a servo device, not pin, ultrasonic, tilt or pir"]]);
+    expect(issues.map((i) => [i.blockId, i.ko, i.en])).toEqual([["w", "led 는 서보 모터예요. 핀 블록으로 준비해 주세요", "TypeError: 'led' is a servo device, not pin, ultrasonic, tilt, pir or seg7"]]);
   });
   it("준비 있음 → 없음 (초음파 trig 도 핀으로 쓸 수 있다, print 는 준비가 필요 없다)", () => {
     const ultra = { type: "esp_ultrasonic_setup", id: "u", fields: { TRIG: 13, ECHO: 12 } };

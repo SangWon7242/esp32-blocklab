@@ -69,6 +69,9 @@ export const toolbox = {
         block("calc_item", { inputs: { X: text("hello"), INDEX: num(0) } }),
         block("calc_ticks"),
         block("calc_elapsed", { inputs: { X: { block: { type: "variables_get", fields: { VAR: { name: "start" } } } } } }),
+        block("calc_ticks_diff", {
+          inputs: { END: { block: { type: "variables_get", fields: { VAR: { name: "stop" } } } }, START: { block: { type: "variables_get", fields: { VAR: { name: "start" } } } } },
+        }),
         block("calc_map", { inputs: { X: num(2048), A: num(0), B: num(4095), C: num(0), D: num(100) } }),
       ],
     },

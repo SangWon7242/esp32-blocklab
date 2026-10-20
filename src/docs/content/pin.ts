@@ -28,6 +28,14 @@ export const pinContent: Record<string, BlockContent> = {
     example: { title: "LED 를 2초 켰다가 끄기", code: "led = Pin(26, Pin.OUT)\nled.value(1)\ntime.sleep(2)\nled.value(0)" },
     tips: ["부저·릴레이도 출력 핀이라 같은 블록으로 켜고 꺼요."],
   },
+  dev_pin_write_value: {
+    concept: "출력 핀에 변수나 계산한 값을 그대로 내보내요. 값이 1 이면 켜지고 0 이면 꺼집니다. 코드로는 led.value(value) 처럼 괄호 안에 값을 넣어요.",
+    example: {
+      title: "버튼을 누르는 동안만 LED 켜기",
+      code: "led = Pin(26, Pin.OUT)\nbutton = Pin(14, Pin.IN, Pin.PULL_UP)\nwhile True:\n    pressed = 1 - button.value()\n    led.value(pressed)\n    time.sleep_ms(10)",
+    },
+    tips: ["0 이나 1 을 바로 적을 때는 켜기·끄기 블록이 더 알아보기 쉬워요.", "7세그먼트의 hc595_shift 함수가 칸마다 0 이나 1 을 si 핀으로 내보낼 때 이 블록을 써요."],
+  },
   esp_pin_read: {
     concept: "입력 핀의 지금 값을 읽어요. 핀에 전기가 들어오면 1, 아니면 0 이 됩니다. 코드로는 echo.value() 처럼 이름 뒤에 .value() 를 붙여요.",
     example: { title: "입력 핀 값을 계속 출력하기", code: "sensor = Pin(14, Pin.IN)\nwhile True:\n    print(sensor.value())\n    time.sleep(0.5)" },

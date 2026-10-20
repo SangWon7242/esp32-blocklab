@@ -40,7 +40,8 @@ export const ledPwm: DeviceSpec = {
       parts: [{ kind: "var", name: "VAR", default: "led" }, { kind: "value", name: "DUTY", check: "Number", shadow: 512 }],
       tooltip: "led.duty(0~1023)",
       code: (v) => `${v.VAR}.duty(${v.DUTY})`,
-      pattern: { kind: "method", name: "duty", args: [null], objPart: "VAR", objKinds: ["pwm"] },
+      // RGB LED(red/green/blue)·DC 모터(motor1a/motor1b) 핀도 0~1023 세기로 쓴다 (set_color·forward 함수 몸통)
+      pattern: { kind: "method", name: "duty", args: [null], objPart: "VAR", objKinds: ["pwm", "rgb", "motor"] },
       range: { DUTY: { min: 0, max: 1023, label: { ko: "세기", en: "duty" } } },
     },
   ],

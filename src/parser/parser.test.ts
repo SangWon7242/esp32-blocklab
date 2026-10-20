@@ -71,7 +71,8 @@ describe("설정 패턴", () => {
     expect(def.fields).toEqual({ NAME: "get_distance" });
     expect(def.inputs?.RETURN?.block?.type).toBe("calc_int");
     const r = parse(src);
-    expect(r.unparsed.map((u) => u.text)).toEqual(["time.ticks_diff(stop, start)"]);
+    // stop·start 는 값을 정한 적 없는 이름이라 식 블록으로 남는다 (time.ticks_diff 는 걸린 시간 블록)
+    expect(r.unparsed.map((u) => u.text)).toEqual(["stop", "start"]);
   });
   it("OLED 준비와 표준 show 는 접히고 show 호출은 esp_oled_show", () => {
     const src = [
@@ -137,10 +138,10 @@ describe("문장", () => {
     expect(b[2].icons?.comment.text).toBe("계속");
   });
   it("모르는 문장은 code_stmt 로, 모르는 식은 code_expr 로", () => {
-    const r = parse("x = time.ticks_us()\noled.fill(0)\n");
-    const b = body("x = time.ticks_us()\noled.fill(0)\n");
+    const r = parse("x = time.ticks_cpu()\noled.fill(0)\n");
+    const b = body("x = time.ticks_cpu()\noled.fill(0)\n");
     expect(b[0].type).toBe("variables_set");
-    expect(b[0].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: "time.ticks_us()" } });
+    expect(b[0].inputs?.VALUE?.block).toEqual({ type: "code_expr", fields: { CODE: "time.ticks_cpu()" } });
     expect(b[1]).toEqual({ type: "code_stmt", fields: { CODE: "oled.fill(0)" } });
     expect(r.unparsed.map((u) => u.line)).toEqual([1, 2]);
   });

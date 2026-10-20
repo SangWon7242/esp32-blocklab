@@ -78,6 +78,11 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
     case "list_create_from": return { body: [], tops: [] };
     // 지난 시간 블록은 시작 시각 변수 start 를 읽는다
     case "calc_elapsed": return { body: [{ type: "variables_set", fields: { VAR: { name: "start" } }, inputs: { VALUE: { block: { type: "calc_ticks" } } } }], tops: [] };
+    // 걸린 시간 블록은 두 시각 변수 stop·start 를 읽는다
+    case "calc_ticks_diff": return {
+      body: ["start", "stop"].map((name) => ({ type: "variables_set", fields: { VAR: { name } }, inputs: { VALUE: { block: { type: "calc_ticks" } } } })),
+      tops: [],
+    };
     case "procedures_callnoreturn":
     case "procedures_callreturn": {
       const name = (entry.extraState as { name: string }).name;

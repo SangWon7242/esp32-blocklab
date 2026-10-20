@@ -63,7 +63,7 @@ describe("editorReducer", () => {
 
   it("변환 안 된 조각 수를 센다", () => {
     const s0 = editorReducer(initialEditorState(LED), { type: "switchSource", source: "code" });
-    const s1 = editorReducer(s0, { type: "codeChanged", code: "x = time.ticks_us()\n" });
+    const s1 = editorReducer(s0, { type: "codeChanged", code: "x = time.ticks_cpu()\n" });
     expect(s1.unparsed).toHaveLength(1);
   });
   it("코드 지도: blocksChanged·mapUpdated 가 지도를 넣고, 블록을 새로 만든 codeChanged 는 비운다", () => {
@@ -87,10 +87,10 @@ describe("countCodeBlocks", () => {
     return r.json;
   };
   it("작업판에 남은 코드 블록(code_stmt·code_expr)을 센다", () => {
-    expect(countCodeBlocks(json("x = time.ticks_us()\noled.fill(0)\n"))).toBe(2);
+    expect(countCodeBlocks(json("x = time.ticks_cpu()\noled.fill(0)\n"))).toBe(2);
   });
   it("몸통·값 칸 안의 코드 블록도 센다", () => {
-    expect(countCodeBlocks(json("while True:\n    print(time.ticks_us())\n"))).toBe(1);
+    expect(countCodeBlocks(json("while True:\n    print(time.ticks_cpu())\n"))).toBe(1);
   });
   it("예시 코드와 빈 작업판은 0", () => {
     expect(countCodeBlocks(json(SAMPLE_CODE))).toBe(0);

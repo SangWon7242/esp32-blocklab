@@ -7,14 +7,17 @@ export const calcBlocks: Record<string, unknown>[] = [
       {
         type: "field_dropdown",
         name: "OP",
-        options: [["+", "ADD"], ["-", "MINUS"], ["×", "MULTIPLY"], ["÷", "DIVIDE"], ["//", "FLOORDIV"], ["%", "MOD"], ["^", "POW"]],
+        options: [
+          ["+", "ADD"], ["-", "MINUS"], ["×", "MULTIPLY"], ["÷", "DIVIDE"], ["//", "FLOORDIV"], ["%", "MOD"], ["^", "POW"],
+          ["&", "BITAND"], ["|", "BITOR"], [">>", "RSHIFT"], ["<<", "LSHIFT"],
+        ],
       },
       { type: "input_value", name: "B" },
     ],
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "// 는 나눈 몫(정수), % 는 나머지, ^ 는 거듭제곱(**)입니다.",
+    tooltip: "// 는 나눈 몫(정수), % 는 나머지, ^ 는 거듭제곱(**)입니다. & | >> << 는 비트 연산(두 수의 0과 1 칸끼리 그리고·또는, 칸 밀기)이에요.",
   },
   {
     type: "calc_paren",
@@ -70,13 +73,13 @@ export const calcBlocks: Record<string, unknown>[] = [
       {
         type: "field_dropdown",
         name: "OP",
-        options: [["반올림", "ROUND"], ["내림", "FLOOR"], ["올림", "CEIL"], ["절댓값", "ABS"], ["제곱근", "SQRT"]],
+        options: [["반올림", "ROUND"], ["내림", "FLOOR"], ["올림", "CEIL"], ["절댓값", "ABS"], ["제곱근", "SQRT"], ["자연로그", "LOG"]],
       },
     ],
     inputsInline: true,
     output: "Number",
     style: "math_blocks",
-    tooltip: "수를 반올림·내림·올림하거나 절댓값·제곱근을 구합니다. 코드로는 round(수), math.floor(수), math.ceil(수), abs(수), math.sqrt(수) 입니다.",
+    tooltip: "수를 반올림·내림·올림하거나 절댓값·제곱근·자연로그를 구합니다. 코드로는 round(수), math.floor(수), math.ceil(수), abs(수), math.sqrt(수), math.log(수) 입니다.",
   },
   {
     type: "calc_minmax",
@@ -114,10 +117,11 @@ export const calcBlocks: Record<string, unknown>[] = [
   },
   {
     type: "calc_ticks",
-    message0: "지금까지 지난 시간 (ms)",
+    message0: "지금까지 지난 시간 (%1)",
+    args0: [{ type: "field_dropdown", name: "UNIT", options: [["ms", "MS"], ["µs", "US"]] }],
     output: "Number",
     style: "math_blocks",
-    tooltip: "time.ticks_ms(). 보드가 켜진 뒤 지난 밀리초입니다.",
+    tooltip: "time.ticks_ms() 는 보드가 켜진 뒤 지난 밀리초(1000분의 1초), time.ticks_us() 는 마이크로초(100만분의 1초)입니다.",
   },
   {
     type: "calc_elapsed",
@@ -127,6 +131,18 @@ export const calcBlocks: Record<string, unknown>[] = [
     output: "Number",
     style: "math_blocks",
     tooltip: "time.ticks_diff(time.ticks_ms(), 시작). 시작 시각(지금까지 지난 시간 값)부터 지금까지 지난 밀리초입니다.",
+  },
+  {
+    type: "calc_ticks_diff",
+    message0: "%2 부터 %1 까지 걸린 시간",
+    args0: [
+      { type: "input_value", name: "END", check: "Number" },
+      { type: "input_value", name: "START", check: "Number" },
+    ],
+    inputsInline: true,
+    output: "Number",
+    style: "math_blocks",
+    tooltip: "time.ticks_diff(끝, 시작). 두 시각(지금까지 지난 시간 값) 사이에 걸린 시간입니다. 두 값의 단위(ms·µs)가 같아야 해요.",
   },
   {
     type: "calc_map",

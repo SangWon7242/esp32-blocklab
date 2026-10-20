@@ -9,10 +9,12 @@ import type { BlockJson } from "./types";
 
 const COMPARE: Record<string, string> = { "<": "LT", ">": "GT", "==": "EQ", "!=": "NEQ", "<=": "LTE", ">=": "GTE" };
 const ARITH: Record<string, string> = { "+": "ADD", "-": "MINUS", "*": "MULTIPLY", "/": "DIVIDE", "//": "FLOORDIV", "%": "MOD", "**": "POW" };
+/** 비트 연산 → calc_arith 의 OP (^ 는 블록에서 거듭제곱 표시라 헷갈리므로 코드로 남긴다) */
+const BIT: Record<string, string> = { "&": "BITAND", "|": "BITOR", ">>": "RSHIFT", "<<": "LSHIFT" };
 /** 인자 하나짜리 내장 함수 → calc_round 의 OP */
 const ROUND_BUILTINS: Record<string, string> = { round: "ROUND", abs: "ABS" };
 /** math.* 함수 → calc_round 의 OP */
-const ROUND_MATH: Record<string, string> = { floor: "FLOOR", ceil: "CEIL", sqrt: "SQRT" };
+const ROUND_MATH: Record<string, string> = { floor: "FLOOR", ceil: "CEIL", sqrt: "SQRT", log: "LOG" };
 
 /** 따옴표 안 내용을 푼다. JSON 으로 풀 수 없는 이스케이프(`\x41`, `\a` 등)면 null — 식을 code_expr 로 남긴다 */
 export function decodeString(literal: string): string | null {
@@ -138,7 +140,7 @@ const OUTPUT_TYPES: Record<string, readonly string[]> = {
   logic_compare: ["Boolean"], logic_operation: ["Boolean"], logic_negate: ["Boolean"], logic_boolean: ["Boolean"],
   judge_between: ["Boolean"], judge_contains: ["Boolean"],
   calc_random: ["Number"], calc_round: ["Number"], calc_minmax: ["Number"], calc_len: ["Number"], calc_ticks: ["Number"],
-  calc_elapsed: ["Number"], calc_map: ["Number"],
+  calc_elapsed: ["Number"], calc_ticks_diff: ["Number"], calc_map: ["Number"],
   list_index: ["Number"],
   // calc_item 은 output null (리스트·글자의 항목은 어떤 값이든) 이라 여기에 넣지 않는다
 };
@@ -243,6 +245,7 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
         if (op === "+" && (isStringy(left, ctx) || isStringy(right, ctx))) return block("calc_concat", undefined, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
         return block("calc_arith", { OP: ARITH[op] }, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
       }
+      if (opNode.name === "BitOp" && BIT[op]) return block("calc_arith", { OP: BIT[op] }, { A: convertExpr(left, ctx), B: convertExpr(right, ctx) });
       return fallback(node, ctx);
     }
     case "CallExpression": {
@@ -271,9 +274,11 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
         return block("calc_round", { OP: ROUND_MATH[member.prop] }, { X: convertExpr(args[0], ctx, "Number") });
       }
       if (member?.obj === "time" && member.prop === "ticks_ms" && args.length === 0) return block("calc_ticks");
-      // time.ticks_diff(time.ticks_ms(), 시작) → 지난 시간. 첫 인자가 바로 그 꼴일 때만 (ticks_diff(stop, start) 는 코드로)
-      if (member?.obj === "time" && member.prop === "ticks_diff" && args.length === 2 && ctx.src.slice(args[0]) === "time.ticks_ms()") {
-        return block("calc_elapsed", undefined, { X: convertExpr(args[1], ctx, "Number") });
+      if (member?.obj === "time" && member.prop === "ticks_us" && args.length === 0) return block("calc_ticks", { UNIT: "US" });
+      // time.ticks_diff(time.ticks_ms(), 시작) → 지난 시간. 첫 인자가 바로 그 꼴일 때. 그 밖의 ticks_diff(stop, start) 는 걸린 시간 블록
+      if (member?.obj === "time" && member.prop === "ticks_diff" && args.length === 2) {
+        if (ctx.src.slice(args[0]) === "time.ticks_ms()") return block("calc_elapsed", undefined, { X: convertExpr(args[1], ctx, "Number") });
+        return block("calc_ticks_diff", undefined, { END: convertExpr(args[0], ctx, "Number"), START: convertExpr(args[1], ctx, "Number") });
       }
       // items.index(3) → 리스트에서 위치
       if (member && member.prop === "index" && args.length === 1 && isListVariable(member.obj, ctx)) {

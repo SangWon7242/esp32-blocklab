@@ -12,10 +12,13 @@ const ARITH: Record<string, [string, number]> = {
   MULTIPLY: ["*", Order.MULTIPLICATIVE], DIVIDE: ["/", Order.MULTIPLICATIVE],
   FLOORDIV: ["//", Order.MULTIPLICATIVE], MOD: ["%", Order.MULTIPLICATIVE],
   POW: ["**", Order.EXPONENTIATION],
+  // 비트 연산 (7세그먼트 hc595_shift 의 `1 & (dat >> bit)`). 파이썬 우선순위: 시프트 > & > |
+  BITAND: ["&", Order.BITWISE_AND], BITOR: ["|", Order.BITWISE_OR],
+  RSHIFT: [">>", Order.BITWISE_SHIFT], LSHIFT: ["<<", Order.BITWISE_SHIFT],
 };
 
 /** calc_round 의 OP → 함수 이름 (math.* 는 import math 규칙이 붙는다) */
-const ROUND: Record<string, string> = { ROUND: "round", FLOOR: "math.floor", CEIL: "math.ceil", ABS: "abs", SQRT: "math.sqrt" };
+const ROUND: Record<string, string> = { ROUND: "round", FLOOR: "math.floor", CEIL: "math.ceil", ABS: "abs", SQRT: "math.sqrt", LOG: "math.log" };
 
 /**
  * 왼쪽은 같은 우선순위에 괄호를 치지 않도록 order + 1, 오른쪽은 그대로.
@@ -116,7 +119,8 @@ export function registerForBlocks(gen: Gen): void {
   f["calc_minmax"] = (block, g) => [`${block.getFieldValue("OP") === "MIN" ? "min" : "max"}(${value(block, g as Gen, "A")}, ${value(block, g as Gen, "B")})`, Order.FUNCTION_CALL];
   f["calc_len"] = (block, g) => [`len(${value(block, g as Gen, "X", Order.NONE, '""')})`, Order.FUNCTION_CALL];
   f["calc_item"] = (block, g) => [`${value(block, g as Gen, "X", Order.MEMBER, '""')}[${value(block, g as Gen, "INDEX")}]`, Order.MEMBER];
-  f["calc_ticks"] = () => ["time.ticks_ms()", Order.FUNCTION_CALL];
+  f["calc_ticks"] = (block) => [block.getFieldValue("UNIT") === "US" ? "time.ticks_us()" : "time.ticks_ms()", Order.FUNCTION_CALL];
+  f["calc_ticks_diff"] = (block, g) => [`time.ticks_diff(${value(block, g as Gen, "END")}, ${value(block, g as Gen, "START")})`, Order.FUNCTION_CALL];
   f["calc_elapsed"] = (block, g) => [`time.ticks_diff(time.ticks_ms(), ${value(block, g as Gen, "X")})`, Order.FUNCTION_CALL];
   // 범위 바꾸기: 바깥 괄호까지 한 덩어리((X - A) * (D - C) // (B - A) + C)로 써서 어디에 끼워도 더 감싸지 않는다(ATOMIC).
   // 빼기의 왼쪽 칸은 같은 우선순위에 괄호를 치지 않고(order + 1), 오른쪽 칸과 + C 는 덧셈·뺄셈이면 괄호 (calc_arith 와 같은 규칙).

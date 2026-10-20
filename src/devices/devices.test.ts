@@ -91,7 +91,7 @@ describe("계획 2B 검사용 메타데이터", () => {
     }
     expect(requiredKinds(findActionByBlock("dev_led_blink")!)).toEqual(["pin"]);
     expect(requiredKinds(findActionByBlock("dev_beeper_note")!)).toEqual(["beeper"]);
-    expect(requiredKinds(findActionByBlock("esp_pin_write")!)).toEqual(["pin", "ultrasonic", "tilt", "pir"]);
+    expect(requiredKinds(findActionByBlock("esp_pin_write")!)).toEqual(["pin", "ultrasonic", "tilt", "pir", "seg7"]);
     // 아날로그 값 블록은 아날로그 핀과 아날로그 센서 넷의 변수를 모두 받는다
     expect(requiredKinds(findValueByBlock("dev_adc_read")!)).toEqual(["adc", "light", "knob", "sound", "flame"]);
     expect(requiredKinds(findValueByBlock("dev_light_value")!)).toEqual(["light"]);

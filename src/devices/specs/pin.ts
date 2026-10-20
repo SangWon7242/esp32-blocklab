@@ -1,8 +1,8 @@
 import type { DeviceSpec } from "../types";
 import { adcLines, adcPatternLines, NO_SETUP_PATTERN, ORDER, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
 
-/** 핀 켜기/끄기·값 블록이 받는 변수 종류: 핀, 초음파(trig/echo), 틸트, PIR */
-const PIN_KINDS = ["pin", "ultrasonic", "tilt", "pir"];
+/** 핀 켜기/끄기·값 블록이 받는 변수 종류: 핀, 초음파(trig/echo), 틸트, PIR, 7세그먼트(si/rck/sck) */
+const PIN_KINDS = ["pin", "ultrasonic", "tilt", "pir", "seg7"];
 
 /** 핀 출력·입력 (esp_pin_setup). 초음파 trig/echo 도 핀이므로 켜기·끄기·값 블록은 그 변수에도 맞는다 */
 export const pinOut: DeviceSpec = {
@@ -46,6 +46,14 @@ export const pinOut: DeviceSpec = {
       tooltip: "led.value(1) 은 켜기, led.value(0) 은 끄기",
       code: (v) => `${v.VAR}.value(${v.VALUE})`,
       pattern: { kind: "method", name: "value", args: [["0", "1"]], objPart: "VAR", objKinds: PIN_KINDS },
+    },
+    {
+      // 0·1 이 아닌 식을 쓰는 꼴 (7세그먼트 hc595_shift 의 si.value(value)). 0·1 글자는 위 켜기·끄기 블록이 먼저 잡는다
+      blockType: "dev_pin_write_value", message: "%1 에 %2 값 내보내기",
+      parts: [{ kind: "var", name: "VAR", default: "led" }, { kind: "value", name: "VALUE", shadow: 1 }],
+      tooltip: "led.value(값) — 값이 1(참)이면 켜고 0(거짓)이면 꺼요. 변수나 계산 값을 그대로 내보낼 때 씁니다.",
+      code: (v) => `${v.VAR}.value(${v.VALUE})`,
+      pattern: { kind: "method", name: "value", args: [null], objPart: "VAR", objKinds: PIN_KINDS },
     },
   ],
   values: [
