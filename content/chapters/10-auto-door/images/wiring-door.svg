@@ -214,20 +214,27 @@
   <rect x="156" y="396" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 462 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="480" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — 브레드보드 없이 보드에 바로</text>
+  <rect x="16" y="500" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 506 h24" stroke="#e03131" stroke-width="5"/>
   <text x="54" y="506" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 VCC</tspan> → 5V</text>
+  <rect x="16" y="524" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 530 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="530" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 GND</tspan> → GND</text>
+  <rect x="16" y="548" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 554 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="54" y="554" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 Trig</tspan> → io13</text>
+  <rect x="16" y="572" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 578 h24" stroke="#2f9e44" stroke-width="5"/>
   <text x="54" y="578" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 Echo</tspan> → io12</text>
+  <rect x="16" y="593" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 599 h24" stroke="#343a40" stroke-width="4"/>
   <path d="M20 605 h24" stroke="#e03131" stroke-width="4"/>
   <text x="54" y="602" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED GND · VCC</tspan> → I2C GND · 5V</text>
+  <rect x="16" y="617" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 623 h24" stroke="#1971c2" stroke-width="4"/>
   <path d="M20 629 h24" stroke="#7048e8" stroke-width="4"/>
   <text x="54" y="626" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED SDA · SCL</tspan> → I2C SDA · SCL</text>
+  <rect x="16" y="638" width="32" height="24" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 644 h24" stroke="#8b5a2b" stroke-width="4"/>
   <path d="M20 650 h24" stroke="#e03131" stroke-width="4"/>
   <path d="M20 656 h24" stroke="#f76707" stroke-width="4"/>

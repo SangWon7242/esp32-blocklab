@@ -121,12 +121,16 @@
   <rect x="156" y="324" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 484 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="502" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — 다리를 한 칸씩 띄워 d 칸에</text>
+  <rect x="16" y="522" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 528 h24" stroke="#f76707" stroke-width="5"/>
   <text x="54" y="528" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">D27 핀</tspan> → 9번 줄 → 220Ω 저항(홈 건너) → 빨강(R) 다리</text>
+  <rect x="16" y="546" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 552 h24" stroke="#2f9e44" stroke-width="5"/>
   <text x="54" y="552" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">D25 핀</tspan> → 13번 줄 → 220Ω 저항(홈 건너) → 초록(G) 다리</text>
+  <rect x="16" y="570" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 576 h24" stroke="#1971c2" stroke-width="5"/>
   <text x="54" y="576" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">D26 핀</tspan> → 15번 줄 → 220Ω 저항(홈 건너) → 파랑(B) 다리</text>
+  <rect x="16" y="594" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 600 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="600" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">− 다리(가장 긴 다리) 11번 줄</tspan> → 위 − 줄 → GND</text>
   <rect x="20" y="622" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="44" y="630" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>

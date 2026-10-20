@@ -116,8 +116,10 @@
   <rect x="156" y="304" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 464 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="482" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — LED 는 저항과 함께 브레드보드에</text>
+  <rect x="16" y="502" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 508 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="54" y="508" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">D26 핀</tspan> → 11번 줄 → 220Ω 저항 → 6번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="526" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 532 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="532" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">LED 짧은 다리(−) 5번 줄</tspan> → − 줄 → GND</text>
   <rect x="20" y="554" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="44" y="562" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>

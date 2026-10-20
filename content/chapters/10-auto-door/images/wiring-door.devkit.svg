@@ -139,19 +139,26 @@
   <rect x="420" y="320" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 552 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="570" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — 5V 는 브레드보드 + 줄로 나눠 써요</text>
+  <rect x="16" y="590" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 596 h24" stroke="#e03131" stroke-width="5"/>
   <text x="54" y="596" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">VIN · 초음파 VCC · 서보 빨강</tspan> → + 줄</text>
+  <rect x="16" y="614" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 620 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="620" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">GND · 초음파 GND · 서보 갈색</tspan> → − 줄</text>
+  <rect x="16" y="638" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 644 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="54" y="644" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 Trig</tspan> → D13</text>
+  <rect x="16" y="662" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 668 h24" stroke="#2f9e44" stroke-width="5"/>
   <text x="54" y="668" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 Echo</tspan> → D12</text>
+  <rect x="16" y="686" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 692 h24" stroke="#f76707" stroke-width="5"/>
   <text x="54" y="692" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">서보 주황(신호)</tspan> → D4</text>
+  <rect x="16" y="707" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 713 h24" stroke="#e03131" stroke-width="4"/>
   <path d="M20 719 h24" stroke="#343a40" stroke-width="4"/>
   <text x="54" y="716" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED VCC · GND</tspan> → 3V3 · GND</text>
+  <rect x="16" y="731" width="32" height="18" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 737 h24" stroke="#1971c2" stroke-width="4"/>
   <path d="M20 743 h24" stroke="#7048e8" stroke-width="4"/>
   <text x="54" y="740" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED SDA · SCL</tspan> → D21 · D22</text>

@@ -250,16 +250,22 @@
   <rect x="152" y="362" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 630 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="648" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — LED 마다 220Ω 저항을 하나씩</text>
+  <rect x="16" y="668" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 674 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="54" y="674" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">io18 핀</tspan> → 6번 줄 → 220Ω 저항 → 3번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="692" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 698 h24" stroke="#2f9e44" stroke-width="5"/>
   <text x="54" y="698" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">io5 핀</tspan> → 12번 줄 → 220Ω 저항 → 9번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="716" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 722 h24" stroke="#1971c2" stroke-width="5"/>
   <text x="54" y="722" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">io14 핀</tspan> → 18번 줄 → 220Ω 저항 → 15번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="740" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 746 h24" stroke="#7048e8" stroke-width="5"/>
   <text x="54" y="746" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">io17 핀</tspan> → 24번 줄 → 220Ω 저항 → 21번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="764" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 770 h24" stroke="#f76707" stroke-width="5"/>
   <text x="54" y="770" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">io26 핀</tspan> → 30번 줄 → 220Ω 저항 → 27번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="788" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 794 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="794" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">LED 짧은 다리(−) 2 · 8 · 14 · 20 · 26번 줄</tspan> → − 줄 → GND</text>
   <rect x="20" y="817" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><text x="40" y="824" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">S 신호</text>

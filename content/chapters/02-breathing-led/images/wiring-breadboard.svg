@@ -208,8 +208,10 @@
   <rect x="172" y="346" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 614 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="632" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — LED 는 저항과 함께 브레드보드에</text>
+  <rect x="16" y="652" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 658 h24" stroke="#f59f00" stroke-width="5"/>
   <text x="54" y="658" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">io26 핀</tspan> → 22번 줄 → 220Ω 저항 → 17번 줄 LED 긴 다리(+)</text>
+  <rect x="16" y="676" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 682 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="682" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">LED 짧은 다리(−) 16번 줄</tspan> → − 줄 → GND</text>
   <rect x="20" y="705" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><text x="40" y="712" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">S 신호</text>
