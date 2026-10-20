@@ -5,6 +5,7 @@
 
 ## 도구
 - `scripts/wiring/esp32plus.mjs` — 보드 그림(실물 사진의 핀 순서: 위 왼쪽 SCL SDA 5V GND 18 19 23 5 13 12 + S·V·G 세 줄, 위 오른쪽 14 27 16 17 25 26 TX RX + S·V·G, ANALOG 묶음 G·V·S × 35 34 33 32 4 2, I2C 묶음 GND·5V·SDA·SCL × 3줄, 아래 0 5V RST 3V3 5V GND VIN 32 33 34 35 36 39), `pin("top:5V" | "io13:S" | "an:io4:G" | "i2c:SDA:0" | "bot:3V3")`, `ffWire`(F-F 듀폰선, 스타일 vv·hv·orth), 부품 `ultrasonic`·`oled`·`servo`(플러그), `compose`(보드 글자를 선 위에 테두리로 다시 그려 가리지 않게).
+- 읽기 쉽게(2차): 폭 640·높이는 내용에 맞춤(화면은 viewBox 비율), 핀 간격 20·글자 13px, 이번에 쓰는 핀만 또렷하게(노란 테두리)·나머지는 흐리게, 보드 글자는 선 위에 테두리로, 선은 흰 테두리, 아래에 연결 표(`connectionTable`: 색 막대 + "부품 핀 → 보드 핀")와 S 신호·V 전원(+)·G 접지(−) 뜻.
 - `scripts/wiring/chapters/<id>.mjs` — 챕터별 그림 명세. `node scripts/wiring/build.mjs <id>` 가 `content/chapters/<id>/images/` 에 쓴다.
 
 ## 연결 규칙 (그림과 글에 똑같이)
