@@ -156,9 +156,10 @@ describe("블록 사전 카탈로그", () => {
   });
 
   it("모든 블록에 툴박스 항목 그대로의 블록 JSON(preset)이 있고, 그것으로 같은 블록이 만들어진다", () => {
-    const toolboxItems = categories.flatMap((c) => (c.contents ?? []).filter((i) => i.kind === "block")) as (ToolboxNode & {
+    // 장치 카테고리의 도우미 함수 정의 블록은 사전에 따로 싣지 않는다 (함수 꾸러미의 함수 정의 블록 설명)
+    const toolboxItems = (categories.flatMap((c) => (c.contents ?? []).filter((i) => i.kind === "block")) as (ToolboxNode & {
       fields?: unknown; inputs?: unknown;
-    })[];
+    })[]).filter((i) => !String(i.type).startsWith("procedures_"));
     for (const d of getCatalog().flatMap((c) => c.blocks)) {
       expect(d.preset.type, d.type).toBe(d.type);
       // 툴박스 항목(처음 나온 것)의 필드·그림자 값이 그대로 들어 있다

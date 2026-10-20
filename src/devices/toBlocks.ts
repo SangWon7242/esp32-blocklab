@@ -1,4 +1,7 @@
-import { DEVICES, DEVICE_CATEGORIES, setupsOf } from "./registry";
+import { codeToBlocks } from "@/parser";
+import type { BlockJson } from "@/parser/types";
+import { actionHelpersOf, defaultValues, DEVICES, DEVICE_CATEGORIES, setupsOf } from "./registry";
+import { helperDef } from "./specs/common";
 import type { DeviceSpec, Part } from "./types";
 
 /** 정의되지 않은 키를 뺀다 (블록 JSON 을 손으로 쓴 것과 같게) */
@@ -48,7 +51,9 @@ export function textFieldValidators(): { blockType: string; field: string; patte
   );
 }
 
-export type ToolboxItem = { kind: "label"; text: string } | { kind: "block"; type: string; fields?: Record<string, unknown>; inputs?: Record<string, unknown> };
+export type ToolboxItem =
+  | { kind: "label"; text: string }
+  | { kind: "block"; type: string; fields?: Record<string, unknown>; inputs?: Record<string, unknown>; extraState?: unknown };
 /** icon: 카테고리 열 아이콘 id (src/blocks/icons.ts, 장치 카테고리 id 와 같다) */
 export type ToolboxCategory = { kind: "category"; name: string; categorystyle: string; icon: string; contents: ToolboxItem[] };
 
@@ -71,6 +76,44 @@ function entry(blockType: string, fields: Record<string, string> = {}): ToolboxI
   };
 }
 
+/**
+ * 파서가 만든 블록 JSON 을 툴박스 꼴로: 변수 칸에 id 와 함께 이름도 적고(작업판에 그 이름의 변수가 없으면 생기고, 있으면 그 변수를 쓴다)
+ * 자리(x·y)를 뗀다
+ */
+function byName(b: BlockJson, names: Map<string, string>): BlockJson {
+  const fields = b.fields
+    ? Object.fromEntries(Object.entries(b.fields).map(([k, v]) => {
+      const id = v && typeof v === "object" ? (v as { id?: unknown }).id : undefined;
+      return [k, typeof id === "string" ? { id, name: names.get(id) ?? id } : v];
+    }))
+    : undefined;
+  const inputs = b.inputs
+    ? Object.fromEntries(Object.entries(b.inputs).map(([k, i]) => [k, { ...(i.block ? { block: byName(i.block, names) } : {}), ...(i.shadow ? { shadow: byName(i.shadow, names) } : {}) }]))
+    : undefined;
+  const out: BlockJson = { type: b.type };
+  if (fields) out.fields = fields;
+  if (inputs) out.inputs = inputs;
+  if (b.extraState) out.extraState = b.extraState;
+  if (b.next?.block) out.next = { block: byName(b.next.block, names) };
+  return out;
+}
+
+/**
+ * 장치 블록이 부르는 도우미의 "함수 만들기" 블록 (몸통이 채워진 함수 정의, 도우미 이름 그대로). 학생이 꺼내 몸통을 읽고 고칠 수 있고,
+ * 작업판에 있으면 생성기는 도우미를 따로 만들지 않고 이 함수를 쓴다. 블록 JSON 은 그 장치의 준비 줄과 도우미 정의를 파서로 바꿔 얻는다.
+ */
+function helperFunctionItems(d: DeviceSpec): ToolboxItem[] {
+  const helpers = actionHelpersOf(d);
+  if (!helpers.length || !d.setup) return [];
+  const code = [...d.setup.lines(defaultValues(d.setup.parts)), "", "", helpers.map(helperDef).join("\n\n\n"), ""].join("\n");
+  const r = codeToBlocks(code);
+  if (!r.ok) return [];
+  const names = new Map<string, string>(((r.json.variables ?? []) as { id: string; name: string }[]).map((v) => [v.id, v.name]));
+  return (r.json.blocks.blocks as BlockJson[])
+    .filter((b) => b.type === "procedures_defnoreturn" || b.type === "procedures_defreturn")
+    .map((b) => ({ kind: "block" as const, ...byName(b, names) }));
+}
+
 function deviceItems(d: DeviceSpec): ToolboxItem[] {
   return [
     { kind: "label", text: d.label },
@@ -78,6 +121,7 @@ function deviceItems(d: DeviceSpec): ToolboxItem[] {
     ...d.actions.map((a) => entry(a.blockType)),
     ...d.values.map((v) => entry(v.blockType)),
     ...(d.extraToolbox ?? []).map((x) => entry(x.blockType, x.fields)),
+    ...helperFunctionItems(d),
   ];
 }
 

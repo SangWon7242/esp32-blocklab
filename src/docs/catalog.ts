@@ -135,7 +135,8 @@ function buildCatalog(): DocCategory[] {
     const category = { id: categoryId(c), name: c.name, colour: categoryColour(c.categorystyle) };
     const entries = c.custom
       ? (CUSTOM_ITEMS[c.custom] ?? []).filter((e) => Blockly.Blocks[e.item.type])
-      : (c.contents ?? []).filter((i): i is BlockItem => i.kind === "block").map((item) => ({ item, before: undefined }));
+      // 장치 카테고리의 도우미 "함수 만들기" 블록(get_distance 함수 정의 …)은 함수 정의 블록이라 함수 카테고리의 설명으로 갈음한다
+      : (c.contents ?? []).filter((i): i is BlockItem => i.kind === "block" && !(i as BlockItem).type.startsWith("procedures_")).map((item) => ({ item, before: undefined }));
     const blocks: BlockDoc[] = [];
     for (const { item, before } of entries) {
       const built = buildBlock(item, before);

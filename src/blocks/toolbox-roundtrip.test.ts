@@ -3,7 +3,7 @@ import * as Blockly from "blockly";
 import { workspaceJsonToCode, type WorkspaceJson } from "@/codegen";
 import { codeToBlocks } from "@/parser";
 import { registerBlocks, toolbox, variableFlyout } from "./index";
-import { findActionByBlock, findValueByBlock } from "@/devices/registry";
+import { actionHelpersOf, DEVICES, findActionByBlock, findValueByBlock } from "@/devices/registry";
 
 type B = Record<string, unknown> & { type: string };
 
@@ -88,6 +88,16 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
       const name = (entry.extraState as { name: string }).name;
       return { body: [], tops: [defOf[name]] };
     }
+    case "procedures_defnoreturn":
+    case "procedures_defreturn": {
+      // 장치 카테고리의 도우미 "함수 만들기" 블록: 그 장치 준비, 앞서 정의되는 같은 장치의 도우미 함수(show_digit 앞의 hc595_shift)
+      const name = (entry.fields as { NAME?: string } | undefined)?.NAME ?? "";
+      const device = DEVICES.find((d) => actionHelpersOf(d).some((h) => h.name === name));
+      if (!device?.setup) return { body: [], tops: [] };
+      const names = actionHelpersOf(device).map((h) => h.name);
+      const before = names.slice(0, names.indexOf(name)).map((n) => helperEntry(n)).filter((b): b is B => !!b);
+      return { body: [setup(device.setup.blockType)], tops: before };
+    }
     default:
       // 리스트 블록(변수 칸 items)·리스트 변수를 끼운 블록(n번째 항목·길이·들어 있는가·각 항목 반복)은 그 리스트를 먼저 만든다
       if (entry.type.startsWith("list_") || readsVariable(entry, "items")) return { body: [listOf("items")], tops: [] };
@@ -96,6 +106,10 @@ function prerequisites(entry: B): { body: B[]; tops: B[] } {
 }
 
 const listOf = (name: string): B => ({ type: "list_create_from", fields: { VAR: { name }, ITEMS: "1, 2, 3" } });
+
+/** 툴박스(장치 카테고리)에 있는 도우미 이름의 함수 정의 블록 */
+const helperEntry = (name: string): B | undefined =>
+  staticEntries().find((e) => e.type.startsWith("procedures_def") && (e.fields as { NAME?: string } | undefined)?.NAME === name);
 
 /** 블록의 입력 아래 어딘가에 그 이름의 variables_get 이 있는지 */
 function readsVariable(node: unknown, name: string): boolean {

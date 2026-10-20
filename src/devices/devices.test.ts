@@ -50,6 +50,25 @@ describe("장치 레지스트리", () => {
   });
 });
 
+describe("장치 카테고리의 도우미 \"함수 만들기\" 블록", () => {
+  const items = (category: string) => deviceToolboxCategories().find((c) => c.name === category)!.contents;
+  it("장치 블록 뒤에 그 장치 도우미의 함수 정의 블록(몸통이 채워진)이 이름 그대로 있다", () => {
+    const defs = deviceToolboxCategories().flatMap((c) => c.contents).flatMap((i) => (i.kind === "block" && i.type.startsWith("procedures_def") ? [(i.fields as { NAME: string }).NAME] : []));
+    expect([...new Set(defs)].sort()).toEqual(DEVICES.flatMap(actionHelpersOf).map((h) => h.name).sort());
+    const sensor = items("센서");
+    const at = sensor.findIndex((i) => i.kind === "label" && i.text === "초음파 센서");
+    expect(sensor.slice(at, at + 4).map((i) => (i.kind === "label" ? i.text : i.type))).toEqual(["초음파 센서", "esp_ultrasonic_setup", "esp_distance", "procedures_defreturn"]);
+    const def = sensor[at + 3] as { fields: unknown; inputs: Record<string, { block?: { type: string; fields?: unknown } }> };
+    expect(def.fields).toEqual({ NAME: "get_distance" });
+    expect(def.inputs.STACK.block).toMatchObject({ type: "esp_pin_write", fields: { VAR: { id: "var_trig", name: "trig" }, VALUE: "1" } });
+    expect(def.inputs.RETURN.block?.type).toBe("calc_int");
+  });
+  it("7세그먼트는 hc595_shift 다음 show_digit (부르는 것보다 먼저 정의)", () => {
+    const names = items("화면").flatMap((i) => (i.kind === "block" && i.type.startsWith("procedures_def") ? [(i.fields as { NAME: string }).NAME] : []));
+    expect(names.filter((n) => n === "hc595_shift" || n === "show_digit")).toEqual(["hc595_shift", "show_digit"]);
+  });
+});
+
 describe("툴박스 순서 (toolboxOrder)", () => {
   it("카테고리 안의 장치 라벨이 읽기 좋은 순서다 (파서 우선순위와 따로)", () => {
     const labels = Object.fromEntries(deviceToolboxCategories().map((c) => [c.name, c.contents.flatMap((i) => (i.kind === "label" ? [i.text] : []))]));
