@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse } from "yaml";
+import { chapterForBoard, type BoardId } from "../../src/track/board.ts";
 import type { Chapter } from "../../src/track/schema.ts";
 
 /*
@@ -58,4 +59,12 @@ export function loadChapter(root: string, id: string): LoadedSlideChapter {
     for (const name of readdirSync(imgDir)) if (name.endsWith(".svg")) images[`images/${name}`] = readFileSync(path.join(imgDir, name), "utf8");
   }
   return { chapter, files, images };
+}
+
+/**
+ * 그 보드에 맞춘 챕터 (--board devkit): 그림은 같은 이름의 .devkit.svg 가 있으면 그것으로, 설명은 captionDevkit,
+ * 준비물은 board 가 그 보드이거나 없는 것만. plus(기본)는 그림·설명 그대로, devkit 전용 준비물만 빠진다.
+ */
+export function chapterForSlideBoard(loaded: LoadedSlideChapter, board: BoardId): LoadedSlideChapter {
+  return { ...loaded, chapter: chapterForBoard(loaded.chapter, board, (ref) => ref in loaded.images) };
 }

@@ -1,7 +1,7 @@
 import path from "node:path";
 import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
-import { loadChapter } from "../../scripts/slides/chapter.ts";
+import { chapterForSlideBoard, loadChapter } from "../../scripts/slides/chapter.ts";
 import { buildDeck, deckBuffer, fixSlideXml, paginate, type Png } from "../../scripts/slides/deck.ts";
 import { blockLines, markdownBlocks } from "../../scripts/slides/text.ts";
 
@@ -88,6 +88,42 @@ describe("슬라이드 내보내기", () => {
     // 학생 설계 칸은 빈 칸으로 (보기 글은 넣지 않는다), 힌트도 넣지 않는다
     expect(body).not.toContain("보기글온도");
     expect(body).not.toContain("숨긴힌트");
+  }, 60_000);
+
+  it("--board devkit: 기본 보드 그림(.devkit.svg)·captionDevkit·기본 보드 준비물 (plus 는 그대로)", async () => {
+    const loaded = loadChapter(ROOT, "10-auto-door");
+    const wiring = loaded.chapter.wiring!;
+    const devkitRef = wiring.image.replace(/\.svg$/, ".devkit.svg");
+    const chapter = {
+      ...loaded.chapter,
+      wiring: { ...wiring, captionDevkit: "기본보드배선설명" },
+      materials: [...(loaded.chapter.materials ?? []), { name: "확장보드전용부품", board: "plus" as const }, { name: "기본보드전용부품", board: "devkit" as const }],
+    };
+    const images = { ...loaded.images, [devkitRef]: '<svg viewBox="0 0 1 1"><title>기본 보드</title></svg>' };
+    const run = async (board: "plus" | "devkit") => {
+      const asked: string[] = [];
+      const rasterize = async (_svg: string, ref: string): Promise<Png> => {
+        asked.push(ref);
+        return { data: `image/png;base64,${PNG_1x1}`, width: 640, height: 360 };
+      };
+      const { pres } = await buildDeck(chapterForSlideBoard({ ...loaded, chapter, images }, board), { rasterize, font: "Malgun Gothic", codeFont: "Consolas" });
+      const zip = await JSZip.loadAsync(await deckBuffer(pres));
+      const names = Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n));
+      const body = (await Promise.all(names.map((n) => zip.file(n)!.async("string")))).map(texts).join("\n");
+      return { asked, body };
+    };
+    const devkit = await run("devkit");
+    expect(devkit.asked).toContain(devkitRef);
+    expect(devkit.asked).not.toContain(wiring.image);
+    expect(devkit.body).toContain("기본보드배선설명");
+    expect(devkit.body).toContain("기본보드전용부품");
+    expect(devkit.body).not.toContain("확장보드전용부품");
+    const plus = await run("plus");
+    expect(plus.asked).toContain(wiring.image);
+    expect(plus.asked).not.toContain(devkitRef);
+    expect(plus.body).not.toContain("기본보드배선설명");
+    expect(plus.body).toContain("확장보드전용부품");
+    expect(plus.body).not.toContain("기본보드전용부품");
   }, 60_000);
 
   it("한 문단에 문단 속성(pPr)은 하나뿐이고, 동아시아 글꼴은 한글 charset", async () => {
