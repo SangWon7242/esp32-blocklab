@@ -14,14 +14,13 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 마이크로 USB 선으로 PC 와 연결 }
-  - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
-  - { name: HC-SR04 초음파 센서, note: "핀 4개를 브레드보드에 꽂기. USB 를 뺀 채, GND 선부터" }
-  - { name: 서보 모터, note: "문 역할. 갈색 − 줄, 빨강 + 줄, 주황 신호선은 4번 핀" }
+  - { name: HC-SR04 초음파 센서, note: "핀 4개를 F-F 듀폰선으로 보드 위쪽 5V · GND · 13 · 12 에 바로. USB 를 뺀 채, GND 선부터" }
+  - { name: 서보 모터, note: "문 역할. 플러그를 ANALOG 묶음 io4 줄에 그대로 꽂기 (갈색 G · 빨강 V · 주황 S)" }
   - { name: OLED 0.96" (SSD1306), note: "SDA 21 · SCL 22. 보드에 ssd1306.py 를 먼저 올려 두기" }
-  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 핀(5V · GND · 3V3 · 22 · 21 · 13 · 12 · 4) → 브레드보드" }
-  - { name: 점퍼선(M-M), note: "양쪽 끝이 핀인 선. 브레드보드 안에서 + 줄 · − 줄로 잇거나 서보 플러그를 꽂을 때" }
+  - { name: F-F 듀폰선 8가닥, note: "양쪽 끝이 구멍인 선. 모듈 핀과 보드 핀에 바로 씌워요 (초음파 4 · OLED 4)" }
+  - { name: (추가 미션) 브레드보드 · LED · 220Ω 저항 · 점퍼선(M-M), note: "LED 는 저항이 필요해서 브레드보드에 꽂아요. 챕터 1 배선과 같아요" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
-wiring: { image: images/wiring-door.svg, caption: "브레드보드 위쪽 + 줄(5V)·− 줄(GND)을 세 부품이 함께 써요. 초음파 Trig → 13 · Echo → 12, 서보 주황 → 4, OLED SDA → 21 · SCL → 22 · VCC → 3V3" }
+wiring: { image: images/wiring-door.svg, caption: "브레드보드 없이 보드에 바로 꽂아요. 초음파 VCC → 5V · GND → GND · Trig → 13 · Echo → 12 (위쪽 한 줄), OLED GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL, 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)" }
 principle:
   image: images/ultrasonic-principle.svg
   body: |
@@ -104,15 +103,15 @@ parts:
         type: run
         title: 복사 · 실행 — 거리 재기
         minutes: 5
-        scene: { image: images/breadboard-basics.svg, caption: "브레드보드 읽는 법: 같은 번호의 다섯 칸은 이어지고, 가운데 홈 건너편은 안 이어져요. + 줄·− 줄은 끝까지 이어져요" }
+        scene: { image: images/wiring-ultrasonic.svg, caption: "보드 위쪽 한 줄의 글자를 읽어요: 5V · GND 옆에 18 19 23 5 13 12. 센서 핀 4개를 F-F 듀폰선으로 바로 씌워요" }
         body: |
-          이제 센서를 **브레드보드**에 꽂고 보드와 이어요. 센서 핀 4개가 꽂힌 줄마다 선을 하나씩: VCC 줄 → + 줄(5V), GND 줄 → − 줄, Trig 줄 → 13번, Echo 줄 → 12번. 배선도는 아래 **부품과 배선**(초음파 센서 부분)과 다음 단계 그림에 있어요.
+          이제 센서를 보드에 **바로** 이어요. 브레드보드는 쓰지 않아요. F-F 듀폰선(양쪽 끝이 구멍인 선) 4가닥으로 센서 핀과 보드 위쪽 한 줄의 핀을 짝지어요: VCC → `5V`, GND → `GND`, Trig → `13`, Echo → `12`. 보드 핀 위에 적힌 글자를 손가락으로 짚으며 찾아요.
 
           **USB 를 뺀 상태에서** 꽂고, **GND 선을 가장 먼저** 꽂아요. 다 꽂으면 짝에게 "검사관"이 되어 달라고 해요.
 
           실행한 뒤에는 손을 센서 앞에서 앞뒤로 움직여 보세요. 창에 찍히는 숫자가 따라 바뀌나요? 아까 적은 예측과 비교해 봐요.
         todo:
-          - USB 를 뺀 채 센서를 브레드보드에 꽂고 VCC · Trig · Echo · GND 4선 연결하기
+          - USB 를 뺀 채 F-F 듀폰선 4가닥으로 VCC → 5V · GND → GND · Trig → 13 · Echo → 12 잇기
           - "**보드 연결** → **실행** 누르기"
           - 손을 움직이며 숫자를 보고, 예측과 비교하기
         code: step1_distance.py
@@ -258,13 +257,13 @@ parts:
         type: run
         title: 복사 · 실행 — 완성 코드
         minutes: 4
-        scene: { image: images/wiring-door.svg, caption: "서보 주황 → 4, OLED SDA → 21 · SCL → 22 · VCC → 3V3. GND 는 모두 브레드보드 − 줄로. 핀이 겹치지 않는지 확인!" }
+        scene: { image: images/wiring-door.svg, caption: "서보 플러그 → ANALOG io4 줄(갈색 G · 빨강 V · 주황 S), OLED → I2C 묶음(GND · 5V · SDA · SCL). 핀이 겹치지 않는지 확인!" }
         body: |
-          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로** 브레드보드에 꽂고, 브레드보드의 + 줄(5V)·− 줄(GND)을 세 부품이 함께 나눠 써요(OLED 의 VCC 만 3V3). 핀 번호가 겹치지 않는지 짝과 확인해요.
+          이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로**, 브레드보드 없이 보드에 바로 꽂아요. 서보는 세 색 선이 모인 **플러그**를 ANALOG 묶음의 `4` 줄에 그대로 꽂아요. 갈색이 `G`, 빨강이 `V`, 주황이 `S` 쪽이에요. OLED 는 F-F 듀폰선 4가닥으로 **I2C 묶음**에 이어요: GND → `GND`, VCC → `5V`, SDA → `SDA`(21번), SCL → `SCL`(22번). 핀이 겹치지 않는지 짝과 확인해요.
 
           완성 코드 `step3_auto_door.py` 를 실행하고 손을 센서 앞 15cm 안으로 넣어 보세요. 화면이 `DOOR OPEN` 으로 바뀌고, 문이 열렸다가 잠시 뒤 닫히나요? 화면이 아예 안 켜지면 보드에 `ssd1306.py` 가 있는지 확인해요.
         todo:
-          - USB 를 뺀 채 서보(4번) · OLED(21 · 22번)를 브레드보드에 연결하기
+          - USB 를 뺀 채 서보 플러그를 io4 줄에, OLED 를 I2C 묶음에 꽂기
           - "**실행** 누르고 손을 15cm 안에 넣어 보기"
           - 화면 글씨가 바뀌고 문이 열렸다 닫히는지 보기
         code: step3_auto_door.py
