@@ -325,7 +325,7 @@ export function button(bb, col, { color = "#ced4da", label } = {}) {
   const p = [bb.hole(col, "e"), bb.hole(col + 2, "e"), bb.hole(col, "f"), bb.hole(col + 2, "f")];
   const cx = (p[0].x + p[1].x) / 2, cy = (p[0].y + p[2].y) / 2;
   const out = [p.map((q) => `<rect x="${q.x - 3}" y="${q.y - 3}" width="6" height="6" fill="#868e96" stroke="none"/>`).join("")];
-  out.push(`<rect x="${cx - 21}" y="${cy - 21}" width="42" height="42" rx="4" fill="#343a40" stroke="currentColor"/><circle cx="${cx}" cy="${cy}" r="13" fill="${color}" stroke="#495057"/>`);
+  out.push(`<rect x="${cx - 21}" y="${cy - 21}" width="42" height="42" rx="4" fill="#343a40" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="13" fill="${color}" stroke="#495057"/>`);
   if (label) out.push(`<text x="${cx}" y="${cy + 32}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="3" paint-order="stroke">${label}</text>`);
   return { svg: out.join(""), legs: { tl: p[0], tr: p[1], bl: p[2], br: p[3] } };
 }
@@ -334,7 +334,7 @@ export function button(bb, col, { color = "#ced4da", label } = {}) {
 export function buzzer(plus, minus, { active = false, up = true, lift = 26 } = {}) {
   const cx = (plus.x + minus.x) / 2, cy = (up ? Math.min(plus.y, minus.y) - lift : Math.max(plus.y, minus.y) + lift);
   const out = [legs([plus, minus], (p) => ({ x: p.x, y: cy }))];
-  out.push(`<circle cx="${cx}" cy="${cy}" r="17" fill="#212529" stroke="currentColor"/><circle cx="${cx}" cy="${cy}" r="4" fill="#495057" stroke="none"/>`);
+  out.push(`<circle cx="${cx}" cy="${cy}" r="17" fill="#212529" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="4" fill="#495057" stroke="none"/>`);
   if (active) out.push(`<circle cx="${cx}" cy="${cy}" r="11" fill="none" stroke="#f8f9fa" stroke-width="2"/>`);
   out.push(`<text x="${plus.x}" y="${up ? plus.y - 10 : plus.y + 10}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#c92a2a" stroke="none">+</text>`);
   return { svg: out.join("") };
@@ -344,7 +344,7 @@ export function buzzer(plus, minus, { active = false, up = true, lift = 26 } = {
 export function potentiometer(l, m, r, { up = true, lift = 30 } = {}) {
   const cx = m.x, cy = up ? m.y - lift : m.y + lift;
   const out = [legs([l, m, r], (p) => ({ x: p.x, y: cy + (up ? 10 : -10) }))];
-  out.push(`<rect x="${cx - 24}" y="${cy - 18}" width="48" height="36" rx="4" fill="#1971c2" stroke="currentColor"/><circle cx="${cx}" cy="${cy}" r="12" fill="#f1f3f5" stroke="#495057"/><path d="M${cx} ${cy - 10} V${cy}" stroke="#495057" stroke-width="3"/>`);
+  out.push(`<rect x="${cx - 24}" y="${cy - 18}" width="48" height="36" rx="4" fill="#1971c2" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="12" fill="#f1f3f5" stroke="#495057"/><path d="M${cx} ${cy - 10} V${cy}" stroke="#495057" stroke-width="3"/>`);
   return { svg: out.join("") };
 }
 
@@ -360,7 +360,7 @@ export function photoresistor(a, b, { up = true, lift = 24 } = {}) {
 export function tiltSwitch(a, b, { up = true, lift = 24 } = {}) {
   const cx = (a.x + b.x) / 2, cy = up ? Math.min(a.y, b.y) - lift : Math.max(a.y, b.y) + lift;
   const out = [legs([a, b], (p) => ({ x: p.x, y: cy }))];
-  out.push(`<rect x="${cx - 9}" y="${cy - 16}" width="18" height="30" rx="8" fill="#343a40" stroke="currentColor"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#ced4da" stroke="none"/>`);
+  out.push(`<rect x="${cx - 9}" y="${cy - 16}" width="18" height="30" rx="8" fill="#343a40" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#ced4da" stroke="none"/>`);
   return { svg: out.join("") };
 }
 
@@ -368,7 +368,7 @@ export function tiltSwitch(a, b, { up = true, lift = 24 } = {}) {
 export function rgbLed(holes, { up = true, lift = 28 } = {}) {
   const cx = (holes[0].x + holes[3].x) / 2, cy = up ? holes[0].y - lift : holes[0].y + lift;
   const out = [legs(holes, (p) => ({ x: p.x, y: cy + (up ? 8 : -8) }))];
-  out.push(`<circle cx="${cx}" cy="${cy}" r="15" fill="#f8f9fa" stroke="currentColor"/><circle cx="${cx - 5}" cy="${cy - 3}" r="4" fill="#e03131" stroke="none"/><circle cx="${cx + 5}" cy="${cy - 3}" r="4" fill="#2f9e44" stroke="none"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#1971c2" stroke="none"/>`);
+  out.push(`<circle cx="${cx}" cy="${cy}" r="15" fill="#f8f9fa" stroke="#343a40" stroke-width="2"/><circle cx="${cx - 5}" cy="${cy - 3}" r="4" fill="#e03131" stroke="none"/><circle cx="${cx + 5}" cy="${cy - 3}" r="4" fill="#2f9e44" stroke="none"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#1971c2" stroke="none"/>`);
   ["R", "−", "G", "B"].forEach((t, i) => out.push(`<text x="${holes[i].x}" y="${up ? holes[i].y - 10 : holes[i].y + 10}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#495057" stroke="none">${t}</text>`));
   return { svg: out.join("") };
 }
@@ -377,7 +377,7 @@ export function rgbLed(holes, { up = true, lift = 28 } = {}) {
 export function irReceiver(holes, { up = true, lift = 26 } = {}) {
   const cx = holes[1].x, cy = up ? holes[1].y - lift : holes[1].y + lift;
   const out = [legs(holes, (p) => ({ x: p.x, y: cy + (up ? 10 : -10) }))];
-  out.push(`<rect x="${cx - 16}" y="${cy - 14}" width="32" height="26" rx="4" fill="#212529" stroke="currentColor"/><circle cx="${cx}" cy="${cy - 2}" r="8" fill="#343a40" stroke="#868e96"/>`);
+  out.push(`<rect x="${cx - 16}" y="${cy - 14}" width="32" height="26" rx="4" fill="#212529" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy - 2}" r="8" fill="#343a40" stroke="#868e96"/>`);
   ["OUT", "G", "V"].forEach((t, i) => out.push(`<text x="${holes[i].x}" y="${up ? holes[i].y + 12 : holes[i].y - 12}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#495057" stroke="none">${t}</text>`));
   return { svg: out.join("") };
 }
@@ -390,7 +390,7 @@ export function dip(bb, col, n, { label = "", notch = true } = {}) {
   const half = n / 2;
   const pinAt = (k) => (k <= half ? bb.hole(col + k - 1, "f") : bb.hole(col + (n - k), "e"));
   const l = bb.hole(col, "e"), r = bb.hole(col + half - 1, "f");
-  const out = [`<rect x="${l.x - 9}" y="${l.y + 3}" width="${r.x - l.x + 18}" height="${r.y - l.y - 6}" rx="3" fill="#212529" stroke="currentColor"/>`];
+  const out = [`<rect x="${l.x - 9}" y="${l.y + 3}" width="${r.x - l.x + 18}" height="${r.y - l.y - 6}" rx="3" fill="#212529" stroke="#343a40" stroke-width="2"/>`];
   if (notch) out.push(`<path d="M${l.x - 9} ${(l.y + r.y) / 2 - 6} a6 6 0 0 1 0 12" stroke="#868e96" stroke-width="2"/>`);
   if (label) out.push(`<text x="${(l.x + r.x) / 2}" y="${(l.y + r.y) / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">${label}</text>`);
   return { svg: out.join(""), pin: pinAt };

@@ -86,6 +86,8 @@ export function connectionTable(y, title, rows, legend = "plus", { columns } = {
     const cx = x0 + (i < half ? 0 : colW + 10);
     const cy = y + 44 + (i % half) * rowH;
     const cs = r.colors ?? [r.color];
+    // 견본 뒤에 옅은 회색 테두리: 검은 선 견본도 어두운 화면에서 보이게
+    out.push(`<rect x="${cx - 4}" y="${cy - 3 - cs.length * 3}" width="32" height="${cs.length * 6 + 6}" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>`);
     cs.forEach((c, k) => out.push(`<path d="M${cx} ${cy - (cs.length - 1) * 3 + k * 6} h24" stroke="${c}" stroke-width="${cs.length > 1 ? 4 : 5}"/>`));
     out.push(`<text x="${cx + 34}" y="${cy}" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">${r.part}</tspan> → ${r.to}</text>`);
   });
