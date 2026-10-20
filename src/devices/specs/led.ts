@@ -1,4 +1,4 @@
-import type { DeviceSpec } from "../types";
+import type { DeviceSpec, HelperSpec } from "../types";
 import { factor, isSingleOperand, unfactor, pinNo, RE_NAME, RE_PIN, validPins } from "./common";
 
 /**
@@ -68,21 +68,23 @@ export const led: DeviceSpec = {
 const RGB_NAMES = ["red", "green", "blue"] as const;
 const hex2 = (n: number) => n.toString(16).padStart(2, "0");
 
-/** RGB LED (dev_rgb_setup). 이름 red/green/blue 고정, set_color(r, g, b) 도우미 (0~255) */
+/** 색을 정하는 set_color(r, g, b) (0~255 → 0~1023 세기) — RGB 색 블록들의 도우미 */
+export const SET_COLOR: HelperSpec = { name: "set_color", params: "r, g, b", body: ["red.duty(r * 1023 // 255)", "green.duty(g * 1023 // 255)", "blue.duty(b * 1023 // 255)"] };
+
+/** RGB LED (dev_rgb_setup). 이름 red/green/blue 고정. 색 블록들이 set_color(r, g, b) 도우미 (0~255) 를 부른다 */
 export const rgb: DeviceSpec = {
   id: "rgb", category: "led", label: "RGB LED", toolboxOrder: 12, colour: "#9ba624",
   setup: {
     blockType: "dev_rgb_setup",
     message: "RGB LED 준비하기 (빨강 핀 %1, 초록 핀 %2, 파랑 핀 %3)",
     parts: [pinNo("R", 27, "out"), pinNo("G", 25, "out"), pinNo("B", 26, "out")],
-    tooltip: "red/green/blue PWM 핀을 만들고 색을 정하는 set_color(r, g, b) 함수를 준비합니다.",
+    tooltip: "red/green/blue PWM 핀을 만듭니다. 색은 RGB 색 블록(set_color(r, g, b))으로 정해요.",
     lines: (v) => [
       `red = PWM(Pin(${v.R}))`, `green = PWM(Pin(${v.G}))`, `blue = PWM(Pin(${v.B}))`,
       "red.freq(1000)", "green.freq(1000)", "blue.freq(1000)",
     ],
-    helpers: [{ name: "set_color", params: "r, g, b", body: ["red.duty(r * 1023 // 255)", "green.duty(g * 1023 // 255)", "blue.duty(b * 1023 // 255)"] }],
     kind: "rgb",
-    provides: () => [...RGB_NAMES, "set_color"],
+    provides: () => [...RGB_NAMES],
     pattern: {
       lines: [
         ...RGB_NAMES.map((n) => new RegExp(String.raw`^${n}\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$`)),
@@ -96,8 +98,9 @@ export const rgb: DeviceSpec = {
     {
       blockType: "dev_rgb_colour", message: "RGB 색 %1",
       parts: [{ kind: "colour", name: "COLOUR", default: "#ff69b4" }],
-      tooltip: "고른 색으로 set_color(r, g, b) 를 부릅니다.",
+      tooltip: "고른 색으로 set_color(r, g, b) 를 부릅니다. 이 블록을 쓰면 set_color 함수가 함께 만들어집니다 (같은 이름의 함수 블록이 있으면 그것을 써요).",
       code: (v) => `set_color(${[1, 3, 5].map((i) => parseInt(v.COLOUR.slice(i, i + 2), 16)).join(", ")})`,
+      helpers: [SET_COLOR],
       pattern: {
         kind: "lines",
         lines: [/^set_color\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/],
@@ -116,6 +119,7 @@ export const rgb: DeviceSpec = {
       ],
       tooltip: "set_color(빨강, 초록, 파랑) — 각각 0~255",
       code: (v) => `set_color(${v.R}, ${v.G}, ${v.B})`,
+      helpers: [SET_COLOR],
       pattern: { kind: "call", name: "set_color", args: [null, null, null] },
       range: {
         R: { min: 0, max: 255, label: { ko: "빨강", en: "red" } },
@@ -127,29 +131,34 @@ export const rgb: DeviceSpec = {
       blockType: "dev_rgb_off", message: "RGB 끄기", parts: [],
       tooltip: "set_color(0, 0, 0)",
       code: () => "set_color(0, 0, 0)",
+      helpers: [SET_COLOR],
       pattern: { kind: "none" }, // 검은색 색 블록으로 돌아온다
     },
   ],
   values: [],
 };
 
-/** 흐르는 LED (dev_flow_setup). 이름 pins 고정, flow_leds(ms) 도우미 */
+/** LED 를 차례로 켜는 flow_leds(ms) — "LED 차례로 켜기" 블록의 도우미 */
+export const FLOW_LEDS: HelperSpec = {
+  name: "flow_leds", params: "ms",
+  body: ["for pin in pins:", "  led = Pin(pin, Pin.OUT)", "  led.value(1)", "  time.sleep_ms(ms)", "  led.value(0)"],
+};
+
+/**
+ * 흐르는 LED (dev_flow_setup). 이름 pins 고정. "LED 차례로 켜기" 블록이 flow_leds(ms) 도우미를 부른다.
+ * `pins = [...]` 는 흔한 리스트라 코드가 flow_leds 를 정의하거나 부를 때만 이 준비로 접는다 (foldOnlyWith. 아니면 리스트 만들기).
+ */
 export const flowLed: DeviceSpec = {
   id: "flow_led", category: "led", label: "흐르는 LED", toolboxOrder: 13, colour: "#ea913a",
   setup: {
     blockType: "dev_flow_setup",
     message: "흐르는 LED 준비하기 (핀 목록 %1)",
     parts: [{ kind: "text", name: "PINS", default: "18, 5, 14, 17, 26", validate: /^\d+(\s*,\s*\d+)*$/ }],
-    tooltip: "pins 목록을 만들고 LED 를 차례로 켜는 flow_leds(ms) 함수를 준비합니다.",
+    tooltip: "LED 핀 번호 목록 pins 를 만듭니다. LED 차례로 켜기 블록(flow_leds(ms))이 이 목록을 써요.",
     lines: (v) => [`pins = [${v.PINS}]`],
-    helpers: [
-      {
-        name: "flow_leds", params: "ms",
-        body: ["for pin in pins:", "  led = Pin(pin, Pin.OUT)", "  led.value(1)", "  time.sleep_ms(ms)", "  led.value(0)"],
-      },
-    ],
+    foldOnlyWith: ["flow_leds"],
     kind: "flow",
-    provides: () => ["pins", "flow_leds"],
+    provides: () => ["pins"],
     pattern: {
       lines: [/^pins\s*=\s*\[([\d,\s]+)\]$/],
       fields: ([m]) => {
@@ -162,8 +171,9 @@ export const flowLed: DeviceSpec = {
     {
       blockType: "dev_flow_run", message: "LED 차례로 켜기 (간격 %1 ms)",
       parts: [{ kind: "value", name: "MS", check: "Number", shadow: 100 }],
-      tooltip: "flow_leds(ms) — 목록의 LED 를 하나씩 켰다 끕니다.",
+      tooltip: "flow_leds(ms) — 목록의 LED 를 하나씩 켰다 끕니다. 이 블록을 쓰면 flow_leds 함수가 함께 만들어집니다 (같은 이름의 함수 블록이 있으면 그것을 써요).",
       code: (v) => `flow_leds(${v.MS})`,
+      helpers: [FLOW_LEDS],
       pattern: { kind: "call", name: "flow_leds", args: [null] },
     },
   ],

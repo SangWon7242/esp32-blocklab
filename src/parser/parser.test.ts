@@ -36,7 +36,7 @@ describe("설정 패턴", () => {
     expect(b.map((x) => x.type)).toEqual(["esp_pwm_setup", "esp_pwm_duty"]);
     expect(b[0].fields).toEqual({ VAR: { id: "var_pwm" }, PIN: 2, FREQ: 1000 });
   });
-  it("표준 get_distance 가 있으면 초음파 준비로 접힌다", () => {
+  it("표준 get_distance 가 있으면 초음파 준비, 호출은 거리 블록, def 는 함수 정의 블록으로 보인다", () => {
     const src = [
       "trig = Pin(13, Pin.OUT)", "echo = Pin(12, Pin.IN)", "",
       "def get_distance():", "    trig.value(1)", "    time.sleep_us(10)", "    trig.value(0)",
@@ -49,23 +49,31 @@ describe("설정 패턴", () => {
     expect(b.map((x) => x.type)).toEqual(["esp_ultrasonic_setup", "variables_set"]);
     expect(b[0].fields).toEqual({ TRIG: 13, ECHO: 12 });
     expect(b[1].inputs?.VALUE?.block?.type).toBe("esp_distance");
-    expect(tops(src)).toHaveLength(0);
-    // 접힌 함수 안에서만 쓰인 start·stop·t 와 접힌 핀 trig·echo 는 변수 목록에 남지 않는다
-    expect((parse(src).json.variables as { name: string }[]).map((v) => v.name)).toEqual(["d"]);
+    const def = tops(src)[0];
+    expect(def.type).toBe("procedures_defreturn");
+    expect(def.fields).toEqual({ NAME: "get_distance" });
+    // 몸통의 모든 줄이 블록: 핀 켜기·끄기, µs 기다리기, 빈 몸통 반복(pass), µs 시각, 걸린 시간, 정수로
+    const stack: string[] = [];
+    for (let s = def.inputs?.STACK?.block; s; s = s.next?.block) stack.push(s.type);
+    expect(stack).toEqual(["esp_pin_write", "flow_wait_us", "esp_pin_write", "controls_whileUntil", "variables_set", "controls_whileUntil", "variables_set", "variables_set"]);
+    expect(def.inputs?.RETURN?.block?.type).toBe("calc_int");
+    expect(parse(src).unparsed).toEqual([]);
+    // 함수 안에서 쓰인 start·stop·t 와 핀 블록이 가리키는 trig·echo 도 변수 목록에 있다
+    expect((parse(src).json.variables as { name: string }[]).map((v) => v.name).sort()).toEqual(["d", "echo", "start", "stop", "t", "trig"]);
   });
   it("함수 매개변수는 쓰이지 않아도 변수로 남는다", () => {
     const r = parse("def wait(t):\n    pass\n");
     expect((r.json.variables as { name: string }[]).map((v) => v.name)).toEqual(["t"]);
   });
-  it("본문이 다른 get_distance 는 사용자 함수로 남는다", () => {
+  it("본문이 다른 get_distance 는 사용자 함수: 호출도 함수 호출 블록 (준비는 초음파)", () => {
     const src = [
       "trig = Pin(13, Pin.OUT)", "echo = Pin(12, Pin.IN)",
       "def get_distance():", "    t = time.ticks_diff(stop, start)", "    t = t // 2", "    return int(340 * t // 10000)",
       'print(get_distance(), "cm")', "",
     ].join("\n");
     const b = body(src);
-    expect(b.map((x) => x.type)).toEqual(["esp_pin_setup", "esp_pin_setup", "esp_print2"]);
-    expect(b[2].inputs?.A?.block?.type).toBe("procedures_callreturn");
+    expect(b.map((x) => x.type)).toEqual(["esp_ultrasonic_setup", "esp_print2"]);
+    expect(b[1].inputs?.A?.block?.type).toBe("procedures_callreturn");
     const def = tops(src)[0];
     expect(def.type).toBe("procedures_defreturn");
     expect(def.fields).toEqual({ NAME: "get_distance" });
@@ -74,7 +82,7 @@ describe("설정 패턴", () => {
     // stop·start 는 값을 정한 적 없는 이름이라 식 블록으로 남는다 (time.ticks_diff 는 걸린 시간 블록)
     expect(r.unparsed.map((u) => u.text)).toEqual(["stop", "start"]);
   });
-  it("OLED 준비와 표준 show 는 접히고 show 호출은 esp_oled_show", () => {
+  it("OLED 준비는 접히고 표준 show 가 있으면 show 호출은 esp_oled_show (def 는 함수 블록)", () => {
     const src = [
       "i2c = SoftI2C(scl=Pin(22), sda=Pin(21))", "oled = ssd1306.SSD1306_I2C(128, 64, i2c)",
       "def show(a, b):", "    oled.fill(0)", "    oled.text(a, 0, 20)", "    oled.text(b, 0, 36)", "    oled.show()",

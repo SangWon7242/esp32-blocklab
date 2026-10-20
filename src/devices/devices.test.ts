@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { defaultValues, DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupsOf, setupSpecs } from "./registry";
+import { actionHelpersOf, defaultValues, DEVICES, DEVICE_CATEGORIES, findActionByBlock, findSetupByBlock, findValueByBlock, requiredKinds, setupSpecs } from "./registry";
+import { workspaceJsonToCode } from "@/codegen";
+import { codeToBlocks } from "@/parser";
+import { print, program } from "./testkit";
 
 import { ADC_PINS, LEADING_ASSIGN, TOUCH_PINS } from "./specs/common";
 import { setupLinesAt } from "@/parser/devices";
@@ -120,25 +123,23 @@ describe("계획 2B 검사용 메타데이터", () => {
     expect(findActionByBlock("dev_servo_angle")!.range).toEqual({ ANGLE: { min: 0, max: 180, label: { ko: "각도", en: "angle" } } });
   });
 
-  it("준비의 provides 는 비어 있지 않고 도우미 이름을 모두 담으며, 기본값 준비 줄을 접은 선언의 장치 변수와 같다", () => {
+  it("준비의 provides 는 비어 있지 않고, 기본값 준비 줄을 접은 선언의 장치 변수와 같다", () => {
     for (const s of setupSpecs()) {
       const v = defaultValues(s.parts);
       const provided = s.provides(v);
       expect(provided.length, s.blockType).toBeGreaterThan(0);
-      const helpers = (s.helpers ?? []).map((h) => h.name);
-      expect(provided, s.blockType).toEqual(expect.arrayContaining(helpers));
       // 이 준비 줄을 실제로 접는 선언 (자기 자신, 또는 같은 줄을 먼저 잡는 esp_pin_setup·dev_adc_setup·dev_button_setup)
       const lines = s.lines(v);
       const folder = setupSpecs().find((o) => setupLinesAt(o, lines, 0));
       expect(folder, s.blockType).toBeTruthy();
-      expect(setupLinesAt(folder!, lines, 0)!.vars, s.blockType).toEqual(provided.filter((n) => !helpers.includes(n)));
+      expect(setupLinesAt(folder!, lines, 0)!.vars, s.blockType).toEqual(provided);
     }
   });
 });
 
 describe("레지스트리 불변식", () => {
   it("명령·값 템플릿은 도우미를 맨 앞에서만(대입 `a, b = ` 뒤 포함), 자기 장치의 것만 부른다 (생성기가 맨 앞 호출만 바뀐 이름으로 고친다)", () => {
-    const helperOwner = new Map(DEVICES.flatMap((d) => setupsOf(d).flatMap((s) => s.helpers ?? []).map((h) => [h.name, d.id] as const)));
+    const helperOwner = new Map(DEVICES.flatMap((d) => actionHelpersOf(d).map((h) => [h.name, d.id] as const)));
     for (const d of DEVICES) for (const spec of [...d.actions, ...d.values]) {
       const code = spec.code(defaultValues(spec.parts));
       const head = LEADING_ASSIGN.exec(code)?.[0].length ?? 0;
@@ -152,23 +153,53 @@ describe("레지스트리 불변식", () => {
   it("함수 정의 뒤에 두는 준비 줄(afterHelpers)은 대입 뒤 맨 앞에서 자기 보드 라이브러리 함수를 부른다", () => {
     for (const s of setupSpecs()) {
       if (!s.afterHelpers) continue;
-      const names = [...(s.helpers ?? []).map((h) => h.name), ...(s.libNames ?? [])];
+      const names = s.libNames ?? [];
       for (const line of s.lines(defaultValues(s.parts))) {
         const rest = line.slice(LEADING_ASSIGN.exec(line)?.[0].length ?? 0);
         expect(names.some((n) => rest.startsWith(`${n}(`)), `${s.blockType}: ${line}`).toBe(true);
       }
     }
   });
-  it("선택 도우미 호출은 템플릿에서 값 칸보다 앞에 온다 (생성기가 처음 나온 호출 하나만 표시한다)", () => {
-    for (const d of DEVICES) for (const a of d.actions) {
-      if (!a.helper) continue;
+  it("도우미가 있는 블록의 템플릿은 그 도우미 중 하나를 값 칸보다 앞(맨 앞)에서 부른다", () => {
+    for (const d of DEVICES) for (const a of [...d.actions, ...d.values]) {
+      if (!a.helpers?.length) continue;
       const v = defaultValues(a.parts);
       for (const p of a.parts) if (p.kind === "value") v[p.name] = `VALUE_${p.name}`;
       const code = a.code(v);
-      const at = code.search(new RegExp(String.raw`(?<![\w.])${a.helper.name}\(`));
+      const at = Math.min(...a.helpers.map((h) => code.search(new RegExp(String.raw`(?<![\w.])${h.name}\(`))).filter((i) => i >= 0), Infinity);
       const firstValue = Math.min(...a.parts.filter((p) => p.kind === "value").map((p) => code.indexOf(`VALUE_${p.name}`)), Infinity);
-      expect(at, a.blockType).toBeGreaterThanOrEqual(0);
+      expect(at, a.blockType).toBe(LEADING_ASSIGN.exec(code)?.[0].length ?? 0);
       expect(at, a.blockType).toBeLessThan(firstValue);
+    }
+  });
+  it("짧은 도우미 이름은 장치끼리 겹치지 않고, 같은 이름이면 몸통도 같다 (한 장치 안에서 여러 블록이 같은 도우미를 쓴다)", () => {
+    const seen = new Map<string, { device: string; body: string }>();
+    for (const d of DEVICES) for (const s of [...d.actions, ...d.values]) for (const h of s.helpers ?? []) {
+      const body = JSON.stringify([h.params, h.body]);
+      const prev = seen.get(h.name);
+      if (prev) expect(prev, `${s.blockType}: ${h.name}`).toEqual({ device: d.id, body });
+      else seen.set(h.name, { device: d.id, body });
+    }
+    expect(seen.size).toBe(11);
+  });
+  it("도우미 몸통은 모두 블록이 되고(code 블록 없음) 그 장치 준비와 함께 글자 그대로 돌아온다", () => {
+    for (const d of DEVICES) {
+      const helpers = actionHelpersOf(d);
+      if (!helpers.length) continue;
+      const setup = d.setup!;
+      const call = [...d.actions, ...d.values].find((s) => s.helpers?.length)!;
+      // 준비 줄 → 도우미 def 들 → 그 도우미를 부르는 블록 하나 (생성기가 내는 꼴)
+      const json = program([{ type: setup.blockType }, "output" in call ? print({ type: call.blockType }) : { type: call.blockType }]);
+      const code = workspaceJsonToCode(json);
+      for (const h of call.helpers!) expect(code, `${call.blockType}`).toContain(`def ${h.name}(`);
+      const r = codeToBlocks(code);
+      if (!r.ok) throw new Error(r.error.message);
+      expect(r.unparsed, `${d.id}:\n${code}`).toEqual([]);
+      expect(JSON.stringify(r.json), d.id).not.toMatch(/"code_(stmt|expr)"/);
+      // 도우미 def 는 함수 정의 블록이 되고, 다시 만든 코드는 같은 글 (생성기는 같은 이름의 함수 블록이 있으면 도우미를 다시 만들지 않는다)
+      const defs = (r.json.blocks.blocks as { type: string; fields?: { NAME?: string } }[]).filter((b) => b.type.startsWith("procedures_def")).map((b) => b.fields?.NAME);
+      expect(defs, d.id).toEqual(call.helpers!.map((h) => h.name));
+      expect(workspaceJsonToCode(r.json), d.id).toBe(code);
     }
   });
   it("명령 lines 패턴의 첫 정규식은 어느 준비 블록의 첫 줄(기본값)에도 맞지 않는다", () => {

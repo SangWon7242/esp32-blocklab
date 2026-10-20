@@ -1,33 +1,33 @@
-import type { DeviceSpec } from "../types";
+import type { DeviceSpec, HelperSpec } from "../types";
 import { adcLines, adcPatternLines, pinNo, validPins } from "./common";
 
+/** 초음파로 거리(cm)를 재는 get_distance() — 거리 블록(esp_distance)의 도우미 */
+export const GET_DISTANCE: HelperSpec = {
+  name: "get_distance", params: "",
+  body: [
+    "trig.value(1)", "time.sleep_us(10)", "trig.value(0)",
+    "while not echo.value():", "  pass",
+    "start = time.ticks_us()",
+    "while echo.value():", "  pass",
+    "stop = time.ticks_us()",
+    "t = time.ticks_diff(stop, start) // 2",
+    "return int(340 * t // 10000)",
+  ],
+};
+
 /**
- * 초음파 (esp_ultrasonic_setup). 이름 trig/echo 고정, get_distance() 도우미.
- * 도우미가 같은 이름·표준 본문으로 최상위에 있을 때만 접힌다(Task 4). 아니면 두 줄은 esp_pin_setup 으로 떨어진다.
+ * 초음파 (esp_ultrasonic_setup). 이름 trig/echo 고정. 거리 블록이 get_distance() 도우미를 부른다
+ * (작업판에 get_distance 함수 블록이 없으면 생성기가 GET_DISTANCE 몸통으로 만든다).
  */
 export const ultrasonic: DeviceSpec = {
   id: "ultrasonic", category: "sensor", label: "초음파 센서", toolboxOrder: 46, colour: "#71bb4a",
   setup: {
     blockType: "esp_ultrasonic_setup", message: "초음파 센서 준비하기 (trig 핀 %1, echo 핀 %2)",
     parts: [pinNo("TRIG", 13, "out"), pinNo("ECHO", 12, "in")],
-    tooltip: "trig/echo 핀을 만들고 거리를 재는 get_distance() 함수를 준비합니다.",
+    tooltip: "초음파를 쏘는 trig 핀과 메아리를 듣는 echo 핀을 만듭니다. 거리는 거리 블록(get_distance())으로 읽어요.",
     lines: (v) => [`trig = Pin(${v.TRIG}, Pin.OUT)`, `echo = Pin(${v.ECHO}, Pin.IN)`],
-    helpers: [
-      {
-        name: "get_distance", params: "",
-        body: [
-          "trig.value(1)", "time.sleep_us(10)", "trig.value(0)",
-          "while not echo.value():", "  pass",
-          "start = time.ticks_us()",
-          "while echo.value():", "  pass",
-          "stop = time.ticks_us()",
-          "t = time.ticks_diff(stop, start) // 2",
-          "return int(340 * t // 10000)",
-        ],
-      },
-    ],
     kind: "ultrasonic",
-    provides: () => ["trig", "echo", "get_distance"],
+    provides: () => ["trig", "echo"],
     pattern: {
       lines: [/^trig\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.OUT\s*\)$/, /^echo\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.IN\s*\)$/],
       fields: ([t, e]) => (validPins(t[1], e[1]) ? { TRIG: t[1], ECHO: e[1] } : null),
@@ -37,9 +37,10 @@ export const ultrasonic: DeviceSpec = {
   values: [
     {
       blockType: "esp_distance", message: "거리 (cm)", parts: [],
-      tooltip: "get_distance() — 초음파로 잰 거리(cm)",
+      tooltip: "get_distance() — 초음파로 잰 거리(cm). 이 블록을 쓰면 거리를 재는 get_distance() 함수가 함께 만들어집니다 (같은 이름의 함수 블록이 있으면 그것을 써요).",
       code: () => "get_distance()",
       output: "Number",
+      helpers: [GET_DISTANCE],
       pattern: { kind: "call", name: "get_distance", args: [] },
     },
   ],
@@ -143,61 +144,65 @@ const fixedAdcPattern = (name: string) => ({
   fields: ([a, b, c]: RegExpExecArray[]) => (a[1] === name && b[1] === name && c[1] === name && validPins(a[2]) ? { PIN: a[2] } : null),
 });
 
-/** 서미스터 (dev_ntc_setup). 이름 ntc 고정, ntc_temperature() 도우미가 10kΩ NTC(B 3950)의 저항을 온도로 바꾼다 */
+/** 서미스터 온도 ntc_temperature(): 10kΩ NTC(B 3950)의 저항을 온도(℃)로 바꾼다 — 서미스터 온도 블록의 도우미 */
+export const NTC_TEMPERATURE: HelperSpec = {
+  name: "ntc_temperature", params: "",
+  body: [
+    "v = ntc.read() / 4095 * 3.3",
+    "r = 10 * v / (3.3 - v)",
+    "return 1 / (math.log(r / 10) / 3950 + 1 / 298.15) - 273.15",
+  ],
+};
+
+/** 서미스터 (dev_ntc_setup). 이름 ntc 고정. 온도 블록이 ntc_temperature() 도우미를 부른다 */
 export const ntc: DeviceSpec = {
   id: "ntc", category: "sensor", label: "온도(서미스터)", toolboxOrder: 44, colour: "#16b567",
   setup: {
     blockType: "dev_ntc_setup",
     message: "서미스터를 핀 %1 에 준비하기",
     parts: [pinNo("PIN", 36, "adc")],
-    tooltip: "ntc = ADC(Pin(36)) 와 온도(℃)를 돌려주는 ntc_temperature() 함수를 준비합니다.",
+    tooltip: "ntc = ADC(Pin(36)) — 서미스터를 준비합니다. 온도(℃)는 서미스터 온도 블록(ntc_temperature())으로 읽어요.",
     lines: (v) => adcLines("ntc", v.PIN),
-    helpers: [
-      {
-        name: "ntc_temperature", params: "",
-        body: [
-          "v = ntc.read() / 4095 * 3.3",
-          "r = 10 * v / (3.3 - v)",
-          "return 1 / (math.log(r / 10) / 3950 + 1 / 298.15) - 273.15",
-        ],
-      },
-    ],
     kind: "adc",
-    provides: () => ["ntc", "ntc_temperature"],
+    provides: () => ["ntc"],
     pattern: fixedAdcPattern("ntc"),
   },
   actions: [],
   values: [
     {
       blockType: "dev_ntc_temp", message: "서미스터 온도 (℃)", parts: [],
-      tooltip: "ntc_temperature() — 서미스터로 잰 온도(℃)",
+      tooltip: "ntc_temperature() — 서미스터로 잰 온도(℃). 이 블록을 쓰면 온도를 계산하는 ntc_temperature() 함수가 함께 만들어집니다.",
       code: () => "ntc_temperature()",
       output: "Number",
+      helpers: [NTC_TEMPERATURE],
       pattern: { kind: "call", name: "ntc_temperature", args: [] },
     },
   ],
 };
 
-/** LM35 온도 센서 (dev_lm35_setup). 이름 lm35 고정, lm35_temperature() 도우미 (10mV/℃) */
+/** LM35 온도 lm35_temperature() (10mV/℃) — LM35 온도 블록의 도우미 */
+export const LM35_TEMPERATURE: HelperSpec = { name: "lm35_temperature", params: "", body: ["return lm35.read() * 330 / 4095"] };
+
+/** LM35 온도 센서 (dev_lm35_setup). 이름 lm35 고정. 온도 블록이 lm35_temperature() 도우미를 부른다 */
 export const lm35: DeviceSpec = {
   id: "lm35", category: "sensor", label: "온도(LM35)", toolboxOrder: 45, colour: "#007d51",
   setup: {
     blockType: "dev_lm35_setup",
     message: "LM35 온도 센서를 핀 %1 에 준비하기",
     parts: [pinNo("PIN", 36, "adc")],
-    tooltip: "lm35 = ADC(Pin(36)) 와 온도(℃)를 돌려주는 lm35_temperature() 함수를 준비합니다.",
+    tooltip: "lm35 = ADC(Pin(36)) — LM35 를 준비합니다. 온도(℃)는 LM35 온도 블록(lm35_temperature())으로 읽어요.",
     lines: (v) => adcLines("lm35", v.PIN),
-    helpers: [{ name: "lm35_temperature", params: "", body: ["return lm35.read() * 330 / 4095"] }],
     kind: "adc",
-    provides: () => ["lm35", "lm35_temperature"],
+    provides: () => ["lm35"],
     pattern: fixedAdcPattern("lm35"),
   },
   actions: [],
   values: [
     {
       blockType: "dev_lm35_temp", message: "LM35 온도 (℃)", parts: [],
-      tooltip: "lm35_temperature() — LM35 로 잰 온도(℃)",
+      tooltip: "lm35_temperature() — LM35 로 잰 온도(℃). 이 블록을 쓰면 온도를 계산하는 lm35_temperature() 함수가 함께 만들어집니다.",
       code: () => "lm35_temperature()",
+      helpers: [LM35_TEMPERATURE],
       output: "Number",
       pattern: { kind: "call", name: "lm35_temperature", args: [] },
     },

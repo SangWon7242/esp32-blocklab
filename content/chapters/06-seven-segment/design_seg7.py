@@ -18,7 +18,10 @@ def hc595_shift(dat):
 
 
 def show_digit(n, dot):
-    hc595_shift(SEGCODE[n] | (0x80 if dot else 0))
+    code = SEGCODE[n]
+    if dot:
+        code = code | 128
+    hc595_shift(code)
 
 
 show_digit(3, False)

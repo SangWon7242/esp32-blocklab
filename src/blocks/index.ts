@@ -15,7 +15,7 @@ export { entryTheme } from "./theme";
 export { toolbox } from "./toolbox";
 export { registerEntryToolbox } from "./entryToolbox";
 export { registerVariableFlyout, variableFlyout } from "./variableFlyout";
-export { FUNCTION_NAME_HINT, isProgramName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
+export { FUNCTION_NAME_HINT, isProgramName, isReservedName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
 
 const definitions = [...startBlocks, ...flowBlocks, ...judgeBlocks, ...calcBlocks, ...dataBlocks, ...deviceBlockDefinitions(), ...codeBlocks];
 
@@ -87,13 +87,13 @@ export function registerBlocks(): void {
 
 /**
  * 함수 이름 칸에 파이썬 이름 검사를 단다. 한글 이름·키워드는 생성기가 다른 이름으로 바꿔 써서 코드와 블록이
- * 어긋나고, print·show 처럼 프로그램이 쓰는 이름은 덮으면 생성 코드가 깨진다. 통과하면 Blockly 의 원래 검사
+ * 어긋나고, print·time 처럼 프로그램이 쓰는 이름은 덮으면 생성 코드가 깨진다 (get_distance 같은 장치 도우미 이름은 된다). 통과하면 Blockly 의 원래 검사
  * (Procedures.rename: 겹치는 이름 피하기, 호출 블록 이름 바꾸기)를 그대로 부른다.
  * 저장된 작업판·코드에서 온 이름(loadState)은 막지 않는다: 코드의 `def show(a, b):` 같은 사용자 함수가
  * 기본 이름으로 바뀌면 호출 블록과 어긋난다.
  */
 function guardProcedureName(field: Blockly.Field<string>): void {
-  guardField(field, (value) => isValidPythonName(value.trim()));
+  guardField(field, (value) => isValidPythonName(value.trim(), "function"));
 }
 
 /**

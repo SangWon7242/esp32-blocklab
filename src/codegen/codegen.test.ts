@@ -86,7 +86,7 @@ describe("챕터 1 코드 모양", () => {
 });
 
 describe("챕터 10 코드 모양", () => {
-  it("step3_auto_door: 접힌 초음파·서보·OLED, if, 문자 합치기", () => {
+  it("step3_auto_door: 초음파·서보·OLED 준비, 거리·두 줄 보여주기 블록이 만드는 도우미 def, if, 문자 합치기", () => {
     const d = "d";
     const show = (a: B, b: B): B => ({ type: "esp_oled_show", inputs: { A: { block: a }, B: { block: b } } });
     const door = (action: "8100" | "1638"): B => ({ type: "esp_servo_door", fields: { VAR: { id: "var_servo" }, ACTION: action } });
@@ -133,6 +133,14 @@ describe("챕터 10 코드 모양", () => {
         "oled = ssd1306.SSD1306_I2C(128, 64, i2c)",
         "",
         "",
+        // 도우미 def 는 그 도우미를 부르는 블록이 생성되는 순서로 (두 줄 보여주기가 거리 블록보다 먼저)
+        "def show(a, b):",
+        "    oled.fill(0)",
+        "    oled.text(a, 0, 20)",
+        "    oled.text(b, 0, 36)",
+        "    oled.show()",
+        "",
+        "",
         "def get_distance():",
         "    trig.value(1)",
         "    time.sleep_us(10)",
@@ -145,13 +153,6 @@ describe("챕터 10 코드 모양", () => {
         "    stop = time.ticks_us()",
         "    t = time.ticks_diff(stop, start) // 2",
         "    return int(340 * t // 10000)",
-        "",
-        "",
-        "def show(a, b):",
-        "    oled.fill(0)",
-        "    oled.text(a, 0, 20)",
-        "    oled.text(b, 0, 36)",
-        "    oled.show()",
         "",
         "",
         "time.sleep(2)",

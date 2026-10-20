@@ -19,6 +19,11 @@ describe("createNamePrompt", () => {
     expect(result).toBe("dist");
     expect(asked[1]).toContain("이 이름은 프로그램이 이미 쓰고 있어요. 다른 이름을 골라 주세요");
   });
+  it("함수 이름은 장치 도우미 이름(get_distance)도 된다 — 그 함수 블록이 도우미가 된다", () => {
+    let result: string | null | undefined;
+    createNamePrompt(() => "get_distance")("새 함수 이름:", "", (r) => { result = r; });
+    expect(result).toBe("get_distance");
+  });
   it("취소하면 null", () => {
     let result: string | null | undefined;
     createNamePrompt(() => null)("새 변수 이름:", "", (r) => { result = r; });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isProgramName, isValidPythonName, PYTHON_KEYWORDS } from "./names";
-import { defaultValues, DEVICES } from "@/devices/registry";
+import { HELPER_NAMES, isProgramName, isValidPythonName, PYTHON_KEYWORDS } from "./names";
+import { defaultValues, DEVICES, setupsOf } from "@/devices/registry";
 
 describe("isValidPythonName", () => {
   it("영어 글자·숫자·_ 로, 숫자로 시작하지 않는 이름만", () => {
@@ -11,9 +11,10 @@ describe("isValidPythonName", () => {
     expect(isValidPythonName("my led")).toBe(false);
     expect(isValidPythonName("")).toBe(false);
   });
-  it("생성 코드가 쓰는 내장 이름·모듈·도우미 이름은 안 된다", () => {
+  it("생성 코드가 쓰는 내장 이름·모듈·라이브러리 함수 이름은 안 된다", () => {
     expect(isValidPythonName("str")).toBe(false);
-    expect(isValidPythonName("get_distance")).toBe(false);
+    expect(isValidPythonName("wifi_connect")).toBe(false);
+    expect(isValidPythonName("card_present", "function")).toBe(false);
     expect(isValidPythonName("Pin")).toBe(false);
     expect(isValidPythonName("led")).toBe(true);
     expect(isProgramName("time")).toBe(true);
@@ -27,18 +28,28 @@ describe("isValidPythonName", () => {
 });
 
 describe("장치 준비가 고정해서 만드는 이름", () => {
-  it("모든 도우미 이름과 고정 변수 이름은 변수·함수 이름으로 안 된다", () => {
+  it("고정 변수 이름과 보드 라이브러리 함수 이름은 변수·함수 이름으로 안 된다", () => {
     const names: string[] = [];
     for (const d of DEVICES) {
-      const s = d.setup;
-      if (!s) continue;
-      names.push(...(s.helpers ?? []).map((h) => h.name));
-      const v = defaultValues(s.parts);
-      const varValues = s.parts.filter((p) => p.kind === "var").map((p) => v[p.name]);
-      names.push(...s.provides(v).filter((n) => !varValues.includes(n)));
+      for (const s of setupsOf(d)) {
+        const v = defaultValues(s.parts);
+        const varValues = s.parts.filter((p) => p.kind === "var").map((p) => v[p.name]);
+        names.push(...s.provides(v).filter((n) => !varValues.includes(n)), ...(s.libNames ?? []));
+      }
     }
-    expect(names).toEqual(expect.arrayContaining(["stop", "show_digit", "set_color", "ntc", "rocker_x", "SEGCODE", "pins", "rc522"]));
-    for (const n of names) expect(isValidPythonName(n), n).toBe(false);
+    expect(names).toEqual(expect.arrayContaining(["ntc", "rocker_x", "SEGCODE", "pins", "rc522", "trig", "web_send", "card_uid"]));
+    for (const n of names) {
+      expect(isValidPythonName(n), n).toBe(false);
+      expect(isValidPythonName(n, "function"), n).toBe(false);
+    }
+  });
+  it("장치 도우미 이름(get_distance·stop·show …)은 함수 이름으로는 되고 변수 이름으로는 안 된다", () => {
+    expect(HELPER_NAMES).toEqual(expect.arrayContaining(["get_distance", "set_color", "forward", "backward", "stop", "show", "flow_leds", "hc595_shift", "show_digit", "ntc_temperature", "lm35_temperature"]));
+    for (const n of HELPER_NAMES) {
+      expect(isValidPythonName(n, "function"), n).toBe(true);
+      expect(isValidPythonName(n), n).toBe(false);
+      expect(isProgramName(n), n).toBe(false);
+    }
   });
   it("import 하는 모듈·클래스 이름과 machine 이름도 안 된다", () => {
     for (const n of ["dht", "math", "ssd1306", "time", "mfrc522", "KeyPad", "irGetCMD", "lcd128_32", "lcd128_32_fonts", "machine", "Pin", "PWM", "SoftI2C", "ADC"]) {

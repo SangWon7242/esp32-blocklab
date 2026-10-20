@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "@lezer/common";
-import { DEVICES, setupsOf, setupSpecs, setupVars } from "@/devices/registry";
+import { DEVICES, setupSpecs, setupVars } from "@/devices/registry";
 import type { ActionSpec, DeviceSpec, HelperSpec, Part, SetupSpec, Values } from "@/devices/types";
 import { block } from "./builders";
 import type { ParseContext } from "./context";
@@ -10,10 +10,12 @@ import type { BlockJson } from "./types";
 
 /*
  * 레지스트리(src/devices)의 패턴으로 문장·식을 장치 블록으로 바꾸는 도우미.
- * - 준비(lines):   최상위 연속 문장 texts[i..] 에 정규식을 차례로. 도우미가 있는 선언은 ctx.folded 일 때만.
+ * - 준비(lines):   최상위 연속 문장 texts[i..] 에 정규식을 차례로. foldOnlyWith 가 있는 선언은 코드가 그 함수를 정의하거나 부를 때만.
  * - 명령(lines):   어느 깊이에서든 연속 문장에. method·call 보다 먼저 본다.
  * - method:       등록된 장치 변수 `obj.name(args)`. obj 의 kind 가 objKinds(기본: 자기 장치 준비의 kind)에 있어야.
- * - call:         `name(args)`. 그 장치가 준비돼 있어야(도우미가 있으면 접혀 있어야).
+ * - call:         `name(args)`. 그 장치가 준비돼 있어야.
+ * 블록에 짧은 도우미(helpers)가 있으면 그 도우미들이 모두 표준 몸통의 최상위 def 로 있어야(ctx.standardHelpers) 맞는다.
+ * 도우미 def 자체는 숨기지 않고 늘 함수 정의 블록이 된다.
  * - expr:         값 식 전체 텍스트에 정규식. objPart 가 있으면 그룹 1이 맞는 kind 의 장치 변수여야.
  * 같은 꼴에 여러 선언이 맞으면 DEVICES 순서(우선순위)로 앞의 것.
  */
@@ -52,13 +54,13 @@ function inPlaceVarsKnown(spec: SetupSpec, fields: Values, ctx: ParseContext): b
 }
 
 /**
- * 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. 도우미가 있는 선언은 ctx.folded 에 그 장치가 있을 때만.
+ * 문장 텍스트 texts[i..] 에 맞는 첫 준비 선언. foldOnlyWith 가 있는 선언은 코드가 그 함수 이름을 정의하거나 부를 때만(ctx.calledNames).
  * inPlaceOnly 면(몸통 안) 제자리 준비만 본다. 제자리 준비는 변수 칸 이름이 아는 변수일 때만 맞는다.
  */
 export function matchSetupAt(texts: string[], i: number, ctx: ParseContext, inPlaceOnly = false): SetupMatch | null {
   for (const spec of setupSpecs()) {
     if (inPlaceOnly && !spec.inPlace) continue;
-    if (spec.helpers?.length && !ctx.foldedSetups.has(spec.blockType)) continue;
+    if (spec.foldOnlyWith && !spec.foldOnlyWith.some((n) => ctx.calledNames.has(n))) continue;
     const hit = setupLinesAt(spec, texts, i);
     if (!hit || (spec.inPlace && !inPlaceVarsKnown(spec, hit.fields, ctx))) continue;
     return { spec, ...hit, consumed: spec.pattern.lines.length };
@@ -74,10 +76,11 @@ export function isStandardHelper(h: HelperSpec, def: { paramText: string; body: 
   return !!def && !!def.body && def.paramText === compactParams(h.params) && isStandardBody(def.body, ctx, standardBody(h));
 }
 
-/** 접힌 준비의 도우미 이름이거나 접힌 선택 도우미인지 (그 def 는 블록을 만들지 않는다) */
-export function isFoldedHelper(name: string, ctx: ParseContext): boolean {
-  return ctx.foldedActionHelpers.has(name) || DEVICES.some((d) => setupsOf(d).some((s) => ctx.foldedSetups.has(s.blockType) && s.helpers?.some((h) => h.name === name)));
-}
+/**
+ * 장치 블록이 부르는 짧은 도우미들이 모두 코드에 표준 몸통의 최상위 def 로 있는지. 아니면 그 호출은 학생 함수 호출이다
+ * (몸통을 바꾼 get_distance 를 거리 블록으로 보이면 블록이 뜻하는 것과 코드가 다르다).
+ */
+const helpersReady = (spec: { helpers?: HelperSpec[] }, ctx: ParseContext): boolean => (spec.helpers ?? []).every((h) => ctx.standardHelpers.has(h.name));
 
 /** 변수 이름이 이 장치 패턴이 받는 kind 로 등록돼 있는지 */
 function kindOk(ctx: ParseContext, name: string | undefined, kinds: string[] | undefined, d: DeviceSpec): boolean {
@@ -85,10 +88,9 @@ function kindOk(ctx: ParseContext, name: string | undefined, kinds: string[] | u
   return !!dev && (kinds ?? (d.setup ? [d.setup.kind] : [])).includes(dev.kind);
 }
 
-/** 장치를 쓸 수 있는지: 준비가 없는 묶음(print)은 늘, 도우미가 있으면 접혀 있을 때, 아니면 준비 줄이 접혔을 때 */
+/** 장치를 쓸 수 있는지: 준비가 없는 묶음(print)은 늘, 아니면 준비 줄이 접혔을 때 */
 function devicePresent(d: DeviceSpec, ctx: ParseContext): boolean {
   if (!d.setup) return true;
-  if (d.setup.helpers?.length) return ctx.folded.has(d.id);
   for (const v of ctx.devices.values()) if (v.deviceId === d.id) return true;
   return false;
 }
@@ -160,6 +162,7 @@ export function matchCall(expr: SyntaxNode, ctx: ParseContext, which: "actions" 
   const line = ctx.src.lineOf(expr.from);
   for (const d of DEVICES) for (const spec of d[which]) {
     const p = spec.pattern;
+    if (!helpersReady(spec, ctx)) continue;
     if (p.kind === "method") {
       if (!member || member.prop !== p.name || args.length !== p.args.length) continue;
       if (p.objName !== undefined && member.obj !== p.objName) continue;
@@ -171,9 +174,6 @@ export function matchCall(expr: SyntaxNode, ctx: ParseContext, which: "actions" 
     }
     if (p.kind === "call") {
       if (plainName !== p.name || args.length !== p.args.length || !devicePresent(d, ctx)) continue;
-      // 선택 도우미를 부르는 명령은 그 도우미 def 가 표준 본문으로 접혔을 때만 (아니면 학생 함수 호출이다)
-      const helper = "helper" in spec ? spec.helper : undefined;
-      if (helper && !ctx.foldedActionHelpers.has(helper.name)) continue;
       const bound = bindArgs(spec.parts, p.args, args, ctx);
       if (!bound) continue;
       return buildBlock(spec.blockType, spec.parts, bound.vals, ctx, line, bound.nodes);
@@ -192,6 +192,7 @@ export function matchExpr(node: SyntaxNode, ctx: ParseContext): BlockJson | null
     const m = p.regex.exec(text);
     if (!m) continue;
     if (p.objPart ? !kindOk(ctx, m[1], p.objKinds, d) : !devicePresent(d, ctx)) continue;
+    if (!helpersReady(spec, ctx)) continue;
     const extra = p.values ? p.values(m) : {};
     if (!extra) continue;
     const vals: Values = { ...(p.objPart ? { [p.objPart]: m[1] } : {}), ...extra };
@@ -212,9 +213,6 @@ function oneLineActions(text: string): ActionSpec[] {
   return out;
 }
 
-/** 문장 글이 선택 도우미를 부르는 한 줄 명령 꼴이면 그 도우미들 (`web_send(conn, web_page(…))` → web_page) */
-export const helpersCalledBy = (text: string): HelperSpec[] => oneLineActions(text).flatMap((a) => (a.helper ? [a.helper] : []));
-
 /** 문장 글이 학생 변수에 값을 정하는 한 줄 명령 꼴이면 그 이름들 (`conn, path, query = web_accept(server)`) */
 export const namesDefinedBy = (text: string): string[] => oneLineActions(text).flatMap((a) => a.defines ?? []);
 
@@ -228,8 +226,8 @@ export function matchActionLines(nodes: SyntaxNode[], texts: string[], i: number
     const vals = p.values(ms);
     if (!vals) continue;
     if (p.objPart ? !kindOk(ctx, vals[p.objPart], p.objKinds, d) : !devicePresent(d, ctx)) continue;
-    // 선택 도우미를 부르는 명령은 그 도우미 def 가 표준 본문으로 접혔을 때만 (matchCall 과 같다)
-    if (spec.helper && !ctx.foldedActionHelpers.has(spec.helper.name)) continue;
+    // 짧은 도우미를 부르는 명령은 그 도우미 def 가 표준 몸통으로 있을 때만 (matchCall 과 같다)
+    if (!helpersReady(spec, ctx)) continue;
     return { block: buildBlock(spec.blockType, spec.parts, vals, ctx, ctx.src.lineOf(nodes[i].from)), consumed: p.lines.length };
   }
   return null;

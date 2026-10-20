@@ -48,7 +48,7 @@ export const ledContent: Record<string, BlockContent> = {
     tips: ["0~65535 로 정하는 세기 블록(duty_u16)과 범위가 달라요. 512 는 절반쯤이에요."],
   },
   dev_rgb_setup: {
-    concept: "빨강·초록·파랑 세 핀으로 RGB LED 를 준비해요. 세 빛의 세기를 섞어 여러 색을 만들며, 색을 정하는 set_color(r, g, b) 함수도 함께 만들어집니다. 이름은 red, green, blue 로 정해져 있어요.",
+    concept: "빨강·초록·파랑 세 핀으로 RGB LED 를 준비해요. 세 빛의 세기를 섞어 여러 색을 만들며, 색 블록을 쓰면 색을 정하는 set_color(r, g, b) 함수가 함께 만들어집니다. 이름은 red, green, blue 로 정해져 있어요.",
     example: { title: "빨강, 파랑 차례로 켜기", code: `${RGB_SETUP}set_color(255, 0, 0)\ntime.sleep(1)\nset_color(0, 0, 255)` },
   },
   dev_rgb_colour: {
@@ -69,7 +69,7 @@ export const ledContent: Record<string, BlockContent> = {
     tips: ["코드를 블록으로 바꾸면 검은색 RGB 색 블록으로 돌아와요. 뜻은 같아요."],
   },
   dev_flow_setup: {
-    concept: "여러 LED 를 차례로 켜는 흐르는 LED 를 준비해요. 핀 번호 목록을 pins 로 만들고, 목록의 LED 를 하나씩 켰다 끄는 flow_leds(ms) 함수도 함께 만들어집니다.",
+    concept: "여러 LED 를 차례로 켜는 흐르는 LED 를 준비해요. 핀 번호 목록을 pins 로 만들고, 차례로 켜기 블록을 쓰면 목록의 LED 를 하나씩 켰다 끄는 flow_leds(ms) 함수가 함께 만들어집니다.",
     example: { title: "LED 가 계속 흐르게 하기", code: `${FLOW_SETUP}while True:\n    flow_leds(100)` },
     tips: ["핀 목록은 18, 5, 14 처럼 쉼표로 나눠 적어요."],
   },

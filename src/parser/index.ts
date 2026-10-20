@@ -1,10 +1,9 @@
 import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
-import { actionHelpersOf, DEVICES, setupSpecs } from "@/devices/registry";
+import { allActionHelpers } from "@/devices/registry";
 import { functionParts, returnsValue } from "./patterns";
-import { callParts } from "./expressions";
-import { helpersCalledBy, isStandardHelper, matchSetupAt, namesDefinedBy, setupLinesAt } from "./devices";
+import { isStandardHelper, matchSetupAt, namesDefinedBy } from "./devices";
 import { escapeCommentLine, withComment } from "./builders";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
@@ -14,8 +13,9 @@ export { normalizeCode } from "./normalize";
 export type { BlockJson, ParseResult, UnparsedItem, WorkspaceJson } from "./types";
 
 /**
- * 대입·매개변수로 쓰인 이름을 모두 변수로 등록하고, 함수 표를 만들고, 레지스트리의 준비 선언으로
- * 장치 변수(ctx.devices)와 도우미까지 접힌 장치(ctx.folded)를 정한다.
+ * 대입·매개변수로 쓰인 이름을 모두 변수로 등록하고, 함수 표를 만들고, 레지스트리의 준비 선언으로 장치 변수(ctx.devices)를 정하고,
+ * 장치 블록의 짧은 도우미 중 표준 몸통으로 정의된 것(ctx.standardHelpers)을 찾는다. 도우미 def 도 함수 표에 그대로 둔다
+ * (숨기지 않고 함수 정의 블록이 된다).
  */
 function survey(script: SyntaxNode, ctx: ParseContext): void {
   const walk = (node: SyntaxNode) => {
@@ -29,6 +29,11 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
       const kids = children(node);
       if (kids[0]?.name === "for" && kids[1]?.name === "VariableName" && kids[2]?.name === "in") ctx.varId(ctx.src.slice(kids[1]));
     }
+    // 부르는 함수 이름 (준비의 foldOnlyWith: flow_leds 를 부를 때만 pins = [...] 를 흐르는 LED 준비로)
+    if (node.name === "CallExpression") {
+      const callee = node.firstChild;
+      if (callee?.name === "VariableName") ctx.calledNames.add(ctx.src.slice(callee));
+    }
     for (const c of children(node)) walk(c);
   };
   walk(script);
@@ -37,50 +42,30 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
   // 함수 블록은 맨 바깥 def 만. 안쪽 def 는 code_stmt 로 남으니 등록하지 않는다.
   // 같은 이름의 def 가 또 나오면 뒤의 것은 code_stmt 로 남긴다 (블록 정의는 맨 위로 올라가므로 순서가 바뀌면 뜻이 바뀐다).
   // 기본값·*args·여러 값 return 이 있는 def 도 code_stmt 로 남으므로 함수 표에 올리지 않는다 (호출도 코드 블록이 된다).
-  // 도우미 비교용으로 기본값·*args 가 있는 def 도 몸통을 둔다 (web_send(conn, body, ctype="text/html")). 함수 표에는 simple 만
+  // 도우미 비교용으로 기본값·*args 가 있는 def 도 몸통을 둔다. 함수 표에는 simple 만
   const defs = new Map<string, { paramText: string; body: SyntaxNode | null }>();
   for (const node of top) {
     if (node.name !== "FunctionDefinition") continue;
     const { name, params, paramText, body, simple } = functionParts(node, ctx);
     if (defs.has(name)) { ctx.duplicateDefs.add(node.from); continue; }
     defs.set(name, { paramText, body });
+    ctx.calledNames.add(name);
     if (simple) ctx.functions.set(name, { params, returns: returnsValue(body) });
   }
+  // 장치 블록이 부르는 짧은 도우미(get_distance·show …) 중 표준 몸통의 최상위 def 로 있는 것: 그 호출이 장치 블록으로 돌아온다
+  for (const h of allActionHelpers()) if (ctx.functions.has(h.name) && isStandardHelper(h, defs.get(h.name), ctx)) ctx.standardHelpers.add(h.name);
 
-  // 도우미 접기 후보(준비 블록 type): 모든 도우미가 같은 이름·매개변수·표준 본문의 최상위 def 로 있고, 준비 줄들도 최상위에 연달아 있다
+  // 문장 변환과 같은 순서로 준비 줄을 접어 보며 장치 변수를 미리 등록한다 (몸통 안의 메서드 호출이 쓴다)
   const texts = top.map((n) => ctx.src.slice(n).trim());
-  const candidates = new Set<string>();
-  for (const spec of setupSpecs()) {
-    const helpers = spec.helpers ?? [];
-    if (!helpers.length || !helpers.every((h) => isStandardHelper(h, defs.get(h.name), ctx))) continue;
-    if (texts.some((_, i) => setupLinesAt(spec, texts, i))) candidates.add(spec.blockType);
+  for (let i = 0; i < texts.length; ) {
+    const m = matchSetupAt(texts, i, ctx);
+    if (!m) { i++; continue; }
+    ctx.registerDevice(m.vars, m.spec.device.id, m.spec.kind);
+    i += m.consumed;
   }
-  const deviceOf = new Map(setupSpecs().map((s) => [s.blockType, s.device.id]));
-
-  // 문장 변환과 같은 순서로 준비 줄을 접어 보며 장치 변수를 미리 등록한다 (몸통 안의 메서드 호출이 쓴다).
-  // 후보인데 더 앞선 선언에 줄을 빼앗겨 접히지 못한 준비는 후보에서 빼고 다시 본다 (도우미 def 를 지우면 안 되므로).
-  for (;;) {
-    ctx.folded.clear();
-    ctx.foldedSetups.clear();
-    ctx.devices.clear();
-    candidates.forEach((type) => { ctx.foldedSetups.add(type); ctx.folded.add(deviceOf.get(type)!); });
-    const seen = new Set<string>();
-    for (let i = 0; i < texts.length; ) {
-      const m = matchSetupAt(texts, i, ctx);
-      if (!m) { i++; continue; }
-      ctx.registerDevice(m.vars, m.spec.device.id, m.spec.kind);
-      seen.add(m.spec.blockType);
-      i += m.consumed;
-    }
-    const lost = [...candidates].filter((type) => !seen.has(type));
-    if (!lost.length) break;
-    lost.forEach((type) => candidates.delete(type));
-  }
-  for (const spec of setupSpecs()) if (ctx.foldedSetups.has(spec.blockType)) for (const h of spec.helpers ?? []) ctx.functions.delete(h.name);
 
   // 제자리 준비(esp_pin_setup_var)는 몸통 안에도 있으므로 모든 문장을 보며 그 줄이 만드는 이름을 장치 변수로 등록한다
   // (반복 안의 led = Pin(pin, Pin.OUT) 뒤 led.value(1) 이 핀 켜기 블록이 되게)
-  const calls = new Map<string, number[]>();
   const visit = (node: SyntaxNode) => {
     if (node.name === "AssignStatement") {
       const text = ctx.src.slice(node).trim();
@@ -89,35 +74,10 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
       // 학생 변수에 값을 정하는 명령(요청 받기의 conn·path·query): 접히든 코드로 남든 그 이름은 값이 정해진 변수다
       for (const name of namesDefinedBy(text)) if (!ctx.devices.has(name)) ctx.varId(name);
     }
-    // 명령으로 부른 이름과 인자 수 (선택 도우미가 쓰였는지 본다)
-    if (node.name === "ExpressionStatement" && node.firstChild?.name === "CallExpression") {
-      const { callee, args, plain } = callParts(node.firstChild);
-      if (plain && callee.name === "VariableName") {
-        const name = ctx.src.slice(callee);
-        calls.set(name, [...(calls.get(name) ?? []), args.length]);
-      }
-      // 명령 꼴 안쪽에서 부르는 선택 도우미 (web_send(conn, web_page(…)) 의 web_page)
-      for (const h of helpersCalledBy(ctx.src.slice(node).trim())) calls.set(h.name, [...(calls.get(h.name) ?? []), arity(h.params)]);
-    }
     for (const c of children(node)) visit(c);
   };
   visit(script);
-
-  // 선택 도우미(esp_oled_show 의 show): 장치가 준비돼 있고, 표준 본문의 최상위 def 가 있고, 그 명령으로 부르는 곳이 있을 때만 접는다.
-  // 부르는 곳 없이 def 만 있으면 생성기가 다시 만들지 않으므로 함수 블록으로 남긴다
-  const present = new Set([...ctx.devices.values()].map((v) => v.deviceId));
-  for (const d of DEVICES) {
-    if (!present.has(d.id)) continue;
-    for (const h of actionHelpersOf(d)) {
-      if (!isStandardHelper(h, defs.get(h.name), ctx) || !calls.get(h.name)?.includes(arity(h.params))) continue;
-      ctx.foldedActionHelpers.add(h.name);
-      ctx.functions.delete(h.name);
-    }
-  }
 }
-
-/** 도우미 매개변수 수 (`a, b` → 2) */
-const arity = (params: string): number => params.split(",").map((p) => p.trim()).filter(Boolean).length;
 
 /** 앞에 코드 없이 주석만 있는 줄들 (위치 순). `#` 와 그 뒤 공백 하나, 끝 공백을 뗀 글 */
 function commentOnlyLines(script: SyntaxNode, ctx: ParseContext): { from: number; text: string }[] {

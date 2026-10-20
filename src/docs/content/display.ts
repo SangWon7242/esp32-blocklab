@@ -25,7 +25,7 @@ const SEG_SETUP = [
   "        sck.value(1)",
   "    rck.value(1)",
   "", "",
-  "def show_digit(n, dot):", "    hc595_shift(SEGCODE[n] | (0x80 if dot else 0))",
+  "def show_digit(n, dot):", "    code = SEGCODE[n]", "    if dot:", "        code = code | 128", "    hc595_shift(code)",
   "", "",
 ].join("\n");
 
@@ -107,7 +107,7 @@ export const displayContent: Record<string, BlockContent> = {
     tips: [LCD_TIP],
   },
   dev_seg_setup: {
-    concept: "숫자 한 자리를 보여 주는 7세그먼트를 74HC595 칩으로 준비해요. 세 핀(si·rck·sck)으로 8칸의 켜짐·꺼짐을 차례로 밀어 넣습니다. 숫자 모양표 SEGCODE 와 hc595_shift·show_digit 함수가 함께 만들어져요.",
+    concept: "숫자 한 자리를 보여 주는 7세그먼트를 74HC595 칩으로 준비해요. 세 핀(si·rck·sck)으로 8칸의 켜짐·꺼짐을 차례로 밀어 넣습니다. 숫자 모양표 SEGCODE 도 함께 만들어지고, 숫자 표시 블록을 쓰면 hc595_shift·show_digit 함수가 함수 블록으로 생겨요.",
     example: { title: "숫자 7 보여 주기", code: `${SEG_SETUP}show_digit(7, False)` },
     tips: ["핀 이름(si, rck, sck)과 SEGCODE 표는 정해져 있어요. 바꾸면 코드를 블록으로 바꿀 때 이 블록으로 돌아오지 않아요."],
   },

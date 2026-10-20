@@ -23,10 +23,17 @@ describe("레지스트리 접기", () => {
     const b = body("servo = PWM(Pin(4))\nservo.freq(50)\nservo.duty_u16(1638)\npwm = PWM(Pin(2))\npwm.freq(1000)\nservo.duty_u16(8100)\npwm.duty_u16(8100)\n");
     expect(b.slice(2).map((x) => x.type)).toEqual(["esp_servo_door", "esp_pwm_duty"]);
   });
-  it("도우미가 있는 준비는 표준 def 가 있을 때만 접힌다", () => {
+  it("도우미 def 가 없어도 준비는 접힌다 (도우미 def 는 따로 함수 블록)", () => {
     const withHelper = "trig = Pin(13, Pin.OUT)\necho = Pin(12, Pin.IN)\n\ndef get_distance():\n    trig.value(1)\n    time.sleep_us(10)\n    trig.value(0)\n    while not echo.value():\n        pass\n    start = time.ticks_us()\n    while echo.value():\n        pass\n    stop = time.ticks_us()\n    t = time.ticks_diff(stop, start) // 2\n    return int(340 * t // 10000)\n\nprint(get_distance())\n";
     expect(body(withHelper).map((x) => x.type)).toEqual(["esp_ultrasonic_setup", "esp_print"]);
-    expect(body("trig = Pin(13, Pin.OUT)\necho = Pin(12, Pin.IN)\n").map((x) => x.type)).toEqual(["esp_pin_setup", "esp_pin_setup"]);
+    const r = codeToBlocks(withHelper);
+    if (!r.ok) throw new Error();
+    expect((r.json.blocks.blocks as BlockJson[]).map((b) => [b.type, b.fields?.NAME])).toEqual([["procedures_defreturn", "get_distance"], ["start_program", undefined]]);
+    expect(body("trig = Pin(13, Pin.OUT)\necho = Pin(12, Pin.IN)\n").map((x) => x.type)).toEqual(["esp_ultrasonic_setup"]);
+  });
+  it("pins = [...] 는 flow_leds 를 정의하거나 부를 때만 흐르는 LED 준비, 아니면 리스트 만들기", () => {
+    expect(body("pins = [18, 5]\nprint(pins)\n").map((x) => x.type)).toEqual(["list_create_from", "esp_print"]);
+    expect(body("pins = [18, 5]\nflow_leds(100)\n")[0].type).toBe("dev_flow_setup");
   });
   it("접힌 장치의 준비 줄 주석은 준비 블록 코멘트로 남는다", () => {
     const { out } = roundtrip("servo = PWM(Pin(4))  # 문\nservo.freq(50)\nservo.duty_u16(1638)\n");

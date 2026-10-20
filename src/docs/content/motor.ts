@@ -39,7 +39,7 @@ export const motorContent: Record<string, BlockContent> = {
     tips: ["각도는 0~180 사이로 정해요. 그 밖의 값을 주면 서보가 끝에 부딪혀 떨릴 수 있어요."],
   },
   dev_motor_setup: {
-    concept: "DC 모터(계속 빙글빙글 도는 모터)를 두 PWM 핀에 준비해요. 두 핀 중 어느 쪽에 힘을 주느냐로 도는 방향이, 세기로 빠르기가 정해집니다. forward·backward·stop 세 함수가 함께 만들어지고, 핀 이름은 motor1a, motor1b 로 정해져 있어요.",
+    concept: "DC 모터(계속 빙글빙글 도는 모터)를 두 PWM 핀에 준비해요. 두 핀 중 어느 쪽에 힘을 주느냐로 도는 방향이, 세기로 빠르기가 정해집니다. 앞으로·뒤로·정지 블록을 쓰면 forward·backward·stop 함수가 함께 만들어지고, 핀 이름은 motor1a, motor1b 로 정해져 있어요.",
     example: { title: "2초 돌리고 멈추기", code: `${MOTOR_SETUP}forward(800)\ntime.sleep(2)\nstop()` },
     tips: ["ESP32 핀만으로는 모터를 돌릴 힘이 모자라요. 모터 드라이버가 달린 모듈의 IN+·IN- 에 연결해요."],
   },

@@ -72,19 +72,19 @@ describe("OLED 확장 (oled.text·fill·show·line·rect·fill_rect)", () => {
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(src);
   });
-  it("두 줄 보여주기 블록을 쓰면 그때만 show 도우미가 정의되고, 왕복하면 def 는 접힌다", () => {
+  it("두 줄 보여주기 블록을 쓰면 그때만 show 도우미가 정의되고, 왕복하면 def 는 show 함수 블록으로 보인다", () => {
     const show = withInputs("esp_oled_show", { A: text("AUTO DOOR"), B: text("Come closer") });
     const src = [...head, ...showDef, 'show("AUTO DOOR", "Come closer")', ""].join("\n");
     expect(toCode([blocks[0], show])).toBe(src);
     const r = fromCode(src);
-    expect(r.tops).toEqual(["start_program"]);
+    expect(r.tops).toEqual(["procedures_defnoreturn", "start_program"]);
     expect(r.types).toEqual(["esp_oled_setup", "esp_oled_show", "text", "text"]);
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(src);
     // 두 번 써도 도우미는 한 번
     expect(toCode([blocks[0], show, show]).match(/def show/g)).toHaveLength(1);
   });
-  it("show 를 부르지 않는 표준 def show 는 접지 않고 함수 블록으로 남긴다 (사라지지 않게)", () => {
+  it("show 를 부르지 않는 표준 def show 도 함수 블록으로 남는다 (사라지지 않게)", () => {
     const src = [...head, ...showDef, "oled.show()", ""].join("\n");
     const r = fromCode(src);
     expect(r.tops).toContain("procedures_defnoreturn");
@@ -177,7 +177,10 @@ describe("7세그먼트 (dev_seg_setup)", () => {
     "",
     "",
     "def show_digit(n, dot):",
-    "    hc595_shift(SEGCODE[n] | (0x80 if dot else 0))",
+    "    code = SEGCODE[n]",
+    "    if dot:",
+    "        code = code | 128",
+    "    hc595_shift(code)",
     "",
     "",
     "show_digit(3, False)",
@@ -188,25 +191,28 @@ describe("7세그먼트 (dev_seg_setup)", () => {
   const digit = (n: number, dot: string) => withInputs("dev_seg_digit", { N: num(n) }, { DOT: dot });
   const blocks: B[] = [{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, digit(3, "False"), digit(7, "True"), { type: "dev_seg_clear" }];
 
-  it("핀 3줄, SEGCODE, hc595_shift·show_digit 도우미", () => {
+  it("핀 3줄, SEGCODE, 숫자 블록이 만드는 hc595_shift·show_digit 도우미 (부르는 것보다 먼저)", () => {
     expect(toCode(blocks)).toBe(code);
   });
-  it("왕복: 도우미까지 접혀 같은 블록들, unparsed 0", () => {
+  it("왕복: 같은 블록들 + 도우미 def 둘은 함수 블록, unparsed 0", () => {
     const r = fromCode(code);
-    expect(r.tops).toEqual(["start_program"]);
+    expect(r.tops).toEqual(["procedures_defnoreturn", "procedures_defnoreturn", "start_program"]);
     expect(r.types).toEqual(["dev_seg_setup", "dev_seg_digit", "math_number", "dev_seg_digit", "math_number", "dev_seg_clear"]);
     expect(r.body[0].fields).toEqual({ SI: 5, RCK: 23, SCK: 18 });
     expect(r.body[2].fields).toEqual({ DOT: "True" });
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
-  it("도우미가 표준 꼴이 아니면 접지 않는다 (출력 핀 셋 + 함수 블록)", () => {
-    const r = fromCode(code.replace("range(7, -1, -1)", "range(8)"));
-    expect(r.types).not.toContain("dev_seg_setup");
-    expect(r.types.slice(0, 3)).toEqual(["esp_pin_setup", "esp_pin_setup", "esp_pin_setup"]);
-    expect(r.tops).toContain("procedures_defnoreturn");
+  it("도우미가 표준 꼴이 아니면 숫자·지우기는 학생 함수 호출 블록 (준비는 그대로 접힌다)", () => {
+    const src = code.replace("range(7, -1, -1)", "range(8)");
+    const r = fromCode(src);
+    expect(r.types[0]).toBe("dev_seg_setup");
+    expect(r.types).not.toContain("dev_seg_digit");
+    expect(r.types).not.toContain("dev_seg_clear");
+    expect(r.types).toContain("procedures_callnoreturn");
+    expect(r.code).toBe(src);
   });
-  describe("SEGCODE 표를 고치면(13칸) 접지 않고 코드로 둔다 (핀 셋 + 코드, unparsed > 0)", () => {
+  describe("SEGCODE 표를 고치면(13칸) 7세그먼트 준비로 접지 않는다 (핀 셋 + 리스트 만들기)", () => {
     const table = "SEGCODE = [0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f, 0x77, 0x7c, 0x39]";
     const standard = "SEGCODE = [0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f]";
     it("함수 정의 뒤에 둔 고친 표는 글자 그대로 왕복한다", () => {
@@ -214,13 +220,12 @@ describe("7세그먼트 (dev_seg_setup)", () => {
       const r = fromCode(edited);
       expect(r.types).not.toContain("dev_seg_setup");
       expect(r.types.slice(0, 3)).toEqual(["esp_pin_setup", "esp_pin_setup", "esp_pin_setup"]);
-      expect(r.unparsed.length).toBeGreaterThan(0);
+      expect(r.types).toContain("list_create_from");
       expect(r.code).toBe(edited);
     });
     it("준비 줄 자리에서 고친 표도 사라지지 않는다 (문장은 함수 정의 뒤로 옮겨지고, 그다음부터는 글자 그대로)", () => {
       const r = fromCode(code.replace(standard, table));
       expect(r.types).not.toContain("dev_seg_setup");
-      expect(r.unparsed.length).toBeGreaterThan(0);
       expect(r.code).toContain(table + "\n");
       expect(r.code).not.toContain(standard);
       expect(fromCode(r.code).code).toBe(r.code);

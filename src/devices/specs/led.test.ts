@@ -110,16 +110,20 @@ describe("RGB LED (dev_rgb_setup)", () => {
   });
   it("왕복: 리터럴 셋은 색 블록(\"#ff69b4\"), 식이 있으면 세 값 블록, 끄기는 검은색", () => {
     const r = fromCode(code);
-    expect(r.tops).toEqual(["start_program"]); // set_color def 는 준비 블록이 다시 만든다
+    expect(r.tops).toEqual(["procedures_defnoreturn", "start_program"]); // set_color def 는 함수 블록 (생성기는 다시 만들지 않는다)
     expect(r.types).toEqual(["dev_rgb_setup", "dev_rgb_colour", "dev_rgb_set", "math_number", "math_number", "calc_arith", "math_number", "math_number", "dev_rgb_colour"]);
     expect(r.body[1].fields).toEqual({ COLOUR: "#ff69b4" });
     expect(r.body[3].fields).toEqual({ COLOUR: "#000000" });
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
-  it("set_color 도우미가 표준 꼴이 아니면 접지 않는다", () => {
+  it("set_color 도우미가 표준 꼴이 아니면 색 블록이 아니라 학생 함수 호출 (준비는 그대로 접힌다)", () => {
     const changed = code.replace("b * 1023 // 255", "b * 4");
-    expect(fromCode(changed).types).not.toContain("dev_rgb_setup");
+    const r = fromCode(changed);
+    expect(r.types[0]).toBe("dev_rgb_setup");
+    expect(r.types).not.toContain("dev_rgb_colour");
+    expect(r.types).toContain("procedures_callnoreturn");
+    expect(r.code).toBe(changed);
   });
 });
 

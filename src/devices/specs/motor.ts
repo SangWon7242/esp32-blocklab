@@ -1,4 +1,4 @@
-import type { DeviceSpec } from "../types";
+import type { DeviceSpec, HelperSpec } from "../types";
 import { factor, isSingleOperand, unfactor, NO_SETUP_PATTERN, pinNo, validPins } from "./common";
 
 /** 서보 (esp_servo_setup). PWM 2줄보다 구체적인 3줄이라 레지스트리에서 pwm 보다 앞에 둔다 */
@@ -41,22 +41,22 @@ export const servo: DeviceSpec = {
   values: [],
 };
 
-/** DC 모터 (dev_motor_setup). 이름 motor1a/motor1b 고정, forward(speed)·backward(speed)·stop() 도우미. PWM 핀 둘이라 pwm 보다 앞 */
+/** DC 모터 도우미: 앞으로 forward(speed)·뒤로 backward(speed)·정지 stop() — 모터 블록들이 하나씩 부른다 */
+export const MOTOR_FORWARD: HelperSpec = { name: "forward", params: "speed", body: ["motor1a.duty(speed)", "motor1b.duty(0)"] };
+export const MOTOR_BACKWARD: HelperSpec = { name: "backward", params: "speed", body: ["motor1a.duty(0)", "motor1b.duty(speed)"] };
+export const MOTOR_STOP: HelperSpec = { name: "stop", params: "", body: ["motor1a.duty(0)", "motor1b.duty(0)"] };
+
+/** DC 모터 (dev_motor_setup). 이름 motor1a/motor1b 고정, 모터 블록이 forward(speed)·backward(speed)·stop() 도우미를 부른다. PWM 핀 둘이라 pwm 보다 앞 */
 export const dcMotor: DeviceSpec = {
   id: "dc_motor", category: "motor", label: "DC 모터", toolboxOrder: 61, colour: "#ae4500",
   setup: {
     blockType: "dev_motor_setup",
     message: "DC 모터 준비하기 (IN+ 핀 %1, IN- 핀 %2)",
     parts: [pinNo("A", 13, "out"), pinNo("B", 12, "out")],
-    tooltip: "motor1a/motor1b PWM 핀과 forward·backward·stop 함수를 준비합니다.",
+    tooltip: "motor1a/motor1b PWM 핀을 만듭니다. 모터 블록(forward·backward·stop)으로 돌리고 멈춰요.",
     lines: (v) => [`motor1a = PWM(Pin(${v.A}))`, `motor1b = PWM(Pin(${v.B}))`, "motor1a.freq(1000)", "motor1b.freq(1000)"],
-    helpers: [
-      { name: "forward", params: "speed", body: ["motor1a.duty(speed)", "motor1b.duty(0)"] },
-      { name: "backward", params: "speed", body: ["motor1a.duty(0)", "motor1b.duty(speed)"] },
-      { name: "stop", params: "", body: ["motor1a.duty(0)", "motor1b.duty(0)"] },
-    ],
     kind: "motor",
-    provides: () => ["motor1a", "motor1b", "forward", "backward", "stop"],
+    provides: () => ["motor1a", "motor1b"],
     pattern: {
       lines: [
         /^motor1a\s*=\s*PWM\(\s*Pin\(\s*(\d+)\s*\)\s*\)$/,
@@ -73,6 +73,7 @@ export const dcMotor: DeviceSpec = {
       parts: [{ kind: "value", name: "SPEED", check: "Number", shadow: 1023 }],
       tooltip: "forward(속도) — 0~1023",
       code: (v) => `forward(${v.SPEED})`,
+      helpers: [MOTOR_FORWARD],
       pattern: { kind: "call", name: "forward", args: [null] },
       range: { SPEED: { min: 0, max: 1023, label: { ko: "속도", en: "speed" } } },
     },
@@ -81,6 +82,7 @@ export const dcMotor: DeviceSpec = {
       parts: [{ kind: "value", name: "SPEED", check: "Number", shadow: 1023 }],
       tooltip: "backward(속도) — 0~1023",
       code: (v) => `backward(${v.SPEED})`,
+      helpers: [MOTOR_BACKWARD],
       pattern: { kind: "call", name: "backward", args: [null] },
       range: { SPEED: { min: 0, max: 1023, label: { ko: "속도", en: "speed" } } },
     },
@@ -88,6 +90,7 @@ export const dcMotor: DeviceSpec = {
       blockType: "dev_motor_stop", message: "모터 정지", parts: [],
       tooltip: "stop() — 두 핀을 모두 0 으로",
       code: () => "stop()",
+      helpers: [MOTOR_STOP],
       pattern: { kind: "call", name: "stop", args: [] },
     },
   ],

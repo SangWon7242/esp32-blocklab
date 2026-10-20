@@ -138,13 +138,14 @@ describe("코드 지도: 블록 id ↔ 줄", () => {
     expectConsistent(code, map);
   });
 
-  it("준비 블록 + 도우미(초음파): trig/echo 두 줄과 get_distance 함수 전부가 준비 블록", () => {
+  it("준비 블록 + 도우미(초음파): trig/echo 두 줄은 준비 블록, get_distance 함수 전부는 그것을 부른 거리 블록", () => {
     const us: B = { type: "esp_ultrasonic_setup", id: "us", fields: { TRIG: 13, ECHO: 12 } };
-    const show: B = { type: "esp_print", id: "p", inputs: { VALUE: { block: { type: "esp_distance" } } } };
+    const show: B = { type: "esp_print", id: "p", inputs: { VALUE: { block: { type: "esp_distance", id: "dist" } } } };
     const { code, map } = workspaceJsonToCodeWithMap(program([us, show]));
     const def = lineOf(code, "def get_distance():");
     const ret = lineOf(code, "return int(340 * t // 10000)");
-    expect(map.blockToLines.us).toEqual([lineOf(code, "trig = Pin(13, Pin.OUT)"), lineOf(code, "echo = Pin(12, Pin.IN)"), ...range(def, ret)]);
+    expect(map.blockToLines.us).toEqual([lineOf(code, "trig = Pin(13, Pin.OUT)"), lineOf(code, "echo = Pin(12, Pin.IN)")]);
+    expect(map.blockToLines.dist).toEqual(range(def, ret));
     expect(map.blockToLines.p).toEqual([lineOf(code, "print(get_distance())")]);
     expectConsistent(code, map);
   });

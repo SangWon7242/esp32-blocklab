@@ -83,7 +83,7 @@ export const sensorContent: Record<string, BlockContent> = {
     tips: ["먼저 불꽃 센서 준비 블록이 있어야 해요.", "불은 꼭 선생님과 함께 다뤄요."],
   },
   dev_ntc_setup: {
-    concept: "서미스터(온도에 따라 저항이 바뀌는 부품)를 아날로그 핀에 준비해요. 읽은 값을 저항으로, 저항을 다시 온도(℃)로 바꾸는 ntc_temperature() 함수도 함께 만들어집니다. 이름은 ntc 로 정해져 있어요.",
+    concept: "서미스터(온도에 따라 저항이 바뀌는 부품)를 아날로그 핀에 준비해요. 온도 블록을 쓰면 읽은 값을 저항으로, 저항을 다시 온도(℃)로 바꾸는 ntc_temperature() 함수가 함께 만들어집니다. 이름은 ntc 로 정해져 있어요.",
     example: { title: "온도를 1초마다 출력하기", code: `${NTC_SETUP}while True:\n    print(ntc_temperature())\n    time.sleep(1)` },
     tips: [ADC_TIP, "10kΩ 서미스터(B 값 3950)와 10kΩ 저항을 함께 연결한 회로에 맞춘 계산이에요."],
   },
@@ -96,7 +96,7 @@ export const sensorContent: Record<string, BlockContent> = {
     tips: ["먼저 서미스터 준비 블록이 있어야 해요."],
   },
   dev_lm35_setup: {
-    concept: "LM35 온도 센서를 아날로그 핀에 준비해요. LM35 는 1℃ 마다 10mV 씩 높은 전압을 내보내서, 읽은 값을 그대로 온도로 바꿀 수 있습니다. 온도를 돌려주는 lm35_temperature() 함수도 함께 만들어지고, 이름은 lm35 로 정해져 있어요.",
+    concept: "LM35 온도 센서를 아날로그 핀에 준비해요. LM35 는 1℃ 마다 10mV 씩 높은 전압을 내보내서, 읽은 값을 그대로 온도로 바꿀 수 있습니다. 온도 블록을 쓰면 온도를 돌려주는 lm35_temperature() 함수가 함께 만들어지고, 이름은 lm35 로 정해져 있어요.",
     example: { title: "온도를 1초마다 출력하기", code: `${LM35_SETUP}while True:\n    print(lm35_temperature())\n    time.sleep(1)` },
     tips: [ADC_TIP],
   },
@@ -109,7 +109,7 @@ export const sensorContent: Record<string, BlockContent> = {
     tips: ["먼저 LM35 준비 블록이 있어야 해요."],
   },
   esp_ultrasonic_setup: {
-    concept: "초음파 거리 센서를 준비해요. trig 핀으로 짧은 초음파를 쏘고, echo 핀으로 되돌아오는 데 걸린 시간을 재서 거리(cm)로 바꾸는 get_distance() 함수가 함께 만들어집니다. 핀 이름은 trig, echo 로 정해져 있어요.",
+    concept: "초음파 거리 센서를 준비해요. trig 핀으로 짧은 초음파를 쏘고, echo 핀으로 되돌아오는 데 걸린 시간을 재요. 거리 블록을 쓰면 그 시간을 거리(cm)로 바꾸는 get_distance() 함수가 함께 만들어집니다. 핀 이름은 trig, echo 로 정해져 있어요.",
     example: { title: "거리를 0.5초마다 출력하기", code: `${ULTRASONIC_SETUP}while True:\n    print(get_distance())\n    time.sleep(0.5)` },
     tips: ["echo 선이 빠져 있으면 get_distance() 가 메아리를 끝없이 기다려서 프로그램이 멈춘 것처럼 보여요. 선을 먼저 확인해요."],
   },

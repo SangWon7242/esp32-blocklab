@@ -98,18 +98,20 @@ describe("DC 모터 (dev_motor_setup)", () => {
   it("준비 4줄과 forward·backward·stop 도우미", () => {
     expect(toCode(blocks)).toBe(code);
   });
-  it("왕복: 도우미 셋이 접혀 같은 블록들, unparsed 0", () => {
+  it("왕복: 같은 블록들 + 도우미 def 셋은 함수 블록, unparsed 0", () => {
     const r = fromCode(code);
-    expect(r.tops).toEqual(["start_program"]);
+    expect(r.tops).toEqual(["procedures_defnoreturn", "procedures_defnoreturn", "procedures_defnoreturn", "start_program"]);
     expect(r.types).toEqual(["dev_motor_setup", "dev_motor_forward", "math_number", "dev_motor_backward", "math_number", "dev_motor_stop"]);
     expect(r.body[0].fields).toEqual({ A: 13, B: 12 });
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
-  it("도우미 하나라도 표준 꼴이 아니면 접지 않는다", () => {
-    const r = fromCode(code.replace("    motor1b.duty(speed)", "    motor1b.duty(speed // 2)"));
-    expect(r.types).not.toContain("dev_motor_setup");
-    expect(r.types).not.toContain("dev_motor_stop");
+  it("몸통을 바꾼 도우미를 부르는 곳만 학생 함수 호출이 된다 (다른 모터 블록·준비는 그대로)", () => {
+    const changed = code.replace("    motor1b.duty(speed)", "    motor1b.duty(speed // 2)");
+    const r = fromCode(changed);
+    expect(r.types).toEqual(["dev_motor_setup", "dev_motor_forward", "math_number", "procedures_callnoreturn", "math_number", "dev_motor_stop"]);
+    expect(r.unparsed).toEqual([]);
+    expect(r.code).toBe(changed);
   });
   it("DC 모터 선언이 PWM 선언보다 앞에 있다", () => {
     const ids = DEVICES.map((d) => d.id);
@@ -141,10 +143,10 @@ describe("릴레이 (준비 줄은 esp_pin_setup 이 접는다)", () => {
   });
 });
 
-describe("도우미 이름이 사용자 함수와 겹치면 (편집기에서 친 코드)", () => {
+describe("도우미와 같은 이름의 사용자 함수 블록이 있으면 그 함수가 도우미다", () => {
   /** 맨 위 블록들(함수 정의 → 시작 블록 순)로 된 작업판 */
-  const workspace = (tops: B[]): WorkspaceJson =>
-    ({ blocks: { languageVersion: 0, blocks: tops.map((t, i) => ({ x: 0, y: 200 * i, ...t })) } }) as unknown as WorkspaceJson;
+  const workspace = (tops: B[], vars: string[] = []): WorkspaceJson =>
+    ({ variables: vars.map((name) => ({ name, id: `var_${name}` })), blocks: { languageVersion: 0, blocks: tops.map((t, i) => ({ x: 0, y: 200 * i, ...t })) } }) as unknown as WorkspaceJson;
   const proc = (name: string, body: B[]): B => ({ type: "procedures_defnoreturn", fields: { NAME: name }, inputs: body.length ? { STACK: { block: chainOf(body) } } : {} });
   const call = (name: string): B => ({ type: "procedures_callnoreturn", extraState: { name } });
   const start = (body: B[]): B => ({ type: "start_program", inputs: { BODY: { block: chainOf(body) } } });
@@ -154,35 +156,67 @@ describe("도우미 이름이 사용자 함수와 겹치면 (편집기에서 친
     return copies[0];
   }
 
-  it("사용자 함수 stop + 모터 정지: 도우미는 stop2 가 되고 모터 정지 블록도 stop2() 를 부른다 (함수 안에서 먼저 만들어져도)", () => {
+  it("사용자 함수 stop + 모터 정지: 도우미를 다시 만들지 않고 모터 정지 블록은 그 stop() 을 부른다 (함수 안에서 먼저 만들어져도)", () => {
     const code = workspaceJsonToCode(workspace([
       proc("halt", [{ type: "dev_motor_stop" }]),
       proc("stop", [{ type: "esp_print", inputs: { VALUE: { block: { type: "text", fields: { TEXT: "bye" } } } } }]),
       start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }, call("stop"), call("halt")]),
     ]));
-    expect(code).toContain("\ndef stop2():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
+    expect(code.match(/def stop\(/g)).toHaveLength(1);
     expect(code).toContain('\ndef stop():\n    print("bye")\n');
-    expect(code).toContain("\ndef halt():\n    stop2()\n");
-    expect(code).toMatch(/\nstop2\(\)\nstop\(\)\nhalt\(\)\n$/);
+    expect(code).toContain("\ndef halt():\n    stop()\n");
+    expect(code).toMatch(/\nstop\(\)\nstop\(\)\nhalt\(\)\n$/);
+    expect(code).not.toContain("stop2");
     expect(code).not.toContain("\uE000");
   });
-  it("사용자 함수 hc595_shift + 7세그먼트: 다른 도우미 본문과 지우기 블록도 바뀐 이름을 부른다", () => {
+  it("사용자 함수 hc595_shift + 7세그먼트 지우기: 지우기 블록은 그 함수를 부르고, 쓰지 않은 show_digit 은 만들지 않는다", () => {
     const code = workspaceJsonToCode(workspace([
       proc("hc595_shift", []),
       start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_clear" }, call("hc595_shift")]),
     ]));
-    expect(code).toContain("\ndef hc595_shift2(dat):\n");
-    expect(code).toContain("\ndef show_digit(n, dot):\n    hc595_shift2(SEGCODE[n] | (0x80 if dot else 0))\n");
-    expect(code).toMatch(/\nhc595_shift2\(0\)\nhc595_shift\(\)\n$/);
+    expect(code.match(/def hc595_shift\(/g)).toHaveLength(1);
+    expect(code).not.toContain("def show_digit");
+    expect(code).toMatch(/\nhc595_shift\(0\)\nhc595_shift\(\)\n$/);
   });
-  it("사용자 함수 show + OLED: show2 도우미 안의 oled.show() 메서드 호출은 그대로", () => {
+  it("사용자 함수 hc595_shift + 7세그먼트 숫자: show_digit 도우미만 만들고 그 몸통은 사용자 hc595_shift 를 부른다", () => {
+    const code = workspaceJsonToCode(workspace([
+      proc("hc595_shift", []),
+      start([{ type: "dev_seg_setup", fields: { SI: 5, RCK: 23, SCK: 18 } }, { type: "dev_seg_digit", inputs: { N: { block: { type: "math_number", fields: { NUM: 3 } } } }, fields: { DOT: "False" } }]),
+    ]));
+    expect(code).toContain("\ndef show_digit(n, dot):\n    code = SEGCODE[n]\n    if dot:\n        code = code | 128\n    hc595_shift(code)\n");
+    expect(code.match(/def hc595_shift\(/g)).toHaveLength(1);
+  });
+  it("사용자 함수 show + OLED: 두 줄 보여주기는 그 show() 를 부르고 oled.show() 메서드 호출은 그대로", () => {
     const text = (t: string): B => ({ type: "text", fields: { TEXT: t } });
     const code = workspaceJsonToCode(workspace([
       proc("show", []),
       start([{ type: "esp_oled_setup", fields: { SCL: 22, SDA: 21 } }, { type: "esp_oled_show", inputs: { A: { block: text("a") }, B: { block: text("b") } } }, { type: "dev_oled_update" }]),
     ]));
-    expect(code).toContain("\ndef show2(a, b):\n    oled.fill(0)\n    oled.text(a, 0, 20)\n    oled.text(b, 0, 36)\n    oled.show()\n");
-    expect(code).toMatch(/\nshow2\("a", "b"\)\noled\.show\(\)\n$/);
+    expect(code.match(/def show\(/g)).toHaveLength(1);
+    expect(code).toMatch(/\nshow\("a", "b"\)\noled\.show\(\)\n$/);
+  });
+  it("꺼 둔 함수 블록은 도우미가 아니다 (생성기가 도우미를 겹치지 않는 이름으로 만들어 부른다)", () => {
+    const off = { ...proc("stop", []), enabled: false };
+    const code = workspaceJsonToCode(workspace([off, start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }])]));
+    expect(code).toContain("\ndef stop2():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
+    expect(code).toMatch(/\nstop2\(\)\n$/);
+  });
+  it("같은 이름의 변수가 있으면 도우미는 stop2 가 되고 모터 정지 블록도 stop2() 를 부른다", () => {
+    const setStop: B = { type: "variables_set", fields: { VAR: { id: "var_stop" } }, inputs: { VALUE: { block: { type: "math_number", fields: { NUM: 1 } } } } };
+    const code = workspaceJsonToCode(workspace([start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, setStop, { type: "dev_motor_stop" }])], ["stop"]));
+    expect(code).toContain("\ndef stop2():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
+    expect(code).toMatch(/\nstop = 1\nstop2\(\)\n$/);
+  });
+  it("사용자 함수 stop 과 (다른 함수의 지역) 변수 stop 이 함께 있어도 함수 이름을 바꾸지 않는다 (31장 안전 선풍기)", () => {
+    const setStop: B = { type: "variables_set", fields: { VAR: { id: "var_stop" } }, inputs: { VALUE: { block: { type: "math_number", fields: { NUM: 1 } } } } };
+    const pwm = (name: string): B => ({ type: "dev_pwm_duty10", fields: { VAR: { id: `var_${name}` } }, inputs: { DUTY: { block: { type: "math_number", fields: { NUM: 0 } } } } });
+    const code = workspaceJsonToCode(workspace([
+      proc("measure", [setStop]), proc("stop", [pwm("motor1a"), pwm("motor1b")]),
+      start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }, call("measure")]),
+    ], ["stop", "motor1a", "motor1b"]));
+    expect(code).toContain("\n\ndef measure():\n    stop = 1\n\n\ndef stop():\n    motor1a.duty(0)\n    motor1b.duty(0)\n");
+    expect(code).toMatch(/\nstop\(\)\nmeasure\(\)\n$/);
+    expect(code).not.toContain("stop2");
   });
   it("겹치지 않으면 그대로 (stop)", () => {
     const code = workspaceJsonToCode(workspace([start([{ type: "dev_motor_setup", fields: { A: 13, B: 12 } }, { type: "dev_motor_stop" }])]));

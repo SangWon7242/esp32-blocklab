@@ -38,7 +38,7 @@ const HELPER_CALL = new RegExp(`${HELPER_MARK}(\\w+)${HELPER_MARK}`, "g");
  * 수업 저장소 코드 모양을 내는 MicroPython 생성기.
  * - 들여쓰기 4칸, 변수 `= None` 선언 없음
  * - 준비(setup) 블록은 setupLines 에 모아 코드 맨 위(import 바로 아래)에 둔다
- * - 도우미 함수(provideFunction_) → 사용자 함수(procedures) → 본문 순서
+ * - 도우미 함수(provideFunction_, 같은 이름의 사용자 함수 블록이 없을 때만) → 사용자 함수(procedures) → 본문 순서
  * - 블록 코멘트는 문장 위 `# ...` 줄과 줄 끝 `# ...` 로 (splitComment). 준비 블록은 끌어올린 첫 줄에,
  *   시작 블록 코멘트는 파일 맨 위 머리말로
  */
@@ -176,13 +176,23 @@ export class MicroPythonGenerator extends PythonGenerator {
     }
   }
 
+  /**
+   * 사용자 함수 이름은 그대로 쓴다 (키워드·파이썬 이름이 아닌 글만 Blockly 처럼 바꾼다). Blockly 는 변수와 함수 이름이 겹치면 함수를
+   * stop2 처럼 바꾸는데, 수업 코드는 get_distance 안의 지역 변수 stop 과 모터 함수 stop() 을 함께 쓴다 (31장 안전 선풍기).
+   * 도우미는 같은 이름의 함수 블록이 있으면 만들지 않으므로(toCodegen.ts) 도우미와도 겹치지 않는다.
+   */
+  override getProcedureName(name: string): string {
+    return /^[A-Za-z_]\w*$/.test(name) && !PYTHON_KEYWORDS.includes(name) ? name : super.getProcedureName(name);
+  }
+
   // definitions_ / provideFunction_ / scrub_ 는 protected 라서 forBlock.ts 가 쓸 공개 창구를 둔다
   setDefinition(name: string, code: string): void { this.definitions_[name] = code; }
   provideHelper(name: string, lines: string[]): string { return this.provideFunction_(name, lines); }
   /**
-   * 장치 도우미를 부르는 코드에 쓸 이름 자리. provideFunction_ 은 사용자 함수·변수와 겹치면 도우미를 stop2 처럼 다른 이름으로
-   * 정의하는데, 그 이름은 준비 블록을 만들 때에야 정해진다 (함수 정의 안의 명령 블록이 먼저 만들어질 수 있다).
-   * 그래서 표시만 남겨 두고 finish 가 실제로 정의된 이름(functionNames_)으로 바꾼다. 정의되지 않았으면 원래 이름.
+   * 장치 도우미를 부르는 코드에 쓸 이름 자리. provideFunction_ 은 학생 변수(또는 꺼 둔 같은 이름의 함수 블록)와 겹치면 도우미를
+   * stop2 처럼 다른 이름으로 정의하는데, 그 이름은 그 도우미를 처음 부르는 블록을 만들 때에야 정해진다 (함수 정의 안의 블록이
+   * 먼저 만들어질 수 있다). 그래서 표시만 남겨 두고 finish 가 실제로 정의된 이름(functionNames_)으로 바꾼다.
+   * 정의되지 않았으면(같은 이름의 학생 함수 블록이 도우미일 때) 원래 이름.
    */
   helperCall(name: string): string { return `${HELPER_MARK}${name}${HELPER_MARK}`; }
   private resolveHelperCalls(text: string): string {

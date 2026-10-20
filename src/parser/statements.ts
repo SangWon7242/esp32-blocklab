@@ -2,7 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { block, chain, codeStmt, commentText, num, varSet, withComment } from "./builders";
 import { definedNames } from "./codeNames";
 import type { ParseContext } from "./context";
-import { isFoldedHelper, matchActionLines, matchCall, matchSetupAt, setupBlock } from "./devices";
+import { matchActionLines, matchCall, matchSetupAt, setupBlock } from "./devices";
 import { callBlock, callParts, convertAllOrNull, convertExpr, isListVariable, isWholeNot, memberParts } from "./expressions";
 import { functionParts, isKnownImport, returnsValue } from "./patterns";
 import { bodyStatements, children, operands } from "./tree";
@@ -33,7 +33,7 @@ export function convertBody(body: SyntaxNode | null, ctx: ParseContext): BlockJs
  * - 문장 첫 줄 끝 주석 → 그 블록 코멘트 (줄 끝 주석)
  * - 문장 앞의 주석만 있는 줄들(빈 줄은 건너뜀, 들여쓰기 상관없이 바로 앞 문장 뒤부터) → 그 블록 코멘트의 윗줄
  * - 여러 문장이 블록 하나로 접히면(준비 줄 묶음, 여러 줄 명령) 둘째 문장부터의 윗줄·줄 끝 주석 → 그 블록 코멘트의 윗줄에 이어서
- * - 블록이 생기지 않는 문장(지운 import, 접힌 도우미 함수) 앞의 주석 줄 → 다음 문장으로 넘김
+ * - 블록이 생기지 않는 문장(지운 import) 앞의 주석 줄 → 다음 문장으로 넘김
  * - 파일 첫 문장이 import 면 그 앞 주석 줄 → 파일 머리말 (시작 블록 코멘트)
  * - 몸통 끝·파일 끝 주석 줄 → 바깥의 다음 문장 (없으면 버림)
  * 장치 패턴(레지스트리)은 최상위 준비 줄 묶음 → 여러 줄 명령(lines) → 문장 하나(method·call) 순으로 본다.
@@ -282,8 +282,7 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
     case "FunctionDefinition": {
       const { name, params, body, simple } = functionParts(node, ctx);
       if (!topLevel || ctx.duplicateDefs.has(node.from)) return unknown(node, ctx);
-      // 접힌 도우미는 기본값이 있어도(web_send 의 ctype="text/html") 생성기가 다시 만든다
-      if (isFoldedHelper(name, ctx)) return none();
+      // 장치 도우미(get_distance·show …)도 숨기지 않고 함수 정의 블록으로 (생성기는 같은 이름의 함수 블록이 있으면 도우미를 다시 만들지 않는다)
       if (!simple) return unknown(node, ctx);
       const stmts = body ? bodyStatements(body) : [];
       const last = stmts[stmts.length - 1];

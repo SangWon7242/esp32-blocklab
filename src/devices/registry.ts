@@ -19,8 +19,8 @@ export const DEVICE_CATEGORIES: { id: DeviceCategory; label: string }[] = [
 /**
  * 순서가 곧 우선순위: 같은 줄에 맞는 선언이 여럿이면 앞의 것이 접힌다
  * (서보 3줄 > 밝기 LED(freq 1000) > 수동 부저(freq 440, duty 0) > DC 모터 > PWM 2줄, 초음파 > 핀,
- *  조이스틱 > 버튼 > 입력 핀 > 핀, 조이스틱 > 서미스터·LM35(이름 고정 + 도우미) > 아날로그 핀,
- *  틸트 > PIR (같은 `x.value() == 1`), RGB 색 > RGB 세 값, 7세그먼트(si·rck·sck + 도우미) > 출력 핀). 같은 값·명령 꼴도 앞의 선언이 먼저 맞는다.
+ *  조이스틱 > 버튼 > 입력 핀 > 핀, 조이스틱 > 서미스터·LM35(이름 고정) > 아날로그 핀,
+ *  틸트 > PIR (같은 `x.value() == 1`), RGB 색 > RGB 세 값, 7세그먼트(si·rck·sck·SEGCODE) > 출력 핀). 같은 값·명령 꼴도 앞의 선언이 먼저 맞는다.
  * 툴박스의 카테고리 안 순서는 이것과 따로 각 장치의 toolboxOrder 로 정한다.
  */
 export const DEVICES: DeviceSpec[] = [
@@ -35,8 +35,14 @@ export const DEVICES: DeviceSpec[] = [
 
 /** 장치의 준비 블록들: setup 다음에 extraSetups (툴박스 순서) */
 export const setupsOf = (d: DeviceSpec): SetupSpec[] => [...(d.setup ? [d.setup] : []), ...(d.extraSetups ?? [])];
-/** 장치의 명령 블록이 쓰는 선택 도우미 (ActionSpec.helper) */
-export const actionHelpersOf = (d: DeviceSpec): HelperSpec[] => d.actions.flatMap((a) => (a.helper ? [a.helper] : []));
+/** 장치의 명령·값 블록이 부르는 짧은 도우미 함수 (ActionSpec.helpers, 같은 이름은 한 번) */
+export const actionHelpersOf = (d: DeviceSpec): HelperSpec[] => {
+  const byName = new Map<string, HelperSpec>();
+  for (const s of [...d.actions, ...d.values]) for (const h of s.helpers ?? []) if (!byName.has(h.name)) byName.set(h.name, h);
+  return [...byName.values()];
+};
+/** 모든 장치 블록의 짧은 도우미 (이름이 겹치지 않는다 — devices.test.ts) */
+export const allActionHelpers = (): HelperSpec[] => DEVICES.flatMap(actionHelpersOf);
 
 type WithDevice<T> = T & { device: DeviceSpec };
 const byType = <T extends { blockType: string }>(items: T[]) => new Map(items.map((i) => [i.blockType, i]));
@@ -74,17 +80,15 @@ export function defaultValues(parts: Part[]): Values {
   return v;
 }
 
-/** 준비가 접힌 뒤 장치 변수로 등록할 이름: pattern.vars 가 없으면 provides(fields) 에서 도우미 이름을 뺀 것 */
+/** 준비가 접힌 뒤 장치 변수로 등록할 이름: pattern.vars 가 없으면 provides(fields) */
 export function setupVars(spec: SetupSpec, fields: Values, ms: RegExpExecArray[]): string[] {
-  if (spec.pattern.vars) return spec.pattern.vars(ms);
-  const helpers = new Set((spec.helpers ?? []).map((h) => h.name));
-  return spec.provides(fields).filter((n) => !helpers.has(n));
+  return spec.pattern.vars ? spec.pattern.vars(ms) : spec.provides(fields);
 }
 
 /**
- * 준비 블록이 고정해서 만드는 이름 (도우미 함수 이름 + VAR 칸이 아닌 고정 변수 이름 + 보드 라이브러리가 주는 함수 이름 libNames)
- * + 명령 블록의 선택 도우미 이름. 학생 변수·함수가 이 이름을
- * 덮으면 생성 코드가 깨지므로 src/blocks/names.ts 가 막는다.
+ * 준비 블록이 고정해서 만드는 이름 (VAR 칸이 아닌 고정 변수 이름 + 보드 라이브러리가 주는 함수 이름 libNames).
+ * 학생 변수·함수가 이 이름을 덮으면 생성 코드가 깨지므로 src/blocks/names.ts 가 막는다.
+ * 짧은 도우미 이름(get_distance·show …)은 넣지 않는다: 학생이 같은 이름의 함수 블록을 만들면 그 블록이 도우미가 된다.
  */
 export function fixedSetupNames(): string[] {
   const out = new Set<string>();
@@ -92,10 +96,8 @@ export function fixedSetupNames(): string[] {
     const v = defaultValues(s.parts);
     const varValues = new Set(s.parts.filter((p) => p.kind === "var").map((p) => v[p.name]));
     for (const n of s.provides(v)) if (!varValues.has(n)) out.add(n);
-    for (const h of s.helpers ?? []) out.add(h.name);
     for (const n of s.libNames ?? []) out.add(n);
   }
-  for (const d of DEVICES) for (const h of actionHelpersOf(d)) out.add(h.name);
   return [...out];
 }
 

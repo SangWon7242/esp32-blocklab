@@ -91,8 +91,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
     setup: {
       blockType: "fake_motor_setup", message: "모터 핀 %1", parts: [{ kind: "pin", name: "PIN", default: 13, dir: "out" }], tooltip: "",
       lines: (x) => [`m = Motor(${x.PIN})`],
-      helpers: [{ name: "go", params: "speed, dir", body: ["if dir:", "  m.on(speed)", "else:", "  m.off()"] }],
-      kind: "motor", provides: () => ["m", "go"],
+      kind: "motor", provides: () => ["m"],
       pattern: { lines: [/^m\s*=\s*Motor\((\d+)\)$/], fields: ([x]) => ({ PIN: x[1] }), vars: () => ["m"] },
     },
     actions: [
@@ -100,6 +99,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
         blockType: "fake_motor_go", message: "모터 %1 방향 %2", tooltip: "",
         parts: [{ kind: "value", name: "SPEED", check: "Number" }, { kind: "dropdown", name: "DIR", options: [["앞", "True"], ["뒤", "False"]] }],
         code: (x) => `go(${x.SPEED}, ${x.DIR})`,
+        helpers: [{ name: "go", params: "speed, dir", body: ["if dir:", "  m.on(speed)", "else:", "  m.off()"] }],
         pattern: { kind: "call", name: "go", args: [null, ["True", "False"]] },
       },
     ],
@@ -118,6 +118,7 @@ vi.mock("@/devices/registry", async (importOriginal) => {
     findActionByBlock: (t: string) => actions.get(t),
     findValueByBlock: (t: string) => values.get(t),
     devicesByCategory: (c: string) => DEVICES.filter((d) => d.category === c),
+    allActionHelpers: () => DEVICES.flatMap(actual.actionHelpersOf),
   };
 });
 
@@ -187,19 +188,23 @@ describe("레지스트리 패턴 종류", () => {
     expect(roundtrip(src).out).toBe(src);
   });
 
-  it("도우미 call: 표준 def 가 있으면 준비·호출이 접히고 def 는 사라진다, 아니면 함수 블록", () => {
+  it("도우미 call: 표준 def 가 있으면 호출은 장치 블록, def 는 숨기지 않고 함수 정의 블록. 아니면 함수 호출 블록", () => {
     const def = "def go(speed, dir):\n    if dir:\n        m.on(speed)\n    else:\n        m.off()\n";
     const src = `m = Motor(13)\n\n\n${def}\n\ngo(100, True)\n`;
     const r = parse(src);
     const blocks = r.json.blocks.blocks as BlockJson[];
-    expect(blocks.map((b) => b.type)).toEqual(["start_program"]);
+    expect(blocks.map((b) => b.type)).toEqual(["procedures_defnoreturn", "start_program"]);
+    expect(blocks[0].fields).toEqual({ NAME: "go" });
     expect(body(src).map((x) => x.type)).toEqual(["fake_motor_setup", "fake_motor_go"]);
     expect(body(src)[1].fields).toEqual({ DIR: "True" });
-    // 접힌 도우미는 함수 표에서 빠지므로 패턴에 안 맞는 호출은 함수 블록이 아니라 code_stmt (def 는 준비 블록이 다시 만든다)
-    expect(body("m = Motor(13)\ngo(100, 7)\n" + def)[1].type).toBe("code_stmt");
+    // 패턴에 안 맞는 호출은 그 함수 블록을 부르는 블록
+    expect(body("m = Motor(13)\ngo(100, 7)\n" + def)[1].type).toBe("procedures_callnoreturn");
+    // 몸통이 다르면 학생 함수: 준비는 그대로 접히고 호출은 함수 호출 블록
     const changed = def.replace("m.off()", "m.stop()");
-    expect(body(`m = Motor(13)\n${changed}\ngo(100, True)\n`).map((x) => x.type)).toEqual(["variables_set", "procedures_callnoreturn"]);
+    expect(body(`m = Motor(13)\n${changed}\ngo(100, True)\n`).map((x) => x.type)).toEqual(["fake_motor_setup", "procedures_callnoreturn"]);
+    // 같은 이름의 함수 블록이 있으면 생성기는 도우미를 다시 만들지 않는다 (def 가 한 번만)
     expect(roundtrip(src).out).toBe(src);
+    expect(roundtrip(`m = Motor(13)\n\n\n${changed}\n\ngo(100, True)\n`).out).toBe(`m = Motor(13)\n\n\n${changed}\n\ngo(100, True)\n`);
   });
 
   it("none 명령은 파서가 되돌리지 않는다 (생성 코드가 다른 블록들로 돌아온다)", () => {

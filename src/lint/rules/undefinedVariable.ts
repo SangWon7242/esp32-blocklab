@@ -15,7 +15,7 @@ const READS_VAR = new Set([
 
 /**
  * 값을 정한 적 없는 변수 읽기. 정한 것으로 치는 것: 어디든 그 변수의 variables_set·리스트 만들기, for 반복 변수
- * (각 항목 반복·범위 반복·걸음 반복), 함수 매개변수, 준비 블록의 변수 칸, n번 반복이 있을 때의 i, 코드 블록(code_stmt) 원문이
+ * (각 항목 반복·범위 반복·걸음 반복), 함수 매개변수, 준비 블록이 만드는 이름(변수 칸·고정 이름), n번 반복이 있을 때의 i, 코드 블록(code_stmt) 원문이
  * 정하는 이름(`a, b = 0, 0`·`x = y = 0`·for·with … as·global·import, codeNames.ts). 읽는 것: 변수 값 블록,
  * 만큼 바꾸기, 리스트 블록(추가·끼우기·지우기·비우기·정하기·위치). 변수는 이름으로 맞춘다 (파이썬도 이름으로 찾는다).
  * 전역 변수 쓰기(var_global, global x)는 이름을 알리기만 하므로 정하는 것도 읽는 것도 아니다.
@@ -36,10 +36,8 @@ export const undefinedVariable: Rule = (ctx) => {
       findActionByBlock(b.type)?.defines?.forEach(add);
       const setup = findSetupByBlock(b.type);
       if (!setup) continue;
-      // 준비가 만드는 이름만 (변수 핀 준비의 핀 번호 칸 PINVAR 는 읽는 변수다)
-      const values = blockValues(ctx, b, setup.parts);
-      const provided = new Set(setup.provides(values));
-      for (const part of setup.parts) if (part.kind === "var" && provided.has(values[part.name])) add(values[part.name]);
+      // 준비가 만드는 이름 (변수 칸 이름과 고정 이름 pins·SEGCODE …). 변수 핀 준비의 핀 번호 칸 PINVAR 는 provides 에 없는 읽는 변수다
+      setup.provides(blockValues(ctx, b, setup.parts)).forEach(add);
     }
   }
   return blocks.flatMap((b) => {

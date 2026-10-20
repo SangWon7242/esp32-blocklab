@@ -27,13 +27,13 @@ export type Values = Record<string, string>;
  * 파서가 알아보는 꼴.
  * - lines: 최상위 연속 문장들의 정규식. 모두 맞으면 준비 블록 하나로 접는다. 그룹은 fields 로 넘어간다.
  * - method: 등록된 장치 변수의 메서드 호출 `obj.name(args)`. args 는 인자별 허용 리터럴(드롭다운 값) 또는 null(아무 식).
- * - call:   접힌 도우미 함수 호출 `name(args)`.
+ * - call:   함수 호출 `name(args)`. 블록에 helpers 가 있으면 그 도우미들이 모두 표준 본문의 최상위 def 로 있을 때만 맞는다.
  * - expr:   식 전체 텍스트의 정규식(값 블록 전용, 예: `button.value() == 0`). 그룹 1은 장치 변수 이름.
  * - lines:  (명령) 연속 문장 N개의 정규식. 몸통 안에서도 맞추며 method·call 보다 먼저 본다. values 의 값 입력 칸 글은 다시 식으로 파싱된다.
  * objPart 가 있는 꼴은 그 변수가 objKinds(기본: 자기 장치 준비의 kind)로 등록돼 있어야 맞는다.
- * objName(고정 이름) method 꼴도 같다: 그 이름은 장치 준비가 접혀야(도우미가 있으면 도우미까지 접혀야) 장치 변수로 등록되므로,
+ * objName(고정 이름) method 꼴도 같다: 그 이름은 장치 준비가 접혀야 장치 변수로 등록되므로,
  * 준비가 접히지 않은 코드의 `oled.fill(0)` 같은 호출은 블록이 되지 않는다.
- * objPart 도 objName 도 없는 call·lines·expr 은 그 장치가 준비돼 있어야(도우미가 있으면 접혀 있어야) 맞는다 (src/parser/devices.ts).
+ * objPart 도 objName 도 없는 call·lines·expr 은 그 장치가 준비돼 있어야 맞는다 (src/parser/devices.ts).
  */
 export type SetupPattern = {
   lines: RegExp[];
@@ -61,7 +61,11 @@ export type SetupSpec = {
   tooltip: string;
   /** 준비 줄. 변수 필드 값은 이미 파이썬 이름으로 바뀌어 온다 */
   lines: (v: Values) => string[];
-  helpers?: HelperSpec[];
+  /**
+   * 코드가 이 이름의 함수를 정의하거나 부를 때만 이 준비로 접는다 (흐르는 LED 의 `pins = [...]` 는 흔한 리스트라 flow_leds 가 없으면
+   * 리스트 만들기 블록으로 둔다). 없으면 준비 줄이 맞을 때 늘 접는다.
+   */
+  foldOnlyWith?: string[];
   /**
    * 준비 줄을 코드 맨 위로 끌어올리지 않고 블록이 놓인 자리에 쓴다 (esp_pin_setup_var: 반복 안에서 핀 번호 변수로
    * `led = Pin(pin, Pin.OUT)`). 파서는 이 준비를 어느 깊이에서든 한 줄로 맞추고, 그 줄이 만드는 이름을 장치 변수로 등록한다.
@@ -109,11 +113,15 @@ export type ActionSpec = {
    */
   varKinds?: string[];
   /**
-   * 이 명령이 부르는 선택 도우미 (예: esp_oled_show → show(a, b)). 생성기는 이 블록이 쓰일 때만 도우미 함수를 정의하고,
-   * 파서는 같은 이름·매개변수·표준 본문의 최상위 def 를 이 블록이 쓰일 때(그 장치가 준비돼 있고 호출이 있을 때)만 접는다.
-   * 준비 블록의 helpers 와 달리 장치 준비가 접히는 데는 필요 없다.
+   * 이 블록 코드가 부르는 짧은 도우미 함수 (예: esp_distance → get_distance(), dev_seg_digit → hc595_shift·show_digit).
+   * 부르는 것보다 먼저 정의할 것을 앞에 적는다 (show_digit 이 hc595_shift 를 부른다).
+   * - 생성기: 이 블록이 쓰이고 작업판에 같은 이름의 (켜진) 함수 정의 블록이 없을 때만 이 몸통으로 def 를 만든다 (블록만으로 만든
+   *   프로그램도 돈다). 있으면 학생의 함수 블록이 그 정의다.
+   * - 파서: 도우미 def 를 숨기지 않는다. 코드의 def 는 늘 함수 정의 블록이 되고, 이 블록의 호출 꼴은 그 도우미들이 모두
+   *   같은 이름·매개변수·표준 몸통의 최상위 def 로 있을 때만 이 장치 블록으로 돌아온다 (아니면 학생 함수 호출 블록).
+   * - 이름 검사: 도우미 이름은 학생 함수 이름으로 쓸 수 있다 (같은 이름의 함수 블록이 이 도우미가 된다).
    */
-  helper?: HelperSpec;
+  helpers?: HelperSpec[];
   /**
    * 이 명령이 값을 정하는 학생 변수 이름 (예: dev_web_accept → conn·path·query). 파서는 이 명령 꼴이 보이면 그 이름을
    * 변수로 등록해 뒤의 `print(path)` 가 변수 블록으로 돌아오게 하고, 검사(undefined-variable)는 정한 것으로 친다.

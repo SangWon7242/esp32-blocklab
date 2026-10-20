@@ -1,12 +1,14 @@
-import type { DeviceSpec, Part } from "../types";
+import type { DeviceSpec, HelperSpec, Part } from "../types";
 import { I2C_ADDR, isSingleArg, pinNo, validPins } from "./common";
 
 const numIn = (name: string, shadow: number): Part => ({ kind: "value", name, check: "Number", shadow });
 
+/** 화면을 지우고 두 줄을 띄우는 show(a, b) — "두 줄 보여주기"(esp_oled_show) 블록의 도우미 */
+export const OLED_SHOW: HelperSpec = { name: "show", params: "a, b", body: ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"] };
+
 /**
  * OLED (esp_oled_setup). 이름 i2c/oled 고정. 글·선·사각형은 oled 의 메서드를 그대로 부른다.
- * show(a, b) 도우미는 준비가 아니라 "두 줄 보여주기"(esp_oled_show) 블록의 선택 도우미: 그 블록을 쓸 때만 정의되고,
- * 준비 두 줄은 도우미 없이도 접힌다.
+ * "두 줄 보여주기"(esp_oled_show) 블록이 show(a, b) 도우미를 부른다.
  */
 export const oled: DeviceSpec = {
   id: "oled", category: "display", label: "OLED", toolboxOrder: 70, colour: "#1d4ed8",
@@ -30,9 +32,9 @@ export const oled: DeviceSpec = {
     {
       blockType: "esp_oled_show", message: "화면에 %1 와(과) %2 보여주기",
       parts: [{ kind: "value", name: "A", shadow: "AUTO DOOR" }, { kind: "value", name: "B", shadow: "Come closer" }],
-      tooltip: "show(첫째 줄, 둘째 줄) — 이 블록을 쓰면 화면을 지우고 두 줄을 띄우는 show(a, b) 함수가 함께 만들어집니다.",
+      tooltip: "show(첫째 줄, 둘째 줄) — 이 블록을 쓰면 화면을 지우고 두 줄을 띄우는 show(a, b) 함수가 함께 만들어집니다 (같은 이름의 함수 블록이 있으면 그것을 써요).",
       code: (v) => `show(${v.A}, ${v.B})`,
-      helper: { name: "show", params: "a, b", body: ["oled.fill(0)", "oled.text(a, 0, 20)", "oled.text(b, 0, 36)", "oled.show()"] },
+      helpers: [OLED_SHOW],
       pattern: { kind: "call", name: "show", args: [null, null] },
     },
     {
@@ -125,37 +127,46 @@ export const lcd: DeviceSpec = {
 /** 표준 숫자 모양표 (0~9). 준비 줄과 패턴이 함께 쓴다 */
 const SEGCODE = ["0x3f", "0x06", "0x5b", "0x4f", "0x66", "0x6d", "0x7d", "0x07", "0x7f", "0x6f"];
 
+/** 74HC595 에 여덟 칸(dat 의 비트)을 밀어 넣고 내보내는 hc595_shift(dat) — 7세그먼트 블록들의 도우미 */
+export const HC595_SHIFT: HelperSpec = {
+  name: "hc595_shift", params: "dat",
+  body: [
+    "rck.value(0)",
+    "for bit in range(7, -1, -1):",
+    "  value = 1 & (dat >> bit)",
+    "  sck.value(0)",
+    "  si.value(value)",
+    "  sck.value(1)",
+    "rck.value(1)",
+  ],
+};
+
 /**
- * 7세그먼트 (dev_seg_setup). 74HC595 로 한 자리를 켠다. 이름 si/rck/sck/SEGCODE 고정, hc595_shift·show_digit 도우미.
- * si·rck·sck 줄은 출력 핀 1줄과 같은 꼴이라 레지스트리에서 pinOut 보다 앞에 둔다 (도우미가 표준이 아니면 출력 핀 셋으로 떨어진다).
+ * 숫자 n 의 모양(SEGCODE[n])을 보내고 dot 이 참이면 점 칸(128 = 0x80)도 켜는 show_digit(n, dot).
+ * 몸통이 모두 블록이 되도록 조건식·16진수 대신 만약 블록과 | 로 쓴다 (6장 수업 파일과 같은 꼴).
+ */
+export const SHOW_DIGIT: HelperSpec = {
+  name: "show_digit", params: "n, dot",
+  body: ["code = SEGCODE[n]", "if dot:", "  code = code | 128", "hc595_shift(code)"],
+};
+
+/**
+ * 7세그먼트 (dev_seg_setup). 74HC595 로 한 자리를 켠다. 이름 si/rck/sck/SEGCODE 고정. 숫자 블록이 show_digit(n, dot)·hc595_shift(dat)
+ * 도우미를, 지우기 블록이 hc595_shift 를 부른다. si·rck·sck 줄은 출력 핀 1줄과 같은 꼴이라 레지스트리에서 pinOut 보다 앞에 둔다
+ * (SEGCODE 표까지 넷이 연달아 있을 때만 접힌다).
  */
 export const seg7: DeviceSpec = {
   id: "seg7", category: "display", label: "7세그먼트", toolboxOrder: 72, colour: "#0832bc",
   setup: {
     blockType: "dev_seg_setup", message: "7세그먼트 준비하기 (SI 핀 %1, RCK 핀 %2, SCK 핀 %3)",
     parts: [pinNo("SI", 5, "out"), pinNo("RCK", 23, "out"), pinNo("SCK", 18, "out")],
-    tooltip: "74HC595 의 세 핀과 숫자 모양표 SEGCODE, show_digit(숫자, 점) 함수를 준비합니다.",
+    tooltip: "74HC595 의 세 핀(si·rck·sck)과 숫자 모양표 SEGCODE 를 준비합니다. 숫자는 7세그먼트 숫자 블록(show_digit(숫자, 점))으로 보여 줘요.",
     lines: (v) => [
       `si = Pin(${v.SI}, Pin.OUT)`, `rck = Pin(${v.RCK}, Pin.OUT)`, `sck = Pin(${v.SCK}, Pin.OUT)`,
       `SEGCODE = [${SEGCODE.join(", ")}]`,
     ],
-    helpers: [
-      {
-        name: "hc595_shift", params: "dat",
-        body: [
-          "rck.value(0)",
-          "for bit in range(7, -1, -1):",
-          "  value = 1 & (dat >> bit)",
-          "  sck.value(0)",
-          "  si.value(value)",
-          "  sck.value(1)",
-          "rck.value(1)",
-        ],
-      },
-      { name: "show_digit", params: "n, dot", body: ["hc595_shift(SEGCODE[n] | (0x80 if dot else 0))"] },
-    ],
     kind: "seg7",
-    provides: () => ["si", "rck", "sck", "SEGCODE", "hc595_shift", "show_digit"],
+    provides: () => ["si", "rck", "sck", "SEGCODE"],
     pattern: {
       lines: [
         /^si\s*=\s*Pin\(\s*(\d+)\s*,\s*Pin\.OUT\s*\)$/,
@@ -171,15 +182,17 @@ export const seg7: DeviceSpec = {
     {
       blockType: "dev_seg_digit", message: "7세그먼트에 숫자 %1 표시 (점 %2)",
       parts: [numIn("N", 3), { kind: "dropdown", name: "DOT", options: [["끄기", "False"], ["켜기", "True"]] }],
-      tooltip: "show_digit(숫자, 점) — 0~9 한 자리를 보여 줍니다.",
+      tooltip: "show_digit(숫자, 점) — 0~9 한 자리를 보여 줍니다. 이 블록을 쓰면 hc595_shift·show_digit 함수가 함께 만들어집니다 (같은 이름의 함수 블록이 있으면 그것을 써요).",
       code: (v) => `show_digit(${v.N}, ${v.DOT})`,
+      helpers: [HC595_SHIFT, SHOW_DIGIT],
       pattern: { kind: "call", name: "show_digit", args: [null, ["False", "True"]] },
       range: { N: { min: 0, max: 9, label: { ko: "숫자", en: "digit" } } },
     },
     {
       blockType: "dev_seg_clear", message: "7세그먼트 지우기", parts: [],
-      tooltip: "hc595_shift(0) — 모든 칸을 끕니다.",
+      tooltip: "hc595_shift(0) — 모든 칸을 끕니다. 이 블록을 쓰면 hc595_shift 함수가 함께 만들어집니다.",
       code: () => "hc595_shift(0)",
+      helpers: [HC595_SHIFT],
       pattern: { kind: "call", name: "hc595_shift", args: [["0"]] },
     },
   ],
