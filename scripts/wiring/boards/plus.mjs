@@ -68,8 +68,9 @@ export function makePlus({ x = 96, y = 150 } = {}) {
 
   const TOP_GPIOS = [18, 19, 23, 5, 13, 12, 14, 27, 16, 17, 25, 26];
   const ANALOG_GPIOS = [35, 34, 33, 32, 4, 2];
-  /** GPIO 번호의 신호 핀 (한 줄 핀 또는 ANALOG 묶음 S). 21·22 는 위 한 줄 SDA·SCL */
-  function gpio(n) {
+  /** GPIO 번호의 신호 핀 (한 줄 핀 또는 ANALOG 묶음 S). 21·22 는 위 한 줄 SDA·SCL. { at: "bottom" } 이면 아래 줄(io0·32~39) */
+  function gpio(n, { at } = {}) {
+    if (at === "bottom" && [0, 32, 33, 34, 35, 36, 39].includes(n)) return { ...pin(`bot:io${n}`), label: `io${n}` };
     if (TOP_GPIOS.includes(n)) return { ...pin(`top:io${n}`), label: `io${n}` };
     if (ANALOG_GPIOS.includes(n)) return { ...pin(`an:io${n}:S`), label: `io${n} (ANALOG S)` };
     if ([36, 39, 0].includes(n)) return { ...pin(`bot:io${n}`), label: `io${n}` };

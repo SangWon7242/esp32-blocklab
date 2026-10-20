@@ -74,7 +74,7 @@ export const rfid = (x, y, opt = {}) =>
 /** 3핀 센서 모듈 공통 (핀 G V S). kind: dht · pir · sound · flame · ir · lm35 */
 export function sensor3(x, y, kind, opt = {}) {
   const look = {
-    dht: { color: "#1971c2", title: "온습도 센서(DHT11)", decor: (x, y) => `<rect x="${x + 16}" y="${y + 10}" width="44" height="48" rx="4" fill="#e7f5ff" stroke="#74c0fc"/>${[0, 1, 2, 3, 4].map((k) => `<path d="M${x + 22} ${y + 18 + k * 8} h32" stroke="#74c0fc" stroke-width="2"/>`).join("")}` },
+    dht: { color: "#1971c2", title: "온습도 센서(DHT11)", decor: (x, y) => `<rect x="${x + 18}" y="${y + 8}" width="40" height="34" rx="4" fill="#e7f5ff" stroke="#74c0fc"/>${[0, 1, 2, 3].map((k) => `<path d="M${x + 24} ${y + 15 + k * 7} h28" stroke="#74c0fc" stroke-width="2"/>`).join("")}` },
     pir: { color: "#2f9e44", title: "PIR 센서", decor: (x, y) => `<circle cx="${x + 38}" cy="${y + 32}" r="24" fill="#f8f9fa" stroke="#ced4da"/><path d="M${x + 22} ${y + 32} q16 -16 32 0 M${x + 26} ${y + 40} q12 -10 24 0" stroke="#ced4da" stroke-width="2"/>` },
     sound: { color: "#e8590c", title: "소리 센서", decor: (x, y) => `<circle cx="${x + 38}" cy="${y + 30}" r="16" fill="#343a40" stroke="#adb5bd"/><circle cx="${x + 38}" cy="${y + 30}" r="8" fill="#868e96" stroke="none"/>` },
     flame: { color: "#c92a2a", title: "불꽃 센서", decor: (x, y) => `<ellipse cx="${x + 38}" cy="${y + 26}" rx="10" ry="14" fill="#212529" stroke="#868e96"/><path d="M${x + 38} ${y + 40} v14" stroke="#adb5bd" stroke-width="2"/>` },
