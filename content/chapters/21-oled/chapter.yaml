@@ -8,7 +8,7 @@ prerequisites: [01-led]
 subjects: [수학, 미술, 국어]
 sessions: 1
 teacherNotes: |
-  **배선** OLED 는 GND · VCC · SCL · SDA 네 핀이에요. 모듈에 M-F 듀폰선을 끼워 브레드보드에 모으고, 보드 쪽은 점퍼선(M-M)으로 이어요. VCC 는 09·10장과 같게 **5V** 줄에 꽂았어요. 이 모듈은 3.3~5V 를 모두 받으므로 3V3 에 꽂아도 돼요. 핀 순서가 VCC · GND 로 바뀐 모듈도 있으니 모듈에 적힌 글자를 꼭 읽게 하세요.
+  **배선** OLED 는 GND · VCC · SCL · SDA 네 핀이에요. 브레드보드 없이 F-F 듀폰선 4가닥으로 보드에 바로 이어요. ESP32 Plus 확장 보드는 I2C 묶음 첫 줄(GND · 5V · SDA · SCL), 기본 보드(DevKit)는 3V3 · GND · D21 · D22 예요. 이 모듈은 3.3~5V 를 모두 받아요. 핀 순서가 VCC · GND 로 바뀐 모듈도 있으니 모듈에 적힌 글자를 꼭 읽게 하세요.
 
   **라이브러리** `import ssd1306` 은 보드에 `ssd1306.py` 가 있어야 해요. 블록랩이 **보드에 저장**·**실행** 때 import 줄을 보고 함께 올려 줘요. 화면 주소는 보통 `0x3C` 예요(09장에서 RFID 와 나눠 쓸 때 다시 나와요).
 
@@ -28,13 +28,12 @@ cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
   - { name: OLED 화면 (128×64), note: "I2C 방식. 핀 4개: GND · VCC · SCL · SDA (모듈에 적힌 글자를 읽기)" }
-  - { name: 브레드보드, note: "위쪽 + 줄(5V)·− 줄(GND)과 세로줄 두 개(SCL 줄 · SDA 줄)를 써요" }
-  - { name: M-F 듀폰선, note: "4개. 구멍 쪽을 OLED 핀에 끼우고, 핀 쪽을 브레드보드에 꽂아요" }
-  - { name: 점퍼선(M-M), note: "4개 (보드 5V · GND · 22번 · 21번 → 브레드보드)" }
+  - { name: F-F 듀폰선 4가닥, note: "양쪽 끝이 구멍인 선. OLED 핀과 보드 핀에 바로 씌워요. 브레드보드는 안 써요" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
-  caption: "OLED 는 M-F 듀폰선으로: GND → 위 − 줄, VCC → 위 + 줄, SCL → 11번 줄 a 칸, SDA → 14번 줄 f 칸. 보드는 점퍼선(M-M)으로: 5V → 위 + 줄, GND → 위 − 줄, 22번 → 11번 줄 e 칸(SCL 줄), 21번 → 14번 줄 j 칸(SDA 줄)"
+  caption: "브레드보드 없이 보드에 바로 꽂아요. OLED GND · VCC · SDA · SCL → 보드 I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22)"
+  captionDevkit: "브레드보드 없이 보드 아래 줄에 바로 꽂아요. OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
 principle:
   image: images/oled-grid.svg
   body: |
@@ -68,7 +67,7 @@ parts:
 
           오늘 쓸 OLED 화면은 가로 128 · 세로 64 개의 점뿐이에요. 이 점들로 글과 그림을 어떻게 그릴 수 있을까요? 코드를 보기 전에 내 생각부터 적어 봐요. 틀려도 괜찮아요.
         todo:
-          - 준비물(ESP32 보드, OLED 화면, 브레드보드, 선, USB 선)을 책상에 꺼내 놓기
+          - 준비물(ESP32 보드, OLED 화면, 듀폰선, USB 선)을 책상에 꺼내 놓기
           - 질문마다 내 생각을 한두 문장으로 쓰기
           - 다 적으면 **완료** 누르기
         questions:
@@ -124,9 +123,10 @@ parts:
         minutes: 5
         scene:
           image: images/wiring-breadboard.svg
-          caption: "OLED 네 핀: GND → − 줄 · VCC → + 줄 · SCL → SCL 줄(22번) · SDA → SDA 줄(21번)"
+          caption: "OLED 네 핀 → I2C 묶음 첫 줄: GND → GND · VCC → 5V · SDA → SDA(21번) · SCL → SCL(22번)"
+          captionDevkit: "OLED 네 핀: VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
         body: |
-          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 OLED 를 이어요. 모듈에 적힌 글자(GND · VCC · SCL · SDA)를 꼭 읽고 꽂아요. 전원 두 선이 바뀌면 화면이 켜지지 않아요.
+          **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 OLED 를 F-F 듀폰선 4가닥으로 보드에 바로 이어요. SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 가요. 모듈에 적힌 글자(GND · VCC · SCL · SDA)를 꼭 읽고 꽂아요. 전원 두 선이 바뀌면 화면이 켜지지 않아요.
 
           화면도 혼자서는 글자를 못 그려서 **라이브러리 파일**(`ssd1306.py`)이 보드에 있어야 해요. **실행**을 누르면 블록랩이 import 줄을 보고 함께 올려 줘요. 화면에 글이 뜨면 예측과 비교해 보세요.
         todo:
