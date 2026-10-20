@@ -14,11 +14,13 @@ materials:
   - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 1장 배선을 그대로 써요 }
   - { name: 빨강 LED, note: 긴 다리가 + }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
-  - { name: 점퍼선(M-M), note: "3개 (26번 선 1, GND 선 2)" }
+  - { name: M-F 듀폰선 2가닥, note: "보드의 26번 핀과 GND 핀 → 브레드보드. 1장과 같아요" }
+  - { name: 점퍼선(M-M) 1가닥, note: "LED 짧은 다리 줄 → 브레드보드 − 줄" }
   - { name: USB 선, note: 마이크로 USB. 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-breadboard.svg
-  caption: "1장과 같은 배선: 26번 핀 → 7번 줄 → 220Ω 저항 → 12번 줄의 LED 긴 다리(+). 짧은 다리(−)는 13번 줄 → 브레드보드 − 줄 → GND. 이번에는 26번으로 0과 1 대신 PWM 신호가 나가요"
+  caption: "1장과 같은 배선: 보드 io26 핀 → 22번 줄 → 220Ω 저항 → 17번 줄의 LED 긴 다리(+). 짧은 다리(−)는 16번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND. 이번에는 26번으로 0과 1 대신 PWM 신호가 나가요"
+  captionDevkit: "1장과 같은 배선: 보드 D26 핀 → 11번 줄 → 220Ω 저항 → 6번 줄의 LED 긴 다리(+). 짧은 다리(−)는 5번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND. 이번에는 26번으로 0과 1 대신 PWM 신호가 나가요"
 principle:
   image: images/pwm-duty.svg
   body: |
@@ -104,7 +106,8 @@ parts:
         title: 복사 · 실행 — 숨쉬는 LED
         scene:
           image: images/wiring-breadboard.svg
-          caption: "1장과 같은 배선: 26번 → 저항 → LED 긴 다리(+), 짧은 다리(−) → − 줄 → GND"
+          caption: "1장과 같은 배선: io26 → 22번 줄 → 저항 → LED 긴 다리(+), 짧은 다리(−) → − 줄 → GND"
+          captionDevkit: "1장과 같은 배선: D26 → 11번 줄 → 저항 → LED 긴 다리(+), 짧은 다리(−) → − 줄 → GND"
         body: |
           배선은 1장과 **똑같아요.** 브레드보드에 LED와 저항이 그대로 꽂혀 있다면 다시 꽂을 필요가 없어요. 빠졌다면 그림을 보고 다시 꽂아요.
 
