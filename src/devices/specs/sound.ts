@@ -7,7 +7,7 @@ export const buzzerActive: DeviceSpec = {
   setup: {
     blockType: "dev_buzzer_setup",
     message: "부저를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 15, "out"), { kind: "var", name: "VAR", default: "buzzer" }],
+    parts: [pinNo("PIN", 25, "out"), { kind: "var", name: "VAR", default: "buzzer" }],
     tooltip: "buzzer = Pin(15, Pin.OUT) — 켜면 삐 소리가 납니다.",
     lines: (v) => [`${v.VAR} = Pin(${v.PIN}, Pin.OUT)`],
     kind: "pin",
@@ -36,7 +36,7 @@ export const buzzerPassive: DeviceSpec = {
   setup: {
     blockType: "dev_beeper_setup",
     message: "소리 나는 부저를 핀 %1 에 준비하고 %2 이름 붙이기",
-    parts: [pinNo("PIN", 15, "out"), { kind: "var", name: "VAR", default: "beeper" }],
+    parts: [pinNo("PIN", 25, "out"), { kind: "var", name: "VAR", default: "beeper" }],
     tooltip: "beeper = PWM(Pin(15)) — 처음에는 조용히(duty 0) 둡니다.",
     lines: (v) => [`${v.VAR} = PWM(Pin(${v.PIN}))`, `${v.VAR}.freq(440)`, `${v.VAR}.duty(0)`],
     kind: "beeper",

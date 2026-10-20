@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 624" role="img" aria-labelledby="wd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title id="wd-title">자동문 배선도(브레드보드 없이 보드에 바로 연결): 초음파 센서 VCC 는 보드 위쪽 5V, GND 는 GND, Trig 는 io13, Echo 는 io12 에 F-F 듀폰선으로. OLED 화면 GND·VCC·SDA·SCL 은 보드 I2C 묶음의 GND·5V·SDA·SCL 에 F-F 듀폰선으로. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로 꽂기</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 696" role="img" aria-labelledby="wd-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="wd-title">자동문 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): 초음파 센서 VCC 는 보드 위쪽 5V, GND 는 GND, Trig 는 io13, Echo 는 io12 에 F-F 듀폰선으로. OLED 화면 GND·VCC·SDA·SCL 은 보드 I2C 묶음의 GND·5V·SDA·SCL 에. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로 꽂기</title>
   <rect x="96" y="150" width="428" height="300" rx="18" fill="#1d1d1f" stroke="currentColor"/>
   <circle cx="110" cy="164" r="5" fill="#495057" stroke="none"/>
   <circle cx="510" cy="164" r="5" fill="#495057" stroke="none"/>
@@ -108,20 +108,18 @@
   <g opacity="0.38"><rect x="469" y="425" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><rect x="473" y="429" width="6" height="6" rx="1" fill="#1d1d1f" stroke="none"/></g>
   <g opacity="0.38"><rect x="489" y="425" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><rect x="493" y="429" width="6" height="6" rx="1" fill="#1d1d1f" stroke="none"/></g>
   <rect x="150" y="22" width="152" height="98" rx="7" fill="#2b8a3e" stroke="currentColor"/>
-  <circle cx="186" cy="56" r="25" fill="#ced4da" stroke="#495057"/><circle cx="186" cy="56" r="11" fill="#495057" stroke="none"/>
-  <circle cx="266" cy="56" r="25" fill="#ced4da" stroke="#495057"/><circle cx="266" cy="56" r="11" fill="#495057" stroke="none"/>
+  <circle cx="186" cy="56" r="25" fill="#ced4da" stroke="#495057"/><circle cx="186" cy="56" r="11" fill="#495057" stroke="none"/><circle cx="266" cy="56" r="25" fill="#ced4da" stroke="#495057"/><circle cx="266" cy="56" r="11" fill="#495057" stroke="none"/>
   <path d="M196 120 V132" stroke="#adb5bd" stroke-width="3"/><text x="196" y="114" transform="rotate(-90 196 114)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">VCC</text>
   <path d="M216 120 V132" stroke="#adb5bd" stroke-width="3"/><text x="216" y="114" transform="rotate(-90 216 114)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">Trig</text>
   <path d="M236 120 V132" stroke="#adb5bd" stroke-width="3"/><text x="236" y="114" transform="rotate(-90 236 114)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">Echo</text>
   <path d="M256 120 V132" stroke="#adb5bd" stroke-width="3"/><text x="256" y="114" transform="rotate(-90 256 114)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">GND</text>
   <text x="138" y="56" text-anchor="end" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">초음파 센서</text>
   <rect x="528" y="312" width="108" height="112" rx="7" fill="#1c4fd6" stroke="currentColor"/>
-  <rect x="537" y="360" width="90" height="54" rx="3" fill="#0b1f4d" stroke="none"/>
-  <path d="M548 378 h44 M548 394 h64" stroke="#74c0fc" stroke-width="3"/>
-  <path d="M552 312 V302" stroke="#adb5bd" stroke-width="3"/><text x="552" y="352" transform="rotate(-90 552 352)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">GND</text>
-  <path d="M572 312 V302" stroke="#adb5bd" stroke-width="3"/><text x="572" y="352" transform="rotate(-90 572 352)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">VCC</text>
-  <path d="M592 312 V302" stroke="#adb5bd" stroke-width="3"/><text x="592" y="352" transform="rotate(-90 592 352)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">SCL</text>
-  <path d="M612 312 V302" stroke="#adb5bd" stroke-width="3"/><text x="612" y="352" transform="rotate(-90 612 352)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">SDA</text>
+  <rect x="537" y="360" width="90" height="54" rx="3" fill="#0b1f4d" stroke="none"/><path d="M548 378 h44 M548 394 h64" stroke="#74c0fc" stroke-width="3"/>
+  <path d="M552 312 V300" stroke="#adb5bd" stroke-width="3"/><text x="552" y="318" transform="rotate(-90 552 318)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">GND</text>
+  <path d="M572 312 V300" stroke="#adb5bd" stroke-width="3"/><text x="572" y="318" transform="rotate(-90 572 318)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">VCC</text>
+  <path d="M592 312 V300" stroke="#adb5bd" stroke-width="3"/><text x="592" y="318" transform="rotate(-90 592 318)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">SCL</text>
+  <path d="M612 312 V300" stroke="#adb5bd" stroke-width="3"/><text x="612" y="318" transform="rotate(-90 612 318)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">SDA</text>
   <text x="582" y="440" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">OLED 화면</text>
   <rect x="8" y="400" width="78" height="12" rx="4" fill="#1971c2" stroke="currentColor"/>
   <rect x="14" y="384" width="66" height="44" rx="7" fill="#1971c2" stroke="currentColor"/>
@@ -129,7 +127,10 @@
   <path d="M80 397 C98 397 97 400 115 400" stroke="#8b5a2b" stroke-width="4"/>
   <path d="M80 406 C98 406 97 406 115 406" stroke="#e03131" stroke-width="4"/>
   <path d="M80 415 C98 415 97 412 115 412" stroke="#f76707" stroke-width="4"/>
-  <rect x="114" y="395" width="64" height="22" rx="3" fill="#212529" stroke="#ffd43b" stroke-width="3"/><rect x="122" y="402" width="8" height="8" rx="1" fill="#8b5a2b" stroke="none"/><rect x="142" y="402" width="8" height="8" rx="1" fill="#e03131" stroke="none"/><rect x="162" y="402" width="8" height="8" rx="1" fill="#f76707" stroke="none"/>
+  <rect x="114" y="395" width="64" height="22" rx="3" fill="#212529" stroke="#ffd43b" stroke-width="3"/>
+  <rect x="122" y="402" width="8" height="8" rx="1" fill="#8b5a2b" stroke="none"/>
+  <rect x="142" y="402" width="8" height="8" rx="1" fill="#e03131" stroke="none"/>
+  <rect x="162" y="402" width="8" height="8" rx="1" fill="#f76707" stroke="none"/>
   <text x="48" y="446" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">서보 모터</text>
   <path d="M196 132 C196 170 162 170 162 208" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M196 132 C196 170 162 170 162 208" stroke="#e03131" stroke-width="4"/>
   <rect x="190" y="124" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/><rect x="156" y="200" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/>
@@ -139,14 +140,14 @@
   <rect x="210" y="124" width="12" height="16" rx="2" fill="#212529" stroke="#f59f00" stroke-width="2.5"/><rect x="276" y="200" width="12" height="16" rx="2" fill="#212529" stroke="#f59f00" stroke-width="2.5"/>
   <path d="M236 132 C236 170 302 170 302 208" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M236 132 C236 170 302 170 302 208" stroke="#2f9e44" stroke-width="4"/>
   <rect x="230" y="124" width="12" height="16" rx="2" fill="#212529" stroke="#2f9e44" stroke-width="2.5"/><rect x="296" y="200" width="12" height="16" rx="2" fill="#212529" stroke="#2f9e44" stroke-width="2.5"/>
-  <path d="M552 302 L552 278 L236 278 L236 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M552 302 L552 278 L236 278 L236 340" stroke="#343a40" stroke-width="4"/>
-  <rect x="546" y="294" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/><rect x="230" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/>
-  <path d="M572 302 L572 283 L256 283 L256 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M572 302 L572 283 L256 283 L256 340" stroke="#e03131" stroke-width="4"/>
-  <rect x="566" y="294" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/><rect x="250" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/>
-  <path d="M612 302 L612 288 L276 288 L276 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M612 302 L612 288 L276 288 L276 340" stroke="#1971c2" stroke-width="4"/>
-  <rect x="606" y="294" width="12" height="16" rx="2" fill="#212529" stroke="#1971c2" stroke-width="2.5"/><rect x="270" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#1971c2" stroke-width="2.5"/>
-  <path d="M592 302 L592 293 L296 293 L296 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M592 302 L592 293 L296 293 L296 340" stroke="#7048e8" stroke-width="4"/>
-  <rect x="586" y="294" width="12" height="16" rx="2" fill="#212529" stroke="#7048e8" stroke-width="2.5"/><rect x="290" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#7048e8" stroke-width="2.5"/>
+  <path d="M552 300 L552 278 L236 278 L236 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M552 300 L552 278 L236 278 L236 340" stroke="#343a40" stroke-width="4"/>
+  <rect x="546" y="292" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/><rect x="230" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/>
+  <path d="M572 300 L572 283 L256 283 L256 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M572 300 L572 283 L256 283 L256 340" stroke="#e03131" stroke-width="4"/>
+  <rect x="566" y="292" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/><rect x="250" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/>
+  <path d="M612 300 L612 288 L276 288 L276 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M612 300 L612 288 L276 288 L276 340" stroke="#1971c2" stroke-width="4"/>
+  <rect x="606" y="292" width="12" height="16" rx="2" fill="#212529" stroke="#1971c2" stroke-width="2.5"/><rect x="270" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#1971c2" stroke-width="2.5"/>
+  <path d="M592 300 L592 293 L296 293 L296 340" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M592 300 L592 293 L296 293 L296 340" stroke="#7048e8" stroke-width="4"/>
+  <rect x="586" y="292" width="12" height="16" rx="2" fill="#212529" stroke="#7048e8" stroke-width="2.5"/><rect x="290" y="332" width="12" height="16" rx="2" fill="#212529" stroke="#7048e8" stroke-width="2.5"/>
   <text x="80" y="262" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="currentColor" stroke="none">USB</text>
   <text x="122" y="195" transform="rotate(-90 122 195)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">SCL</text>
   <text x="142" y="195" transform="rotate(-90 142 195)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">SDA</text>
@@ -221,18 +222,18 @@
   <text x="54" y="554" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 Trig</tspan> → io13</text>
   <path d="M20 578 h24" stroke="#2f9e44" stroke-width="5"/>
   <text x="54" y="578" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">초음파 Echo</tspan> → io12</text>
-  <path d="M330 503 h24" stroke="#343a40" stroke-width="4"/>
-  <path d="M330 509 h24" stroke="#e03131" stroke-width="4"/>
-  <text x="364" y="506" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED GND · VCC</tspan> → I2C GND · 5V</text>
-  <path d="M330 527 h24" stroke="#1971c2" stroke-width="4"/>
-  <path d="M330 533 h24" stroke="#7048e8" stroke-width="4"/>
-  <text x="364" y="530" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED SDA · SCL</tspan> → I2C SDA · SCL</text>
-  <path d="M330 548 h24" stroke="#8b5a2b" stroke-width="4"/>
-  <path d="M330 554 h24" stroke="#e03131" stroke-width="4"/>
-  <path d="M330 560 h24" stroke="#f76707" stroke-width="4"/>
-  <text x="364" y="554" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">서보 플러그</tspan> → io4 줄 G·V·S</text>
-  <rect x="20" y="601" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><text x="40" y="608" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">S 신호</text>
-  <rect x="112" y="601" width="14" height="14" rx="2.5" fill="#e03131" stroke="none"/><text x="132" y="608" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">V 전원(+)</text>
-  <rect x="224" y="601" width="14" height="14" rx="2.5" fill="#495057" stroke="none"/><text x="244" y="608" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">G 접지(−)</text>
-  <rect x="336" y="600" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="360" y="608" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>
+  <path d="M20 599 h24" stroke="#343a40" stroke-width="4"/>
+  <path d="M20 605 h24" stroke="#e03131" stroke-width="4"/>
+  <text x="54" y="602" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED GND · VCC</tspan> → I2C GND · 5V</text>
+  <path d="M20 623 h24" stroke="#1971c2" stroke-width="4"/>
+  <path d="M20 629 h24" stroke="#7048e8" stroke-width="4"/>
+  <text x="54" y="626" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">OLED SDA · SCL</tspan> → I2C SDA · SCL</text>
+  <path d="M20 644 h24" stroke="#8b5a2b" stroke-width="4"/>
+  <path d="M20 650 h24" stroke="#e03131" stroke-width="4"/>
+  <path d="M20 656 h24" stroke="#f76707" stroke-width="4"/>
+  <text x="54" y="650" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">서보 플러그</tspan> → io4 줄 G·V·S</text>
+  <rect x="20" y="673" width="14" height="14" rx="2.5" fill="#f5c518" stroke="none"/><text x="40" y="680" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">S 신호</text>
+  <rect x="112" y="673" width="14" height="14" rx="2.5" fill="#e03131" stroke="none"/><text x="132" y="680" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">V 전원(+)</text>
+  <rect x="224" y="673" width="14" height="14" rx="2.5" fill="#495057" stroke="none"/><text x="244" y="680" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">G 접지(−)</text>
+  <rect x="336" y="672" width="16" height="16" rx="3" fill="none" stroke="#ffd43b" stroke-width="3"/><text x="360" y="680" dominant-baseline="central" font-size="13" fill="currentColor" stroke="none">이번에 꽂는 핀 (흐린 핀은 안 써요)</text>
 </svg>
