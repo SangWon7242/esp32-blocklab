@@ -7,7 +7,7 @@ blue = PWM(Pin(26))
 red.freq(1000)
 green.freq(1000)
 blue.freq(1000)
-beeper = PWM(Pin(15))  # 건너라는 소리를 낼 수동 부저
+beeper = PWM(Pin(16))  # 건너라는 소리를 낼 수동 부저
 beeper.freq(440)
 beeper.duty(0)
 trig = Pin(13, Pin.OUT)  # 초음파 Trig 13, Echo 12
