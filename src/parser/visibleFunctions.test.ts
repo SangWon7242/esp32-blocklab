@@ -3,7 +3,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { codeToBlocks } from "./index";
-import { PENDING_LIB_MIGRATION } from "./pendingLibMigration";
 import type { BlockJson } from "./types";
 
 /**
@@ -11,7 +10,6 @@ import type { BlockJson } from "./types";
  * 모든 수업 파일(content/chapters/*\/*.py)에서
  * - 코드 블록(code_stmt·code_expr)이 하나도 없고,
  * - 파일의 맨 바깥 `def 이름` 이 모두 같은 이름의 함수 정의 블록이 된다 (장치 준비 안으로 접혀 사라지지 않는다).
- * 보드 라이브러리로 옮길 옛 꼴의 수업 파일(PENDING_LIB_MIGRATION)은 다음 단계에서 고칠 때까지 건너뛴다.
  */
 
 const root = join(__dirname, "../../content/chapters");
@@ -27,14 +25,12 @@ function allTypes(b: BlockJson | undefined, out: string[] = []): string[] {
 }
 
 describe("수업 파일의 함수는 모두 함수 블록으로 보인다", () => {
-  it("수업 파일이 있고, 건너뛰는 목록의 파일은 모두 실제로 있다", () => {
+  it("수업 파일이 있다", () => {
     expect(files.length).toBeGreaterThan(100);
-    for (const f of PENDING_LIB_MIGRATION) expect(files, f).toContain(f);
   });
 
   for (const file of files) {
-    const pending = PENDING_LIB_MIGRATION.includes(file);
-    (pending ? it.skip : it)(`${file}${pending ? " (PENDING_LIB_MIGRATION)" : ""}`, () => {
+    it(file, () => {
       const src = readFileSync(join(root, file), "utf8");
       const r = codeToBlocks(src);
       expect(r.ok, "파싱 성공").toBe(true);

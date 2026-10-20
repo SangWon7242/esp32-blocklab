@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { workspaceJsonToCode } from "@/codegen";
 import { codeToBlocks, normalizeCode } from "./index";
-import { PENDING_LIB_MIGRATION } from "./pendingLibMigration";
 
 const root = join(__dirname, "../../content/chapters");
 const files = readdirSync(root).flatMap((dir) => readdirSync(join(root, dir)).filter((f) => f.endsWith(".py")).map((f) => join(dir, f)));
@@ -17,9 +16,7 @@ describe("코드 → 블록 → 코드 왕복", () => {
 
   for (const file of files) {
     const exact = EXACT_CHAPTERS.length === 0 || EXACT_CHAPTERS.some((c) => file.startsWith(c + "/"));
-    // 보드 라이브러리로 옮긴 도우미를 아직 파일 안에 둔 수업 파일은 다음 단계에서 고칠 때까지 건너뛴다 (pendingLibMigration.ts)
-    const pending = PENDING_LIB_MIGRATION.includes(file.split("\\").join("/"));
-    (pending ? it.skip : it)(`${file}${exact ? "" : " (표준 꼴 안정)"}${pending ? " (PENDING_LIB_MIGRATION)" : ""}`, () => {
+    it(`${file}${exact ? "" : " (표준 꼴 안정)"}`, () => {
       const src = readFileSync(join(root, file), "utf8");
       const r = codeToBlocks(src);
       expect(r.ok, "파싱 성공").toBe(true);
