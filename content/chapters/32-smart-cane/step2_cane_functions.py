@@ -3,7 +3,7 @@ import time
 
 trig = Pin(13, Pin.OUT)
 echo = Pin(12, Pin.IN)
-beeper = PWM(Pin(15))
+beeper = PWM(Pin(25))
 beeper.freq(440)
 beeper.duty(0)
 led = Pin(26, Pin.OUT)  # 26번 = 밤에 남에게 보이는 LED

@@ -3,7 +3,7 @@ import time
 
 trig = Pin(13, Pin.OUT)  # 13번 = 초음파를 쏘는 핀, 12번 = 메아리를 듣는 핀
 echo = Pin(12, Pin.IN)
-beeper = PWM(Pin(15))  # 수동 부저를 15번 핀에, 처음에는 조용히
+beeper = PWM(Pin(25))  # 수동 부저를 25번 핀에, 처음에는 조용히
 beeper.freq(440)
 beeper.duty(0)
 

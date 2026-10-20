@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sct-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title id="sct-title">지팡이의 세 감각. 초음파: 소리를 쏘고 벽에서 돌아온 메아리까지 걸린 시간으로 거리를 잰다(거리 = 340 × 시간 ÷ 2). 조도 센서: 이 모듈은 밝으면 값이 작고 어두우면 값이 크다(0~4095). 틸트 스위치: 서 있으면 구슬이 두 다리를 이어 0, 누우면 구슬이 굴러가 1</title>
+  <title id="sct-title">지팡이의 세 감각. 초음파: 소리를 쏘고 벽에서 돌아온 메아리까지 걸린 시간으로 거리를 잰다(거리 = 340 × 시간 ÷ 2). 조도 센서: 이 회로는 밝으면 값이 작고 어두우면 값이 크다(0~4095). 틸트 스위치: 서 있으면 구슬이 두 다리를 이어 0, 누우면 구슬이 굴러가 1</title>
   <defs>
     <marker id="sct-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 Z" fill="currentColor" stroke="none"/>
@@ -43,7 +43,7 @@
   <rect x="242" y="236" width="132" height="18" rx="9" fill="currentColor" fill-opacity="0.35" stroke="none"/>
   <g font-size="12" fill="currentColor" stroke="none" text-anchor="middle">
     <text x="320" y="276">0 ············ 4095</text>
-    <text x="320" y="300">이 모듈은 어두울수록</text>
+    <text x="320" y="300">이 회로는 어두울수록</text>
     <text x="320" y="318">값이 커져요</text>
   </g>
   <!-- 3 틸트 -->
