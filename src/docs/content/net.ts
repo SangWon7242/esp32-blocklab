@@ -1,20 +1,17 @@
 import type { BlockContent } from "../types";
-import { helperDef } from "@/devices/specs/common";
-import { PAGE_HELPER, SEND_FILE_HELPER, WEB_HELPERS, wifi } from "@/devices/specs/net";
-import type { HelperSpec } from "@/devices/types";
 
-/** 도우미 정의들 (생성 코드 꼴, 함수 사이 빈 줄 둘). 뒤에 준비 줄이 오도록 끝에도 빈 줄 둘 */
-const defs = (hs: HelperSpec[]) => hs.map(helperDef).join("\n\n\n") + "\n\n\n";
-
-const [CONNECT, AP] = [wifi.setup!.helpers![0], wifi.extraSetups![0].helpers![0]];
+/*
+ * WiFi·웹서버 함수(wifi_connect·web_start·web_send …)는 보드 라이브러리 blocklab_net 에 있어 예시 코드에는 부르는 줄만 나온다
+ * (import 줄 `from blocklab_net import *` 는 생성기가 붙인다).
+ */
 const CONNECT_LINE = 'ip = wifi_connect("MyWiFi", "12345678")';
 const AP_LINE = 'ip = wifi_ap("ESP32-LAB", "12345678")';
-// 생성기는 함수 뒤로 옮긴 준비 줄과 본문 사이에 빈 줄 하나를 둔다
-const WIFI_SETUP = `${defs([CONNECT])}${CONNECT_LINE}\n\n`;
-const AP_SETUP = `${defs([AP])}${AP_LINE}\n\n`;
+// 생성기는 함수 정의 뒤로 옮긴 준비 줄과 본문 사이에 빈 줄 하나를 둔다
+const WIFI_SETUP = `${CONNECT_LINE}\n\n`;
+const AP_SETUP = `${AP_LINE}\n\n`;
 
-/** WiFi 연결 + 웹서버 준비 (extra: 그 예시가 쓰는 선택 도우미) */
-const web = (extra: HelperSpec[] = []) => `${defs([CONNECT, ...WEB_HELPERS, ...extra])}${CONNECT_LINE}\nserver = web_start(80)\n\n`;
+/** WiFi 연결 + 웹서버 준비 */
+const web = () => `${CONNECT_LINE}\nserver = web_start(80)\n\n`;
 
 const WIFI_TIP = "먼저 WiFi 연결(또는 공유기 모드) 블록이 있어야 해요.";
 const WEB_TIP = "먼저 WiFi 연결 블록과 웹서버 시작 블록이 있어야 해요.";
@@ -40,7 +37,7 @@ export const netContent: Record<string, BlockContent> = {
     tips: [WIFI_TIP],
   },
   dev_web_setup: {
-    concept: "보드를 작은 웹서버로 만들어 브라우저의 요청을 기다리게 해요. 요청 받기·응답하기 함수가 함께 만들어지고, 서버 이름은 server 로 정해져 있습니다. 포트는 보통 80 이라 주소창에 IP 주소만 적으면 돼요.",
+    concept: "보드를 작은 웹서버로 만들어 브라우저의 요청을 기다리게 해요. 요청 받기·응답하기 함수는 보드 라이브러리(blocklab_net)에 들어 있고, 서버 이름은 server 로 정해져 있습니다. 포트는 보통 80 이라 주소창에 IP 주소만 적으면 돼요.",
     example: {
       title: "접속하면 인사하는 웹서버",
       code: `${web()}while True:\n    conn, path, query = web_accept(server)\n    web_send(conn, "<h1>Hello ESP32</h1>")`,
@@ -67,7 +64,7 @@ export const netContent: Record<string, BlockContent> = {
     concept: "제목, 버튼, 값이 든 웹 페이지를 만들어 답해요. 버튼 칸에 led=on,led=off 처럼 쉼표로 나눠 적으면 버튼이 생기고, 누르면 /cmd?led=on 주소로 다시 요청이 옵니다. 값 칸도 쉼표로 나눠 여러 줄을 보여 주고, 새로고침에 초를 넣으면 그 간격으로 페이지를 다시 읽어요.",
     example: {
       title: "버튼으로 LED 켜고 끄기",
-      code: `led = Pin(2, Pin.OUT)\n\n\n${web([PAGE_HELPER])}while True:\n    conn, path, query = web_accept(server)\n    if query.get("led", "") == "on":\n        led.value(1)\n    if query.get("led", "") == "off":\n        led.value(0)\n    web_send(conn, web_page("ESP32", "led=on,led=off", "LED: " + str(led.value()), 0))`,
+      code: `led = Pin(2, Pin.OUT)\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    if query.get("led", "") == "on":\n        led.value(1)\n    if query.get("led", "") == "off":\n        led.value(0)\n    web_send(conn, web_page("ESP32", "led=on,led=off", "LED: " + str(led.value()), 0))`,
     },
     tips: [ACCEPT_TIP, "버튼과 값 칸에는 쉼표가 나누는 표시라서, 글 안에 쉼표를 넣지 않아요."],
   },
@@ -75,7 +72,7 @@ export const netContent: Record<string, BlockContent> = {
     concept: "두 값을 JSON 이라는 정해진 꼴로 답해요. {\"temp\": 25, \"hum\": 60} 처럼 이름과 값이 짝지어 가서 앱이나 다른 프로그램이 읽기 좋습니다. 값 칸에는 센서 값 같은 숫자를 넣어요.",
     example: {
       title: "온습도를 JSON 으로 알려 주기",
-      code: `dht11 = dht.DHT11(Pin(13))\n\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    dht11.measure()\n    web_send(conn, "{\\"temp\\": " + str(dht11.temperature()) + ", \\"hum\\": " + str(dht11.humidity()) + "}", "application/json")`,
+      code: `dht11 = dht.DHT11(Pin(13))\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    dht11.measure()\n    web_send(conn, "{\\"temp\\": " + str(dht11.temperature()) + ", \\"hum\\": " + str(dht11.humidity()) + "}", "application/json")`,
     },
     tips: [ACCEPT_TIP, "이름 칸에는 영어 낱말을 쓰면 앱에서 다루기 쉬워요."],
   },
@@ -83,7 +80,7 @@ export const netContent: Record<string, BlockContent> = {
     concept: "값 하나를 JSON 꼴로 답해요. {\"light\": 2048} 처럼 이름 하나와 값 하나가 갑니다. 앱이 센서 값 하나만 물어볼 때 써요.",
     example: {
       title: "조도 값을 JSON 으로 알려 주기",
-      code: `light = ADC(Pin(34))\nlight.atten(ADC.ATTN_11DB)\nlight.width(ADC.WIDTH_12BIT)\n\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    web_send(conn, "{\\"light\\": " + str(light.read()) + "}", "application/json")`,
+      code: `light = ADC(Pin(34))\nlight.atten(ADC.ATTN_11DB)\nlight.width(ADC.WIDTH_12BIT)\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    web_send(conn, "{\\"light\\": " + str(light.read()) + "}", "application/json")`,
     },
     tips: [ACCEPT_TIP, ADC2_TIP],
   },
@@ -91,7 +88,7 @@ export const netContent: Record<string, BlockContent> = {
     concept: "보드에 저장해 둔 파일(index.html 등)을 읽어 답해요. 직접 만든 웹 페이지를 파일로 올려 두면 그 페이지를 그대로 보여 줄 수 있습니다. 파일이 없으면 'not found' 라고 답해요.",
     example: {
       title: "index.html 페이지 보여 주기",
-      code: `${web([SEND_FILE_HELPER])}while True:\n    conn, path, query = web_accept(server)\n    web_send_file(conn, "index.html")`,
+      code: `${web()}while True:\n    conn, path, query = web_accept(server)\n    web_send_file(conn, "index.html")`,
     },
     tips: [ACCEPT_TIP, "파일은 앱 화면에서 보드에 함께 저장해요. 파일 이름은 대소문자까지 똑같이 적어요."],
   },
@@ -115,7 +112,7 @@ export const netContent: Record<string, BlockContent> = {
     concept: "주소의 질의에 이 이름과 값이 있는지 참·거짓으로 알려 줘요. 페이지 버튼 led=on 을 누르면 질의 led 가 on 인가 가 참이 됩니다. 만약 블록에 끼워 버튼마다 할 일을 정해요.",
     example: {
       title: "버튼 주소로 LED 켜기",
-      code: `led = Pin(2, Pin.OUT)\n\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    if query.get("led", "") == "on":\n        led.value(1)\n    web_send(conn, "ok")`,
+      code: `led = Pin(2, Pin.OUT)\n\n${web()}while True:\n    conn, path, query = web_accept(server)\n    if query.get("led", "") == "on":\n        led.value(1)\n    web_send(conn, "ok")`,
     },
     tips: [WEB_TIP, ONE_ANSWER_TIP],
   },

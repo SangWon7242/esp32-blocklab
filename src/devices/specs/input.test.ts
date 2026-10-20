@@ -1,35 +1,33 @@
+/// <reference types="node" />
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { isProgramName } from "@/blocks/names";
+import { libFilesFor } from "../registry";
 import { forever, fromCode, ifThen, print, toCode, type B } from "../testkit";
+import { RFID_LIB_NAMES } from "./input";
 
 const val = (type: string): B => ({ type });
 
 describe("RFID (dev_rfid_setup)", () => {
   const code = [
     "from mfrc522_i2c import mfrc522",
+    "from blocklab_rfid import *",
     "",
     "rc522 = mfrc522(22, 21, 0x28)",
     "rc522.PCD_Init()",
     "",
-    "",
-    "def card_present():",
-    "    return rc522.PICC_IsNewCardPresent() and rc522.PICC_ReadCardSerial()",
-    "",
-    "",
-    "def card_uid():",
-    "    return rc522.uid.uidByte[0:rc522.uid.size]",
-    "",
-    "",
     "while True:",
-    "    if card_present():",
-    "        print(card_uid())",
+    "    if card_present(rc522):",
+    "        print(card_uid(rc522))",
     "",
   ].join("\n");
   const blocks: B[] = [{ type: "dev_rfid_setup", fields: { SCL: 22, SDA: 21, ADDR: "0x28" } }, forever([ifThen(val("dev_rfid_present"), [print(val("dev_rfid_uid"))])])];
 
-  it("준비 2줄, card_present·card_uid 도우미 (from mfrc522_i2c import mfrc522)", () => {
+  it("준비 2줄, 카드 함수는 보드 라이브러리에서 (from blocklab_rfid import *), 함수 정의 없음", () => {
     expect(toCode(blocks)).toBe(code);
   });
-  it("왕복: 도우미까지 접혀 같은 블록들, unparsed 0", () => {
+  it("왕복: 같은 블록들, unparsed 0", () => {
     const r = fromCode(code);
     expect(r.tops).toEqual(["start_program"]);
     expect(r.types).toEqual(["dev_rfid_setup", "flow_repeat_forever", "controls_if", "esp_print", "dev_rfid_uid", "dev_rfid_present"]);
@@ -37,11 +35,18 @@ describe("RFID (dev_rfid_setup)", () => {
     expect(r.unparsed).toEqual([]);
     expect(r.code).toBe(code);
   });
-  it("도우미가 표준 꼴이 아니면 접지 않고 card_present() 도 장치 블록이 아니다", () => {
-    const r = fromCode(code.replace("[0:rc522.uid.size]", "[0:4]"));
-    expect(r.types).not.toContain("dev_rfid_setup");
-    expect(r.types).not.toContain("dev_rfid_present");
-    expect(r.tops).toContain("procedures_defreturn");
+  it("RFID 준비가 없거나 읽개가 rc522 가 아니면 카드 블록이 아니다", () => {
+    expect(fromCode("x = 1\nprint(card_present(rc522))\n").types).not.toContain("dev_rfid_present");
+    expect(fromCode(code.replace("print(card_uid(rc522))", "print(card_uid(reader))")).types).not.toContain("dev_rfid_uid");
+  });
+  it("보드 라이브러리 blocklab_rfid.py: card_present(reader)·card_uid(reader) 와 맨 위 한국어 주석, RFID 준비가 함께 올린다", () => {
+    const lib = readFileSync(path.resolve(import.meta.dirname, "../../../public/lib/blocklab_rfid.py"), "utf8");
+    expect([...lib.matchAll(/^def (\w+\(\w*\)):/gm)].map((m) => m[1])).toEqual(RFID_LIB_NAMES.map((n) => `${n}(reader)`));
+    expect(lib).toContain("return reader.PICC_IsNewCardPresent() and reader.PICC_ReadCardSerial()");
+    expect(lib).toContain("return reader.uid.uidByte[0:reader.uid.size]");
+    expect(lib.split("\n")[0]).toMatch(/^# .*blocklab_rfid/);
+    expect(libFilesFor(["dev_rfid_setup"])).toContain("blocklab_rfid.py");
+    for (const n of RFID_LIB_NAMES) expect(isProgramName(n), n).toBe(true);
   });
 });
 

@@ -1,4 +1,9 @@
 import type { ImportRule } from "./types";
+import { NET_LIB_NAMES } from "./specs/net";
+import { RFID_LIB_NAMES } from "./specs/input";
+
+/** 이 함수들 중 하나를 부르는 꼴 `name(` */
+const callsAny = (names: string[]) => new RegExp(String.raw`(?<![\w.])(?:${names.join("|")})\(`);
 
 /** 생성 코드에 이 꼴이 보이면 이 import 줄이 필요하다. rank: machine 0 → ssd1306 1 → time 2 → 그 밖 3 */
 export const IMPORT_RULES: ImportRule[] = [
@@ -14,6 +19,9 @@ export const IMPORT_RULES: ImportRule[] = [
   { when: /\blcd128_32\(/, line: "import lcd128_32_fonts", rank: 3 },
   { when: /\bnetwork\./, line: "import network", rank: 3 },
   { when: /\bsocket\./, line: "import socket", rank: 3 },
+  // 보드 라이브러리(public/lib/blocklab_*.py)의 함수: WiFi·웹서버, RFID 카드 읽기
+  { when: callsAny(NET_LIB_NAMES), line: "from blocklab_net import *", rank: 3 },
+  { when: callsAny(RFID_LIB_NAMES), line: "from blocklab_rfid import *", rank: 3 },
 ];
 
 /** 생성기가 `Name(` 이 보이면 `from machine import …` 로 가져오는 이름 (이 순서로) */

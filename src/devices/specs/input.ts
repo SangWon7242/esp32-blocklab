@@ -1,41 +1,47 @@
 import type { DeviceSpec } from "../types";
 import { I2C_ADDR, pinNo, RE_PIN, validPins } from "./common";
 
-/** RFID (dev_rfid_setup). Keyestudio mfrc522_i2c 라이브러리. 이름 rc522 고정, card_present()·card_uid() 도우미 */
+/**
+ * 보드 라이브러리 public/lib/blocklab_rfid.py 가 주는 함수 이름. 생성 코드는 `from blocklab_rfid import *` 로 가져와
+ * card_present(rc522)·card_uid(rc522) 처럼 읽개를 넘겨 부른다 (함수 몸통은 그 파일에, 이름 확인은 input.test.ts).
+ */
+export const RFID_LIB_NAMES = ["card_present", "card_uid"];
+
+/**
+ * RFID (dev_rfid_setup). Keyestudio mfrc522_i2c 라이브러리. 이름 rc522 고정. 카드 읽기 함수 card_present(reader)·card_uid(reader) 는
+ * 보드 라이브러리 blocklab_rfid 에 있다.
+ */
 export const rfid: DeviceSpec = {
   id: "rfid", category: "input", label: "RFID", toolboxOrder: 80, colour: "#8b6b3e",
   setup: {
     blockType: "dev_rfid_setup", message: "RFID 준비하기 (scl 핀 %1, sda 핀 %2, 주소 %3)",
     parts: [pinNo("SCL", 22, "bus"), pinNo("SDA", 21, "bus"), { kind: "text", name: "ADDR", default: "0x28", validate: I2C_ADDR }],
-    tooltip: "rc522 = mfrc522(22, 21, 0x28) 과 카드를 읽는 card_present()·card_uid() 함수를 준비합니다.",
+    tooltip: "rc522 = mfrc522(22, 21, 0x28) — RFID 읽개 rc522 를 준비합니다. 카드 읽기 함수는 보드 라이브러리(blocklab_rfid)에서 가져와요.",
     lines: (v) => [`rc522 = mfrc522(${v.SCL}, ${v.SDA}, ${v.ADDR})`, "rc522.PCD_Init()"],
-    helpers: [
-      { name: "card_present", params: "", body: ["return rc522.PICC_IsNewCardPresent() and rc522.PICC_ReadCardSerial()"] },
-      { name: "card_uid", params: "", body: ["return rc522.uid.uidByte[0:rc522.uid.size]"] },
-    ],
     kind: "rfid",
-    provides: () => ["rc522", "card_present", "card_uid"],
+    provides: () => ["rc522"],
     pattern: {
       lines: [/^rc522\s*=\s*mfrc522\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(0x[0-9a-fA-F]+)\s*\)$/, /^rc522\.PCD_Init\(\s*\)$/],
       fields: ([m]) => (validPins(m[1], m[2]) ? { SCL: m[1], SDA: m[2], ADDR: m[3] } : null),
     },
-    libFiles: ["mfrc522_i2c.py", "mfrc522_config.py", "soft_iic.py"],
+    libFiles: ["mfrc522_i2c.py", "mfrc522_config.py", "soft_iic.py", "blocklab_rfid.py"],
+    libNames: RFID_LIB_NAMES,
   },
   actions: [],
   values: [
     {
       blockType: "dev_rfid_present", message: "카드가 있는가", parts: [],
-      tooltip: "card_present() — 새 카드를 대고 번호까지 읽었으면 참",
-      code: () => "card_present()",
+      tooltip: "card_present(rc522) — 새 카드를 대고 번호까지 읽었으면 참",
+      code: () => "card_present(rc522)",
       output: "Boolean",
-      pattern: { kind: "call", name: "card_present", args: [] },
+      pattern: { kind: "call", name: "card_present", args: [["rc522"]] },
     },
     {
       blockType: "dev_rfid_uid", message: "카드 번호", parts: [],
-      tooltip: "card_uid() — 마지막으로 읽은 카드 번호 (바이트 목록)",
-      code: () => "card_uid()",
+      tooltip: "card_uid(rc522) — 마지막으로 읽은 카드 번호 (바이트 목록)",
+      code: () => "card_uid(rc522)",
       output: null,
-      pattern: { kind: "call", name: "card_uid", args: [] },
+      pattern: { kind: "call", name: "card_uid", args: [["rc522"]] },
     },
   ],
 };

@@ -82,7 +82,8 @@ export function setupVars(spec: SetupSpec, fields: Values, ms: RegExpExecArray[]
 }
 
 /**
- * 준비 블록이 고정해서 만드는 이름 (도우미 함수 이름 + VAR 칸이 아닌 고정 변수 이름) + 명령 블록의 선택 도우미 이름. 학생 변수·함수가 이 이름을
+ * 준비 블록이 고정해서 만드는 이름 (도우미 함수 이름 + VAR 칸이 아닌 고정 변수 이름 + 보드 라이브러리가 주는 함수 이름 libNames)
+ * + 명령 블록의 선택 도우미 이름. 학생 변수·함수가 이 이름을
  * 덮으면 생성 코드가 깨지므로 src/blocks/names.ts 가 막는다.
  */
 export function fixedSetupNames(): string[] {
@@ -92,6 +93,7 @@ export function fixedSetupNames(): string[] {
     const varValues = new Set(s.parts.filter((p) => p.kind === "var").map((p) => v[p.name]));
     for (const n of s.provides(v)) if (!varValues.has(n)) out.add(n);
     for (const h of s.helpers ?? []) out.add(h.name);
+    for (const n of s.libNames ?? []) out.add(n);
   }
   for (const d of DEVICES) for (const h of actionHelpersOf(d)) out.add(h.name);
   return [...out];

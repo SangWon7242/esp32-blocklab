@@ -47,8 +47,8 @@ export function fixedNameOf(spec: ActionSpec | ValueSpec, setup: SetupSpec): str
     code = "";
   }
   const head = /^[A-Za-z_]\w*/.exec(code.trim())?.[0];
-  // 선택 도우미를 부르는 블록(show(a, b))은 그 도우미 이름
-  return head && (provided.includes(head) || spec.helper?.name === head) ? head : (provided[0] ?? setup.blockType);
+  // 선택 도우미를 부르는 블록(show(a, b))은 그 도우미 이름, 보드 라이브러리 함수를 부르는 블록(web_send(…))은 그 함수 이름
+  return head && (provided.includes(head) || spec.helper?.name === head || setup.libNames?.includes(head)) ? head : (provided[0] ?? setup.blockType);
 }
 
 /**

@@ -149,10 +149,10 @@ describe("레지스트리 불변식", () => {
       }
     }
   });
-  it("도우미를 부르는 준비 줄(afterHelpers)은 대입 뒤 맨 앞에서 자기 도우미를 부른다", () => {
+  it("함수 정의 뒤에 두는 준비 줄(afterHelpers)은 대입 뒤 맨 앞에서 자기 보드 라이브러리 함수를 부른다", () => {
     for (const s of setupSpecs()) {
       if (!s.afterHelpers) continue;
-      const names = (s.helpers ?? []).map((h) => h.name);
+      const names = [...(s.helpers ?? []).map((h) => h.name), ...(s.libNames ?? [])];
       for (const line of s.lines(defaultValues(s.parts))) {
         const rest = line.slice(LEADING_ASSIGN.exec(line)?.[0].length ?? 0);
         expect(names.some((n) => rest.startsWith(`${n}(`)), `${s.blockType}: ${line}`).toBe(true);

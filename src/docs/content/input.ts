@@ -1,13 +1,7 @@
 import type { BlockContent } from "../types";
 
-const RFID_SETUP = [
-  "rc522 = mfrc522(22, 21, 0x28)", "rc522.PCD_Init()",
-  "", "",
-  "def card_present():", "    return rc522.PICC_IsNewCardPresent() and rc522.PICC_ReadCardSerial()",
-  "", "",
-  "def card_uid():", "    return rc522.uid.uidByte[0:rc522.uid.size]",
-  "", "",
-].join("\n");
+/** RFID 준비 2줄 (카드 읽기 함수는 보드 라이브러리 blocklab_rfid 에 있어 import 줄만 붙는다) */
+const RFID_SETUP = ["rc522 = mfrc522(22, 21, 0x28)", "rc522.PCD_Init()", "", ""].join("\n");
 
 const KEYPAD_SETUP = "keypad = KeyPad(26, 25, 17, 16, 27, 14, 12, 13)";
 const IR_SETUP = "ir = irGetCMD(5)";
@@ -17,26 +11,26 @@ const RFID_TIP = "먼저 RFID 준비 블록이 있어야 해요.";
 /** 입력장치 카테고리 블록 설명 (src/devices/specs/input.ts) */
 export const inputContent: Record<string, BlockContent> = {
   dev_rfid_setup: {
-    concept: "RFID 카드 읽개를 I2C(scl·sda 두 선)로 준비해요. 카드나 열쇠고리를 가까이 대면 안에 든 칩의 번호를 무선으로 읽습니다. 카드를 알아내는 card_present()·card_uid() 함수가 함께 만들어지고, 이름은 rc522 로 정해져 있어요.",
+    concept: "RFID 카드 읽개를 I2C(scl·sda 두 선)로 준비해요. 카드나 열쇠고리를 가까이 대면 안에 든 칩의 번호를 무선으로 읽습니다. 읽개 이름은 rc522 로 정해져 있고, 카드를 알아내는 card_present(rc522)·card_uid(rc522) 함수는 보드 라이브러리(blocklab_rfid)에서 가져와요.",
     example: {
       title: "카드를 대면 번호 출력하기",
-      code: `${RFID_SETUP}while True:\n    if card_present():\n        print(card_uid())\n    time.sleep(0.5)`,
+      code: `${RFID_SETUP}while True:\n    if card_present(rc522):\n        print(card_uid(rc522))\n    time.sleep(0.5)`,
     },
     tips: ["mfrc522_i2c.py 등 라이브러리 세 개가 필요해요. 보드에 저장할 때 앱이 알아서 함께 올려 줘요."],
   },
   dev_rfid_present: {
-    concept: "새 카드를 대서 번호까지 읽었는지 참·거짓으로 알려 줘요. 코드로는 card_present() 이고, 만약 블록의 조건 칸에 끼워 씁니다. 참이 된 뒤에 카드 번호 블록으로 번호를 꺼내요.",
+    concept: "새 카드를 대서 번호까지 읽었는지 참·거짓으로 알려 줘요. 코드로는 card_present(rc522) 이고, 만약 블록의 조건 칸에 끼워 씁니다. 참이 된 뒤에 카드 번호 블록으로 번호를 꺼내요.",
     example: {
       title: "카드를 대면 LED 켜기",
-      code: `led = Pin(26, Pin.OUT)\n${RFID_SETUP}while True:\n    if card_present():\n        led.value(1)\n        time.sleep(1)\n        led.value(0)\n    time.sleep(0.1)`,
+      code: `led = Pin(26, Pin.OUT)\n${RFID_SETUP}while True:\n    if card_present(rc522):\n        led.value(1)\n        time.sleep(1)\n        led.value(0)\n    time.sleep(0.1)`,
     },
     tips: [RFID_TIP, "카드를 계속 대고 있어도 처음 한 번만 참이 돼요. 다시 읽으려면 카드를 뗐다가 다시 대요."],
   },
   dev_rfid_uid: {
-    concept: "마지막으로 읽은 카드의 번호를 알려 줘요. 번호는 [12, 34, 56, 78] 처럼 숫자 몇 개가 든 목록(바이트)입니다. 코드로는 card_uid() 이고, 카드마다 번호가 달라서 누구의 카드인지 가려낼 때 써요.",
+    concept: "마지막으로 읽은 카드의 번호를 알려 줘요. 번호는 [12, 34, 56, 78] 처럼 숫자 몇 개가 든 목록(바이트)입니다. 코드로는 card_uid(rc522) 이고, 카드마다 번호가 달라서 누구의 카드인지 가려낼 때 써요.",
     example: {
       title: "카드 번호 출력하기",
-      code: `${RFID_SETUP}while True:\n    if card_present():\n        print(card_uid())\n    time.sleep(0.5)`,
+      code: `${RFID_SETUP}while True:\n    if card_present(rc522):\n        print(card_uid(rc522))\n    time.sleep(0.5)`,
     },
     tips: [RFID_TIP, "먼저 '카드가 있는가' 가 참인지 확인한 다음 번호를 읽어요."],
   },

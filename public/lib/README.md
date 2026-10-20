@@ -6,7 +6,7 @@ ESP32 에 함께 올려야 하는 장치 라이브러리 파일입니다. 블록
 
 ## 출처
 
-Keyestudio KS5020 키트 자료의 `Library.zip` 안 `Library/MicroPython_Library/` 폴더를 내려받은 그대로(줄 끝 CRLF 포함) 옮겼습니다.
+`blocklab_net.py`·`blocklab_rfid.py` 는 블록랩이 직접 만든 도우미 모음입니다 (아래 표). 나머지는 Keyestudio KS5020 키트 자료의 `Library.zip` 안 `Library/MicroPython_Library/` 폴더를 내려받은 그대로(줄 끝 CRLF 포함) 옮겼습니다.
 
 - https://docs.keyestudio.com/projects/KS5020/en/latest/_downloads/aa55cec3f54bf29d6d697256c354e3bd/Library.zip
 - 가져온 날: 2026-10-14
@@ -24,9 +24,13 @@ Keyestudio KS5020 키트 자료의 `Library.zip` 안 `Library/MicroPython_Librar
 | `soft_iic.py` | RFID (`dev_rfid_setup`) | 소프트웨어 I2C (`mfrc522_i2c.py` 가 가져옴) |
 | `keypad.py` | 4×4 키패드 (`dev_keypad_setup`) | 키패드 읽기 (`from keypad import KeyPad`) |
 | `irrecvdata.py` | IR 리모컨 (`dev_ir_setup`) | IR 수신 신호 풀이 (`from irrecvdata import irGetCMD`) |
+| `blocklab_net.py` | WiFi (`dev_wifi_connect`·`dev_wifi_ap`)·웹서버 (`dev_web_setup`) | 블록랩 통신 도우미: `wifi_connect`·`wifi_ap`·`web_start`·`web_accept`·`web_send`·`web_send_file`·`web_page` (`from blocklab_net import *`) |
+| `blocklab_rfid.py` | RFID (`dev_rfid_setup`) | 블록랩 RFID 도우미: `card_present(reader)`·`card_uid(reader)` (`from blocklab_rfid import *`) |
 
 ## 라이선스
 
+- `blocklab_net.py`·`blocklab_rfid.py`: 블록랩 저장소의 코드입니다. 함수 이름 목록은 `src/devices/specs/net.ts`(NET_LIB_NAMES)·
+  `src/devices/specs/input.ts`(RFID_LIB_NAMES)와 같아야 합니다 (`net.test.ts`·`input.test.ts` 가 확인합니다).
 - `gfx.py`: 파일 머리말에 MIT License 라고 적혀 있습니다 (Adafruit GFX 를 옮긴 것, Tony DiCola).
 - `ssd1306.py`: MicroPython 공식 저장소(micropython-lib, MIT 라이선스)의 SSD1306 드라이버입니다(2026-10-14 교체).
   Keyestudio 판은 framebuf 를 상속하지 않아 `line`/`rect` 가 없었고, 그래서 선·네모 블록이 보드에서 AttributeError 를 냈습니다.

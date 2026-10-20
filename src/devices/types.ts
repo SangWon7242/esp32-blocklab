@@ -69,8 +69,8 @@ export type SetupSpec = {
    */
   inPlace?: boolean;
   /**
-   * 준비 줄이 이 준비의 도우미를 부른다 (`ip = wifi_connect("…", "…")`). 생성기는 이 준비 줄을 맨 위가 아니라
-   * 도우미·사용자 함수 정의 뒤(본문 바로 앞)에 둔다 — 정의되기 전에 부르면 NameError 다. 파서는 어디서든 똑같이 접는다.
+   * 준비 줄을 맨 위가 아니라 함수 정의 뒤(본문 바로 앞)에 둔다 (`ip = wifi_connect("…", "…")`·`server = web_start(80)`:
+   * 연결될 때까지 기다리는 줄이라 수업 파일은 함수 정의 다음에 적는다). 파서는 어디서든 똑같이 접는다.
    */
   afterHelpers?: boolean;
   /** 이 장치 변수들의 종류. 메서드 패턴이 objKind 로 맞춘다 */
@@ -81,7 +81,13 @@ export type SetupSpec = {
    */
   provides: (v: Values) => string[];
   pattern: SetupPattern;
+  /** 이 준비가 쓰는 보드 라이브러리 파일 (public/lib 아래 이름). 보드에 저장·실행할 때 함께 올린다 (registry.ts libFilesFor) */
   libFiles?: string[];
+  /**
+   * libFiles 의 라이브러리가 `from … import *` 로 프로그램에 주는 함수 이름 (wifi_connect·card_present …).
+   * 학생 변수·함수가 이 이름을 덮으면 생성 코드가 깨지므로 src/blocks/names.ts 가 막는다 (registry.ts fixedSetupNames).
+   */
+  libNames?: string[];
 };
 
 /** 검사용 값 범위 (계획 2B). label 은 안내 문구에 쓰는 값 이름 */

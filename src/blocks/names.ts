@@ -18,7 +18,8 @@ const BUILTIN_NAMES: readonly string[] = [
 const importedNames = (): string[] =>
   IMPORT_RULES.flatMap((r) => {
     const m = /^(?:from\s+\S+\s+)?import\s+(.+)$/.exec(r.line);
-    return m ? m[1].split(",").map((n) => n.trim()) : [];
+    // `from blocklab_net import *` 의 * 는 이름이 아니다 (그 라이브러리가 주는 이름은 준비 블록의 libNames)
+    return m ? m[1].split(",").map((n) => n.trim()).filter((n) => /^\w+$/.test(n)) : [];
   });
 
 /**
