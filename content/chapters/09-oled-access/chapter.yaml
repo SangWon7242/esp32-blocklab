@@ -14,16 +14,18 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: Micro USB 선으로 노트북과 연결 }
-  - { name: OLED 화면 (128×64), note: "I2C 방식. 핀 4개: GND → − 줄 · VCC → + 줄 · SCL → 22 · SDA → 21" }
-  - { name: RFID RC522 모듈, note: "OLED 와 같은 선을 나눠 써요: SCL → 22 · SDA → 21 · G → − 줄 · V → + 줄" }
+  - { name: OLED 화면 (128×64), note: "I2C 방식. 핀 4개: GND · VCC · SCL(22번) · SDA(21번)" }
+  - { name: RFID RC522 모듈, note: "OLED 와 같은 SCL(22번) · SDA(21번) 두 선을 나눠 써요. 핀 4개: GND · VCC · SDA · SCL" }
   - { name: IC 카드 또는 열쇠고리 태그, note: 8장에서 적어 둔 내 카드 번호도 챙기기 }
-  - { name: 서보 모터, note: "8장과 같아요. 주황 신호선 → 4 · 빨강 → + 줄 · 갈색 → − 줄" }
-  - { name: 브레드보드, note: "+ 줄(5V)·− 줄(GND)을 셋이 함께 쓰고, SCL·SDA 도 세로줄 하나씩에 모아 꽂아요" }
-  - { name: M-F 듀폰선, note: "한쪽은 핀, 한쪽은 구멍인 선 여러 가닥. 보드 핀과 모듈 핀을 모두 브레드보드에 모아 꽂아요" }
+  - { name: 서보 모터, note: "8장과 같아요. 갈색 G(−) · 빨강 V(+) · 주황 S(신호, 4번 핀)" }
+  - { name: F-F 듀폰선 8가닥, board: plus, note: "양쪽 끝이 구멍인 선. RFID 4 · OLED 4, 모듈 핀과 보드 핀에 바로. 서보는 플러그째 꽂아요" }
+  - { name: 브레드보드, board: devkit, note: "+ 줄(3V3)·− 줄(GND)과 세로줄 둘(SDA 줄 · SCL 줄)에 OLED · RFID 선을 모아요" }
+  - { name: M-F 듀폰선 15가닥, board: devkit, note: "보드 3V3 · GND · D21 · D22 → 브레드보드 4, OLED 4 · RFID 4 → 브레드보드, 보드 VIN · GND · D4 → 서보 플러그 3" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-oled-rfid.svg
-  caption: "OLED SCL 과 RFID SCL 은 같은 세로줄 → 22번, OLED SDA 와 RFID SDA 는 같은 세로줄 → 21번. OLED VCC · RFID V · 서보 빨강 → + 줄(5V), OLED GND · RFID G · 서보 갈색 → − 줄(GND). 서보 주황 → 4번"
+  caption: "브레드보드 없이 보드에 바로 꽂아요. RFID → I2C 묶음 첫 줄(8장과 같아요), OLED GND · VCC · SDA · SCL → 보드 위쪽 한 줄 왼쪽의 GND · 5V · SDA · SCL(I2C 묶음과 같은 21 · 22번 선), 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)"
+  captionDevkit: "보드 아래 브레드보드에 모아요. 3V3 → + 줄, GND → − 줄, D21 → 14번 줄(SDA 줄), D22 → 9번 줄(SCL 줄). OLED · RFID 의 VCC → + 줄, GND → − 줄, SDA → 14번 줄, SCL → 9번 줄. 서보 빨강 → VIN · 갈색 → GND · 주황 → D4"
 principle:
   image: images/i2c-shared.svg
   body: |
@@ -111,9 +113,10 @@ parts:
         minutes: 8
         scene:
           image: images/wiring-oled-rfid.svg
-          caption: "지금은 OLED 4선만 새로 꽂아요: GND → − 줄 · VCC → + 줄 · SCL → 22번 줄 · SDA → 21번 줄"
+          caption: "8장의 RFID · 서보는 그대로 두고 OLED 4선만 새로 꽂아요: 보드 위쪽 한 줄 왼쪽의 GND · 5V · SDA(21번) · SCL(22번)"
+          captionDevkit: "OLED 4선: VCC → + 줄 · GND → − 줄 · SDA → 14번 줄 · SCL → 9번 줄. 브레드보드의 3V3 · GND · D21 · D22 선과 RFID 선도 배선 그림처럼"
         body: |
-          **USB 를 뺀 채로** OLED 를 연결해요. GND → − 줄, VCC → + 줄(5V), SCL → 22번, SDA → 21번. 8장의 RFID·서보 배선이 남아 있으면 그대로 두고, SCL·SDA 는 RFID 와 **같은 세로줄**에 꽂아요.
+          **USB 를 뺀 채로** OLED 를 연결해요. SCL → `22`번, SDA → `21`번, VCC · GND 는 전원으로 가요. OLED 와 RFID 는 **같은 21 · 22번 두 선**을 나눠 써요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요.
 
           화면도 혼자서는 그림을 못 그려서 **라이브러리 파일**이 보드에 있어야 해요. 오늘 쓰는 건 모두 4개(RFID 3개 + `ssd1306.py`)예요. **보드에 저장**이나 **실행**을 누르면 블록랩이 코드의 import 줄을 보고 필요한 파일을 함께 올려 줘요.
 
