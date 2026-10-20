@@ -3,7 +3,7 @@ import time
 
 tilt = Pin(14, Pin.IN)
 led = Pin(26, Pin.OUT)
-buzzer = Pin(15, Pin.OUT)  # 능동 부저
+buzzer = Pin(25, Pin.OUT)  # 능동 부저
 
 while True:
     print(tilt.value())

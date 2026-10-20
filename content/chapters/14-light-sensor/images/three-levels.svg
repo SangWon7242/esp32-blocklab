@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="ls-levels-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title id="ls-levels-title">센서 값 막대 0~4095 를 세 구간으로 나눈 그림. 0~999 는 밝음(LED 끄기), 1000~2500 은 보통(LED 한 번 깜빡), 2501~4095 는 어두움(LED 켜기). 이 챕터의 모듈은 가릴수록 값이 커진다. 경계 숫자 1000 과 2500 은 교실에서 잰 값으로 정한다</title>
+  <title id="ls-levels-title">센서 값 막대 0~4095 를 세 구간으로 나눈 그림. 0~999 는 밝음(LED 끄기), 1000~2500 은 보통(LED 한 번 깜빡), 2501~4095 는 어두움(LED 켜기). 이 챕터의 배선은 가릴수록 값이 커진다. 경계 숫자 1000 과 2500 은 교실에서 잰 값으로 정한다</title>
   <text x="320" y="36" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor" stroke="none">센서 값을 세 구간으로 나누기</text>
   <!-- 구간 아이콘 -->
   <circle cx="124" cy="84" r="13" fill="#f4af18" stroke="none"/>
@@ -29,7 +29,7 @@
   </g>
   <!-- 가릴수록 값이 커져요 -->
   <path d="M120 222 H560 M550 216 L560 222 L550 228" stroke-width="2"/>
-  <text x="340" y="244" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">가릴수록 값이 커져요 (이 챕터의 모듈)</text>
+  <text x="340" y="244" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.75" stroke="none">가릴수록 값이 커져요 (이 챕터의 배선)</text>
   <!-- 할 일 -->
   <g stroke-width="1.8">
     <rect x="66" y="262" width="115" height="62" rx="12" fill="var(--card)"/>
