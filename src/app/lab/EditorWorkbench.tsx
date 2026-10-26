@@ -23,9 +23,9 @@ import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { DeviceBar } from "./DeviceBar";
 import { blockTypesIn } from "./deviceConsole";
-import { useDevice } from "./useDevice";
+import { useDevice, type RunEndResult } from "./useDevice";
 import { ProblemsPanel } from "./ProblemsPanel";
-import { blockAtLine, highlightFor, useLint, type WorkspaceSnapshot } from "./useLint";
+import { blockAtLine, highlightFor, markRange, useLint, type WorkspaceSnapshot } from "./useLint";
 import { useIsNarrow } from "./useViewport";
 
 /** 넓은 화면에서 어느 패널을 펼쳐 두었는지. 좁은 화면에서는 블록·코드 대신 지금 기준(source) 쪽만 보인다 */
@@ -62,6 +62,11 @@ export type EditorWorkbenchHandle = {
   getSaveProgram(): SaveProgram;
   /** 예시 프로그램(코드)을 블록·코드 패널·검사에 함께 싣는다 (?example= 이 화면 안에서 바뀔 때) */
   openExample(code: string): void;
+  /**
+   * 편집기 전체를 이 코드로 바꾼다 (lib-v1.1.0, 코치 제안 「적용」). 블록으로 바뀌면 블록도 함께 바꾸고 지금 모드(블록·코드)를 지킨다.
+   * 블록으로 바뀌지 않으면(문법 오류) 코드 모드로 글을 그대로 둔다. 바꾼 뒤의 저장용 프로그램을 돌려준다
+   */
+  replaceCode(code: string): SaveProgram;
 };
 
 export type EditorWorkbenchProps = {
@@ -87,10 +92,18 @@ export type EditorWorkbenchProps = {
   assemblyMode?: boolean;
   /** 코드·블록이 바뀔 때 */
   onProgram?(program: EditorProgram): void;
-  /** 실행이 끝날 때: 결과와 그 실행의 보드 출력(stdout) */
-  onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
+  /** 실행이 끝날 때: 결과(오류면 Traceback)와 그 실행의 보드 출력(stdout), 실행한 코드 */
+  onRunEnd?(result: RunEndResult, output: string, code: string): void;
+  /** 저장용 프로그램(programForSave)이 바뀔 때 (lib-v1.1.0, 코치 편집기: 문법 오류 여부까지 넘긴다). 처음 실린 것도 한 번 알린다 */
+  onSaveProgram?(program: SaveProgram): void;
   /** 머리줄 보드 버튼 앞에 둘 단추 (「작품으로 저장」 — lib-v1.0.3) */
   actions?: ReactNode;
+  /** 머리줄 바로 다음에 둘 띠 (lib-v1.1.0, 코치 제안 상자) */
+  banner?: ReactNode;
+  /** 코드 칸에서 배경을 칠할 줄 범위 (1부터, 지금 코드 패널의 줄 기준. lib-v1.1.0 코치 강조) */
+  markLines?: { start: number; end: number } | null;
+  /** 보기만 한다 (lib-v1.1.0): 코드·블록 편집과 보드 단추를 막는다. 블록·코드 탭은 오갈 수 있다 */
+  readOnly?: boolean;
   ref?: Ref<EditorWorkbenchHandle>;
 };
 
@@ -101,7 +114,9 @@ export type EditorWorkbenchProps = {
 /** 설계 조립에서 빼는 검사 규칙 */
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
-export function EditorWorkbench({ initialCode, initialExample, initialBlocks, initialSource, fake, hideSave, assemblyMode, onProgram, onRunEnd, actions, ref }: EditorWorkbenchProps) {
+export function EditorWorkbench({
+  initialCode, initialExample, initialBlocks, initialSource, fake, hideSave, assemblyMode, onProgram, onRunEnd, onSaveProgram, actions, banner, markLines, readOnly, ref,
+}: EditorWorkbenchProps) {
   /** 핸들의 openExample 이 최신 openExample 을 부르게 (useImperativeHandle 의존성에 넣지 않으려고) */
   const openExampleRef = useRef<(code: string) => void>(() => undefined);
   const [state, dispatch] = useReducer(
@@ -223,7 +238,12 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
     setPanels((p) => (p.bottom ? p : { ...p, bottom: true }));
   }, [issues]);
 
-  const highlightLines = useMemo(() => highlightFor(issues, focus.lines), [issues, focus.lines]);
+  const markStart = markLines?.start ?? null;
+  const markEnd = markLines?.end ?? null;
+  const highlightLines = useMemo(
+    () => [...markRange(markStart, markEnd), ...highlightFor(issues, focus.lines)],
+    [issues, focus.lines, markStart, markEnd],
+  );
 
   /**
    * 블록을 선택하고(있으면) 그 블록의 코드 줄과 line 을 강조한다. 코드 모드에서는 작업판이 오버레이 아래에 숨어 있으므로
@@ -265,6 +285,11 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
   useEffect(() => {
     onProgramRef.current?.({ code: state.code, blocksJson: state.blocks });
   }, [state.code, state.blocks]);
+  const onSaveProgramRef = useRef(onSaveProgram);
+  onSaveProgramRef.current = onSaveProgram;
+  useEffect(() => {
+    onSaveProgramRef.current?.(programForSave({ source: state.source, code: state.code, blocks: state.blocks, parseError: state.parseError, unparsed: [], map: null }));
+  }, [state.source, state.code, state.blocks, state.parseError]);
 
   const device = useDevice({
     fake,
@@ -278,7 +303,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
       return { code: current.code, blockTypes: blockTypesIn(current.blocks) };
     },
     onErrorLine: (code, line) => setErrorLine({ code, line }),
-    onRunEnd: (result, output) => onRunEndRef.current?.(result, output),
+    onRunEnd: (result, output, code) => onRunEndRef.current?.(result, output, code),
     showConsole: () => {
       setPanels((p) => (p.bottom ? p : { ...p, bottom: true }));
       setBottomTab("console");
@@ -329,6 +354,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
     },
     getSaveProgram: () => programForSave(flushPendingCode()),
     openExample: (code: string) => openExampleRef.current(code),
+    replaceCode: (code: string) => replaceCodeRef.current(code),
   }), [flushPendingCode]);
 
   const switchSource = (source: Source) => {
@@ -379,6 +405,25 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
 
   openExampleRef.current = openExample;
 
+  /** 핸들의 replaceCode (코치 제안 적용). openExample 과 달리 실패해도 코드 모드로 글을 싣고, 작업판 코드로 덮지 않는다 */
+  const replaceCodeRef = useRef<(code: string) => SaveProgram>(() => ({ code: "", blocksJson: null, unconvertible: false }));
+  replaceCodeRef.current = (code: string) => {
+    window.clearTimeout(debounceRef.current);
+    pendingCodeRef.current = null;
+    const action = { type: "replaceCode", code } as const;
+    const next = editorReducer(stateRef.current, action);
+    sourceRef.current = next.source;
+    stateRef.current = next;
+    dispatch(action);
+    // 블록 모드: 작업판에 바로 올린다 (코드 모드는 위 effect 가 state.blocks 를 보고 올린다). load 는 변경 이벤트를 내지 않아
+    // 코드 패널은 제안 코드 글 그대로다 (처음 열 때와 같은 규칙)
+    if (next.source === "blocks" && next.blocks) {
+      blocklyRef.current?.load(next.blocks, { keepScroll: true });
+      refreshMap();
+    }
+    return programForSave(next);
+  };
+
   // 처음 한 번: 블록 사전에서 넘어온 예시 프로그램을 싣는다
   useEffect(() => {
     if (initialExample !== undefined) openExample(initialExample);
@@ -404,7 +449,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
         </span>
         <div className="ml-auto flex items-center gap-2">
           {actions}
-          <DeviceBar
+          {!readOnly && <DeviceBar
             status={device.status}
             canToggleConnection={device.canToggleConnection}
             canRun={device.canRun}
@@ -416,9 +461,10 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
             onRun={device.run}
             onSave={device.save}
             onStop={device.stop}
-          />
+          />}
         </div>
       </div>
+      {banner}
 
       <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
         <ResizablePanel
@@ -443,7 +489,11 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
             )}
             <div className="relative min-h-0 flex-1">
               <BlocklyWorkspace ref={blocklyRef} onChange={onBlocksChange} onSelect={onBlockSelect} onWarningOpen={onWarningOpen} onDocRequest={setDocRequest} />
-              {codeMode && (
+              {readOnly ? (
+                <div className="pointer-events-auto absolute inset-0 flex items-start justify-center bg-background/20 pt-6" data-testid="blocks-readonly">
+                  <Badge variant="secondary">보기만 할 수 있어요</Badge>
+                </div>
+              ) : codeMode && (
                 <div className="pointer-events-auto absolute inset-0 flex items-start justify-center bg-background/40 pt-6" data-testid="blocks-overlay">
                   <Badge variant="secondary">코드 편집 중 — 블록은 코드에 따라 갱신됩니다</Badge>
                 </div>
@@ -488,7 +538,7 @@ export function EditorWorkbench({ initialCode, initialExample, initialBlocks, in
             <div className="min-h-0 flex-1">
               <CodePanel
                 value={state.code}
-                readOnly={!codeMode}
+                readOnly={!codeMode || readOnly === true}
                 onChange={onCodeChange}
                 errorLine={state.parseError?.line ?? null}
                 highlightLines={highlightLines}

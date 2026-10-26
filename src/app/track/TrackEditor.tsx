@@ -39,7 +39,7 @@ export function TrackEditor({ initialCode, initialBlocks, assemblyMode, onProgra
   const { fakeBoard: fake } = useSettings();
   const readOnly = useReadOnly();
   const inner = useRef<EditorWorkbenchHandle>(null);
-  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), getSaveProgram: () => inner.current!.getSaveProgram(), openExample: (code: string) => inner.current?.openExample(code) }), []);
+  useImperativeHandle(ref, () => ({ getProgram: () => inner.current!.getProgram(), getSaveProgram: () => inner.current!.getSaveProgram(), openExample: (code: string) => inner.current?.openExample(code), replaceCode: (code: string) => inner.current!.replaceCode(code) }), []);
 
   const onProgramRef = useRef(onProgram);
   onProgramRef.current = onProgram;

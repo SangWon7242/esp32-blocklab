@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { DeviceError, FakeDevice, WebSerialDevice, type Device, type DeviceStatus } from "@/device";
+import { DeviceError, FakeDevice, WebSerialDevice, type Device, type DeviceStatus, type RunError } from "@/device";
 import {
   appendDeviceRow, appendDeviceText, EMPTY_DEVICE_CONSOLE, tracebackRow, type DeviceConsole, type DeviceKind, type DeviceRow,
 } from "./deviceConsole";
 import { saveToBoard, syncLibs, type DeviceProgram } from "./saveToBoard";
 
 export type { DeviceProgram };
+
+/** 실행 결과 (onRunEnd). ok 는 오류도 멈춤도 없이 끝났을 때만 true. error 는 보드 Traceback (lib-v1.1.0) */
+export type RunEndResult = { ok: boolean; stopped: boolean; error?: RunError };
 
 /** 화면에 보이는 보드 상태. 저장 흐름(라이브러리 확인·올리기·main.py·다시 시작) 내내 "saving" 이다 */
 export type DeviceDisplayStatus = DeviceStatus;
@@ -23,8 +26,11 @@ export type UseDeviceOptions = {
   onErrorLine(code: string, line: number): void;
   /** 보드 행이 생길 일을 시작할 때 (하단 콘솔을 펼친다) */
   showConsole(): void;
-  /** 실행이 끝날 때 (트랙: 실행 단계 완료, outputIncludes 판정용 출력). 멈춤·오류도 알린다 */
-  onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
+  /**
+   * 실행이 끝날 때 (트랙: 실행 단계 완료, outputIncludes 판정용 출력). 멈춤·오류도 알린다.
+   * code 는 그 실행에 보낸 코드 (lib-v1.1.0, 코치 편집기의 실행 증거)
+   */
+  onRunEnd?(result: RunEndResult, output: string, code: string): void;
 };
 
 /** stdout 을 화면에 붙이는 것은 한 프레임에 한 번. 숨은 탭처럼 프레임이 오지 않아도 이만큼 쌓이면 바로 붙인다 */
@@ -167,7 +173,11 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
         pushRow(tracebackRow(result.error));
         if (result.error.line !== null) optsRef.current.onErrorLine(code, result.error.line);
       }
-      optsRef.current.onRunEnd?.({ ok: result.ok && !result.stopped, stopped: result.stopped === true }, runOutput.current);
+      optsRef.current.onRunEnd?.(
+        { ok: result.ok && !result.stopped, stopped: result.stopped === true, ...(result.error ? { error: result.error } : {}) },
+        runOutput.current,
+        code,
+      );
     } catch (e) {
       report(e);
     } finally {

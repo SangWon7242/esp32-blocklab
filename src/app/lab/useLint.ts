@@ -92,6 +92,22 @@ export function highlightFor(issues: Issue[], focusLines: number[]): LineHighlig
   return out;
 }
 
+/** 강조 줄 범위 한도 (잘못 넘긴 아주 큰 범위로 장식이 수만 개 생기지 않게) */
+const MAX_MARK_LINES = 2000;
+
+/**
+ * 바깥(코치)이 고른 줄 범위 → "mark" 장식 (lib-v1.1.0). 1부터, start > end 면 바꿔 읽는다.
+ * 문서보다 긴 줄은 코드 패널이 건너뛴다
+ */
+export function markRange(start: number | null, end: number | null): LineHighlight[] {
+  if (start === null || end === null || !Number.isFinite(start) || !Number.isFinite(end)) return [];
+  const from = Math.max(1, Math.floor(Math.min(start, end)));
+  const to = Math.min(Math.floor(Math.max(start, end)), from + MAX_MARK_LINES - 1);
+  const out: LineHighlight[] = [];
+  for (let line = from; line <= to; line++) out.push({ line, kind: "mark" });
+  return out;
+}
+
 /** 강조할 대상: 블록(그 블록의 줄 전부)과/또는 줄 하나 */
 export type FocusTarget = { blockId?: string; line?: number };
 

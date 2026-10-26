@@ -14,14 +14,17 @@ type Props = {
   onChange: (code: string) => void;
   /** 1-based. null 이면 강조 없음 */
   errorLine?: number | null;
-  /** 여러 줄 장식 (1-based). 문제 줄은 수준별 색, focus 는 지금 살펴보는 줄(파란 띠 + 왼쪽 선) */
+  /**
+   * 여러 줄 장식 (1-based). 문제 줄은 수준별 색, focus 는 지금 살펴보는 줄(파란 띠 + 왼쪽 선),
+   * mark 는 바깥(코치)이 고른 줄 범위(보라 띠 + 왼쪽 선, lib-v1.1.0)
+   */
   highlightLines?: LineHighlight[];
   /** 줄 번호를 누르면 그 줄 (1-based) */
   onLineClick?: (line: number) => void;
   className?: string;
 };
 
-export type HighlightKind = "error" | "warning" | "info" | "focus";
+export type HighlightKind = "error" | "warning" | "info" | "focus" | "mark";
 export type LineHighlight = { line: number; kind: HighlightKind };
 
 const NO_HIGHLIGHTS: LineHighlight[] = [];
@@ -68,6 +71,8 @@ const theme = EditorView.theme({
   ".cm-lint-info": { backgroundColor: "rgba(148, 163, 184, 0.12)" },
   ".cm-lint-warning": { backgroundColor: "rgba(245, 158, 11, 0.12)" },
   ".cm-lint-error": { backgroundColor: "rgba(239, 68, 68, 0.12)" },
+  // 코치가 고른 줄 범위. 살펴보는 줄(focus)이 같은 줄에 붙으면 focus 가 앞선다 (아래에 있어서)
+  ".cm-line.cm-lint-mark": { backgroundColor: "rgba(139, 92, 246, 0.16)", boxShadow: "inset 3px 0 0 #8b5cf6" },
   // 강조 줄은 문제 줄 색보다 앞선다 (같은 줄에 둘 다 붙을 수 있다)
   ".cm-line.cm-lint-focus": { backgroundColor: "rgba(59, 130, 246, 0.15)", boxShadow: "inset 3px 0 0 #3b82f6" },
   ".cm-lineNumbers .cm-gutterElement": { cursor: "pointer" },
@@ -162,7 +167,8 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
   }, [fontSize]);
 
   // 새로 강조한 줄이 화면 밖이면 보이게 스크롤한다
-  const firstFocus = highlightLines.find((h) => h.kind === "focus")?.line ?? null;
+  // 살펴보는 줄이 없으면 코치가 고른 범위의 첫 줄
+  const firstFocus = (highlightLines.find((h) => h.kind === "focus") ?? highlightLines.find((h) => h.kind === "mark"))?.line ?? null;
   useEffect(() => {
     const view = viewRef.current;
     if (!view || firstFocus == null || firstFocus > view.state.doc.lines) return;

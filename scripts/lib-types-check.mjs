@@ -54,7 +54,8 @@ try {
   writeFileSync(
     path.join(hub, "consumer.ts"),
     `import type { StepRecord, Progress, Chapter, Step, StepType, LoadedChapter, ChapterSnapshot, HostProps, LabViewProps, LabInitialProgram, BoardId } from "./vendor/blocklab";
-import { BOARD_LABELS, BoardSelect, setBoardChoice, useBoardChoice } from "./vendor/blocklab";
+import { BOARD_LABELS, BoardSelect, setBoardChoice, useBoardChoice, CoachEditorView } from "./vendor/blocklab";
+import type { CoachEditorViewProps, CoachProgram, CoachProposal, CoachRunEvent } from "./vendor/blocklab";
 type IsAny<T> = 0 extends 1 & T ? true : false;
 type NotAny<T> = IsAny<T> extends true ? false : true;
 const checks: [NotAny<StepRecord>, NotAny<Progress>, NotAny<Chapter>, NotAny<Step>, NotAny<StepType>, NotAny<LoadedChapter>, NotAny<ChapterSnapshot>, NotAny<HostProps["store"]>, NotAny<StepRecord["status"]>] =
@@ -88,7 +89,25 @@ const badBoard: BoardId = "uno";
 const boardOfFirst = (c: Chapter): BoardId | undefined => c.materials?.[0]?.board;
 const devkitCaption = (c: Chapter): string | undefined => c.wiring?.captionDevkit;
 const boardLabel: string = BOARD_LABELS.devkit;
-export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, badBoard, boardOfFirst, devkitCaption, boardLabel };
+// lib-v1.1.0: 코치 편집기 (계획 14 계약)
+const coachChecks: [NotAny<CoachEditorViewProps>, NotAny<CoachProgram>, NotAny<CoachProposal>, NotAny<CoachRunEvent>, NotAny<typeof CoachEditorView>,
+  NotAny<NonNullable<CoachEditorViewProps["onProgramChange"]>>, NotAny<NonNullable<CoachEditorViewProps["onProposalDecision"]>>, NotAny<CoachRunEvent["source"]>] =
+  [true, true, true, true, true, true, true, true];
+const coachProps: CoachEditorViewProps = {
+  initialProgram: { code: "print(1)", blocksJson: null },
+  onProgramChange: (p: CoachProgram) => void [p.code.length, p.parseError, p.blocksJson],
+  proposal: { id: "p1", code: "print(2)", note: "한 줄" },
+  onProposalDecision: (id: string, accepted: boolean, p: CoachProgram) => void [id, accepted, p.code],
+  onRunEnd: (e: CoachRunEvent) => void [e.source === "fake", e.ok, e.error?.line, e.error?.message, e.output, e.code, e.at],
+  highlightLines: { start: 1, end: 2 },
+  readOnly: false,
+};
+const coachElement = CoachEditorView(coachProps);
+// @ts-expect-error source 는 board·fake 만
+const badSource: CoachRunEvent = { source: "usb", ok: true, output: "", code: "", at: "" };
+// @ts-expect-error proposal 은 id 가 있어야 한다
+const badProposal: CoachEditorViewProps = { proposal: { code: "" } };
+export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, badBoard, boardOfFirst, devkitCaption, boardLabel, coachChecks, coachProps, coachElement, badSource, badProposal };
 `,
   );
   tscIn(hub, "zod 없는 폴더");

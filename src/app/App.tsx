@@ -20,6 +20,8 @@ const StepPage = lazy(() => import("./track/StepPage").then((m) => ({ default: m
 // 블록 사전은 카탈로그를 만들 때 Blockly 를 쓰므로 열 때 받는다
 const DocsPage = lazy(() => import("./docs/DocsPage").then((m) => ({ default: m.DocsPage })));
 const SettingsPage = lazy(() => import("./settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+// 확인용 숨은 화면 (lib-v1.1.0 코치 편집기, 메뉴에 없다. e2e 가 쓴다)
+const CoachEditorDemoPage = lazy(() => import("./pages/CoachEditorDemoPage").then((m) => ({ default: m.CoachEditorDemoPage })));
 
 const navItems = [
   { to: "/lab", label: "자유 코딩", icon: Blocks },
@@ -141,6 +143,7 @@ function Screens() {
           <Route path="/track/:chapter/:step" element={<StepRoute />} />
           <Route path="/docs" element={<DocsRoute />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/coach-editor-demo" element={<CoachEditorDemoPage />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

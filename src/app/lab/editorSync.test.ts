@@ -156,3 +156,24 @@ describe("programForSave (작품으로 저장)", () => {
     expect(labStart({ initialProgram: { code: BROKEN, blocksJson: old } })).toEqual({ initialCode: BROKEN, initialSource: "code" });
   });
 });
+
+describe("replaceCode (lib-v1.1.0 코치 제안 적용)", () => {
+  it("블록으로 바뀌면 지금 모드를 지키고 코드·블록을 함께 바꾼다", () => {
+    const blocks = editorReducer(initialEditorState("print(1)\n"), { type: "replaceCode", code: "print(2)\n" });
+    expect(blocks.source).toBe("blocks");
+    expect(blocks.code).toBe("print(2)\n");
+    expect(blocks.parseError).toBeNull();
+    const code = editorReducer(initialEditorState("print(1)\n", "code"), { type: "replaceCode", code: "print(3)\n" });
+    expect(code.source).toBe("code");
+    expect(code.code).toBe("print(3)\n");
+    expect(JSON.stringify(code.blocks)).toContain("3");
+  });
+
+  it("블록으로 바뀌지 않으면 코드 모드로 글을 그대로 두고 오류를 보인다", () => {
+    const next = editorReducer(initialEditorState("print(1)\n"), { type: "replaceCode", code: "if x\n" });
+    expect(next.source).toBe("code");
+    expect(next.code).toBe("if x\n");
+    expect(next.parseError).not.toBeNull();
+    expect(programForSave(next)).toEqual({ code: "if x\n", blocksJson: null, unconvertible: true });
+  });
+});

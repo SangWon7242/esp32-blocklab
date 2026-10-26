@@ -23,6 +23,11 @@ export type EditorAction =
   | { type: "codeChanged"; code: string }
   | { type: "switchSource"; source: Source }
   | { type: "loadCode"; code: string }
+  /**
+   * 편집기 전체를 바깥 코드로 바꾼다 (lib-v1.1.0, 코치 제안 적용). 블록으로 바뀌면 지금 모드를 지키고,
+   * 바뀌지 않으면 코드 모드로 글을 그대로 두고 오류 줄을 보인다 (블록은 마지막 성공 것이 남는다)
+   */
+  | { type: "replaceCode"; code: string }
   /** 작업판에 블록을 다시 올린 뒤(전환·코드 모드 재로드) 그 작업판에서 잰 지도 */
   | { type: "mapUpdated"; map: LineMap };
 
@@ -67,6 +72,11 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     }
     case "loadCode":
       return fromCode(action.code, { ...state, source: "blocks" });
+    case "replaceCode": {
+      const r = codeToBlocks(action.code);
+      if (!r.ok) return { ...state, source: "code", code: action.code, parseError: r.error, map: null };
+      return { ...state, code: action.code, blocks: r.json, unparsed: r.unparsed, parseError: null, map: null };
+    }
     case "mapUpdated":
       return { ...state, map: action.map };
   }

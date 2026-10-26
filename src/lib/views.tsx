@@ -1,4 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
+import type { CoachEditorViewProps } from "@/app/coach/types";
 import type { TrackId } from "@/track/schema";
 
 /*
@@ -13,6 +14,9 @@ const TrackPage = lazy(() => import("@/app/track/TrackPage").then((m) => ({ defa
 const ChapterPage = lazy(() => import("@/app/track/ChapterPage").then((m) => ({ default: m.ChapterPage })));
 const StepPage = lazy(() => import("@/app/track/StepPage").then((m) => ({ default: m.StepPage })));
 const LabPage = lazy(() => import("@/app/lab/LabPage").then((m) => ({ default: m.LabPage })));
+const CoachEditor = lazy(() => import("@/app/coach/CoachEditor").then((m) => ({ default: m.CoachEditor })));
+
+export type { CoachEditorViewProps, CoachProgram, CoachProposal, CoachRunEvent } from "@/app/coach/types";
 
 export type TrackListViewProps = {
   /** 호스트가 주소(?track=)에서 읽은 탭. 없거나 모르는 값이면 마지막으로 본 탭(없으면 센서 트랙) */
@@ -78,6 +82,19 @@ export function LabView(props: LabViewProps = {}) {
   return (
     <Loading>
       <LabPage {...props} />
+    </Loading>
+  );
+}
+
+/**
+ * 코치 편집기 (lib-v1.1.0, 계획 14). 자유 코딩과 같은 편집기·보드 연결에 작품 저장·예제 단추는 없고,
+ * 프로그램 변경(1초 디바운스)·제안 차이 상자(적용/닫기)·실행 증거·줄 강조를 호스트와 주고받는다.
+ * BlocklabProvider 안에서 쓰고(settings.fakeBoard 를 따른다), 부모가 높이를 준다(h-full 사슬).
+ */
+export function CoachEditorView(props: CoachEditorViewProps) {
+  return (
+    <Loading>
+      <CoachEditor {...props} />
     </Loading>
   );
 }
