@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import { HostLink, useHost, withQuery } from "@/host/HostContext";
+import { HostLink, useHost, useHostSlots, withQuery } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { figureCaption, materialsForBoard } from "@/track/board";
 import { getChapter, loadChapters, type LoadedChapter } from "@/track/content";
@@ -49,6 +49,7 @@ type ProgressChapters = Parameters<typeof PrerequisiteList>[0]["progressChapters
  */
 export function ChapterPage({ chapterId }: { chapterId: string }) {
   const { nav, mode } = useHost();
+  const slots = useHostSlots();
   const chapter = getChapter(chapterId);
   const progress = useProgress();
   const records = useChapterRecords(chapterId);
@@ -72,7 +73,9 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
     <div className="flex h-full flex-col overflow-y-auto bg-background text-foreground lg:overflow-hidden" data-testid="chapter-page">
       <header className={cn("shrink-0 border-b py-3 lg:py-4", PAGE_GUTTER)} data-testid="chapter-header">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <Button variant="ghost" asChild className="-ml-3 h-11 px-3 text-sm">
+          {/* 호스트 끼움 자리 (lib-v1.1.1): 허브의 학생 메뉴 단추 등. 있으면 「챕터 목록」 의 왼쪽 당김(-ml-3)을 푼다 */}
+          {slots.headerStart && <div className="-ml-1 flex shrink-0 items-center" data-slot="blocklab-header-start">{slots.headerStart}</div>}
+          <Button variant="ghost" asChild className={cn("h-11 px-3 text-sm", !slots.headerStart && "-ml-3")}>
             <HostLink to={withQuery(nav.href.track(), { track: chapter.track })}><ArrowLeft className="size-4" />챕터 목록</HostLink>
           </Button>
           <div className="flex flex-wrap items-center gap-1.5" data-testid="chapter-track">
@@ -85,6 +88,10 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
           {/* 수업 보드 (배선이 있는 챕터만): 고르면 배선 그림·설명·준비물이 그 보드로 바뀌고 모든 챕터에 적용된다.
               뒤로 가기 줄의 오른쪽에 두어 머리띠 높이를 늘리지 않는다 (첫 화면 단계 카드 수). 좁으면 다음 줄로 */}
           {chapterShowsBoardSelect(chapter) && <BoardSelect className="sm:ml-auto" />}
+          {/* 호스트 끼움 자리 (lib-v1.1.1): 저장 상태 등. 줄 끝에 붙는다 */}
+          {slots.headerEnd && (
+            <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2" data-slot="blocklab-header-end">{slots.headerEnd}</div>
+          )}
         </div>
 
         <div className="mt-1 flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-8">

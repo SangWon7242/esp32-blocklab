@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { findDoc } from "@/docs/catalog";
+import { useHostSlots } from "@/host/HostContext";
 import { useSettings } from "../settings/settings";
 import { EditorWorkbench, type EditorWorkbenchHandle } from "./EditorWorkbench";
 import { labStart, type LabInitialProgram } from "./labStart";
@@ -25,6 +26,7 @@ type Props = {
 /** 자유 코딩 화면 */
 export function LabPage({ exampleType, codeRef, onExampleLoaded, initialProgram }: Props = {}) {
   const { fakeBoard } = useSettings();
+  const slots = useHostSlots();
   const workbench = useRef<EditorWorkbenchHandle>(null);
   const mounted = useRef(false);
   const onLoaded = useRef(onExampleLoaded);
@@ -62,6 +64,9 @@ export function LabPage({ exampleType, codeRef, onExampleLoaded, initialProgram 
       fake={fakeBoard}
       // 「작품으로 저장」: 호스트 onSaveProject 가 없거나(체험판) 열람 모드면 단추가 그려지지 않는다
       actions={actions}
+      // 호스트 끼움 자리 (lib-v1.1.1): 편집기 툴바 맨 앞·맨 끝
+      toolbarStart={slots.headerStart}
+      toolbarEnd={slots.headerEnd}
     />
   );
 }

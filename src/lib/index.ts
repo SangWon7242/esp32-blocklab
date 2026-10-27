@@ -17,6 +17,7 @@ export {
   type AiClient,
   type HostMode,
   type HostProps,
+  type HostSlots,
   type HostUser,
   type NavigateOptions,
   type Navigator,

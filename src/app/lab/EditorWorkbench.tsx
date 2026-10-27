@@ -98,6 +98,9 @@ export type EditorWorkbenchProps = {
   onSaveProgram?(program: SaveProgram): void;
   /** 머리줄 보드 버튼 앞에 둘 단추 (「작품으로 저장」 — lib-v1.0.3) */
   actions?: ReactNode;
+  /** 머리줄 맨 앞·맨 끝에 둘 것 (lib-v1.1.1, 자유 코딩 화면이 호스트 끼움 자리를 넘긴다) */
+  toolbarStart?: ReactNode;
+  toolbarEnd?: ReactNode;
   /** 머리줄 바로 다음에 둘 띠 (lib-v1.1.0, 코치 제안 상자) */
   banner?: ReactNode;
   /** 코드 칸에서 배경을 칠할 줄 범위 (1부터, 지금 코드 패널의 줄 기준. lib-v1.1.0 코치 강조) */
@@ -115,7 +118,7 @@ export type EditorWorkbenchProps = {
 const ASSEMBLY_IGNORED_RULES = ["orphan"] as const;
 
 export function EditorWorkbench({
-  initialCode, initialExample, initialBlocks, initialSource, fake, hideSave, assemblyMode, onProgram, onRunEnd, onSaveProgram, actions, banner, markLines, readOnly, ref,
+  initialCode, initialExample, initialBlocks, initialSource, fake, hideSave, assemblyMode, onProgram, onRunEnd, onSaveProgram, actions, toolbarStart, toolbarEnd, banner, markLines, readOnly, ref,
 }: EditorWorkbenchProps) {
   /** 핸들의 openExample 이 최신 openExample 을 부르게 (useImperativeHandle 의존성에 넣지 않으려고) */
   const openExampleRef = useRef<(code: string) => void>(() => undefined);
@@ -436,7 +439,8 @@ export function EditorWorkbench({
 
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
-      <div className="flex h-12 shrink-0 items-center gap-3 overflow-hidden border-b px-3 whitespace-nowrap">
+      <div className={cn("flex h-12 shrink-0 items-center overflow-hidden border-b px-3 whitespace-nowrap", toolbarStart || toolbarEnd ? "gap-2 sm:gap-3" : "gap-3")}>
+        {toolbarStart && <div className="flex shrink-0 items-center gap-1" data-slot="blocklab-header-start">{toolbarStart}</div>}
         <Tabs value={state.source} onValueChange={(v) => switchSource(v as Source)}>
           <TabsList>
             {/* 아주 좁은 화면(sm 미만)은 아이콘만 — 머리줄에 보드 단추와 「작품으로 저장」이 다 들어가게. 이름은 화면 읽기 프로그램에 남는다 */}
@@ -462,6 +466,7 @@ export function EditorWorkbench({
             onSave={device.save}
             onStop={device.stop}
           />}
+          {toolbarEnd && <div className="flex shrink-0 items-center gap-2" data-slot="blocklab-header-end">{toolbarEnd}</div>}
         </div>
       </div>
       {banner}

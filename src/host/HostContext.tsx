@@ -32,6 +32,13 @@ export type Navigator = {
   };
   go(href: string, opts?: NavigateOptions): void;
 };
+/**
+ * 머리 줄 끼움 자리 (lib-v1.1.1). 호스트가 제 단추(학생 메뉴·저장 상태 등)를 블록랩 화면 머리 줄에 넣는다 —
+ * 허브가 화면 위에 따로 줄을 두지 않아도 되게. 챕터 화면은 「챕터 목록」 줄, 단계 화면은 머리 줄, 자유 코딩은 편집기
+ * 툴바의 맨 앞(headerStart)·맨 끝(headerEnd)에 그린다. 없으면 아무것도 그리지 않는다 (체험판은 비워 둔다).
+ * 좁은 화면(390px)에서도 한 줄에 들도록 아이콘 크기로 넣는다
+ */
+export type HostSlots = { headerStart?: ReactNode; headerEnd?: ReactNode };
 export type HostProps = {
   user: HostUser | null;
   mode: HostMode;
@@ -48,6 +55,8 @@ export type HostProps = {
    * 호스트는 dist-lib/media/ 의 파일을 이 주소에서 서빙한다. 끝 "/" 는 없어도 붙인다
    */
   blocklyMediaPath?: string;
+  /** 머리 줄 끼움 자리 (lib-v1.1.1, 선택) */
+  slots?: HostSlots;
 };
 
 const HostContext = createContext<HostProps | null>(null);
@@ -92,6 +101,11 @@ export function useHost(): HostProps {
   const host = useContext(HostContext);
   if (!host) throw new Error(MISSING_HOST_MESSAGE);
   return host;
+}
+
+/** 머리 줄 끼움 자리 (없으면 빈 것) */
+export function useHostSlots(): HostSlots {
+  return useHost().slots ?? {};
 }
 
 /** review(열람) 모드: 입력·판정·저장·AI 를 숨기고 기록만 보여 준다 */

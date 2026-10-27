@@ -56,6 +56,7 @@ try {
     `import type { StepRecord, Progress, Chapter, Step, StepType, LoadedChapter, ChapterSnapshot, HostProps, LabViewProps, LabInitialProgram, BoardId } from "./vendor/blocklab";
 import { BOARD_LABELS, BoardSelect, setBoardChoice, useBoardChoice, CoachEditorView } from "./vendor/blocklab";
 import type { CoachEditorViewProps, CoachProgram, CoachProposal, CoachRunEvent } from "./vendor/blocklab";
+import type { HostSlots } from "./vendor/blocklab";
 type IsAny<T> = 0 extends 1 & T ? true : false;
 type NotAny<T> = IsAny<T> extends true ? false : true;
 const checks: [NotAny<StepRecord>, NotAny<Progress>, NotAny<Chapter>, NotAny<Step>, NotAny<StepType>, NotAny<LoadedChapter>, NotAny<ChapterSnapshot>, NotAny<HostProps["store"]>, NotAny<StepRecord["status"]>] =
@@ -107,7 +108,12 @@ const coachElement = CoachEditorView(coachProps);
 const badSource: CoachRunEvent = { source: "usb", ok: true, output: "", code: "", at: "" };
 // @ts-expect-error proposal 은 id 가 있어야 한다
 const badProposal: CoachEditorViewProps = { proposal: { code: "" } };
-export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, badBoard, boardOfFirst, devkitCaption, boardLabel, coachChecks, coachProps, coachElement, badSource, badProposal };
+// lib-v1.1.1: 머리 줄 끼움 자리
+const slotChecks: [NotAny<HostSlots>, NotAny<NonNullable<HostProps["slots"]>>] = [true, true];
+const slots: HostProps["slots"] = { headerStart: "메뉴", headerEnd: null };
+// @ts-expect-error 끼움 자리는 headerStart·headerEnd 만
+const badSlots: HostSlots = { footer: "x" };
+export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, badBoard, boardOfFirst, devkitCaption, boardLabel, coachChecks, coachProps, coachElement, badSource, badProposal, slotChecks, slots, badSlots };
 `,
   );
   tscIn(hub, "zod 없는 폴더");

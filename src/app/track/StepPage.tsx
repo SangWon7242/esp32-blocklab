@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import { HostLink, useHost } from "@/host/HostContext";
+import { HostLink, useHost, useHostSlots } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { figureCaption, materialsForBoard } from "@/track/board";
 import { awaitingExplain, canComplete, isEditorStep } from "@/track/completion";
@@ -108,6 +108,7 @@ type BodyProps = {
 
 function StepBody({ chapter, step, index, steps, record, states, teacherMode, explainGate, readOnly, store }: BodyProps) {
   const { nav } = useHost();
+  const slots = useHostSlots();
   const [input, setInput] = useState<Record<string, unknown>>(record?.input ?? {});
   const [attempts, setAttempts] = useState(record?.attempts ?? 0);
   const done = states[step.id] === "done";
@@ -166,8 +167,14 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
       <div className="flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b px-2 whitespace-nowrap sm:gap-3 sm:px-3">
-        <Button variant="ghost" asChild className="h-11 px-3 text-sm">
-          <HostLink to={nav.href.chapter(chapter.id)}><ArrowLeft className="size-4" /><span className="hidden sm:inline">{chapter.title}</span><span className="sm:hidden">단계 목록</span></HostLink>
+        {/* 호스트 끼움 자리 (lib-v1.1.1): 허브의 학생 메뉴 단추 등 */}
+        {slots.headerStart && <div className="flex shrink-0 items-center" data-slot="blocklab-header-start">{slots.headerStart}</div>}
+        <Button variant="ghost" asChild className="h-11 min-w-0 shrink px-3 text-sm">
+          <HostLink to={nav.href.chapter(chapter.id)} title={chapter.title}>
+            <ArrowLeft className="size-4" />
+            <span className="hidden min-w-0 truncate sm:inline">{chapter.title}</span>
+            <span className="truncate sm:hidden">단계 목록</span>
+          </HostLink>
         </Button>
         {readOnly && <ReviewBadge />}
         <Button
@@ -187,11 +194,14 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
         {guideCollapsed && <span className="hidden min-w-0 truncate text-base font-medium md:block">{step.title}</span>}
         <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
           {/* 수업 보드 (배선이 있는 챕터만, 작은 모양): 챕터 화면의 고르는 칸과 같은 값 */}
-          {boardSelect && <BoardSelect compact />}
-          <div className={cn("flex items-center gap-2 text-sm text-muted-foreground", boardSelect ? "w-28 sm:w-48 lg:w-64" : "w-40 sm:w-64")}>
+          {/* 좁아도 고르는 칸은 줄이지 않는다(줄면 「기본」 단추가 잘린다). 모자라면 진행 막대가 먼저 준다 */}
+          {boardSelect && <BoardSelect compact className="shrink-0" />}
+          <div className={cn("flex min-w-0 items-center gap-2 text-sm text-muted-foreground", boardSelect ? "w-28 sm:w-48 lg:w-64" : "w-40 sm:w-64")}>
             <Progress value={(doneCount / steps.length) * 100} className="h-2" aria-label="챕터 진행률" />
             <span className="shrink-0" data-testid="step-position">{index + 1} / {steps.length}</span>
           </div>
+          {/* 호스트 끼움 자리 (lib-v1.1.1): 저장 상태 등. 진행 n/m 뒤 */}
+          {slots.headerEnd && <div className="flex shrink-0 items-center gap-2" data-slot="blocklab-header-end">{slots.headerEnd}</div>}
         </div>
       </div>
 
