@@ -328,7 +328,7 @@ parts:
             rules:
               - codeMatches: '\.duty\(512\)(?![\s\S]*\.duty\(512\))[\s\S]*\.duty\(0\)'
                 fail: 마지막으로 소리를 켠 다음, 소리를 끄는 줄이 있나요?
-          - title: "두 음은 잘 나오다가 빨간 글씨로 IndexError: list index out of range 가 떠요"
+          - title: "여섯 음은 잘 나오다가 일곱 번째 음에서 빨간 글씨로 IndexError: list index out of range 가 뜨고 소리가 계속 나요"
             code: |
               from machine import Pin, PWM
               import time
