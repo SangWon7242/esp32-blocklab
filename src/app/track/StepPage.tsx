@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  ArrowLeft, ArrowRight, BookOpen, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward, Target,
+  ArrowLeft, ArrowRight, BookOpen, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, ClipboardCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward, Target,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import { useSettings } from "../settings/settings";
 import { ReviewBadge } from "./ReviewBadge";
 import { ProjectSaveTargetContext, projectSaveTarget } from "./TrackSaveButton";
 import { GuideBody } from "./GuideBody";
+import { JUDGE_LABEL, JudgeActionContext } from "./judgeAction";
 import { useGuideCollapsed } from "./guidePanel";
 import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
@@ -120,8 +121,11 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   const doneCount = steps.filter((s) => states[s.id] === "done").length;
   const boardSelect = chapterShowsBoardSelect(chapter);
   const [guideCollapsed, setGuideCollapsed] = useGuideCollapsed();
+  /** 하단 줄 「채점하기」가 부를 함수 (판정 패널이 있을 때만) */
+  const [judge, setJudge] = useState<(() => void) | null>(null);
+  const registerJudge = useCallback((fn: (() => void) | null) => setJudge(() => fn), []);
 
-  const save = (nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") => {
+  const save =(nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") => {
     if (readOnly) return; // 열람 모드는 학생 기록을 바꾸지 않는다
     void saveStepRecord(store, chapter.id, step.id, { status, input: nextInput, attempts: nextAttempts, updatedAt: new Date().toISOString() });
   };
@@ -159,8 +163,11 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   }
   // 편집기 단계의 「작품으로 저장」이 이 챕터·단계를 알도록 (TrackEditor 가 읽는다)
   activity = <ProjectSaveTargetContext.Provider value={saveTarget}>{activity}</ProjectSaveTargetContext.Provider>;
+  // 판정 패널이 「채점하기」를 하단 줄에 올린다
+  activity = <JudgeActionContext.Provider value={registerJudge}>{activity}</JudgeActionContext.Provider>;
 
   const ready = canComplete(step, input, { explainGate });
+  const showJudge = judge !== null && !readOnly;
   /** 판정은 통과했는데 교사 "설명 확인"만 남았다 */
   const awaiting = !done && awaitingExplain(step, input, { explainGate });
   const part = chapter.parts.find((p) => p.steps.some((s) => s.id === step.id));
@@ -233,14 +240,25 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
         </section>
       </div>
 
-      {/* 이전·완료·다음: 터치 대상 44px (h-11) */}
-      <div className="flex shrink-0 items-center gap-2 border-t px-3 py-2 [&_[data-slot=button]]:h-11 [&_[data-slot=button]]:px-4 [&_[data-slot=button]]:text-base">
+      {/* 이전·채점하기·완료·다음: 터치 대상 44px (h-11). 폰(sm 미만)은 채점하기를 맨 위 한 줄 전체로 올리고,
+          「이전」·「건너뛰기」는 아이콘만 (글자는 aria-label) — 버튼이 다섯 개여도 가로로 넘치지 않게 */}
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-t px-3 py-2 [&_[data-slot=button]]:h-11 [&_[data-slot=button]]:px-3 [&_[data-slot=button]]:text-base sm:flex-nowrap sm:[&_[data-slot=button]]:px-4">
         {prev ? (
-          <Button variant="outline" asChild><HostLink to={nav.href.step(chapter.id, prev.id)}><ArrowLeft className="size-4" />이전</HostLink></Button>
+          <Button variant="outline" asChild><HostLink to={nav.href.step(chapter.id, prev.id)} aria-label="이전"><ArrowLeft className="size-4" /><span className="max-sm:hidden">이전</span></HostLink></Button>
         ) : (
-          <Button variant="outline" disabled><ArrowLeft className="size-4" />이전</Button>
+          <Button variant="outline" disabled aria-label="이전"><ArrowLeft className="size-4" /><span className="max-sm:hidden">이전</span></Button>
         )}
-        <div className="ml-auto flex items-center gap-2">
+        {/* 채점하기: 판정 패널이 있는 단계에서만 (judgeAction.ts). 완료(보라)와 헷갈리지 않게 초록. 완료한 뒤에도 다시 채점할 수 있다 */}
+        {showJudge && (
+          <Button
+            onClick={judge}
+            className="order-first basis-full bg-emerald-600 text-white hover:bg-emerald-700 sm:order-none sm:ml-auto sm:basis-auto dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+            data-testid="judge-button"
+          >
+            <ClipboardCheck className="size-4" />{JUDGE_LABEL}
+          </Button>
+        )}
+        <div className={cn("flex items-center gap-2", showJudge ? "max-sm:ml-auto" : "ml-auto")}>
           {done ? (
             <span className="hidden items-center gap-1 text-base text-primary sm:flex"><CheckCircle2 className="size-4" />완료한 단계예요</span>
           ) : readOnly ? (
@@ -253,7 +271,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
                 </span>
               )}
               {/* 건너뛰기는 선택 단계만 (§8.3). 필수 편집기 단계는 실행·판정을 통과해야 끝난다 */}
-              {editor && step.optional && <Button variant="secondary" onClick={() => complete({ skipped: true })}><SkipForward className="size-4" />건너뛰기</Button>}
+              {editor && step.optional && <Button variant="secondary" onClick={() => complete({ skipped: true })} aria-label="건너뛰기"><SkipForward className="size-4" /><span className="max-sm:hidden">건너뛰기</span></Button>}
               <Button
                 onClick={() => complete()}
                 disabled={!ready}

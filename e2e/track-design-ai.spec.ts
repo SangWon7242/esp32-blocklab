@@ -63,12 +63,12 @@ test("설계 단계: 빈칸 채점 → 번역표 → 흩어진 블록을 이어 
   await expect(page.getByTestId("bottom-panel").getByRole("tab", { name: /^문제/ })).toHaveText("문제");
   await expect(button(page, "완료")).toBeDisabled();
   await expect(page.getByTestId("code-panel")).not.toContainText("while True:");
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
   await expect(page.getByTestId("judge-failures")).toContainText("순서나 값이 설계도와 달라요");
 
   await connectInOrder(page, ["esp_pin_setup", "flow_repeat_forever"]);
   await expect(page.getByTestId("code-panel")).toContainText("while True:");
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
   await expect(page.getByText("설계도대로 조립했어요")).toBeVisible();
   await expect(button(page, "완료")).toBeEnabled();
 
@@ -90,7 +90,7 @@ test("설계 단계: 빈칸 채점 → 번역표 → 흩어진 블록을 이어 
     all.find((b) => b.type === "esp_pin_setup")!.nextConnection.connect(all.find((b) => b.type === "flow_repeat_forever")!.previousConnection);
   });
   await expect(page.getByTestId("code-panel")).toContainText("while True:");
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
   await expect(page.getByText("설계도대로 조립했어요")).toBeVisible();
   await button(page, "완료").click();
   await expect(page.getByText("완료한 단계예요")).toBeVisible();

@@ -229,7 +229,7 @@ parts:
         todo:
           - 함수 안을 "전역 변수 pressed 쓰기 → pressed 를 True 로" 두 블록으로 바꾸기
           - 시작할 때 pressed 를 False 로 정하고, 반복을 깃발 보기로 바꾸기
-          - 실행해 누를 때마다 LED 가 바뀌는지 본 뒤 **판정** 누르기
+          - 실행해 누를 때마다 LED 가 바뀌는지 본 뒤 **채점하기** 누르기
         instructions: "함수 on_press 는 전역 변수 pressed 를 True 로 바꾸기만 하게 해 주세요. 시작할 때 pressed 는 False 예요. 반복에서는 깜박이기 대신, pressed 가 참이면 LED 가 꺼져 있을 때(값 0) 켜고 아니면 끈 뒤 pressed 를 False 로 내려요. 반복 끝에서는 0.05초 쉬어요"
         hint: "함수 몸통: 전역 변수 pressed 쓰기 → pressed 를 True 로 정하기. 반복 몸통: 만약 pressed 이면 → (만약 LED 값이 0 이면 켜기, 아니면 끄기) → pressed 를 False 로. 그 뒤 0.05초 기다리기"
         code: step2_irq.py
@@ -265,7 +265,7 @@ parts:
         todo:
           - LED 를 켠 순간 시각을 start 에 담기
           - 함수 안에서 start 부터 지난 시간을 reaction 에 담고, 반복에서 찍기
-          - 다섯 번 재서 가장 빠른 기록을 짝과 비교하고 **판정** 누르기
+          - 다섯 번 재서 가장 빠른 기록을 짝과 비교하고 **채점하기** 누르기
         instructions: "반복에서 3초 쉰 뒤 reaction 을 0 으로 하고, LED 를 켜고 그 순간 시각을 start 에 담아요. 2초 뒤 LED 를 끄고 reaction 을 찍어요. 함수 on_press 는 reaction 이 0 일 때만 start 부터 지난 시간(ms)을 reaction 에 담아요"
         hint: 함수 몸통은 전역 변수 reaction 쓰기 → 만약 reaction 이 0 이면 → reaction 을 "start 부터 지난 시간" 으로. 시작할 때 start 와 reaction 은 0 이에요
         code: mission_flag.py
@@ -293,7 +293,7 @@ parts:
           하나 더 알아 둘 것: 코드로 쓸 때 `handler=on_press()` 처럼 이름 뒤에 괄호를 붙이면, 그 줄에서 함수가 **한 번 바로 실행**되고 돌려준 값(`None`)이 이어져서 누를 때는 아무 일도 없어요. 블록은 함수 이름 칸에 이름만 적으니 걱정 없어요.
         todo:
           - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
-          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 편집기에서 고장 난 곳을 고치고 **채점하기**
           - 세 증상을 모두 고치기
         symptoms:
           - title: "버튼을 누르면 빨간 글씨로 TypeError: function takes 0 positional arguments but 1 were given 이 떠요"
@@ -372,7 +372,7 @@ parts:
         todo:
           - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
           - 번역표에서 "바깥 변수를 바꾸겠다"가 어떤 코드인지 찾아보기
-          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **채점하기** 누르기
         pseudocode:
           - text: 버튼 핀 __번을 풀업 입력으로 준비한다
             blank: { answer: 14 }

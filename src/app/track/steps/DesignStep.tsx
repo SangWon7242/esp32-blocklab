@@ -139,7 +139,7 @@ export function DesignStep({ step, chapter, input, onInput, teacherMode, readOnl
         <section className="flex flex-1 flex-col gap-4" data-testid="design-assembly">
           <div>
             <h3 className="font-semibold">3. 블록 조립</h3>
-            <p className="mt-1 text-sm text-muted-foreground">흩어진 블록을 설계도 순서대로 "프로그램이 시작되면" 블록 안에 이어 붙이고 판정을 누르세요. 회색 블록은 아직 이어지지 않은 블록이에요.</p>
+            <p className="mt-1 text-sm text-muted-foreground">흩어진 블록을 설계도 순서대로 "프로그램이 시작되면" 블록 안에 이어 붙이고 아래 채점하기를 누르세요. 회색 블록은 아직 이어지지 않은 블록이에요.</p>
           </div>
           <JudgePanel onJudge={onJudge} failures={d.failures} passed={d.passed} passText="설계도대로 조립했어요. 아래 완료를 누르세요." />
           <TrackEditor

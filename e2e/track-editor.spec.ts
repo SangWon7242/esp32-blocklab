@@ -62,7 +62,7 @@ test("미션 단계: 판정 실패 → 힌트 → 코드 모드에서 고치기 
   await expect(page.getByTestId("mission-hint")).toHaveCount(0);
   await expect(button(page, "완료")).toBeDisabled();
 
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
   const failures = page.getByTestId("judge-failures");
   await expect(failures).toContainText("거리를 판단하는 if 줄이 있나요?");
   await expect(failures).toContainText("가까울 때 찍을 말이 '가까워요!' 인가요?");
@@ -70,7 +70,7 @@ test("미션 단계: 판정 실패 → 힌트 → 코드 모드에서 고치기 
   await expect(button(page, "완료")).toBeDisabled();
 
   await replaceCode(page, 'd = 20\nif d < 15:\n    print("가까워요!")\n');
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
   await expect(page.getByText("통과했어요")).toBeVisible();
   await expect(failures).toHaveCount(0);
   await expect(button(page, "완료")).toBeEnabled();
@@ -89,6 +89,9 @@ test("미션 단계: 지시문은 안내 칸 「미션」 탭에 한 번만 있�
   const activity = page.getByTestId("step-activity");
   await expect(guide.getByTestId("mission-brief")).toContainText("15cm보다 가까워지면");
   await expect(activity.getByTestId("mission-brief")).toHaveCount(0);
+  // 채점하기는 활동 칸 위가 아니라 하단 줄(완료 옆)에 있다
+  await expect(activity.getByRole("button", { name: "채점하기" })).toHaveCount(0);
+  await expect(page.getByTestId("judge-button")).toBeVisible();
 
   await page.getByTestId("guide-tab-explain").click();
   await expect(guide.getByTestId("mission-brief")).toHaveCount(0);
@@ -108,7 +111,7 @@ test("미션 단계: 통과한 판정에 주의(기다리기 없는 반복·준�
 
   // 규칙은 통과하지만 trig 를 준비만 하고, 반복 안에 기다리기가 없다
   await replaceCode(page, 'from machine import Pin\ntrig = Pin(13, Pin.OUT)\nd = 20\nwhile True:\n    if d < 15:\n        print("가까워요!")\n');
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
   await expect(page.getByText("통과했어요")).toBeVisible();
   await expect(page.getByTestId("judge-failures")).toHaveCount(0);
   const notes = page.getByTestId("judge-notes");
@@ -140,12 +143,12 @@ test("디버깅 단계: 설명을 저장하기 전에는 잠겨 있고, 저장�
     if (i === 0) {
       // 고장 코드가 실려 있고, 그대로 판정하면 되묻기 문장이 나온다
       await expect(page.getByTestId("code-panel")).toContainText("trig = Pin(12, Pin.OUT)");
-      await button(page, "판정").click();
+      await button(page, "채점하기").click();
       await expect(page.getByTestId("judge-failures")).toContainText("쏘는 선과 듣는 선");
       await expect(button(page, "완료")).toBeDisabled();
     }
     await replaceCode(page, fixes[i]);
-    await button(page, "판정").click();
+    await button(page, "채점하기").click();
     await expect(page.getByTestId("judge-failures")).toHaveCount(0);
     await expect(page.getByText(/이 증상은 고쳤어요|모든 증상을 고쳤어요/)).toBeVisible();
   }
@@ -158,7 +161,7 @@ test("미션 단계 + 설명 관문: 설정을 켜면 판정 통과만으로는 
   await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1"], { explainGate: true });
   await openStep(page, "mission1");
   await replaceCode(page, 'd = 20\nif d < 15:\n    print("가까워요!")\n');
-  await button(page, "판정").click();
+  await button(page, "채점하기").click();
 
   // 통과 문구가 관문 문구로 바뀌고, 학생에게는 대기 배지만 보인다. 완료는 아직 못 누른다
   const gateText = page.getByText("통과했어요. 선생님께 1분 설명을 하고 확인을 받아요");

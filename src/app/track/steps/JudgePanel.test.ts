@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { renderWithHost } from "@/host/testHost";
+import { JudgeActionContext } from "../judgeAction";
 import { JudgePanel } from "./JudgePanel";
 
 /*
@@ -15,11 +16,23 @@ function render(props: Partial<Parameters<typeof JudgePanel>[0]>, mode: "student
 }
 
 describe("JudgePanel 화면", () => {
-  it("판정 전: 버튼만", () => {
+  it("판정 전: 하단 줄이 없는 곳에서는 채점하기 버튼만", () => {
     const html = render({});
-    expect(html).toContain("판정");
+    expect(html).toContain("채점하기");
     expect(html).not.toContain("judge-failures");
     expect(html).not.toContain("judge-notes");
+  });
+
+  it("단계 화면 안(하단 줄 통로가 있으면): 버튼은 하단 줄로 가고, 결과가 없으면 패널은 아무것도 그리지 않는다", () => {
+    const inFooter = (props: Partial<Parameters<typeof JudgePanel>[0]>) => renderWithHost(
+      createElement(JudgeActionContext.Provider, { value: () => {} },
+        createElement(JudgePanel, { onJudge: () => {}, failures: null, passed: undefined, passText: "통과", ...props })),
+      { mode: "student" },
+    );
+    expect(inFooter({})).not.toContain("<button");
+    expect(inFooter({})).not.toContain("채점하기");
+    expect(inFooter({ passed: false, failures: ["if 줄이 있나요?"] })).not.toContain("채점하기");
+    expect(inFooter({ passed: false, failures: ["if 줄이 있나요?"] })).toContain("if 줄이 있나요?");
   });
 
   it("실패: 되묻기 문장만, 주의는 없다", () => {

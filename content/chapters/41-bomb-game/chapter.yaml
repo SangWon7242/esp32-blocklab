@@ -202,7 +202,7 @@ parts:
         todo:
           - "a 버튼 조건에 `and player > 0`, b 버튼 조건에 `and player < 4` 붙이기"
           - "`score = 0` 을 반복 밖에 두고, 맨 밑에서 폭탄 칸 == 플레이어 칸이면 END · 점수 띄우고 `break`, 아니면 점수 1 올리기"
-          - 실행해서 세 판 이상 해 본 뒤 **판정** 누르기
+          - 실행해서 세 판 이상 해 본 뒤 **채점하기** 누르기
         instructions: "(1) 플레이어 칸 번호가 0 보다 클 때만 줄이고, 4 보다 작을 때만 늘리기 (2) 폭탄이 맨 밑(bomb_y 가 4)에 닿았을 때 bomb_x 와 player 가 같으면 화면에 END 와 점수를 띄우고 반복을 멈추기 (3) 같지 않으면 점수 score 를 1 올리기. score 는 반복 밖에서 0 으로 시작해요"
         hint: "조건에 and 붙이기: if button_a.value() == 0 and player > 0: · if button_b.value() == 0 and player < 4:. 맨 밑 검사 안: if bomb_x == player: → oled.fill(0) · oled.text(\"END\", 52, 20) · oled.text(\"SCORE \" + str(score), 32, 36) · oled.show() · break. 그다음 score = score + 1 → bomb_y = 0 → 칸 새로 뽑기"
         code: step1_one_bomb.py
@@ -296,7 +296,7 @@ parts:
         todo:
           - "`move_bomb` 안에 `gap = 900 - score * 50` 과 `if gap < 200: gap = 200` 넣기"
           - "다음 시각을 `time.ticks_ms() + random.randint(200, gap)` 으로 바꾸기"
-          - 실행해서 10점 넘게 피해 보고 빨라지는지 느낀 뒤 **판정** 누르기
+          - 실행해서 10점 넘게 피해 보고 빨라지는지 느낀 뒤 **채점하기** 누르기
         instructions: "(1) 폭탄 번호를 매개변수로 받는 함수 move_bomb(i) 로 세 폭탄을 움직이기 (2) 폭탄마다 다음에 움직일 시각을 리스트에 두고 지금 시각과 비교하기 (3) 함수 안에 time.sleep 을 쓰지 않기 (4) 간격 gap 을 900 - score * 50 으로 계산해 점수가 오르면 줄이기 (5) gap 이 200 보다 작아지면 200 으로 묶기"
         hint: "함수 끝부분: gap = 900 - score * 50 → if gap < 200: gap = 200 → next_time[i] = time.ticks_ms() + random.randint(200, gap). gap 은 함수 안에서만 쓰는 변수라 global 이 필요 없어요"
         code: step2_three_bombs.py
@@ -326,7 +326,7 @@ parts:
           폭탄이 차례로만 움직이면 **기다리는 자리**를, 플레이어가 사라지면 **범위 조건**을, 맞았는데도 계속 떨어지면 **반복 조건**을 봐요. 최소 4분은 혼자 해 봐요.
         todo:
           - 증상마다 "왜 이런 증상일까?" 에 내 생각 적고 저장
-          - 편집기에서 고장 난 곳을 고치고 **판정**
+          - 편집기에서 고장 난 곳을 고치고 **채점하기**
           - 세 증상을 모두 고치기
         symptoms:
           - title: 폭탄 셋이 동시에 안 떨어지고 0번, 1번, 2번 차례로 하나씩만 움직여요
@@ -457,7 +457,7 @@ parts:
         todo:
           - 우리말 설계도의 빈칸을 채우고 **빈칸 확인** 누르기
           - 번역표에서 "다음 시각이 지났으면"이 어떤 코드인지 찾아보기
-          - 섞인 블록을 설계도 순서대로 이어 붙이고 **판정** 누르기
+          - 섞인 블록을 설계도 순서대로 이어 붙이고 **채점하기** 누르기
         pseudocode:
           - text: 버튼 a 14번 · 버튼 b 27번 · OLED · 부저 __번을 준비한다
             blank: { answer: 25 }
