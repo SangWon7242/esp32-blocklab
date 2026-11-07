@@ -82,8 +82,83 @@ export function clampFlyoutWidth(natural: number, available: number): number {
   return Math.min(natural, max);
 }
 
-/** 폭을 작업판 안으로 줄이는 세로 팔레트 (스크롤바가 늘 보이는 자리에 온다) */
+/**
+ * 가로·세로 스크롤바 한 쌍인데, 넘치는 쪽만 보인다.
+ * Blockly 는 짝 지은 스크롤바를 내용이 다 보여도 숨기지 않는다 (홀로 쓰는 스크롤바만 스스로 숨긴다). 그래서 크기를 다시 잴 때마다 쪽마다 정한다.
+ */
+export class AutoHideScrollbarPair extends Blockly.ScrollbarPair {
+  private readonly ws: Blockly.WorkspaceSvg;
+
+  constructor(ws: Blockly.WorkspaceSvg, addHorizontal?: boolean, addVertical?: boolean, cls?: string, margin?: number) {
+    super(ws, addHorizontal, addVertical, cls, margin);
+    this.ws = ws;
+  }
+
+  override resize(): void {
+    super.resize();
+    const m = this.ws.getMetrics();
+    // 반올림 차이로 1px 안쪽 넘침은 넘침으로 보지 않는다
+    this.hScroll?.setVisibleInternal(m.scrollWidth > m.viewWidth + 1);
+    this.vScroll?.setVisibleInternal(m.scrollHeight > m.viewHeight + 1);
+  }
+}
+
+/** 팔레트가 열려 있는 동안 작업판(주입 칸)에 붙이는 class. src/index.css 가 이때 작업판 가로 스크롤바를 숨긴다 */
+export const FLYOUT_OPEN_CLASS = "blocklabFlyoutOpen";
+
+/**
+ * 폭을 작업판 안으로 줄이고, 넘치는 넓은 블록은 가로로도 스크롤하는 세로 팔레트.
+ * Blockly 의 세로 팔레트는 세로 스크롤바만 만든다. 폭을 줄이면 넓은 함수 블록의 오른쪽 끝을 볼 수 없으므로 가로 스크롤바를 더하고
+ * (팔레트 metrics 는 이미 내용 폭을 알려 준다), 가로 휠·Shift+휠로도 옮긴다.
+ * 팔레트 아래쪽 가로 스크롤바가 작업판 가로 스크롤바와 겹치므로, 열려 있는 동안 작업판 쪽을 숨긴다(FLYOUT_OPEN_CLASS).
+ */
 export class ClampedVerticalFlyout extends Blockly.VerticalFlyout {
+  override init(targetWorkspace: Blockly.WorkspaceSvg): void {
+    super.init(targetWorkspace);
+    // 기본(세로만) 스크롤바를 가로·세로 둘 다로 바꾼다. 보이고 숨기는 것은 팔레트(updateDisplay)가 그대로 맡는다
+    this.workspace_.scrollbar?.dispose();
+    this.workspace_.scrollbar = new AutoHideScrollbarPair(this.workspace_, true, true, "blocklyFlyoutScrollbar", this.SCROLLBAR_MARGIN);
+    this.workspace_.scrollbar.setContainerVisible(this.isVisible());
+  }
+
+  override show(flyoutDef: Blockly.utils.toolbox.FlyoutDefinition | string): void {
+    super.show(flyoutDef);
+    this.targetWorkspace.getInjectionDiv()?.classList.add(FLYOUT_OPEN_CLASS);
+  }
+
+  override hide(): void {
+    super.hide();
+    this.targetWorkspace?.getInjectionDiv()?.classList.remove(FLYOUT_OPEN_CLASS);
+  }
+
+  /** 세로 팔레트의 setMetrics_ 는 y 만 본다. 가로 스크롤바가 움직인 x 도 반영한다 */
+  protected override setMetrics_(xyRatio: { x?: number; y?: number }): void {
+    if (!this.isVisible()) return;
+    const mm = this.workspace_.getMetricsManager();
+    const scroll = mm.getScrollMetrics();
+    const view = mm.getViewMetrics();
+    const abs = mm.getAbsoluteMetrics();
+    if (typeof xyRatio.x === "number") this.workspace_.scrollX = -(scroll.left + (scroll.width - view.width) * xyRatio.x);
+    if (typeof xyRatio.y === "number") this.workspace_.scrollY = -(scroll.top + (scroll.height - view.height) * xyRatio.y);
+    this.workspace_.translate(this.workspace_.scrollX + abs.left, this.workspace_.scrollY + abs.top);
+  }
+
+  /** 가로 휠(트랙패드 옆으로 밀기)이나 Shift+휠은 가로로, 나머지는 원래대로 세로로 */
+  protected override wheel_(e: WheelEvent): void {
+    const delta = Blockly.browserEvents.getScrollDeltaPixels(e);
+    const dx = e.shiftKey ? delta.x || delta.y : delta.x;
+    if (dx) {
+      const mm = this.workspace_.getMetricsManager();
+      this.workspace_.scrollbar?.setX(mm.getViewMetrics().left - mm.getScrollMetrics().left + dx);
+    }
+    if (!e.shiftKey && delta.y) {
+      super.wheel_(e);
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   protected override reflowInternal_(): void {
     super.reflowInternal_();
     const target = this.targetWorkspace;

@@ -139,18 +139,39 @@ test("넓은 함수 블록이 있는 센서 팔레트도 작업판 안에 들어
   const fly = (await flyout.boundingBox())!;
   // 팔레트 오른쪽 끝(세로 스크롤바 자리)이 작업판 안에 있다
   expect(fly.x + fly.width).toBeLessThanOrEqual(svg.x + svg.width);
-  const handle = page.locator(".blocklyFlyoutScrollbar .blocklyScrollbarHandle").first();
+  const handle = page.locator(".blocklyFlyoutScrollbar.blocklyScrollbarVertical .blocklyScrollbarHandle").first();
   await expect(handle).toBeVisible();
   const h = (await handle.boundingBox())!;
   expect(h.x + h.width).toBeLessThanOrEqual(svg.x + svg.width);
   // 손잡이를 끌면 팔레트가 아래로 움직인다
   const canvas = page.locator(".blocklyToolboxFlyout .blocklyBlockCanvas").first();
-  const before = await canvas.getAttribute("transform");
+  const translate = async () => (await canvas.getAttribute("transform"))!.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/)!.slice(1).map(Number);
+  const [x0, y0] = await translate();
   await page.mouse.move(h.x + h.width / 2, h.y + 5);
   await page.mouse.down();
   await page.mouse.move(h.x + h.width / 2, h.y + 150, { steps: 8 });
   await page.mouse.up();
-  await expect.poll(() => canvas.getAttribute("transform")).not.toBe(before);
+  await expect.poll(async () => (await translate())[1]).toBeLessThan(y0);
+
+  // 넓은 블록이 넘치므로 팔레트에 가로 스크롤바가 있고, 그동안 작업판 가로 스크롤바는 숨는다
+  const mainH = page.locator(".blocklyMainWorkspaceScrollbar.blocklyScrollbarHorizontal");
+  await expect(mainH).toBeHidden();
+  const hHandle = page.locator(".blocklyFlyoutScrollbar.blocklyScrollbarHorizontal .blocklyScrollbarHandle").first();
+  await expect(hHandle).toBeVisible();
+  const hh = (await hHandle.boundingBox())!;
+  expect(hh.y + hh.height).toBeLessThanOrEqual(svg.y + svg.height);
+  // 가로 손잡이를 끌면 팔레트가 왼쪽으로 움직여 넓은 블록의 오른쪽 끝이 보인다
+  await page.mouse.move(hh.x + 5, hh.y + hh.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(hh.x + 200, hh.y + hh.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect.poll(async () => (await translate())[0]).toBeLessThan(x0);
+
+  // 팔레트를 닫으면 작업판 가로 스크롤바가 돌아온다 (팔레트가 덮지 않은 오른쪽 위 빈 곳을 누른다)
+  const bg = (await page.locator(".blocklyMainBackground").boundingBox())!;
+  await page.mouse.click(bg.x + bg.width - 60, bg.y + 30);
+  await expect(flyout).toBeHidden();
+  await expect(mainH).toBeVisible();
 });
 
 test("코드 ↔ 블록 전환과 코드 고치기는 작업판의 보던 자리를 그대로 둔다", async ({ page }) => {
