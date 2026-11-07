@@ -18,4 +18,4 @@ while True:
         blink(0.6)
     for i in range(3):  # 짧게 3번  (S)
         blink(0.2)
-    time.sleep(1)  # 한 번 보내고 1초 쉬기
+    time.sleep(1)  # 한 번 다 보내면 1초 쉬기

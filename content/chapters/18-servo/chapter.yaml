@@ -190,13 +190,13 @@ parts:
         hint: 범위 바꾸기 블록의 네 칸에는 원래 범위의 처음·끝, 바꿀 범위의 처음·끝이 들어가요. 서보 각도 블록의 칸에는 숫자 대신 변수 angle 을 끼울 수 있어요
         code: step1_sweep.py
         rules:
-          - pinIs: { name: knob, pin: 39 }
+          - pinIs: { name: knob }
             fail: 가변저항 가운데 다리는 몇 번 핀에 꽂았나요? 그 핀을 knob 이라는 이름으로 준비했나요?
           - codeMatches: '\(\(knob\.read\(\)\s*-\s*0\)\s*\*\s*\(180\s*-\s*0\)\s*//\s*\(4095\s*-\s*0\)\s*\+\s*0\)'
             fail: 다이얼 값의 범위와 서보 각도의 범위는 각각 어디부터 어디까지인가요? 범위 바꾸기의 네 칸에 그 숫자가 들어갔나요?
           - codeMatches: '^\s+servo\.duty_u16\(1638\s*\+\s*angle\s*\*\s*6462\s*//\s*180\)$'
             fail: 바꾼 각도를 서보에게 보냈나요? 서보 각도 블록의 칸에 무엇이 들어 있나요?
-          - codeMatches: '^servo\s*=\s*PWM\(Pin\(4\)\)[\s\S]*^knob\s*=\s*ADC\(Pin\(39\)\)'
+          - codeMatches: '^servo\s*=\s*PWM\(Pin\(\d+\)\)[\s\S]*^knob\s*=\s*ADC\(Pin\(\d+\)\)'
             fail: 가변저항 준비와 서보 준비는 어느 순서로 있나요? 둘 다 반복 밖에 있나요?
           - codeMatches: '^\s+angle\s*=\s*.*knob\.read\(\).*\n(\s*print\(.*\)\n)*\s+servo\.duty_u16\(1638\s*\+\s*angle\b'
             fail: 다이얼 값을 바꿔 담은 이름과 서보에게 보내는 이름이 같나요? 담은 줄 바로 다음에 서보에게 보내나요?

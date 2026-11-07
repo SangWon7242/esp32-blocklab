@@ -326,7 +326,7 @@ parts:
         instructions: 25번 핀의 수동 부저로 당첨이면 높은 음, 꽝이면 낮은 음을 울려 주세요
         code: step2_hammer.py
         rules:
-          - codeMatches: '^\w+ = PWM\(Pin\(25\)\)$'
+          - codeMatches: '^\w+ = PWM\(Pin\(\d+\)\)$'
             fail: 부저는 몇 번 핀에 꽂았나요? 소리 나는 부저를 그 핀에 준비했나요?
           - codeMatches: '\.duty\(512\)[\s\S]*\.duty\(512\)'
             fail: 당첨일 때와 꽝일 때 모두 소리가 나나요? 두 자리에 음을 하나씩 넣었나요?

@@ -202,8 +202,8 @@ parts:
         hint: "버튼 준비 블록(14번, button). 손잡이 색 사다리는 함수 블록 knob_color 로 묶어요. 반복 안: 만약 button.value() == 0 → mode 를 1 만큼 바꾸기 → 만약 mode == 3 → mode 를 0 으로 → 0.3초 기다리기. 그 아래 만약 mode == 0 → RGB 끄기 / 아니면 만약 mode == 1 → knob_color() / 아니면 → RGB 색 정하기(내 색). 끝에 50 ms 기다리기"
         code: step1_knob_colors.py
         rules:
-          - pinIs: { name: button, pin: 14 }
-            fail: 모드 버튼은 몇 번 핀에 이었나요? 버튼 준비에 이름 button 과 핀 14 가 있나요?
+          - pinIs: { name: button }
+            fail: 모드 버튼은 몇 번 핀에 이었나요? 버튼을 button 이라는 이름으로 준비했나요?
           - codeMatches: 'if button\.value\(\) == 0:\n\s+mode (= mode \+ 1|\+= 1)$'
             fail: 버튼을 누르면(값 0) 모드가 1 커지나요? 누름을 묻는 조건 바로 아래에 모드를 키우는 줄이 있나요?
           - codeMatches: '(if mode (== 3|> 2|>= 3):\n\s+mode = 0|mode = \(mode \+ 1\) % 3|mode % 3)'

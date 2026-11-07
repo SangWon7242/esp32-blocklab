@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { onEditedProgram, type MissionInput } from "@/track/completion";
 import { judge } from "@/track/judge";
 import { useSettings } from "../../settings/settings";
+import { GuideBody } from "../GuideBody";
 import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { JudgePanel } from "./JudgePanel";
@@ -30,16 +31,25 @@ export function MissionBrief({ step, chapterId, failedOnce, teacherMode, classNa
   return (
     <section className={cn("rounded-lg border p-4", className)} data-testid="mission-brief">
       <h3 className="font-semibold">미션</h3>
-      <p className="mt-1">{step.instructions}</p>
+      {/* 가벼운 markdown: 시간·숫자를 **굵게**, 조건을 - 목록으로 나눠 적을 수 있다 */}
+      <GuideBody text={step.instructions} className="mt-1" />
       {step.hint && failedOnce && (
         <p className="mt-2 flex items-start gap-1 text-sm text-muted-foreground" data-testid="mission-hint">
           <Lightbulb className="mt-0.5 size-4 shrink-0" />힌트: {step.hint}
         </p>
       )}
       {teacherMode && step.answerCode && (
-        <Button asChild variant="outline" size="sm" className="mt-3">
-          <HostLink to={withQuery(nav.href.lab(), { code: `${chapterId}/${step.answerCode}` })}>정답 코드 열기 ({step.answerCode})</HostLink>
-        </Button>
+        // 정답이 여러 꼴이면(쉬운 버전 · 함수로 묶은 버전) 단추마다 이름을 붙인다
+        <div className="mt-3 flex flex-wrap gap-2" data-testid="mission-answers">
+          {[{ file: step.answerCode, label: step.answerLabel }, ...(step.answerVariants ?? [])].map(({ file, label }) => (
+            // 좁은 안내 칸에서도 잘리지 않게 줄바꿈을 허용한다. 이름이 있으면 파일 이름은 title 로만
+            <Button key={file} asChild variant="outline" size="sm" className="h-auto min-h-8 py-1.5 text-left whitespace-normal">
+              <HostLink to={withQuery(nav.href.lab(), { code: `${chapterId}/${file}` })} title={file}>
+                {label ? `정답 보기 — ${label}` : `정답 코드 열기 (${file})`}
+              </HostLink>
+            </Button>
+          ))}
+        </div>
       )}
     </section>
   );

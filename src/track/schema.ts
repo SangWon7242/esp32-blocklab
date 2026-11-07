@@ -76,7 +76,14 @@ export const RuleSchema = z.union([
   z.object({ useBlock: z.array(z.string().min(1)).min(1), fail }).strict(),
   z.object({ codeMatches: regex, fail }).strict(),
   z.object({ codeEquals: z.object({ file: FileRef, tolerance: z.number().nonnegative().optional() }).strict(), fail }).strict(),
-  z.object({ pinIs: z.object({ name: z.string().regex(/^[A-Za-z_]\w*$/), pin: z.number().int().nonnegative() }).strict(), fail }).strict(),
+  z.object({
+    pinIs: z.object({
+      name: z.string().regex(/^[A-Za-z_]\w*$/),
+      pin: z.number().int().nonnegative().optional(),
+      notPin: z.array(z.number().int().nonnegative()).min(1).optional(),
+    }).strict(),
+    fail,
+  }).strict(),
   z.object({ maxBlocks: z.number().int().positive(), fail }).strict(),
   z.object({ outputIncludes: z.string().min(1), fail }).strict(),
   z.object({ hasLine: z.object({ text: lineText, inside: LineInside.optional() }).strict(), fail }).strict(),
@@ -166,6 +173,10 @@ export const MissionStep = z.object({
   rules: z.array(RuleSchema).min(1),
   /** 정답 코드 (스스로 해 본 뒤 비교용) */
   answerCode: FileRef.optional(),
+  /** 정답 코드가 여럿일 때 answerCode 단추에 붙일 이름 (예: "쉬운 버전 (반복만)") */
+  answerLabel: z.string().min(1).optional(),
+  /** 다른 꼴의 정답 (예: 함수로 묶은 "더 나은 버전"). 모두 자기 규칙을 통과해야 한다 (content 테스트) */
+  answerVariants: z.array(z.object({ file: FileRef, label: z.string().min(1) }).strict()).min(1).optional(),
   /** 시작 코드(code)가 이미 규칙을 모두 통과하는 미션임을 밝힌다 (content 테스트의 "시작 코드는 한 규칙은 실패" 보호에서 예외) */
   startPasses: z.boolean().optional(),
 }).strict();

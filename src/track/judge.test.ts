@@ -98,6 +98,13 @@ describe("judge — 6가지 규칙", () => {
     expect(judge([{ pinIs: { name: "led", pin: 26 }, fail: "x" }], { code: "# led = Pin(26, Pin.OUT)\n" }).pass).toBe(false);
   });
 
+  it("pinIs: pin 을 빼면 어느 번호든 통과, notPin 번호는 실패", () => {
+    expect(judge([{ pinIs: { name: "led" }, fail: "x" }], { code: "led = Pin(27, Pin.OUT)\n" }).pass).toBe(true);
+    expect(judge([{ pinIs: { name: "led" }, fail: "x" }], { code: "buzzer = Pin(27, Pin.OUT)\n" }).pass).toBe(false);
+    expect(judge([{ pinIs: { name: "trig", notPin: [12, 13] }, fail: "x" }], { code: "trig = Pin(27, Pin.OUT)\n" }).pass).toBe(true);
+    expect(judge([{ pinIs: { name: "trig", notPin: [12, 13] }, fail: "x" }], { code: "trig = Pin(13, Pin.OUT)\n" }).pass).toBe(false);
+  });
+
   it("maxBlocks: 그림자 블록은 세지 않는다", () => {
     expect(countBlocks(workspace)).toBe(6);
     expect(countBlocks(undefined)).toBe(0);

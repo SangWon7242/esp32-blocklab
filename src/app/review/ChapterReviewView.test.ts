@@ -34,7 +34,7 @@ describe("ChapterReviewView", () => {
     expect(html).toContain('data-testid="chapter-review"');
     expect(html).toContain("열람 모드");
     expect(html).toContain("LED 켜기");
-    expect(html).toContain("5 / 8 단계 완료");
+    expect(html).toContain("5 / 9 단계 완료");
   });
 
   it("단계마다 카드가 있고 기록이 없는 단계는 그렇게 말한다", () => {
@@ -66,7 +66,7 @@ describe("ChapterReviewView", () => {
   });
 
   it("미션: 지시문·통과·주의·교사 확인·메모·코드와 블록 자리", () => {
-    expect(html).toContain("LED가 2초 동안 켜져 있다가 1초 동안 꺼지기를 계속 되풀이하도록 코드를 바꾸세요");
+    expect(html).toContain("2초 켜져 있다가 1초 꺼지기</strong>를 계속 되풀이하게 바꾸세요");
     expect(html).toContain('data-testid="review-judge" data-passed="true"');
     expect(html).toContain("통과했어요");
     expect(html).toContain("검사 주의");
@@ -111,8 +111,8 @@ describe("ChapterReviewView", () => {
 
   it("빈 기록이면 모든 단계가 기록 없음", () => {
     const empty = renderToStaticMarkup(createElement(ChapterReviewView, { chapterId: CHAPTER, records: {} }));
-    expect(empty).toContain("0 / 8 단계 완료");
-    expect(empty.match(new RegExp(NO_RECORD_TEXT, "g"))).toHaveLength(8);
+    expect(empty).toContain("0 / 9 단계 완료");
+    expect(empty.match(new RegExp(NO_RECORD_TEXT, "g"))).toHaveLength(9);
   });
 });
 

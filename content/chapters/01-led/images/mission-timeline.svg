@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>미션 시간표: 지금은 켜짐 1초 꺼짐 1초, 목표는 켜짐 2초 꺼짐 1초. 켜기 바로 아래 기다리기가 켜진 시간, 끄기 바로 아래 기다리기가 꺼진 시간</title>
+  <!-- 1초 = 90px -->
+  <!-- 지금 -->
+  <text x="20" y="62" font-size="16" font-weight="700" fill="currentColor" stroke="none">지금</text>
+  <rect x="96" y="36" width="90" height="44" rx="6" fill="#c99c00"/>
+  <rect x="186" y="36" width="90" height="44" rx="6" fill="var(--muted)"/>
+  <rect x="276" y="36" width="90" height="44" rx="6" fill="#c99c00"/>
+  <rect x="366" y="36" width="90" height="44" rx="6" fill="var(--muted)"/>
+  <g font-size="15" font-weight="700" text-anchor="middle" stroke="none">
+    <text x="141" y="63" fill="#2b2200">켜짐 1초</text>
+    <text x="231" y="63" fill="currentColor">꺼짐 1초</text>
+    <text x="321" y="63" fill="#2b2200">켜짐 1초</text>
+    <text x="411" y="63" fill="currentColor">꺼짐 1초</text>
+    <text x="490" y="63" fill="currentColor" opacity="0.7">…</text>
+  </g>
+
+  <!-- 목표 -->
+  <text x="20" y="150" font-size="16" font-weight="700" fill="currentColor" stroke="none">목표</text>
+  <rect x="96" y="124" width="180" height="44" rx="6" fill="#c99c00"/>
+  <rect x="276" y="124" width="90" height="44" rx="6" fill="var(--muted)"/>
+  <rect x="366" y="124" width="180" height="44" rx="6" fill="#c99c00" fill-opacity="0.45" stroke-dasharray="6 6"/>
+  <g font-size="15" font-weight="700" text-anchor="middle" stroke="none">
+    <text x="186" y="151" fill="#2b2200">켜짐 2초</text>
+    <text x="321" y="151" fill="currentColor">꺼짐 1초</text>
+    <text x="456" y="151" fill="#2b2200" opacity="0.8">켜짐 2초 …</text>
+  </g>
+  <!-- 바뀌는 곳 표시 -->
+  <path d="M96 180 V188 H276 V180" opacity="0.6"/>
+  <path d="M276 180 V188 H366 V180" opacity="0.6"/>
+  <g font-size="14" text-anchor="middle" fill="currentColor" stroke="none">
+    <text x="186" y="208">1초 → 2초로 늘리기</text>
+    <text x="321" y="208">1초 그대로</text>
+  </g>
+
+  <!-- 블록(코드)과 짝 짓기 -->
+  <rect x="96" y="236" width="270" height="124" rx="10" fill="var(--muted)" fill-opacity="0.5" stroke-opacity="0.4"/>
+  <g font-size="15" fill="currentColor" stroke="none">
+    <text x="114" y="264">led 켜기</text>
+    <text x="114" y="292" font-weight="700">? 초 기다리기   ← 켜진 시간</text>
+    <text x="114" y="320">led 끄기</text>
+    <text x="114" y="348" font-weight="700">? 초 기다리기   ← 꺼진 시간</text>
+  </g>
+  <g font-size="14" fill="currentColor" stroke="none" opacity="0.8">
+    <text x="390" y="278">기다리는 동안 LED 는</text>
+    <text x="390" y="300">바로 위 블록의 상태</text>
+    <text x="390" y="322">(켜짐 또는 꺼짐)</text>
+    <text x="390" y="344">그대로예요</text>
+  </g>
+</svg>

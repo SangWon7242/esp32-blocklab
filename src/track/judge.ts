@@ -39,9 +39,13 @@ function passes(rule: Rule, input: JudgeInput, files: Readonly<Record<string, st
     return expected !== undefined && codeEquals(canon(input.code ?? ""), canon(expected), rule.codeEquals.tolerance ?? 0);
   }
   if ("pinIs" in rule) {
-    const { name, pin } = rule.pinIs;
-    const re = new RegExp(`^\\s*${name}\\s*=.*\\bPin\\(\\s*${pin}\\s*[,)]`);
-    return lines().some((l) => re.test(l));
+    // pin 을 빼면 번호는 보지 않는다 (학생이 다른 핀에 꽂아도 된다). notPin 은 쓰면 안 되는 번호 (다른 부품이 쓰는 핀)
+    const { name, pin, notPin } = rule.pinIs;
+    const re = new RegExp(`^\\s*${name}\\s*=.*\\bPin\\(\\s*(${pin ?? "\\d+"})\\s*[,)]`);
+    return lines().some((l) => {
+      const m = re.exec(l);
+      return m !== null && !notPin?.includes(Number(m[1]));
+    });
   }
   if ("maxBlocks" in rule) return countBlocks(input.blocksJson) <= rule.maxBlocks;
   if ("hasLine" in rule) {

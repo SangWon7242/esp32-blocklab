@@ -297,18 +297,18 @@ parts:
           - LED 핀을 준비하고, 처음엔 끄고, 열 때 켜고, 닫을 때 끄기
           - 실행해서 내 카드를 대 보고 **판정** 누르기
         instructions: |
-          문이 열려 있는 동안 LED 가 켜지게 해 주세요 (LED 는 26번 핀, 이름은 led).
+          문이 열려 있는 동안 LED 가 켜지게 해 주세요 (LED 는 내가 꽂은 핀, 배선도대로면 26번. 이름은 led).
           LED 준비 줄은 서보 준비 바로 아래, 처음에 끄는 줄은 문을 닫아 두는 줄 바로 아래, 켜고 끄는 줄은 각각 문을 열고 닫는 줄 바로 아래에 둬요
         hint: "led = Pin(26, Pin.OUT) 로 준비하고, led.value(1) 은 켜기, led.value(0) 은 끄기예요"
         code: mission_allowed_list.py
         rules:
-          - pinIs: { name: led, pin: 26 }
-            fail: LED 핀을 준비했나요? 몇 번 핀에 꽂았는지 다시 보세요
+          - pinIs: { name: led }
+            fail: LED 를 꽂은 핀을 led 라는 이름으로 준비했나요?
           - codeMatches: 'duty_u16\(8100\)\n\s*led\.value\(1\)'
             fail: 문을 여는 줄 바로 아래에서 LED 를 켜나요?
           - codeMatches: '^ +servoPin\.duty_u16\(1638\)\n\s*led\.value\(0\)'
             fail: 모르는 카드라 문을 닫을 때 LED 도 끄나요?
-          - codeMatches: '^servoPin\.freq\(50\)\n *led\s*=\s*Pin\(\s*26\s*,'
+          - codeMatches: '^servoPin\.freq\(50\)\n *led\s*=\s*Pin\(\s*\d+\s*,'
             fail: LED 준비 줄은 서보 준비 바로 아래에 있나요?
           - codeMatches: '^servoPin\.duty_u16\(1638\)\n *led\.value\(0\)'
             fail: 처음에 문을 닫아 두는 줄 바로 아래에서 LED 도 꺼 두나요?

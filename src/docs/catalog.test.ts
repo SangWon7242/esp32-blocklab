@@ -104,7 +104,7 @@ describe("블록 사전 카탈로그", () => {
 
   it("대표 블록의 제목과 코드", () => {
     expect(findDoc("flow_wait")!.code).toBe("time.sleep(1)");
-    expect(findDoc("esp_pin_setup")!.code).toBe("led = Pin(26, Pin.OUT)");
+    expect(findDoc("esp_pin_setup")!.code).toBe("pin1 = Pin(26, Pin.OUT)");
     expect(findDoc("math_number")!.code).toBe("0");
     expect(findDoc("dev_led_blink")!.title).toEqual([
       { kind: "slot", text: "led" }, { kind: "text", text: "을(를)" }, { kind: "slot", text: "0.5" },
@@ -136,8 +136,9 @@ describe("블록 사전 카탈로그", () => {
     const doc = findDoc("controls_if")!;
     expect(doc.variants?.length).toBe(1);
     expect(doc.variants![0].map((p) => p.text).join(" ")).toContain("아니면");
-    // 핀 출력 블록은 LED 카테고리에도 같은 모양으로 나온다: 같은 제목은 variants 에 넣지 않는다
-    expect(findDoc("esp_pin_setup")!.variants).toBeUndefined();
+    // 핀 준비 블록은 핀 카테고리(pin1)와 LED 카테고리(led)에 이름만 달리 나온다: LED 쪽 모양이 variants 에 하나
+    expect(findDoc("esp_pin_setup")!.variants?.length).toBe(1);
+    expect(findDoc("dev_adc_setup")!.variants).toBeUndefined();
   });
 
   it("검색: 공백으로 나눈 낱말이 모두 들어 있는 블록", () => {

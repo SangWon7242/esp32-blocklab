@@ -225,7 +225,7 @@ parts:
         hint: "수동 부저 꾸러미의 준비 블록(25번)과 '음을 울리기' 블록을 써요. 울리기 블록은 freq → duty(512) → 기다리기 → duty(0) 네 줄로 나와요. 조건은 '또는' 블록으로 state == \"FIRE\" 와 state == \"QUAKE\" 를 묶어요. 출력 뒤, 1초 기다리기 위에 넣어요"
         code: step1_state_print.py
         rules:
-          - pinIs: { name: beeper, pin: 25 }
+          - pinIs: { name: beeper }
             fail: (1) 수동 부저를 준비했나요? + 다리가 꽂힌 줄은 몇 번 핀과 이어져 있나요?
           - codeMatches: 'if\s+f\s*>=\s*\d+\s+and\s+t\s*>=\s*\d+\s*:'
             fail: (2) 화재 조건에 불꽃 값과 온도가 and 로 함께 들어 있나요? 불꽃만 보고 화재라고 하면 어떤 오경보가 날까요?

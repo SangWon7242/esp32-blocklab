@@ -4,7 +4,7 @@
 `npm test`가 모든 YAML을 `src/track/schema.ts`(zod)로 검사한다. 키 오타, 없는 파일, 겹치는 id, 틀린 정규식,
 범위 밖 답은 테스트에서 걸린다.
 
-코드를 가리키는 키(`code`, `targetCode`, `lineExplain`, `answerCode`, `codeEquals.file`)는 **같은 폴더의 파일 이름**만 쓴다
+코드를 가리키는 키(`code`, `targetCode`, `lineExplain`, `answerCode`, `answerVariants[].file`, `codeEquals.file`)는 **같은 폴더의 파일 이름**만 쓴다
 (`code: step1_distance.py`). 예외: `debug`의 증상 `code`는 파일 이름이 아니라 **고장 난 코드 조각 그대로**다.
 
 그림을 가리키는 키(`cover`, `materials[].image`, `wiring.image`, `principle.image`, `scene.image`)는 **챕터 폴더 기준 `images/<이름>.svg`** 만 쓴다
@@ -177,7 +177,7 @@ todo: [보드를 USB 로 연결하기, "`26`번 핀에 LED 꽂기"]
 | `predict` | `code`, `blanks: [{ q, unit? }]` — 빈칸 하나에 질문 하나 |
 | `run` | `code`, `expected?`(실행 결과), `codeNotes?`(코드 설명) |
 | `readcheck` | `code`, `questions: [...]` (아래), `codeNotes?`(코드 설명) |
-| `mission` | `instructions`, `code?`(미리 깔 코드), `hint?`, `rules`(1개 이상), `answerCode?`, `startPasses?`(아래 "규칙 유지 장치") |
+| `mission` | `instructions`, `code?`(미리 깔 코드), `hint?`, `rules`(1개 이상), `answerCode?`, `answerLabel?`·`answerVariants?: [{ file, label }]`(정답이 여러 꼴일 때 — 예: 쉬운 버전 · 함수로 묶은 버전, 교사 모드에 단추가 하나씩), `startPasses?`(아래 "규칙 유지 장치") |
 | `debug` | `symptoms: [{ title, code(코드 조각), question, rules? }]`, `rules?`(전체 규칙), `answerCode?` |
 | `design` | `pseudocode: [{ text, blank?: { answer, tolerance? } }]`, `translation: [[우리말, 코드], ...]`, `targetCode` |
 | `reflect` | `lineExplain`(줄마다 "이 줄은 ___" 을 쓸 코드), `prompts`: 정확히 4개 |
@@ -274,7 +274,7 @@ AI 바이브 코딩으로 폰 앱(웹 페이지 한 장)을 만드는 단계. �
 | `useBlock: [type, ...]` | 블록 중 하나 이상이 작업판에 있다 (그림자 블록 제외, 입력·다음 블록 재귀) |
 | `codeMatches: '정규식'` | 정규화 코드(주석·빈 줄·끝 공백 제거, 줄바꿈으로 이음)에 일치. `m` 플래그라 `^`·`$`는 줄 단위. 공백도 그대로 비교하니 필요하면 `\s*` |
 | `codeEquals: { file, tolerance? }` | 정규화 코드가 파일과 줄마다 같다. 들여쓰기는 그대로, 문자열 밖 공백 차이(`d<15` / `d < 15`)는 무시. 문자열 밖 숫자는 차이가 `tolerance`(절대값, 기본 0) 안이면 같다 |
-| `pinIs: { name, pin }` | `name = ...Pin(pin, ...)` 줄이 있다 (`led = Pin(26, Pin.OUT)`, `servo = PWM(Pin(4))`) |
+| `pinIs: { name, pin?, notPin? }` | `name = ...Pin(pin, ...)` 줄이 있다 (`led = Pin(26, Pin.OUT)`, `servo = PWM(Pin(4))`). `pin` 을 빼면 번호는 보지 않는다(학생이 다른 핀에 꽂아도 통과 — 미션은 이 꼴을 쓴다). `notPin` 번호면 실패(다른 부품이 쓰는 핀). 핀을 바꾸는 것 자체가 답인 디버깅만 `pin` 을 적는다 |
 | `maxBlocks: n` | 그림자 아닌 블록이 n개 이하 |
 | `outputIncludes: 글` | 실행 출력에 그 글이 들어 있다 |
 | `hasLine: { text, inside? }` | 정규화 코드에 **그 줄**이 있다(아래 "줄 비교"). `inside` 를 주면 그 줄이 속한 가장 가까운 블록 머리가 `loop`(`while`/`for`) · `def` · `if`(`if`/`elif`/`else`) · `top`(들여쓰기 0) 인 줄이 하나라도 있어야 한다. 들여쓰기로 판단: 위로 올라가며 처음 만나는 더 얕은 줄이 머리 |
@@ -330,6 +330,6 @@ rules:
 
 `npm test` 가 모든 챕터의 `mission`·`debug` 규칙을 보호한다 (`src/track/content.test.ts`):
 
-- `answerCode` 가 있으면 그 코드는 자기 규칙(debug 는 전체 규칙 + 증상 규칙)을 **모두 통과**해야 한다.
+- `answerCode`(와 미션의 `answerVariants` 파일 모두)가 있으면 그 코드는 자기 규칙(debug 는 전체 규칙 + 증상 규칙)을 **모두 통과**해야 한다.
 - `mission` 에 `code:`(시작 코드)가 있으면 그 코드는 **적어도 한 규칙에 실패**해야 한다 — 시작 코드가 그대로 통과하면 미션이 아니다. 시작 코드가 이미 정답인 미션(예: 선을 고치는 미션)은 `startPasses: true` 를 적어 예외로 둔다(그러면 반대로 시작 코드가 통과하는지 검사).
 - 모든 규칙의 `fail` 은 **정답을 말하지 않는 되묻기** 꼴이어야 한다: 물음표로 끝나거나 중간에 `…요?` 물음(`…나요?`·`…인가요?`·`…까요?`)이 있어야 한다. "LED 핀은 26번이에요" 처럼 답을 말하는 문장은 걸린다.

@@ -144,11 +144,11 @@ describe("textAnswersOf", () => {
 });
 
 describe("judgeSnapshot", () => {
-  it("01-led 정답 기록: 미션·설계 모두 통과 (missions 2, passed 2), 저장된 주의는 그대로 붙는다", () => {
+  it("01-led 정답 기록: 미션·설계 모두 통과 (missions 3 = 선택 도전 포함, passed 2), 저장된 주의는 그대로 붙는다", () => {
     const summary = judgeSnapshot(chapter(), snapshotOf(answerRecords()));
-    expect(summary.missions).toBe(2);
+    expect(summary.missions).toBe(3);
     expect(summary.passed).toBe(2);
-    expect(summary.steps.map((s) => [s.stepId, s.type, s.passed])).toEqual([["mission", "mission", true], ["design", "design", true]]);
+    expect(summary.steps.map((s) => [s.stepId, s.type, s.passed])).toEqual([["mission", "mission", true], ["design", "design", true], ["challenge", "mission", null]]);
     expect(summary.steps[0].failures).toEqual([]);
     expect(summary.steps[0].notes).toEqual(["검사 주의 하나"]);
     expect(summary.steps[1].notes).toEqual([]);
@@ -178,11 +178,11 @@ describe("judgeSnapshot", () => {
 
   it("프로그램이 없으면 null, 건너뛰었으면 그렇게 알린다", () => {
     const summary = judgeSnapshot(chapter(), snapshotOf({ mission: rec({}, "open"), design: rec({ skipped: true }) }));
-    expect(summary.steps.map((s) => [s.passed, s.notes])).toEqual([[null, [NOTE_NO_PROGRAM]], [null, [NOTE_SKIPPED]]]);
-    expect(summary.missions).toBe(2);
+    expect(summary.steps.map((s) => [s.passed, s.notes])).toEqual([[null, [NOTE_NO_PROGRAM]], [null, [NOTE_SKIPPED]], [null, [NOTE_NO_PROGRAM]]]);
+    expect(summary.missions).toBe(3);
     expect(summary.passed).toBe(0);
     // 기록이 전혀 없어도 단계 수는 그대로
-    expect(judgeSnapshot(chapter(), snapshotOf({})).steps.map((s) => s.passed)).toEqual([null, null]);
+    expect(judgeSnapshot(chapter(), snapshotOf({})).steps.map((s) => s.passed)).toEqual([null, null, null]);
   });
 
   it("설계: 목표 코드와 다르면 설계 실패 문장", () => {

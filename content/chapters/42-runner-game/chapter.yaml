@@ -489,10 +489,10 @@ parts:
         hint: "소리 블록은 4줄 꼴이에요: beeper.freq(880) · beeper.duty(512) · time.sleep(0.03) · beeper.duty(0). 범위 바꾸기: wait = ((knob.read() - 0) * (60 - 160) // (4095 - 0) + 160) 다음 time.sleep_ms(wait)"
         code: mission_runner.py
         rules:
-          - pinIs: { name: beeper, pin: 25 }
-            fail: 수동 부저를 25번 핀에 beeper 이름으로 준비했나요?
-          - pinIs: { name: knob, pin: 39 }
-            fail: 가변저항을 39번 핀에 knob 이름으로 준비했나요?
+          - pinIs: { name: beeper }
+            fail: 수동 부저를 꽂은 핀에 beeper 이름으로 준비했나요?
+          - pinIs: { name: knob }
+            fail: 가변저항을 꽂은 핀에 knob 이름으로 준비했나요?
           - codeMatches: '^\s+jump = 1\n\s+beeper\.freq\(880\)$'
             fail: 점프가 시작되는 바로 그 자리에서 높은 음이 나나요? 어느 줄 다음에 소리 블록을 두어야 할까요?
           - codeMatches: 'beeper\.freq\(220\)'

@@ -241,13 +241,13 @@ parts:
         hint: 18장 미션과 무엇이 같고 무엇이 다른가요? 범위 바꾸기 블록의 첫 칸에 다이얼 값 대신 조이스틱 X 값 블록을 끼워 보세요
         code: step1_read.py
         rules:
-          - pinIs: { name: servo, pin: 4 }
+          - pinIs: { name: servo }
             fail: 서보 주황 신호선은 몇 번 핀에 꽂았나요? 그 핀을 servo 라는 이름으로 준비했나요?
           - codeMatches: '\(\(rocker_x\.read\(\)\s*-\s*0\)\s*\*\s*\(180\s*-\s*0\)\s*//\s*\(4095\s*-\s*0\)\s*\+\s*0\)'
             fail: 조이스틱 X 값의 범위와 서보 각도의 범위는 각각 어디부터 어디까지인가요? 범위 바꾸기의 첫 칸에 조이스틱 X 값이 들어갔나요?
           - codeMatches: '^\s+servo\.duty_u16\(1638\s*\+\s*angle\s*\*\s*6462\s*//\s*180\)$'
             fail: 바꾼 각도를 서보에게 보냈나요? 서보 각도 블록의 칸에 무엇이 들어 있나요?
-          - codeMatches: '^rocker_x\s*=\s*ADC\(Pin\(36\)\)[\s\S]*^servo\s*=\s*PWM\(Pin\(4\)\)'
+          - codeMatches: '^rocker_x\s*=\s*ADC\(Pin\(\d+\)\)[\s\S]*^servo\s*=\s*PWM\(Pin\(\d+\)\)'
             fail: 서보 준비와 조이스틱 준비는 어느 순서로 있나요? 둘 다 반복 밖에 있나요?
           - codeMatches: '^\s+angle\s*=\s*.*rocker_x\.read\(\).*\n(\s*print\(.*\)\n)*\s+servo\.duty_u16\(1638\s*\+\s*angle\b'
             fail: 조이스틱 값을 바꿔 담은 이름과 서보에게 보내는 이름이 같나요? 담은 줄 바로 다음에 서보에게 보내나요?

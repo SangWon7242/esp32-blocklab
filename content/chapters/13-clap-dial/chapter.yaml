@@ -246,9 +246,9 @@ parts:
         hint: 2장에서 밝기를 바꿀 때 LED 를 어떻게 준비했나요? 범위 바꾸기 블록의 네 칸에는 원래 범위의 처음·끝, 바꿀 범위의 처음·끝이 들어가요
         code: step1_dial.py
         rules:
-          - pinIs: { name: led, pin: 26 }
+          - pinIs: { name: led }
             fail: LED 는 몇 번 핀에 꽂았나요? 그 핀을 led 라는 이름으로 준비했나요?
-          - codeMatches: '^led = PWM\(Pin\(26\)\)$'
+          - codeMatches: '^led = PWM\(Pin\(\d+\)\)$'
             fail: 켜기·끄기만 하는 핀으로 밝기를 여러 단계로 바꿀 수 있을까요? 2장에서는 어떻게 준비했나요?
           - codeMatches: '^led\.freq\(\s*1000\s*\)'
             fail: 밝기 조절 LED 는 1초에 몇 번 켜고 끄게 준비했나요? 2장의 숨쉬는 LED 는 어떻게 했나요?

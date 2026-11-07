@@ -363,7 +363,7 @@ parts:
                   time.sleep(0.5)
             question: 이 코드는 어느 부저를 위한 코드였나요? 1과 0만 보내면 수동 부저의 떨림판은 1초에 몇 번 떨까요? 부저를 바꾸지 말고, 코드를 수동 부저에 맞게 고쳐 보세요.
             rules:
-              - codeMatches: 'PWM\(Pin\(25\)\)'
+              - codeMatches: 'PWM\(Pin\(\d+\)\)'
                 fail: 수동 부저는 떨림 빠르기를 정해 주는 핀이 필요해요. 25번 핀을 무엇으로 준비해야 할까요?
               - codeMatches: '\.freq\('
                 fail: 1초에 몇 번 떨지(진동수)를 정하는 줄이 있나요?

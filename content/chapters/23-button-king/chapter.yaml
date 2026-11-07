@@ -191,7 +191,7 @@ parts:
         hint: LED 카테고리의 RGB LED 준비 블록을 맨 위에 놓아요. held 를 구한 줄 아래에 "만약 held < 500 이면 RGB 색 빨강, 아니면 RGB 색 파랑" 을 넣어요. 빨강은 (255, 0, 0), 파랑은 (0, 0, 255) 예요
         code: step1_press_time.py
         rules:
-          - codeMatches: '^red = PWM\(Pin\(27\)\)$'
+          - codeMatches: '^red = PWM\(Pin\(\d+\)\)$'
             fail: RGB LED 를 쓸 준비가 되어 있나요? 빨강 · 초록 · 파랑 다리는 각각 몇 번 핀에 이어져 있나요?
           - codeMatches: '^\s+if .+ (<|<=|>|>=) 500:$'
             fail: 몇 ms 를 기준으로 짧게와 길게를 나누기로 했나요? 누른 시간을 그 기준과 비교하는 조건이 있나요?

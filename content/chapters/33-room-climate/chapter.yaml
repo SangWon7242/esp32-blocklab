@@ -277,7 +277,7 @@ parts:
             fail: (1) 센서에게 재 달라고 부탁하는 줄이 되풀이 안에 있나요? 한 바퀴 끝에 몇 초 쉬나요? DHT11 이 쉬어야 하는 시간보다 넉넉한가요?
           - codeMatches: 'oled\.fill\(0\)[\s\S]*oled\.text\([^\n]*str\(t\)[^\n]*\)[\s\S]*oled\.text\([^\n]*str\(h\)[^\n]*\)[\s\S]*oled\.show\(\)'
             fail: (2) 화면에 온도 줄과 습도 줄이 차례로 보이나요? 숫자를 글자로 바꿔 이었나요? 지우기와 내보내기도 있나요?
-          - pinIs: { name: motor1a, pin: 13 }
+          - pinIs: { name: motor1a }
             fail: (3) 팬(모터 모듈)을 준비했나요? IN+ 선은 몇 번 핀에 꽂았나요?
           - codeMatches: '^\s+if\s+di\s*>=\s*75\s*:\n\s+forward\(\d+\)\n\s+else\s*:\n\s+stop\(\)'
             fail: (3) 불쾌지수가 몇 이상일 때 팬을 켜기로 했나요? 그보다 낮을 때 팬은 어떻게 되어야 하나요? 색을 고르는 묶음과 따로 물었나요?

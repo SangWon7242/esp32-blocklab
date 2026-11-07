@@ -41,8 +41,8 @@ describe("챕터 YAML", () => {
     expect(chapters["10-auto-door"].title).toBe("다가가면 열리는 자동문");
   });
 
-  it("단계 수: 챕터 1 은 8, 챕터 10 은 14 (1부 7 + 2부 7)", () => {
-    expect(allSteps(chapters["01-led"]).map((s) => s.type)).toEqual(["problem", "analysis", "predict", "run", "readcheck", "mission", "design", "reflect"]);
+  it("단계 수: 챕터 1 은 9 (선택 도전 포함), 챕터 10 은 14 (1부 7 + 2부 7)", () => {
+    expect(allSteps(chapters["01-led"]).map((s) => s.type)).toEqual(["problem", "analysis", "predict", "run", "readcheck", "mission", "design", "reflect", "mission"]);
     const ch10 = chapters["10-auto-door"];
     expect(ch10.parts.map((p) => p.steps.map((s) => s.id))).toEqual([
       ["problem", "analysis", "predict", "run1", "readcheck1", "mission1", "debug1"],
@@ -72,10 +72,13 @@ describe("챕터 YAML", () => {
     for (const ch of Object.values(chapters)) {
       for (const step of allSteps(ch)) {
         if (step.type !== "mission" || !step.answerCode) continue;
-        const code = ch.files[step.answerCode];
-        const r = codeToBlocks(code);
-        if (!r.ok) throw new Error(`${step.id} 정답 파싱 실패`);
-        expect(judge(step.rules, { code, blocksJson: r.json }, ch.files), `${ch.id}/${step.id}`).toEqual({ pass: true, failures: [] });
+        // 다른 꼴의 정답(answerVariants)도 같은 규칙을 통과해야 한다
+        for (const file of [step.answerCode, ...(step.answerVariants ?? []).map((v) => v.file)]) {
+          const code = ch.files[file];
+          const r = codeToBlocks(code);
+          if (!r.ok) throw new Error(`${step.id} 정답 파싱 실패 (${file})`);
+          expect(judge(step.rules, { code, blocksJson: r.json }, ch.files), `${ch.id}/${step.id} ${file}`).toEqual({ pass: true, failures: [] });
+        }
       }
     }
   });
@@ -149,9 +152,12 @@ describe("저장소 전체 보호: 미션·디버깅 규칙", () => {
     for (const ch of loadAll()) {
       for (const step of allSteps(ch)) {
         if ((step.type !== "mission" && step.type !== "debug") || !step.answerCode) continue;
-        const code = ch.files[step.answerCode];
         const rules = step.type === "mission" ? step.rules : [...step.rules, ...step.symptoms.flatMap((s) => s.rules)];
-        expect(judge(rules, { code, blocksJson: blocksOf(code) }, ch.files), `${ch.id}/${step.id}`).toEqual({ pass: true, failures: [] });
+        const files = [step.answerCode, ...(step.type === "mission" ? step.answerVariants ?? [] : []).map((v) => v.file)];
+        for (const file of files) {
+          const code = ch.files[file];
+          expect(judge(rules, { code, blocksJson: blocksOf(code) }, ch.files), `${ch.id}/${step.id} ${file}`).toEqual({ pass: true, failures: [] });
+        }
       }
     }
   });

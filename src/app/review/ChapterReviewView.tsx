@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AiReviewCard } from "@/app/track/steps/AiCheck";
+import { GuideBody } from "@/app/track/GuideBody";
 import { ReviewBadge } from "@/app/track/ReviewBadge";
 import { STEP_TYPE_LABEL } from "@/app/track/stepMeta";
 import { StepTypeIcon } from "@/app/track/StepTypeIcon";
@@ -270,7 +271,10 @@ function ReadCheckReview({ step, input }: { step: StepOf<"readcheck">; input: Re
 function MissionReview({ step, input }: { step: StepOf<"mission">; input: MissionInput }) {
   return (
     <div className="space-y-3">
-      <p className="text-sm"><span className="font-medium">미션</span> {step.instructions}</p>
+      <div className="text-sm">
+        <span className="font-medium">미션</span>
+        <GuideBody text={step.instructions} className="mt-1 space-y-1 text-sm md:text-sm" />
+      </div>
       <JudgeResult passed={input.passed} failures={input.failures} notes={input.notes} explained={input.explained} />
       {input.explainMemo?.trim() && <p className="text-sm"><span className="font-medium">1분 설명 메모</span> {input.explainMemo}</p>}
       <Program program={input.program} />

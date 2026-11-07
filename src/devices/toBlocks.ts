@@ -2,7 +2,7 @@ import { codeToBlocks } from "@/parser";
 import type { BlockJson } from "@/parser/types";
 import { actionHelpersOf, defaultValues, DEVICES, DEVICE_CATEGORIES, setupsOf } from "./registry";
 import { helperDef } from "./specs/common";
-import type { DeviceSpec, Part } from "./types";
+import type { DeviceCategory, DeviceSpec, Part } from "./types";
 
 /** 정의되지 않은 키를 뺀다 (블록 JSON 을 손으로 쓴 것과 같게) */
 const defined = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
@@ -114,7 +114,9 @@ function helperFunctionItems(d: DeviceSpec): ToolboxItem[] {
     .map((b) => ({ kind: "block" as const, ...byName(b, names) }));
 }
 
-function deviceItems(d: DeviceSpec): ToolboxItem[] {
+function deviceItems(d: DeviceSpec, category: DeviceCategory): ToolboxItem[] {
+  const own = d.toolboxIn?.[category];
+  if (own) return [{ kind: "label", text: own.label }, ...own.items.map((x) => entry(x.blockType, x.fields))];
   return [
     { kind: "label", text: d.label },
     ...setupsOf(d).map((s) => entry(s.blockType)),
@@ -135,6 +137,6 @@ const byToolboxOrder = (ds: DeviceSpec[]): DeviceSpec[] =>
 export function deviceToolboxCategories(): ToolboxCategory[] {
   return DEVICE_CATEGORIES.map((c) => ({
     kind: "category", name: c.label, categorystyle: `${c.id}_category`, icon: c.id,
-    contents: byToolboxOrder(DEVICES.filter((d) => d.category === c.id || d.alsoIn?.includes(c.id))).flatMap(deviceItems),
+    contents: byToolboxOrder(DEVICES.filter((d) => d.category === c.id || d.alsoIn?.includes(c.id))).flatMap((d) => deviceItems(d, c.id)),
   }));
 }

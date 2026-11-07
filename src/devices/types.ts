@@ -160,6 +160,11 @@ export type DeviceSpec = {
   /** 라벨 아래에 다른 장치의 블록을 필드 기본값만 바꿔 넣는다 (예: 조도 센서 밑에 dev_adc_read VAR=light) */
   extraToolbox?: { blockType: string; fields: Record<string, string> }[];
   /**
+   * 카테고리마다 툴박스에 보일 라벨·블록을 따로 정한다 (자기 category·alsoIn 모두). 정한 카테고리에서는 기본 항목 대신 이것만 보인다.
+   * 예: 출력 핀은 핀 카테고리에 이름 pin1 로, LED 카테고리에 이름 led 로 — 같은 블록이 두 카테고리에 겹치지 않게
+   */
+  toolboxIn?: Partial<Record<DeviceCategory, { label: string; items: { blockType: string; fields?: Record<string, string> }[] }>>;
+  /**
    * 툴박스에서 카테고리 안의 보여 주는 순서 (작은 것이 위). DEVICES 순서는 파서가 맞추는 우선순위라 따로 둔다.
    * 없으면 순서가 있는 장치들 뒤에 DEVICES 순서대로.
    */

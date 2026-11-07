@@ -7,7 +7,28 @@ const PIN_KINDS = ["pin", "ultrasonic", "tilt", "pir", "seg7"];
 /** 핀 출력·입력 (esp_pin_setup). 초음파 trig/echo 도 핀이므로 켜기·끄기·값 블록은 그 변수에도 맞는다 */
 export const pinOut: DeviceSpec = {
   id: "pin_out", category: "pin", label: "핀", toolboxOrder: 1, colour: "#00b6b1",
-  alsoIn: ["led"], // LED 는 따로 준비 블록이 없다: 출력 핀 준비·켜기·끄기를 LED 카테고리에도 보여 준다
+  alsoIn: ["led"], // LED 는 따로 준비 블록이 없다: 출력 핀 준비·켜기·끄기를 LED 카테고리에서 꺼낸다
+  // 핀 카테고리에는 LED 이름(led)·켜기·끄기를 두지 않는다. 일반 핀 이름 pin1 로 준비·값 내보내기·읽기만,
+  // LED 준비와 켜기·끄기는 LED 카테고리에만 (같은 블록이 두 곳에 겹쳐 보이지 않게)
+  toolboxIn: {
+    pin: {
+      label: "핀",
+      items: [
+        { blockType: "esp_pin_setup", fields: { VAR: "pin1" } },
+        { blockType: "esp_pin_setup_var", fields: { VAR: "pin1" } },
+        { blockType: "dev_pin_write_value", fields: { VAR: "pin1" } },
+        { blockType: "esp_pin_read" },
+      ],
+    },
+    led: {
+      label: "LED 켜고 끄기",
+      items: [
+        { blockType: "esp_pin_setup", fields: { VAR: "led", MODE: "OUT" } },
+        { blockType: "esp_pin_write", fields: { VAR: "led", VALUE: "1" } },
+        { blockType: "esp_pin_write", fields: { VAR: "led", VALUE: "0" } },
+      ],
+    },
+  },
   setup: {
     blockType: "esp_pin_setup",
     message: "핀 %1 을(를) %2 으로 준비하고 %3 이름 붙이기",

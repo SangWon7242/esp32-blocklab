@@ -203,11 +203,11 @@ parts:
         instructions: "터치 패드 세 개를 touch_a(32번) · touch_b(33번) · touch_c(27번) 이름으로 준비하고, 끝없이 되풀이하며 세 패드의 터치 값을 출력 창에 찍은 뒤 0.5초 기다려 주세요"
         hint: "터치 패드 준비 블록을 세 번 쓰고 핀과 이름을 바꿔요. 되풀이 안에 \"터치 값 찍기\" 세 개(print(touch_a.read()) …), 구분용 print(\"---\"), 0.5초 기다리기"
         rules:
-          - pinIs: { name: touch_a, pin: 32 }
+          - pinIs: { name: touch_a }
             fail: 패드 a 는 몇 번 핀에 이었나요? 터치 패드 준비의 이름과 핀이 지시와 같나요?
-          - pinIs: { name: touch_b, pin: 33 }
+          - pinIs: { name: touch_b }
             fail: 패드 b 는 몇 번 핀에 이었나요? 이름 touch_b 로 준비했나요?
-          - pinIs: { name: touch_c, pin: 27 }
+          - pinIs: { name: touch_c }
             fail: 패드 c 는 몇 번 핀에 이었나요? 이름 touch_c 로 준비했나요?
           - codeMatches: '^(?=[\s\S]*print\([^\n]*touch_a\.read\(\))(?=[\s\S]*print\([^\n]*touch_b\.read\(\))(?=[\s\S]*print\([^\n]*touch_c\.read\(\))'
             fail: 세 패드의 값이 모두 출력 창에 찍히나요? 빠진 패드는 없나요?
