@@ -66,11 +66,44 @@ export class EntryToolboxCategory extends Blockly.ToolboxCategory {
   }
 }
 
+/** 블록 팔레트(flyout)가 작업판에서 차지해도 되는 몫. 나머지는 블록을 끌어다 놓을 자리로 남긴다 */
+export const FLYOUT_MAX_SHARE = 0.7;
+/** 팔레트 폭의 아래 한계 (작업판이 아주 좁아도 이만큼은) */
+export const FLYOUT_MIN_WIDTH = 240;
+
+/**
+ * 팔레트 폭: Blockly 는 가장 넓은 블록에 맞춰 늘리는데, 몸통이 채워진 함수 블록(센서의 ntc_temperature 등)은 수백 px 이라
+ * 팔레트가 작업판보다 넓어지고 세로 스크롤바가 작업판 밖으로 밀려 보이지도 잡히지도 않았다. 작업판 안(available 의 70%)으로 줄인다.
+ * 넓은 블록은 오른쪽이 잘려 보이지만 그대로 끌어 쓸 수 있다.
+ */
+export function clampFlyoutWidth(natural: number, available: number): number {
+  if (!(available > 0)) return natural;
+  const max = Math.max(Math.min(FLYOUT_MIN_WIDTH, available), available * FLYOUT_MAX_SHARE);
+  return Math.min(natural, max);
+}
+
+/** 폭을 작업판 안으로 줄이는 세로 팔레트 (스크롤바가 늘 보이는 자리에 온다) */
+export class ClampedVerticalFlyout extends Blockly.VerticalFlyout {
+  protected override reflowInternal_(): void {
+    super.reflowInternal_();
+    const target = this.targetWorkspace;
+    const svgWidth = target.getMetricsManager().getSvgMetrics().width;
+    const available = svgWidth - (target.getToolbox()?.getWidth() ?? 0);
+    const width = clampFlyoutWidth(this.width_, available);
+    if (width === this.width_) return;
+    this.width_ = width;
+    this.position();
+    target.resizeContents();
+    target.recordDragTargets();
+  }
+}
+
 let registered = false;
 
-/** 툴박스의 기본 카테고리(kind: "category")를 EntryToolboxCategory 로 바꾼다. 여러 번 불러도 한 번만 등록한다 */
+/** 툴박스의 기본 카테고리(kind: "category")를 EntryToolboxCategory 로, 세로 팔레트를 ClampedVerticalFlyout 으로 바꾼다. 여러 번 불러도 한 번만 등록한다 */
 export function registerEntryToolbox(): void {
   if (registered) return;
   Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, EntryToolboxCategory, true);
+  Blockly.registry.register(Blockly.registry.Type.FLYOUTS_VERTICAL_TOOLBOX, Blockly.registry.DEFAULT, ClampedVerticalFlyout, true);
   registered = true;
 }

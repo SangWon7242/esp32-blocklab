@@ -127,6 +127,32 @@ test("팔레트를 닫으면 팔레트 스크롤바도 사라진다", async ({ p
   await expect(flyoutBar).toBeHidden();
 });
 
+test("넓은 함수 블록이 있는 센서 팔레트도 작업판 안에 들어오고, 세로 스크롤바를 끌면 아래 블록이 보인다", async ({ page }) => {
+  // 코드 칸이 옆에 있는 좁은 작업판 (트랙 편집기 단계와 비슷한 폭)
+  await page.setViewportSize({ width: 1024, height: 700 });
+  await page.goto("/#/lab");
+  const category = (name: string) => page.locator(".blocklyToolboxCategory").filter({ hasText: new RegExp(`^${name}$`) });
+  await category("센서").click();
+  const flyout = page.locator(".blocklyToolboxFlyout");
+  await expect(flyout).toBeVisible();
+  const svg = (await page.locator("svg.blocklySvg").first().boundingBox())!;
+  const fly = (await flyout.boundingBox())!;
+  // 팔레트 오른쪽 끝(세로 스크롤바 자리)이 작업판 안에 있다
+  expect(fly.x + fly.width).toBeLessThanOrEqual(svg.x + svg.width);
+  const handle = page.locator(".blocklyFlyoutScrollbar .blocklyScrollbarHandle").first();
+  await expect(handle).toBeVisible();
+  const h = (await handle.boundingBox())!;
+  expect(h.x + h.width).toBeLessThanOrEqual(svg.x + svg.width);
+  // 손잡이를 끌면 팔레트가 아래로 움직인다
+  const canvas = page.locator(".blocklyToolboxFlyout .blocklyBlockCanvas").first();
+  const before = await canvas.getAttribute("transform");
+  await page.mouse.move(h.x + h.width / 2, h.y + 5);
+  await page.mouse.down();
+  await page.mouse.move(h.x + h.width / 2, h.y + 150, { steps: 8 });
+  await page.mouse.up();
+  await expect.poll(() => canvas.getAttribute("transform")).not.toBe(before);
+});
+
 test("코드 ↔ 블록 전환과 코드 고치기는 작업판의 보던 자리를 그대로 둔다", async ({ page }) => {
   await page.goto("/#/lab");
   const host = page.getByTestId("blockly-host");
