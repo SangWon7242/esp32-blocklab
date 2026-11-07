@@ -82,6 +82,25 @@ test("미션 단계: 판정 실패 → 힌트 → 코드 모드에서 고치기 
   await expect(page.getByTestId("code-panel")).toContainText('print("가까워요!")');
 });
 
+test("미션 단계: 지시문은 안내 칸 「미션」 탭에 한 번만 있고, 「설명」 탭으로 글을 보며, 안내 칸을 접으면 활동 칸 위로 온다", async ({ page }) => {
+  await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1"]);
+  await openStep(page, "mission1");
+  const guide = page.getByTestId("step-guide");
+  const activity = page.getByTestId("step-activity");
+  await expect(guide.getByTestId("mission-brief")).toContainText("15cm보다 가까워지면");
+  await expect(activity.getByTestId("mission-brief")).toHaveCount(0);
+
+  await page.getByTestId("guide-tab-explain").click();
+  await expect(guide.getByTestId("mission-brief")).toHaveCount(0);
+  await page.getByTestId("guide-tab-mission").click();
+  await expect(guide.getByTestId("mission-brief")).toBeVisible();
+
+  await page.getByTestId("guide-toggle").click();
+  await expect(activity.getByTestId("mission-brief")).toContainText("15cm보다 가까워지면");
+  await page.getByTestId("guide-toggle").click();
+  await expect(activity.getByTestId("mission-brief")).toHaveCount(0);
+});
+
 test("미션 단계: 통과한 판정에 주의(기다리기 없는 반복·준비만 한 장치)가 붙어도 완료는 그대로 된다", async ({ page }) => {
   await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1"]);
   await openStep(page, "mission1");

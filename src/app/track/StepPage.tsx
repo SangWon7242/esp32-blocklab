@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  ArrowLeft, ArrowRight, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward,
+  ArrowLeft, ArrowRight, BookOpen, Cable, Check, CheckCircle2, ChevronDown, CircleCheck, Clock, Hourglass, ListChecks, PanelLeftClose, PanelLeftOpen, SkipForward, Target,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HostLink, useHost, useHostSlots } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { figureCaption, materialsForBoard } from "@/track/board";
-import { awaitingExplain, canComplete, isEditorStep } from "@/track/completion";
+import { awaitingExplain, canComplete, isEditorStep, type MissionInput } from "@/track/completion";
 import { getChapter, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates } from "@/track/gating";
 import type { ProgressStore, StepRecord } from "@/track/progress";
@@ -32,7 +33,7 @@ import { AppStep } from "./steps/AppStep";
 import { ANALYSIS_IMAGE, Analysis } from "./steps/Analysis";
 import { DebugStep } from "./steps/DebugStep";
 import { DesignStep } from "./steps/DesignStep";
-import { MissionStep } from "./steps/MissionStep";
+import { MissionBrief, MissionStep } from "./steps/MissionStep";
 import { Predict } from "./steps/Predict";
 import { Problem } from "./steps/Problem";
 import { ReadCheck } from "./steps/ReadCheck";
@@ -151,7 +152,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
     case "readcheck": activity = <ReadCheck step={step} {...props} />; break;
     case "reflect": activity = <Reflect step={step} {...props} />; break;
     case "run": activity = <RunStep step={step} {...props} />; break;
-    case "mission": activity = <MissionStep step={step} {...props} />; break;
+    case "mission": activity = <MissionStep step={step} {...props} briefInActivity={guideCollapsed} />; break;
     case "debug": activity = <DebugStep step={step} {...props} />; break;
     case "design": activity = <DesignStep step={step} {...props} />; break;
     case "app": activity = <AppStep step={step} {...props} />; break;
@@ -217,7 +218,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
           data-testid="step-guide"
           className={cn("border-b p-4 sm:p-6 lg:overflow-y-auto lg:border-r lg:border-b-0", guideCollapsed && "md:hidden")}
         >
-          <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} awaiting={awaiting} />
+          <StepGuide chapter={chapter} step={step} partTitle={part?.title} done={done} awaiting={awaiting} input={input} teacherMode={teacherMode} />
         </aside>
         {/* 활동 칸 (기본 글자 16 → md 17px, lib-v1.0.6): 세로로 꽉 차게 (편집기·입력 칸이 남는 높이를 채운다). 칸 폭에 따라 안쪽 배치가 바뀐다(@container) */}
         <section className="@container flex min-h-0 flex-col p-4 text-base sm:p-6 md:text-md lg:overflow-y-auto" aria-label="활동" data-testid="step-activity">
@@ -277,12 +278,33 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   );
 }
 
-/** 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → 이렇게 되면 성공(run 의 expected) → (접힘) 부품과 배선 → 시간·완료 */
+/**
+ * 안내 칸: 배지·제목 → 장면 그림 → 글 → 지금 할 일 → 이렇게 되면 성공(run 의 expected) → (접힘) 부품과 배선 → 시간·완료.
+ * 미션 단계는 제목 아래를 탭 두 개로 나눈다: 「미션」(지시문·힌트·장면 그림·지금 할 일, 처음 열림) · 「설명」(글).
+ * 미션 지시문을 활동 칸에 따로 두지 않아 편집기가 위로 올라온다
+ */
 function StepGuide({
-  chapter, step, partTitle, done, awaiting,
-}: { chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean; awaiting: boolean }) {
+  chapter, step, partTitle, done, awaiting, input, teacherMode,
+}: {
+  chapter: LoadedChapter; step: Step; partTitle?: string; done: boolean; awaiting: boolean;
+  input: Record<string, unknown>; teacherMode: boolean;
+}) {
   const board = useBoardChoice();
   const hasKit = Boolean(materialsForBoard(chapter.materials, board).length || chapter.wiring);
+
+  // 조건 분석의 세 칸 그림은 활동 칸에서 입력 칸 바로 위에 보인다 (두 번 그리지 않게)
+  const scene = step.scene && !(step.type === "analysis" && step.scene.image === ANALYSIS_IMAGE) && (
+    <Illustration
+      chapterId={chapter.id}
+      image={step.scene.image}
+      caption={figureCaption(step.scene, board)}
+      className="mt-4 max-w-xl rounded-lg border bg-muted/30 p-3"
+      zoomable
+    />
+  );
+  const body = <GuideBody text={step.body ?? STEP_TYPE_GUIDE[step.type]} className="mt-4" />;
+  const todo = step.todo && <StepTodo todo={step.todo} done={done} />;
+
   return (
     <>
       {partTitle && <p className="text-sm text-muted-foreground">{partTitle}</p>}
@@ -294,44 +316,33 @@ function StepGuide({
       </div>
       <h1 className="mt-3 text-xl leading-snug font-bold tracking-tight break-keep sm:text-2xl xl:text-3xl xl:leading-tight">{step.title}</h1>
 
-      {/* 조건 분석의 세 칸 그림은 활동 칸에서 입력 칸 바로 위에 보인다 (두 번 그리지 않게) */}
-      {step.scene && !(step.type === "analysis" && step.scene.image === ANALYSIS_IMAGE) && (
-        <Illustration
-          chapterId={chapter.id}
-          image={step.scene.image}
-          caption={figureCaption(step.scene, board)}
-          className="mt-4 max-w-xl rounded-lg border bg-muted/30 p-3"
-          zoomable
-        />
-      )}
-
-      <GuideBody text={step.body ?? STEP_TYPE_GUIDE[step.type]} className="mt-4" />
-
-      {step.todo && (
-        <Card size="sm" className="mt-4" data-testid="step-todo">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-md font-semibold group-data-[size=sm]/card:text-md"><ListChecks className="size-4 text-primary" />지금 할 일</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {step.todo.map((t) => (
-                <li key={t} className="flex items-start gap-2">
-                  {/* 체크 표시는 장식: 완료 조건은 유형별 규칙 그대로 */}
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "mt-1 flex size-4 shrink-0 items-center justify-center rounded border",
-                      done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40",
-                    )}
-                  >
-                    {done && <Check className="size-3" />}
-                  </span>
-                  <GuideBody text={t} className="space-y-0" />
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+      {step.type === "mission" ? (
+        <Tabs defaultValue="mission" className="mt-4" data-testid="guide-tabs">
+          <TabsList className="h-11 w-full group-data-horizontal/tabs:h-11">
+            <TabsTrigger value="mission" className="text-base" data-testid="guide-tab-mission"><Target />미션</TabsTrigger>
+            <TabsTrigger value="explain" className="text-base" data-testid="guide-tab-explain"><BookOpen />설명</TabsTrigger>
+          </TabsList>
+          <TabsContent value="mission" className="text-base md:text-md">
+            <MissionBrief
+              step={step}
+              chapterId={chapter.id}
+              failedOnce={(input as MissionInput).failedOnce === true}
+              teacherMode={teacherMode}
+              className="border-primary/30 bg-primary/5"
+            />
+            {scene}
+            {todo}
+          </TabsContent>
+          <TabsContent value="explain" className="text-base md:text-md">
+            {body}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <>
+          {scene}
+          {body}
+          {todo}
+        </>
       )}
 
       {/* 실행 결과 (Keyestudio 수업의 "실행 결과"): 코드를 올리면 무엇이 보이는지 */}
@@ -370,5 +381,35 @@ function StepGuide({
         </div>
       )}
     </>
+  );
+}
+
+/** 지금 할 일 카드 */
+function StepTodo({ todo, done }: { todo: string[]; done: boolean }) {
+  return (
+    <Card size="sm" className="mt-4" data-testid="step-todo">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-md font-semibold group-data-[size=sm]/card:text-md"><ListChecks className="size-4 text-primary" />지금 할 일</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {todo.map((t) => (
+            <li key={t} className="flex items-start gap-2">
+              {/* 체크 표시는 장식: 완료 조건은 유형별 규칙 그대로 */}
+              <span
+                aria-hidden
+                className={cn(
+                  "mt-1 flex size-4 shrink-0 items-center justify-center rounded border",
+                  done ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40",
+                )}
+              >
+                {done && <Check className="size-3" />}
+              </span>
+              <GuideBody text={t} className="space-y-0" />
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }
