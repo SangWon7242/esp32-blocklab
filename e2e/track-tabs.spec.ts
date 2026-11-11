@@ -48,9 +48,9 @@ async function requiredStepIds(chapterId: string): Promise<string[]> {
 const panel = (page: Page, track: string) => page.getByTestId(`track-panel-${track}`);
 const cards = (page: Page, track: string) => panel(page, track).locator("[data-testid^='chapter-card-']");
 
-test("트랙 화면: 두 탭, 센서 트랙 S1~S23, 교과 융합 트랙 F1~F16 와 먼저 할 챕터, 탭은 주소와 브라우저에 기억", async ({ page }) => {
+test("트랙 화면: 세 탭, 센서 트랙 S1~S23, 교과 융합 트랙 F1~F16, 체험 트랙 T1 와 먼저 할 챕터, 탭은 주소와 브라우저에 기억", async ({ page }) => {
   await page.goto("/#/track");
-  await expect(page.getByRole("tab")).toHaveText(["센서 트랙", "교과 융합 트랙"]);
+  await expect(page.getByRole("tab")).toHaveText(["센서 트랙", "교과 융합 트랙", "체험 트랙"]);
   await expect(page.getByRole("tab", { name: "센서 트랙" })).toHaveAttribute("aria-selected", "true");
   await expect(cards(page, "sensor").getByTestId("chapter-label")).toHaveText(Array.from({ length: 23 }, (_, i) => `S${i + 1}`));
 
@@ -85,6 +85,11 @@ test("트랙 화면: 두 탭, 센서 트랙 S1~S23, 교과 융합 트랙 F1~F16 
   await expect(page.getByRole("tab", { name: "교과 융합 트랙" })).toHaveAttribute("aria-selected", "true");
   await page.goto("/#/track?track=sensor");
   await expect(page.getByRole("tab", { name: "센서 트랙" })).toHaveAttribute("aria-selected", "true");
+
+  // 체험 트랙: 처음 온 학생 1:1 체험 챕터
+  await page.getByRole("tab", { name: "체험 트랙" }).click();
+  await expect(page).toHaveURL(/#\/track\?track=trial$/);
+  await expect(cards(page, "trial").getByTestId("chapter-label")).toHaveText(["T1"]);
 });
 
 test("먼저 할 챕터를 다 끝내면 완료로 보인다 (잠그지는 않는다)", async ({ page }) => {

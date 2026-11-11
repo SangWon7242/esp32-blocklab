@@ -15,11 +15,11 @@ const ID_PATTERN = /^[0-9]{2,3}-[a-z0-9]+(-[a-z0-9]+)*$/;
 describe("트랙 메타 — 모든 챕터", () => {
   const chapters = loadChapters();
 
-  it("모든 chapter.yaml 에 track·label 이 있고, 번호 머리글자가 트랙과 맞는다 (센서 S, 교과 융합 F)", () => {
+  it("모든 chapter.yaml 에 track·label 이 있고, 번호 머리글자가 트랙과 맞는다 (센서 S, 교과 융합 F, 체험 T)", () => {
     for (const d of dirs) {
       const raw = parse(readFileSync(join(root, d, "chapter.yaml"), "utf8")) as Record<string, unknown>;
-      expect(raw.track, d).toMatch(/^(sensor|fusion)$/);
-      expect(raw.label, d).toMatch(raw.track === "sensor" ? /^S\d+$/ : /^F\d+$/);
+      expect(raw.track, d).toMatch(/^(sensor|fusion|trial)$/);
+      expect(raw.label, d).toMatch({ sensor: /^S\d+$/, fusion: /^F\d+$/, trial: /^T\d+$/ }[raw.track as string]!);
     }
   });
 

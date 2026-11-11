@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>오늘 만들 것 세 단계: 1단계 빨강 LED 하나 깜빡이기, 2단계 빨강·노랑·초록 신호등, 3단계 버튼을 누르면 바뀌는 보행자 신호등</title>
+  <defs>
+    <marker id="fs-stage-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor" stroke="none"/></marker>
+  </defs>
+  <!-- 1단계 -->
+  <rect x="24" y="40" width="168" height="250" rx="16" fill="var(--card)"/>
+  <text x="108" y="74" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">1단계</text>
+  <circle cx="108" cy="150" r="30" fill="#e03131"/>
+  <path d="M60 150 h-14 M156 150 h14 M108 102 v-12 M74 116 l-9 -9 M142 116 l9 -9" stroke-width="3"/>
+  <text x="108" y="230" text-anchor="middle" font-size="19" fill="currentColor" stroke="none">불 하나</text>
+  <text x="108" y="258" text-anchor="middle" font-size="19" fill="currentColor" stroke="none">깜빡이기</text>
+  <path d="M198 165 H228" stroke-width="3" marker-end="url(#fs-stage-arrow)"/>
+  <!-- 2단계 -->
+  <rect x="236" y="40" width="168" height="250" rx="16" fill="var(--card)"/>
+  <text x="320" y="74" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">2단계</text>
+  <rect x="290" y="92" width="60" height="120" rx="12" fill="var(--muted)"/>
+  <circle cx="320" cy="116" r="14" fill="#e03131"/>
+  <circle cx="320" cy="152" r="14" fill="#fab005"/>
+  <circle cx="320" cy="188" r="14" fill="#2f9e44"/>
+  <text x="320" y="245" text-anchor="middle" font-size="19" fill="currentColor" stroke="none">신호등</text>
+  <text x="320" y="271" text-anchor="middle" font-size="19" fill="currentColor" stroke="none">만들기</text>
+  <path d="M410 165 H440" stroke-width="3" marker-end="url(#fs-stage-arrow)"/>
+  <!-- 3단계 -->
+  <rect x="448" y="40" width="168" height="250" rx="16" fill="var(--card)"/>
+  <text x="532" y="74" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">3단계</text>
+  <rect x="470" y="92" width="44" height="96" rx="10" fill="var(--muted)"/>
+  <circle cx="492" cy="112" r="10" fill="#e03131"/>
+  <circle cx="492" cy="140" r="10" fill="#fab005"/>
+  <circle cx="492" cy="168" r="10" fill="#2f9e44"/>
+  <rect x="538" y="124" width="56" height="56" rx="8" fill="var(--muted)"/>
+  <circle cx="566" cy="152" r="16" fill="var(--card)" stroke-width="3"/>
+  <path d="M566 102 v14 M552 108 l7 9 M580 108 l-7 9" stroke-width="3"/>
+  <text x="532" y="245" text-anchor="middle" font-size="19" fill="currentColor" stroke="none">보행자</text>
+  <text x="532" y="271" text-anchor="middle" font-size="19" fill="currentColor" stroke="none">버튼 넣기</text>
+  <text x="320" y="330" text-anchor="middle" font-size="18" fill="currentColor" stroke="none">하나씩 더해 가며 같은 브레드보드를 키워요</text>
+</svg>

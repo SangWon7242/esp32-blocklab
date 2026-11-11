@@ -52,8 +52,8 @@ type Props = {
 const CARD_GRID = "grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4";
 
 /**
- * 트랙 목록 — 찾기 칸 + 두 탭(센서 트랙 / 교과 융합 트랙), 탭마다 챕터 카드 격자 (화면 전체 폭).
- * 찾기 칸에 글을 넣으면 탭 대신 두 트랙 전체에서 찾은 결과를 보여 준다 (src/track/search.ts — 제목·번호·장치·준비물·단계…).
+ * 트랙 목록 — 찾기 칸 + 세 탭(센서 트랙 / 교과 융합 트랙 / 체험 트랙), 탭마다 챕터 카드 격자 (화면 전체 폭).
+ * 찾기 칸에 글을 넣으면 탭 대신 모든 트랙에서 찾은 결과를 보여 준다 (src/track/search.ts — 제목·번호·장치·준비물·단계…).
  * 초안(draft) 챕터는 교사 모드에서만 "초안" 배지와 함께 보인다 (찾기도 같다).
  */
 export function TrackPage({ track: fromHost, onTrackChange }: Props = {}) {

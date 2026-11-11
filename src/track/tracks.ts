@@ -2,19 +2,20 @@ import type { Chapter, TrackId } from "./schema";
 import { allSteps } from "./gating";
 
 /*
- * 두 트랙(센서 / 교과 융합)과 챕터 메타(번호·먼저 할 챕터·초안). 화면(src/app/track)이 쓰는 순수 함수만 둔다.
+ * 세 트랙(센서 / 교과 융합 / 체험)과 챕터 메타(번호·먼저 할 챕터·초안). 화면(src/app/track)이 쓰는 순수 함수만 둔다.
  * 먼저 할 챕터(prerequisites)는 안내일 뿐 잠그지 않는다 — 관문은 챕터 안에서만 (gating.ts).
  */
 
 export const TRACKS: readonly { id: TrackId; name: string; description: string }[] = [
   { id: "sensor", name: "센서 트랙", description: "모듈 하나, 개념 하나. 부품을 하나씩 익히는 기본기예요." },
   { id: "fusion", name: "교과 융합 트랙", description: "센서 여러 개를 묶어 교과·SDG 문제를 풀어요. 먼저 할 챕터를 끝내고 오면 좋아요." },
+  { id: "trial", name: "체험 트랙", description: "처음 만나는 친구를 위한 50분 체험이에요. 불을 켜고, 신호등을 만들고, 버튼으로 움직여 봐요." },
 ];
 
-export const TRACK_NAME: Record<TrackId, string> = { sensor: "센서 트랙", fusion: "교과 융합 트랙" };
+export const TRACK_NAME: Record<TrackId, string> = { sensor: "센서 트랙", fusion: "교과 융합 트랙", trial: "체험 트랙" };
 
 export function isTrackId(v: unknown): v is TrackId {
-  return v === "sensor" || v === "fusion";
+  return v === "sensor" || v === "fusion" || v === "trial";
 }
 
 /**

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>보행자 신호등의 순서: 평소에는 자동차용 초록불. 버튼을 누르면 노란불 1초, 빨간불 5초 동안 사람이 건너고, 다시 초록불로 돌아온다. 버튼을 안 누르면 계속 초록불</title>
+  <defs>
+    <marker id="fs-flow-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor" stroke="none"/></marker>
+  </defs>
+  <!-- 평소 -->
+  <rect x="20" y="96" width="132" height="120" rx="14" fill="var(--card)"/>
+  <circle cx="86" cy="138" r="22" fill="#2f9e44"/>
+  <text x="86" y="188" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none">평소 초록불</text>
+  <!-- 버튼 -->
+  <path d="M158 156 H196" stroke-width="3" marker-end="url(#fs-flow-arrow)"/>
+  <text x="177" y="138" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">버튼</text>
+  <text x="177" y="182" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">누름</text>
+  <!-- 노랑 -->
+  <rect x="204" y="96" width="132" height="120" rx="14" fill="var(--card)"/>
+  <circle cx="270" cy="138" r="22" fill="#fab005"/>
+  <text x="270" y="188" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none">노란불 1초</text>
+  <path d="M342 156 H380" stroke-width="3" marker-end="url(#fs-flow-arrow)"/>
+  <!-- 빨강 -->
+  <rect x="388" y="96" width="132" height="120" rx="14" fill="var(--card)"/>
+  <circle cx="454" cy="138" r="22" fill="#e03131"/>
+  <text x="454" y="188" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none">빨간불 5초</text>
+  <text x="454" y="244" text-anchor="middle" font-size="16" fill="currentColor" stroke="none">사람이 건너요</text>
+  <!-- 사람 -->
+  <circle cx="570" cy="122" r="10" fill="currentColor" stroke="none"/>
+  <path d="M570 134 V170 M570 146 L554 160 M570 146 L588 156 M570 170 L556 196 M570 170 L586 194" stroke-width="4"/>
+  <!-- 돌아오기 -->
+  <path d="M454 270 C454 316 86 316 86 228" stroke-width="2.5" marker-end="url(#fs-flow-arrow)"/>
+  <text x="270" y="334" text-anchor="middle" font-size="17" fill="currentColor" stroke="none">다시 초록불로 돌아와 다음 버튼을 기다려요</text>
+  <!-- 안 누르면 -->
+  <path d="M60 96 C40 44 132 44 112 92" stroke-width="2.5" marker-end="url(#fs-flow-arrow)"/>
+  <text x="86" y="34" text-anchor="middle" font-size="15" fill="currentColor" stroke="none">안 누르면 계속</text>
+</svg>

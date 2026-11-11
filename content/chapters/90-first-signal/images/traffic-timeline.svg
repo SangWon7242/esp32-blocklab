@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" font-family="inherit">
+  <title>신호등 시간표: 초록불 3초, 노란불 1초, 빨간불 3초를 차례로 켜고 처음부터 계속 반복. 한 번에 켜지는 불은 하나뿐</title>
+  <defs>
+    <marker id="fs-time-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor" stroke="none"/></marker>
+  </defs>
+  <text x="320" y="44" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" stroke="none">신호등 시간표 (1칸 = 1초)</text>
+  <text x="40" y="117" font-size="19" fill="currentColor" stroke="none">초록</text>
+  <text x="40" y="177" font-size="19" fill="currentColor" stroke="none">노랑</text>
+  <text x="40" y="237" font-size="19" fill="currentColor" stroke="none">빨강</text>
+  <g stroke-opacity="0.35">
+    <path d="M100 100 H590 M100 160 H590 M100 220 H590 M100 252 H590"/>
+  </g>
+  <rect x="100" y="94" width="204" height="34" rx="6" fill="#2f9e44"/>
+  <rect x="304" y="154" width="68" height="34" rx="6" fill="#fab005"/>
+  <rect x="372" y="214" width="204" height="34" rx="6" fill="#e03131"/>
+  <g font-size="18" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" text-anchor="middle">
+    <text x="202" y="117">3초</text>
+    <text x="338" y="177">1초</text>
+    <text x="474" y="237">3초</text>
+  </g>
+  <path d="M576 280 C576 320 100 320 100 284" stroke-width="2.5" marker-end="url(#fs-time-arrow)"/>
+  <text x="338" y="340" text-anchor="middle" font-size="18" fill="currentColor" stroke="none">끝나면 처음(초록)으로 돌아가 계속 반복</text>
+</svg>
