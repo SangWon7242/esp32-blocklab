@@ -42,9 +42,26 @@ export type SavedProgram = { code: string; blocksJson?: unknown };
 
 export type RunInput = EditorInput & {
   program?: SavedProgram;
-  /** 보드(가짜 포함)에서 실행이 한 번 끝까지 성공했는지 */
+  /** 보드(가짜 포함)에서 실행이 오류 없이 한 번 끝났는지 (멈춤으로 끝난 것도 든다 — runSucceeded) */
   ran?: boolean;
 };
+
+/**
+ * 이 실행 결과를 "실행 단계를 해냈다"로 볼 것인가. **오류만 없으면 해낸 것이다.**
+ *
+ * 멈춤도 센다. 실행 단계의 코드는 대개 `while True:` 로 끝없이 도는 프로그램이라(운영 챕터의 실행 단계
+ * 74개 가운데 64개) 스스로 끝나지 않는다 — 깜빡이는 LED 를 보던 아이가 「멈춤」을 눌러야 끝난다. 그런데
+ * 멈춤은 ok 가 아니다(useDevice: ok 는 멈춤도 오류도 없이 끝났을 때만). 그래서 ok 만 보면 그 아이는
+ * 완료 버튼이 꺼진 화면 앞에서 다음 단계로 못 간다 — 가짜 보드는 `while True:` 를 한 바퀴만 훑고
+ * 끝내므로(device/fake.ts) 이 막힘은 **진짜 보드에서만** 드러난다.
+ *
+ * 멈춤(Ctrl-C)은 오류가 아니라는 것은 보드 계층의 약속이기도 하다 — device/types.ts 의 RunResult 는
+ * KeyboardInterrupt 를 오류로 보지 않는다. 오류(Traceback)로 끝난 실행만 해내지 못한 것으로 둔다.
+ */
+export function runSucceeded(result: { ok: boolean; stopped?: boolean; error?: unknown }): boolean {
+  if (result.error !== undefined) return false;
+  return result.ok || result.stopped === true;
+}
 export type MissionInput = EditorInput & {
   program?: SavedProgram;
   /** 마지막 판정에서 실패한 규칙의 fail 문장 */

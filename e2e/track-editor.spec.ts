@@ -54,6 +54,28 @@ test("실행 단계: 지정 코드가 실려 있고, 가짜 보드에서 실행�
   await expect(page.getByRole("link", { name: "다음" })).toBeVisible();
 });
 
+/*
+ * 실행 단계의 코드는 대개 끝없이 도는 프로그램(while True)이라 스스로 끝나지 않는다 — 아이가 「멈춤」을
+ * 눌러야 끝난다. 멈춤을 실패로 세면 그 단계를 영영 끝낼 수 없다. 가짜 보드는 while True 를 한 바퀴만
+ * 훑고 끝내 버리므로, 여기서는 오래 도는 프로그램(print 20줄 × 200ms)으로 그 자리를 만든다.
+ */
+test("실행 단계: 끝없이 도는 프로그램은 멈춤으로 끝내도 완료된다", async ({ page }) => {
+  await seedDone(page, ["problem", "analysis", "predict"]);
+  await openStep(page, "run1");
+  await replaceCode(page, Array.from({ length: 20 }, (_, i) => `print(${i})`).join("\n"));
+  await button(page, "보드 연결").click();
+  await expect(page.getByTestId("device-status")).toHaveText("연결됨");
+  await button(page, "실행").click();
+  await expect(page.getByTestId("console-entry").filter({ hasText: /^0$/ })).toHaveCount(1);
+  await expect(button(page, "완료")).toBeDisabled();
+
+  await button(page, "멈춤").click();
+  await expect(page.getByTestId("console-entry").filter({ hasText: "실행을 멈췄어요" })).toHaveCount(1);
+  await expect(page.getByText("실행에 성공했어요")).toBeVisible();
+  await expect(page.getByText("완료한 단계예요")).toBeVisible();
+  await expect(page.getByRole("link", { name: "다음" })).toBeVisible();
+});
+
 test("미션 단계: 판정 실패 → 힌트 → 코드 모드에서 고치기 → 통과 → 완료, 다시 열면 고친 코드가 남아 있다", async ({ page }) => {
   await seedDone(page, ["problem", "analysis", "predict", "run1", "readcheck1"]);
   await openStep(page, "mission1");

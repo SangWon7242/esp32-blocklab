@@ -2,6 +2,7 @@ import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, type Ref 
 import { useReadOnly } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { EditorWorkbench, type EditorProgram, type EditorWorkbenchHandle } from "../lab/EditorWorkbench";
+import type { RunEndResult } from "../lab/useDevice";
 import { useSettings } from "../settings/settings";
 import { ReadOnlyCode } from "./steps/ReadOnlyCode";
 import { TrackSaveButton } from "./TrackSaveButton";
@@ -19,8 +20,8 @@ type Props = {
   initialBlocks?: EditorProgram["blocksJson"];
   /** 코드·블록이 바뀌면 1초 뒤(마지막 변경 기준) 한 번. 화면을 떠날 때 기다리던 것도 저장한다 */
   onProgram(code: string, blocksJson: unknown): void;
-  /** 실행 결과와 그 실행의 보드 출력 */
-  onRunEnd?(result: { ok: boolean; stopped: boolean }, output: string): void;
+  /** 실행 결과(오류·멈춤까지)와 그 실행의 보드 출력 */
+  onRunEnd?(result: RunEndResult, output: string): void;
   /** 설계 조립: 블록 모드 고정, 떨어진 블록 경고 없음 */
   assemblyMode?: boolean;
   /** 높이를 줄인다 */
