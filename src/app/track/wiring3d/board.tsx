@@ -274,7 +274,7 @@ function silkPaint(b: BoardData, devkit: boolean, kz: number) {
   };
 }
 
-export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index: number; blueLed: THREE.MeshToonMaterial }) {
+export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index: number; blueLed: THREE.MeshStandardMaterial }) {
   const api = useViewerApi();
   const devkit = b.kind === "devkit";
   const kz = devkit ? L.F : 1;
@@ -438,7 +438,7 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
  */
 function PlusDetails({ b, L, index, top, pressEn, releaseEn, enCap, blueLed }: {
   b: BoardData; L: Layout; index: number; top: number;
-  pressEn: (e: ThreeEvent<PointerEvent>) => void; releaseEn: () => void; enCap: RefObject<THREE.Mesh | null>; blueLed: THREE.MeshToonMaterial;
+  pressEn: (e: ThreeEvent<PointerEvent>) => void; releaseEn: () => void; enCap: RefObject<THREE.Mesh | null>; blueLed: THREE.MeshStandardMaterial;
 }) {
   const X = (rx: number) => L.X(b.x + rx), Z = (ry: number) => L.Z(b.y + ry);
   const black = toon("#17171a"), metal = toon(COLOR.metal), tan = toon("#c9a26b", { outline: false }), dark = toon("#2b2b30", { outline: false });

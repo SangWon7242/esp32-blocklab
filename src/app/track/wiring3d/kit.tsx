@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { canvasTexture, COLOR, glowTexture, noOutline } from "./materials";
 import { useViewerApi, type Selected } from "./store";
 
@@ -12,10 +13,25 @@ import { useViewerApi, type Selected } from "./store";
 
 type V3 = [number, number, number];
 
+/*
+ * 상자: 실물처럼 모서리를 살짝 둥글게 깎는다 (빛이 모서리에 맺혀 입체감이 산다).
+ * 크기마다 모양을 한 번만 만들어 나눠 쓴다. 아주 얇은 판(1.5 아래)은 그냥 상자.
+ */
+const boxCache = new Map<string, THREE.BufferGeometry>();
+export function roundedBox(w: number, h: number, d: number): THREE.BufferGeometry {
+  const k = `${w}|${h}|${d}`;
+  let g = boxCache.get(k);
+  if (!g) {
+    const m = Math.min(w, h, d);
+    g = m < 1.5 ? new THREE.BoxGeometry(w, h, d) : new RoundedBoxGeometry(w, h, d, 2, Math.min(1.6, m * 0.22));
+    boxCache.set(k, g);
+  }
+  return g;
+}
+
 export function Box({ size, at, mat, rot, cast = true, children }: { size: V3; at: V3; mat: THREE.Material; rot?: V3; cast?: boolean; children?: ReactNode }) {
   return (
-    <mesh position={at} rotation={rot} castShadow={cast} receiveShadow material={mat}>
-      <boxGeometry args={size} />
+    <mesh position={at} rotation={rot} castShadow={cast} receiveShadow material={mat} geometry={roundedBox(size[0], size[1], size[2])}>
       {children}
     </mesh>
   );

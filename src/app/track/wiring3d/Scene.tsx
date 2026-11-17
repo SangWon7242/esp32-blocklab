@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { Pt, Scene3D } from "@/track/wiring3d";
 import { Board, Breadboard } from "./board";
 import { Diorama } from "./diorama";
@@ -184,8 +185,21 @@ function OverlaySync({ anchors, L }: { anchors: Anchor[]; L: Layout }) {
   return null;
 }
 
+/** 방 안 빛: 실사 재질이 비출 주변 (금속 핀 · 은색 통에 반사가 맺힌다) */
+function RoomLight() {
+  const { gl, scene } = useThree();
+  useEffect(() => {
+    const pm = new THREE.PMREMGenerator(gl);
+    const env = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = env;
+    scene.environmentIntensity = 0.75;
+    return () => { scene.environment = null; env.dispose(); pm.dispose(); };
+  }, [gl, scene]);
+  return null;
+}
+
 /** 실행 중: 시뮬레이션을 한 걸음씩. 읽은 값 판은 초당 여섯 번만 고친다. 보드의 파란 LED 는 2번 핀 · 핀이 바뀔 때 깜빡 */
-function SimDriver({ blueLed }: { blueLed: THREE.MeshToonMaterial }) {
+function SimDriver({ blueLed }: { blueLed: THREE.MeshStandardMaterial }) {
   const api = useViewerApi();
   const acc = useRef(0);
   useFrame((_, dt) => {
@@ -227,9 +241,11 @@ export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; 
   const irPart = scene.parts.find((p): p is Extract<typeof p, { type: "irrx" }> => p.type === "irrx");
   return (
     <>
-      <hemisphereLight args={["#ffffff", "#c9c2b4", 1.7]} />
-      <directionalLight position={[-r * 0.5, r * 1.1, r * 0.35]} intensity={2.4} castShadow shadow-mapSize={[1024, 1024]}
+      <RoomLight />
+      <hemisphereLight args={["#ffffff", "#d8cfbf", 0.55]} />
+      <directionalLight position={[-r * 0.5, r * 1.1, r * 0.35]} intensity={2.1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-normalBias={0.6} shadow-radius={6}
         shadow-camera-left={-r} shadow-camera-right={r} shadow-camera-top={r} shadow-camera-bottom={-r} shadow-camera-near={1} shadow-camera-far={r * 4} />
+      <directionalLight position={[r * 0.8, r * 0.6, -r * 0.4]} intensity={0.45} color="#e7eefc" />
       <Floor r={r} />
       <PanFloor r={r} />
       <Rig L={L} cardsRoom={cardsRoom && anchors.length <= (L.diorama ? 4 : 6)} />

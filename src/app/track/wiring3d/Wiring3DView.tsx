@@ -1,5 +1,6 @@
 import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { ChevronLeft, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -130,9 +131,9 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
       <Canvas
         orthographic
         frameloop="demand"
-        shadows
+        shadows="variance"
         dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, toneMappingExposure: 1.05 }}
         camera={{ zoom: 1, position: [0, 600, 600], near: -10000, far: 10000 }}
         style={{ position: "absolute", inset: 0, touchAction: "none" }}
         aria-label={`3D 배선 보기: ${scene.rows.map((r) => `${r.part} → ${r.to}`).join(", ")}`}

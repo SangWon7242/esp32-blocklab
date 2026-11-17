@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { OutlineEffect } from "three/examples/jsm/effects/OutlineEffect.js";
 import type { Layout } from "./layout";
 import { useViewerApi } from "./store";
 
@@ -12,7 +11,7 @@ import { useViewerApi } from "./store";
  *   - W A S D: 누르고 있는 동안 화면 기준 앞 · 왼쪽 · 뒤 · 오른쪽으로 (1초에 화면 380px)
  *   - 끌기: 빈 곳 · 보드 · 브레드보드를 끌면 옮긴다 (부품을 끄는 조작이 먼저)
  *   - 휠 · 두 손가락: 마우스 자리를 향해 크게 · 작게
- *   - 짙은 남색 외곽선(OutlineEffect)으로 그린다
+ *   - 외곽선 없이 실사 재질 그대로 그린다
  */
 
 const AZ0 = Math.PI / 5;
@@ -28,7 +27,6 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
   const api = useViewerApi();
   const { gl, camera, size, invalidate } = useThree();
   const cam = camera as THREE.OrthographicCamera;
-  const effect = useMemo(() => new OutlineEffect(gl, { defaultThickness: 0.0042, defaultColor: [0.06, 0.13, 0.22], defaultAlpha: 1 }), [gl]);
   const r = Math.max(L.size.w, L.size.d);
   // 처음 각도에서 장면 바닥 상자(높이 60)가 화면에 차지하는 가로 · 세로
   const proj = useMemo(() => {
@@ -217,7 +215,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     // 도는 동안에는 설명 카드가 좌우로 옮겨 다니지 않게 잠시 숨긴다
     const c = api.getState().dom.callouts;
     if (c) c.style.opacity = s.turn || api.getState().step !== null ? "0" : "1";
-    effect.render(scene, cam);
+    gl.render(scene, cam);
     if (moving) invalidate();
   }, 1);
 
@@ -229,7 +227,7 @@ export function PanFloor({ r }: { r: number }) {
   const api = useViewerApi();
   const dragging = useRef(false);
   const mat = useMemo(() => {
-    const m = new THREE.ShadowMaterial({ opacity: 0.18 });
+    const m = new THREE.ShadowMaterial({ opacity: 0.3 });
     m.userData.outlineParameters = { visible: false };
     return m;
   }, []);

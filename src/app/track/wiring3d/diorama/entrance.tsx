@@ -70,8 +70,8 @@ export function Entrance({ mode }: { mode: "card" | "oled" | "auto" }) {
       {/* 문 앞 발판 */}
       <Box size={[84, 1.6, 36]} at={[0, 6.8, wallZ + 22]} mat={toon("#4b5563", { outline: false })} cast={false} />
       {/* 간판 */}
-      <Box size={[96, 20, 3]} at={[0, 6 + H - 6, wallZ + 2]} mat={toon("#1f2937")} />
-      <Sign w={90} h={15} at={[0, 6 + H - 6, wallZ + 3.7]} paint={(g, cw, ch) => {
+      <Box size={[96, 20, 3]} at={[mode === "auto" ? 100 : 0, mode === "auto" ? 132 : 6 + H - 6, wallZ + 2]} mat={toon("#1f2937")} />
+      <Sign w={90} h={15} at={[mode === "auto" ? 100 : 0, mode === "auto" ? 132 : 6 + H - 6, wallZ + 3.7]} paint={(g, cw, ch) => {
         g.fillStyle = "#1f2937"; g.fillRect(0, 0, cw, ch);
         g.fillStyle = "#ffffff"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
         g.fillText(mode === "auto" ? "자동문" : "출입 통제 구역", cw / 2, ch / 2 + 1);
@@ -101,11 +101,11 @@ export function Entrance({ mode }: { mode: "card" | "oled" | "auto" }) {
       {mode === "auto" && (
         <>
           {/* 문 위 초음파 센서: 사람이 오는 쪽(앞)을 본다 */}
-          <Box size={[44, 18, 6]} at={[0, 6 + 128 - 12, wallZ + 3]} mat={toon("#1c5fa8")} />
+          <Box size={[44, 18, 6]} at={[0, 6 + 128 + 13, wallZ + 3]} mat={toon("#1c5fa8")} />
           {[-11, 11].map((x) => (
             <group key={x}>
-              <Cyl r={7} h={7} at={[x, 6 + 128 - 12, wallZ + 9]} rot={[Math.PI / 2, 0, 0]} mat={toon("#d9dde3")} seg={18} />
-              <Cyl r={4} h={1} at={[x, 6 + 128 - 12, wallZ + 12.8]} rot={[Math.PI / 2, 0, 0]} mat={toon("#495057", { outline: false })} seg={14} />
+              <Cyl r={7} h={7} at={[x, 6 + 128 + 13, wallZ + 9]} rot={[Math.PI / 2, 0, 0]} mat={toon("#d9dde3")} seg={18} />
+              <Cyl r={4} h={1} at={[x, 6 + 128 + 13, wallZ + 12.8]} rot={[Math.PI / 2, 0, 0]} mat={toon("#495057", { outline: false })} seg={14} />
             </group>
           ))}
         </>
