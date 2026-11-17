@@ -3,7 +3,8 @@ import { Part } from "../kit";
 import type { Layout } from "../layout";
 import { useViewer } from "../store";
 import { Entrance, ENTRANCE_ROOM } from "./entrance";
-import { ALARM_ROOM, AlarmRoom, BOARD_ROOM, CANE_ROOM, CHICK_ROOM, ChickPen, CLIMATE_ROOM, ClimateRoom, CONSOLE_ROOM, DeskFan, FAN_ROOM, GameConsole, HAMMER_ROOM, HammerGame, MOOD_ROOM, MoodLamp, SensorBoard, SmartCane } from "./rooms";
+import { ALARM_ROOM, AlarmRoom, BOARD_ROOM, CHICK_ROOM, ChickPen, CLIMATE_ROOM, ClimateRoom, CONSOLE_ROOM, DeskFan, FAN_ROOM, GameConsole, HAMMER_ROOM, HammerGame, MOOD_ROOM, MoodLamp, SensorBoard } from "./rooms";
+import { CANE_ROOM, SmartCane } from "./cane";
 import { CROSSWALK_ROOM, Crosswalk, LAMP_ROOM, StreetLamp } from "./street";
 
 /*
@@ -12,14 +13,14 @@ import { CROSSWALK_ROOM, Crosswalk, LAMP_ROOM, StreetLamp } from "./street";
  * 챕터 번호마다 하나. 자리 크기(room)는 레이아웃이 회로 오른쪽에 비워 둔다.
  */
 
-type Spec = { room: { w: number; d: number }; name: string; text: string; view: () => ReactNode };
+type Spec = { room: { w: number; d: number }; name: string; text: string; view: (L: Layout) => ReactNode };
 
 const SPECS: Record<string, Spec> = {
   "08": { room: ENTRANCE_ROOM, name: "현장 모형 · 출입문", text: "실제로 설치하면 이런 모습이에요. 등록된 카드를 리더기에 대면 서보 모터가 문을 열고, 문 위 초록 등(26번 LED)이 켜져요.", view: () => <Entrance mode="card" /> },
   "09": { room: ENTRANCE_ROOM, name: "현장 모형 · 출입문", text: "실제로 설치하면 이런 모습이에요. 카드를 대면 벽의 안내 화면(OLED)에 결과가 나오고, 등록된 카드면 서보 모터가 문을 열어요.", view: () => <Entrance mode="oled" /> },
   "10": { room: ENTRANCE_ROOM, name: "현장 모형 · 자동문", text: "실제로 설치하면 이런 모습이에요. 문 위의 초음파 센서가 사람과의 거리를 재고, 가까이 오면 서보 모터가 문을 열었다가 닫아요.", view: () => <Entrance mode="auto" /> },
   "31": { room: FAN_ROOM, name: "현장 모형 · 안전 선풍기", text: "책상 위 선풍기예요. A 버튼으로 켜고 B 버튼으로 세기를 바꾸고, 손이 날개 가까이 오면(초음파) 멈춰요.", view: () => <DeskFan /> },
-  "32": { room: CANE_ROOM, name: "현장 모형 · 스마트 지팡이", text: "지팡이 아래쪽 초음파 센서가 앞의 장애물을 재요. 가까울수록 삐 소리가 빨라지고, 어두우면 끝의 등이 깜빡여요.", view: () => <SmartCane /> },
+  "32": { room: CANE_ROOM, name: "현장 모형 · 스마트 지팡이", text: "흰 지팡이 아래쪽에 단 초음파 센서가 앞의 벽까지 거리를 재요. 실행하고 지팡이를 벽 쪽으로 끌어 보세요. 30cm 안에 들어가면 손잡이의 부저가 삐 울리고, 가까울수록 빨라져요.", view: (L) => <SmartCane L={L} /> },
   "33": { room: CLIMATE_ROOM, name: "현장 모형 · 교실", text: "교실 벽에 단 온습도 알리미예요. 불쾌지수를 화면에 보이고 상태 등 색을 바꾸며, 덥고 습하면 선풍기를 돌려요.", view: () => <ClimateRoom /> },
   "34": { room: LAMP_ROOM, name: "현장 모형 · 가로등", text: "기둥의 빛 센서가 주변 밝기를 재고, 어두울수록 가로등을 밝게 켜요. 빛 조절판을 움직여 밤낮을 바꿔 보세요.", view: () => <StreetLamp /> },
   "35": { room: HAMMER_ROOM, name: "현장 모형 · 뿅망치 게임", text: "손을 대고 버튼을 누르면 3번에 1번 서보 모터가 망치를 내려쳐요(WIN). 빗나가면 옆으로 떨어져요.", view: () => <HammerGame /> },
@@ -42,12 +43,13 @@ export function dioramaRoom(chapterId: string | null | undefined): { w: number; 
 }
 
 /** 초음파 센서 앞에서 끄는 물체 */
-export type SonarTarget = "car" | "person" | "hand" | "wall";
+export type SonarTarget = "car" | "person" | "hand" | "wall" | "none";
 export function sonarTargetFor(chapterId: string | null | undefined): SonarTarget {
   switch (num(chapterId)) {
     case "10": case "40": return "person";
     case "31": case "35": return "hand";
-    case "32": return "wall";
+    // 32장: 지팡이 현장 모형이 거리를 정한다 (회로 앞에는 끄는 물체가 없다)
+    case "32": return "none";
     default: return "car";
   }
 }
@@ -62,7 +64,7 @@ export function Diorama({ L }: { L: Layout }) {
   return (
     <group position={[at.x, at.y, at.z]}>
       <Part id="diorama" label={spec.name} text={spec.text} lift={false}>
-        {spec.view()}
+        {spec.view(L)}
       </Part>
     </group>
   );

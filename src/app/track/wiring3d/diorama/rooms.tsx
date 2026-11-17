@@ -319,34 +319,3 @@ export function SensorBoard() {
     </group>
   );
 }
-
-/* ── 32장 스마트 지팡이 ── */
-export const CANE_ROOM = { w: 200, d: 180 };
-export function SmartCane() {
-  const api = useViewerApi();
-  const tip = useMemo(() => toonOwn({ color: "#ffe3e3", emissive: "#ff6b6b", emissiveIntensity: 0 }), []);
-  useEffect(() => () => tip.dispose(), [tip]);
-  useFrame(() => {
-    const s = api.getState();
-    const led = deviceKind(s, "led");
-    tip.emissiveIntensity = (pinLevel(s, led?.pin) + (buzzing(s) ? 0.6 : 0)) * 1.8;
-    if (s.running) s.invalidate();
-  });
-  return (
-    <group>
-      {/* 점자 블록이 깔린 보도 */}
-      <Box size={[200, 6, 180]} at={[0, 3, 0]} mat={toon("#d8d1c5")} />
-      <Box size={[40, 1.4, 180]} at={[-30, 6.7, 0]} mat={toon("#fcc419")} />
-      {Array.from({ length: 8 }, (_, k) => <Box key={k} size={[30, 1, 2]} at={[-30, 7.6, -80 + k * 22]} mat={toon("#f59f00", { outline: false })} cast={false} />)}
-      {/* 지팡이: 손잡이 · 흰 막대 · 아래의 센서 상자 · 끝의 경고등 */}
-      <group position={[30, 6, 10]} rotation={[0.18, 0, 0.12]}>
-        <Cyl r={2.4} h={150} at={[0, 75, 0]} mat={toon("#f8f9fa")} seg={12} />
-        <Cyl r={2.5} h={30} at={[0, 40, 0]} mat={toon("#e03131")} seg={12} />
-        <mesh position={[0, 152, 6]} rotation={[Math.PI / 2, 0, 0]} material={toon("#212529")}><torusGeometry args={[7, 2.4, 8, 16, Math.PI]} /></mesh>
-        <Box size={[14, 18, 12]} at={[0, 46, 7]} mat={toon("#1c5fa8")} />
-        <Ball r={3.4} at={[0, 4, 0]} mat={tip} />
-      </group>
-      <Sign w={70} h={14} at={[50, 18, 70]} rotY={0} paint={(g, cw, ch) => { g.fillStyle = "#f1f3f5"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#495057"; g.font = `700 ${Math.round(ch * 0.58)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("앞의 벽을 끌어 보세요", cw / 2, ch / 2 + 1); }} />
-    </group>
-  );
-}

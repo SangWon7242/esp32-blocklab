@@ -549,10 +549,10 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
   };
   const chapterId = useViewer((s) => s.chapterId);
   const target = sonarTargetFor(chapterId);
-  const what = { car: "자동차", person: "사람", hand: "손", wall: "벽" }[target];
+  const what = { car: "자동차", person: "사람", hand: "손", wall: "벽", none: "" }[target];
   // 물체 앞면까지의 거리: 자동차는 길이의 반, 사람 · 손 · 벽은 몸 앞쪽
-  const half = { car: 50, person: 12, hand: 6, wall: 9 }[target];
-  const tagY = { car: 72, person: 136, hand: 70, wall: 98 }[target];
+  const half = { car: 50, person: 12, hand: 6, wall: 9, none: 0 }[target];
+  const tagY = { car: 72, person: 136, hand: 70, wall: 98, none: 0 }[target];
   const carZ = (d: number) => track.origin.z + face * d * track.perCm;
   const drag = useDrag((e) => {
     const s = api.getState();
@@ -572,7 +572,7 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
     const run = s.running;
     pings.current?.children.forEach((r, k) => {
       const ph = (clock.current * 1.4 + k / 3) % 1;
-      r.visible = run;
+      r.visible = run && target !== "none";
       r.position.z = track.origin.z + face * ph * d * track.perCm;
       r.scale.setScalar(10 + ph * 16);
       ((r as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = 0.7 * (1 - ph);
@@ -584,7 +584,7 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
   const ringMat = useMemo(() => noOutline(new THREE.MeshBasicMaterial({ color: "#2f9e44", transparent: true, depthWrite: false, side: THREE.DoubleSide })), []);
   return (
     <>
-      <Part id={`part${i}`} label={name} text={`${text} 앞의 ${what}${what === "자동차" ? "를" : "을"} 끌어 거리를 바꿔 보세요.`}>
+      <Part id={`part${i}`} label={name} text={target === "none" ? `${text} 오른쪽 지팡이 모형을 벽 쪽으로 끌어 거리를 바꿔 보세요.` : `${text} 앞의 ${what}${what === "자동차" ? "를" : "을"} 끌어 거리를 바꿔 보세요.`}>
         <ModuleBase p={p} L={L} zz={zz} />
         <group position={[0, 4, zz(edge)]} rotation={[tilt, 0, 0]}>
           {/* 세운 판 안의 좌표: z 는 핀 쪽 가장자리에서 위로 */}
@@ -609,10 +609,10 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
         ))}
       </group>
       {/* 장난감 자동차: 끌어서 센서 앞을 오간다 */}
-      <group ref={car} position={[track.origin.x, 0, carZ(cm()) + face * half]} rotation={[0, target === "car" ? (face > 0 ? -Math.PI / 2 : Math.PI / 2) : face > 0 ? Math.PI : 0, 0]} {...drag}>
+      {target !== "none" && <group ref={car} position={[track.origin.x, 0, carZ(cm()) + face * half]} rotation={[0, target === "car" ? (face > 0 ? -Math.PI / 2 : Math.PI / 2) : face > 0 ? Math.PI : 0, 0]} {...drag}>
         {target === "car" ? <ToyCar /> : target === "person" ? <PersonFigure /> : target === "hand" ? <HandFigure /> : <WallFigure />}
         <sprite material={tag.mat} position={[0, tagY, 0]} scale={[60, 22.8, 1]} renderOrder={7} raycast={() => null} />
-      </group>
+      </group>}
     </>
   );
 }
