@@ -148,11 +148,11 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
         {anchors.map((a) => (
           <div key={a.id} ref={nodeRef(dom, a.id, "card")} className={cn(
             "absolute top-0 left-0 border bg-white text-[#0f2239] will-change-transform", ink,
-            "group-data-[mode=cards]/callouts:w-[184px] group-data-[mode=cards]/callouts:rounded-xl group-data-[mode=cards]/callouts:px-3 group-data-[mode=cards]/callouts:py-2 group-data-[mode=cards]/callouts:shadow-[0_3px_0_rgba(15,34,57,0.18)]",
+            "group-data-[mode=cards]/callouts:w-[200px] group-data-[mode=cards]/callouts:rounded-xl group-data-[mode=cards]/callouts:px-3 group-data-[mode=cards]/callouts:py-2 group-data-[mode=cards]/callouts:shadow-[0_3px_0_rgba(15,34,57,0.18)]",
             "group-data-[mode=pills]/callouts:rounded-full group-data-[mode=pills]/callouts:px-2 group-data-[mode=pills]/callouts:py-0.5 group-data-[mode=pills]/callouts:shadow-[0_2px_0_rgba(15,34,57,0.3)]",
           )}>
             <p className="flex items-center gap-1.5 text-xs font-bold whitespace-nowrap group-data-[mode=cards]/callouts:text-[0.8rem]"><span className="size-2 shrink-0 rounded-full" style={{ background: a.color }} />{a.label}</p>
-            <p className="mt-0.5 line-clamp-2 text-[0.7rem] leading-snug break-keep text-[#5b6168] group-data-[mode=pills]/callouts:hidden">{a.text}</p>
+            <p className="mt-0.5 line-clamp-3 text-[0.7rem] leading-snug break-keep text-[#5b6168] group-data-[mode=pills]/callouts:hidden">{a.text}</p>
           </div>
         ))}
       </div>
@@ -352,16 +352,16 @@ function Controls({ has }: { has: (k: Device["kind"]) => boolean }) {
   if (!light && !dht) return null;
   const i = sim.inputs;
   const slider = (label: string, icon: ReactNode, value: number, min: number, max: number, unit: string, onChange: (v: number) => void) => (
-    <label className="flex items-center gap-2 text-xs font-semibold text-[#0f2239]">
+    <label className="flex min-w-0 items-center gap-2 text-xs font-semibold text-[#0f2239]">
       {icon}<span className="w-8 shrink-0">{label}</span>
-      <input type="range" min={min} max={max} value={value} aria-label={label} onChange={(e) => { onChange(Number(e.target.value)); bump((n) => n + 1); invalidate(); }} className="h-1.5 min-w-0 flex-1 accent-[#e8590c]" />
+      <input type="range" min={min} max={max} value={value} aria-label={label} onChange={(e) => { onChange(Number(e.target.value)); bump((n) => n + 1); invalidate(); }} className="h-1.5 w-0 min-w-0 flex-1 accent-[#e8590c]" />
       <span className="w-11 shrink-0 text-right tabular-nums">{value}{unit}</span>
     </label>
   );
   return (
-    <div className={cn("absolute top-12 right-2 z-10 grid w-60 gap-2 rounded-xl border bg-white/97 p-2.5 shadow-[0_3px_0_rgba(15,34,57,0.18)]", ink)} data-testid="wiring-3d-controls">
+    <div className={cn("absolute top-12 right-2 z-10 grid w-64 grid-cols-[minmax(0,1fr)] gap-2 rounded-xl border bg-white/97 p-2.5 shadow-[0_3px_0_rgba(15,34,57,0.18)]", ink)} data-testid="wiring-3d-controls">
       {light && slider("빛", <Sun className="size-3.5 text-amber-500" />, Math.round(i.light * 100), 0, 100, "%", (v) => { i.light = v / 100; })}
-      {light && <p className="-mt-1 flex items-center gap-1 text-[0.7rem] text-[#5b6168]"><Hand className="size-3" />빛 센서를 누르면 손으로 가려요</p>}
+      {light && <p className="-mt-1 flex items-center gap-1 text-[0.7rem] break-keep text-[#5b6168]"><Hand className="size-3" />빛 센서를 누르면 손으로 가려요</p>}
       {dht && slider("온도", <Thermometer className="size-3.5 text-red-500" />, i.temp, 0, 45, "°C", (v) => { i.temp = v; })}
       {dht && slider("습도", <span className="w-3.5 text-center text-[0.65rem] font-bold text-sky-500">%</span>, i.humidity, 10, 95, "%", (v) => { i.humidity = v; })}
     </div>

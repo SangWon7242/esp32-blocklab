@@ -60,7 +60,23 @@ export function anchorsOf(scene: Scene3D, L: Layout): Anchor[] {
   return out.length > 9 ? out.filter((a) => !a.pin) : out;
 }
 
-const CARD_W = 184, CARD_H = 66;
+const CARD_W = 200, CARD_H = 66, GAP = 8;
+
+/** 화면 위 다른 판(조절판 · 시리얼 모니터)이 차지한 세로 구간: 카드 기둥은 그 구간을 피한다 */
+function blockedY(host: HTMLElement | null, side: "left" | "right", w: number): [number, number][] {
+  if (!host) return [];
+  const base = host.getBoundingClientRect();
+  const out: [number, number][] = [];
+  for (const id of ["wiring-3d-controls", "wiring-3d-serial"]) {
+    const el = host.querySelector<HTMLElement>(`[data-testid=${id}]`);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    const x0 = r.left - base.left, x1 = r.right - base.left;
+    const colX0 = side === "left" ? 12 : w - CARD_W - 12, colX1 = colX0 + CARD_W;
+    if (x1 > colX0 && x0 < colX1) out.push([r.top - base.top - GAP, r.bottom - base.top + GAP]);
+  }
+  return out;
+}
 
 /** 설명 카드 · 이름표 · 점선 · 부품 카드 점선을 3D 자리에 맞춰 놓는다 (DOM 을 바로 고친다) */
 function OverlaySync({ anchors }: { anchors: Anchor[] }) {
@@ -76,22 +92,39 @@ function OverlaySync({ anchors }: { anchors: Anchor[] }) {
     });
     const cards = !s.selected && w >= 760 && h >= 420 && anchors.length <= 6;
     if (s.dom.callouts) s.dom.callouts.dataset.mode = cards ? "cards" : "pills";
-    const spot = new Map<string, { x: number; y: number }>();
+    const spot = new Map<string, { x: number; y: number; h: number }>();
     if (cards) {
+      // 카드 높이는 실제로 잰다(글이 두세 줄) — 겹치지 않게 쌓고, 조절판 · 시리얼 모니터 자리는 건너뛴다
+      const heightOf = (id: string) => s.dom.nodes.get(id)?.card?.offsetHeight || CARD_H;
+      const host = s.dom.callouts?.parentElement ?? null;
       const byX = [...pts].sort((p, q) => p.x - q.x);
       const leftIds = new Set(byX.slice(0, Math.ceil(byX.length / 2)).map((p) => p.a.id));
       for (const side of ["left", "right"] as const) {
         const col = pts.filter((p) => leftIds.has(p.a.id) === (side === "left")).sort((p, q) => p.y - q.y);
-        const top = side === "left" ? 52 : 52, bottom = h - 60;
+        const blocks = blockedY(host, side, w);
+        const top = 52, bottom = h - 60;
+        const fit = (y: number, ch: number) => {
+          // 막힌 구간과 겹치면 그 아래로
+          for (let k = 0; k < 4; k++) {
+            const b = blocks.find(([b0, b1]) => y < b1 && y + ch > b0);
+            if (!b) break;
+            y = b[1];
+          }
+          return y;
+        };
         let y = top;
-        const ys = col.map((p) => { const cy = Math.max(y, p.y - CARD_H / 2); y = cy + CARD_H + 10; return cy; });
-        let over = (ys[ys.length - 1] ?? 0) + CARD_H - bottom;
-        for (let i = ys.length - 1; i >= 0 && over > 0; i--) {
-          ys[i] -= over;
-          if (i > 0) over = ys[i - 1] + CARD_H + 10 - ys[i];
-          if (ys[i] < top) ys[i] = top;
+        const hs = col.map((p) => heightOf(p.a.id));
+        const ys = col.map((p, i) => { const cy = fit(Math.max(y, p.y - hs[i] / 2), hs[i]); y = cy + hs[i] + GAP; return cy; });
+        // 아래로 넘치면 위로 밀어 올린다(막힌 구간을 건너뛰며)
+        for (let i = ys.length - 1; i >= 0; i--) {
+          const limit = i === ys.length - 1 ? bottom : ys[i + 1] - GAP;
+          if (ys[i] + hs[i] <= limit) continue;
+          let ny = limit - hs[i];
+          const b = blocks.find(([b0, b1]) => ny < b1 && ny + hs[i] > b0);
+          if (b) ny = b[0] - hs[i];
+          ys[i] = Math.max(top, ny);
         }
-        col.forEach((p, i) => spot.set(p.a.id, { x: side === "left" ? 12 : w - CARD_W - 12, y: ys[i] }));
+        col.forEach((p, i) => spot.set(p.a.id, { x: side === "left" ? 12 : w - CARD_W - 12, y: ys[i], h: hs[i] }));
       }
     }
     for (const p of pts) {
@@ -102,7 +135,7 @@ function OverlaySync({ anchors }: { anchors: Anchor[] }) {
       if (c) {
         if (node.card) node.card.style.transform = `translate(${c.x}px, ${c.y}px)`;
         node.line?.setAttribute("x1", String(p.x)); node.line?.setAttribute("y1", String(p.y));
-        node.line?.setAttribute("x2", String(c.x < p.x ? c.x + CARD_W : c.x)); node.line?.setAttribute("y2", String(c.y + CARD_H / 2));
+        node.line?.setAttribute("x2", String(c.x < p.x ? c.x + CARD_W : c.x)); node.line?.setAttribute("y2", String(c.y + c.h / 2));
       } else {
         if (node.card) node.card.style.transform = `translate(${p.x + 14}px, ${p.y - 30}px)`;
         node.line?.setAttribute("x1", String(p.x)); node.line?.setAttribute("y1", String(p.y));
