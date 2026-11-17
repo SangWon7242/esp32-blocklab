@@ -39,9 +39,11 @@ export function WireView({ w, i, L, scene }: { w: Wire; i: number; L: Layout; sc
   useFrame(() => {
     const s = api.getState();
     const color = s.preview ?? s.hover?.wire ?? s.picked;
-    const on = color === null || color === w.color;
+    // 조립 순서: 지금 잇는 선은 또렷하게, 앞 단계에서 이은 선은 옅게
+    const now = s.step !== null && s.assembly ? s.assembly.wireStep[i] === s.step : null;
+    const on = now ?? (color === null || color === w.color);
     for (const m of [mat, head]) {
-      const op = on ? 1 : 0.12;
+      const op = on ? 1 : now === false ? 0.28 : 0.12;
       if (m.opacity !== op) { m.opacity = op; m.depthWrite = on; m.userData.outlineParameters = { visible: on }; s.invalidate(); }
     }
   });

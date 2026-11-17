@@ -30,9 +30,15 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
   const cam = camera as THREE.OrthographicCamera;
   const effect = useMemo(() => new OutlineEffect(gl, { defaultThickness: 0.0042, defaultColor: [0.06, 0.13, 0.22], defaultAlpha: 1 }), [gl]);
   const r = Math.max(L.size.w, L.size.d);
-  const span = Math.hypot(L.size.w, L.size.d);
+  // 처음 각도에서 장면 바닥 상자(높이 60)가 화면에 차지하는 가로 · 세로
+  const proj = useMemo(() => {
+    const ca = Math.cos(AZ0), sa = Math.sin(AZ0), se = Math.sin(EL_TILT), ce = Math.cos(EL_TILT);
+    return { w: L.size.w * ca + L.size.d * sa, h: se * (L.size.w * sa + L.size.d * ca) + ce * 60 };
+  }, [L.size.w, L.size.d]);
   const st = useRef({
     target: L.focus.clone(),
+    /** 조립 순서에서 천천히 옮겨 갈 자리 */
+    goal: null as THREE.Vector3 | null,
     az: AZ0, azGoal: AZ0, el: EL_TILT, elGoal: EL_TILT,
     turn: null as null | { az0: number; el0: number; t0: number },
     fit: 1,
@@ -47,7 +53,13 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     const s = st.current;
     const was = s.fit;
     const room = cardsRoom && size.width >= 760 ? 2 * 184 : 0;
-    s.fit = Math.min((size.width - room) / (span * 0.68), size.height / (span * 0.54));
+    // 위 · 아래 단추 줄(약 110px)과 양옆 여백을 빼고 맞춘다.
+    // 설명 카드 자리는 장면을 20% 넘게 줄여야 할 때는 다 비우지 않는다 (카드가 가장자리에 조금 겹쳐도 장면이 크게 보이는 편이 낫다)
+    const fitH = (size.height - 110) / proj.h;
+    const fitW = (size.width - 48) / proj.w;
+    const fitRoom = (size.width - 48 - room) / proj.w;
+    const best = Math.min(fitH, fitW);
+    s.fit = Math.min(best, Math.max(fitRoom, best * 0.8));
     // 처음에는 장면 전체가 들어오게, 그 뒤로는 사람이 키운 만큼을 지킨다
     cam.zoom = fitted.current ? (cam.zoom / was) * s.fit : s.fit;
     fitted.current = true;
@@ -55,7 +67,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     cam.far = r * 10;
     cam.updateProjectionMatrix();
     invalidate();
-  }, [size.width, size.height, span, r, cam, cardsRoom, invalidate]);
+  }, [size.width, size.height, proj, r, cam, cardsRoom, invalidate]);
 
   // 카메라 다루기: 보기 단추 · 키보드
   useEffect(() => {
@@ -65,7 +77,9 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     const ctl = {
       rotate: (dir: 1 | -1) => { startTurn(); s.azGoal += (dir * Math.PI) / 2; invalidate(); },
       zoom: (f: number) => { cam.zoom = THREE.MathUtils.clamp(cam.zoom * f, s.fit * 0.5, s.fit * 6); cam.updateProjectionMatrix(); invalidate(); },
+      focus: (at: THREE.Vector3 | null) => { s.goal = (at ?? L.focus).clone().setY(L.focus.y); invalidate(); },
       pan: (dx: number, dy: number) => {
+        s.goal = null;
         cam.matrixWorld.extractBasis(right, up, fwd);
         s.target.addScaledVector(right, dx / cam.zoom).addScaledVector(up, dy / cam.zoom);
         invalidate();
@@ -78,6 +92,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
       },
       reset: () => {
         startTurn();
+        s.goal = null;
         s.target.copy(L.focus);
         s.azGoal = AZ0 + Math.round((s.az - AZ0) / (Math.PI * 2)) * Math.PI * 2;
         s.elGoal = EL_TILT;
@@ -122,6 +137,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
       cam.updateProjectionMatrix();
       cam.updateMatrixWorld();
       const after = ndc(cx, cy).unproject(cam);
+      s.goal = null;
       s.target.add(before.sub(after));
       invalidate();
     };
@@ -175,10 +191,17 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     } else { s.az = s.azGoal; s.el = s.elGoal; }
     const kx = (s.keys.has("d") ? 1 : 0) - (s.keys.has("a") ? 1 : 0), ky = (s.keys.has("w") ? 1 : 0) - (s.keys.has("s") ? 1 : 0);
     if (kx || ky) {
+      s.goal = null;
       cam.matrixWorld.extractBasis(right, up, fwd);
       const step = (380 * dt) / cam.zoom;
       s.target.addScaledVector(right, kx * step).addScaledVector(up, ky * step);
       moving = true;
+    }
+    if (s.goal) {
+      // 조립 순서: 지금 단계 쪽으로 부드럽게 (0.4초쯤)
+      s.target.lerp(s.goal, 1 - Math.exp(-dt * 9));
+      if (s.target.distanceTo(s.goal) < 0.5) { s.target.copy(s.goal); s.goal = null; }
+      else moving = true;
     }
     s.target.x = THREE.MathUtils.clamp(s.target.x, L.focus.x - r * 0.7, L.focus.x + r * 0.7);
     s.target.z = THREE.MathUtils.clamp(s.target.z, L.focus.z - r * 0.7, L.focus.z + r * 0.7);
@@ -188,7 +211,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     cam.updateMatrixWorld();
     // 도는 동안에는 설명 카드가 좌우로 옮겨 다니지 않게 잠시 숨긴다
     const c = api.getState().dom.callouts;
-    if (c) c.style.opacity = s.turn ? "0" : "1";
+    if (c) c.style.opacity = s.turn || api.getState().step !== null ? "0" : "1";
     effect.render(scene, cam);
     if (moving) invalidate();
   }, 1);

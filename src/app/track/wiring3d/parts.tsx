@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Html } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Device } from "@/track/sim/circuit";
@@ -516,9 +515,33 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
   const edge = face < 0 ? p.y + p.h : p.y;
   const car = useRef<THREE.Group>(null);
   const pings = useRef<THREE.Group>(null);
-  const label = useRef<HTMLDivElement>(null);
   const clock = useRef(0);
   const cm = () => api.getState().sim?.inputs.distance[i] ?? 30;
+  // 자동차 위 거리 글자: 3D 안의 그림판(스프라이트) — 숫자가 바뀔 때만 다시 그린다
+  const tag = useMemo(() => {
+    const cv = document.createElement("canvas");
+    cv.width = 200; cv.height = 76;
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = noOutline(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+    return { cv, tex, mat, text: "" };
+  }, []);
+  useEffect(() => () => { tag.tex.dispose(); tag.mat.dispose(); }, [tag]);
+  const paintTag = (text: string) => {
+    if (tag.text === text) return;
+    tag.text = text;
+    const g = tag.cv.getContext("2d");
+    if (!g) return;
+    const { width: w, height: h } = tag.cv;
+    g.clearRect(0, 0, w, h);
+    g.fillStyle = "rgba(15,34,57,0.22)";
+    g.beginPath(); g.roundRect(4, 10, w - 8, h - 14, 16); g.fill();
+    g.fillStyle = "#ffffff"; g.strokeStyle = "rgba(15,34,57,0.8)"; g.lineWidth = 4;
+    g.beginPath(); g.roundRect(4, 4, w - 8, h - 14, 16); g.fill(); g.stroke();
+    g.fillStyle = "#0f2239"; g.font = "700 36px system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText(text, w / 2, (h - 10) / 2 + 2);
+    tag.tex.needsUpdate = true;
+  };
   const carZ = (d: number) => track.origin.z + face * d * track.perCm;
   const drag = useDrag((e) => {
     const s = api.getState();
@@ -532,7 +555,7 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
     if (s.sim && s.sim.inputs.distance[i] === undefined) s.sim.inputs.distance[i] = 30;
     const d = cm();
     if (car.current) car.current.position.z = carZ(d) + face * 50;
-    if (label.current) label.current.textContent = `${d.toFixed(1)} cm`;
+    paintTag(`${d.toFixed(1)} cm`);
     // 실행 중: 소리 고리가 센서에서 물체까지 갔다 돌아온다
     clock.current += dt;
     const run = s.running;
@@ -577,9 +600,7 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
       {/* 장난감 자동차: 끌어서 센서 앞을 오간다 */}
       <group ref={car} position={[track.origin.x, 0, carZ(cm()) + face * 50]} rotation={[0, face > 0 ? -Math.PI / 2 : Math.PI / 2, 0]} {...drag}>
         <ToyCar />
-        <Html position={[0, 70, 0]} center style={{ pointerEvents: "none" }}>
-          <div ref={label} className="rounded-md border border-[#0f2239]/70 bg-white px-1.5 py-0.5 text-xs font-bold whitespace-nowrap text-[#0f2239] shadow-sm" />
-        </Html>
+        <sprite material={tag.mat} position={[0, 72, 0]} scale={[60, 22.8, 1]} renderOrder={7} raycast={() => null} />
       </group>
     </>
   );

@@ -242,6 +242,21 @@ test("챕터 화면: 소개 탭에 표지 그림·준비물이 보이고, 작업
   await expect(page.getByTestId("chapter-wiring-info")).toContainText("LED 긴 다리");
 });
 
+test("3D 조립 순서: 보드 놓기부터 한 단계씩 넘기고, 단계마다 이을 선이 글로 나온다", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
+  await page.goto("/#/track/03-traffic-light");
+  const wiring = page.getByTestId("chapter-wiring");
+  await wiring.getByTestId("wiring-3d-steps").click();
+  const card = wiring.getByTestId("wiring-3d-step");
+  await expect(card).toContainText("1 /");
+  await expect(card).toContainText("보드와 브레드보드");
+  await wiring.getByTestId("wiring-3d-step-next").click();
+  await expect(card).toContainText("2 /");
+  await expect(card).toContainText("선:");
+  await card.getByRole("button", { name: "조립 순서 닫기" }).click();
+  await expect(card).toHaveCount(0);
+});
+
 test("원리 카드, 실행 단계의 이렇게 되면 성공과 코드 설명(누르면 원본 코드에서 그 줄 표시)", async ({ page }) => {
   await seedDone(page, "01-led", ["problem", "analysis", "predict"]);
   await page.goto("/#/track/01-led");

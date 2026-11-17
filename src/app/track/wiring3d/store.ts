@@ -2,6 +2,7 @@ import { createContext, useContext } from "react";
 import * as THREE from "three";
 import { createStore, useStore, type StoreApi } from "zustand";
 import type { Device } from "@/track/sim/circuit";
+import type { Assembly } from "./assembly";
 import type { Simulator } from "@/track/sim/engine";
 
 /*
@@ -54,6 +55,9 @@ export type ViewerState = {
   serial: string[];
   /** 폰 화면 (WiFi 챕터): 보드 웹서버가 보여 주는 단추 · 글 */
   phone: { title: string; buttons: { label: string; path: string }[]; lines: string[] } | null;
+  /** 조립 순서 보기: 지금 단계 (null 이면 다 보인다) */
+  step: number | null;
+  assembly: Assembly | null;
   /** 시뮬레이션 (없으면 그 챕터 동작이 아직 없다) */
   sim: Simulator | null;
   devices: Device[];
@@ -70,7 +74,7 @@ export type ViewerState = {
     nodes: Map<string, { dot: HTMLElement | null; card: HTMLElement | null; line: SVGLineElement | null }>;
   };
   /** 카메라 다루기 (보기 단추 · 키보드) — 카메라 컴포넌트가 채운다 */
-  camera: { rotate: (dir: 1 | -1) => void; zoom: (f: number) => void; pan: (dx: number, dy: number) => void; top: (on: boolean) => void; reset: () => void } | null;
+  camera: { rotate: (dir: 1 | -1) => void; zoom: (f: number) => void; pan: (dx: number, dy: number) => void; top: (on: boolean) => void; reset: () => void; focus: (at: THREE.Vector3 | null) => void } | null;
   set: (p: Partial<ViewerState>) => void;
 };
 
@@ -79,7 +83,7 @@ export function createViewerStore(): StoreApi<ViewerState> {
     hover: null, selected: null, picked: null, preview: null,
     running: false, sound: false, topView: false, dragging: false,
     ledColor: {}, dim: 1, readings: [], serial: [], phone: null,
-    sim: null, devices: [],
+    sim: null, devices: [], step: null, assembly: null,
     invalidate: () => {},
     dom: { partCard: null, leader: null, leaderHalo: null, leaderDot: null, tip: null, callouts: null, nodes: new Map() },
     camera: null,

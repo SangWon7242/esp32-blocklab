@@ -1,13 +1,14 @@
 import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Canvas } from "@react-three/fiber";
-import { CircuitBoard, Eye, Hand, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { behaviorFor } from "@/track/sim/behaviors";
 import { readDevices, type Device } from "@/track/sim/circuit";
 import { defaultInputs, Simulator } from "@/track/sim/engine";
 import type { Scene3D } from "@/track/wiring3d";
+import { buildAssembly } from "./assembly";
 import { makeLayout } from "./layout";
 import { Schematic, schematicRows } from "./Schematic";
 import { anchorsOf, Scene3DView } from "./Scene";
@@ -52,10 +53,10 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
   const anchors = useMemo(() => anchorsOf(scene, L), [scene, L]);
   const set = useViewer((s) => s.set);
   const behavior = behaviorFor(chapterId);
-  // 장면이 바뀌면 시뮬레이션도 새로
+  // 장면이 바뀌면 시뮬레이션 · 조립 순서도 새로
   useEffect(() => {
     const devices = readDevices(scene);
-    set({ sim: new Simulator(devices, behavior, defaultInputs()), devices, running: false, selected: null, hover: null, picked: null, readings: [], serial: [] });
+    set({ sim: new Simulator(devices, behavior, defaultInputs()), devices, running: false, selected: null, hover: null, picked: null, readings: [], serial: [], assembly: buildAssembly(scene), step: null });
   }, [scene, behavior, set]);
   const devices = useViewer((s) => s.devices);
   const has = (k: Device["kind"]) => devices.some((d) => d.kind === k);
@@ -68,6 +69,8 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
   const sim = useViewer((s) => s.sim);
   const dom = useViewer((s) => s.dom);
   const invalidate = useViewer((s) => s.invalidate);
+  const step = useViewer((s) => s.step);
+  const assembly = useViewer((s) => s.assembly);
   const hasSchematic = schematicRows(scene).length > 0;
   const [schematic, setSchematic] = useState(Boolean(stage || large));
   const boxRef = useRef<HTMLDivElement>(null);
@@ -78,7 +81,16 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
   const run = (on: boolean) => {
     if (!sim) return;
     if (on) sim.reset();
-    set({ running: on, readings: [], serial: [] });
+    // 실행하면 조립 순서 보기를 닫고 다 꽂힌 모습으로
+    set({ running: on, readings: [], serial: [], ...(on ? { step: null } : {}) });
+    invalidate();
+  };
+
+  // 조립 순서: 켜면 처음(보드 놓기)부터. 실행 · 고른 부품은 멈춘다
+  const goStep = (n: number | null) => {
+    const last = (assembly?.steps.length ?? 1) - 1;
+    const next = n === null ? null : Math.max(0, Math.min(last, n));
+    set({ step: next, ...(next !== null ? { running: false, selected: null, picked: null, hover: null } : {}) });
     invalidate();
   };
 
@@ -97,6 +109,8 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === " " && behavior && e.target === e.currentTarget) { e.preventDefault(); run(!running); }
     else if (e.key === "Escape" && selected) { set({ selected: null }); invalidate(); }
+    else if (e.key === "Escape" && step !== null) goStep(null);
+    else if (step !== null && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); goStep(step + (e.key === "ArrowRight" ? 1 : -1)); }
   };
 
   const tall = scene.boards.length > 0 && scene.breadboards.length > 0;
@@ -163,6 +177,11 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
             {running ? <Square className="size-3.5 fill-current" /> : <Play className="size-3.5 fill-current" />}{running ? "멈춤" : "실행"}
           </Button>
         )}
+        {assembly && assembly.steps.length > 2 && (
+          <Button type="button" size="sm" variant="outline" className={cn("h-8", step !== null ? "border-[#0f2239] bg-[#0f2239] text-white hover:bg-[#0f2239]/90 hover:text-white" : "bg-background/95")} aria-pressed={step !== null} data-testid="wiring-3d-steps" onClick={() => goStep(step === null ? 0 : null)} title="한 단계씩 꽂아 보기">
+            <ListOrdered className="size-3.5" />조립 순서
+          </Button>
+        )}
         {behavior && has("buzzer") && (
           <Button type="button" size="icon" variant="outline" className="size-8 bg-background/95" aria-pressed={sound} aria-label={sound ? "소리 끄기" : "소리 켜기"} title={sound ? "소리 끄기" : "소리 켜기"} onClick={() => set({ sound: !sound })}>
             {sound ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
@@ -172,11 +191,12 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
       </div>
 
       {selected && <PartCard />}
-      <Controls has={has} />
+      {step !== null && assembly && <StepCard step={step} go={goStep} />}
+      {step === null && <Controls has={has} />}
       {behavior && <SerialMonitor />}
       <Phone />
 
-      {hasSchematic && schematic && (
+      {hasSchematic && schematic && step === null && (
         <div className={cn("absolute right-2 bottom-12 z-10 hidden w-72 rounded-xl border bg-white/97 p-2 shadow-[0_3px_0_rgba(15,34,57,0.18)] sm:block", ink)} data-testid="wiring-3d-schematic">
           <div className="mb-1 flex items-center gap-1.5 px-1 text-xs font-bold text-[#0f2239]">
             <CircuitBoard className="size-3.5" />회로도
@@ -231,6 +251,50 @@ function nodeRef(dom: ViewerState["dom"], id: string, key: "dot" | "card" | "lin
     const cur = dom.nodes.get(id) ?? { dot: null, card: null, line: null };
     dom.nodes.set(id, { ...cur, [key]: el });
   };
+}
+
+/** 조립 순서 카드: 지금 단계에서 꽂을 부품과 이을 선. ← → 로 넘긴다 */
+function StepCard({ step, go }: { step: number; go: (n: number | null) => void }) {
+  const assembly = useViewer((s) => s.assembly);
+  if (!assembly) return null;
+  const { steps } = assembly;
+  const cur = steps[step];
+  const lead = step === 0 ? "부품을 꽂기 전에 보드와 브레드보드 자리부터 잡아요."
+    : !cur.parts.length ? "보드의 전원 핀을 브레드보드 + − 줄에 이어요. 여러 부품이 이 줄을 함께 써요."
+    : cur.wires.length ? "주황 빛 자리에 부품을 꽂고, 아래 선을 이어요. 선 끝 고리가 꽂을 자리예요."
+    : "주황 빛 자리에 부품을 놓아요.";
+  const last = step === steps.length - 1;
+  return (
+    <div className={cn("absolute bottom-14 left-2 z-10 flex max-h-[calc(100%-7.5rem)] w-[min(20rem,calc(100%-1rem))] flex-col rounded-xl border bg-white text-[#0f2239] shadow-[0_4px_0_rgba(15,34,57,0.2)]", ink)} data-testid="wiring-3d-step" aria-live="polite">
+      <div className="flex items-center gap-2 border-b border-neutral-200 px-3 py-2">
+        <span className="rounded-md bg-[#0f2239] px-1.5 py-0.5 text-xs font-bold text-white tabular-nums">{step + 1} / {steps.length}</span>
+        <p className="min-w-0 flex-1 truncate text-sm font-bold">{cur.title}</p>
+        <button type="button" className="-mr-1 rounded-md p-1 text-[#5b6168] outline-none hover:bg-neutral-100 focus-visible:ring-3 focus-visible:ring-ring/60" aria-label="조립 순서 닫기" onClick={() => go(null)}><XIcon className="size-4" /></button>
+      </div>
+      <div className="min-h-0 overflow-y-auto px-3 py-2">
+        <p className="text-[0.8rem] leading-snug break-keep text-[#5b6168]">{lead}</p>
+        {cur.lines.length > 0 && (
+          <ul className="mt-2 grid gap-1">
+            {cur.lines.map((l, i) => (
+              <li key={i} className="flex items-start gap-2 text-[0.8rem] leading-snug break-keep">
+                <span className="mt-1 h-1.5 w-5 shrink-0 rounded-full shadow-[0_0_0_1px_rgba(15,34,57,0.25)]" style={{ background: l.color }} />
+                <span>{l.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="flex items-center gap-2 border-t border-neutral-200 px-2 py-1.5">
+        <Button type="button" size="sm" variant="ghost" className="h-8" disabled={step === 0} onClick={() => go(step - 1)} aria-label="이전 단계 (←)"><ChevronLeft className="size-4" />이전</Button>
+        <div className="flex min-w-0 flex-1 justify-center gap-1" aria-hidden>
+          {steps.map((_, i) => <span key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-4 bg-[#e8590c]" : i < step ? "w-1.5 bg-[#0f2239]/60" : "w-1.5 bg-[#0f2239]/15")} />)}
+        </div>
+        {last
+          ? <Button type="button" size="sm" className="h-8" onClick={() => go(null)}>다 꽂았어요</Button>
+          : <Button type="button" size="sm" className="h-8" onClick={() => go(step + 1)} aria-label="다음 단계 (→)" data-testid="wiring-3d-step-next">다음<ChevronRight className="size-4" /></Button>}
+      </div>
+    </div>
+  );
 }
 
 /** 누른 부품의 카드: 설명 + (LED) 색 바꾸기 · (저항) 값 바꾸기 */

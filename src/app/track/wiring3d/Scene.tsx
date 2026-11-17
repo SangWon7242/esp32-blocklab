@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Pt, Scene3D } from "@/track/wiring3d";
 import { Board, Breadboard } from "./board";
+import { StepMarks, StepShow } from "./assemblyView";
 import { HoverMarks, SelectionRing } from "./kit";
 import { BB_H, HEADER_H, PCB_H, PIN_SEAT, type Layout } from "./layout";
 import { COLOR, toonOwn } from "./materials";
@@ -180,27 +181,10 @@ export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; 
       <Rig L={L} cardsRoom={cardsRoom && anchors.length <= 6} />
       {scene.breadboards.map((bb, i) => <Breadboard key={i} bb={bb} L={L} index={i} />)}
       {scene.boards.map((b, i) => <Board key={i} b={b} L={L} index={i} blueLed={blueLed} />)}
-      {scene.parts.map((p, i) => {
-        switch (p.type) {
-          case "led": return <Led key={i} p={p} i={i} L={L} />;
-          case "resistor": return <Resistor key={i} p={p} i={i} L={L} />;
-          case "button": return <Button key={i} p={p} i={i} L={L} />;
-          case "buzzer": return <Buzzer key={i} p={p} i={i} L={L} />;
-          case "pot": return <Pot key={i} p={p} i={i} L={L} />;
-          case "photo": return <Photo key={i} p={p} i={i} L={L} />;
-          case "tilt": return <Tilt key={i} p={p} i={i} L={L} />;
-          case "rgb": return <Rgb key={i} p={p} i={i} L={L} />;
-          case "irrx": return <IrRx key={i} p={p} i={i} L={L} />;
-          case "dip": return <Dip key={i} p={p} i={i} L={L} />;
-          case "servo": return <Servo key={i} p={p} i={i} L={L} />;
-          case "module": return <Module key={i} p={p} i={i} L={L} />;
-          case "touch": return <Touch key={i} p={p} i={i} L={L} />;
-          case "seg7": return <Seg7 key={i} p={p} i={i} L={L} />;
-          case "prop": return <Prop key={i} p={p} i={i} L={L} />;
-        }
-      })}
-      {hasIr && irPart && <Remote at={new THREE.Vector3(L.X(irPart.legs[1].x) + 90, 0, L.Zp(irPart.legs[1]) + 40)} />}
-      {scene.wires.map((w, i) => <WireView key={i} w={w} i={i} L={L} scene={scene} />)}
+      {scene.parts.map((p, i) => <StepShow key={i} part={i}>{partView(p, i, L)}</StepShow>)}
+      {hasIr && irPart && <StepShow part={scene.parts.indexOf(irPart)}><Remote at={new THREE.Vector3(L.X(irPart.legs[1].x) + 90, 0, L.Zp(irPart.legs[1]) + 40)} /></StepShow>}
+      {scene.wires.map((w, i) => <StepShow key={i} wire={i}><WireView w={w} i={i} L={L} scene={scene} /></StepShow>)}
+      <StepMarks scene={scene} L={L} />
       <Flow chains={chains} ledPins={ledPins} />
       <HoverMarks />
       <SelectionRing />
@@ -208,6 +192,27 @@ export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; 
       <SimDriver blueLed={blueLed} />
     </>
   );
+}
+
+/** 부품 한 개의 3D 모습 */
+function partView(p: Scene3D["parts"][number], i: number, L: Layout) {
+  switch (p.type) {
+    case "led": return <Led key={i} p={p} i={i} L={L} />;
+    case "resistor": return <Resistor key={i} p={p} i={i} L={L} />;
+    case "button": return <Button key={i} p={p} i={i} L={L} />;
+    case "buzzer": return <Buzzer key={i} p={p} i={i} L={L} />;
+    case "pot": return <Pot key={i} p={p} i={i} L={L} />;
+    case "photo": return <Photo key={i} p={p} i={i} L={L} />;
+    case "tilt": return <Tilt key={i} p={p} i={i} L={L} />;
+    case "rgb": return <Rgb key={i} p={p} i={i} L={L} />;
+    case "irrx": return <IrRx key={i} p={p} i={i} L={L} />;
+    case "dip": return <Dip key={i} p={p} i={i} L={L} />;
+    case "servo": return <Servo key={i} p={p} i={i} L={L} />;
+    case "module": return <Module key={i} p={p} i={i} L={L} />;
+    case "touch": return <Touch key={i} p={p} i={i} L={L} />;
+    case "seg7": return <Seg7 key={i} p={p} i={i} L={L} />;
+    case "prop": return <Prop key={i} p={p} i={i} L={L} />;
+  }
 }
 
 /** 바닥 모눈: 장면과 함께 돌아서 방향을 잃지 않는다 */
