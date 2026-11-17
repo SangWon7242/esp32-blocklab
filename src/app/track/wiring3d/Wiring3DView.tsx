@@ -2,7 +2,7 @@ import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, ty
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import { Armchair, Cable, ChevronLeft, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
+import { Armchair, Cable, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { behaviorFor } from "@/track/sim/behaviors";
@@ -13,6 +13,7 @@ import { buildAssembly } from "./assembly";
 import { makeLayout, siteLayout } from "./layout";
 import { withPlusLayout } from "./plusLayout";
 import { OledZoom } from "./OledZoom";
+import { PinoutDialog } from "./PinoutDialog";
 import { dioramaRoom } from "./diorama";
 import { Schematic, schematicRows } from "./Schematic";
 import { anchorsOf, Scene3DView } from "./Scene";
@@ -84,6 +85,7 @@ function Viewer({ scene: raw, chapterId, onUnsupported, large, toolbar, stage, i
   const step = useViewer((s) => s.step);
   const assembly = useViewer((s) => s.assembly);
   const hasSchematic = schematicRows(scene).length > 0;
+  const [pinout, setPinout] = useState(false);
   const [schematic, setSchematic] = useState(Boolean(stage || large));
   const boxRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
@@ -206,6 +208,11 @@ function Viewer({ scene: raw, chapterId, onUnsupported, large, toolbar, stage, i
             <ListOrdered className="size-3.5" />조립 순서
           </Button>
         )}
+        {!site && scene.boards.length > 0 && (
+          <Button type="button" size="sm" variant="outline" className={cn("h-8", pinout ? "border-[#0f2239] bg-[#0f2239] text-white hover:bg-[#0f2239]/90 hover:text-white" : "bg-background/95")} aria-pressed={pinout} data-testid="wiring-3d-pinout-open" onClick={() => setPinout((v) => !v)} title="보드의 핀마다 무엇을 할 수 있는지 봐요">
+            <MapIcon className="size-3.5" />핀 배치도
+          </Button>
+        )}
         {behavior && has("buzzer") && (
           <Button type="button" size="icon" variant="outline" className="size-8 bg-background/95" aria-pressed={sound} aria-label={sound ? "소리 끄기" : "소리 켜기"} title={sound ? "소리 끄기" : "소리 켜기"} onClick={() => set({ sound: !sound })}>
             {sound ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
@@ -216,6 +223,7 @@ function Viewer({ scene: raw, chapterId, onUnsupported, large, toolbar, stage, i
 
       {selected && <PartCard />}
       <OledZoom />
+      {pinout && <PinoutDialog scene={scene} onClose={() => setPinout(false)} />}
       {step !== null && assembly && <StepCard step={step} go={goStep} />}
       {step === null && <Controls has={has} />}
       {behavior && <SerialMonitor />}

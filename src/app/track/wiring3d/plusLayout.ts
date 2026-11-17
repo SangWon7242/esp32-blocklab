@@ -53,12 +53,42 @@ function mapPin(rx: number, ry: number): Pt | null {
   return null;
 }
 
-/** Plus 보드가 있는 장면의 보드 핀 · 그 핀에 꽂힌 점을 도면 자리로 옮긴 새 장면 (DevKit 은 그대로) */
+/*
+ * 기본 보드: ESP32-DevKitC 38핀 (ESP32-WROOM-32). 눕혀서 USB-C 가 왼쪽, 모듈(안테나)이 오른쪽.
+ * 세워 놓은 사진(USB 위)의 왼쪽 줄이 아래 줄, 오른쪽 줄이 위 줄이 된다 (왼 → 오 = 사진의 위 → 아래).
+ * 배선도(DevKit V1 30핀)의 핀 이름을 38핀 자리로 옮긴다 — 줄 높이는 같고 가로 자리만 바뀐다.
+ */
+export const DK38_TOP = ["5V", "CMD", "D3", "D2", "13", "GND", "12", "14", "27", "26", "25", "33", "32", "35", "34", "VN", "VP", "EN", "3V3"];
+export const DK38_BOT = ["CLK", "D0", "D1", "15", "2", "0", "4", "16", "17", "5", "18", "19", "GND", "21", "RX", "TX", "22", "23", "GND"];
+/** 38핀 첫 핀 자리 · 간격 (보드 왼쪽 끝에서) */
+export const DK38_X0 = 14, DK38_P = 22;
+/** 배선도 30핀 이름 → [위 줄?, 38핀 칸] */
+const DK30_TO_38: Record<string, [boolean, number]> = {
+  VIN: [true, 0], D13: [true, 4], D12: [true, 6], D14: [true, 7], D27: [true, 8], D26: [true, 9], D25: [true, 10], D33: [true, 11],
+  D32: [true, 12], D35: [true, 13], D34: [true, 14], VN: [true, 15], VP: [true, 16], EN: [true, 17], "3V3": [true, 18],
+  D15: [false, 3], D2: [false, 4], D4: [false, 6], RX2: [false, 7], TX2: [false, 8], D5: [false, 9], D18: [false, 10], D19: [false, 11],
+  D21: [false, 13], RX0: [false, 14], TX0: [false, 15], D22: [false, 16], D23: [false, 17],
+};
+
+/** 보드가 있는 장면의 보드 핀 · 그 핀에 꽂힌 점을 실물 배치로 옮긴 새 장면 (Plus: 실물 도면, DevKit: 38핀) */
 export function withPlusLayout(scene: Scene3D): Scene3D {
-  const plus = scene.boards.filter((b) => b.kind === "plus");
-  if (!plus.length) return scene;
+  if (!scene.boards.length) return scene;
   const moves: { from: Pt; to: Pt }[] = [];
   const boards = scene.boards.map((b) => {
+    if (b.kind === "devkit") {
+      const rows = [...new Set(b.pins.map((p) => Math.round(p.y)))].sort((a, c) => a - c);
+      const pins = b.pins.map((p) => {
+        const label = p.label.replace(/ \(.*\)$/, "");
+        const top = Math.round(p.y) === rows[0];
+        const m = label === "GND" ? [top, top ? 5 : 12] as [boolean, number] : DK30_TO_38[label];
+        if (!m) return p;
+        const to = { x: b.x + DK38_X0 + DK38_P * m[1], y: m[0] === top ? p.y : top ? rows[rows.length - 1] : rows[0] };
+        moves.push({ from: { x: p.x, y: p.y }, to });
+        return { ...p, ...to };
+      });
+      // 모듈: 오른쪽 끝(안테나가 보드 끝까지), 폭은 보드 가운데 18mm 쯤
+      return { ...b, pins, chip: { x: b.x + 248, y: b.y + 27, w: 224, h: 96 }, usb: { x: b.x - 10, y: b.y + b.h / 2 - 17, w: 28, h: 34 } };
+    }
     if (b.kind !== "plus") return b;
     const ny = b.y + DY;
     const at = (sx: number, sy: number) => { const q = svgToBoard(sx, sy); return { x: b.x + q.x, y: ny + q.y }; };

@@ -7,7 +7,7 @@ import { Board, Breadboard } from "./board";
 import { Diorama } from "./diorama";
 import { StepMarks, StepShow } from "./assemblyView";
 import { HoverMarks, SelectionRing } from "./kit";
-import { BB_H, HEADER_H, PCB_H, PIN_SEAT, type Layout } from "./layout";
+import { BB_H, DEVKIT_TOP, HEADER_H, PCB_H, type Layout } from "./layout";
 import { COLOR, toonOwn } from "./materials";
 import { Button, Buzzer, Dip, IrRx, Led, Module, Photo, Pot, Prop, Remote, Resistor, Rgb, Seg7, Servo, Tilt, Touch } from "./parts";
 import { PanFloor, Rig } from "./rig";
@@ -31,7 +31,7 @@ export function anchorsOf(scene: Scene3D, L: Layout): Anchor[] {
   for (const b of scene.boards) {
     for (const p of b.pins.filter((q) => q.used)) {
       const gnd = /GND|\bG$/.test(p.label);
-      add(p.label.replace(/ \(.*\)$/, ""), pinText(p.label, true), gnd ? "#495057" : "#f08c00", L.v(p, PCB_H + (b.kind === "devkit" ? PIN_SEAT : HEADER_H) + 15), true);
+      add(p.label.replace(/ \(.*\)$/, ""), pinText(p.label, true), gnd ? "#495057" : "#f08c00", L.v(p, (b.kind === "devkit" ? DEVKIT_TOP : PCB_H + HEADER_H) + 15), true);
     }
   }
   scene.parts.forEach((p) => {

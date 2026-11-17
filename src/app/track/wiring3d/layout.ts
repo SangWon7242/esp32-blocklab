@@ -14,6 +14,9 @@ export const HEADER_H = 11; // Plus 핀 소켓 높이
 export const PIN_LEN = 21; // DevKit 금색 핀 길이
 export const PIN_SEAT = 8; // DevKit: 선 머리가 핀에 씌워져 내려앉는 높이
 export const DEVKIT_F = 1.7;
+/** DevKit 38핀: 아래로 난 핀 위에 올라서 있는 높이 · 선 머리가 윗면 패드에 앉는 높이 */
+export const DEVKIT_LIFT = 12;
+export const DEVKIT_TOP = DEVKIT_LIFT + PCB_H + 2;
 
 type Rect = { x: number; y: number; w: number; h: number };
 export const inRect = (p: Pt, r: Rect) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
@@ -119,7 +122,7 @@ export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): 
     if (pad) return pad.top;
     if (scene.breadboards.some((b) => inRect(p, b))) return BB_H;
     const board = scene.boards.find((b) => inRect(p, b));
-    return board ? PCB_H + (board.kind === "devkit" ? PIN_SEAT : HEADER_H) : 0;
+    return board ? (board.kind === "devkit" ? DEVKIT_TOP : PCB_H + HEADER_H) : 0;
   };
 
   const sonars: SonarTrack[] = [];

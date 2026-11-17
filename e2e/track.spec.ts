@@ -268,6 +268,19 @@ test("융합 챕터 3D: 현장 보기가 먼저, 회로 보기로 바꾸면 조�
   await expect(wiring.getByTestId("wiring-3d-steps")).toBeVisible();
 });
 
+test("핀 배치도: 3D 에서 열면 보드 그림과 한글 설명, Esc 로 닫힌다", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
+  await page.goto("/#/track/01-led");
+  const wiring = page.getByTestId("chapter-wiring");
+  await wiring.getByTestId("wiring-3d-pinout-open").click();
+  const dialog = wiring.getByTestId("wiring-3d-pinout");
+  await expect(dialog).toContainText("핀 배치도");
+  await expect(dialog).toContainText("마음껏 쓰는 핀");
+  await expect(dialog.getByTestId("wiring-3d-pinout-info")).toContainText("핀에 마우스를 올려 보세요");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});
+
 test("원리 카드, 실행 단계의 이렇게 되면 성공과 코드 설명(누르면 원본 코드에서 그 줄 표시)", async ({ page }) => {
   await seedDone(page, "01-led", ["problem", "analysis", "predict"]);
   await page.goto("/#/track/01-led");

@@ -5,6 +5,7 @@ import type { Scene3D } from "@/track/wiring3d";
 import { Box, Cyl, Decal, Part, roundedBox } from "./kit";
 import { BB_H, HEADER_H, PCB_H, PIN_LEN, type Layout } from "./layout";
 import { K, svgToBoard } from "./plusLayout";
+import { Devkit38 } from "./devkit38";
 import { COLOR, noOutline, toon, toonOwn } from "./materials";
 import { useViewerApi } from "./store";
 import { pinText, TEXT } from "./texts";
@@ -339,6 +340,8 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
     api.getState().invalidate();
   };
 
+  // 기본 보드: ESP32-DevKitC 38핀 실물 모양 (devkit38.tsx)
+  if (devkit) return <Devkit38 b={b} L={L} index={index} blueLed={blueLed} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} />;
   return (
     <group>
       {/* 보드 판: 올리면 설명만 (들리거나 빛나지 않는다 — 판 위 부품에 올릴 때 어지럽지 않게) */}
