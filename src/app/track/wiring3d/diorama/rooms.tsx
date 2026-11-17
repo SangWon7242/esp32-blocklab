@@ -6,6 +6,8 @@ import { glowTexture, noOutline, toon, toonOwn } from "../materials";
 import { useViewerApi } from "../store";
 import { buzzing, deviceKind, ease, pinLevel, rgbOf, servoAngle } from "./common";
 import { LiveOled, Plant, Sign } from "./pieces";
+import { PressPad, Slider } from "./controls";
+import { HandFigure } from "../figures";
 
 /* 방 · 책상 위 현장 모형: 무드등 · 선풍기 · 뿅망치 · 재난 알리미 · 교실 기후 · 병아리 집 · 게임기 · 지팡이 */
 
@@ -74,31 +76,56 @@ export function MoodLamp() {
   );
 }
 
-/* ── 31장 안전 선풍기 ── */
-export const FAN_ROOM = { w: 220, d: 200 };
+/* ── 31장 안전 선풍기: 선풍기 안전망 아래에 초음파 센서, 받침에 A · B 버튼과 단계 LED 셋 ── */
+export const FAN_ROOM = { w: 240, d: 220 };
+
+/** 핀이 켜지면 빛나는 작은 등 */
+function PinLamp({ pin, at, color }: { pin: number; at: [number, number, number]; color: string }) {
+  const api = useViewerApi();
+  const m = useMemo(() => toonOwn({ color: "#f1f3f5", emissive: color, emissiveIntensity: 0 }), [color]);
+  useEffect(() => () => m.dispose(), [m]);
+  useFrame(() => { m.emissiveIntensity = pinLevel(api.getState(), pin) * 2.4; });
+  return <Ball r={2.6} at={at} mat={m} />;
+}
+
 export function DeskFan() {
   const api = useViewerApi();
   const blades = useRef<THREE.Group>(null);
   const speed = useRef(0);
+  const pings = useRef<THREE.Group>(null);
+  const clock = useRef(0);
+  const ping = useMemo(() => noOutline(new THREE.MeshBasicMaterial({ color: "#2f9e44", transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide })), []);
+  useEffect(() => () => ping.dispose(), [ping]);
   useFrame((_, dt) => {
     const s = api.getState();
     const d = deviceKind(s, "fan");
     const goal = d ? pinLevel(s, d.inP) - pinLevel(s, d.inM) : 0;
     speed.current = ease(speed.current, goal, dt, 2.5);
     if (blades.current) blades.current.rotation.z += speed.current * dt * 24;
-    if (Math.abs(speed.current) > 0.002) s.invalidate();
+    clock.current += dt;
+    pings.current?.children.forEach((m, k) => {
+      const ph = (clock.current * 1.4 + k / 3) % 1;
+      m.visible = s.running;
+      m.position.z = ph * 40;
+      m.scale.setScalar(4 + ph * 8);
+    });
+    if (s.running || Math.abs(speed.current) > 0.002) s.invalidate();
   });
-  const guard = toon("#dee2e6");
+  const guard = toon("#dee2e6", { metal: 0.6, rough: 0.35 });
+  const FX = -10, TOP = 58;
+  // 센서 앞면 z (모형 좌표) · 손 끝이 손 자리보다 앞(−z)으로 나온 길이
+  const SENSOR_Z = 22, TIP = 8;
   return (
     <group>
-      <Corner w={220} d={200} />
-      <Desk w={170} d={110} top={58} />
-      {/* 선풍기: 받침 · 목 · 모터 · 날개 · 망 */}
-      <group position={[-20, 58, -10]}>
-        <Cyl r={24} r2={20} h={8} at={[0, 4, 0]} mat={toon("#f1f3f5")} seg={28} />
-        <Cyl r={4} h={50} at={[0, 32, 0]} mat={toon("#ced4da")} seg={12} />
-        <Box size={[18, 18, 26]} at={[0, 64, -8]} mat={toon("#f1f3f5")} />
-        <group position={[0, 64, 10]}>
+      <Corner w={240} d={220} />
+      <Desk w={180} d={150} top={TOP} />
+      <group position={[FX, TOP, -20]}>
+        {/* 받침 · 목 · 모터 */}
+        <Box size={[70, 10, 46]} at={[0, 5, 6]} mat={toon("#f1f3f5")} />
+        <Cyl r={4} h={46} at={[0, 32, 0]} mat={toon("#ced4da", { metal: 0.6, rough: 0.35 })} seg={12} />
+        <Box size={[20, 20, 28]} at={[0, 62, -8]} mat={toon("#f1f3f5")} />
+        {/* 날개 · 안전망 */}
+        <group position={[0, 62, 12]}>
           <group ref={blades}>
             <Cyl r={6} h={6} at={[0, 0, 0]} rot={[Math.PI / 2, 0, 0]} mat={toon("#74c0fc")} seg={14} />
             {[0, 1, 2, 3].map((k) => (
@@ -107,14 +134,35 @@ export function DeskFan() {
               </group>
             ))}
           </group>
-          {/* 안전망 */}
-          <mesh rotation={[0, 0, 0]} position={[0, 0, 5]} material={guard}><torusGeometry args={[32, 1.4, 8, 40]} /></mesh>
-          {[0, 1, 2, 3, 4, 5].map((k) => <Box key={k} size={[1.4, 64, 1.4]} at={[0, 0, 5]} rot={[0, 0, (k * Math.PI) / 6]} mat={guard} cast={false} />)}
+          <mesh position={[0, 0, 5]} material={guard}><torusGeometry args={[32, 1.4, 8, 40]} /></mesh>
+          <mesh position={[0, 0, -4]} material={guard}><torusGeometry args={[32, 1.4, 8, 40]} /></mesh>
+          {[0, 1, 2, 3, 4, 5].map((k) => <Box key={k} size={[1.2, 64, 1.2]} at={[0, 0, 5]} rot={[0, 0, (k * Math.PI) / 6]} mat={guard} cast={false} />)}
         </group>
-        {/* 버튼 둘 (A · B) */}
-        {[-8, 8].map((x, k) => <Cyl key={x} r={3.4} h={3} at={[x, 9, 18]} mat={toon(k ? "#228be6" : "#fa5252")} seg={12} />)}
+        {/* 초음파 센서: 안전망 바로 아래, 앞(+z)을 본다 */}
+        <group position={[0, 24, SENSOR_Z + 20 - 6]}>
+          <Box size={[42, 18, 3]} at={[0, 0, 0]} mat={toon("#1c5fa8")} />
+          {[-11, 11].map((x) => (
+            <group key={x}>
+              <Cyl r={7} h={7} at={[x, 0, 4]} rot={[Math.PI / 2, 0, 0]} mat={toon("#d9dde3")} seg={18} />
+              <Cyl r={4} h={1} at={[x, 0, 7.8]} rot={[Math.PI / 2, 0, 0]} mat={toon("#495057", { outline: false })} seg={14} />
+            </group>
+          ))}
+          <group ref={pings} position={[0, 0, 8]}>
+            {[0, 1, 2].map((k) => <mesh key={k} material={ping} visible={false} raycast={() => null}><ringGeometry args={[0.85, 1, 32]} /></mesh>)}
+          </group>
+        </group>
+        {/* 받침의 A · B 버튼 · 단계 LED 셋 */}
+        <PressPad pin={14} at={[25, 10, -8]} label="A 버튼 (켜기 · 끄기)" color="#fa5252" size={7} />
+        <PressPad pin={27} at={[25, 10, 8]} label="B 버튼 (세기)" color="#228be6" size={7} />
+        {[[25, "#ffd43b"], [26, "#ffa94d"], [33, "#ff6b6b"]].map(([pin, c], k) => <PinLamp key={pin as number} pin={pin as number} at={[-27, 11, -8 + k * 8]} color={c as string} />)}
       </group>
-      <Sign w={60} h={14} at={[60, 120, -95.5]} paint={(g, cw, ch) => { g.fillStyle = "#fff3bf"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#e8590c"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("손이 가까우면 멈춰요", cw / 2, ch / 2 + 1); }} />
+      {/* 손: 선풍기 앞에서 센서 쪽으로 끌어 대 본다 */}
+      <group position={[FX, TOP + 24 - 38, 0]}>
+        <Slider sensor={SENSOR_Z + TIP} start={110} min={SENSOR_Z + TIP + 6} max={150} label="손" text="선풍기 쪽으로 끌어 보세요. 손이 2~8cm 안에 들어오면 날개가 멈춰요." tagY={70}>
+          <group rotation={[0, Math.PI, 0]}><HandFigure /></group>
+        </Slider>
+      </group>
+      <Sign w={70} h={14} at={[70, 120, -105.5]} paint={(g, cw, ch) => { g.fillStyle = "#fff3bf"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#e8590c"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("손이 가까우면 멈춰요", cw / 2, ch / 2 + 1); }} />
     </group>
   );
 }

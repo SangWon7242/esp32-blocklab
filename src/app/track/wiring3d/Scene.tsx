@@ -222,7 +222,7 @@ function SimDriver({ blueLed }: { blueLed: THREE.MeshStandardMaterial }) {
   return null;
 }
 
-export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; L: Layout; anchors: Anchor[]; cardsRoom: boolean }) {
+export function Scene3DView({ scene, L, anchors, cardsRoom, site = false }: { scene: Scene3D; L: Layout; anchors: Anchor[]; cardsRoom: boolean; site?: boolean }) {
   const api = useViewerApi();
   const { invalidate } = useThree();
   useEffect(() => {
@@ -249,14 +249,16 @@ export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; 
       <Floor r={r} />
       <PanFloor r={r} />
       <Rig L={L} cardsRoom={cardsRoom && anchors.length <= (L.diorama ? 4 : 6)} />
+      {/* 현장 보기: 가전 · 가구에 단 모듈만 (회로는 회로 보기에서) */}
+      {site ? <Diorama L={L} /> : <>
       {scene.breadboards.map((bb, i) => <Breadboard key={i} bb={bb} L={L} index={i} />)}
       {scene.boards.map((b, i) => <Board key={i} b={b} L={L} index={i} blueLed={blueLed} />)}
       {scene.parts.map((p, i) => <StepShow key={i} part={i}>{partView(p, i, L)}</StepShow>)}
       {hasIr && irPart && <StepShow part={scene.parts.indexOf(irPart)}><Remote at={new THREE.Vector3(L.X(irPart.legs[1].x) + 90, 0, L.Zp(irPart.legs[1]) + 40)} /></StepShow>}
       {scene.wires.map((w, i) => <StepShow key={i} wire={i}><WireView w={w} i={i} L={L} scene={scene} /></StepShow>)}
       <StepMarks scene={scene} L={L} />
-      <Diorama L={L} />
       <Flow chains={chains} ledPins={ledPins} />
+      </>}
       <HoverMarks />
       <SelectionRing />
       <OverlaySync anchors={anchors} L={L} />

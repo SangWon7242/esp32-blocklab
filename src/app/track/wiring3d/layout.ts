@@ -43,7 +43,21 @@ export type Layout = {
   sonars: SonarTrack[];
   /** 현장 모형 자리 (융합 챕터): 바닥 가운데 · 가로 · 세로. 회로 오른쪽에 둔다 */
   diorama: { at: THREE.Vector3; w: number; d: number } | null;
+  /** 장면에서 가장 높은 것의 높이 (카메라 맞춤, 기본 60) */
+  height?: number;
 };
+
+/** 현장 보기: 현장 모형만 가운데에 (회로는 그리지 않는다) */
+export function siteLayout(room: { w: number; d: number }): Layout {
+  const id = (v: number) => v;
+  return {
+    X: id, Z: id, Zp: (p) => p.y, v: (p, y) => new THREE.Vector3(p.x, y, p.y), topAt: () => 0, unZ: id, F: 1,
+    zIn: () => id, sonars: [],
+    size: { w: room.w, d: room.d }, height: 170,
+    focus: new THREE.Vector3(0, 40, 0),
+    diorama: { at: new THREE.Vector3(0, 0, 0), w: room.w, d: room.d },
+  };
+}
 
 /** 현장 모형과 회로 사이 틈 (그림 px) */
 const DIORAMA_GAP = 90;
@@ -52,6 +66,7 @@ const DIORAMA_GAP = 90;
 const SONAR_ROOM = 230;
 
 export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): Layout {
+  // 현장 모형은 이제 현장 보기에 따로 그린다 (diorama 를 주면 예전처럼 회로 옆에 자리를 비운다)
   const dk = scene.boards.find((b) => b.kind === "devkit");
   const F = dk ? DEVKIT_F : 1;
   const stretch = (y: number) => (!dk || y <= dk.y ? y : y >= dk.y + dk.h ? y + (F - 1) * dk.h : dk.y + (y - dk.y) * F);

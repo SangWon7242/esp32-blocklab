@@ -2,7 +2,7 @@ import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, ty
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import { ChevronLeft, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
+import { Armchair, Cable, ChevronLeft, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { behaviorFor } from "@/track/sim/behaviors";
@@ -10,7 +10,7 @@ import { readDevices, type Device } from "@/track/sim/circuit";
 import { defaultInputs, Simulator } from "@/track/sim/engine";
 import type { Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
-import { makeLayout } from "./layout";
+import { makeLayout, siteLayout } from "./layout";
 import { OledZoom } from "./OledZoom";
 import { dioramaRoom } from "./diorama";
 import { Schematic, schematicRows } from "./Schematic";
@@ -52,8 +52,14 @@ export function Wiring3DView(props: Props) {
 }
 
 function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
-  const L = useMemo(() => makeLayout(scene, dioramaRoom(chapterId)), [scene, chapterId]);
-  const anchors = useMemo(() => anchorsOf(scene, L), [scene, L]);
+  // 융합 챕터: 현장 보기(가전 · 가구에 단 모듈로 시뮬레이션)가 먼저, 회로 보기는 배선만
+  const room = dioramaRoom(chapterId);
+  const [mode, setMode] = useState<"site" | "circuit">(room ? "site" : "circuit");
+  const [modeFor, setModeFor] = useState(chapterId);
+  if (modeFor !== chapterId) { setModeFor(chapterId); setMode(room ? "site" : "circuit"); }
+  const site = mode === "site" && Boolean(room);
+  const L = useMemo(() => (site && room ? siteLayout(room) : makeLayout(scene)), [scene, site, room]);
+  const anchors = useMemo(() => (site ? [] : anchorsOf(scene, L)), [scene, L, site]);
   const set = useViewer((s) => s.set);
   const behavior = behaviorFor(chapterId);
   // 장면이 바뀌면 시뮬레이션 · 조립 순서도 새로
@@ -138,7 +144,7 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
         style={{ position: "absolute", inset: 0, touchAction: "none" }}
         aria-label={`3D 배선 보기: ${scene.rows.map((r) => `${r.part} → ${r.to}`).join(", ")}`}
       >
-        <Scene3DView scene={scene} L={L} anchors={anchors} cardsRoom={Boolean(stage || large)} />
+        <Scene3DView key={site ? "site" : "circuit"} scene={scene} L={L} anchors={anchors} cardsRoom={!site && Boolean(stage || large)} site={site} />
       </Canvas>
       </GlBoundary>
 
@@ -180,7 +186,19 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
             {running ? <Square className="size-3.5 fill-current" /> : <Play className="size-3.5 fill-current" />}{running ? "멈춤" : "실행"}
           </Button>
         )}
-        {assembly && assembly.steps.length > 2 && (
+        {room && (
+          <div className="inline-flex h-8 items-center rounded-lg border bg-background/95 p-[3px]" role="group" aria-label="보는 방법">
+            {([["site", "현장", Armchair], ["circuit", "회로", Cable]] as const).map(([id, name, Icon]) => (
+              <button key={id} type="button" aria-pressed={mode === id} data-testid={`wiring-3d-mode-${id}`}
+                onClick={() => { setMode(id); set({ selected: null, hover: null, step: null }); invalidate(); }}
+                title={id === "site" ? "가전 · 가구에 단 모듈로 시뮬레이션해요" : "보드 · 브레드보드 배선만 봐요"}
+                className={cn("flex h-full items-center gap-1 rounded-md px-2 text-sm font-medium text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50", mode === id && "bg-foreground text-background")}>
+                <Icon className="size-3.5" />{name}
+              </button>
+            ))}
+          </div>
+        )}
+        {!site && assembly && assembly.steps.length > 2 && (
           <Button type="button" size="sm" variant="outline" className={cn("h-8", step !== null ? "border-[#0f2239] bg-[#0f2239] text-white hover:bg-[#0f2239]/90 hover:text-white" : "bg-background/95")} aria-pressed={step !== null} data-testid="wiring-3d-steps" onClick={() => goStep(step === null ? 0 : null)} title="한 단계씩 꽂아 보기">
             <ListOrdered className="size-3.5" />조립 순서
           </Button>

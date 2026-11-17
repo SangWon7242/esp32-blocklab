@@ -48,8 +48,7 @@ export function sonarTargetFor(chapterId: string | null | undefined): SonarTarge
   switch (num(chapterId)) {
     case "10": case "40": return "person";
     case "31": case "35": return "hand";
-    // 32장: 지팡이 현장 모형이 거리를 정한다 (회로 앞에는 끄는 물체가 없다)
-    case "32": return "none";
+    case "32": return "wall";
     default: return "car";
   }
 }

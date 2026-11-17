@@ -31,8 +31,8 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
   // 처음 각도에서 장면 바닥 상자(높이 60)가 화면에 차지하는 가로 · 세로
   const proj = useMemo(() => {
     const ca = Math.cos(AZ0), sa = Math.sin(AZ0), se = Math.sin(EL_TILT), ce = Math.cos(EL_TILT);
-    return { w: L.size.w * ca + L.size.d * sa, h: se * (L.size.w * sa + L.size.d * ca) + ce * 60 };
-  }, [L.size.w, L.size.d]);
+    return { w: L.size.w * ca + L.size.d * sa, h: se * (L.size.w * sa + L.size.d * ca) + ce * (L.height ?? 60) };
+  }, [L.size.w, L.size.d, L.height]);
   const st = useRef({
     target: L.focus.clone(),
     /** 조립 순서에서 천천히 옮겨 갈 자리 */
