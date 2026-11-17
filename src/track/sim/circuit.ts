@@ -138,6 +138,11 @@ export type Device =
   | { kind: "pir"; part: number; pin: number }
   | { kind: "sound"; part: number; pin: number }
   | { kind: "flame"; part: number; pin: number }
+  /** 토양 수분 센서 · 수위 센서 (아날로그 S) */
+  | { kind: "soil"; part: number; pin: number }
+  | { kind: "water"; part: number; pin: number }
+  /** 릴레이 모듈: 입력 S 핀이 1 이면 COM 과 NO 가 이어져 펌프가 돈다 */
+  | { kind: "relay"; part: number; pin: number }
   | { kind: "joystick"; part: number; x?: number; y?: number; b?: number }
   | { kind: "keypad"; part: number }
   | { kind: "fan"; part: number; inP?: number; inM?: number }
@@ -235,6 +240,9 @@ export function readDevices(scene: Scene3D, circuit: Circuit = readCircuit(scene
           case "pir": if (s !== undefined) out.push({ kind: "pir", part, pin: s }); break;
           case "sound": if (s !== undefined) out.push({ kind: "sound", part, pin: s }); break;
           case "flame": if (s !== undefined) out.push({ kind: "flame", part, pin: s }); break;
+          case "soil": if (s !== undefined) out.push({ kind: "soil", part, pin: s }); break;
+          case "water": if (s !== undefined) out.push({ kind: "water", part, pin: s }); break;
+          case "relay": if (s !== undefined) out.push({ kind: "relay", part, pin: s }); break;
           case "ir": if (s !== undefined) out.push({ kind: "irrx", part, pin: s }); break;
           case "joystick": out.push({ kind: "joystick", part, x: pin("X"), y: pin("Y"), b: pin("B") }); break;
           case "keypad": out.push({ kind: "keypad", part }); break;

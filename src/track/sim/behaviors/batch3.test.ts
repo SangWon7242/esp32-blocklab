@@ -26,7 +26,7 @@ const make = (id: string, devices: Device[]) => new Simulator(devices, behaviorF
 
 afterEach(() => vi.restoreAllMocks());
 
-describe("31~43 · 90장 동작", () => {
+describe("31~44 · 90장 동작", () => {
   it("31장: A 로 켜고 B 로 단계를 올리며, 손이 8cm 안에 오면 선풍기가 멈춘다", () => {
     const sim = make("31-safe-fan", [
       { kind: "fan", part: 0, inP: 13, inM: 12 },
@@ -256,6 +256,58 @@ describe("31~43 · 90장 동작", () => {
     const bad = seen(sim, 2.5, () => sim.outputs.tone[25]);
     expect(bad).toContain(262);
     expect(sim.outputs.oled?.slice(0, 2)).toEqual(["S: BAD", "T: 33C"]);
+  });
+
+  it("44장: 배선 장면에서 흙 34 · 물통 35 · 릴레이 26 을 읽는다 (두 보드 같음)", () => {
+    for (const board of ["plus", "devkit"] as const) {
+      const sim = simFor("44-smart-plant", board);
+      expect(device(sim, "soil").pin, board).toBe(34);
+      expect(device(sim, "water").pin, board).toBe(35);
+      expect(device(sim, "relay").pin, board).toBe(26);
+      expect(device(sim, "oled"), board).toBeDefined();
+    }
+  });
+
+  it("44장: 흙이 마르면 릴레이가 1초 켜져 물을 주고, 흙이 젖으면 OK 로 멈춘다", () => {
+    const sim = simFor("44-smart-plant");
+    run(sim, 0.5);
+    expect(sim.outputs.pins[26]).toBe(1);
+    const relay = seen(sim, 8, () => sim.outputs.pins[26]);
+    expect(sim.outputs.phone?.title).toBe("Smart Plant");
+    expect(relay).toContain(0);
+    expect(sim.inputs.soil).toBeGreaterThan(0.36);
+    expect(sim.inputs.water).toBeLessThan(0.8);
+    expect(sim.outputs.oled?.[2]).toBe("OK");
+    expect(sim.outputs.oled?.[0]).toMatch(/^SOIL: \d+$/);
+    expect(Number(sim.outputs.oled?.[0].slice(6))).toBeGreaterThanOrEqual(1500);
+    expect(sim.outputs.pins[26]).toBe(0);
+  });
+
+  it("44장: 물통이 비면 흙이 말라도 릴레이가 켜지지 않고 NO WATER", () => {
+    const sim = simFor("44-smart-plant");
+    sim.inputs.water = 0;
+    const relay = seen(sim, 5, () => sim.outputs.pins[26] ?? 0);
+    expect(relay.every((v) => v === 0)).toBe(true);
+    expect(sim.outputs.oled).toEqual([expect.stringMatching(/^SOIL: \d+$/), expect.stringMatching(/^WATER: \d+$/), "NO WATER"]);
+    expect(sim.inputs.soil).toBeLessThan(0.3);
+  });
+
+  it("44장: 흙이 촉촉해도 앱의 물 주기 단추(/cmd?pump=on)면 1초 물을 준다, 물이 없으면 펌프가 돌아도 물이 안 나온다", () => {
+    const sim = simFor("44-smart-plant");
+    sim.inputs.soil = 0.8;
+    run(sim, 0.5);
+    expect(sim.outputs.oled?.[2]).toBe("OK");
+    sim.inputs.web.push("/cmd?pump=on");
+    run(sim, 0.2);
+    expect(sim.outputs.pins[26]).toBe(1);
+    expect(seen(sim, 1.5, () => sim.outputs.oled?.[2])).toContain("WATERING");
+    // 엔진: 릴레이가 켜져 있어도 물통이 비었으면 흙이 젖지 않는다
+    const dry = make("44-smart-plant", [{ kind: "relay", part: 0, pin: 26 }]);
+    dry.inputs.water = 0;
+    dry.outputs.pins[26] = 1;
+    const before = dry.inputs.soil;
+    dry.step(1);
+    expect(dry.inputs.soil).toBeLessThan(before);
   });
 
   it("90 체험: 평소 초록, 버튼을 누르면 노랑 1초 → 빨강 8초 → 초록", () => {

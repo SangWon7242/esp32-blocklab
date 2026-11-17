@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sp-pulse-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sp-pulse-title">물 주기 흐름: 흙 값을 재고, 마르면 펌프를 1초만 켰다 끄고, 물이 흙에 스며들 동안 5초 기다린 뒤 다시 잰다. 아래 그림: 폰 요청을 기다리는 동안 펌프를 켜 둔 채이면 물통이 빌 때까지 계속 돌지만, 1초 뒤 끄고 기다리면 안전하다</title>
+  <text x="24" y="32" font-size="16" font-weight="700" fill="currentColor" stroke="none">조금 주고, 스며들 때까지 기다리고, 다시 재기</text>
+
+  <!-- 위: 한 바퀴 시간 띠 -->
+  <g font-size="13" font-weight="700" stroke="none" text-anchor="middle">
+    <rect x="24" y="60" width="96" height="48" rx="8" fill="#e7f5ff"/>
+    <text x="72" y="80" fill="#1c4fd6">흙 · 물통</text>
+    <text x="72" y="98" fill="#1c4fd6">재기</text>
+    <rect x="136" y="60" width="96" height="48" rx="8" fill="#fff3bf"/>
+    <text x="184" y="80" fill="#8a6100">말랐나?</text>
+    <text x="184" y="98" fill="#8a6100">물은 있나?</text>
+    <rect x="248" y="60" width="72" height="48" rx="8" fill="#ffc9c9"/>
+    <text x="284" y="80" fill="#c92a2a">펌프</text>
+    <text x="284" y="98" fill="#c92a2a">1초</text>
+    <rect x="336" y="60" width="200" height="48" rx="8" fill="#d3f9d8"/>
+    <text x="436" y="80" fill="#2b8a3e">5초 기다리기</text>
+    <text x="436" y="98" fill="#2b8a3e">물이 흙에 스며들어요</text>
+  </g>
+  <path d="M120 84 H136 M232 84 H248 M320 84 H336" stroke-width="2.5"/>
+  <path d="M536 84 H572 V132 H72 V108" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <path d="M66 116 l6 -8 6 8" stroke-width="2.5"/>
+  <text x="580" y="80" font-size="13" fill="currentColor" stroke="none">다시</text>
+
+  <!-- 펌프 켜짐 그래프 -->
+  <text x="24" y="168" font-size="13" font-weight="700" fill="currentColor" stroke="none">펌프</text>
+  <path d="M72 186 H130 V160 H160 V186 H330 V160 H360 V186 H600" stroke="#e03131" stroke-width="3"/>
+  <g font-size="12" fill="currentColor" stroke="none">
+    <text x="130" y="204">1초</text>
+    <text x="196" y="204">기다리는 동안 꺼져 있어요</text>
+  </g>
+
+  <!-- 아래: 폰 요청을 기다리는 코드 -->
+  <rect x="24" y="222" width="290" height="124" rx="10" fill="var(--card)"/>
+  <text x="40" y="246" font-size="13" font-weight="700" fill="#c92a2a" stroke="none">켜 둔 채로 폰 요청을 기다리면</text>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="40" y="272">relay.value(1)</text>
+    <text x="40" y="294">web_accept(...) 에서 기다림</text>
+    <text x="40" y="316">폰을 닫으면 → 펌프가 계속 돌아요</text>
+    <text x="40" y="336">물통이 빌 때까지</text>
+  </g>
+  <rect x="330" y="222" width="286" height="124" rx="10" fill="var(--card)"/>
+  <text x="346" y="246" font-size="13" font-weight="700" fill="#2b8a3e" stroke="none">켜고 1초 뒤 끄면</text>
+  <g font-size="13" fill="currentColor" stroke="none">
+    <text x="346" y="272">relay.value(1)</text>
+    <text x="346" y="294">time.sleep(1)</text>
+    <text x="346" y="316">relay.value(0)</text>
+    <text x="346" y="336">기다리는 동안은 늘 꺼져 있어요</text>
+  </g>
+</svg>

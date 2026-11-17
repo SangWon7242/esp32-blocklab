@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sp-cover-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sp-cover-title">스마트 화분: 화분 흙에 꽂은 토양 수분 센서가 흙이 마른 것을 알아채면 ESP32 가 릴레이를 켜고, 물통 속 펌프가 호스로 화분에 물을 준다. 물통의 수위 센서는 물이 없으면 펌프를 멈추게 하고, OLED 와 폰 화면에 흙 값 · 물통 값 · 상태가 보인다</title>
+  <text x="24" y="34" font-size="16" font-weight="700" fill="currentColor" stroke="none">스마트 화분 — 흙이 마르면 스스로 물 주기</text>
+
+  <!-- 화분과 식물 -->
+  <path d="M60 236 H180 L168 326 H72 Z" fill="#c0703a" stroke="#8a4b20"/>
+  <rect x="56" y="226" width="128" height="16" rx="4" fill="#d9844a" stroke="#8a4b20"/>
+  <path d="M66 236 H174" stroke="#5c3d1e" stroke-width="6"/>
+  <path d="M120 230 V150" stroke="#2f9e44" stroke-width="4"/>
+  <path d="M120 186 C96 176 84 156 88 138 C108 142 120 160 120 180 Z" fill="#69db7c" stroke="#2f9e44"/>
+  <path d="M120 170 C144 160 158 140 154 122 C134 126 120 146 120 164 Z" fill="#69db7c" stroke="#2f9e44"/>
+  <path d="M120 152 C112 140 112 124 120 112 C128 124 128 140 120 152 Z" fill="#8ce99a" stroke="#2f9e44"/>
+  <!-- 토양 수분 센서 (흙에 꽂힘) -->
+  <rect x="146" y="196" width="26" height="30" rx="3" fill="#c92a2a" stroke="none"/>
+  <path d="M152 226 V262 M166 226 V262" stroke="#e9b949" stroke-width="5"/>
+  <text x="120" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">화분 · 토양 수분 센서</text>
+
+  <!-- 물통 · 펌프 · 호스 -->
+  <rect x="214" y="236" width="96" height="90" rx="8" fill="#e7f5ff"/>
+  <rect x="218" y="262" width="88" height="60" rx="5" fill="#74c0fc" fill-opacity="0.6" stroke="none"/>
+  <rect x="244" y="292" width="34" height="24" rx="5" fill="#343a40" stroke="none"/>
+  <rect x="290" y="246" width="12" height="70" rx="2" fill="#c92a2a" stroke="none"/>
+  <path d="M294 254 V310 M298 254 V310" stroke="#dee2e6" stroke-width="1.5"/>
+  <path d="M252 292 V200 H92 V206" stroke="#4dabf7" stroke-width="5"/>
+  <g fill="#4dabf7" stroke="none"><circle cx="88" cy="214" r="3"/><circle cx="96" cy="219" r="3"/><circle cx="90" cy="222" r="2.5"/></g>
+  <text x="262" y="346" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">물통 · 펌프 · 수위 센서</text>
+
+  <!-- 릴레이 -->
+  <rect x="236" y="120" width="72" height="52" rx="6" fill="#1864ab" stroke="currentColor"/>
+  <rect x="244" y="130" width="34" height="26" rx="3" fill="#4dabf7" stroke="none"/>
+  <circle cx="294" cy="140" r="5" fill="#ff8787" stroke="none"/>
+  <text x="272" y="110" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">릴레이</text>
+  <path d="M272 172 V236" stroke="#e03131" stroke-width="3"/>
+
+  <!-- ESP32 보드 + OLED -->
+  <rect x="346" y="150" width="120" height="76" rx="8" fill="#141619" stroke="currentColor"/>
+  <rect x="398" y="164" width="54" height="40" rx="3" fill="#dee2e6" stroke="none"/>
+  <text x="372" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="#facc15" stroke="none">ESP32</text>
+  <rect x="346" y="62" width="120" height="70" rx="6" fill="#1c4fd6" stroke="currentColor"/>
+  <rect x="354" y="70" width="104" height="54" rx="3" fill="#0b1f4d" stroke="none"/>
+  <g fill="#74c0fc" stroke="none" font-size="12" font-weight="700">
+    <text x="362" y="86">SOIL: 1234</text>
+    <text x="362" y="102">WATER: 2880</text>
+    <text x="362" y="118">WATERING</text>
+  </g>
+  <!-- 선: 보드 ↔ 릴레이 · 센서 · OLED -->
+  <path d="M346 160 H308" stroke="#f59f00" stroke-width="3"/>
+  <path d="M372 226 V270 H310" stroke="#0c8599" stroke-width="3"/>
+  <path d="M346 190 H196 V211 H172" stroke="#2f9e44" stroke-width="3"/>
+  <path d="M406 132 V150" stroke="#7048e8" stroke-width="3"/>
+
+  <!-- 폰 -->
+  <rect x="510" y="96" width="104" height="200" rx="16" fill="var(--card)"/>
+  <rect x="520" y="116" width="84" height="164" rx="4" fill="#f8f9fa" stroke="#adb5bd" stroke-width="1"/>
+  <g stroke="none" font-size="12" font-weight="700" fill="#212529">
+    <text x="562" y="138" text-anchor="middle">내 화분</text>
+    <text x="528" y="164">흙 1234</text>
+    <text x="528" y="186">물통 2880</text>
+  </g>
+  <rect x="528" y="198" width="68" height="20" rx="4" fill="#ffe3e3" stroke="none"/>
+  <text x="562" y="212" text-anchor="middle" font-size="12" font-weight="700" fill="#c92a2a" stroke="none">목말라요</text>
+  <rect x="528" y="238" width="68" height="26" rx="6" fill="#1c7ed6" stroke="none"/>
+  <text x="562" y="255" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">물 주기</text>
+  <!-- WiFi -->
+  <path d="M478 150 a22 22 0 0 1 22 -22 M484 150 a16 16 0 0 1 16 -16 M490 150 a10 10 0 0 1 10 -10" stroke-width="2.5"/>
+  <text x="562" y="318" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">폰 앱 (WiFi)</text>
+</svg>

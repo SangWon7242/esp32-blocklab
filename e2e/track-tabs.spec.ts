@@ -48,7 +48,7 @@ async function requiredStepIds(chapterId: string): Promise<string[]> {
 const panel = (page: Page, track: string) => page.getByTestId(`track-panel-${track}`);
 const cards = (page: Page, track: string) => panel(page, track).locator("[data-testid^='chapter-card-']");
 
-test("트랙 화면: 세 탭, 센서 트랙 S1~S23, 교과 융합 트랙 F1~F16, 체험 트랙 T1 와 먼저 할 챕터, 탭은 주소와 브라우저에 기억", async ({ page }) => {
+test("트랙 화면: 세 탭, 센서 트랙 S1~S23, 교과 융합 트랙 F1~F17, 체험 트랙 T1 와 먼저 할 챕터, 탭은 주소와 브라우저에 기억", async ({ page }) => {
   await page.goto("/#/track");
   await expect(page.getByRole("tab")).toHaveText(["센서 트랙", "교과 융합 트랙", "체험 트랙"]);
   await expect(page.getByRole("tab", { name: "센서 트랙" })).toHaveAttribute("aria-selected", "true");
@@ -56,8 +56,8 @@ test("트랙 화면: 세 탭, 센서 트랙 S1~S23, 교과 융합 트랙 F1~F16,
 
   await page.getByRole("tab", { name: "교과 융합 트랙" }).click();
   await expect(page).toHaveURL(/#\/track\?track=fusion$/);
-  await expect(cards(page, "fusion")).toHaveCount(16);
-  await expect(cards(page, "fusion").getByTestId("chapter-label")).toHaveText(Array.from({ length: 16 }, (_, i) => `F${i + 1}`));
+  await expect(cards(page, "fusion")).toHaveCount(17);
+  await expect(cards(page, "fusion").getByTestId("chapter-label")).toHaveText(Array.from({ length: 17 }, (_, i) => `F${i + 1}`));
   for (const id of ["08-access-control", "09-oled-access", "10-auto-door"]) {
     await expect(page.getByTestId(`chapter-card-${id}`).getByTestId("chapter-prerequisites")).toContainText("먼저 할 챕터");
   }

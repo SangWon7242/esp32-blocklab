@@ -52,6 +52,7 @@ export const PLANNED_CHAPTERS: Readonly<Record<string, { label: string; title: s
   "41-bomb-game": { label: "F14", title: "폭탄 피하기 게임" },
   "42-runner-game": { label: "F15", title: "달리는 디콘 — OLED 러닝 게임" },
   "43-chick": { label: "F16", title: "병아리 키우기" },
+  "44-smart-plant": { label: "F17", title: "스마트 화분" },
 };
 
 type Records = Readonly<Record<string, { status: string } | undefined>>;

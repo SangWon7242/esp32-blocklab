@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="sp-relay-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <title id="sp-relay-title">릴레이 원리: 보드 26번 핀의 작은 전기(3.3V, 1)가 릴레이 안 전자석을 켜면 쇠 스위치가 철컥 끌려가 COM 과 NO 가 붙는다. 그러면 5V 큰 전기가 VIN → COM → NO → 펌프 → GND 로 한 바퀴 돌아 펌프가 돈다. 26번이 0 이면 스위치가 떨어져 펌프가 멈춘다</title>
+  <text x="24" y="32" font-size="16" font-weight="700" fill="currentColor" stroke="none">릴레이 — 작은 전기로 큰 전기를 켜는 스위치</text>
+
+  <!-- 작은 전기 쪽 -->
+  <rect x="24" y="58" width="250" height="240" rx="12" fill="var(--card)"/>
+  <text x="40" y="82" font-size="14" font-weight="700" fill="currentColor" stroke="none">작은 전기 (보드 쪽)</text>
+  <rect x="44" y="104" width="72" height="56" rx="6" fill="#141619" stroke="currentColor"/>
+  <text x="80" y="128" text-anchor="middle" font-size="12" font-weight="700" fill="#facc15" stroke="none">ESP32</text>
+  <text x="80" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" stroke="none">26번 = 1</text>
+  <path d="M116 132 H160" stroke="#f59f00" stroke-width="4"/>
+  <!-- 전자석(코일) -->
+  <rect x="160" y="112" width="40" height="80" rx="6" fill="#868e96" stroke="currentColor"/>
+  <path d="M156 122 h48 M156 134 h48 M156 146 h48 M156 158 h48 M156 170 h48 M156 182 h48" stroke="#e8590c" stroke-width="3"/>
+  <text x="152" y="186" text-anchor="end" font-size="13" font-weight="700" fill="currentColor" stroke="none">전자석</text>
+  <path d="M180 192 V236 H80 V160" stroke="#343a40" stroke-width="3"/>
+  <text x="40" y="266" font-size="13" fill="currentColor" stroke="none">3.3V · 아주 작은 전기라</text>
+  <text x="40" y="284" font-size="13" fill="currentColor" stroke="none">펌프는 바로 못 돌려요</text>
+
+  <!-- 끌어당김 -->
+  <path d="M206 152 H250" stroke="#7048e8" stroke-width="3" stroke-dasharray="5 4"/>
+  <path d="M244 146 l8 6 -8 6" stroke="#7048e8" stroke-width="3"/>
+  <text x="228" y="140" text-anchor="middle" font-size="12" font-weight="700" fill="#7048e8" stroke="none">끌어당김</text>
+
+  <!-- 큰 전기 쪽 -->
+  <rect x="290" y="58" width="326" height="240" rx="12" fill="var(--card)"/>
+  <text x="306" y="82" font-size="14" font-weight="700" fill="currentColor" stroke="none">큰 전기 (펌프 쪽, 5V)</text>
+  <!-- 스위치 COM · NO -->
+  <circle cx="330" cy="152" r="7" fill="#ced4da"/>
+  <circle cx="410" cy="132" r="7" fill="#ced4da"/>
+  <path d="M330 152 L404 134" stroke="currentColor" stroke-width="5"/>
+  <text x="330" y="180" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">COM</text>
+  <text x="410" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" stroke="none">NO</text>
+  <text x="404" y="200" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">철컥! 붙으면 이어져요</text>
+  <!-- 5V → COM, NO → 펌프 → GND -->
+  <path d="M330 159 V244 H324" stroke="#e03131" stroke-width="4"/>
+  <rect x="300" y="232" width="24" height="24" rx="4" fill="#e03131" stroke="none"/>
+  <text x="312" y="276" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">VIN 5V</text>
+  <path d="M417 132 H500 V160" stroke="#e03131" stroke-width="4"/>
+  <rect x="472" y="160" width="56" height="44" rx="8" fill="#343a40" stroke="none"/>
+  <circle cx="500" cy="182" r="9" fill="#868e96" stroke="none"/>
+  <text x="560" y="186" font-size="13" font-weight="700" fill="currentColor" stroke="none">펌프</text>
+  <path d="M500 204 V244 H560" stroke="#343a40" stroke-width="4"/>
+  <rect x="560" y="232" width="24" height="24" rx="4" fill="#495057" stroke="none"/>
+  <text x="572" y="276" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor" stroke="none">GND</text>
+
+  <text x="24" y="330" font-size="13" fill="currentColor" stroke="none">26번이 1 → 전자석이 스위치를 당겨 COM 과 NO 가 붙어요 → 펌프가 돌아요.</text>
+  <text x="24" y="350" font-size="13" fill="currentColor" stroke="none">26번이 0 → 스위치가 떨어져요 → 펌프가 멈춰요. 보드는 스위치만 움직이고, 펌프 전기는 5V 가 줘요.</text>
+</svg>

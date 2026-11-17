@@ -31,6 +31,10 @@ export type Inputs = {
   flame: boolean;
   temp: number;
   humidity: number;
+  /** 화분 흙의 촉촉함 0(바싹 마름)~1(물에 잠김). 펌프가 물을 주면 오르고, 가만두면 아주 천천히 마른다 */
+  soil: number;
+  /** 물통에 남은 물 0(빈 통)~1(가득). 펌프가 돌면 줄어든다 */
+  water: number;
   /** RFID 리더에 댄 카드 번호 (없으면 null) */
   card: string | null;
   /** 아직 읽지 않은 키패드 · 리모컨 누름 */
@@ -42,8 +46,19 @@ export type Inputs = {
 
 export const defaultInputs = (): Inputs => ({
   pressed: {}, knob: {}, joy: {}, light: 0.75, covered: {}, distance: {}, motion: false, tilted: {},
-  sound: 0, flame: false, temp: 24, humidity: 45, card: null, keys: [], ir: [], web: [],
+  sound: 0, flame: false, temp: 24, humidity: 45, soil: 0.3, water: 0.8, card: null, keys: [], ir: [], web: [],
 });
+
+/**
+ * 화분 세상 (학생 코드가 아니라 바깥 세상이 바뀌는 빠르기, 1초에). 릴레이가 붙어 있고 물통에 물이 있으면 펌프가 물을 보내
+ * 흙이 젖고(WET) 물통이 준다(USE). 펌프가 쉬면 흙이 아주 천천히 마른다(DRY). 물통이 비면 펌프가 돌아도 물이 안 나온다.
+ */
+export const PLANT_RATES = { WET: 0.06, USE: 0.02, DRY: 0.004 } as const;
+
+/** 토양 수분 센서 값(0~4095): 흙이 촉촉할수록 전기가 잘 통해 커진다 (마른 흙 약 300, 물에 담그면 약 3600) */
+export const soilAdc = (soil: number) => 300 + soil * 3300;
+/** 수위 센서 값(0~4095): 줄무늬 판이 물에 잠길수록 커진다 (빈 통 0, 가득 약 3600) */
+export const waterAdc = (water: number) => water * 3600;
 
 export type Outputs = {
   /** 핀 → 0~1 (디지털은 0 · 1, PWM 은 그 사이) */
@@ -172,6 +187,8 @@ export class Simulator {
       if (d.kind === "sound" && d.pin === pin) return clamp(180 + i.sound * 3600 + Math.abs(noise()) * 3);
       // 불꽃(적외선)이 비치면 값이 커진다 (평소 수백)
       if (d.kind === "flame" && d.pin === pin) return clamp((i.flame ? 3600 : 300) + noise());
+      if (d.kind === "soil" && d.pin === pin) return clamp(soilAdc(i.soil) + noise());
+      if (d.kind === "water" && d.pin === pin) return i.water <= 0 ? Math.abs(noise()) : clamp(waterAdc(i.water) + noise());
       if (d.kind === "joystick") {
         const j = i.joy[d.part] ?? { x: 0, y: 0, pressed: false };
         if (d.x === pin) return clamp(2048 + j.x * 2047 + noise());
@@ -250,6 +267,21 @@ export class Simulator {
       },
     };
     this.behavior?.(board);
+    this.plant(dt);
+  }
+
+  /** 펌프가 돌면 흙이 젖고 물통이 준다 (릴레이가 있는 장면만) */
+  private plant(dt: number) {
+    const relay = this.find("relay");
+    if (!relay) return;
+    const i = this.inputs;
+    const pumping = (this.outputs.pins[relay.pin] ?? 0) >= 0.5 && i.water > 0;
+    if (pumping) {
+      i.soil = Math.min(1, i.soil + PLANT_RATES.WET * dt);
+      i.water = Math.max(0, i.water - PLANT_RATES.USE * dt);
+    } else {
+      i.soil = Math.max(0, i.soil - PLANT_RATES.DRY * dt);
+    }
   }
 
   /** 지금 시간 (실행하고 지난 초) */
