@@ -258,6 +258,18 @@ function silkPaint(b: BoardData, devkit: boolean, kz: number) {
       g.fillText("ON", 226, 252); g.fillText("TX", 192, 236); g.fillText("RX", 192, 244);
       g.font = "italic 700 13px system-ui, sans-serif";
       g.fillText("ESP32 Plus", 344, 136);
+      // 묶음 둘레 노란 실크 테두리 (사진처럼)
+      g.strokeStyle = "rgba(245,197,24,0.9)";
+      g.lineWidth = 1.2;
+      g.strokeRect(18, 156, 64, 132);   // ANALOG
+      g.strokeRect(128, 168, 84, 72);   // BUS I2C
+      g.strokeRect(94, 68, 120, 56);    // DIGITAL 왼쪽
+      g.strokeRect(248, 68, 124, 56);   // DIGITAL 오른쪽
+      g.font = "700 8px system-ui, sans-serif";
+      g.fillStyle = "rgba(255,255,255,0.92)";
+      g.fillText("POWER", 230, 248);
+      g.fillText("ANALOG IN", 360, 248);
+      ["TX", "RX", "G", "V"].forEach((t, k) => g.fillText(t, 402, 80 + k * 16));
     }
   };
 }
@@ -314,14 +326,35 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
           g.strokeStyle = "#3a3f4a";
           g.textAlign = "center";
           g.textBaseline = "middle";
-          g.font = `700 ${Math.round(w * 0.16)}px system-ui, sans-serif`;
-          g.fillText("ESP32", w * 0.58, h / 2 - h * 0.08);
-          g.font = `600 ${Math.round(w * 0.07)}px system-ui, sans-serif`;
-          g.fillText("WROOM-32", w * 0.58, h / 2 + h * 0.14);
+          if (devkit) {
+            g.font = `700 ${Math.round(w * 0.16)}px system-ui, sans-serif`;
+            g.fillText("ESP32", w * 0.58, h / 2 - h * 0.08);
+            g.font = `600 ${Math.round(w * 0.07)}px system-ui, sans-serif`;
+            g.fillText("WROOM-32", w * 0.58, h / 2 + h * 0.14);
+          } else {
+            // 실물 덮개처럼: 위에 작은 인증 글자 줄, 와이파이 표시, ESPRESSIF · ESP32-WROOM-32, 아래 QR 무늬
+            g.font = `600 ${Math.round(h * 0.07)}px system-ui, sans-serif`;
+            ["FCC ID: 2AC7Z-ESPWROOM32", "CMIIT ID: 2016AJ1001", "R 211-161007"].forEach((t, k) => g.fillText(t, w * 0.42, h * (0.12 + k * 0.08)));
+            g.font = `800 ${Math.round(h * 0.17)}px system-ui, sans-serif`;
+            g.fillText("ESPRESSIF", w * 0.5, h * 0.5);
+            g.font = `700 ${Math.round(h * 0.1)}px system-ui, sans-serif`;
+            g.fillText("ESP32-WROOM-32", w * 0.5, h * 0.66);
+            // QR 무늬 (보기용)
+            const q = h * 0.24, qx = w * 0.08, qy = h * 0.72, n = 9, cell = q / n;
+            let seed = 7;
+            for (let yy = 0; yy < n; yy++) for (let xx = 0; xx < n; xx++) {
+              seed = (seed * 37 + 11) % 101;
+              const corner = (xx < 3 && yy < 3) || (xx > n - 4 && yy < 3) || (xx < 3 && yy > n - 4);
+              if (corner ? !(xx % (n - 1) === 1 || yy % (n - 1) === 1) || (xx === 1 && yy === 1) : seed % 2) g.fillRect(qx + xx * cell, qy + yy * cell, cell, cell);
+            }
+            g.font = `700 ${Math.round(h * 0.09)}px system-ui, sans-serif`;
+            g.fillText("CE", w * 0.84, h * 0.86);
+          }
           g.lineWidth = w * 0.025;
           g.lineCap = "round";
-          for (const r of [0.055, 0.11, 0.165]) { g.beginPath(); g.arc(w * 0.2, h / 2 + h * 0.12, w * r, -Math.PI * 0.78, -Math.PI * 0.22); g.stroke(); }
-          g.beginPath(); g.arc(w * 0.2, h / 2 + h * 0.12, w * 0.02, 0, Math.PI * 2); g.fill();
+          const wx = devkit ? w * 0.2 : w * 0.86, wy = devkit ? h / 2 + h * 0.12 : h * 0.24, k = devkit ? 1 : 0.6;
+          for (const r of [0.055, 0.11, 0.165]) { g.beginPath(); g.arc(wx, wy, w * r * k, -Math.PI * 0.78, -Math.PI * 0.22); g.stroke(); }
+          g.beginPath(); g.arc(wx, wy, w * 0.02 * k, 0, Math.PI * 2); g.fill();
         }} />
         {Array.from({ length: steps }, (_, i) => (
           <group key={i}>
@@ -333,8 +366,22 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
 
       {/* USB */}
       <Bit id={`board${index}-usb`} label="USB" text={TEXT.usb}>
-        <Box size={[u.w, 9, u.h]} at={[L.X(u.x + u.w / 2), top + 3.5, L.Z(u.y + u.h / 2)]} mat={toon(COLOR.metalLight)} />
-        <Box size={[3, 4.5, u.h - 10]} at={[L.X(u.x + 1.2), top + 3.5, L.Z(u.y + u.h / 2)]} mat={toon(COLOR.plastic)} />
+        {devkit ? (
+          <>
+            <Box size={[u.w, 9, u.h]} at={[L.X(u.x + u.w / 2), top + 3.5, L.Z(u.y + u.h / 2)]} mat={toon(COLOR.metalLight)} />
+            <Box size={[3, 4.5, u.h - 10]} at={[L.X(u.x + 1.2), top + 3.5, L.Z(u.y + u.h / 2)]} mat={toon(COLOR.plastic)} />
+          </>
+        ) : (
+          // USB-C: 납작하고 둥근 은색 통, 가운데 검은 구멍
+          <>
+            <mesh position={[L.X(u.x + u.w / 2), top + 4.2, L.Z(u.y + u.h / 2)]} rotation={[Math.PI / 2, 0, Math.PI / 2]} scale={[1, 1, 1]} material={toon(COLOR.metalLight)} castShadow>
+              <capsuleGeometry args={[4.2, u.h - 10, 4, 12]} />
+            </mesh>
+            <mesh position={[L.X(u.x) - 0.2, top + 4.2, L.Z(u.y + u.h / 2)]} rotation={[Math.PI / 2, 0, Math.PI / 2]} material={toon("#1b1b1f", { outline: false })}>
+              <capsuleGeometry args={[2.4, u.h - 16, 4, 10]} />
+            </mesh>
+          </>
+        )}
       </Bit>
 
       {devkit ? (
@@ -410,6 +457,15 @@ function PlusDetails({ b, L, index, top, pressEn, releaseEn, enCap, blueLed }: {
           <Cyl r={5} h={0.8} at={[X(hx), top + 0.3, Z(hy)]} mat={toon("#f8f1e5", { outline: false })} seg={20} />
         </group>
       ))}
+      {/* 오른쪽 가장자리 세로 4핀 (TX · RX · G · V, 블루투스 모듈 자리) */}
+      <Part id={`board${index}-uart`} label="TX · RX · G · V 핀" text="블루투스 같은 통신 모듈을 꽂는 자리예요. 이 수업에서는 쓰지 않아요.">
+        {[0, 1, 2, 3].map((k) => (
+          <group key={k}>
+            <Box size={[17, HEADER_H, 15.4]} at={[X(416), top + HEADER_H / 2, Z(80 + k * 16)]} mat={toon("#f5c518")} />
+            <Box size={[6, 0.6, 6]} at={[X(416), top + HEADER_H + 0.25, Z(80 + k * 16)]} mat={toon("#121214", { outline: false })} cast={false} />
+          </group>
+        ))}
+      </Part>
       {/* RESET 버튼: 누르면 처음부터 다시 */}
       <Part id={`board${index}-EN`} label="RESET 버튼" text="누르면 보드가 처음부터 다시 시작해요. 눌러 보세요!" card={false}>
         <Box size={[18, 4, 18]} at={[X(30), top + 2, Z(26)]} mat={metal} />
