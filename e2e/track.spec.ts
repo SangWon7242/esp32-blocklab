@@ -257,6 +257,17 @@ test("3D 조립 순서: 보드 놓기부터 한 단계씩 넘기고, 단계마�
   await expect(card).toHaveCount(0);
 });
 
+test("융합 챕터 3D: 현장 보기가 먼저, 회로 보기로 바꾸면 조립 순서가 나온다", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
+  await page.goto("/#/track/10-auto-door");
+  const wiring = page.getByTestId("chapter-wiring");
+  await expect(wiring.getByTestId("wiring-3d-mode-site")).toHaveAttribute("aria-pressed", "true");
+  await expect(wiring.getByTestId("wiring-3d-steps")).toHaveCount(0);
+  await wiring.getByTestId("wiring-3d-mode-circuit").click();
+  await expect(wiring.getByTestId("wiring-3d-mode-circuit")).toHaveAttribute("aria-pressed", "true");
+  await expect(wiring.getByTestId("wiring-3d-steps")).toBeVisible();
+});
+
 test("원리 카드, 실행 단계의 이렇게 되면 성공과 코드 설명(누르면 원본 코드에서 그 줄 표시)", async ({ page }) => {
   await seedDone(page, "01-led", ["problem", "analysis", "predict"]);
   await page.goto("/#/track/01-led");

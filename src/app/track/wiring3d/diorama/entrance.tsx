@@ -6,6 +6,8 @@ import { glowTexture, noOutline, toon, toonOwn } from "../materials";
 import { useViewerApi } from "../store";
 import { deviceKind, ease, pinLevel, servoAngle } from "./common";
 import { LiveOled, Paving, Plant, Sign } from "./pieces";
+import { CardPair, Slider } from "./controls";
+import { PersonFigure } from "../figures";
 
 /*
  * 출입구 현장 모형 (8 · 9 · 10장): 건물 앞면 · 문틀 · 경첩으로 도는 문.
@@ -109,6 +111,15 @@ export function Entrance({ mode }: { mode: "card" | "oled" | "auto" }) {
             </group>
           ))}
         </>
+      )}
+      {/* 조작: 카드를 리더기에 대기 (8 · 9장) · 사람이 문으로 걸어오기 (10장) */}
+      {mode !== "auto" && <CardPair reader={[gapW / 2 + 22, 72, wallZ + 8]} homes={[[40, 7, 70], [80, 7, 70]]} />}
+      {mode === "auto" && (
+        <group position={[-8, 6, 0]}>
+          <Slider sensor={wallZ + 12 + 12} start={95} min={wallZ + 12 + 12 + 6} max={118} label="사람" text="문 쪽으로 끌어 보세요. 15cm 안에 오면 문 위 센서가 알아채고 문이 열려요." tagY={132}>
+            <group rotation={[0, Math.PI, 0]}><PersonFigure /></group>
+          </Slider>
+        </group>
       )}
       <Plant at={[-128, 6, wallZ + 20]} />
       <Plant at={[128, 6, wallZ + 20]} s={0.9} />

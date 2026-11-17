@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { Ball, Box, Cyl } from "../kit";
+import { Box, Cyl } from "../kit";
 import { glowTexture, noOutline, toon, toonOwn } from "../materials";
 import { useViewerApi } from "../store";
 import { buzzing, deviceKind, ease, pinLevel, rgbOf, servoAngle } from "./common";
 import { Bench, Paving, Sign, Tree } from "./pieces";
+import { CoverToggle, Slider } from "./controls";
 import { PersonFigure } from "../figures";
 
 /* 길거리 현장 모형: 밝기 단계 가로등 (34장) · 보행자 신호등과 차단기 (40장) */
@@ -74,8 +75,10 @@ export function StreetLamp() {
         <planeGeometry args={[170, 170]} />
       </mesh>
       {/* 빛 센서 상자 (기둥에 달린 포토레지스터) */}
-      <Box size={[12, 10, 10]} at={[px, 150, pz + 6]} mat={toon("#e9ecef")} />
-      <Ball r={4} at={[px, 156, pz + 6]} mat={toon("#f59f00")} half />
+      {/* 기둥의 빛 센서 (누르면 손으로 가린다) */}
+      <Box size={[14, 4, 14]} at={[px, 148, pz + 9]} mat={toon("#e9ecef")} />
+      <Box size={[4, 8, 8]} at={[px, 144, pz + 4]} mat={toon("#5c6670")} />
+      <CoverToggle pin={36} at={[px, 150, pz + 9]} label="빛 센서 (포토레지스터)" />
       <Bench at={[40, 6, -70]} />
       <Tree at={[100, 6, -78]} s={0.9} />
       <Tree at={[-100, 6, -82]} s={0.75} />
@@ -150,6 +153,21 @@ export function Crosswalk() {
       <Box size={[14, 18, 10]} at={[-70, 82, -85]} mat={toon("#495057")} />
       <group ref={rings} position={[-70, 82, -79]}>
         {[0, 1, 2].map((k) => <mesh key={k} material={ring} visible={false} raycast={() => null}><ringGeometry args={[0.85, 1, 32]} /></mesh>)}
+      </group>
+      {/* 신호등 기둥의 초음파 센서 (보도 쪽 +x 를 본다) · 다가오는 보행자 */}
+      <group position={[-62, 64, -95]}>
+        <Box size={[3, 18, 40]} at={[0, 0, 0]} mat={toon("#1c5fa8")} />
+        {[-10, 10].map((z) => (
+          <group key={z}>
+            <Cyl r={7} h={7} at={[4, 0, z]} rot={[0, 0, Math.PI / 2]} mat={toon("#d9dde3")} seg={18} />
+            <Cyl r={4} h={1} at={[7.8, 0, z]} rot={[0, 0, Math.PI / 2]} mat={toon("#495057", { outline: false })} seg={14} />
+          </group>
+        ))}
+      </group>
+      <group position={[0, 6, -100]}>
+        <Slider axis="x" sensor={-54 + 12} start={110} min={-54 + 12 + 6} max={140} label="보행자" text="신호등 쪽으로 끌어 보세요. 10cm 안에 오면 초록불이 켜지고 차단기가 올라가요." tagY={132}>
+          <group rotation={[0, -Math.PI / 2, 0]}><PersonFigure shirt="#e8590c" /></group>
+        </Slider>
       </group>
       {/* 길 건너편에서 기다리는 사람 (눈에 보이는 장식, 끄는 사람은 회로의 초음파 앞에 있다) */}
       <group position={[110, 6, 112]} rotation={[0, Math.PI, 0]} scale={0.8}><PersonFigure shirt="#e8590c" /></group>

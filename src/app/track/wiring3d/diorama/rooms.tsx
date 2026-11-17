@@ -6,8 +6,8 @@ import { glowTexture, noOutline, toon, toonOwn } from "../materials";
 import { useViewerApi } from "../store";
 import { buzzing, deviceKind, ease, pinLevel, rgbOf, servoAngle } from "./common";
 import { LiveOled, Plant, Sign } from "./pieces";
-import { PressPad, Slider } from "./controls";
-import { HandFigure } from "../figures";
+import { Clap, CoverToggle, KnobDial, Lighter, PressPad, Slider, TiltToggle, Walker } from "./controls";
+import { HandFigure, PersonFigure } from "../figures";
 
 /* 방 · 책상 위 현장 모형: 무드등 · 선풍기 · 뿅망치 · 재난 알리미 · 교실 기후 · 병아리 집 · 게임기 · 지팡이 */
 
@@ -30,6 +30,21 @@ function Corner({ w, d, h = 160 }: { w: number; d: number; h?: number }) {
       <Box size={[w, 4, d]} at={[0, 2, 0]} mat={toon(FLOOR)} />
       <Box size={[w, h, 8]} at={[0, h / 2, -d / 2 + 4]} mat={toon(WALL)} />
       <Box size={[w, 8, 10]} at={[0, 8, -d / 2 + 6]} mat={toon("#ced4da")} />
+    </group>
+  );
+}
+
+/** 초음파 센서 (파란 판 · 은색 눈 둘). 앞이 +z */
+function SonarBox({ at, rotY = 0 }: { at: [number, number, number]; rotY?: number }) {
+  return (
+    <group position={at} rotation={[0, rotY, 0]}>
+      <Box size={[42, 18, 3]} at={[0, 0, 0]} mat={toon("#1c5fa8")} />
+      {[-11, 11].map((x) => (
+        <group key={x}>
+          <Cyl r={7} h={7} at={[x, 0, 4]} rot={[Math.PI / 2, 0, 0]} mat={toon("#d9dde3")} seg={18} />
+          <Cyl r={4} h={1} at={[x, 0, 7.8]} rot={[Math.PI / 2, 0, 0]} mat={toon("#495057", { outline: false })} seg={14} />
+        </group>
+      ))}
     </group>
   );
 }
@@ -68,6 +83,8 @@ export function MoodLamp() {
       <Cyl r={16} r2={12} h={8} at={[-10, 64, -40]} mat={toon("#e9ecef")} seg={24} />
       <Ball r={26} at={[-10, 68, -40]} mat={shade} half />
       <sprite material={halo} position={[-10, 84, -40]} scale={[150, 150, 1]} raycast={() => null} />
+      <KnobDial pin={39} at={[-30, 60, -18]} label="색 손잡이 (가변저항)" />
+      <PressPad pin={14} at={[12, 60, -18]} label="모드 버튼" color="#ae3ec9" size={7} />
       {/* 침대 끝 · 베개 */}
       <Box size={[110, 30, 80]} at={[60, 19, 40]} mat={toon("#748ffc")} />
       <Box size={[50, 10, 30]} at={[60, 38, 10]} mat={toon("#f8f9fa")} />
@@ -203,6 +220,14 @@ export function HammerGame() {
           <Cyl r={8} h={22} at={[-60, 0, 0]} rot={[Math.PI / 2, 0, 0]} mat={toon("#fa5252")} seg={16} />
         </group>
       </group>
+      {/* 게임판 앞의 초음파 센서 · 버튼 · 다가오는 손 */}
+      <SonarBox at={[-30, 56 + 19, 37]} />
+      <PressPad pin={14} at={[40, 56 + 10, 22]} label="버튼 (손을 대고 누르기)" color="#fa5252" size={8} />
+      <group position={[-30, 56 + 19 - 38, 0]}>
+        <Slider sensor={45 + 8} start={100} min={45 + 8 + 6} max={130} label="손" text="센서 쪽으로 끌어 20cm 안에 두고 빨간 버튼을 눌러 보세요." tagY={70}>
+          <group rotation={[0, Math.PI, 0]}><HandFigure /></group>
+        </Slider>
+      </group>
       <Sign w={56} h={14} at={[0, 125, -95.5]} paint={(g, cw, ch) => { g.fillStyle = "#e7f5ff"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#1864ab"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("3번에 1번 성공!", cw / 2, ch / 2 + 1); }} />
     </group>
   );
@@ -242,6 +267,17 @@ export function AlarmRoom() {
         </group>
         <sprite material={halo} position={[0, 8, 6]} scale={[90, 90, 1]} raycast={() => null} />
       </group>
+      {/* 벽의 불꽃 센서 · 그 앞 라이터 / 흔들림 상자(기울기 스위치) / 「여기 있어요」 버튼 */}
+      <Box size={[22, 14, 4]} at={[-100, 60, -94]} mat={toon("#1c5fa8")} />
+      <Ball r={4} at={[-100, 60, -90]} mat={toon("#212529")} />
+      <Lighter at={[-100, 4, -70]} />
+      <group position={[20, 4, -60]}>
+        <TiltToggle pin={14} label="흔들림 상자 (기울기 스위치)" axis="x" angle={0.6}>
+          <Box size={[30, 22, 22]} at={[0, 11, 0]} mat={toon("#ffd8a8")} />
+          <Box size={[10, 4, 6]} at={[0, 23, 0]} mat={toon("#343a40")} />
+        </TiltToggle>
+      </group>
+      <PressPad pin={27} at={[-40, 40, 30]} label="여기 있어요 버튼" color="#40c057" size={8} />
       {/* 책상 둘 · 소화기 */}
       {[-60, 40].map((x) => <group key={x} position={[x, 0, 30]}><Desk w={60} d={40} top={40} /></group>)}
       <Cyl r={7} h={30} at={[105, 19, -70]} mat={toon("#e03131")} seg={16} />
@@ -297,7 +333,7 @@ export function ClimateRoom() {
 }
 
 /* ── 43장 병아리 집 ── */
-export const CHICK_ROOM = { w: 220, d: 200 };
+export const CHICK_ROOM = { w: 300, d: 200 };
 export function ChickPen() {
   const api = useViewerApi();
   const chick = useRef<THREE.Group>(null);
@@ -320,10 +356,17 @@ export function ChickPen() {
       <Box size={[70, 50, 50]} at={[-50, 29, -40]} mat={toon("#f8f1e5")} />
       <mesh position={[-50, 66, -40]} rotation={[0, Math.PI / 4, 0]} material={toon("#e8590c")} castShadow><coneGeometry args={[52, 30, 4]} /></mesh>
       <LiveOled w={36} h={18} at={[-50, 32, -14.6]} />
+      <PressPad pin={27} at={[-26, 6, -14]} label="시작 버튼" color="#40c057" size={7} />
+      {/* 움직임 센서(PIR): 집 지붕 아래 흰 반구 · 다가오는 사람 */}
+      <Ball r={7} at={[-50, 52, -14]} mat={toon("#f8f9fa")} half />
+      <Walker center={[-20, 0, 10]} R={70} start={[150, 0, 70]}>
+        <group rotation={[0, -Math.PI / 2, 0]} scale={0.8}><PersonFigure shirt="#20c997" bag={false} /></group>
+      </Walker>
       {/* 모이통 · 물통 */}
       <Cyl r={12} h={6} at={[50, 7, -40]} mat={toon("#adb5bd")} seg={20} />
       <Cyl r={10} h={4} at={[50, 10, -40]} mat={toon("#e9c46a")} seg={20} />
-      {/* 병아리 */}
+      {/* 병아리 (누르면 흔들어 기울기 스위치) */}
+      <TiltToggle pin={14} label="병아리 놀아 주기 (기울기 스위치)" angle={0.5}>
       <group ref={chick} position={[20, 4, 20]}>
         <Ball r={14} at={[0, 14, 0]} mat={yellow} />
         <Ball r={10} at={[0, 32, 6]} mat={yellow} />
@@ -331,13 +374,14 @@ export function ChickPen() {
         {[-4, 4].map((x) => <Ball key={x} r={1.6} at={[x, 35, 14.5]} mat={toon("#212529", { outline: false })} />)}
         {[-5, 5].map((x) => <Cyl key={x} r={1.2} h={6} at={[x, 2, 2]} mat={toon("#f76707")} seg={6} />)}
       </group>
+      </TiltToggle>
     </group>
   );
 }
 
 /* ── 36 · 41 · 42장 손에 드는 게임기 ── */
 export const CONSOLE_ROOM = { w: 200, d: 170 };
-export function GameConsole({ pads }: { pads: "touch" | "buttons" }) {
+export function GameConsole({ pads }: { pads: "touch" | "bomb" | "runner" }) {
   return (
     <group>
       <Corner w={200} d={170} h={120} />
@@ -345,9 +389,20 @@ export function GameConsole({ pads }: { pads: "touch" | "buttons" }) {
       <group position={[0, 46, 0]} rotation={[-0.5, 0, 0]}>
         <Box size={[120, 10, 74]} at={[0, 5, 0]} mat={toon("#5f3dc4")} />
         <LiveOled w={58} h={30} at={[0, 10.4, -10]} rotY={0} />
-        {pads === "buttons"
-          ? [[-40, "#fa5252"], [40, "#228be6"]].map(([x, c]) => <Cyl key={x as number} r={7} h={5} at={[x as number, 12, 16]} mat={toon(c as string)} seg={16} />)
-          : [-26, 0, 26].map((x, k) => <Box key={x} size={[18, 2, 14]} at={[x, 11, 22]} mat={toon(["#ced4da", "#adb5bd", "#dee2e6"][k])} />)}
+        {pads === "touch" && (
+          <>
+            {/* 호일 터치 패드 A(32) · B(33) · C(27) · 시작 버튼(14) */}
+            {([[32, "A"], [33, "B"], [27, "C"]] as const).map(([pin, n], k) => <PressPad key={pin} kind="touch" pin={pin} flat at={[-26 + k * 26, 10, 22]} label={`터치 패드 ${n}`} color="#ced4da" size={9} />)}
+            <PressPad pin={14} at={[46, 10, -18]} label="시작 버튼" color="#40c057" size={7} />
+          </>
+        )}
+        {pads === "bomb" && [[14, -40, "#fa5252", "A 버튼 (왼쪽)"], [27, 40, "#228be6", "B 버튼 (오른쪽)"]].map(([pin, x, c, n]) => <PressPad key={pin as number} pin={pin as number} at={[x as number, 10, 16]} label={n as string} color={c as string} size={9} />)}
+        {pads === "runner" && (
+          <>
+            <PressPad pin={14} at={[40, 10, 16]} label="점프 버튼" color="#fa5252" size={9} />
+            <KnobDial pin={39} at={[-40, 10, 16]} label="빠르기 손잡이 (가변저항)" />
+          </>
+        )}
       </group>
     </group>
   );
@@ -364,6 +419,19 @@ export function SensorBoard() {
       <LiveOled w={70} h={36} at={[-20, 104, -80]} />
       {[["#ffd8a8", 40, 120], ["#c3fae8", 44, 86], ["#ffc9c9", -60, 78]].map(([c, x, y], k) => <Box key={k} size={[22, 22, 1]} at={[x as number, y as number, -80.2]} mat={toon(c as string)} cast={false} />)}
       {[-50, 30].map((x) => <group key={x} position={[x, 0, 30]}><Desk w={60} d={40} top={40} /></group>)}
+      {/* 책상 위 센서들: 빛(누르면 가림) · 손잡이 · 흔들림 상자 · 소리(손뼉) · 움직임(사람) */}
+      <CoverToggle pin={34} at={[-64, 40, 30]} label="빛 센서" />
+      <KnobDial pin={39} at={[-38, 40, 30]} label="손잡이 (가변저항)" />
+      <group position={[20, 40, 30]}>
+        <TiltToggle pin={14} label="흔들림 상자 (기울기 스위치)" axis="x" angle={0.6}>
+          <Box size={[18, 14, 14]} at={[0, 7, 0]} mat={toon("#ffd8a8")} />
+        </TiltToggle>
+      </group>
+      <Clap at={[44, 40, 30]} />
+      <Ball r={6} at={[80, 120, -82]} mat={toon("#f8f9fa")} half />
+      <Walker center={[60, 0, 0]} R={50} start={[95, 0, 75]}>
+        <group rotation={[0, Math.PI, 0]} scale={0.7}><PersonFigure bag={false} /></group>
+      </Walker>
     </group>
   );
 }

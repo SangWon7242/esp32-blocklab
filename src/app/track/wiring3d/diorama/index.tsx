@@ -29,8 +29,8 @@ const SPECS: Record<string, Spec> = {
   "38": { room: ALARM_ROOM, name: "현장 모형 · 교실 재난 알리미", text: "불꽃 · 기울기 · 온도로 재난을 알아채면 부저가 울리고 경광등이 돌아요.", view: () => <AlarmRoom /> },
   "39": { room: BOARD_ROOM, name: "현장 모형 · 교실 상황판", text: "교실 게시판의 상황판이에요. 빛 · 소리 · 온습도 · 움직임을 화면에 보여 줘요.", view: () => <SensorBoard /> },
   "40": { room: CROSSWALK_ROOM, name: "현장 모형 · 횡단보도", text: "사람이 다가오면(초음파) 보행자 신호가 초록으로 바뀌고 차단기가 올라가며 삐 소리가 나요.", view: () => <Crosswalk /> },
-  "41": { room: CONSOLE_ROOM, name: "현장 모형 · 폭탄 피하기 게임기", text: "A · B 버튼으로 떨어지는 폭탄을 피하는 게임기예요.", view: () => <GameConsole pads="buttons" /> },
-  "42": { room: CONSOLE_ROOM, name: "현장 모형 · 달리기 게임기", text: "버튼을 눌러 점프하며 벽돌을 넘는 게임기예요.", view: () => <GameConsole pads="buttons" /> },
+  "41": { room: CONSOLE_ROOM, name: "현장 모형 · 폭탄 피하기 게임기", text: "A · B 버튼으로 떨어지는 폭탄을 피하는 게임기예요.", view: () => <GameConsole pads="bomb" /> },
+  "42": { room: CONSOLE_ROOM, name: "현장 모형 · 달리기 게임기", text: "버튼을 눌러 점프하며 벽돌을 넘고, 손잡이로 빠르기를 바꾸는 게임기예요.", view: () => <GameConsole pads="runner" /> },
   "43": { room: CHICK_ROOM, name: "현장 모형 · 병아리 집", text: "병아리 집의 온습도가 알맞고 사람이 와서 놀아 주면 병아리가 웃으며 뛰어요.", view: () => <ChickPen /> },
 };
 
