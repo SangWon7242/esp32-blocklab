@@ -10,6 +10,7 @@ import { defaultInputs, Simulator } from "@/track/sim/engine";
 import type { Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
 import { makeLayout } from "./layout";
+import { OledZoom } from "./OledZoom";
 import { dioramaRoom } from "./diorama";
 import { Schematic, schematicRows } from "./Schematic";
 import { anchorsOf, Scene3DView } from "./Scene";
@@ -192,6 +193,7 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
       </div>
 
       {selected && <PartCard />}
+      <OledZoom />
       {step !== null && assembly && <StepCard step={step} go={goStep} />}
       {step === null && <Controls has={has} />}
       {behavior && <SerialMonitor />}

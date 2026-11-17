@@ -8,6 +8,7 @@ import { Ball, Box, Cyl, Decal, onPlane, Part, Tube, useDrag } from "./kit";
 import { BB_H, type Layout } from "./layout";
 import { canvasTexture, COLOR, glowTexture, noOutline, toon, toonOwn } from "./materials";
 import { HandFigure, PersonFigure, WallFigure } from "./figures";
+import { paintOled } from "./oled";
 import { sonarTargetFor } from "./diorama";
 import { useViewer, useViewerApi, type ViewerState } from "./store";
 import { MODULE, TEXT } from "./texts";
@@ -454,6 +455,7 @@ function PinNames({ p, L, zz, y }: { p: Mod; L: Layout; zz: (y: number) => numbe
 }
 
 export function Module({ p, i, L }: P<"module">) {
+  const api = useViewerApi();
   const info = MODULE[p.kind] ?? MODULE.generic;
   const name = p.title || info.name;
   const zz = L.zIn(p);
@@ -461,7 +463,8 @@ export function Module({ p, i, L }: P<"module">) {
   const cx = L.X(p.x + p.w / 2), cz = zz(p.y + p.h / 2);
   return (
     <>
-      <Part id={`part${i}`} label={name} text={info.text} card={!["joystick", "keypad", "sound", "flame"].includes(p.kind)}>
+      <Part id={`part${i}`} label={name} text={p.kind === "oled" ? `${info.text} 누르면 화면을 세워서 크게 볼 수 있어요.` : info.text} card={!["joystick", "keypad", "sound", "flame"].includes(p.kind)}
+        onPick={p.kind === "oled" ? () => { const s = api.getState(); s.set({ oledZoom: i, selected: null, hover: null }); s.invalidate(); } : undefined}>
         <Box size={[p.w, 4, p.h]} at={[cx, 2, cz]} mat={toon(p.color)} />
         <ModuleBase p={p} L={L} zz={zz} />
         <PinNames p={p} L={L} zz={zz} y={4.2} />
@@ -632,7 +635,7 @@ function ToyCar() {
 function OledScreen({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number }) {
   const api = useViewerApi();
   const sy = p.side === "top" ? p.y + 48 : p.y + 10;
-  const tex = useMemo(() => canvasTexture(256, 128, (g) => { g.fillStyle = "#06122e"; g.fillRect(0, 0, 256, 128); }), []);
+  const tex = useMemo(() => canvasTexture(256, 128, (g, w, h) => paintOled(g, w, h, null)), []);
   const mat = useMemo(() => noOutline(new THREE.MeshBasicMaterial({ map: tex })), [tex]);
   useEffect(() => () => { tex.dispose(); mat.dispose(); }, [tex, mat]);
   const last = useRef("");
@@ -642,13 +645,8 @@ function OledScreen({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number
     const k = lines.join("\n");
     if (k === last.current) return;
     last.current = k;
-    const g = (tex.image as HTMLCanvasElement).getContext("2d")!;
-    g.fillStyle = "#06122e";
-    g.fillRect(0, 0, 256, 128);
-    g.fillStyle = "#a5d8ff";
-    g.font = "700 22px ui-monospace, monospace";
-    g.textBaseline = "top";
-    lines.slice(0, 5).forEach((line, n) => g.fillText(line, 10, 8 + n * 24));
+    const cv = tex.image as HTMLCanvasElement;
+    paintOled(cv.getContext("2d")!, cv.width, cv.height, lines);
     tex.needsUpdate = true;
     s.invalidate();
   });

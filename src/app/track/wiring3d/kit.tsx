@@ -80,9 +80,11 @@ type PartProps = {
   control?: Selected["control"];
   position?: V3;
   rotation?: V3;
+  /** 누르면 부품 카드 대신 이것을 한다 (OLED: 크게 보기) */
+  onPick?: () => void;
 };
 
-export function Part({ id, label, text, children, lift = true, glow = true, card = true, control, position, rotation }: PartProps) {
+export function Part({ id, label, text, children, lift = true, glow = true, card = true, control, position, rotation, onPick }: PartProps) {
   const api = useViewerApi();
   const group = useRef<THREE.Group>(null);
   const rest = useRef<THREE.Box3 | null>(null);
@@ -121,6 +123,7 @@ export function Part({ id, label, text, children, lift = true, glow = true, card
   const click = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     if (e.delta > 4) return;
+    if (onPick) { onPick(); return; }
     if (!card) return;
     const box = restBox();
     if (!box) return;
