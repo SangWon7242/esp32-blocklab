@@ -148,9 +148,9 @@ export const pinIn: DeviceSpec = {
   values: [],
 };
 
-/** 아날로그 핀 (dev_adc_setup). 0~4095 로 읽는다. 조도·가변저항·소리·불꽃 센서도 이 3줄로 접힌다 */
-/** 아날로그 값·전압 블록이 받는 변수 종류: 아날로그 핀과 아날로그 센서 넷 */
-const ADC_KINDS = ["adc", "light", "knob", "sound", "flame"];
+/** 아날로그 핀 (dev_adc_setup). 0~4095 로 읽는다. 조도·가변저항·소리·불꽃·토양 수분·수위 센서도 이 3줄로 접힌다 */
+/** 아날로그 값·전압 블록이 받는 변수 종류: 아날로그 핀과 아날로그 센서 여섯 */
+const ADC_KINDS = ["adc", "light", "knob", "sound", "flame", "soil", "water"];
 
 export const adc: DeviceSpec = {
   id: "adc", category: "pin", label: "아날로그 핀", toolboxOrder: 4, colour: "#009eb1",

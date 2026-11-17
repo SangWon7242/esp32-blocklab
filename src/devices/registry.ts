@@ -3,7 +3,7 @@ import { adc, pinIn, pinOut, pwm } from "./specs/pin";
 import { flowLed, led, ledPwm, rgb } from "./specs/led";
 import { button, joystick, pir, tilt, touch } from "./specs/switch";
 import { dcMotor, relay, servo } from "./specs/motor";
-import { dht11, flame, knob, light, lm35, ntc, sound, ultrasonic } from "./specs/sensor";
+import { dht11, flame, knob, light, lm35, ntc, soil, sound, ultrasonic, water } from "./specs/sensor";
 import { buzzerActive, buzzerPassive } from "./specs/sound";
 import { lcd, oled, seg7 } from "./specs/display";
 import { ir, keypad, rfid } from "./specs/input";
@@ -26,7 +26,7 @@ export const DEVICE_CATEGORIES: { id: DeviceCategory; label: string }[] = [
 export const DEVICES: DeviceSpec[] = [
   servo, ultrasonic, oled, lcd, seg7, rfid, keypad, ir,
   joystick, button, tilt, pir, touch,
-  pinIn, dht11, ntc, lm35, light, knob, sound, flame, adc,
+  pinIn, dht11, ntc, lm35, light, knob, sound, flame, soil, water, adc,
   pinOut, ledPwm, led, rgb, flowLed,
   buzzerActive, buzzerPassive, dcMotor, relay,
   pwm, printer,

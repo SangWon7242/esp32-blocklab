@@ -47,12 +47,12 @@ export const ultrasonic: DeviceSpec = {
 };
 
 /**
- * 아날로그 센서 (조도·가변저항·소리·불꽃). 준비 줄은 아날로그 핀과 같은 3줄이지만, 변수 이름이 그 센서 이름(light…)으로
+ * 아날로그 센서 (조도·가변저항·소리·불꽃·토양 수분·수위). 준비 줄은 아날로그 핀과 같은 3줄이지만, 변수 이름이 그 센서 이름(light…)으로
  * 시작할 때만 그 센서 준비 블록으로 접는다 (아니면 뒤의 dev_adc_setup 이 잡는다 — 레지스트리에서 adc 보다 앞에 둔다).
  * 값 블록(`dev_<id>_value`)은 센서마다 따로 두어 센서 색으로 보이게 한다. kind 도 센서마다 달라서 `light.read()` 는
  * 조도 센서 값 블록으로 돌아온다. 아날로그 핀의 dev_adc_read·dev_adc_voltage 도 이 변수들을 받는다 (objKinds).
  */
-export const ADC_SENSOR_KINDS = ["light", "knob", "sound", "flame"] as const;
+export const ADC_SENSOR_KINDS = ["light", "knob", "sound", "flame", "soil", "water"] as const;
 
 function adcSensor(id: (typeof ADC_SENSOR_KINDS)[number], label: string, subject: string, name: string, toolboxOrder: number, colour: string): DeviceSpec {
   const prefix = new RegExp(`^${id}`);
@@ -89,6 +89,10 @@ export const light = adcSensor("light", "조도 센서", "조도 센서를", "li
 export const knob = adcSensor("knob", "가변저항", "가변저항을", "knob", 41, "#5b8100");
 export const sound = adcSensor("sound", "소리 센서", "소리 센서를", "sound", 42, "#918a00");
 export const flame = adcSensor("flame", "불꽃 센서", "불꽃 센서를", "flame", 43, "#00935a");
+/** 토양 수분 센서: 흙에 꽂은 두 탐침 사이로 전기가 잘 통할수록(흙이 촉촉할수록) 값이 커진다 */
+export const soil = adcSensor("soil", "토양 수분 센서", "토양 수분 센서를", "soil", 48, "#0c7907");
+/** 수위 센서: 줄무늬 판이 물에 많이 잠길수록 값이 커진다 */
+export const water = adcSensor("water", "수위 센서", "수위 센서를", "water", 49, "#5c6c00");
 
 /** 온습도 센서 DHT11 (dev_dht_setup). measure() 로 잰 뒤 temperature()·humidity() 를 읽는다 */
 export const dht11: DeviceSpec = {

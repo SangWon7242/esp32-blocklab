@@ -76,7 +76,7 @@ describe("툴박스 순서 (toolboxOrder)", () => {
       "핀": ["핀", "입력 핀", "PWM 핀", "아날로그 핀", "출력"],
       "LED": ["LED 켜고 끄기", "LED", "밝기 LED", "RGB LED", "흐르는 LED"],
       "버튼·스위치": ["버튼", "터치 패드", "틸트 스위치", "인체감지(PIR)", "조이스틱"],
-      "센서": ["조도 센서", "가변저항", "소리 센서", "불꽃 센서", "온도(서미스터)", "온도(LM35)", "초음파 센서", "온습도(DHT11)"],
+      "센서": ["조도 센서", "가변저항", "소리 센서", "불꽃 센서", "온도(서미스터)", "온도(LM35)", "초음파 센서", "온습도(DHT11)", "토양 수분 센서", "수위 센서"],
       "소리": ["능동 부저", "수동 부저(음)"],
       "모터": ["서보 모터", "DC 모터", "릴레이"],
       "화면": ["OLED", "LCD 128×32", "7세그먼트"],
@@ -114,8 +114,8 @@ describe("계획 2B 검사용 메타데이터", () => {
     expect(requiredKinds(findActionByBlock("dev_led_blink")!)).toEqual(["pin"]);
     expect(requiredKinds(findActionByBlock("dev_beeper_note")!)).toEqual(["beeper"]);
     expect(requiredKinds(findActionByBlock("esp_pin_write")!)).toEqual(["pin", "ultrasonic", "tilt", "pir", "seg7"]);
-    // 아날로그 값 블록은 아날로그 핀과 아날로그 센서 넷의 변수를 모두 받는다
-    expect(requiredKinds(findValueByBlock("dev_adc_read")!)).toEqual(["adc", "light", "knob", "sound", "flame"]);
+    // 아날로그 값 블록은 아날로그 핀과 아날로그 센서 여섯의 변수를 모두 받는다
+    expect(requiredKinds(findValueByBlock("dev_adc_read")!)).toEqual(["adc", "light", "knob", "sound", "flame", "soil", "water"]);
     expect(requiredKinds(findValueByBlock("dev_light_value")!)).toEqual(["light"]);
     expect(requiredKinds(findActionByBlock("dev_motor_stop")!)).toEqual(["motor"]);
   });

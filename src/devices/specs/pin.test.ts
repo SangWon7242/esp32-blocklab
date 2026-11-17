@@ -112,8 +112,8 @@ describe("아날로그 핀 (dev_adc_setup)", () => {
   });
 });
 
-describe("아날로그 센서 (조도·가변저항·소리·불꽃)", () => {
-  for (const id of ["light", "knob", "sound", "flame"]) {
+describe("아날로그 센서 (조도·가변저항·소리·불꽃·토양 수분·수위)", () => {
+  for (const id of ["light", "knob", "sound", "flame", "soil", "water"]) {
     it(`${id}: 아날로그 핀 3줄을 내고 이름이 ${id} 로 시작하면 자기 준비·값 블록으로 돌아온다`, () => {
       const code = toCode([{ type: `dev_${id}_setup`, fields: { PIN: 39, VAR: v(id) } }, print({ type: `dev_${id}_value`, fields: { VAR: v(id) } })], [id]);
       expect(code).toBe(`from machine import Pin, ADC\n\n${id} = ADC(Pin(39))\n${id}.atten(ADC.ATTN_11DB)\n${id}.width(ADC.WIDTH_12BIT)\n\nprint(${id}.read())\n`);

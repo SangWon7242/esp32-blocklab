@@ -162,13 +162,21 @@ export const MIN_TEXT_CONTRAST = 4.5;
 /** 후보 색 격자: 색상 3° · 밝기 0.02 간격 */
 const HUE_GRID = 3;
 const LIGHTNESS_GRID = 0.02;
+/**
+ * 한 카테고리에 장치가 많으면(9번째 장치부터) 보통 격자로는 다 떨어진 색이 모자라다. 그 장치들만 촘촘한 격자
+ * (색상 1° · 밝기 0.005)와 넓은 밝기(±SPREAD_LIGHTNESS_LIMIT)에서 고른다 — 앞의 여덟 장치 색은 그대로 둔다.
+ */
+const CROWDED_FROM = 8;
+const FINE_HUE_GRID = 1;
+const FINE_LIGHTNESS_GRID = 0.005;
 
 /** 카테고리 색 base 계열의 후보 색 (색상 ±half, 밝기 ±SPREAD_LIGHTNESS, 채도는 base 의 70% 이상, 알약 글자 대비 4.5:1) */
-function familyCandidates(base: string, half: number): string[] {
+function familyCandidates(base: string, half: number, fine = false): string[] {
   const { l, c, h } = oklch(base);
   const out: string[] = [];
-  for (let dh = -half; dh <= half + 1e-9; dh += HUE_GRID)
-    for (let dl = -SPREAD_LIGHTNESS; dl <= SPREAD_LIGHTNESS + 1e-9; dl += LIGHTNESS_GRID) {
+  const [hueGrid, lightGrid, spread] = fine ? [FINE_HUE_GRID, FINE_LIGHTNESS_GRID, SPREAD_LIGHTNESS_LIMIT] : [HUE_GRID, LIGHTNESS_GRID, SPREAD_LIGHTNESS];
+  for (let dh = -half; dh <= half + 1e-9; dh += hueGrid)
+    for (let dl = -spread; dl <= spread + 1e-9; dl += lightGrid) {
       const hue = (h + dh + 360) % 360;
       let li = l + dl;
       let hex = fromOklch({ l: li, c, h: hue });
@@ -186,6 +194,7 @@ function familyCandidates(base: string, half: number): string[] {
  * 카테고리 색 base 에서 n 가지 장치 색. 첫째는 base 그대로(카테고리 대표 장치 = 카테고리 타일 색), 그다음부터는 하나씩
  * 후보(familyCandidates) 가운데 이미 고른 색·avoid 의 색 모두와 가장 먼 색을 고른다. 다만 SPREAD_TARGET 만큼 떨어진
  * 후보가 여럿이면 그중 base 에 가장 가까운 색(카테고리 색 계열이 덜 흐려지게). 후보 순서가 정해져 있어 결과도 늘 같다.
+ * 장치가 아홉 개 이상이면 아홉째부터는 촘촘한 후보(CROWDED_FROM)에서 고른다.
  * avoid 에는 다른 카테고리 색과 앞 카테고리의 장치 색을 넣는다(deviceColourPlan). 장치 색은 이 결과를 카테고리 안
  * 툴박스 순서대로 src/devices/specs/*.ts 에 적어 둔다.
  */
@@ -195,8 +204,11 @@ export function spreadHues(base: string, n: number, avoid: readonly string[] = [
   const out = [first];
   if (n === 1) return out;
   const others = avoid.map((a) => a.toLowerCase()).filter((a) => a !== first);
-  const candidates = familyCandidates(first, n > 5 ? SPREAD_HALF_WIDE : SPREAD_HALF);
+  const half = n > 5 ? SPREAD_HALF_WIDE : SPREAD_HALF;
+  const normal = familyCandidates(first, half);
+  let fine: string[] | undefined;
   while (out.length < n) {
+    const candidates = out.length < CROWDED_FROM ? normal : (fine ??= familyCandidates(first, half, true));
     let best = "";
     let bestScore = -Infinity;
     for (const c of candidates) {
