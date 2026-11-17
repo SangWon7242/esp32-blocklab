@@ -4,25 +4,8 @@
 import { COLORS as C, compose, connectionTable, mfWire, mmWire, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
-import { breadboard, resistor } from "../parts.mjs";
+import { breadboard, resistor, rgbSpread } from "../parts.mjs";
 import { route } from "./01-led.mjs";
-
-/**
- * 다리를 벌려 꽂은 RGB LED (도구의 rgbLed 는 다리가 몸통 바로 아래라, 벌린 다리를 몸통에 잇는 작은 그림을 여기 둔다).
- * holes: [R, −, G, B] 구멍, 몸통은 구멍 위 lift 만큼.
- */
-function rgbSpread(holes, { lift = 30 } = {}) {
-  const cx = (holes[0].x + holes[3].x) / 2, cy = holes[0].y - lift;
-  const out = [];
-  holes.forEach((h, i) => {
-    const sx = cx + (i - 1.5) * 7;
-    out.push(`<path d="M${sx} ${cy + 12} L${h.x} ${h.y - 8} L${h.x} ${h.y}" stroke="#868e96" stroke-width="2.5"/>`);
-  });
-  out.push(`<circle cx="${cx}" cy="${cy}" r="15" fill="#f8f9fa" stroke="#343a40" stroke-width="2"/><circle cx="${cx - 5}" cy="${cy - 3}" r="4" fill="#e03131" stroke="none"/><circle cx="${cx + 5}" cy="${cy - 3}" r="4" fill="#2f9e44" stroke="none"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#1971c2" stroke="none"/>`);
-  ["R", "−", "G", "B"].forEach((t, i) =>
-    out.push(`<text x="${holes[i].x + 9}" y="${holes[i].y + 8}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="3" paint-order="stroke">${t}</text>`));
-  return out.join("");
-}
 
 const LEGS = [
   { key: "R", gpio: 27, wire: C.orange, name: "빨강(R)" },

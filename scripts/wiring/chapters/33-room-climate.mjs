@@ -8,7 +8,8 @@
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
-import { breadboard, fan, module, oled, resistor, rgbLed, sensor3 } from "../parts.mjs";
+import { breadboard, fan, module, oled, powerJack, resistor, rgbLed, sensor3 } from "../parts.mjs";
+import { mark, pt, rec } from "../record.mjs";
 
 /** + − 줄에서 구멍이 있는 열 (6·12·18… 은 비어 있어 옆 열로) */
 const railHole = (c) => ((c - 1) % 6 === 5 ? c - 1 : c);
@@ -46,10 +47,12 @@ function plugRun(from, to, colors) {
     const d = `M${p.x} ${p.y} V${ty - 18 + i * 6} C${p.x} ${ty} ${p.x + 10} ${ty} ${p.x + 24} ${ty} H${ex}`;
     out.push(`<path d="${d}" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="${d}" stroke="${colors[i]}" stroke-width="4"/>`);
     out.push(`<rect x="${p.x - 6}" y="${p.y - 8}" width="12" height="16" rx="2" fill="#212529" stroke="${colors[i]}" stroke-width="2.5"/>`);
+    // 3D: 모듈 핀(구멍 머리) → 보드 핀 한 가닥씩 (보드 쪽 끝은 한 덩어리 플러그로 그렸지만 F-F 선 셋이다)
+    rec("wires", { from: pt(p), to: pt(to[i]), color: colors[i], ends: ["f", "f"] });
   });
   out.push(`<rect x="${to[0].x - 12}" y="${to[0].y - 11}" width="${to[2].x - to[0].x + 24}" height="22" rx="3" fill="#212529" stroke="#868e96" stroke-width="2"/>`);
   to.forEach((p, i) => out.push(`<rect x="${p.x - 4}" y="${p.y - 4}" width="8" height="8" rx="1" fill="${colors[i]}" stroke="none"/>`));
-  return out.join("");
+  return mark(out.join(""));
 }
 
 /* ───── ESP32 Plus ───── */
@@ -66,7 +69,7 @@ function plus() {
   used.push(ft.G, ft.V, ft.INp, ft.INm);
   // 외부 전원 단자 + 배터리 홀더 메모
   const jack = { x: X - 10, y: Y + 150, w: 24, h: 30 };
-  parts.push(`<rect x="${jack.x}" y="${jack.y}" width="${jack.w}" height="${jack.h}" rx="5" fill="#212529" stroke="#868e96" stroke-width="2"/><circle cx="${jack.x + 9}" cy="${jack.y + jack.h / 2}" r="5" fill="#495057" stroke="none"/>`);
+  parts.push(powerJack(jack));
 
   // OLED: 위쪽 가운데, 선 넷을 io12 와 io14 사이 빈 틈 → 빈 띠 → I2C 묶음 첫 줄
   const o = oled(240, 24, { side: "bottom", titleAt: { x: 294, y: 12 } });

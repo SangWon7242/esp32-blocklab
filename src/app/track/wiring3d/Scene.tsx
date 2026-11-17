@@ -177,7 +177,7 @@ export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; 
         shadow-camera-left={-r} shadow-camera-right={r} shadow-camera-top={r} shadow-camera-bottom={-r} shadow-camera-near={1} shadow-camera-far={r * 4} />
       <Floor r={r} />
       <PanFloor r={r} />
-      <Rig L={L} cardsRoom={cardsRoom} />
+      <Rig L={L} cardsRoom={cardsRoom && anchors.length <= 6} />
       {scene.breadboards.map((bb, i) => <Breadboard key={i} bb={bb} L={L} index={i} />)}
       {scene.boards.map((b, i) => <Board key={i} b={b} L={L} index={i} blueLed={blueLed} />)}
       {scene.parts.map((p, i) => {

@@ -401,6 +401,24 @@ export function rgbLed(holes, { up = true, lift = 28 } = {}) {
   return { svg: mark(out.join("")) };
 }
 
+/**
+ * 다리를 벌려 꽂은 RGB LED (rgbLed 는 다리가 몸통 바로 아래라, 벌린 다리를 몸통에 잇는 꺾은 다리로 그린다).
+ * holes: [R, −, G, B] 구멍, 몸통은 구멍 위 lift 만큼. 다리 이름은 구멍 오른쪽 아래.
+ */
+export function rgbSpread(holes, { lift = 30 } = {}) {
+  const cx = (holes[0].x + holes[3].x) / 2, cy = holes[0].y - lift;
+  const out = [];
+  holes.forEach((h, i) => {
+    const sx = cx + (i - 1.5) * 7;
+    out.push(`<path d="M${sx} ${cy + 12} L${h.x} ${h.y - 8} L${h.x} ${h.y}" stroke="#868e96" stroke-width="2.5"/>`);
+  });
+  out.push(`<circle cx="${cx}" cy="${cy}" r="15" fill="#f8f9fa" stroke="#343a40" stroke-width="2"/><circle cx="${cx - 5}" cy="${cy - 3}" r="4" fill="#e03131" stroke="none"/><circle cx="${cx + 5}" cy="${cy - 3}" r="4" fill="#2f9e44" stroke="none"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#1971c2" stroke="none"/>`);
+  ["R", "−", "G", "B"].forEach((t, i) =>
+    out.push(`<text x="${holes[i].x + 9}" y="${holes[i].y + 8}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="3" paint-order="stroke">${t}</text>`));
+  rec("parts", { type: "rgb", legs: holes.map(pt) });
+  return mark(out.join(""));
+}
+
 /** IR 수신기 VS1838B (다리 3개 왼→오: OUT · GND · VCC) */
 export function irReceiver(holes, { up = true, lift = 26 } = {}) {
   const cx = holes[1].x, cy = up ? holes[1].y - lift : holes[1].y + lift;
@@ -424,4 +442,24 @@ export function dip(bb, col, n, { label = "", notch = true } = {}) {
   if (label) out.push(`<text x="${(l.x + r.x) / 2}" y="${(l.y + r.y) / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">${label}</text>`);
   rec("parts", { type: "dip", l: pt(l), r: pt(r), label });
   return { svg: mark(out.join("")), pin: pinAt };
+}
+
+/* ───────────── 소품 (배선 없이 책상 위에) ───────────── */
+
+/** ESP32 Plus 외부 전원 단자(보드 왼쪽 가장자리). 반환 svg 조각 */
+export function powerJack({ x, y, w = 24, h = 30 }, { label = "외부 전원 단자" } = {}) {
+  rec("parts", { type: "prop", kind: "jack", x, y, w, h, label });
+  return mark(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="#212529" stroke="#868e96" stroke-width="2"/><circle cx="${x + 9}" cy="${y + h / 2}" r="5" fill="#495057" stroke="none"/>`);
+}
+
+/** 배터리 홀더(AA 6개) — 세로로 세운 상자, 위에서 빨강·검정 선이 나온다. 반환 { svg, plus, minus } (선이 나오는 점) */
+export function batteryHolder(x, y, { label = "배터리 홀더" } = {}) {
+  const w = 58, h = 128;
+  const out = [`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#343a40" stroke="currentColor"/>`];
+  for (let i = 0; i < 6; i++) {
+    const cy = y + 10 + i * 19.5;
+    out.push(`<rect x="${x + 8}" y="${cy}" width="${w - 16}" height="15" rx="7" fill="#868e96" stroke="none"/><rect x="${x + w - 12}" y="${cy + 4}" width="4" height="7" rx="1" fill="#ced4da" stroke="none"/>`);
+  }
+  rec("parts", { type: "prop", kind: "battery", x, y, w, h, label });
+  return { svg: mark(out.join("")), plus: { x: x + 20, y }, minus: { x: x + 38, y } };
 }

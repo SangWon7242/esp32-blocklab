@@ -1,20 +1,10 @@
 // 센서 S7 "작은 선풍기" — 130 모터(팬) 모듈 G · V · IN+(13) · IN−(12). 브레드보드 없이 F-F 듀폰선 4가닥으로 보드에 바로.
 // ESP32 Plus 는 AA 6개 배터리 홀더를 보드의 외부 전원 단자에 꽂는다(그림에 메모). 기본 보드(DevKit)는 그런 단자가 없어 USB 전원만.
 import { COLORS as C, compose, connectionTable, ffWire, name, note, svgDoc } from "../common.mjs";
+import { mark, pt, rec } from "../record.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
-import { fan } from "../parts.mjs";
-
-/** 배터리 홀더(AA 6개) 그림 — 세로로 세운 상자, 위에서 빨강·검정 선이 나온다. 반환 { svg, plus, minus } (선이 나오는 점) */
-function batteryHolder(x, y) {
-  const w = 58, h = 128;
-  const out = [`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#343a40" stroke="currentColor"/>`];
-  for (let i = 0; i < 6; i++) {
-    const cy = y + 10 + i * 19.5;
-    out.push(`<rect x="${x + 8}" y="${cy}" width="${w - 16}" height="15" rx="7" fill="#868e96" stroke="none"/><rect x="${x + w - 12}" y="${cy + 4}" width="4" height="7" rx="1" fill="#ced4da" stroke="none"/>`);
-  }
-  return { svg: out.join(""), plus: { x: x + 20, y }, minus: { x: x + 38, y } };
-}
+import { batteryHolder, fan, powerJack } from "../parts.mjs";
 
 /* ───── ESP32 Plus: 팬 모듈은 보드 위쪽 한 줄에 바로, 배터리 홀더는 외부 전원 단자 ───── */
 function plus() {
@@ -27,12 +17,17 @@ function plus() {
   used.push(t.G, t.V, t.INp, t.INm);
   // 외부 전원 단자(보드 왼쪽 가장자리, USB 아래)와 배터리 홀더
   const jack = { x: b.bounds.x - 10, y: b.bounds.y + 150, w: 24, h: 30 };
-  parts.push(`<rect x="${jack.x}" y="${jack.y}" width="${jack.w}" height="${jack.h}" rx="5" fill="#212529" stroke="#868e96" stroke-width="2"/><circle cx="${jack.x + 9}" cy="${jack.y + jack.h / 2}" r="5" fill="#495057" stroke="none"/>`);
+  parts.push(powerJack(jack));
   const bh = batteryHolder(24, 340);
   parts.push(bh.svg);
   const plug = { x: jack.x - 2, y: jack.y + jack.h / 2 };
-  const cable = (d, color) => `<path d="${d}" stroke="#ffffff" stroke-width="6.5" stroke-opacity="0.9"/><path d="${d}" stroke="${color}" stroke-width="3.5"/>`;
-  parts.push(cable(`M${bh.plus.x} ${bh.plus.y} C${bh.plus.x} ${plug.y - 4} ${plug.x - 40} ${plug.y - 4} ${plug.x} ${plug.y - 3}`, C.red), cable(`M${bh.minus.x} ${bh.minus.y} C${bh.minus.x} ${plug.y + 4} ${plug.x - 30} ${plug.y + 4} ${plug.x} ${plug.y + 3}`, C.black));
+  // 배터리 선(듀폰선이 아니라 홀더에 달린 전선): 그림은 가는 곡선, 3D 에는 홀더 위 → 단자 플러그까지의 선으로 적는다
+  const cable = (from, to, d, color) => {
+    rec("wires", { from: pt(from), to: pt(to), color, ends: ["m", "m"] });
+    return mark(`<path d="${d}" stroke="#ffffff" stroke-width="6.5" stroke-opacity="0.9"/><path d="${d}" stroke="${color}" stroke-width="3.5"/>`);
+  };
+  const pp = { x: plug.x, y: plug.y - 3 }, pm = { x: plug.x, y: plug.y + 3 };
+  parts.push(cable(bh.plus, pp, `M${bh.plus.x} ${bh.plus.y} C${bh.plus.x} ${plug.y - 4} ${plug.x - 40} ${plug.y - 4} ${plug.x} ${plug.y - 3}`, C.red), cable(bh.minus, pm, `M${bh.minus.x} ${bh.minus.y} C${bh.minus.x} ${plug.y + 4} ${plug.x - 30} ${plug.y + 4} ${plug.x} ${plug.y + 3}`, C.black));
   parts.push(note(12, 288, "외부 전원 단자", "start", 13), name(53, 484, "배터리 홀더", "middle", 14), note(53, 502, "AA 6개", "middle", 13));
   const rows = [
     { color: C.black, part: "팬 G", to: "GND" }, { color: C.red, part: "팬 V", to: "5V" },

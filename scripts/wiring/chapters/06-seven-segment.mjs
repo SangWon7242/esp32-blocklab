@@ -6,6 +6,7 @@ import { COLORS as C, compose, connectionTable, mfWire, mmWire, svgDoc } from ".
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
 import { breadboard } from "../parts.mjs";
+import { mark, moveSince, pt, rec, recCount } from "../record.mjs";
 import { railCol, railLink } from "./11-button-touch.mjs";
 
 const CHIP = 4; // 칩 왼쪽 열
@@ -23,6 +24,7 @@ function chip595(bb, col) {
   out.push(`<path d="M${r.x + 9} ${(l.y + r.y) / 2 - 6} a6 6 0 0 0 0 12" stroke="#868e96" stroke-width="2"/>`);
   out.push(`<text x="${(l.x + r.x) / 2}" y="${(l.y + r.y) / 2}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="700" fill="#ffffff" stroke="none">74HC595</text>`);
   for (let i = 0; i < 8; i++) for (const rw of ["e", "f"]) { const p = bb.hole(col + i, rw); out.push(`<rect x="${p.x - 3}" y="${p.y - 3}" width="6" height="6" fill="#adb5bd" stroke="none"/>`); }
+  rec("parts", { type: "dip", l: pt(l), r: pt(r), label: "74HC595" });
   return { svg: out.join(""), col: (n) => at[n] };
 }
 
@@ -41,6 +43,8 @@ function digit(bb, s) {
   const at = {};
   topN.forEach((n, i) => { const p = bb.hole(s + i, "c"); out.push(`<rect x="${p.x - 3}" y="${p.y - 3}" width="6" height="6" fill="#adb5bd" stroke="none"/>`, lab(n, p, n === "COM" ? 21 : 11)); if (n !== "COM") at[n] = s + i; });
   botN.forEach((n, i) => { const p = bb.hole(s + i, "g"); out.push(`<rect x="${p.x - 3}" y="${p.y - 3}" width="6" height="6" fill="#adb5bd" stroke="none"/>`, lab(n, p, n === "COM" ? -21 : -11)); if (n !== "COM") at[n] = s + i; });
+  // 다리: 위 줄(c 칸) g f COM a b, 아래 줄(g 칸) e d COM c dp
+  rec("parts", { type: "seg7", x: x0, y: y0, w, h, legs: [...topN.map((_, i) => pt(bb.hole(s + i, "c"))), ...botN.map((_, i) => pt(bb.hole(s + i, "g")))] });
   return { svg: out.join(""), at, com: s + 2 };
 }
 
@@ -51,6 +55,8 @@ function legResistor(pts, k, frac = 0.5) {
   const cx = a.x + (b.x - a.x) * frac, cy = a.y + (b.y - a.y) * frac;
   const horiz = Math.abs(a.y - b.y) < 1;
   const bands = ["#e03131", "#e03131", "#8b5a2b"];
+  // 3D: 다리 두 끝(칩 쪽 구멍 · 튜브 쪽 구멍) 사이의 220Ω 저항
+  rec("parts", { type: "resistor", a: pt(pts[0]), b: pt(pts[pts.length - 1]), bands });
   const out = [`<path d="${d}" stroke="#ffffff" stroke-width="5" stroke-opacity="0.95"/>`, `<path d="${d}" stroke="#5c636a" stroke-width="2"/>`];
   out.push(horiz
     ? `<rect x="${cx - 12}" y="${cy - 4.5}" width="24" height="9" rx="4" fill="#e9c891" stroke="#a07d4a" stroke-width="1.2"/>`
@@ -107,11 +113,14 @@ function circuit(bb) {
 /** 브레드보드를 S 배로 키워 (tx, ty) 에 둔다. 반환: 그룹 svg, 브레드보드 구멍 → 그림 좌표 변환, 아래 + − 줄 좌표 */
 const S = 1.25;
 function placed(tx, ty) {
+  const since = recCount();
   const bb = breadboard({ x: 0, y: 0, cols: 24, rails: { top: true, bottom: true } });
   const c = circuit(bb);
+  // 그룹 안에서 기록한 브레드보드 · 부품 · 점퍼도 그림처럼 옮기고 키운다
+  moveSince(since, tx, ty, S);
   const T = (p) => ({ x: tx + S * p.x, y: ty + S * p.y });
   const g = `<g transform="translate(${tx} ${ty}) scale(${S})">${[bb.svg, ...c.parts, ...c.jumpers].join("\n  ")}</g>`;
-  return { g, T, bb, c, bottom: ty + S * bb.h, right: tx + S * bb.w };
+  return { g: mark(g), T, bb, c, bottom: ty + S * bb.h, right: tx + S * bb.w };
 }
 
 function rowsFor(b, sig, cols, pw) {

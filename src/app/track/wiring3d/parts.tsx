@@ -636,7 +636,9 @@ function OledScreen({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number
 function Cards({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number }) {
   const api = useViewerApi();
   const reader = new THREE.Vector3(L.X(p.x + p.w / 2), 0, zz(p.y + p.h / 2));
-  const home = (k: number) => new THREE.Vector3(L.X(p.x - 70), 0, zz(p.y + 10 + k * 70));
+  // 카드 둘은 리더기 앞(핀 반대쪽) 빈 곳에 나란히 놓는다
+  const front = p.side === "top" ? p.y + p.h + 70 : p.y - 70;
+  const home = (k: number) => new THREE.Vector3(L.X(p.x + p.w / 2 + (k - 0.5) * 72), 0, zz(front));
   const refs = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
   const pos = useRef([home(0), home(1)]);
   const which = useRef(-1);
@@ -920,13 +922,13 @@ export function Touch({ p, i, L }: P<"touch">) {
   });
   // 구겨진 호일: 판을 잘게 나눠 높이를 조금씩 흔든다
   const geo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(w, h * L.F, 10, 8);
+    const g = new THREE.PlaneGeometry(w, h, 10, 8);
     const pos = g.attributes.position;
     for (let k = 0; k < pos.count; k++) pos.setZ(k, Math.sin(k * 12.9898) * 1.1);
     g.computeVertexNormals();
     g.rotateX(-Math.PI / 2);
     return g;
-  }, [w, h, L.F]);
+  }, [w, h]);
   useEffect(() => () => geo.dispose(), [geo]);
   const clip = L.v(p.clip, 4);
   const skin = toon("#f1c27d");
@@ -973,9 +975,12 @@ export function Seg7({ p, i, L }: P<"seg7">) {
   };
   useFrame(() => {
     const s = api.getState();
+    // 마지막 글자 하나 (+ 뒤에 점이 붙으면 소수점 dp 도 켠다)
     const text = (s.running && s.sim?.outputs.seg7) || "";
-    const lit = SEG[text.slice(-1)] ?? "";
-    for (const k of Object.keys(layout)) {
+    const dp = text.endsWith(".");
+    const ch = dp ? text.slice(-2, -1) : text.slice(-1);
+    const lit = (SEG[ch] ?? "") + (dp ? "p" : "");
+    for (const k of [...Object.keys(layout), "p"]) {
       const m = segs.current[k];
       if (m) m.material = lit.includes(k) ? on : off;
     }
@@ -984,6 +989,9 @@ export function Seg7({ p, i, L }: P<"seg7">) {
     <Part id={`part${i}`} label="7세그먼트" text="막대 일곱 개(a~g)를 켜고 꺼서 숫자를 보여 줘요. 칩이 보드 대신 막대를 켜 줘요.">
       {p.legs.map((q, k) => <LegUp key={k} p={q} h={4} L={L} />)}
       <Box size={[w, 14, d]} at={[cx, BB_H + 9, cz]} mat={toon("#212529")} />
+      <mesh ref={(m) => { segs.current.p = m; }} position={[cx + sw / 2 + 7, BB_H + 16.3, cz + sd + 2]} material={off}>
+        <cylinderGeometry args={[2.6, 2.6, 0.8, 12]} />
+      </mesh>
       {Object.entries(layout).map(([k, [horiz, dx, dz]]) => (
         <mesh key={k} ref={(m) => { segs.current[k] = m; }} position={[cx + dx, BB_H + 16.3, cz + dz]} material={off}>
           <boxGeometry args={horiz ? [sw * 0.8, 0.8, 5] : [5, 0.8, sd * 0.8]} />

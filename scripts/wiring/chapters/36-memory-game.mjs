@@ -7,6 +7,7 @@ import { COLORS as C, compose, connectionTable, ffWire, mfWire, note, svgDoc } f
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
 import { breadboard, button, oled } from "../parts.mjs";
+import { mark, pt, rec } from "../record.mjs";
 import { alley } from "./35-random-hammer.mjs";
 
 /**
@@ -21,11 +22,12 @@ export function foilPad(x, y, label, { side = "up" } = {}) {
     ? `M${x - 7} ${y - 2} l-4 -22 h22 l-4 22 z`
     : `M${x - 7} ${y + 2} l-4 22 h22 l-4 -22 z`;
   const svg = [
-    `<path d="M${fx} ${fy + 6} l20 -6 l22 5 l24 -4 l18 5 l-2 ${h - 8} l-20 4 l-22 -5 l-22 4 l-18 -3 z" fill="#ced4da" stroke="#868e96" stroke-width="2"/>`,
-    `<path d="M${fx + 10} ${fy + 14} l16 4 M${fx + 52} ${fy + h - 12} l20 -3" stroke="#f8f9fa" stroke-width="2"/>`,
+    mark(`<path d="M${fx} ${fy + 6} l20 -6 l22 5 l24 -4 l18 5 l-2 ${h - 8} l-20 4 l-22 -5 l-22 4 l-18 -3 z" fill="#ced4da" stroke="#868e96" stroke-width="2"/>`),
+    mark(`<path d="M${fx + 10} ${fy + 14} l16 4 M${fx + 52} ${fy + h - 12} l20 -3" stroke="#f8f9fa" stroke-width="2"/>`),
     `<text x="${x}" y="${fy + h / 2 + 1}" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="#343a40" stroke="none">${label}</text>`,
-    `<path d="${clipPath}" fill="#e03131" stroke="#a61e1e" stroke-width="1.5"/>`,
+    mark(`<path d="${clipPath}" fill="#e03131" stroke="#a61e1e" stroke-width="1.5"/>`),
   ];
+  rec("parts", { type: "touch", pad: { x: fx, y: fy, w, h }, clip: pt({ x, y }), label });
   return { svg, clip: { x, y } };
 }
 

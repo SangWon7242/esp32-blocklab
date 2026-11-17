@@ -114,8 +114,17 @@ export function makeLayout(scene: Scene3D): Layout {
     sonars.push({ part, origin: new THREE.Vector3(X(p.x + p.w / 2), 4 + eyeUp, zz(edge) + face * 26), face, perCm: 6 });
   });
 
-  // 장면 크기: 초음파 앞 자리까지
-  const all = [...rects, ...sonarRects];
+  // 손으로 다루는 소품 자리: PIR 앞 사람 · RFID 카드 · 리모컨 · 라이터
+  const propRects: Rect[] = scene.parts.flatMap((p) => {
+    if (p.type !== "module") return [];
+    if (p.kind === "pir") return [{ x: p.x + 38 - 190, y: p.y + 32 - 180, w: 190 + 300, h: 360 }];
+    if (p.kind === "rfid") return [p.side === "top" ? { x: p.x - 20, y: p.y, w: p.w + 40, h: p.h + 130 } : { x: p.x - 20, y: p.y - 130, w: p.w + 40, h: p.h + 130 }];
+    if (p.kind === "ir") return [{ x: p.x, y: p.y - 30, w: p.w + 150, h: p.h + 60 }];
+    if (p.kind === "flame") return [{ x: p.x, y: p.y, w: p.w + 90, h: p.h }];
+    return [];
+  });
+  // 장면 크기: 초음파 앞 자리 · 소품 자리까지
+  const all = [...rects, ...sonarRects, ...propRects];
   const ax0 = Math.min(...all.map((r) => r.x)), ax1 = Math.max(...all.map((r) => r.x + r.w));
   const az0 = Math.min(...all.map((r) => stretch(r.y))), az1 = Math.max(...all.map((r) => stretch(r.y + r.h)));
 

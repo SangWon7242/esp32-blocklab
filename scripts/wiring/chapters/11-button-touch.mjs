@@ -5,6 +5,7 @@ import { COLORS as C, compose, connectionTable, mfWire, mmWire, note, svgDoc } f
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
 import { breadboard, button, led, resistor } from "../parts.mjs";
+import { mark, pt, rec } from "../record.mjs";
 
 /** + − 줄에서 구멍이 있는 열 (6·12·18… 은 비어 있어 옆 열로) */
 export function railCol(c) {
@@ -51,11 +52,12 @@ export function railLink(bb, col = 1) {
 export function foil(x, y, label = "호일 터치 패드") {
   const fx = x - 50, fy = y + 18;
   const svg = [
-    `<path d="M${fx} ${fy + 6} l22 -6 l26 5 l30 -4 l22 6 l-3 34 l-24 4 l-28 -5 l-26 4 l-22 -3 z" fill="#ced4da" stroke="#868e96" stroke-width="2"/>`,
-    `<path d="M${fx + 14} ${fy + 16} l20 4 M${fx + 50} ${fy + 26} l26 -3" stroke="#f8f9fa" stroke-width="2"/>`,
-    `<path d="M${x - 7} ${y + 2} l-4 22 h22 l-4 -22 z" fill="#e03131" stroke="#a61e1e" stroke-width="1.5"/>`,
+    mark(`<path d="M${fx} ${fy + 6} l22 -6 l26 5 l30 -4 l22 6 l-3 34 l-24 4 l-28 -5 l-26 4 l-22 -3 z" fill="#ced4da" stroke="#868e96" stroke-width="2"/>`),
+    mark(`<path d="M${fx + 14} ${fy + 16} l20 4 M${fx + 50} ${fy + 26} l26 -3" stroke="#f8f9fa" stroke-width="2"/>`),
+    mark(`<path d="M${x - 7} ${y + 2} l-4 22 h22 l-4 -22 z" fill="#e03131" stroke="#a61e1e" stroke-width="1.5"/>`),
     note(fx + 112, fy + 22, label, "start", 14),
   ];
+  rec("parts", { type: "touch", pad: { x: fx - 3, y: fy, w: 103, h: 45 }, clip: pt({ x, y }), label });
   return { svg, clip: { x, y } };
 }
 

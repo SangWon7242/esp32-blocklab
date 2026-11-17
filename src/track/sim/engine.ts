@@ -170,7 +170,8 @@ export class Simulator {
         return clamp((d.brighterIsHigher ? v : 4095 - v) + noise());
       }
       if (d.kind === "sound" && d.pin === pin) return clamp(180 + i.sound * 3600 + Math.abs(noise()) * 3);
-      if (d.kind === "flame" && d.pin === pin) return clamp((i.flame ? 380 : 3900) + noise());
+      // 불꽃(적외선)이 비치면 값이 커진다 (평소 수백)
+      if (d.kind === "flame" && d.pin === pin) return clamp((i.flame ? 3600 : 300) + noise());
       if (d.kind === "joystick") {
         const j = i.joy[d.part] ?? { x: 0, y: 0, pressed: false };
         if (d.x === pin) return clamp(2048 + j.x * 2047 + noise());

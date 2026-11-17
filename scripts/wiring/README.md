@@ -32,7 +32,9 @@ node scripts/wiring/build.mjs 10-auto-door
 - 모듈: `ultrasonic(x, y)`(VCC Trig Echo GND) · `oled(x, y, { side })`(GND VCC SCL SDA, 기본 위쪽) · `rfid`(GND VCC SDA SCL) · `sensor3(x, y, "dht" | "pir" | "sound" | "flame" | "ir" | "lm35")`(G V S) · `joystick`(X Y B V G) · `keypad`(R1~R4 C1~C4) · `fan`(G V IN+ IN−) · 일반 `module({...})`.
 - 서보: Plus 는 `servo(x, y, [G, V, S])` (플러그를 보드 세 핀에 그대로). DevKit 은 `servoWithPlug(x, y, { plugSide, order })` + 플러그 구멍에 M-F/M-M 선.
 - 브레드보드: `breadboard({ x, y, cols, rails: { top, bottom }, railsOnly })` → `hole(col, "a"~"j")`, `rail(side, "+"|"-", col)`(6·12·18… 열은 구멍 없음), `nearestCol(x, railHole)`, `tint(col, "top"|"bottom")`(이어진 다섯 칸 옅게). `railsOnly` 는 + − 두 줄 띠.
-- 맨 부품(구멍 좌표를 받음): `led(anode, cathode, color)` · `resistor(a, b, { label })` · `button(bb, col)`(홈을 건너 다리 4개) · `buzzer(plus, minus, { active })` · `potentiometer(l, m, r)` · `photoresistor(a, b)` · `tiltSwitch(a, b)` · `rgbLed([R, −, G, B])` · `irReceiver([OUT, G, V])` · `dip(bb, col, n, { label })`(74HC595 등, `pin(k)`).
+- 맨 부품(구멍 좌표를 받음): `led(anode, cathode, color)` · `resistor(a, b, { label })` · `button(bb, col)`(홈을 건너 다리 4개) · `buzzer(plus, minus, { active })` · `potentiometer(l, m, r)` · `photoresistor(a, b)` · `tiltSwitch(a, b)` · `rgbLed([R, −, G, B])` · `rgbSpread([R, −, G, B])`(다리를 벌려 꽂은 RGB) · `irReceiver([OUT, G, V])` · `dip(bb, col, n, { label })`(74HC595 등, `pin(k)`).
+- 소품(배선 없음): `powerJack({ x, y, w, h })`(Plus 외부 전원 단자) · `batteryHolder(x, y)`(AA 6개, `{ svg, plus, minus }`).
+- 3D 기록: 부품 함수는 `rec("parts", …)` 로 남기고 SVG 를 `mark()` 로 감싼다. 챕터가 손으로 그린 조각이 mark 되지 않으면 그 그림은 `.3d.json` 을 내지 않는다(`WIRING_DEBUG=1` 로 찍힘). 그룹을 `translate+scale` 로 옮겨 그리면 `recCount()` · `moveSince(since, tx, ty, s)` 로 기록도 같이 옮긴다(6장).
 
 ## 배치 요령 (본보기: chapters/10-auto-door.mjs, chapters/01-led.mjs)
 - 폭 640, 높이는 표 끝(`table.bottom`)까지. 오른쪽 위(x>560, y<44)는 "크게 보기" 자리라 비운다.

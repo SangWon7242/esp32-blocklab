@@ -47,7 +47,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     const s = st.current;
     const was = s.fit;
     const room = cardsRoom && size.width >= 760 ? 2 * 184 : 0;
-    s.fit = Math.min((size.width - room) / (span * 0.78), size.height / (span * 0.62));
+    s.fit = Math.min((size.width - room) / (span * 0.68), size.height / (span * 0.54));
     // 처음에는 장면 전체가 들어오게, 그 뒤로는 사람이 키운 만큼을 지킨다
     cam.zoom = fitted.current ? (cam.zoom / was) * s.fit : s.fit;
     fitted.current = true;

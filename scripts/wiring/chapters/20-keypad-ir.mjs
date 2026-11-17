@@ -6,6 +6,7 @@ import { COLORS as C, compose, connectionTable, mfWire, note, svgDoc } from "../
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
 import { breadboard, keypad, led, resistor } from "../parts.mjs";
+import { mark, pt, rec } from "../record.mjs";
 
 const KEY_PINS = ["R1", "R2", "R3", "R4", "C1", "C2", "C3", "C4"];
 const KEY_GPIO = { R1: 26, R2: 25, R3: 17, R4: 16, C1: 27, C2: 14, C3: 12, C4: 13 };
@@ -40,8 +41,10 @@ function irRx(holes, names = "OUT G V") {
 function parts(bb, { ir, ledAnode, ledCathode, sig }) {
   [ir.OUT, ir.G, ir.V, ledAnode, ledCathode, sig].forEach((col) => bb.tint(col, "top"));
   const order = ["OUT", "G", "V"].sort((a, b) => ir[a] - ir[b]);
+  // 3D: 다리는 늘 OUT · G · V 순서로 (parts.irReceiver 와 같은 꼴)
+  rec("parts", { type: "irrx", legs: ["OUT", "G", "V"].map((k) => pt(bb.hole(ir[k], "e"))) });
   return [
-    irRx(order.map((k) => bb.hole(ir[k], "e")), order.join(" ")),
+    mark(irRx(order.map((k) => bb.hole(ir[k], "e")), order.join(" "))),
     resistor(bb.hole(sig, "d"), bb.hole(ledAnode, "d"), { label: "220Ω" }).svg,
     led(bb.hole(ledAnode, "e"), bb.hole(ledCathode, "e"), "#e03131", { up: false, lift: 30, label: false }).svg,
   ];

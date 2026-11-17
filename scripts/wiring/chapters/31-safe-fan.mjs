@@ -16,7 +16,8 @@
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
-import { breadboard, button, fan, led, resistor, ultrasonic } from "../parts.mjs";
+import { breadboard, button, fan, led, powerJack, resistor, ultrasonic } from "../parts.mjs";
+import { mark } from "../record.mjs";
 import { echoDivider, echoRows } from "../echo-divider.mjs";
 
 /** + − 줄에서 구멍이 있는 열 (6·12·18… 은 비어 있어 옆 열로) */
@@ -34,7 +35,7 @@ function buttonPullup(bb, col, label) {
 /** LED 회로: 신호 (k, j) → 220Ω (k,h)~(k+4,h) → 긴 다리 (k+4, f), 짧은 다리 (k+5, f) → (k+5, j) → 아래 − 줄 */
 function ledRight(bb, k, color, railCol = railHole(k + 5)) {
   [k, k + 4, k + 5].forEach((c) => bb.tint(c, "bottom"));
-  const svg = [resistor(bb.hole(k, "h"), bb.hole(k + 4, "h"), { label: "220Ω" }).svg, led(bb.hole(k + 4, "f"), bb.hole(k + 5, "f"), color).svg].join("");
+  const svg = mark([resistor(bb.hole(k, "h"), bb.hole(k + 4, "h"), { label: "220Ω" }).svg, led(bb.hole(k + 4, "f"), bb.hole(k + 5, "f"), color).svg].join(""));
   const jumper = mmWire(bb.hole(k + 5, "j"), bb.rail("bottom", "-", railCol), C.black);
   return { svg, jumper, hole: bb.hole(k, "j"), cols: { sig: k, anode: k + 4, cathode: k + 5 } };
 }
@@ -135,7 +136,7 @@ function plus() {
   parts.push(u.svg, f.svg);
   // 외부 전원 단자 + 배터리 홀더 메모
   const jack = { x: X - 10, y: Y + 150, w: 24, h: 30 };
-  parts.push(`<rect x="${jack.x}" y="${jack.y}" width="${jack.w}" height="${jack.h}" rx="5" fill="#212529" stroke="#868e96" stroke-width="2"/><circle cx="${jack.x + 9}" cy="${jack.y + jack.h / 2}" r="5" fill="#495057" stroke="none"/>`);
+  parts.push(powerJack(jack));
   parts.push(note(12, Y + 332, "배터리 홀더(AA 6개)는", "start", 13), note(12, Y + 350, "USB 아래 외부 전원 단자에", "start", 13));
 
   const rows = [
