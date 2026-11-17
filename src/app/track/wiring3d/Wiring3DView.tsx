@@ -10,6 +10,7 @@ import { defaultInputs, Simulator } from "@/track/sim/engine";
 import type { Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
 import { makeLayout } from "./layout";
+import { dioramaRoom } from "./diorama";
 import { Schematic, schematicRows } from "./Schematic";
 import { anchorsOf, Scene3DView } from "./Scene";
 import { createViewerStore, useViewer, ViewerContext, type ViewerState } from "./store";
@@ -49,15 +50,15 @@ export function Wiring3DView(props: Props) {
 }
 
 function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
-  const L = useMemo(() => makeLayout(scene), [scene]);
+  const L = useMemo(() => makeLayout(scene, dioramaRoom(chapterId)), [scene, chapterId]);
   const anchors = useMemo(() => anchorsOf(scene, L), [scene, L]);
   const set = useViewer((s) => s.set);
   const behavior = behaviorFor(chapterId);
   // 장면이 바뀌면 시뮬레이션 · 조립 순서도 새로
   useEffect(() => {
     const devices = readDevices(scene);
-    set({ sim: new Simulator(devices, behavior, defaultInputs()), devices, running: false, selected: null, hover: null, picked: null, readings: [], serial: [], assembly: buildAssembly(scene), step: null });
-  }, [scene, behavior, set]);
+    set({ sim: new Simulator(devices, behavior, defaultInputs()), devices, running: false, selected: null, hover: null, picked: null, readings: [], serial: [], assembly: buildAssembly(scene), step: null, chapterId: chapterId ?? null, oledZoom: null });
+  }, [scene, behavior, set, chapterId]);
   const devices = useViewer((s) => s.devices);
   const has = (k: Device["kind"]) => devices.some((d) => d.kind === k);
   const running = useViewer((s) => s.running);

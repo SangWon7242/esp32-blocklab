@@ -7,7 +7,9 @@ import type { Part3D, Pt } from "@/track/wiring3d";
 import { Ball, Box, Cyl, Decal, onPlane, Part, Tube, useDrag } from "./kit";
 import { BB_H, type Layout } from "./layout";
 import { canvasTexture, COLOR, glowTexture, noOutline, toon, toonOwn } from "./materials";
-import { useViewerApi, type ViewerState } from "./store";
+import { HandFigure, PersonFigure, WallFigure } from "./figures";
+import { sonarTargetFor } from "./diorama";
+import { useViewer, useViewerApi, type ViewerState } from "./store";
 import { MODULE, TEXT } from "./texts";
 
 /*
@@ -542,6 +544,12 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
     g.fillText(text, w / 2, (h - 10) / 2 + 2);
     tag.tex.needsUpdate = true;
   };
+  const chapterId = useViewer((s) => s.chapterId);
+  const target = sonarTargetFor(chapterId);
+  const what = { car: "자동차", person: "사람", hand: "손", wall: "벽" }[target];
+  // 물체 앞면까지의 거리: 자동차는 길이의 반, 사람 · 손 · 벽은 몸 앞쪽
+  const half = { car: 50, person: 12, hand: 6, wall: 9 }[target];
+  const tagY = { car: 72, person: 136, hand: 70, wall: 98 }[target];
   const carZ = (d: number) => track.origin.z + face * d * track.perCm;
   const drag = useDrag((e) => {
     const s = api.getState();
@@ -554,7 +562,7 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
     const s = api.getState();
     if (s.sim && s.sim.inputs.distance[i] === undefined) s.sim.inputs.distance[i] = 30;
     const d = cm();
-    if (car.current) car.current.position.z = carZ(d) + face * 50;
+    if (car.current) car.current.position.z = carZ(d) + face * half;
     paintTag(`${d.toFixed(1)} cm`);
     // 실행 중: 소리 고리가 센서에서 물체까지 갔다 돌아온다
     clock.current += dt;
@@ -573,7 +581,7 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
   const ringMat = useMemo(() => noOutline(new THREE.MeshBasicMaterial({ color: "#2f9e44", transparent: true, depthWrite: false, side: THREE.DoubleSide })), []);
   return (
     <>
-      <Part id={`part${i}`} label={name} text={`${text} 앞의 자동차를 끌어 거리를 바꿔 보세요.`}>
+      <Part id={`part${i}`} label={name} text={`${text} 앞의 ${what}${what === "자동차" ? "를" : "을"} 끌어 거리를 바꿔 보세요.`}>
         <ModuleBase p={p} L={L} zz={zz} />
         <group position={[0, 4, zz(edge)]} rotation={[tilt, 0, 0]}>
           {/* 세운 판 안의 좌표: z 는 핀 쪽 가장자리에서 위로 */}
@@ -598,9 +606,9 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
         ))}
       </group>
       {/* 장난감 자동차: 끌어서 센서 앞을 오간다 */}
-      <group ref={car} position={[track.origin.x, 0, carZ(cm()) + face * 50]} rotation={[0, face > 0 ? -Math.PI / 2 : Math.PI / 2, 0]} {...drag}>
-        <ToyCar />
-        <sprite material={tag.mat} position={[0, 72, 0]} scale={[60, 22.8, 1]} renderOrder={7} raycast={() => null} />
+      <group ref={car} position={[track.origin.x, 0, carZ(cm()) + face * half]} rotation={[0, target === "car" ? (face > 0 ? -Math.PI / 2 : Math.PI / 2) : face > 0 ? Math.PI : 0, 0]} {...drag}>
+        {target === "car" ? <ToyCar /> : target === "person" ? <PersonFigure /> : target === "hand" ? <HandFigure /> : <WallFigure />}
+        <sprite material={tag.mat} position={[0, tagY, 0]} scale={[60, 22.8, 1]} renderOrder={7} raycast={() => null} />
       </group>
     </>
   );
@@ -722,7 +730,6 @@ function Person({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number }) 
     coneMat.color.set(inside ? "#f08c00" : "#2f9e44");
     coneMat.opacity = inside ? 0.16 : 0.08;
   });
-  const skin = toon("#f1c27d"), shirt = toon("#4c6ef5"), pants = toon("#343a40");
   return (
     <>
       <mesh ref={cone} position={[center.x, 0.6, center.z]} rotation={[-Math.PI / 2, 0, 0]} material={coneMat} raycast={() => null}>
@@ -730,10 +737,7 @@ function Person({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number }) 
       </mesh>
       <group ref={ref} {...drag}>
         <Part id="person" label="사람" text="PIR 센서 둘레(초록 원) 안으로 끌어 보세요. 사람이 움직이면 센서가 알아채요." card={false} lift={false}>
-          <mesh position={[-7, 22, 0]} material={pants} castShadow><capsuleGeometry args={[5, 26, 4, 10]} /></mesh>
-          <mesh position={[7, 22, 0]} material={pants} castShadow><capsuleGeometry args={[5, 26, 4, 10]} /></mesh>
-          <mesh position={[0, 58, 0]} material={shirt} castShadow><capsuleGeometry args={[14, 22, 6, 14]} /></mesh>
-          <Ball r={12} at={[0, 88, 0]} mat={skin} />
+          <group rotation={[0, -Math.PI / 2, 0]} scale={0.85}><PersonFigure /></group>
         </Part>
       </group>
     </>

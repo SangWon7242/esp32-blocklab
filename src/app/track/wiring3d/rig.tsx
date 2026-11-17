@@ -52,7 +52,9 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     if (size.width < 10 || size.height < 10) return;
     const s = st.current;
     const was = s.fit;
-    const room = cardsRoom && size.width >= 760 ? 2 * 184 : 0;
+    // 설명 카드 기둥: 보통은 양옆에 하나씩, 현장 모형이 있으면 왼쪽에만 (모형이 오른쪽에 있다)
+    const oneSide = Boolean(L.diorama);
+    const room = cardsRoom && size.width >= 760 ? (oneSide ? 224 : 2 * 200) : 0;
     // 위 · 아래 단추 줄(약 110px)과 양옆 여백을 빼고 맞춘다.
     // 설명 카드 자리는 장면을 20% 넘게 줄여야 할 때는 다 비우지 않는다 (카드가 가장자리에 조금 겹쳐도 장면이 크게 보이는 편이 낫다)
     const fitH = (size.height - 110) / proj.h;
@@ -65,9 +67,12 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     fitted.current = true;
     cam.near = -r * 10;
     cam.far = r * 10;
+    // 카드가 왼쪽에만 서면 장면을 그만큼 오른쪽으로 비켜 보인다
+    if (oneSide && room) cam.setViewOffset(size.width, size.height, -room / 2, 0, size.width, size.height);
+    else cam.clearViewOffset();
     cam.updateProjectionMatrix();
     invalidate();
-  }, [size.width, size.height, proj, r, cam, cardsRoom, invalidate]);
+  }, [size.width, size.height, proj, r, cam, cardsRoom, invalidate, L.diorama]);
 
   // 카메라 다루기: 보기 단추 · 키보드
   useEffect(() => {

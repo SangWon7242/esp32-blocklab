@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Pt, Scene3D } from "@/track/wiring3d";
 import { Board, Breadboard } from "./board";
+import { Diorama } from "./diorama";
 import { StepMarks, StepShow } from "./assemblyView";
 import { HoverMarks, SelectionRing } from "./kit";
 import { BB_H, HEADER_H, PCB_H, PIN_SEAT, type Layout } from "./layout";
@@ -79,7 +80,7 @@ function blockedY(host: HTMLElement | null, side: "left" | "right", w: number): 
 }
 
 /** 설명 카드 · 이름표 · 점선 · 부품 카드 점선을 3D 자리에 맞춰 놓는다 (DOM 을 바로 고친다) */
-function OverlaySync({ anchors }: { anchors: Anchor[] }) {
+function OverlaySync({ anchors, L }: { anchors: Anchor[]; L: Layout }) {
   const api = useViewerApi();
   const { camera, size } = useThree();
   const v = useMemo(() => new THREE.Vector3(), []);
@@ -90,7 +91,7 @@ function OverlaySync({ anchors }: { anchors: Anchor[] }) {
       v.copy(a.position).project(camera);
       return { a, x: ((v.x + 1) / 2) * w, y: ((1 - v.y) / 2) * h };
     });
-    const cards = !s.selected && w >= 760 && h >= 420 && anchors.length <= 6;
+    const cards = !s.selected && w >= 760 && h >= 420 && anchors.length <= (L.diorama ? 4 : 6);
     if (s.dom.callouts) s.dom.callouts.dataset.mode = cards ? "cards" : "pills";
     const spot = new Map<string, { x: number; y: number; h: number }>();
     if (cards) {
@@ -98,7 +99,8 @@ function OverlaySync({ anchors }: { anchors: Anchor[] }) {
       const heightOf = (id: string) => s.dom.nodes.get(id)?.card?.offsetHeight || CARD_H;
       const host = s.dom.callouts?.parentElement ?? null;
       const byX = [...pts].sort((p, q) => p.x - q.x);
-      const leftIds = new Set(byX.slice(0, Math.ceil(byX.length / 2)).map((p) => p.a.id));
+      // 현장 모형이 오른쪽에 있으면 카드는 모두 왼쪽 기둥에 (모형을 가리지 않게)
+      const leftIds = new Set((L.diorama ? byX : byX.slice(0, Math.ceil(byX.length / 2))).map((p) => p.a.id));
       for (const side of ["left", "right"] as const) {
         const col = pts.filter((p) => leftIds.has(p.a.id) === (side === "left")).sort((p, q) => p.y - q.y);
         const blocks = blockedY(host, side, w);
@@ -127,6 +129,24 @@ function OverlaySync({ anchors }: { anchors: Anchor[] }) {
         col.forEach((p, i) => spot.set(p.a.id, { x: side === "left" ? 12 : w - CARD_W - 12, y: ys[i], h: hs[i] }));
       }
     }
+    // 이름표(pill): 서로 겹치면 아래로 비켜 놓는다
+    const pill = new Map<string, number>();
+    if (!cards) {
+      const placed: { x0: number; x1: number; y0: number; y1: number }[] = [];
+      for (const p of [...pts].sort((a, b) => a.y - b.y)) {
+        const el = s.dom.nodes.get(p.a.id)?.card;
+        const pw = el?.offsetWidth || 90, ph = el?.offsetHeight || 26;
+        const x0 = p.x + 14, x1 = x0 + pw;
+        let y0 = p.y - 30;
+        for (let k = 0; k < 12; k++) {
+          const hit = placed.find((r) => x0 < r.x1 + 4 && x1 > r.x0 - 4 && y0 < r.y1 + 3 && y0 + ph > r.y0 - 3);
+          if (!hit) break;
+          y0 = hit.y1 + 4;
+        }
+        placed.push({ x0, x1, y0, y1: y0 + ph });
+        pill.set(p.a.id, y0);
+      }
+    }
     for (const p of pts) {
       const node = s.dom.nodes.get(p.a.id);
       if (!node) continue;
@@ -137,9 +157,10 @@ function OverlaySync({ anchors }: { anchors: Anchor[] }) {
         node.line?.setAttribute("x1", String(p.x)); node.line?.setAttribute("y1", String(p.y));
         node.line?.setAttribute("x2", String(c.x < p.x ? c.x + CARD_W : c.x)); node.line?.setAttribute("y2", String(c.y + c.h / 2));
       } else {
-        if (node.card) node.card.style.transform = `translate(${p.x + 14}px, ${p.y - 30}px)`;
+        const py = pill.get(p.a.id) ?? p.y - 30;
+        if (node.card) node.card.style.transform = `translate(${p.x + 14}px, ${py}px)`;
         node.line?.setAttribute("x1", String(p.x)); node.line?.setAttribute("y1", String(p.y));
-        node.line?.setAttribute("x2", String(p.x + 16)); node.line?.setAttribute("y2", String(p.y - 16));
+        node.line?.setAttribute("x2", String(p.x + 16)); node.line?.setAttribute("y2", String(py + 14));
       }
     }
     // 누른 부품 ↔ 부품 카드
@@ -211,17 +232,18 @@ export function Scene3DView({ scene, L, anchors, cardsRoom }: { scene: Scene3D; 
         shadow-camera-left={-r} shadow-camera-right={r} shadow-camera-top={r} shadow-camera-bottom={-r} shadow-camera-near={1} shadow-camera-far={r * 4} />
       <Floor r={r} />
       <PanFloor r={r} />
-      <Rig L={L} cardsRoom={cardsRoom && anchors.length <= 6} />
+      <Rig L={L} cardsRoom={cardsRoom && anchors.length <= (L.diorama ? 4 : 6)} />
       {scene.breadboards.map((bb, i) => <Breadboard key={i} bb={bb} L={L} index={i} />)}
       {scene.boards.map((b, i) => <Board key={i} b={b} L={L} index={i} blueLed={blueLed} />)}
       {scene.parts.map((p, i) => <StepShow key={i} part={i}>{partView(p, i, L)}</StepShow>)}
       {hasIr && irPart && <StepShow part={scene.parts.indexOf(irPart)}><Remote at={new THREE.Vector3(L.X(irPart.legs[1].x) + 90, 0, L.Zp(irPart.legs[1]) + 40)} /></StepShow>}
       {scene.wires.map((w, i) => <StepShow key={i} wire={i}><WireView w={w} i={i} L={L} scene={scene} /></StepShow>)}
       <StepMarks scene={scene} L={L} />
+      <Diorama L={L} />
       <Flow chains={chains} ledPins={ledPins} />
       <HoverMarks />
       <SelectionRing />
-      <OverlaySync anchors={anchors} />
+      <OverlaySync anchors={anchors} L={L} />
       <SimDriver blueLed={blueLed} />
     </>
   );

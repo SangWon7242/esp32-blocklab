@@ -41,12 +41,17 @@ export type Layout = {
   size: { w: number; d: number };
   focus: THREE.Vector3;
   sonars: SonarTrack[];
+  /** 현장 모형 자리 (융합 챕터): 바닥 가운데 · 가로 · 세로. 회로 오른쪽에 둔다 */
+  diorama: { at: THREE.Vector3; w: number; d: number } | null;
 };
+
+/** 현장 모형과 회로 사이 틈 (그림 px) */
+const DIORAMA_GAP = 90;
 
 /** 초음파 센서 앞에 둘 자리 (그림 px). 센서가 서 있는 방향으로 이만큼 비워 둔다 */
 const SONAR_ROOM = 230;
 
-export function makeLayout(scene: Scene3D): Layout {
+export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): Layout {
   const dk = scene.boards.find((b) => b.kind === "devkit");
   const F = dk ? DEVKIT_F : 1;
   const stretch = (y: number) => (!dk || y <= dk.y ? y : y >= dk.y + dk.h ? y + (F - 1) * dk.h : dk.y + (y - dk.y) * F);
@@ -125,8 +130,15 @@ export function makeLayout(scene: Scene3D): Layout {
   });
   // 장면 크기: 초음파 앞 자리 · 소품 자리까지
   const all = [...rects, ...sonarRects, ...propRects];
-  const ax0 = Math.min(...all.map((r) => r.x)), ax1 = Math.max(...all.map((r) => r.x + r.w));
-  const az0 = Math.min(...all.map((r) => stretch(r.y))), az1 = Math.max(...all.map((r) => stretch(r.y + r.h)));
+  // 현장 모형: 회로 · 소품 자리 오른쪽, 세로 가운데. (stretch 를 거치지 않게 이미 늘인 좌표로 둔다)
+  let dRect: Rect | null = null;
+  if (diorama) {
+    const x1 = Math.max(...all.map((r) => r.x + r.w));
+    const zc = (Math.min(...all.map((r) => stretch(r.y))) + Math.max(...all.map((r) => stretch(r.y + r.h)))) / 2;
+    dRect = { x: x1 + DIORAMA_GAP, y: zc - diorama.d / 2, w: diorama.w, h: diorama.d };
+  }
+  const ax0 = Math.min(...all.map((r) => r.x)), ax1 = Math.max(...all.map((r) => r.x + r.w), dRect ? dRect.x + dRect.w : -Infinity);
+  const az0 = Math.min(...all.map((r) => stretch(r.y)), dRect ? dRect.y : Infinity), az1 = Math.max(...all.map((r) => stretch(r.y + r.h)), dRect ? dRect.y + dRect.h : -Infinity);
 
   return {
     X, Z, Zp, zIn, topAt, F, sonars,
@@ -134,5 +146,6 @@ export function makeLayout(scene: Scene3D): Layout {
     unZ: (z) => unstretch(z + cz),
     size: { w: Math.max(maxX - minX, ax1 - ax0), d: Math.max(maxY - minY, az1 - az0) },
     focus: new THREE.Vector3(X((ax0 + ax1) / 2), 12, (az0 + az1) / 2 - cz),
+    diorama: dRect ? { at: new THREE.Vector3(X(dRect.x + dRect.w / 2), 0, dRect.y + dRect.h / 2 - cz), w: dRect.w, d: dRect.h } : null,
   };
 }

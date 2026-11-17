@@ -61,6 +61,10 @@ export type ViewerState = {
   /** 시뮬레이션 (없으면 그 챕터 동작이 아직 없다) */
   sim: Simulator | null;
   devices: Device[];
+  /** 지금 챕터 ("10-auto-door") — 현장 모형 · 초음파 앞 물체를 고른다 */
+  chapterId: string | null;
+  /** OLED 화면 크게 보기 (부품 번호, 닫으면 null) */
+  oledZoom: number | null;
   /** 장면이 다시 그려지게 (R3F invalidate) */
   invalidate: () => void;
   /** 화면 위 글자들이 따라갈 DOM (부품 카드 · 점선 · 설명 카드 …) */
@@ -83,7 +87,7 @@ export function createViewerStore(): StoreApi<ViewerState> {
     hover: null, selected: null, picked: null, preview: null,
     running: false, sound: false, topView: false, dragging: false,
     ledColor: {}, dim: 1, readings: [], serial: [], phone: null,
-    sim: null, devices: [], step: null, assembly: null,
+    sim: null, devices: [], step: null, assembly: null, chapterId: null, oledZoom: null,
     invalidate: () => {},
     dom: { partCard: null, leader: null, leaderHalo: null, leaderDot: null, tip: null, callouts: null, nodes: new Map() },
     camera: null,
