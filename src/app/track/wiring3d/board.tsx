@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Scene3D } from "@/track/wiring3d";
@@ -122,14 +122,17 @@ function PinCluster({ id, pins, L, devkit, pcb }: { id: string; pins: BoardData[
         inst.current?.setMatrixAt(i, mx);
         grip.current?.setMatrixAt(i, mx);
       } else {
+        // 실물처럼: 소켓 몸통이 그 줄의 색(노랑 S · 빨강 V · 검정 G · 흰 SCL)이고 위에 검은 구멍
         inst.current?.setMatrixAt(i, mx.makeTranslation(L.X(p.x), top + HEADER_H / 2, L.Z(p.y)));
-        caps.current?.setMatrixAt(i, mx.makeTranslation(L.X(p.x), top + HEADER_H + 0.3, L.Z(p.y)));
-        c.set(p.fill);
-        if (!p.used) c.lerp(new THREE.Color(pcb), 0.55);
-        caps.current?.setColorAt(i, c);
+        caps.current?.setMatrixAt(i, mx.makeTranslation(L.X(p.x), top + HEADER_H + 0.25, L.Z(p.y)));
+        c.set(p.fill === "#495057" ? "#2b2b30" : p.fill);
+        if (!p.used) c.lerp(new THREE.Color("#3a3a3f"), 0.18);
+        inst.current?.setColorAt(i, c);
       }
     });
     for (const m of [inst.current, caps.current, grip.current]) if (m) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+    // 핀마다 색을 처음 넣으면 재질을 다시 만들어야 색이 보인다
+    if (!devkit) headerMat.needsUpdate = true;
   }, [pins, L, devkit, pcb, top]);
   useFrame(() => {
     const g = group.current;
@@ -171,12 +174,11 @@ function PinCluster({ id, pins, L, devkit, pcb }: { id: string; pins: BoardData[
         </>
       ) : (
         <>
-          <instancedMesh ref={inst} args={[undefined, undefined, pins.length]} material={toon(COLOR.plastic)} castShadow onPointerMove={move} onPointerOut={out}>
-            <boxGeometry args={[14, HEADER_H, 14]} />
+          <instancedMesh ref={inst} args={[undefined, undefined, pins.length]} material={headerMat} castShadow onPointerMove={move} onPointerOut={out}>
+            <boxGeometry args={[19.2, HEADER_H, 17.2]} />
           </instancedMesh>
-          <instancedMesh ref={caps} args={[undefined, undefined, pins.length]} raycast={() => null}>
-            <boxGeometry args={[9, 1, 9]} />
-            <meshBasicMaterial />
+          <instancedMesh ref={caps} args={[undefined, undefined, pins.length]} raycast={() => null} material={holeMat}>
+            <boxGeometry args={[6.4, 0.6, 6.4]} />
           </instancedMesh>
         </>
       )}
@@ -227,6 +229,35 @@ function silkPaint(b: BoardData, devkit: boolean, kz: number) {
         g.fillText(p.label, 0, 0);
         g.restore();
       }
+      // 실물 기판의 무늬: 구리 선(옅게) · 묶음 이름 · 보드 이름
+      g.globalAlpha = 1;
+      g.strokeStyle = "rgba(210,170,80,0.22)";
+      g.lineWidth = 1.4;
+      const trace = (pts: [number, number][]) => { g.beginPath(); pts.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); };
+      for (let k = 0; k < 6; k++) trace([[74, 110 + k * 3], [96 + k * 3, 110 + k * 3], [96 + k * 3, 70], [100 + k * 20, 66]]);
+      for (let k = 0; k < 5; k++) trace([[40, 134 + k * 3], [40, 178 + k * 3], [100 - k * 3, 178 + k * 3]]);
+      for (let k = 0; k < 4; k++) trace([[212 + k * 4, 128], [212 + k * 4, 236], [262, 236 + k * 4]]);
+      trace([[140, 140], [140, 150], [262, 150]]);
+      g.fillStyle = "rgba(255,255,255,0.92)";
+      g.textAlign = "center";
+      g.font = "700 7px system-ui, sans-serif";
+      for (const [x0, n] of [[106, 6], [260, 6]] as const) {
+        ["S", "V", "G"].forEach((r, k) => g.fillText(r, x0 - 13, 78 + k * 18));
+        void n;
+      }
+      g.fillText("G", 30, 164); g.fillText("V", 50, 164); g.fillText("S", 70, 164);
+      ["GND", "V", "SDA", "SCL"].forEach((t, k) => g.fillText(t, 140 + k * 20, 176));
+      g.font = "700 8px system-ui, sans-serif";
+      const vert = (t: string, x: number, y: number) => { g.save(); g.translate(x, y); g.rotate(-Math.PI / 2); g.fillText(t, 0, 0); g.restore(); };
+      vert("DIGITAL", 236, 96);
+      vert("ANALOG", 88, 226);
+      vert("BUS I2C", 214, 210);
+      g.fillText("RESET", 30, 44);
+      g.fillText("DC 7-12V", 118, 244);
+      g.font = "700 6px system-ui, sans-serif";
+      g.fillText("ON", 226, 252); g.fillText("TX", 192, 236); g.fillText("RX", 192, 244);
+      g.font = "italic 700 13px system-ui, sans-serif";
+      g.fillText("ESP32 Plus", 344, 136);
     }
   };
 }
@@ -245,7 +276,8 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
   // WROOM 모듈: DevKit 은 보드 끝에 길게(25.5mm), 폭은 핀 두 줄 사이를 거의 채운다(18mm)
   const c = devkit ? { x: b.x + b.w - 236, y: b.y + 25, w: 232, h: 100 } : b.chip;
   const antW = devkit ? 56 : Math.min(26, c.w * 0.24);
-  const antennaRight = devkit;
+  // 안테나: 두 보드 모두 모듈의 오른쪽 끝 (Plus 사진처럼 기판 가장자리 쪽)
+  const antennaRight = true;
   const shield = { x: antennaRight ? c.x + 5 : c.x + antW + 3, y: c.y + 6, w: c.w - antW - 8, h: c.h - 12 };
   const ax = antennaRight ? c.x + c.w - antW + 2 : c.x + 4;
   const steps = 6, sh = (c.h - 16) / steps;
@@ -337,9 +369,7 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
           </Bit>
         </>
       ) : (
-        ([[b.x + 14, b.y + 14], [b.x + b.w - 14, b.y + 14], [b.x + 14, b.y + b.h - 14], [b.x + b.w - 14, b.y + b.h - 14]] as const).map(([hx, hy], i) => (
-          <Cyl key={i} r={5} h={0.8} at={[L.X(hx), top + 0.3, L.Z(hy)]} mat={toon("#6c757d", { outline: false })} />
-        ))
+        <PlusDetails b={b} L={L} index={index} top={top} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} blueLed={blueLed} />
       )}
 
       {clusters.map((pins, k) => <PinCluster key={k} id={`pins${index}-${k}`} pins={pins} L={L} devkit={devkit} pcb={pcb} />)}
@@ -354,4 +384,73 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
   );
 }
 
+/**
+ * ESP32 Plus(Keyestudio KS5020) 실물 사진에 있는 것들: RESET 버튼 · USB 통역 칩(CH340) · 전원 칩 · 4R7 코일 ·
+ * DC 7-12V 전원 잭 · 작은 칩 저항 · 콘덴서 · ON / TX / RX LED · 고정 구멍. 핀 자리는 배선도와 같아서 빈 곳에 놓는다.
+ * 좌표는 보드 왼쪽 위에서 잰 그림 px (보드 428 × 300).
+ */
+function PlusDetails({ b, L, index, top, pressEn, releaseEn, enCap, blueLed }: {
+  b: BoardData; L: Layout; index: number; top: number;
+  pressEn: (e: ThreeEvent<PointerEvent>) => void; releaseEn: () => void; enCap: RefObject<THREE.Mesh | null>; blueLed: THREE.MeshToonMaterial;
+}) {
+  const X = (rx: number) => L.X(b.x + rx), Z = (ry: number) => L.Z(b.y + ry);
+  const black = toon("#17171a"), metal = toon(COLOR.metal), tan = toon("#c9a26b", { outline: false }), dark = toon("#2b2b30", { outline: false });
+  // 작은 칩 저항 · 콘덴서 (사진의 왼쪽 부품 밭)
+  const smd: [number, number, number, number, THREE.Material][] = [
+    [96, 150, 7, 4, dark], [96, 160, 7, 4, dark], [110, 150, 7, 4, tan], [84, 172, 4, 7, dark], [20, 150, 7, 4, dark], [20, 160, 7, 4, tan],
+    [36, 168, 7, 4, dark], [60, 168, 7, 4, dark], [214, 258, 7, 4, dark], [226, 258, 7, 4, tan], [238, 258, 7, 4, dark], [214, 272, 7, 4, tan],
+    [238, 140, 4, 7, tan], [250, 140, 4, 7, dark], [250, 236, 7, 4, dark], [120, 230, 4, 7, tan], [120, 246, 4, 7, dark],
+  ];
+  return (
+    <>
+      {/* 고정 구멍 넷 (흰 테두리) */}
+      {([[14, 14], [b.w - 14, 14], [14, b.h - 14], [b.w - 14, b.h - 14]] as const).map(([hx, hy], i) => (
+        <group key={i}>
+          <Cyl r={7.5} h={0.6} at={[X(hx), top + 0.2, Z(hy)]} mat={toon("#e9ecef", { outline: false })} seg={20} />
+          <Cyl r={5} h={0.8} at={[X(hx), top + 0.3, Z(hy)]} mat={toon("#f8f1e5", { outline: false })} seg={20} />
+        </group>
+      ))}
+      {/* RESET 버튼: 누르면 처음부터 다시 */}
+      <Part id={`board${index}-EN`} label="RESET 버튼" text="누르면 보드가 처음부터 다시 시작해요. 눌러 보세요!" card={false}>
+        <Box size={[18, 4, 18]} at={[X(30), top + 2, Z(26)]} mat={metal} />
+        <mesh ref={enCap} position={[X(30), top + 5, Z(26)]} material={black} castShadow onPointerDown={pressEn} onPointerUp={releaseEn} onPointerLeave={releaseEn}>
+          <cylinderGeometry args={[4.6, 4.6, 2.6, 18]} />
+        </mesh>
+      </Part>
+      {/* USB 통역 칩 (CH340, 다리 열여섯) */}
+      <Part id={`board${index}-usbchip`} label="USB 칩" text={TEXT.usbChip}>
+        <Box size={[36, 3.4, 22]} at={[X(56), top + 1.7, Z(118)]} mat={black} />
+        {Array.from({ length: 8 }, (_, k) => [-1, 1].map((sgn) => <Box key={`${k}${sgn}`} size={[2, 1.2, 4]} at={[X(56 - 15.4 + k * 4.4), top + 0.6, Z(118 + sgn * 12.6)]} mat={metal} cast={false} />))}
+      </Part>
+      {/* 전원 칩 (5V → 3.3V) · 4R7 코일 */}
+      <Part id={`board${index}-reg`} label="전원 조절 부품" text={TEXT.regulator}>
+        <Box size={[20, 4.5, 14]} at={[X(232), top + 2.25, Z(160)]} mat={black} />
+        <Box size={[20, 1.4, 6]} at={[X(232), top + 0.7, Z(150)]} mat={metal} cast={false} />
+      </Part>
+      <Part id={`board${index}-coil`} label="코일 (4R7)" text="전기를 고르게 다듬어 주는 부품이에요. 전원이 흔들리지 않게 해요.">
+        <Box size={[22, 9, 22]} at={[X(234), top + 4.5, Z(204)]} mat={toon("#8a8f98")} />
+        <Decal w={16} d={10} at={[X(234), top + 9.15, Z(204)]} paint={(g, cw, ch) => { g.fillStyle = "#1f2328"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("4R7", cw / 2, ch / 2); }} />
+      </Part>
+      {/* DC 7-12V 전원 잭 (노란 몸통) */}
+      <Part id={`board${index}-dc`} label="DC 전원 잭" text="USB 대신 7~12V 어댑터나 건전지로 전기를 넣는 곳이에요. 모터처럼 전기를 많이 쓰는 작품에 써요.">
+        <Box size={[44, 26, 36]} at={[X(118), top + 13, Z(270)]} mat={toon("#f2b51d")} />
+        <Box size={[4, 20, 20]} at={[X(95.5), top + 13, Z(270)]} mat={toon("#d99a0b")} />
+        <Cyl r={6} h={3} at={[X(94), top + 13, Z(270)]} rot={[0, 0, Math.PI / 2]} mat={black} seg={16} />
+      </Part>
+      {/* LED: ON(빨강) · TX · RX · 2번 핀 LED(파랑) */}
+      <Part id={`board${index}-pwr`} label="전원 LED (ON)" text={TEXT.powerLed}>
+        <Box size={[7, 2.6, 4]} at={[X(226), top + 1.3, Z(244)]} mat={toon("#ff6b6b", { outline: false, emissive: "#e03131", emissiveIntensity: 0.9 })} />
+      </Part>
+      <Part id={`board${index}-led2`} label="내장 LED (2번 핀)" text={TEXT.bootLed}>
+        <Box size={[7, 2.6, 4]} at={[X(246), top + 1.3, Z(272)]} mat={blueLed} />
+      </Part>
+      {[[202, 236], [202, 244]].map(([rx, ry]) => <Box key={ry} size={[6, 2.2, 3.6]} at={[X(rx), top + 1.1, Z(ry)]} mat={toon("#ffe066", { outline: false })} cast={false} />)}
+      {smd.map(([rx, ry, w, d, m], i) => <Box key={i} size={[w, 2.2, d]} at={[X(rx), top + 1.1, Z(ry)]} mat={m} cast={false} />)}
+    </>
+  );
+}
+
 const usedRing = noOutline(toonOwn({ color: COLOR.glow, emissive: COLOR.glow, emissiveIntensity: 0.6 }));
+/** Plus 핀 소켓 몸통 (핀마다 색) · 소켓 구멍 */
+const headerMat = toonOwn({ color: "#ffffff" });
+const holeMat = noOutline(new THREE.MeshBasicMaterial({ color: "#121214" }));
