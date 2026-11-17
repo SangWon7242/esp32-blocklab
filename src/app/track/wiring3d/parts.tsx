@@ -507,6 +507,33 @@ function ModuleTop({ p, i, L, zz }: { p: Mod; i: number; L: Layout; zz: (y: numb
     case "joystick": return <Joystick p={p} i={i} L={L} zz={zz} />;
     case "keypad": return <Keypad p={p} L={L} zz={zz} />;
     case "fan": return <Fan p={p} i={i} L={L} zz={zz} />;
+    case "soil": {
+      // 두 갈래 금빛 다리 (흙에 꽂는 쪽) · 비교 칩
+      const cx = L.X(x + w / 2), legY = p.side === "top" ? y + h - 4 : y + 4;
+      const span = h * 0.62, mid = p.side === "top" ? legY - span / 2 : legY + span / 2;
+      return (
+        <>
+          {[-0.2, 0.2].map((k) => <Box key={k} size={[w * 0.16, 1, span]} at={[cx + k * w, 4.6, zz(mid)]} mat={toon("#d4a72c", { metal: 0.9, rough: 0.3 })} cast={false} />)}
+          <Box size={[10, 2.4, 8]} at={[cx, 5.4, zz(p.side === "top" ? y + 26 : y + h - 26)]} mat={toon("#212529")} />
+        </>
+      );
+    }
+    case "water": {
+      // 물에 잠그는 은빛 줄무늬
+      const cx = L.X(x + w / 2), mid = p.side === "top" ? y + h * 0.62 : y + h * 0.38;
+      return <>{Array.from({ length: 9 }, (_, k) => <Box key={k} size={[1.6, 0.6, h * 0.5]} at={[cx - w * 0.32 + (k * w * 0.64) / 8, 4.4, zz(mid)]} mat={toon("#dee2e6", { metal: 0.9, rough: 0.3 })} cast={false} />)}</>;
+    }
+    case "relay": {
+      // 파란 릴레이 통 · 빨간 불(신호가 오면 켜진다)
+      const cx = L.X(x + w / 2), mid = y + h / 2;
+      return (
+        <>
+          <Box size={[w * 0.5, 15, h * 0.42]} at={[cx, 11.5, zz(mid)]} mat={toon("#2f6fdb")} />
+          <Decal w={w * 0.44} d={h * 0.3} at={[cx, 19.1, zz(mid)]} px={160} paint={(g, cw, ch) => { g.fillStyle = "#ffffff"; g.font = `700 ${Math.round(ch * 0.28)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("SRD-05VDC", cw / 2, ch * 0.35); g.fillText("10A 250VAC", cw / 2, ch * 0.7); }} />
+          <RelayLamp p={p} i={i} L={L} zz={zz} />
+        </>
+      );
+    }
     default: void api; return null;
   }
 }
@@ -890,6 +917,23 @@ function Keypad({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number }) 
   );
 }
 
+/* ── 릴레이: 신호 핀이 켜지면 빨간 불이 켜진다 ── */
+
+function RelayLamp({ p, i, L, zz }: { p: Mod; i: number; L: Layout; zz: (y: number) => number }) {
+  const api = useViewerApi();
+  const m = useMemo(() => toonOwn({ color: "#ffe3e3", emissive: "#ff2d2d", emissiveIntensity: 0 }), []);
+  useEffect(() => () => m.dispose(), [m]);
+  useFrame(() => {
+    const s = api.getState();
+    const o = outputs(s);
+    const d = deviceOf(s, i, "relay");
+    const on = Boolean(o && d && (o.pins[d.pin] ?? 0) > 0.5);
+    m.emissiveIntensity = on ? 2.6 : 0;
+  });
+  const lx = L.X(p.x + p.w * 0.85), ly = p.side === "top" ? p.y + 22 : p.y + p.h - 22;
+  return <Ball r={2.4} at={[lx, 5, zz(ly)]} mat={m} />;
+}
+
 /* ── 팬: IN+ · IN− 핀의 차이만큼 날개가 돈다 ── */
 
 function Fan({ p, i, L, zz }: { p: Mod; i: number; L: Layout; zz: (y: number) => number }) {
@@ -1024,11 +1068,50 @@ export function Seg7({ p, i, L }: P<"seg7">) {
   );
 }
 
-/* ───────────── 책상 위 소품: 건전지 상자 · 전원 플러그 ───────────── */
+/* ───────────── 책상 위 소품: 건전지 상자 · 전원 플러그 · 물통과 펌프 ───────────── */
+
+/** 물통 안의 미니 워터 펌프: 릴레이가 붙으면 떨리며 호스로 물을 밀어 올린다 */
+function PumpProp({ p, i, L }: P<"prop">) {
+  const api = useViewerApi();
+  const { x, y, w, h } = p;
+  const cx = L.X(x + w / 2), cz = L.Zp({ x: x + w / 2, y: y + h / 2 });
+  const body = useRef<THREE.Group>(null);
+  const water = useRef<THREE.Mesh>(null);
+  const clock = useRef(0);
+  const glass = useMemo(() => noOutline(toonOwn({ color: "#e7f5ff", transparent: true, opacity: 0.25, roughness: 0.1, depthWrite: false })), []);
+  const wet = useMemo(() => noOutline(toonOwn({ color: "#4dabf7", transparent: true, opacity: 0.5, roughness: 0.2, depthWrite: false })), []);
+  useEffect(() => () => { glass.dispose(); wet.dispose(); }, [glass, wet]);
+  const H = 34;
+  useFrame((_, dt) => {
+    const s = api.getState();
+    const o = outputs(s);
+    const relay = s.devices.find((d): d is Extract<Device, { kind: "relay" }> => d.kind === "relay");
+    const level = s.sim?.inputs.water ?? 0.8;
+    const on = Boolean(o && relay && (o.pins[relay.pin] ?? 0) > 0.5 && level > 0.02);
+    clock.current += dt;
+    if (body.current) body.current.position.x = on ? Math.sin(clock.current * 90) * 0.4 : 0;
+    if (water.current) { water.current.scale.y = Math.max(0.001, level); water.current.position.y = 2 + ((H - 4) * level) / 2; }
+    if (on) s.invalidate();
+  });
+  return (
+    <Part id={`part${i}`} label={p.label ?? "물통 · 미니 워터 펌프"} text="물통 안에 넣은 5V 펌프예요. 릴레이가 붙으면 돌아서 호스로 물을 화분에 보내요. 물 밖에서 돌리면 고장 나요.">
+      <group position={[cx, 0, cz]}>
+        <mesh position={[0, H / 2, 0]} material={glass}><boxGeometry args={[w, H, h]} /></mesh>
+        <mesh ref={water} position={[0, H / 2, 0]} material={wet} raycast={() => null}><boxGeometry args={[w - 3, H - 4, h - 3]} /></mesh>
+        <group ref={body}>
+          <Cyl r={Math.min(9, w * 0.18)} h={18} at={[0, 10, 0]} mat={toon("#2b2b30")} seg={18} />
+          <Cyl r={2.6} h={8} at={[0, 22, 0]} mat={toon("#495057")} seg={10} />
+        </group>
+        <Tube points={[new THREE.Vector3(0, 25, 0), new THREE.Vector3(0, H + 10, 0), new THREE.Vector3(-w * 0.3, H + 18, 0), new THREE.Vector3(-w * 0.55, H + 8, 0)]} radius={1.8} mat={toonOwn({ color: "#f1f3f5", transparent: true, opacity: 0.9 })} />
+      </group>
+    </Part>
+  );
+}
 
 export function Prop({ p, i, L }: P<"prop">) {
   const { x, y, w, h } = p;
   const cx = L.X(x + w / 2), cz = L.Zp({ x: x + w / 2, y: y + h / 2 });
+  if (p.kind === "pump") return <PumpProp p={p} i={i} L={L} />;
   if (p.kind === "jack") {
     return (
       <Part id={`part${i}`} label="전원 플러그" text="건전지 상자의 전기를 보드로 보내는 둥근 플러그예요.">

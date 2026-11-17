@@ -5,6 +5,7 @@ import { useViewer } from "../store";
 import { Entrance, ENTRANCE_ROOM } from "./entrance";
 import { ALARM_ROOM, AlarmRoom, BOARD_ROOM, CHICK_ROOM, ChickPen, CLIMATE_ROOM, ClimateRoom, CONSOLE_ROOM, DeskFan, FAN_ROOM, GameConsole, HAMMER_ROOM, HammerGame, MOOD_ROOM, MoodLamp, SensorBoard } from "./rooms";
 import { CANE_ROOM, SmartCane } from "./cane";
+import { PLANT_ROOM, SmartPlant } from "./garden";
 import { CROSSWALK_ROOM, Crosswalk, LAMP_ROOM, StreetLamp } from "./street";
 
 /*
@@ -32,6 +33,7 @@ const SPECS: Record<string, Spec> = {
   "41": { room: CONSOLE_ROOM, name: "현장 모형 · 폭탄 피하기 게임기", text: "A · B 버튼으로 떨어지는 폭탄을 피하는 게임기예요.", view: () => <GameConsole pads="bomb" /> },
   "42": { room: CONSOLE_ROOM, name: "현장 모형 · 달리기 게임기", text: "버튼을 눌러 점프하며 벽돌을 넘고, 손잡이로 빠르기를 바꾸는 게임기예요.", view: () => <GameConsole pads="runner" /> },
   "43": { room: CHICK_ROOM, name: "현장 모형 · 병아리 집", text: "병아리 집의 온습도가 알맞고 사람이 와서 놀아 주면 병아리가 웃으며 뛰어요.", view: () => <ChickPen /> },
+  "44": { room: PLANT_ROOM, name: "현장 모형 · 스마트 화분", text: "베란다 화분대예요. 흙에 꽂은 센서가 흙이 마른 걸 알아채면 릴레이가 붙고, 물통 안 펌프가 호스로 물을 줘요. 해를 누르고 있으면 흙이 마르고, 물통을 누르면 물을 비우거나 채워요.", view: () => <SmartPlant /> },
 };
 
 const num = (chapterId: string | null | undefined) => (chapterId ? /^(\d+)-/.exec(chapterId)?.[1] : undefined);
