@@ -11,6 +11,7 @@ import { defaultInputs, Simulator } from "@/track/sim/engine";
 import type { Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
 import { makeLayout, siteLayout } from "./layout";
+import { withPlusLayout } from "./plusLayout";
 import { OledZoom } from "./OledZoom";
 import { dioramaRoom } from "./diorama";
 import { Schematic, schematicRows } from "./Schematic";
@@ -51,7 +52,9 @@ export function Wiring3DView(props: Props) {
   );
 }
 
-function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
+function Viewer({ scene: raw, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
+  // Plus 보드는 실물 도면 배치로 (배선도 그림의 핀 자리 → 실물 자리)
+  const scene = useMemo(() => withPlusLayout(raw), [raw]);
   // 융합 챕터: 현장 보기(가전 · 가구에 단 모듈로 시뮬레이션)가 먼저, 회로 보기는 배선만
   const room = dioramaRoom(chapterId);
   const [mode, setMode] = useState<"site" | "circuit">(room ? "site" : "circuit");
