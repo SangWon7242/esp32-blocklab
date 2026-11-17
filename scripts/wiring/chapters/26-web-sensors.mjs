@@ -13,6 +13,7 @@ const TEN_K = ["#8b5a2b", "#212529", "#f76707"]; // 갈 검 주
 /** DHT11 모듈 (핀 G V S, 아래쪽). 핀 이름이 가리지 않게 그림을 위쪽에 둔다 */
 const dht11 = (x, y, titleAt) =>
   module({
+    kind: "dht",
     x, y, w: 76, h: 70, color: "#1971c2", pins: ["G", "V", "S"], side: "bottom", firstPin: 18, title: "DHT11", titleAt,
     decor: (mx, my, w) => `<rect x="${mx + 14}" y="${my + 6}" width="${w - 28}" height="38" rx="4" fill="#e7f5ff" stroke="#74c0fc"/>${[0, 1, 2, 3].map((k) => `<path d="M${mx + 20} ${my + 14 + k * 8} h${w - 40}" stroke="#74c0fc" stroke-width="2"/>`).join("")}`,
   });

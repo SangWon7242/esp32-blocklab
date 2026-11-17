@@ -177,7 +177,7 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
                 scene ? (
                   <div className="absolute inset-0">
                     <Suspense fallback={null}>
-                      <Wiring3DView scene={scene} stage infoContainer={infoBox} onUnsupported={onUnsupported} />
+                      <Wiring3DView scene={scene} chapterId={chapter.id} stage infoContainer={infoBox} onUnsupported={onUnsupported} />
                     </Suspense>
                   </div>
                 ) : (

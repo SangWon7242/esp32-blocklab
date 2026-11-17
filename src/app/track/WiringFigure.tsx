@@ -59,6 +59,7 @@ export function WiringFigure({ chapterId, image, caption, className, board: boar
           <Suspense fallback={<Loading />}>
             <Wiring3DView
               scene={scene}
+              chapterId={chapterId}
               onUnsupported={onUnsupported}
               toolbar={
                 <Dialog>
@@ -70,7 +71,7 @@ export function WiringFigure({ chapterId, image, caption, className, board: boar
                   <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[min(80rem,calc(100vw-4rem))]" data-testid="wiring-3d-dialog">
                     <DialogTitle>3D 배선 보기</DialogTitle>
                     <DialogDescription className="sr-only">배선을 3D 로 크게 보여 줍니다. Esc 를 누르면 닫혀요.</DialogDescription>
-                    <Wiring3DView scene={scene} large />
+                    <Wiring3DView scene={scene} chapterId={chapterId} large />
                   </DialogContent>
                 </Dialog>
               }

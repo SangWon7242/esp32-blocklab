@@ -31,6 +31,7 @@ function rgbCircuit(bb, r) {
 /** DHT11 핀이 위로 (모듈을 돌려 놓음). 그림을 핀 반대쪽(아래)에 두어 핀 이름을 가리지 않는다 */
 function dhtUp(x, y, { pins, titleAt }) {
   return module({
+    kind: "dht",
     x, y, w: 76, h: 70, color: "#1971c2", pins, side: "top", firstPin: 18, title: "DHT11", titleAt,
     decor: (mx, my, w) => `<rect x="${mx + 14}" y="${my + 26}" width="${w - 28}" height="36" rx="4" fill="#e7f5ff" stroke="#74c0fc"/>${[0, 1, 2, 3].map((k) => `<path d="M${mx + 20} ${my + 33 + k * 7} h${w - 40}" stroke="#74c0fc" stroke-width="2"/>`).join("")}`,
   });

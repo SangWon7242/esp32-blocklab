@@ -22,6 +22,7 @@ export function checkPieces(pieces) {
   for (const piece of pieces) {
     if (known.has(piece) || /^\s*(<text\b[^>]*>[^<]*<\/text>\s*)*$/.test(piece)) continue;
     scene.unsupported = true;
+    if (process.env.WIRING_DEBUG) console.error("UNKNOWN:", piece.replace(/\s+/g, " ").slice(0, 160));
   }
 }
 export function rec(kind, item) {

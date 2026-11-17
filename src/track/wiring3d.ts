@@ -15,7 +15,13 @@ export type Part3D =
   | { type: "irrx"; legs: Pt[] }
   | { type: "dip"; l: Pt; r: Pt; label: string }
   | { type: "servo"; x: number; y: number; plug: Pt[]; onBoard: boolean; plugBox?: { x: number; y: number; w: number; h: number } }
-  | { type: "module"; kind: string; x: number; y: number; w: number; h: number; color: string; side: "top" | "bottom"; title: string; pins: (Pt & { name: string })[] };
+  | { type: "module"; kind: string; x: number; y: number; w: number; h: number; color: string; side: "top" | "bottom"; title: string; pins: (Pt & { name: string })[] }
+  /** 호일 터치 패드: 판(pad)과 악어 클립 끝(clip, 선이 물리는 자리) */
+  | { type: "touch"; pad: { x: number; y: number; w: number; h: number }; clip: Pt; label?: string }
+  /** 1자리 7세그먼트 표시 장치 (공통 음극): 몸통 사각형과 다리 구멍들 */
+  | { type: "seg7"; x: number; y: number; w: number; h: number; legs: Pt[] }
+  /** 책상 위 소품: 건전지 상자 · 전원 플러그 */
+  | { type: "prop"; kind: "battery" | "jack"; x: number; y: number; w: number; h: number; label?: string };
 
 export type Scene3D = {
   board: "plus" | "devkit";

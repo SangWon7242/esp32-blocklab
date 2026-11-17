@@ -20,6 +20,7 @@ const TEN_K = ["#8b5a2b", "#212529", "#f76707"]; // 갈 검 주
 /** DHT11 모듈 (15장 도우미와 같다 — 그림이 핀 이름을 가리지 않게 핀 반대쪽에). side "top" 은 돌려 놓아 왼→오 S V G */
 function dht11(x, y, { side = "bottom", pins = ["G", "V", "S"], titleAt } = {}) {
   return module({
+    kind: "dht",
     x, y, w: 76, h: 70, color: "#1971c2", pins, side, firstPin: 18, title: "DHT11", titleAt,
     decor: (mx, my, w) => {
       const ry = side === "top" ? my + 24 : my + 6;
