@@ -3,6 +3,7 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { esmExternalRequirePlugin } from "rolldown/plugins";
 import { blocklabScope } from "./scripts/postcss-blocklab-scope.ts";
 import { blocklyMedia, blocklyNoAmd } from "./scripts/vite-blockly.ts";
 
@@ -13,8 +14,12 @@ import { blocklyMedia, blocklyNoAmd } from "./scripts/vite-blockly.ts";
  *   - Blockly·CodeMirror 는 따로 조각으로 (크고 거의 안 바뀜). 화면 컴포넌트는 lazy 라서 index.js 를 Node 에서 import 해도 DOM 을 건드리지 않는다
  *   - Blockly UMD 의 AMD 갈래를 끈다(blocklyNoAmd — 허브 Turbopack 이 define([...]) 의존을 풀다 멈춤). dist-lib 에 define.amd 가 없어야 한다
  *   - Blockly media(효과음·sprites.svg 등)를 dist-lib/media/ 로 낸다(blocklyMedia). 호스트가 /blocklab/media/ 로 서빙한다
+ *   - 3D 배선(@react-three/fiber)이 싣는 CommonJS 조각(react-reconciler · use-sync-external-store)의 require("react") 를
+ *     ESM import 로 바꾼다(esmExternalRequirePlugin, lib-v1.2.1). 그대로 두면 __require("react") 가 남아 허브 Turbopack 이
+ *     "dynamic usage of require is not supported" 로 3D 화면을 멈춘다
  *   - 선언 파일(index.d.ts)·package.json 은 scripts/build-lib.mjs 가 뒤에 만든다
  */
+const REACT = [/^react(\/|$)/, /^react-dom(\/|$)/];
 const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string };
 
 export default defineConfig({
@@ -37,7 +42,8 @@ export default defineConfig({
       cssFileName: "style",
     },
     rolldownOptions: {
-      external: [/^react(\/|$)/, /^react-dom(\/|$)/],
+      // react · react-dom 은 바깥(호스트 것). external 은 아래 플러그인이 정한다(require 도 import 로 바꾸며)
+      plugins: [esmExternalRequirePlugin({ external: REACT })],
       output: {
         chunkFileNames: "chunks/[name]-[hash].js",
         codeSplitting: {
