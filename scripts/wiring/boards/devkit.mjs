@@ -10,6 +10,7 @@
  * makeDevkit({ x, y }) 는 보드 왼쪽 위 모서리를 받는다. 보드 크기 470×150.
  */
 import { htext, vtext, vtextDown } from "../common.mjs";
+import { rec } from "../record.mjs";
 
 const TOP = ["VIN", "GND", "D13", "D12", "D14", "D27", "D26", "D25", "D33", "D32", "D35", "D34", "VN", "VP", "EN"];
 const BOT = ["3V3", "GND", "D15", "D2", "D4", "RX2", "TX2", "D5", "D18", "D19", "D21", "RX0", "TX0", "D22", "D23"];
@@ -88,6 +89,13 @@ export function makeDevkit({ x = 85, y = 260 } = {}) {
       base.push(pinBox(px, BOT_Y, dim(`bot:${n}`)));
       labels.push(vtext(px, BOT_Y - 13, n, dim(`bot:${n}`)));
     });
+    {
+      const pins = [...TOP.map((n) => `top:${n}`), ...BOT.map((n) => `bot:${n}`)].map((nm) => {
+        const p = pin(nm);
+        return { x: p.x, y: p.y, label: nm.split(":")[1], fill: "#e8c547", used: usedSet.has(nm) };
+      });
+      rec("boards", { kind: "devkit", name: "ESP32 DevKit V1", ...BOARD, color: "#1b2b4b", chip: MODULE, usb: { x: x - 14, y: y + 58, w: 30, h: 34 }, pins });
+    }
     const marks = names.map((n) => {
       const p = pin(n);
       return `<rect x="${p.x - 10}" y="${p.y - 10}" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>`;

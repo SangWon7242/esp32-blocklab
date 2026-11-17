@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Cable, CheckCircle2, ChevronDown, Circle, Clock, Hourglass, Lightbulb, ListOrdered, Lock, NotebookPen, Package, Target,
+  ArrowLeft, ArrowRight, Box, Cable, CheckCircle2, ChevronDown, Circle, Clock, Hourglass, Image as ImageIcon, Lightbulb, ListOrdered, Loader2, Lock, NotebookPen, Package, Target,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,12 @@ import { getChapter, loadChapters, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates, type StepState } from "@/track/gating";
 import type { Step } from "@/track/schema";
 import { TRACK_NAME } from "@/track/tracks";
+import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
 import { BoardSelect, chapterShowsBoardSelect } from "../board/BoardSelect";
 import { useBoardChoice } from "../board/boardChoice";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
-import { Illustration } from "./Illustration";
+import { Illustration, resolveBoardImage } from "./Illustration";
 import { PAGE_GUTTER } from "./layout";
 import { MaterialChips } from "./Materials";
 import { useChapterRecords, useProgress } from "./progressState";
@@ -25,6 +26,7 @@ import { ReviewBadge } from "./ReviewBadge";
 import { STEP_TYPE_LABEL } from "./stepMeta";
 import { StepTypeIcon } from "./StepTypeIcon";
 import { SubmitCard } from "./SubmitCard";
+import { WhyCards } from "./WhyCards";
 import { DraftBadge, PrerequisiteList, Sessions, SubjectChips } from "./TrackMeta";
 
 const STATE_ICON: Record<StepState, typeof Lock> = { locked: Lock, open: Circle, awaiting: Hourglass, done: CheckCircle2 };
@@ -38,12 +40,20 @@ const STATE_COLOR: Record<StepState, string> = {
 
 type ProgressChapters = Parameters<typeof PrerequisiteList>[0]["progressChapters"];
 
+// three.js 는 3D 배선이 있는 챕터를 열 때만 받는다
+const Wiring3DView = lazy(() => import("./wiring3d/Wiring3DView").then((m) => ({ default: m.Wiring3DView })));
+
+/** 작업대 바탕: 밝은 종이색 (모눈은 3D 바닥에 그려져 장면과 함께 돈다). 어두운 화면에서는 짙은 회색 */
+const STAGE_BG = "bg-[#f8f4ec] dark:bg-[#24262b]";
+
+type PanelId = "steps" | "intro" | "wiring" | "principle";
+
 /**
- * 챕터 화면 (lib-v1.0.6 풀페이지 두 칸).
+ * 챕터 화면 — 「작업대」 구조.
  * - 머리띠(전체 폭): 챕터 목록으로 · 트랙·번호 배지 · 제목 · 차시·교과 · 진행률 · 시작/이어서 하기
- * - 넓은 화면(lg ≥1024): 소개 칸(폭 clamp 340~560px, 약 2/5) | 단계 지도 칸(나머지). 칸마다 따로 스크롤
- * - 좁은 화면(<1024, 폰·태블릿 세로): 한 줄로 쌓고 머리띠 → 단계 지도 → 소개 순서 (시작 버튼과 단계가 먼저 보이게).
- *   태블릿 세로(768~1023)는 소개 칸 안을 두 열로 나눠 그림과 글이 나란히 놓인다 (@container)
+ * - 넓은 화면(lg ≥1024): 작업대(배선을 3D 로 크게, 나머지 폭) | 옆 칸(폭 clamp 400~600px): 단계 · 소개 · 배선 · 원리 탭
+ *   3D 장면이 없는 챕터는 작업대에 배선 그림이, 배선이 없는 챕터는 표지 그림이 놓인다.
+ * - 좁은 화면(<1024, 폰·태블릿 세로): 한 줄로 쌓고 머리띠 → 옆 칸(단계가 먼저) → 작업대 순서 (시작 버튼과 단계가 먼저 보이게)
  * 먼저 할 챕터는 안내만 하고 잠그지 않는다. 초안(draft)도 주소로는 그대로 열린다.
  * 열람(review) 모드는 호스트가 넘긴 학생 기록으로 모든 단계를 열어 보여 준다.
  */
@@ -55,6 +65,30 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
   const records = useChapterRecords(chapterId);
   const { teacherMode, explainGate } = useSettings();
   const review = mode === "review";
+  const board = useBoardChoice();
+  const [panel, setPanel] = useState<PanelId>("steps");
+  const [view, setView] = useState<"3d" | "picture">("3d");
+  const [scene, setScene] = useState<Scene3D | null>(null);
+  const [no3d, setNo3d] = useState(false);
+  // 이 기기에서 3D 를 보여 줄지는 화면이 뜬 뒤에 정한다 (그래픽 가속이 없으면 그림으로)
+  useEffect(() => { if (!canShow3D()) setNo3d(true); }, []);
+  const [infoBox, setInfoBox] = useState<HTMLDivElement | null>(null);
+  // 고른 보드의 배선 그림에 3D 장면이 있으면 받아 둔다
+  const shown = chapter?.wiring ? resolveBoardImage(chapterId, chapter.wiring.image, board) : undefined;
+  const has3d = hasScene3D(chapterId, shown) && !no3d;
+  useEffect(() => {
+    setScene(null);
+    if (!has3d) return;
+    let alive = true;
+    // 단계 목록 · 머리띠가 먼저 그려지고 눌릴 수 있게, 3D 는 브라우저가 한가해진 뒤에 올린다
+    const idle = (run: () => void) => {
+      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(run, { timeout: 1200 });
+      else setTimeout(run, 200);
+    };
+    void loadScene3D(chapterId, shown)?.then((sc) => idle(() => { if (alive) setScene(sc); }));
+    return () => { alive = false; };
+  }, [has3d, chapterId, shown]);
+  const onUnsupported = useCallback(() => setNo3d(true), []);
 
   // 없는 챕터는 목록으로 돌려보낸다
   useEffect(() => {
@@ -118,36 +152,114 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
         </div>
       </header>
 
-      <div className="lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[clamp(340px,38%,560px)_minmax(0,1fr)]">
-        {/* 단계 지도: 읽는 순서(DOM)는 좁은 화면에 맞춰 먼저, 넓은 화면에서는 둘째 칸(col 2)에 놓는다 */}
-        <section
-          aria-labelledby="step-map-title"
-          className={cn("@container min-w-0 py-5 lg:col-start-2 lg:row-start-1 lg:overflow-y-auto lg:py-6", PAGE_GUTTER)}
-          data-testid="chapter-steps"
-        >
-          {/* 부 제목이 눈에 보이는 머리 역할을 하므로 구역 제목은 읽기 프로그램에만 */}
-          <h2 id="step-map-title" className="sr-only">단계 지도</h2>
-          <StepMap chapter={chapter} states={states} resumeId={resume.id} />
-
-          {/* 제출: 필수 단계를 모두 끝냈고 호스트가 onSubmit 을 줬을 때만 (SubmitCard 가 스스로 숨는다) */}
-          <div className="mt-6 max-w-2xl empty:hidden">
-            <SubmitCard chapter={chapter} states={states} progress={progress} />
-          </div>
+      <div className="flex flex-col lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_clamp(400px,42%,600px)]">
+        {/* 작업대: 배선을 크게. 읽는 순서(DOM)는 넓은 화면 기준이고, 좁은 화면에서는 옆 칸 뒤로 보낸다 */}
+        <section aria-label="배선 작업대" className={cn("relative order-2 min-h-[22rem] border-t lg:order-1 lg:min-h-0 lg:border-t-0", STAGE_BG)} data-testid="chapter-stage">
+          {chapter.wiring ? (
+            <div className="lg:absolute lg:inset-0" data-testid="chapter-wiring">
+              {has3d && (
+                <div className="absolute top-2 right-2 z-10 inline-flex rounded-lg border bg-background/95 p-[3px] shadow-xs" role="group" aria-label="배선 보는 방법">
+                  {([["3d", "3D", Box], ["picture", "그림", ImageIcon]] as const).map(([id, name, Icon]) => (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={view === id}
+                      onClick={() => setView(id)}
+                      className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50", view === id && "bg-foreground text-background")}
+                      data-testid={`wiring-view-${id}`}
+                    >
+                      <Icon className="size-4" />{name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {has3d && view === "3d" ? (
+                scene ? (
+                  <div className="absolute inset-0">
+                    <Suspense fallback={null}>
+                      <Wiring3DView scene={scene} stage infoContainer={infoBox} onUnsupported={onUnsupported} />
+                    </Suspense>
+                  </div>
+                ) : (
+                  <p className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />3D 배선을 준비하고 있어요</p>
+                )
+              ) : (
+                <div className={cn("p-4 lg:absolute lg:inset-0 lg:overflow-auto lg:p-8", has3d && "pt-14 lg:pt-14")}>
+                  <Illustration chapterId={chapter.id} image={chapter.wiring.image} className="mx-auto max-w-3xl rounded-xl border bg-white p-3 text-neutral-900 shadow-sm" zoomable />
+                </div>
+              )}
+            </div>
+          ) : chapter.cover ? (
+            <div className="flex items-center justify-center p-6 lg:absolute lg:inset-0 lg:p-10">
+              <Illustration chapterId={chapter.id} image={chapter.cover} className="w-full max-w-xl rounded-xl border bg-white p-4 text-neutral-900 shadow-sm" />
+            </div>
+          ) : null}
         </section>
 
-        <aside
-          aria-label="챕터 소개"
-          className={cn("@container min-w-0 border-t py-5 lg:col-start-1 lg:row-start-1 lg:overflow-y-auto lg:border-t-0 lg:border-r lg:py-6", PAGE_GUTTER)}
-          data-testid="chapter-intro"
-        >
-          <ChapterIntro chapter={chapter} progressChapters={progress.chapters} teacherMode={teacherMode} />
+        {/* 옆 칸: 단계(처음에 보인다) · 소개 · 배선 · 원리 */}
+        <aside className="order-1 flex min-h-0 min-w-0 flex-col lg:order-2 lg:border-l" data-testid="chapter-panel">
+          <div className="flex shrink-0 gap-1 overflow-x-auto border-b px-3 pt-1 lg:px-4" role="tablist" aria-label="챕터 정보">
+            {([
+              ["steps", "단계", ListOrdered, true],
+              ["intro", "소개", Target, true],
+              ["wiring", "배선", Cable, Boolean(chapter.wiring)],
+              ["principle", "원리", Lightbulb, Boolean(chapter.principle || chapter.why?.length)],
+            ] as const).filter((t) => t[3]).map(([id, name, Icon]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`chapter-tab-${id}`}
+                aria-selected={panel === id}
+                aria-controls={`chapter-panel-${id}`}
+                onClick={() => setPanel(id)}
+                className={cn(
+                  "-mb-px flex h-11 items-center gap-1.5 border-b-2 border-transparent px-3 text-sm font-medium whitespace-nowrap text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+                  panel === id && "border-foreground text-foreground",
+                )}
+              >
+                <Icon className="size-4" />{name}
+              </button>
+            ))}
+          </div>
+          <div className="min-h-0 flex-1 lg:overflow-y-auto">
+            <section
+              id="chapter-panel-steps"
+              role="tabpanel"
+              aria-labelledby="chapter-tab-steps"
+              hidden={panel !== "steps"}
+              className="@container min-w-0 px-4 py-4 lg:px-5"
+              data-testid="chapter-steps"
+            >
+              <StepMap chapter={chapter} states={states} resumeId={resume.id} />
+              {/* 제출: 필수 단계를 모두 끝냈고 호스트가 onSubmit 을 줬을 때만 (SubmitCard 가 스스로 숨는다) */}
+              <div className="mt-6 max-w-2xl empty:hidden">
+                <SubmitCard chapter={chapter} states={states} progress={progress} />
+              </div>
+            </section>
+            <div id="chapter-panel-intro" role="tabpanel" aria-labelledby="chapter-tab-intro" hidden={panel !== "intro"} className="@container min-w-0 px-4 py-4 lg:px-5" data-testid="chapter-intro">
+              <ChapterIntro chapter={chapter} progressChapters={progress.chapters} teacherMode={teacherMode} />
+            </div>
+            {chapter.wiring && (
+              <div id="chapter-panel-wiring" role="tabpanel" aria-labelledby="chapter-tab-wiring" hidden={panel !== "wiring"} className="min-w-0 space-y-3 px-4 py-4 lg:px-5" data-testid="chapter-wiring-info">
+                {/* 3D 를 보고 있으면 연결 · 부품 목록이 여기로 온다 (줄을 누르면 작업대의 그 선만 또렷해진다) */}
+                <div ref={setInfoBox} />
+                {!(has3d && view === "3d" && scene) && <p className="text-base leading-relaxed break-keep">{figureCaption(chapter.wiring, board)}</p>}
+              </div>
+            )}
+            {(chapter.principle || chapter.why?.length) && (
+              <div id="chapter-panel-principle" role="tabpanel" aria-labelledby="chapter-tab-principle" hidden={panel !== "principle"} className="@container min-w-0 space-y-5 px-4 py-4 lg:px-5">
+                <ChapterPrinciple chapter={chapter} />
+              </div>
+            )}
+          </div>
         </aside>
       </div>
     </div>
   );
 }
 
-/** 단계 지도: 부마다 단계 카드 격자. 칸 폭에 따라 1 → 2 → 3열 (@container 28rem · 52rem) */
+/** 단계 지도: 부마다 단계 카드 격자. 칸 폭에 따라 1 → 2 → 3열 (@container 28rem · 52rem, 넓은 화면의 옆 칸에서는 22rem 부터 2열) */
 function StepMap({ chapter, states, resumeId }: { chapter: LoadedChapter; states: Record<string, StepState>; resumeId: string }) {
   let index = 0;
   return (
@@ -155,7 +267,7 @@ function StepMap({ chapter, states, resumeId }: { chapter: LoadedChapter; states
       {chapter.parts.map((part) => (
         <section key={part.id} aria-label={part.title}>
           <h3 className="mb-1.5 text-base font-semibold text-muted-foreground">{part.title}</h3>
-          <ol className="grid gap-2 @md:grid-cols-2 @[52rem]:grid-cols-3">
+          <ol className="grid gap-2 @md:grid-cols-2 lg:@[22rem]:grid-cols-2 @[52rem]:grid-cols-3">
             {part.steps.map((step) => {
               index += 1;
               return <StepCard key={step.id} chapterId={chapter.id} step={step} n={index} state={states[step.id]} resume={step.id === resumeId} />;
@@ -222,7 +334,7 @@ function StepCard({ chapterId, step, n, state, resume }: { chapterId: string; st
 }
 
 /**
- * 소개 칸: [표지 · 이렇게 되면 성공] [소개 글 · 목표 · 준비물 · 먼저 할 챕터] → 배선(접힘) · 원리(펼침) · 교사 메모.
+ * 소개 탭: [표지 · 이렇게 되면 성공] [소개 글 · 목표 · 준비물 · 먼저 할 챕터] → 교사 메모. (배선은 작업대와 배선 탭, 원리는 원리 탭)
  * 칸이 넓으면(@2xl — 태블릿 세로에서 쌓였을 때) 앞 두 묶음을 두 열로 나란히.
  */
 function ChapterIntro({ chapter, progressChapters, teacherMode }: { chapter: LoadedChapter; progressChapters: ProgressChapters; teacherMode: boolean }) {
@@ -272,26 +384,21 @@ function ChapterIntro({ chapter, progressChapters, teacherMode }: { chapter: Loa
         </div>
       </div>
 
-      {chapter.wiring && (
-        <Collapsible className="rounded-xl border" data-testid="chapter-wiring">
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="group h-12 w-full justify-start rounded-xl px-4 text-md font-semibold">
-              <Cable className="size-4 text-primary" />배선 보기
-              <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-180" />
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="px-4 pt-1 pb-4">
-            <Illustration
-              chapterId={chapter.id}
-              image={chapter.wiring.image}
-              caption={figureCaption(chapter.wiring, board)}
-              className="rounded-md bg-muted/30 p-2"
-              zoomable
-            />
-          </CollapsibleContent>
-        </Collapsible>
+      {/* 교사 메모: 교사 모드에서만 */}
+      {teacherMode && chapter.teacherNotes && (
+        <section aria-labelledby="teacher-notes-title" className="rounded-xl border border-dashed bg-muted/30 p-4" data-testid="teacher-notes">
+          <h2 id="teacher-notes-title" className="flex items-center gap-2 text-md font-semibold"><NotebookPen className="size-4 text-primary" />교사 메모</h2>
+          <GuideBody text={chapter.teacherNotes} className="mt-3" />
+        </section>
       )}
+    </div>
+  );
+}
 
+/** 원리 탭: 원리 카드(그림 + 글) + 「왜 그럴까?」 */
+function ChapterPrinciple({ chapter }: { chapter: LoadedChapter }) {
+  return (
+    <>
       {/* 원리 (Keyestudio 수업의 "원리"): 그림 + 글. 기본 펼침 — 소개 칸이 따로 스크롤되어 첫 화면(표지·성공 기준)을 밀어내지 않는다 */}
       {chapter.principle && (
         <Collapsible defaultOpen className="rounded-xl border bg-card" data-testid="chapter-principle">
@@ -312,13 +419,7 @@ function ChapterIntro({ chapter, progressChapters, teacherMode }: { chapter: Loa
         </Collapsible>
       )}
 
-      {/* 교사 메모: 교사 모드에서만 */}
-      {teacherMode && chapter.teacherNotes && (
-        <section aria-labelledby="teacher-notes-title" className="rounded-xl border border-dashed bg-muted/30 p-4" data-testid="teacher-notes">
-          <h2 id="teacher-notes-title" className="flex items-center gap-2 text-md font-semibold"><NotebookPen className="size-4 text-primary" />교사 메모</h2>
-          <GuideBody text={chapter.teacherNotes} className="mt-3" />
-        </section>
-      )}
-    </div>
+      <WhyCards ids={chapter.why} />
+    </>
   );
 }

@@ -220,25 +220,39 @@ test("단계 화면: 안내 칸을 접으면 활동 칸이 넓어지고, 새로 
   await expect(page.getByTestId("step-guide")).toBeVisible();
 });
 
-test("챕터 화면: 표지 그림·준비물이 보이고, 배선 보기를 펼치면 배선도가 나온다", async ({ page }) => {
+test("챕터 화면: 소개 탭에 표지 그림·준비물이 보이고, 작업대는 3D 배선이 먼저, 「그림」 을 누르면 배선도가 나온다", async ({ page }) => {
+  // 시험 브라우저는 그래픽 가속이 없어 3D 가 꺼지므로(느린 기기 보호) 이 시험에서만 켠다
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
   await page.goto("/#/track/01-led");
+  // 처음에는 단계 탭 — 소개 탭으로 바꾸면 표지와 준비물
+  await expect(page.getByTestId("chapter-steps")).toBeVisible();
+  await expect(page.getByTestId("chapter-intro")).toBeHidden();
+  await page.getByRole("tab", { name: "소개" }).click();
   await expect(page.getByTestId("chapter-cover").locator("svg[role=img]")).toBeVisible();
   await expect(page.getByTestId("material-chips")).toContainText("220Ω 저항");
+  // 작업대: 3D 가 먼저 (배선도 그림은 아직 없다)
   const wiring = page.getByTestId("chapter-wiring");
-  await expect(wiring.locator("svg[role=img]")).toHaveCount(0);
-  await wiring.getByRole("button", { name: "배선 보기" }).click();
-  await expect(wiring.locator("svg[role=img]")).toBeVisible();
+  await expect(wiring.getByTestId("wiring-3d")).toBeVisible();
+  await expect(wiring.getByTestId("illustration")).toHaveCount(0);
+  await wiring.getByTestId("wiring-view-picture").click();
+  await expect(wiring.getByTestId("illustration").locator("svg[role=img]")).toBeVisible();
+  // 배선 탭: 3D 로 돌아오면 연결 목록이 옆 칸에
+  await wiring.getByTestId("wiring-view-3d").click();
+  await page.getByRole("tab", { name: "배선" }).click();
+  await expect(page.getByTestId("chapter-wiring-info")).toContainText("LED 긴 다리");
 });
 
 test("원리 카드, 실행 단계의 이렇게 되면 성공과 코드 설명(누르면 원본 코드에서 그 줄 표시)", async ({ page }) => {
   await seedDone(page, "01-led", ["problem", "analysis", "predict"]);
   await page.goto("/#/track/01-led");
+  await page.getByRole("tab", { name: "원리" }).click();
   const principle = page.getByTestId("chapter-principle");
   await expect(principle).toContainText("HIGH");
   await expect(principle.locator("svg[role=img]")).toBeVisible();
   await principle.getByRole("button", { name: "원리" }).click();
   await expect(principle).not.toContainText("HIGH");
 
+  await page.getByRole("tab", { name: "단계" }).click();
   await stepRow(page, "run").getByRole("link").click();
   await expect(page.getByTestId("step-expected")).toContainText("이렇게 되면 성공");
   await expect(page.getByTestId("step-expected")).toContainText("LED에 불이 들어오고");
@@ -264,4 +278,13 @@ test("안내 칸 그림: 크게 보기를 누르면 큰 창에 그림이 나오�
   await expect(dialog.locator("svg[role=img]")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
+});
+
+test("그래픽 가속이 없는 기기: 3D 대신 배선도 그림이 작업대에 바로 보인다", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "off"));
+  await page.goto("/#/track/01-led");
+  const wiring = page.getByTestId("chapter-wiring");
+  await expect(wiring.getByTestId("illustration").locator("svg[role=img]")).toBeVisible();
+  await expect(wiring.getByTestId("wiring-3d")).toHaveCount(0);
+  await expect(wiring.getByTestId("wiring-view-3d")).toHaveCount(0);
 });

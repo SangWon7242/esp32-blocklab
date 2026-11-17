@@ -54,8 +54,8 @@ test("기본 보드를 고르면 자동문 배선 그림이 기본 보드 그림
     "content/chapters/10-auto-door/images/wiring-door.devkit.svg 가 아직 없음 (콘텐츠 작업에서 더한다)",
   );
   await page.goto("/#/track/10-auto-door");
+  // 시험 브라우저는 그래픽 가속이 없어 작업대에 배선도 그림이 바로 보인다 (3D 는 track.spec 에서 따로 켜서 본다)
   const wiring = page.getByTestId("chapter-wiring");
-  await wiring.getByRole("button", { name: /배선 보기/ }).click();
   const title = () => wiring.getByTestId("illustration").locator("svg > title").first().textContent();
   expect((await title())?.trim().startsWith("기본 보드")).toBe(false);
 

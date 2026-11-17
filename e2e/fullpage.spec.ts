@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 /*
  * lib-v1.0.6 풀페이지 배치: 폭 4종(폰 390 · 태블릿 세로 820 · 태블릿 가로 1180 · 노트북 1440)에서
- * 챕터·단계·목록 화면이 가로로 넘치지 않고, 넓은 화면(≥1024)의 챕터 화면은 소개 칸과 단계 지도 칸이 나란히 놓인다.
+ * 챕터·단계·목록 화면이 가로로 넘치지 않고, 넓은 화면(≥1024)의 챕터 화면은 작업대(배선)와 옆 칸(단계 · 소개 · 배선 · 원리 탭)이 나란히 놓인다.
  * 스크린샷은 .superpowers/sdd/2026-10-19-fullpage/shots/ 에 남긴다 (눈으로 확인용).
  */
 
@@ -48,26 +48,34 @@ for (const size of SIZES) {
   test.describe(`${size.name} (${size.width}×${size.height})`, () => {
     test.use({ viewport: { width: size.width, height: size.height } });
 
-    test("챕터 화면: 넘침 없음, 넓으면 두 칸 나란히, 첫 화면에 단계 카드", async ({ page }) => {
+    test("챕터 화면: 넘침 없음, 넓으면 작업대와 옆 칸이 나란히, 첫 화면에 단계 카드", async ({ page }) => {
       await page.goto("/#/track/17-ultrasonic");
       const steps = page.getByTestId("chapter-steps");
-      const intro = page.getByTestId("chapter-intro");
+      const panel = page.getByTestId("chapter-panel");
+      const stage = page.getByTestId("chapter-stage");
       await expect(steps).toBeVisible();
-      await expect(page.getByTestId("chapter-cover").locator("svg[role=img]")).toBeVisible();
+      await expect(stage).toBeVisible();
       await expectNoHorizontalOverflow(page);
 
-      const s = (await steps.boundingBox())!;
-      const i = (await intro.boundingBox())!;
+      const s = (await panel.boundingBox())!;
+      const i = (await stage.boundingBox())!;
       if (size.width >= 1024) {
-        // 두 칸이 나란히: x 가 다르고 위쪽 선이 같다
+        // 두 칸이 나란히: 작업대가 앞(넓게), 옆 칸이 뒤. 위쪽 선이 같다
         expect(Math.abs(s.x - i.x)).toBeGreaterThan(200);
         expect(Math.abs(s.y - i.y)).toBeLessThan(2);
         expect(i.x).toBeLessThan(s.x);
+        expect(i.width).toBeGreaterThan(s.width);
       } else {
-        // 쌓기: 단계 지도가 먼저(위), 소개가 다음
+        // 쌓기: 옆 칸(단계가 먼저 보인다)이 위, 작업대가 다음
         expect(Math.abs(s.x - i.x)).toBeLessThan(2);
         expect(i.y).toBeGreaterThan(s.y);
       }
+
+      // 소개 탭: 표지 그림이 보이고 넘치지 않는다
+      await page.getByRole("tab", { name: "소개" }).click();
+      await expect(page.getByTestId("chapter-cover").locator("svg[role=img]")).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      await page.getByRole("tab", { name: "단계" }).click();
 
       // 첫 화면에 다 보이는 단계 카드 수 (스크롤 없이)
       const visible = await page.evaluate((h) => {
@@ -79,8 +87,8 @@ for (const size of SIZES) {
       const total = await page.locator("[data-testid^=step-row-]").count();
       test.info().annotations.push({ type: "first-screen-steps", description: `${visible} / ${total}` });
       console.log(`[fullpage] ${size.name} 챕터 첫 화면 단계 카드 ${visible} / ${total}`);
-      // 노트북·태블릿 가로는 9단계가 모두, 태블릿 세로는 절반 넘게, 폰은 둘 이상
-      const min = size.width >= 1024 ? total : size.width >= 768 ? Math.ceil(total / 2) : 2;
+      // 작업대 구조: 단계는 옆 칸(두 열)에 놓이므로 넓은 화면·태블릿 세로는 절반 넘게, 폰은 둘 이상 (나머지는 옆 칸을 내려 본다)
+      const min = size.width >= 768 ? Math.ceil(total / 2) : 2;
       expect(visible).toBeGreaterThanOrEqual(min);
 
       // 터치 대상 44px 이상: 시작 버튼·단계 카드
@@ -98,9 +106,8 @@ for (const size of SIZES) {
         return { visible: rows.filter((el) => { const r = el.getBoundingClientRect(); return r.top >= 0 && r.bottom <= h; }).length, total: rows.length };
       }, size.height);
       console.log(`[fullpage] ${size.name} 자동문 첫 화면 단계 카드 ${many.visible} / ${many.total}`);
-      // 노트북(1440×900)은 14단계 모두, 태블릿 가로(1180×820)는 11단계 이상 (마지막 한 줄만 스크롤)
-      if (size.width >= 1400) expect(many.visible).toBe(many.total);
-      else if (size.width >= 1024) expect(many.visible).toBeGreaterThanOrEqual(11);
+      // 단계가 많아도 넓은 화면에서는 절반 넘게 첫 화면에 보인다
+      if (size.width >= 1024) expect(many.visible).toBeGreaterThanOrEqual(Math.ceil(many.total / 2));
       await page.screenshot({ path: `${SHOTS}/chapter-door-${size.name}.png` });
     });
 

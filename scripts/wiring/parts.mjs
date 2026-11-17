@@ -3,6 +3,7 @@
  * 모든 함수는 { svg, pins } 를 돌려준다. pins 의 좌표에 선 끝을 붙인다.
  * 모듈 핀 간격은 20, 브레드보드 구멍 간격은 16.
  */
+import { mark, pt, rec } from "./record.mjs";
 import { name, note } from "./common.mjs";
 
 const pinName = (x, yBottom, s) =>
@@ -17,7 +18,7 @@ const pinNameDown = (x, yTop, s) =>
  * pins: 이름 목록(왼→오). firstPin: 왼쪽 끝에서 첫 핀까지. title: 모듈 이름(판 밖), titleAt: { x, y, anchor }.
  * decor(x, y, w, h): 판 위 그림.
  */
-export function module({ x, y, w, h, color, pins, side = "bottom", firstPin, pitch = 20, title, titleAt, decor }) {
+export function module({ x, y, w, h, color, pins, side = "bottom", firstPin, pitch = 20, title, titleAt, decor, kind = "generic" }) {
   const fp = firstPin ?? (w - (pins.length - 1) * pitch) / 2;
   const out = [`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${color}" stroke="currentColor"/>`];
   if (decor) out.push(decor(x, y, w, h));
@@ -36,12 +37,14 @@ export function module({ x, y, w, h, color, pins, side = "bottom", firstPin, pit
     const t = titleAt ?? { x: x + w / 2, y: side === "bottom" ? y - 14 : y + h + 16, anchor: "middle" };
     out.push(name(t.x, t.y, title, t.anchor ?? "middle"));
   }
-  return { svg: out.join("\n  "), pins: at };
+  rec("parts", { type: "module", kind, x, y, w, h, color, side, title: title ?? "", pins: pins.map((n) => ({ name: n, ...pt(at[n]) })) });
+  return { svg: mark(out.join("\n  ")), pins: at };
 }
 
 /** HC-SR04 초음파 센서 (핀 VCC Trig Echo GND) */
 export const ultrasonic = (x, y, opt = {}) =>
   module({
+    kind: "ultrasonic",
     x, y, w: 152, h: 98, color: "#2b8a3e", pins: ["VCC", "Trig", "Echo", "GND"], side: opt.side ?? "bottom", firstPin: 46,
     title: opt.title ?? "초음파 센서", titleAt: opt.titleAt ?? { x: x - 12, y: y + 34, anchor: "end" },
     decor: (x, y) => [x + 36, x + 116].map((cx) => `<circle cx="${cx}" cy="${y + 34}" r="25" fill="#ced4da" stroke="#495057"/><circle cx="${cx}" cy="${y + 34}" r="11" fill="#495057" stroke="none"/>`).join(""),
@@ -51,6 +54,7 @@ export const ultrasonic = (x, y, opt = {}) =>
 export const oled = (x, y, opt = {}) => {
   const side = opt.side ?? "top";
   return module({
+    kind: "oled",
     x, y, w: 108, h: 112, color: "#1c4fd6", pins: ["GND", "VCC", "SCL", "SDA"], side, firstPin: 24,
     title: opt.title ?? "OLED 화면", titleAt: opt.titleAt,
     decor: (x, y) => {
@@ -63,6 +67,7 @@ export const oled = (x, y, opt = {}) => {
 /** RFID RC522 (I2C, 핀 GND VCC SDA SCL) */
 export const rfid = (x, y, opt = {}) =>
   module({
+    kind: "rfid",
     x, y, w: 130, h: 110, color: "#1864ab", pins: ["GND", "VCC", "SDA", "SCL"], side: opt.side ?? "top", firstPin: 35,
     title: opt.title ?? "RFID 모듈", titleAt: opt.titleAt,
     decor: (x, y, w, h) => {
@@ -82,12 +87,13 @@ export function sensor3(x, y, kind, opt = {}) {
     lm35: { color: "#5f3dc4", title: "온도 센서(LM35)", decor: (x, y) => `<path d="M${x + 28} ${y + 44} v-26 a10 10 0 0 1 20 0 v26 z" fill="#212529" stroke="#868e96"/>` },
   }[kind];
   if (!look) throw new Error(`모르는 센서 모듈: ${kind}`);
-  return module({ x, y, w: 76, h: 70, color: look.color, pins: opt.pins ?? ["G", "V", "S"], side: opt.side ?? "bottom", firstPin: 18, title: opt.title ?? look.title, titleAt: opt.titleAt, decor: look.decor });
+  return module({ kind, x, y, w: 76, h: 70, color: look.color, pins: opt.pins ?? ["G", "V", "S"], side: opt.side ?? "bottom", firstPin: 18, title: opt.title ?? look.title, titleAt: opt.titleAt, decor: look.decor });
 }
 
 /** 조이스틱 모듈 (핀 X Y B V G) */
 export const joystick = (x, y, opt = {}) =>
   module({
+    kind: "joystick",
     x, y, w: 120, h: 100, color: "#212529", pins: opt.pins ?? ["X", "Y", "B", "V", "G"], side: opt.side ?? "bottom", firstPin: 20,
     title: opt.title ?? "조이스틱", titleAt: opt.titleAt,
     decor: (x, y) => `<circle cx="${x + 60}" cy="${y + 40}" r="30" fill="#495057" stroke="#adb5bd"/><circle cx="${x + 60}" cy="${y + 40}" r="16" fill="#343a40" stroke="#ced4da" stroke-width="2"/>`,
@@ -98,6 +104,7 @@ export function keypad(x, y, opt = {}) {
   const w = 160, h = 150;
   const keys = ["1", "2", "3", "A", "4", "5", "6", "B", "7", "8", "9", "C", "*", "0", "#", "D"];
   return module({
+    kind: "keypad",
     x, y, w, h, color: "#343a40", pins: opt.pins ?? ["R1", "R2", "R3", "R4", "C1", "C2", "C3", "C4"], side: "bottom", firstPin: 10, pitch: 20,
     title: opt.title ?? "4×4 키패드", titleAt: opt.titleAt,
     decor: (x, y) => keys.map((k, i) => {
@@ -110,6 +117,7 @@ export function keypad(x, y, opt = {}) {
 /** 팬(130 모터) 모듈 (핀 G V IN+ IN−) */
 export const fan = (x, y, opt = {}) =>
   module({
+    kind: "fan",
     x, y, w: 110, h: 92, color: "#1c7ed6", pins: ["G", "V", "IN+", "IN−"], side: opt.side ?? "bottom", firstPin: 25,
     title: opt.title ?? "팬 모듈", titleAt: opt.titleAt,
     decor: (x, y) => `<circle cx="${x + 55}" cy="${y + 34}" r="24" fill="#e9ecef" stroke="#495057"/>${[0, 120, 240].map((a) => `<ellipse cx="${x + 55}" cy="${y + 20}" rx="7" ry="14" fill="#74c0fc" stroke="none" transform="rotate(${a} ${x + 55} ${y + 34})"/>`).join("")}<circle cx="${x + 55}" cy="${y + 34}" r="5" fill="#495057" stroke="none"/>`,
@@ -140,7 +148,8 @@ export function servo(x, y, plugAt, opt = {}) {
   }
   [g, v, s].forEach((p, i) => out.push(`<rect x="${p.x - 4}" y="${p.y - 4}" width="8" height="8" rx="1" fill="${cols[i]}" stroke="none"/>`));
   if (opt.title !== false) out.push(name(opt.titleAt?.x ?? x + 34, opt.titleAt?.y ?? y + 62, opt.title ?? "서보 모터", opt.titleAt?.anchor ?? "middle"));
-  return { svg: out.join("\n  ") };
+  rec("parts", { type: "servo", x, y, plug: [pt(g), pt(v), pt(s)], onBoard: true });
+  return { svg: mark(out.join("\n  ")) };
 }
 
 function servoBody(x, y) {
@@ -174,7 +183,8 @@ export function servoWithPlug(x, y, opt = {}) {
   out.push(`<rect x="${px - 10}" y="${py0}" width="20" height="52" rx="3" fill="#212529" stroke="#495057" stroke-width="2"/>`);
   order.forEach((k) => out.push(`<rect x="${pins[k].x - 3}" y="${pins[k].y - 3}" width="6" height="6" fill="#868e96" stroke="none"/>`));
   if (opt.title !== false) out.push(name(opt.titleAt?.x ?? x + 34, opt.titleAt?.y ?? y + 62, opt.title ?? "서보 모터", opt.titleAt?.anchor ?? "middle"));
-  return { svg: out.join("\n  "), pins };
+  rec("parts", { type: "servo", x, y, plug: [pt(pins.G), pt(pins.V), pt(pins.S)], onBoard: false, plugBox: { x: px - 10, y: py0, w: 20, h: 52 }, plugSide: left ? "left" : "right" });
+  return { svg: mark(out.join("\n  ")), pins };
 }
 
 /* ───────────── 브레드보드 ───────────── */
@@ -188,7 +198,10 @@ const ROW_LETTERS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
  * 반환 { svg, hole(col, row), rail(side, sign, col), tint(col, half), x, y, w, h }.
  *   hole(5, "a") · rail("top", "+", 3) · tint(5, "top"|"bottom") (이어진 다섯 칸을 옅게 칠한다 — svg 보다 먼저 그려야 하므로 tints 로 모아 쓴다)
  */
-export function breadboard({ x, y, cols = 24, rails = { top: true, bottom: false }, railsOnly = false }) {
+/** half: "bottom" 이면 아래 칸(f~j)만 그린 작은 띠 — 부품 몇 개만 꽂는 그림에서 자리를 아낀다 (+ − 줄 없음) */
+export function breadboard({ x, y, cols = 24, rails = { top: true, bottom: false }, railsOnly = false, half }) {
+  const LETTERS = half === "bottom" ? ROW_LETTERS.slice(5) : ROW_LETTERS;
+  if (half) rails = { top: false, bottom: false };
   const x0 = x + 28;
   const w = 56 + (cols - 1) * HOLE;
   if (railsOnly) return railStrip({ x, y, cols, x0, w });
@@ -202,7 +215,7 @@ export function breadboard({ x, y, cols = 24, rails = { top: true, bottom: false
   const numTop = cy + 4;
   const rowY = {};
   const aY = numTop + 18;
-  ROW_LETTERS.forEach((r, i) => (rowY[r] = aY + i * HOLE + (i >= 5 ? 14 : 0)));
+  LETTERS.forEach((r, i) => (rowY[r] = aY + i * HOLE + (!half && i >= 5 ? 14 : 0)));
   cy = rowY.j + 18;
   const numBot = cy;
   cy += 14;
@@ -218,10 +231,10 @@ export function breadboard({ x, y, cols = 24, rails = { top: true, bottom: false
   const out = [];
   out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#f1f3f5" stroke="#adb5bd"/>`);
   // 가운데 홈
-  out.push(`<rect x="${x + 6}" y="${rowY.e + 5}" width="${w - 12}" height="${rowY.f - rowY.e - 10}" rx="2" fill="#dee2e6" stroke="none"/>`);
+  out.push(half ? "" : `<rect x="${x + 6}" y="${rowY.e + 5}" width="${w - 12}" height="${rowY.f - rowY.e - 10}" rx="2" fill="#dee2e6" stroke="none"/>`);
   const holeSq = (hx, hy) => `<rect x="${hx - 3}" y="${hy - 3}" width="6" height="6" rx="1" fill="#868e96" stroke="none"/>`;
   const holes = [];
-  for (let c = 1; c <= cols; c++) for (const r of ROW_LETTERS) holes.push(holeSq(colX(c), rowY[r]));
+  for (let c = 1; c <= cols; c++) for (const r of LETTERS) holes.push(holeSq(colX(c), rowY[r]));
   out.push(`<g>${holes.join("")}</g>`);
   for (const [key, ry] of Object.entries(railY)) {
     const plus = key.endsWith("+");
@@ -233,7 +246,7 @@ export function breadboard({ x, y, cols = 24, rails = { top: true, bottom: false
     out.push(`<text x="${x + 12}" y="${ry}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${plus ? "#e03131" : "#1971c2"}" stroke="none">${plus ? "+" : "−"}</text>`);
     out.push(`<text x="${x + w - 12}" y="${ry}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${plus ? "#e03131" : "#1971c2"}" stroke="none">${plus ? "+" : "−"}</text>`);
   }
-  for (const r of ROW_LETTERS) {
+  for (const r of LETTERS) {
     out.push(`<text x="${x + 13}" y="${rowY[r]}" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#495057" stroke="none">${r}</text>`);
   }
   for (let c = 1; c <= cols; c++) {
@@ -257,8 +270,14 @@ export function breadboard({ x, y, cols = 24, rails = { top: true, bottom: false
     }
     return best;
   }
+  {
+    const holes = [];
+    for (let c = 1; c <= cols; c++) for (const r of LETTERS) holes.push([colX(c), rowY[r]]);
+    const railRows = Object.entries(railY).map(([key, ry]) => ({ y: ry, plus: key.endsWith("+"), xs: Array.from({ length: cols }, (_, i) => i + 1).filter((c) => (c - 1) % 6 !== 5).map(colX) }));
+    rec("breadboards", { x, y, w, h, gap: half ? [rowY.f, rowY.f] : [rowY.e + 5, rowY.f - 5], holes, rails: railRows });
+  }
   return {
-    get svg() { return [out[0], out[1], ...tints, ...out.slice(2)].join("\n  "); },
+    get svg() { return mark([out[0], out[1], ...tints, ...out.slice(2)].join("\n  ")); },
     hole: (c, r) => ({ x: colX(c), y: rowY[r] }),
     rail: (side, sign, c) => {
       if ((c - 1) % 6 === 5) throw new Error(`+ − 줄 ${c}번 칸은 비어 있어요 (6·12·18… 은 구멍 없음)`);
@@ -282,7 +301,8 @@ function railStrip({ x, y, cols, x0, w }) {
     out.push(`<g>${rh.join("")}</g>`);
     for (const tx of [x + 12, x + w - 12]) out.push(`<text x="${tx}" y="${ry}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${plus ? "#e03131" : "#1971c2"}" stroke="none">${plus ? "+" : "−"}</text>`);
   }
-  return { svg: out.join("\n  "), hole: () => { throw new Error("+ − 띠에는 a~j 구멍이 없어요"); }, rail: (_side, sign, c) => ({ x: colX(c), y: railY[sign === "+" ? "+" : "-"] }), tint: () => {}, x, y, w, h };
+  rec("breadboards", { x, y, w, h, gap: [y, y], holes: [], rails: Object.entries(railY).map(([sign, ry]) => ({ y: ry, plus: sign === "+", xs: Array.from({ length: cols }, (_, i) => i + 1).filter((c) => (c - 1) % 6 !== 5).map(colX) })) });
+  return { svg: mark(out.join("\n  ")), hole: () => { throw new Error("+ − 띠에는 a~j 구멍이 없어요"); }, rail: (_side, sign, c) => ({ x: colX(c), y: railY[sign === "+" ? "+" : "-"] }), tint: () => {}, x, y, w, h };
 }
 
 /* ───────────── 맨 부품 (브레드보드에 꽂음) ───────────── */
@@ -294,17 +314,19 @@ const legs = (pts, from) => pts.map((p) => `<path d="M${from(p).x} ${from(p).y} 
  * label: true 면 "+ 긴 다리" 글자.
  */
 export function led(anode, cathode, color = "#e03131", { up = true, label = true, lift = 30 } = {}) {
+  rec("parts", { type: "led", a: pt(anode), c: pt(cathode), color });
   const cx = (anode.x + cathode.x) / 2, cy = (up ? Math.min(anode.y, cathode.y) - lift : Math.max(anode.y, cathode.y) + lift);
   const out = [];
   out.push(legs([anode, cathode], (p) => ({ x: p.x, y: cy + (up ? 6 : -6) })));
   out.push(`<path d="M${anode.x} ${cy + (up ? 6 : -6)} H${cathode.x}" stroke="#868e96" stroke-width="2.5"/>`);
   out.push(`<circle cx="${cx}" cy="${cy}" r="14" fill="${color}" stroke="#343a40" stroke-width="2"/><circle cx="${cx - 5}" cy="${cy - 5}" r="4" fill="#ffffff" fill-opacity="0.7" stroke="none"/>`);
   if (label) out.push(`<text x="${anode.x + 9}" y="${up ? anode.y - 10 : anode.y + 10}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#c92a2a" stroke="#f1f3f5" stroke-width="3" paint-order="stroke">+</text>`);
-  return { svg: out.join("") };
+  return { svg: mark(out.join("")) };
 }
 
 /** 저항 (두 구멍 사이, 가로 또는 세로). bands: 색 띠 (220Ω: 빨 빨 갈) */
 export function resistor(a, b, { bands = ["#e03131", "#e03131", "#8b5a2b"], label } = {}) {
+  rec("parts", { type: "resistor", a: pt(a), b: pt(b), bands, label });
   const horiz = Math.abs(a.y - b.y) < 1;
   const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
   const out = [`<path d="M${a.x} ${a.y} L${b.x} ${b.y}" stroke="#868e96" stroke-width="2.5"/>`];
@@ -317,7 +339,7 @@ export function resistor(a, b, { bands = ["#e03131", "#e03131", "#8b5a2b"], labe
     out.push(horiz ? `<rect x="${cx + o}" y="${cy - th / 2}" width="3" height="${th}" fill="${c}" stroke="none"/>` : `<rect x="${cx - th / 2}" y="${cy + o}" width="${th}" height="3" fill="${c}" stroke="none"/>`);
   });
   if (label) out.push(`<text x="${horiz ? cx : cx + 12}" y="${horiz ? cy - 15 : cy}" text-anchor="${horiz ? "middle" : "start"}" dominant-baseline="central" font-size="12" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="3" paint-order="stroke">${label}</text>`);
-  return { svg: out.join("") };
+  return { svg: mark(out.join("")) };
 }
 
 /** 푸시 버튼 (다리 4개, 홈을 건너 꽂음): bb 와 왼쪽 열 col. 다리 (col,e) (col+2,e) (col,f) (col+2,f) */
@@ -327,7 +349,8 @@ export function button(bb, col, { color = "#ced4da", label } = {}) {
   const out = [p.map((q) => `<rect x="${q.x - 3}" y="${q.y - 3}" width="6" height="6" fill="#868e96" stroke="none"/>`).join("")];
   out.push(`<rect x="${cx - 21}" y="${cy - 21}" width="42" height="42" rx="4" fill="#343a40" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="13" fill="${color}" stroke="#495057"/>`);
   if (label) out.push(`<text x="${cx}" y="${cy + 32}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="3" paint-order="stroke">${label}</text>`);
-  return { svg: out.join(""), legs: { tl: p[0], tr: p[1], bl: p[2], br: p[3] } };
+  rec("parts", { type: "button", legs: p.map(pt), color });
+  return { svg: mark(out.join("")), legs: { tl: p[0], tr: p[1], bl: p[2], br: p[3] } };
 }
 
 /** 부저 (+ 다리, − 다리). active: 능동(위에 스티커) · 수동 */
@@ -337,7 +360,8 @@ export function buzzer(plus, minus, { active = false, up = true, lift = 26 } = {
   out.push(`<circle cx="${cx}" cy="${cy}" r="17" fill="#212529" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="4" fill="#495057" stroke="none"/>`);
   if (active) out.push(`<circle cx="${cx}" cy="${cy}" r="11" fill="none" stroke="#f8f9fa" stroke-width="2"/>`);
   out.push(`<text x="${plus.x}" y="${up ? plus.y - 10 : plus.y + 10}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#c92a2a" stroke="none">+</text>`);
-  return { svg: out.join("") };
+  rec("parts", { type: "buzzer", a: pt(plus), b: pt(minus), active });
+  return { svg: mark(out.join("")) };
 }
 
 /** 가변저항 (다리 3개: 왼쪽 끝 · 가운데(와이퍼) · 오른쪽 끝) */
@@ -345,7 +369,8 @@ export function potentiometer(l, m, r, { up = true, lift = 30 } = {}) {
   const cx = m.x, cy = up ? m.y - lift : m.y + lift;
   const out = [legs([l, m, r], (p) => ({ x: p.x, y: cy + (up ? 10 : -10) }))];
   out.push(`<rect x="${cx - 24}" y="${cy - 18}" width="48" height="36" rx="4" fill="#1971c2" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="12" fill="#f1f3f5" stroke="#495057"/><path d="M${cx} ${cy - 10} V${cy}" stroke="#495057" stroke-width="3"/>`);
-  return { svg: out.join("") };
+  rec("parts", { type: "pot", legs: [pt(l), pt(m), pt(r)] });
+  return { svg: mark(out.join("")) };
 }
 
 /** 포토레지스터(빛 센서, 다리 2개) */
@@ -353,7 +378,8 @@ export function photoresistor(a, b, { up = true, lift = 24 } = {}) {
   const cx = (a.x + b.x) / 2, cy = up ? Math.min(a.y, b.y) - lift : Math.max(a.y, b.y) + lift;
   const out = [legs([a, b], (p) => ({ x: p.x, y: cy }))];
   out.push(`<circle cx="${cx}" cy="${cy}" r="12" fill="#ffe8cc" stroke="#e8590c"/><path d="M${cx - 7} ${cy - 4} h4 v8 h4 v-8 h4 v8" stroke="#c92a2a" stroke-width="1.6"/>`);
-  return { svg: out.join("") };
+  rec("parts", { type: "photo", a: pt(a), b: pt(b) });
+  return { svg: mark(out.join("")) };
 }
 
 /** 틸트 스위치(다리 2개, 안에 쇠구슬) */
@@ -361,7 +387,8 @@ export function tiltSwitch(a, b, { up = true, lift = 24 } = {}) {
   const cx = (a.x + b.x) / 2, cy = up ? Math.min(a.y, b.y) - lift : Math.max(a.y, b.y) + lift;
   const out = [legs([a, b], (p) => ({ x: p.x, y: cy }))];
   out.push(`<rect x="${cx - 9}" y="${cy - 16}" width="18" height="30" rx="8" fill="#343a40" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#ced4da" stroke="none"/>`);
-  return { svg: out.join("") };
+  rec("parts", { type: "tilt", a: pt(a), b: pt(b) });
+  return { svg: mark(out.join("")) };
 }
 
 /** RGB LED (다리 4개 왼→오: R · −(가장 긺) · G · B) */
@@ -370,7 +397,8 @@ export function rgbLed(holes, { up = true, lift = 28 } = {}) {
   const out = [legs(holes, (p) => ({ x: p.x, y: cy + (up ? 8 : -8) }))];
   out.push(`<circle cx="${cx}" cy="${cy}" r="15" fill="#f8f9fa" stroke="#343a40" stroke-width="2"/><circle cx="${cx - 5}" cy="${cy - 3}" r="4" fill="#e03131" stroke="none"/><circle cx="${cx + 5}" cy="${cy - 3}" r="4" fill="#2f9e44" stroke="none"/><circle cx="${cx}" cy="${cy + 5}" r="4" fill="#1971c2" stroke="none"/>`);
   ["R", "−", "G", "B"].forEach((t, i) => out.push(`<text x="${holes[i].x}" y="${up ? holes[i].y - 10 : holes[i].y + 10}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#495057" stroke="none">${t}</text>`));
-  return { svg: out.join("") };
+  rec("parts", { type: "rgb", legs: holes.map(pt) });
+  return { svg: mark(out.join("")) };
 }
 
 /** IR 수신기 VS1838B (다리 3개 왼→오: OUT · GND · VCC) */
@@ -379,7 +407,8 @@ export function irReceiver(holes, { up = true, lift = 26 } = {}) {
   const out = [legs(holes, (p) => ({ x: p.x, y: cy + (up ? 10 : -10) }))];
   out.push(`<rect x="${cx - 16}" y="${cy - 14}" width="32" height="26" rx="4" fill="#212529" stroke="#343a40" stroke-width="2"/><circle cx="${cx}" cy="${cy - 2}" r="8" fill="#343a40" stroke="#868e96"/>`);
   ["OUT", "G", "V"].forEach((t, i) => out.push(`<text x="${holes[i].x}" y="${up ? holes[i].y + 12 : holes[i].y - 12}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#495057" stroke="none">${t}</text>`));
-  return { svg: out.join("") };
+  rec("parts", { type: "irrx", legs: holes.map(pt) });
+  return { svg: mark(out.join("")) };
 }
 
 /**
@@ -393,5 +422,6 @@ export function dip(bb, col, n, { label = "", notch = true } = {}) {
   const out = [`<rect x="${l.x - 9}" y="${l.y + 3}" width="${r.x - l.x + 18}" height="${r.y - l.y - 6}" rx="3" fill="#212529" stroke="#343a40" stroke-width="2"/>`];
   if (notch) out.push(`<path d="M${l.x - 9} ${(l.y + r.y) / 2 - 6} a6 6 0 0 1 0 12" stroke="#868e96" stroke-width="2"/>`);
   if (label) out.push(`<text x="${(l.x + r.x) / 2}" y="${(l.y + r.y) / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="none">${label}</text>`);
-  return { svg: out.join(""), pin: pinAt };
+  rec("parts", { type: "dip", l: pt(l), r: pt(r), label });
+  return { svg: mark(out.join("")), pin: pinAt };
 }

@@ -25,6 +25,7 @@ import { ProjectSaveTargetContext, projectSaveTarget } from "./TrackSaveButton";
 import { GuideBody } from "./GuideBody";
 import { JUDGE_LABEL, JudgeActionContext } from "./judgeAction";
 import { useGuideCollapsed } from "./guidePanel";
+import { WiringFigure } from "./WiringFigure";
 import { Illustration } from "./Illustration";
 import { MaterialChips } from "./Materials";
 import { saveStepRecord, useChapterRecords } from "./progressState";
@@ -386,7 +387,7 @@ function StepGuide({
           <CollapsibleContent className="space-y-4 px-3 pt-1 pb-3">
             {chapter.materials && <MaterialChips chapterId={chapter.id} materials={chapter.materials} board={board} />}
             {chapter.wiring && (
-              <Illustration chapterId={chapter.id} image={chapter.wiring.image} caption={figureCaption(chapter.wiring, board)} className="rounded-md bg-muted/30 p-2" zoomable />
+              <WiringFigure chapterId={chapter.id} image={chapter.wiring.image} caption={figureCaption(chapter.wiring, board)} className="rounded-md bg-muted/30 p-2" />
             )}
           </CollapsibleContent>
         </Collapsible>

@@ -334,6 +334,8 @@ export const ChapterSchema = z.object({
   wiring: FigureSchema.optional(),
   /** 원리 (Keyestudio 수업의 "원리"): 챕터 화면 hero 아래 카드. body 는 markdown, image 는 왼쪽 그림 */
   principle: z.object({ body: z.string().min(1), image: ImageRef.optional() }).strict().optional(),
+  /** 「왜 그럴까?」 카드 id 들 (src/track/why.ts 의 WHY_CARDS) — 원리 아래에 접힌 카드로 보인다 */
+  why: z.array(z.string().regex(/^[a-z][a-z-]*$/)).min(1).optional(),
   goals: z.object({ content: z.string().min(1), thinking: z.string().min(1) }).strict().optional(),
   successCriteria: z.array(z.string().min(1)).optional(),
   parts: z.array(PartSchema).min(1),

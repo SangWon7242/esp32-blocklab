@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 853" role="img" aria-labelledby="wsgk-title" font-family="inherit" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <title id="wsgk-title">기본 보드(ESP32 DevKit V1 30핀) 7세그먼트 배선도: 74HC595 칩은 브레드보드 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽. 아래 줄 D5 → 칩 SI(9번 줄), D18 → SCK(6번 줄), D23 → RCK(7번 줄) — 세 선은 보드 아래로 돌아와요. 보드 VIN(5V) → 아래 + 줄, GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. 칩 Q0~Q7 은 220Ω 저항을 하나씩 거쳐 17~21번 줄의 디지털 튜브 a~g · dp 로(Q0→a, Q1→b, Q2→c, Q3→d, Q4→e, Q5→f, Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로</title>
+  <title id="wsgk-title">기본 보드(ESP32 DevKit V1 30핀) 7세그먼트 배선도: 74HC595 칩은 브레드보드 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽. 아래 줄 D5 → 칩 SI(9번 줄), D18 → SCK(6번 줄), D23 → RCK(7번 줄) — 세 선은 보드 아래로 돌아와요. 보드 3V3 → 보드 왼쪽으로 돌아 아래 + 줄, GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. 칩 Q0~Q7 은 220Ω 저항을 하나씩 거쳐 17~21번 줄의 디지털 튜브 a~g · dp 로(Q0→a, Q1→b, Q2→c, Q3→d, Q4→e, Q5→f, Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로</title>
   <rect x="130" y="420.5" width="470" height="150" rx="10" fill="#1b2b4b" stroke="currentColor"/>
   <rect x="116" y="478.5" width="30" height="34" rx="4" fill="#ced4da" stroke="#868e96"/>
   <rect x="486" y="450.5" width="104" height="90" rx="4" fill="#adb5bd" stroke="#e9ecef"/>
   <path d="M572 462.5 h-10 v66 h10 M578 462.5 v66" stroke="#868e96" stroke-width="1.5"/>
   <rect x="496" y="464.5" width="64" height="62" rx="3" fill="#ced4da" stroke="#868e96" stroke-width="1"/>
   <text x="528" y="495.5" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#343a40" stroke="none">ESP32</text>
-  <g opacity="1"><rect x="157" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="164" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="0.4"><rect x="157" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="164" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="1"><rect x="179" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="186" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="201" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="208" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="223" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="230" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
@@ -21,7 +21,7 @@
   <g opacity="0.4"><rect x="421" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="428" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="443" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="450" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="465" y="429.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="472" cy="436.5" r="3.2" fill="#e8c547" stroke="none"/></g>
-  <g opacity="0.4"><rect x="157" y="547.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="164" cy="554.5" r="3.2" fill="#e8c547" stroke="none"/></g>
+  <g opacity="1"><rect x="157" y="547.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="164" cy="554.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="179" y="547.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="186" cy="554.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="201" y="547.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="208" cy="554.5" r="3.2" fill="#e8c547" stroke="none"/></g>
   <g opacity="0.4"><rect x="223" y="547.5" width="14" height="14" rx="2" fill="#0b0f19" stroke="#868e96" stroke-width="1"/><circle cx="230" cy="554.5" r="3.2" fill="#e8c547" stroke="none"/></g>
@@ -107,13 +107,13 @@
   <rect x="334" y="546.5" width="12" height="16" rx="2" fill="#212529" stroke="#2f9e44" stroke-width="2.5"/><rect x="151" y="289" width="8" height="12" rx="1.5" fill="#212529" stroke="#2f9e44" stroke-width="2"/><rect x="153.5" y="296" width="3" height="5" fill="#ced4da" stroke="none"/>
   <path d="M472 554.5 L472 602.5 L24 602.5 L24 390.5 L175 390.5 L175 298" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M472 554.5 L472 602.5 L24 602.5 L24 390.5 L175 390.5 L175 298" stroke="#1971c2" stroke-width="4"/>
   <rect x="466" y="546.5" width="12" height="16" rx="2" fill="#212529" stroke="#1971c2" stroke-width="2.5"/><rect x="171" y="289" width="8" height="12" rx="1.5" fill="#212529" stroke="#1971c2" stroke-width="2"/><rect x="173.5" y="296" width="3" height="5" fill="#ced4da" stroke="none"/>
-  <path d="M164 436.5 L164 410.5 L295 410.5 L295 365.5" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M164 436.5 L164 410.5 L295 410.5 L295 365.5" stroke="#e03131" stroke-width="4"/>
-  <rect x="158" y="428.5" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/><rect x="291" y="356.5" width="8" height="12" rx="1.5" fill="#212529" stroke="#e03131" stroke-width="2"/><rect x="293.5" y="363.5" width="3" height="5" fill="#ced4da" stroke="none"/>
+  <path d="M164 554.5 L164 576.5 L58 576.5 L58 410.5 L295 410.5 L295 365.5" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M164 554.5 L164 576.5 L58 576.5 L58 410.5 L295 410.5 L295 365.5" stroke="#e03131" stroke-width="4"/>
+  <rect x="158" y="546.5" width="12" height="16" rx="2" fill="#212529" stroke="#e03131" stroke-width="2.5"/><rect x="291" y="356.5" width="8" height="12" rx="1.5" fill="#212529" stroke="#e03131" stroke-width="2"/><rect x="293.5" y="363.5" width="3" height="5" fill="#ced4da" stroke="none"/>
   <path d="M186 436.5 L186 416.5 L315 416.5 L315 345.5" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="M186 436.5 L186 416.5 L315 416.5 L315 345.5" stroke="#343a40" stroke-width="4"/>
   <rect x="180" y="428.5" width="12" height="16" rx="2" fill="#212529" stroke="#343a40" stroke-width="2.5"/><rect x="311" y="336.5" width="8" height="12" rx="1.5" fill="#212529" stroke="#343a40" stroke-width="2"/><rect x="313.5" y="343.5" width="3" height="5" fill="#ced4da" stroke="none"/>
   <text x="112" y="495.5" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="currentColor" stroke="none">USB</text>
   <text x="320" y="495.5" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">ESP32 DevKit V1 (30핀)</text>
-  <text x="164" y="449.5" transform="rotate(-90 164 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">VIN</text>
+  <text x="164" y="449.5" transform="rotate(-90 164 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">VIN</text>
   <text x="186" y="449.5" transform="rotate(-90 186 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">GND</text>
   <text x="208" y="449.5" transform="rotate(-90 208 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D13</text>
   <text x="230" y="449.5" transform="rotate(-90 230 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D12</text>
@@ -128,7 +128,7 @@
   <text x="428" y="449.5" transform="rotate(-90 428 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">VN</text>
   <text x="450" y="449.5" transform="rotate(-90 450 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">VP</text>
   <text x="472" y="449.5" transform="rotate(-90 472 449.5)" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">EN</text>
-  <text x="164" y="541.5" transform="rotate(-90 164 541.5)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">3V3</text>
+  <text x="164" y="541.5" transform="rotate(-90 164 541.5)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="1">3V3</text>
   <text x="186" y="541.5" transform="rotate(-90 186 541.5)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">GND</text>
   <text x="208" y="541.5" transform="rotate(-90 208 541.5)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D15</text>
   <text x="230" y="541.5" transform="rotate(-90 230 541.5)" dominant-baseline="central" font-size="13" font-weight="700" fill="#ffffff" stroke="#1d1d1f" stroke-width="4" paint-order="stroke" opacity="0.55">D2</text>
@@ -146,7 +146,7 @@
   <rect x="308" y="544.5" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <rect x="330" y="544.5" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <rect x="462" y="544.5" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
-  <rect x="154" y="426.5" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
+  <rect x="154" y="544.5" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <rect x="176" y="426.5" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>
   <path d="M20 618.5 H620" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
   <text x="20" y="636.5" dominant-baseline="central" font-size="15" font-weight="700" fill="currentColor" stroke="none">이렇게 꽂아요 — 칩은 반달 홈이 그림과 같은 쪽</text>
@@ -161,7 +161,7 @@
   <text x="54" y="710.5" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">D23 핀</tspan> → 칩 RCK (7번 줄)</text>
   <rect x="16" y="728.5" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 734.5 h24" stroke="#e03131" stroke-width="5"/>
-  <text x="54" y="734.5" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">VIN(5V) · 칩 VCC · MR</tspan> → 아래 + 줄</text>
+  <text x="54" y="734.5" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">3V3 · 칩 VCC · MR</tspan> → 아래 + 줄</text>
   <rect x="16" y="752.5" width="32" height="12" rx="4" fill="#f1f3f5" stroke="#adb5bd" stroke-width="1"/>
   <path d="M20 758.5 h24" stroke="#343a40" stroke-width="5"/>
   <text x="54" y="758.5" dominant-baseline="central" font-size="14" fill="currentColor" stroke="none"><tspan font-weight="700">GND · 칩 OE</tspan> → 아래 − 줄 (위 − 줄과 점퍼로)</text>

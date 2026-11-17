@@ -10,6 +10,7 @@
  * makePlus({ x, y }) 는 보드 왼쪽 위 모서리를 받아 핀 좌표·그림을 돌려준다. 보드 크기 428×300.
  */
 import { PIN_FILL as FILL, htext, vtext } from "../common.mjs";
+import { rec } from "../record.mjs";
 
 const TOP_LEFT = ["SCL", "SDA", "5V", "GND", "io18", "io19", "io23", "io5", "io13", "io12"];
 const TOP_RIGHT = ["io14", "io27", "io16", "io17", "io25", "io26", "TX", "RX"];
@@ -166,6 +167,21 @@ export function makePlus({ x = 96, y = 150 } = {}) {
       base.push(pinBox(px, BOTTOM_Y, FILL.one, dimPin(nm)));
     });
 
+    {
+      // 3D 장면: 모든 핀(이름·색·쓰는지)
+      const pins = [];
+      const add = (nm, label, fill) => { const p = pin(nm); pins.push({ x: p.x, y: p.y, label, fill, used: usedSet.has(nm) }); };
+      const tops = (list, from, count) => list.forEach((n, i) => {
+        add(`top:${n}`, n, FILL.one);
+        if (i >= from && i < from + count) for (const r of ["S", "V", "G"]) add(`${n}:${r}`, `${n} ${r}`, FILL[r]);
+      });
+      tops(TOP_LEFT, 4, 6);
+      tops(TOP_RIGHT, 0, 6);
+      ANALOG_ROWS.forEach((n) => ["G", "V", "S"].forEach((c) => add(`an:${n}:${c}`, `${n} ${c}`, FILL[c])));
+      I2C_COLS.forEach((c) => { for (let r = 0; r < 3; r++) add(`i2c:${c}:${r}`, `I2C ${c}`, c === "GND" ? FILL.G : c === "5V" ? FILL.V : c === "SDA" ? FILL.S : FILL.SCL); });
+      BOTTOM.forEach((n, i) => add(n === "5V" && i === BOTTOM.lastIndexOf("5V") ? "bot:5V2" : `bot:${n}`, n, FILL.one));
+      rec("boards", { kind: "plus", name: "ESP32 Plus", ...BOARD, color: "#1d1d1f", chip: MODULE, usb: { x: x - 12, y: y + 92, w: 28, h: 40 }, pins });
+    }
     const marks = names.map((n) => {
       const p = pin(n);
       return `<rect x="${p.x - 10}" y="${p.y - 10}" width="20" height="20" rx="4" fill="none" stroke="#ffd43b" stroke-width="3"/>`;

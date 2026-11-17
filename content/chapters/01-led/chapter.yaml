@@ -32,6 +32,7 @@ principle:
 
     - **HIGH**(1, 3.3V): 전기가 흘러 불이 켜져요
     - **LOW**(0, 0V): 전기가 흐르지 않아 불이 꺼져요
+why: [led-resistor, gnd]
 parts:
   - id: part1
     title: LED 켜고 깜빡이기

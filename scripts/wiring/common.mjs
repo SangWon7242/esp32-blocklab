@@ -6,6 +6,8 @@
  * 그림 규칙: 폭 640(글자 크기가 다른 그림과 같게), 높이는 내용에 맞춤, role="img" + <title>, 글자 12px 이상, 이모지 없음.
  */
 
+import { checkPieces, mark, pt, rec, recTitle } from "./record.mjs";
+
 export const W = 640;
 
 export const COLORS = {
@@ -58,8 +60,9 @@ const end = (p, kind, color) =>
  * 흰 테두리로 검은 보드 위에서도 보인다.
  */
 export function wire(from, to, color, { via = [], style = "vv", ends = ["f", "f"] } = {}) {
+  rec("wires", { from: pt(from), to: pt(to), color, ends });
   const d = wirePath(from, to, via, style);
-  return `<path d="${d}" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="${d}" stroke="${color}" stroke-width="4"/>\n  ${end(from, ends[0], color)}${end(to, ends[1], color)}`;
+  return mark(`<path d="${d}" stroke="#ffffff" stroke-width="7.5" stroke-opacity="0.9"/><path d="${d}" stroke="${color}" stroke-width="4"/>\n  ${end(from, ends[0], color)}${end(to, ends[1], color)}`);
 }
 export const ffWire = (from, to, color, via = [], style = "vv") => wire(from, to, color, { via, style, ends: ["f", "f"] });
 /** 보드 핀(구멍 머리) → 브레드보드 구멍(핀 끝) */
@@ -75,6 +78,8 @@ export const PIN_FILL = { one: "#f5c518", S: "#f5c518", V: "#e03131", G: "#49505
  * legend: "plus"(S·V·G 뜻까지) · "devkit"(노란 테두리 뜻만). 반환 { svg, bottom }.
  */
 export function connectionTable(y, title, rows, legend = "plus", { columns } = {}) {
+  recTitle(title);
+  rows.forEach((r) => rec("rows", { colors: r.colors ?? [r.color], part: r.part, to: r.to }));
   const out = [];
   const colW = 300, rowH = 24, x0 = 20;
   // 글이 길면 한 칸으로 (두 칸이면 한 줄에 약 24자)
@@ -112,5 +117,6 @@ export function svgDoc(idPrefix, title, body, height) {
 
 /** 보드 + 모듈 + 선을 겹 순서대로: 보드 판·핀 → 모듈·부품 → 선 → 보드 글자(선 위에서도 읽히게) → 노란 테두리 → 표 */
 export function compose(b, modules, wires, extra = []) {
+  checkPieces([...modules, ...wires]);
   return [b.base, ...modules, ...wires, b.labels, b.marks, ...extra].join("\n  ");
 }

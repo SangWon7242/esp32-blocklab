@@ -9,7 +9,7 @@ sessions: 1
 teacherNotes: |
   **핀** 초음파 Trig 13 · Echo 12(계획 11 핀 표, 10장 F3 자동문과 같은 자리), LED 26(1·2장 자리). 코드의 `get_distance()` 함수는 블록의 "초음파 센서 준비하기"가 만드는 본문 그대로라 블록과 코드가 오간다.
 
-  **전원** HC-SR04 는 **5V** 로 움직인다. 3V3 에 꽂으면 값이 들쭉날쭉하거나 아예 안 나온다(디버깅 증상 3). Echo 는 5V 신호라 키트 튜토리얼처럼 바로 잇지만, 오래 켜 두는 작품에서는 1kΩ · 2kΩ 분압을 권한다. 배선은 USB 를 뺀 채, GND 선부터.
+  **전원** HC-SR04 는 **5V** 로 움직인다. 3V3 에 꽂으면 값이 들쭉날쭉하거나 아예 안 나온다(디버깅 증상 3). Echo 는 5V 신호이고 ESP32 핀은 3.3V 까지만 받으므로 1kΩ · 2kΩ 저항으로 전압을 나눠(약 3.3V) 12번 핀에 잇는다. 배선은 USB 를 뺀 채, GND 선부터.
 
   **멈춤** Echo 선이 빠지거나 코드의 echo 핀 번호가 틀리면 `while not echo.value():` 에서 끝없이 기다려 멈춘 것처럼 보인다(디버깅 증상 1). 정지 버튼으로 멈추고 선을 확인한다. Trig · Echo 를 바꿔 꽂았을 때는 지도안처럼 0 이 계속 나오기도 하고 멈추기도 한다(센서마다 다름).
 
@@ -29,17 +29,19 @@ summary: |
 cover: images/cover.svg
 materials:
   - { name: ESP32 보드, note: 노트북과 USB 선으로 연결 }
-  - { name: HC-SR04 초음파 센서, note: "핀 4개: VCC · Trig · Echo · GND. 브레드보드 없이 F-F 듀폰선으로 보드 핀에 바로" }
+  - { name: HC-SR04 초음파 센서, note: "핀 4개: VCC · Trig · Echo · GND. VCC · Trig 는 보드 핀에 바로, Echo · GND 는 브레드보드의 저항을 거쳐요" }
   - { name: 빨강 LED, note: 긴 다리가 + }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
+  - { name: 1kΩ 저항, note: "갈색-검정-빨강 띠. 초음파 Echo 줄에" }
+  - { name: 2kΩ 저항, note: "빨강-검정-빨강 띠. Echo 가운데 줄과 GND 줄 사이" }
   - { name: 브레드보드, note: LED 와 저항을 꽂는 판 }
-  - { name: F-F 듀폰선 4가닥, note: "양쪽 끝이 구멍인 선. 초음파 센서 핀 4개를 보드 핀에 바로 씌워요" }
-  - { name: M-F 듀폰선 2가닥, note: "한쪽은 핀, 한쪽은 구멍인 선. 26번 핀 → 브레드보드, LED 짧은 다리 줄 → 보드 GND" }
+  - { name: F-F 듀폰선 2가닥, note: "양쪽 끝이 구멍인 선. 초음파 VCC · Trig 를 보드 핀에 바로 씌워요" }
+  - { name: M-F 듀폰선 6가닥, note: "한쪽은 핀, 한쪽은 구멍인 선. 초음파 Echo · GND, 보드 12번 핀 · GND, 26번 핀 → 브레드보드. LED 짧은 다리 줄 → 보드 GND" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
-  caption: "초음파 센서는 보드에 바로: VCC → 5V · GND → GND · Trig → io13 · Echo → io12 (위쪽 한 줄). LED 는 보드 위 브레드보드에: io26 → 9번 줄 → 220Ω 저항 → 15번 줄의 긴 다리(+), 짧은 다리(−)는 16번 줄 → io26 기둥 맨 아래 G"
-  captionDevkit: "초음파 센서는 보드에 바로: VCC → VIN(5V) · GND → GND(위 줄) · Trig → D13 · Echo → D12. LED 는 보드 위 브레드보드에: D26 → 3번 줄 → 220Ω 저항 → 8번 줄의 긴 다리(+), 짧은 다리(−)는 9번 줄 → GND(아래 줄)"
+  caption: "초음파 VCC → 5V · Trig → io13 은 보드에 바로. Echo 는 브레드보드 7번 줄 → 1kΩ 저항 → 4번 줄 → io12, 4번 줄 → 2kΩ 저항 → 1번 줄 ← 초음파 GND · 보드 GND. LED 는 보드 위 브레드보드에: io26 → 9번 줄 → 220Ω 저항 → 15번 줄의 긴 다리(+), 짧은 다리(−)는 16번 줄 → io26 기둥 맨 아래 G"
+  captionDevkit: "초음파 VCC → VIN(5V) · Trig → D13 은 보드에 바로. Echo 는 브레드보드 19번 줄 → 1kΩ 저항 → 16번 줄 → D12, 16번 줄 → 2kΩ 저항 → 13번 줄 ← 초음파 GND · GND(위 줄). LED 는 보드 위 브레드보드에: D26 → 3번 줄 → 220Ω 저항 → 8번 줄의 긴 다리(+), 짧은 다리(−)는 9번 줄 → GND(아래 줄)"
 principle:
   image: images/formula-steps.svg
   body: |
@@ -49,6 +51,7 @@ principle:
     - **Echo** 핀은 소리가 갔다가 돌아올 때까지 1 로 켜져 있어요. 그 길이가 **왕복 시간**이에요
     - 소리는 1초에 약 **340m** 를 가요. 시간을 µs 로, 거리를 cm 로 바꿔 식을 정리하면 340 ÷ 10000 이 돼요
     - 갔다가 돌아왔으니 **절반**만 물체까지의 거리예요: 거리(cm) = 340 × 왕복 시간 ÷ 10000 ÷ 2
+why: [led-resistor, echo-divider]
 goals:
   content: 초음파 센서로 소리가 갔다 오는 시간을 재고, 그 시간을 cm 로 바꿔 거리를 출력하고, 거리를 기준과 비교해 LED를 켠다
   thinking: 속력 × 시간 = 거리 식을 단위를 바꿔 가며 코드의 숫자(340 · 2 · 10000)와 짝지어 설명한다
@@ -128,8 +131,8 @@ parts:
         minutes: 6
         scene:
           image: images/wiring-breadboard.svg
-          caption: "초음파 VCC → 5V, GND → GND, Trig → io13, Echo → io12 에 바로. LED 는 io26 → 9번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → io26 기둥 G"
-          captionDevkit: "초음파 VCC → VIN(5V), GND → GND, Trig → D13, Echo → D12 에 바로. LED 는 D26 → 3번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → 아래 줄 GND"
+          caption: "초음파 VCC → 5V, Trig → io13 에 바로. Echo → 7번 줄 → 1kΩ → 4번 줄 → io12, 4번 줄 → 2kΩ → 1번 줄(초음파 GND · 보드 GND). LED 는 io26 → 9번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → io26 기둥 G"
+          captionDevkit: "초음파 VCC → VIN(5V), Trig → D13 에 바로. Echo → 19번 줄 → 1kΩ → 16번 줄 → D12, 16번 줄 → 2kΩ → 13번 줄(초음파 GND · 보드 GND). LED 는 D26 → 3번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → 아래 줄 GND"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**의 배선도를 보고 센서를 꽂아요. **GND 선을 가장 먼저** 꽂고, VCC 는 3V3 이 아니라 **5V**(VIN) 핀에 이어요. LED도 지금 같이 꽂아 두면 미션에서 바로 쓸 수 있어요.
 
