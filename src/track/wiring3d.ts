@@ -20,8 +20,8 @@ export type Part3D =
   | { type: "touch"; pad: { x: number; y: number; w: number; h: number }; clip: Pt; label?: string }
   /** 1자리 7세그먼트 표시 장치 (공통 음극): 몸통 사각형과 다리 구멍들 */
   | { type: "seg7"; x: number; y: number; w: number; h: number; legs: Pt[] }
-  /** 책상 위 소품: 건전지 상자 · 전원 플러그 */
-  | { type: "prop"; kind: "battery" | "jack"; x: number; y: number; w: number; h: number; label?: string };
+  /** 책상 위 소품: 건전지 상자 · 전원 플러그 · 물통과 미니 워터 펌프(펌프의 + · − 선 끝이 사각형 안에 닿는다) */
+  | { type: "prop"; kind: "battery" | "jack" | "pump"; x: number; y: number; w: number; h: number; label?: string };
 
 export type Scene3D = {
   board: "plus" | "devkit";

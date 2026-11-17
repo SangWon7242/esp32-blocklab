@@ -29,11 +29,11 @@ node scripts/wiring/build.mjs 10-auto-door
 | `b.bounds` · `b.legend` · `b.lane`(Plus: 위 G 줄과 ESP32 모듈 사이 가로 빈 띠) | |
 
 ## 부품 (parts.mjs) — 모두 `{ svg, pins }`
-- 모듈: `ultrasonic(x, y)`(VCC Trig Echo GND) · `oled(x, y, { side })`(GND VCC SCL SDA, 기본 위쪽) · `rfid`(GND VCC SDA SCL) · `sensor3(x, y, "dht" | "pir" | "sound" | "flame" | "ir" | "lm35")`(G V S) · `joystick`(X Y B V G) · `keypad`(R1~R4 C1~C4) · `fan`(G V IN+ IN−) · 일반 `module({...})`.
+- 모듈: `ultrasonic(x, y)`(VCC Trig Echo GND) · `oled(x, y, { side })`(GND VCC SCL SDA, 기본 위쪽) · `rfid`(GND VCC SDA SCL) · `sensor3(x, y, "dht" | "pir" | "sound" | "flame" | "ir" | "lm35" | "soil" | "water")`(G V S — soil 토양 수분 · water 수위는 76×110 긴 판, 핀 반대쪽에 탐침 · 줄무늬) · `relay(x, y, { side, pins, terminals })`(입력 G V S, 반대쪽 나사 단자 COM NO — 모두 pins 로 기록, kind "relay") · `joystick`(X Y B V G) · `keypad`(R1~R4 C1~C4) · `fan`(G V IN+ IN−) · 일반 `module({...})`.
 - 서보: Plus 는 `servo(x, y, [G, V, S])` (플러그를 보드 세 핀에 그대로). DevKit 은 `servoWithPlug(x, y, { plugSide, order })` + 플러그 구멍에 M-F/M-M 선.
 - 브레드보드: `breadboard({ x, y, cols, rails: { top, bottom }, railsOnly })` → `hole(col, "a"~"j")`, `rail(side, "+"|"-", col)`(6·12·18… 열은 구멍 없음), `nearestCol(x, railHole)`, `tint(col, "top"|"bottom")`(이어진 다섯 칸 옅게). `railsOnly` 는 + − 두 줄 띠.
 - 맨 부품(구멍 좌표를 받음): `led(anode, cathode, color)` · `resistor(a, b, { label })` · `button(bb, col)`(홈을 건너 다리 4개) · `buzzer(plus, minus, { active })` · `potentiometer(l, m, r)` · `photoresistor(a, b)` · `tiltSwitch(a, b)` · `rgbLed([R, −, G, B])` · `rgbSpread([R, −, G, B])`(다리를 벌려 꽂은 RGB) · `irReceiver([OUT, G, V])` · `dip(bb, col, n, { label })`(74HC595 등, `pin(k)`).
-- 소품(배선 없음): `powerJack({ x, y, w, h })`(Plus 외부 전원 단자) · `batteryHolder(x, y)`(AA 6개, `{ svg, plus, minus }`).
+- 소품: `powerJack({ x, y, w, h })`(Plus 외부 전원 단자) · `batteryHolder(x, y)`(AA 6개, `{ svg, plus, minus }`) · `waterPump(x, y, { w, h, hose })`(물통과 미니 워터 펌프, 3D 는 prop kind "pump". `{ svg, plus, minus, hose }` — plus · minus 는 물통 사각형 안 위쪽 선 끝이라 릴레이 NO · GND 선을 여기에 잇는다).
 - 3D 기록: 부품 함수는 `rec("parts", …)` 로 남기고 SVG 를 `mark()` 로 감싼다. 챕터가 손으로 그린 조각이 mark 되지 않으면 그 그림은 `.3d.json` 을 내지 않는다(`WIRING_DEBUG=1` 로 찍힘). 그룹을 `translate+scale` 로 옮겨 그리면 `recCount()` · `moveSince(since, tx, ty, s)` 로 기록도 같이 옮긴다(6장).
 
 ## 배치 요령 (본보기: chapters/10-auto-door.mjs, chapters/01-led.mjs)

@@ -76,8 +76,14 @@ export const rfid = (x, y, opt = {}) =>
     },
   });
 
-/** 3핀 센서 모듈 공통 (핀 G V S). kind: dht · pir · sound · flame · ir · lm35 */
+/**
+ * 3핀 센서 모듈 공통 (핀 G V S). kind: dht · pir · sound · flame · ir · lm35 · soil · water
+ * soil(토양 수분 센서)·water(수위 센서)는 긴 판(76×110): 핀 반대쪽 끝에 흙에 꽂는 두 갈래 탐침 · 물에 잠그는 줄무늬
+ */
 export function sensor3(x, y, kind, opt = {}) {
+  const side = opt.side ?? "bottom";
+  /** 긴 판에서 핀 반대쪽 끝 구역의 위 · 아래 y (판 길이의 frac 만큼) */
+  const farEnd = (y0, h, frac) => (side === "bottom" ? [y0 + 6, y0 + h * frac] : [y0 + h * (1 - frac), y0 + h - 6]);
   const look = {
     dht: { color: "#1971c2", title: "온습도 센서(DHT11)", decor: (x, y) => `<rect x="${x + 18}" y="${y + 8}" width="40" height="34" rx="4" fill="#e7f5ff" stroke="#74c0fc"/>${[0, 1, 2, 3].map((k) => `<path d="M${x + 24} ${y + 15 + k * 7} h28" stroke="#74c0fc" stroke-width="2"/>`).join("")}` },
     pir: { color: "#2f9e44", title: "PIR 센서", decor: (x, y) => `<circle cx="${x + 38}" cy="${y + 32}" r="24" fill="#f8f9fa" stroke="#ced4da"/><path d="M${x + 22} ${y + 32} q16 -16 32 0 M${x + 26} ${y + 40} q12 -10 24 0" stroke="#ced4da" stroke-width="2"/>` },
@@ -85,9 +91,69 @@ export function sensor3(x, y, kind, opt = {}) {
     flame: { color: "#c92a2a", title: "불꽃 센서", decor: (x, y) => `<ellipse cx="${x + 38}" cy="${y + 26}" rx="10" ry="14" fill="#212529" stroke="#868e96"/><path d="M${x + 38} ${y + 40} v14" stroke="#adb5bd" stroke-width="2"/>` },
     ir: { color: "#495057", title: "IR 수신 모듈", decor: (x, y) => `<rect x="${x + 26}" y="${y + 12}" width="24" height="30" rx="4" fill="#212529" stroke="#868e96"/><circle cx="${x + 38}" cy="${y + 24}" r="7" fill="#343a40" stroke="#adb5bd"/>` },
     lm35: { color: "#5f3dc4", title: "온도 센서(LM35)", decor: (x, y) => `<path d="M${x + 28} ${y + 44} v-26 a10 10 0 0 1 20 0 v26 z" fill="#212529" stroke="#868e96"/>` },
+    soil: {
+      color: "#c92a2a", title: "토양 수분 센서", h: 110,
+      decor: (x, y, w, h) => {
+        const [t, b] = farEnd(y, h, 0.6);
+        const tip = side === "bottom" ? t : b, root = side === "bottom" ? b : t, dir = side === "bottom" ? -1 : 1;
+        const prong = (cx) => `<path d="M${cx - 7} ${root} V${tip - dir * 10} L${cx} ${tip} L${cx + 7} ${tip - dir * 10} V${root} Z" fill="#e9b949" stroke="#a07d1c" stroke-width="1.5"/>`;
+        const chipY = side === "bottom" ? y + h * 0.68 : y + h * 0.18;
+        return `${prong(x + w * 0.3)}${prong(x + w * 0.7)}<rect x="${x + w / 2 - 9}" y="${chipY}" width="18" height="12" rx="2" fill="#212529" stroke="none"/>`;
+      },
+    },
+    water: {
+      color: "#c92a2a", title: "수위 센서", h: 110,
+      decor: (x, y, w, h) => {
+        const [t, b] = farEnd(y, h, 0.62);
+        const lines = Array.from({ length: 9 }, (_, k) => `<path d="M${x + 14 + k * 6} ${t + 4} V${b - 4}" stroke="#dee2e6" stroke-width="2.2"/>`).join("");
+        return `<rect x="${x + 9}" y="${t}" width="${w - 18}" height="${b - t}" rx="3" fill="#a61e1e" stroke="none"/>${lines}`;
+      },
+    },
   }[kind];
   if (!look) throw new Error(`모르는 센서 모듈: ${kind}`);
-  return module({ kind, x, y, w: 76, h: 70, color: look.color, pins: opt.pins ?? ["G", "V", "S"], side: opt.side ?? "bottom", firstPin: 18, title: opt.title ?? look.title, titleAt: opt.titleAt, decor: look.decor });
+  return module({ kind, x, y, w: 76, h: look.h ?? 70, color: look.color, pins: opt.pins ?? ["G", "V", "S"], side, firstPin: 18, title: opt.title ?? look.title, titleAt: opt.titleAt, decor: look.decor });
+}
+
+/**
+ * 릴레이 모듈 (kind "relay"). 한쪽 끝(side, 기본 아래)에 입력 핀 G · V · S, 반대쪽 끝에 나사 단자 COM · NO.
+ * 입력 S 가 1 이면 안의 스위치가 붙어 COM 과 NO 가 이어진다. 두 쪽 핀을 모두 pins 로 기록한다(선이 꽂힐 수 있게).
+ * opt.pins: 입력 핀 순서(왼→오), opt.terminals: 단자 순서(왼→오, 기본 COM · NO)
+ */
+export function relay(x, y, opt = {}) {
+  const side = opt.side ?? "bottom";
+  const w = 110, h = 80, color = "#1864ab";
+  const pins = opt.pins ?? ["G", "V", "S"], terms = opt.terminals ?? ["COM", "NO"];
+  const inY = side === "bottom" ? y + h : y, outY = side === "bottom" ? y : y + h, dir = side === "bottom" ? 1 : -1;
+  const at = {};
+  const out = [`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${color}" stroke="currentColor"/>`];
+  // 파란 릴레이 통 · 빨간 불
+  const boxY = side === "bottom" ? y + 26 : y + 14;
+  out.push(`<rect x="${x + 10}" y="${boxY}" width="52" height="40" rx="3" fill="#4dabf7" stroke="#1c7ed6"/><text x="${x + 36}" y="${boxY + 20}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#0b3d75" stroke="none">5V</text>`);
+  out.push(`<circle cx="${x + 80}" cy="${side === "bottom" ? y + h - 22 : y + 22}" r="5" fill="#ff8787" stroke="#c92a2a"/>`);
+  pins.forEach((n, i) => {
+    const px = x + 25 + i * 20;
+    at[n] = { x: px, y: inY + dir * 12 };
+    out.push(`<path d="M${px} ${inY} V${inY + dir * 12}" stroke="#adb5bd" stroke-width="3"/>`);
+    out.push(side === "bottom" ? pinName(px, inY - 6, n) : pinNameDown(px, inY + 6, n));
+  });
+  // 나사 단자 (초록 블록 + 나사 구멍), 선이 꽂히는 끝은 단자 바깥
+  const tY = side === "bottom" ? y + 4 : y + h - 22;
+  out.push(`<rect x="${x + w - 64}" y="${tY}" width="58" height="18" rx="2" fill="#2b8a3e" stroke="#1b5e20"/>`);
+  terms.forEach((n, i) => {
+    const px = x + w - 50 + i * 30;
+    at[n] = { x: px, y: outY - dir * 12 };
+    out.push(`<circle cx="${px}" cy="${tY + 9}" r="5" fill="#ced4da" stroke="#495057"/><path d="M${px - 3} ${tY + 9} h6" stroke="#495057" stroke-width="1.5"/>`);
+    out.push(`<path d="M${px} ${outY} V${outY - dir * 12}" stroke="#adb5bd" stroke-width="3"/>`);
+    const ly = side === "bottom" ? tY + 30 : tY - 12;
+    out.push(`<text x="${px}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#ffffff" stroke="none">${n}</text>`);
+  });
+  const title = opt.title ?? "릴레이 모듈";
+  if (title) {
+    const t = opt.titleAt ?? { x: x + w / 2, y: side === "bottom" ? y - 26 : y + h + 26, anchor: "middle" };
+    out.push(name(t.x, t.y, title, t.anchor ?? "middle"));
+  }
+  rec("parts", { type: "module", kind: "relay", x, y, w, h, color, side, title: title || "", pins: [...pins, ...terms].map((n) => ({ name: n, ...pt(at[n]) })) });
+  return { svg: mark(out.join("\n  ")), pins: at };
 }
 
 /** 조이스틱 모듈 (핀 X Y B V G) */
@@ -450,6 +516,36 @@ export function dip(bb, col, n, { label = "", notch = true } = {}) {
 export function powerJack({ x, y, w = 24, h = 30 }, { label = "외부 전원 단자" } = {}) {
   rec("parts", { type: "prop", kind: "jack", x, y, w, h, label });
   return mark(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" fill="#212529" stroke="#868e96" stroke-width="2"/><circle cx="${x + 9}" cy="${y + h / 2}" r="5" fill="#495057" stroke="none"/>`);
+}
+
+/**
+ * 물통과 미니 워터 펌프(5V) — 3D 에는 prop kind "pump". 물통 안 바닥에 펌프, 펌프에서 빨강(+) · 검정(−) 선이 물통 위로 나온다.
+ * 반환 { svg, plus, minus } (선 끝: 물통 사각형 안 위쪽 — 여기에 릴레이 NO · GND 선이 닿는다), hose(호스 끝, 화분 쪽)
+ * opt.hose: "left" | "right" — 호스는 물통 위로 나와 그쪽으로 꺾인다(화분 쪽)
+ */
+export function waterPump(x, y, { w = 120, h = 116, label = "물통 · 미니 워터 펌프", hose = "left" } = {}) {
+  const out = [];
+  const lvl = y + 34;
+  out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#e7f5ff" stroke="currentColor"/>`);
+  out.push(`<rect x="${x + 4}" y="${lvl}" width="${w - 8}" height="${y + h - 4 - lvl}" rx="5" fill="#74c0fc" fill-opacity="0.55" stroke="none"/>`);
+  out.push(`<path d="M${x + 8} ${lvl} q8 -4 16 0 t16 0 t16 0 t16 0 t16 0 t16 0" stroke="#1c7ed6" stroke-width="1.5"/>`);
+  // 펌프 몸통 (바닥 오른쪽) — 왼쪽 아래에 "펌프", 물 위 왼쪽에 "물통"
+  const px = x + w - 54, py = y + h - 40;
+  out.push(`<rect x="${px}" y="${py}" width="44" height="30" rx="6" fill="#343a40" stroke="#212529"/><circle cx="${px + 22}" cy="${py + 15}" r="7" fill="#868e96" stroke="none"/>`);
+  const label13 = (lx, ly, t) => `<text x="${lx}" y="${ly}" dominant-baseline="central" font-size="13" font-weight="700" fill="#0b3d75" stroke="none">${t}</text>`;
+  out.push(label13(x + 8, y + 50, "물통"), label13(px - 32, py + 15, "펌프"));
+  // 선 둘: 펌프 위 → 물통 위쪽 끝 점 (여기에 릴레이 NO · GND 선이 닿는다)
+  const plus = { x: x + w / 2 + 14, y: y + 14 }, minus = { x: x + w / 2 + 30, y: y + 14 };
+  out.push(`<path d="M${px + 30} ${py} V${y + 26} H${plus.x} V${plus.y}" stroke="#e03131" stroke-width="3"/>`);
+  out.push(`<path d="M${px + 38} ${py} V${y + 30} H${minus.x} V${minus.y}" stroke="#212529" stroke-width="3"/>`);
+  out.push(`<circle cx="${plus.x}" cy="${plus.y}" r="3" fill="#e03131" stroke="none"/><circle cx="${minus.x}" cy="${minus.y}" r="3" fill="#212529" stroke="none"/>`);
+  // 호스 (펌프 → 물통 위로 → 화분 쪽)
+  const hx0 = px + 8, hy = y - 14, hx = hose === "left" ? hx0 - 30 : hx0 + 30;
+  const hoseEnd = { x: hx, y: hy };
+  const hoseD = `M${hx0} ${py} V${hy} H${hx}`;
+  out.push(`<path d="${hoseD}" stroke="#a5d8ff" stroke-width="7" opacity="0.9"/><path d="${hoseD}" stroke="#4dabf7" stroke-width="2"/>`);
+  rec("parts", { type: "prop", kind: "pump", x, y, w, h, label });
+  return { svg: mark(out.join("")), plus, minus, hose: hoseEnd };
 }
 
 /** 배터리 홀더(AA 6개) — 세로로 세운 상자, 위에서 빨강·검정 선이 나온다. 반환 { svg, plus, minus } (선이 나오는 점) */
