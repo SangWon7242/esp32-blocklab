@@ -233,8 +233,8 @@ function Viewer({ scene: raw, chapterId, onUnsupported, large, toolbar, stage, i
 
       {/* 보기 조절 */}
       <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-xl border bg-background/95 p-1 shadow-sm">
-        <Button type="button" size="icon" variant="ghost" className={tool} aria-label="왼쪽으로 돌리기 (Q)" title="왼쪽으로 돌리기 (Q)" data-testid="wiring-3d-rotate-left" onClick={() => camera?.rotate(-1)}><RotateCcw className="size-4" /></Button>
-        <Button type="button" size="icon" variant="ghost" className={tool} aria-label="오른쪽으로 돌리기 (E)" title="오른쪽으로 돌리기 (E)" onClick={() => camera?.rotate(1)}><RotateCw className="size-4" /></Button>
+        <Button type="button" size="icon" variant="ghost" className={tool} aria-label="왼쪽으로 돌리기 (Q)" title="왼쪽으로 돌리기 (Q) · 마우스 오른쪽 버튼을 누른 채 끌면 360도로 돌아가요" data-testid="wiring-3d-rotate-left" onClick={() => camera?.rotate(-1)}><RotateCcw className="size-4" /></Button>
+        <Button type="button" size="icon" variant="ghost" className={tool} aria-label="오른쪽으로 돌리기 (E)" title="오른쪽으로 돌리기 (E) · 마우스 오른쪽 버튼을 누른 채 끌면 360도로 돌아가요" onClick={() => camera?.rotate(1)}><RotateCw className="size-4" /></Button>
         <span className="mx-0.5 h-5 w-px bg-border" aria-hidden />
         <Button type="button" size="icon" variant="ghost" className={tool} aria-label="작게 (−)" title="작게 (−)" onClick={() => camera?.zoom(1 / 1.25)}><Minus className="size-4" /></Button>
         <Button type="button" size="icon" variant="ghost" className={tool} aria-label="크게 (+)" title="크게 (+)" onClick={() => camera?.zoom(1.25)}><Plus className="size-4" /></Button>

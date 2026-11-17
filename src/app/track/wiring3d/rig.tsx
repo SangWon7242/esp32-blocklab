@@ -39,6 +39,8 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     goal: null as THREE.Vector3 | null,
     az: AZ0, azGoal: AZ0, el: EL_TILT, elGoal: EL_TILT,
     turn: null as null | { az0: number; el0: number; t0: number },
+    /** 오른쪽 버튼으로 돌리는 중 (마지막 마우스 자리) */
+    orbit: null as null | { x: number; y: number; id: number },
     fit: 1,
     keys: new Set<string>(),
     last: performance.now(),
@@ -148,8 +150,33 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     // 두 손가락: 벌리면 크게
     const touches = new Map<number, { x: number; y: number }>();
     let pinch = 0;
-    const pdown = (e: PointerEvent) => { if (e.pointerType === "touch") touches.set(e.pointerId, { x: e.clientX, y: e.clientY }); };
+    // 오른쪽 버튼 끌기: 옆으로 끌면 360도 빙 돌고, 위아래로 끌면 내려다보는 각도가 바뀐다
+    const pdown = (e: PointerEvent) => {
+      if (e.pointerType === "touch") touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (e.button === 2) {
+        s.orbit = { x: e.clientX, y: e.clientY, id: e.pointerId };
+        s.turn = null;
+        s.az = s.azGoal; s.el = s.elGoal;
+        el.setPointerCapture?.(e.pointerId);
+        e.preventDefault();
+      }
+    };
+    const orbitMove = (e: PointerEvent) => {
+      const o = s.orbit;
+      if (!o || e.pointerId !== o.id) return false;
+      if (!(e.buttons & 2)) { s.orbit = null; invalidate(); return true; }
+      const dx = e.clientX - o.x, dy = e.clientY - o.y;
+      o.x = e.clientX; o.y = e.clientY;
+      s.azGoal -= dx * 0.009;
+      s.elGoal = THREE.MathUtils.clamp(s.elGoal + dy * 0.007, (8 * Math.PI) / 180, EL_TOP);
+      // 위에서 보기 단추는 손으로 돌리면 꺼진다
+      if (api.getState().topView) api.getState().set({ topView: false });
+      invalidate();
+      return true;
+    };
+    const menu = (e: MouseEvent) => e.preventDefault();
     const pmove = (e: PointerEvent) => {
+      if (orbitMove(e)) return;
       if (!touches.has(e.pointerId)) return;
       touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (touches.size !== 2) { pinch = 0; return; }
@@ -158,8 +185,12 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
       if (pinch) zoomAt(d / pinch, (a.x + b.x) / 2, (a.y + b.y) / 2);
       pinch = d;
     };
-    const pup = (e: PointerEvent) => { touches.delete(e.pointerId); pinch = 0; };
+    const pup = (e: PointerEvent) => {
+      touches.delete(e.pointerId); pinch = 0;
+      if (s.orbit && e.pointerId === s.orbit.id) { s.orbit = null; el.releasePointerCapture?.(e.pointerId); invalidate(); }
+    };
     el.addEventListener("wheel", wheel, { passive: false });
+    el.addEventListener("contextmenu", menu);
     el.addEventListener("pointerdown", pdown);
     el.addEventListener("pointermove", pmove);
     window.addEventListener("pointerup", pup);
@@ -170,6 +201,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
       window.removeEventListener("keyup", upKey);
       window.removeEventListener("blur", blur);
       el.removeEventListener("wheel", wheel);
+      el.removeEventListener("contextmenu", menu);
       el.removeEventListener("pointerdown", pdown);
       el.removeEventListener("pointermove", pmove);
       window.removeEventListener("pointerup", pup);
@@ -214,7 +246,7 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
     cam.updateMatrixWorld();
     // 도는 동안에는 설명 카드가 좌우로 옮겨 다니지 않게 잠시 숨긴다
     const c = api.getState().dom.callouts;
-    if (c) c.style.opacity = s.turn || api.getState().step !== null ? "0" : "1";
+    if (c) c.style.opacity = s.turn || s.orbit || api.getState().step !== null ? "0" : "1";
     gl.render(scene, cam);
     if (moving) invalidate();
   }, 1);

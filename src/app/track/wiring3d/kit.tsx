@@ -237,6 +237,8 @@ export function useDrag(onMove: (e: ThreeEvent<PointerEvent>) => void, onEnd?: (
   const api = useViewerApi();
   return {
     onPointerDown: (e: ThreeEvent<PointerEvent>) => {
+      // 오른쪽 버튼은 화면 돌리기 (끌어 옮기는 물건도 그대로 둔다)
+      if (e.button !== 0) return;
       e.stopPropagation();
       (e.target as Element).setPointerCapture?.(e.pointerId);
       api.getState().set({ dragging: true, hover: null });
