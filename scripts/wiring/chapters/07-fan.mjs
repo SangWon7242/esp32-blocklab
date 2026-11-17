@@ -37,7 +37,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀): 팬 모듈을 위 줄 VIN · GND · D13 · D12 에 바로. 외부 전원 단자는 없다 ───── */
+/* ───── 기본 보드(DevKit 38핀): 팬 모듈을 위 줄 VIN · GND · D13 · D12 에 바로. 외부 전원 단자는 없다 ───── */
 function devkit() {
   const b = makeDevkit({ x: 110, y: 176 });
   const parts = [], wires = [], used = [];
@@ -57,7 +57,7 @@ function devkit() {
 
 const T = {
   plus: "작은 선풍기 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): 130 모터(팬) 모듈의 G 는 보드 위쪽 GND, V 는 5V, IN+ 는 io13(motor1a), IN− 는 io12(motor1b) 에 F-F 듀폰선으로. AA 건전지 6개 배터리 홀더는 보드의 외부 전원 단자에 꽂아요. 팬 날개는 배선이 모두 끝난 뒤에 끼워요",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 작은 선풍기 배선도: 130 모터(팬) 모듈의 G 는 GND, V 는 VIN(5V), IN+ 는 D13(motor1a), IN− 는 D12(motor1b) 에 F-F 듀폰선 네 가닥으로. 기본 보드에는 외부 전원 단자가 없어 USB 전원으로 돌려요. 팬 날개는 배선이 모두 끝난 뒤에 끼워요",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 작은 선풍기 배선도: 130 모터(팬) 모듈의 G 는 GND, V 는 VIN(5V), IN+ 는 D13(motor1a), IN− 는 D12(motor1b) 에 F-F 듀폰선 네 가닥으로. 기본 보드에는 외부 전원 단자가 없어 USB 전원으로 돌려요. 팬 날개는 배선이 모두 끝난 뒤에 끼워요",
 };
 
 export default {

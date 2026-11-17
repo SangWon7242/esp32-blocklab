@@ -119,7 +119,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 50, y: 8, cols: 30, rails: { top: false, bottom: true } });
   const below = bb.y + bb.h; // 브레드보드 아래 끝
@@ -165,7 +165,7 @@ function devkit() {
     echoRow,
     pinRow,
     { color: C.black, part: `${div.cols.mid}번 줄 → 2kΩ → ${div.cols.gnd}번 줄`, to: "− 줄" },
-    { colors: [C.red, C.black], part: "3V3 · GND (아래 줄)", to: "+ 줄 · − 줄" },
+    { colors: [C.red, C.black], part: "3V3(위 줄 끝) · GND(아래 줄)", to: "+ 줄 · − 줄" },
     { color: C.blue, part: "D14", to: "12번 줄 (10kΩ 저항과 틸트 스위치 사이)" },
     { colors: [C.red, C.black], part: "10kΩ 9번 줄 · 틸트 14번 줄", to: "+ 줄 · − 줄" },
     { color: C.orange, part: "D26", to: "19번 줄 → 220Ω → 16번 줄 LED 긴 다리" },
@@ -180,7 +180,7 @@ function devkit() {
 
 const T = {
   plus: "스마트 지팡이 배선도(ESP32 Plus 확장 보드): 초음파 센서 VCC · Trig 는 보드 위쪽 5V · io13 에 F-F 듀폰선으로 바로. Echo 는 센서 옆 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → io12, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 위쪽 GND. 큰 브레드보드는 보드 아래, 아래 줄 3V3 → + 줄, GND → − 줄. 위 줄 io26 · io25 · io14 는 보드 왼쪽 바깥으로 돌아 내려와요. io26 → 2번 줄 → 220Ω → 6번 줄 LED 긴 다리, 짧은 다리 7번 줄 → − 줄. io25 → 9번 줄 수동 부저 + 다리, − 다리 11번 줄 → − 줄. io14 → 15번 줄, 10kΩ 저항 15~20번 줄(20번 → + 줄), 틸트 스위치 13 · 15번 줄(13번 → − 줄). 아래 줄 io36 → 26번 줄, 10kΩ 저항 23~26번 줄(23번 → + 줄), 포토레지스터 26 · 28번 줄(28번 → − 줄)",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 스마트 지팡이 배선도: 초음파 센서 VCC · GND · Trig 는 VIN · GND · D13 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위. Echo → 2번 줄 → 1kΩ 저항 → 5번 줄 → D12, 5번 줄 → 2kΩ 저항 → 8번 줄 → − 줄. 3V3 · GND(아래 줄) → 보드 왼쪽 바깥으로 돌아 + 줄 · − 줄. D14 → 12번 줄, 10kΩ 저항 9~12번 줄(9번 → + 줄), 틸트 스위치 12 · 14번 줄(14번 → − 줄). D26 → 19번 줄 → 220Ω → 16번 줄 LED 긴 다리, 짧은 다리 15번 줄 → − 줄. D25 → 22번 줄 수동 부저 + 다리, − 다리 20번 줄 → − 줄. VP(36) → 26번 줄, 10kΩ 저항 23~26번 줄(23번 → + 줄), 포토레지스터 26 · 28번 줄(28번 → − 줄)",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 스마트 지팡이 배선도: 초음파 센서 VCC · GND · Trig 는 VIN · GND · D13 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위. Echo → 2번 줄 → 1kΩ 저항 → 5번 줄 → D12, 5번 줄 → 2kΩ 저항 → 8번 줄 → − 줄. 3V3 · GND(아래 줄) → 보드 왼쪽 바깥으로 돌아 + 줄 · − 줄. D14 → 12번 줄, 10kΩ 저항 9~12번 줄(9번 → + 줄), 틸트 스위치 12 · 14번 줄(14번 → − 줄). D26 → 19번 줄 → 220Ω → 16번 줄 LED 긴 다리, 짧은 다리 15번 줄 → − 줄. D25 → 22번 줄 수동 부저 + 다리, − 다리 20번 줄 → − 줄. VP(36) → 26번 줄, 10kΩ 저항 23~26번 줄(23번 → + 줄), 포토레지스터 26 · 28번 줄(28번 → − 줄)",
 };
 
 export default {

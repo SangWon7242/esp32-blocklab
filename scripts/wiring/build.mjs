@@ -1,7 +1,7 @@
 // 사용: node scripts/wiring/build.mjs <챕터 id> [출력 폴더]
 // scripts/wiring/chapters/<id>.mjs 의 그림 명세를 content/chapters/<id>/images/ (또는 출력 폴더)에 쓴다.
 // 명세: export default { "wiring-x.svg": { plus: () => svg, devkit: () => svg } }
-//   plus → wiring-x.svg (ESP32 Plus 확장 보드, 기본), devkit → wiring-x.devkit.svg (기본 보드 DevKit V1 30핀)
+//   plus → wiring-x.svg (ESP32 Plus 확장 보드, 기본), devkit → wiring-x.devkit.svg (기본 보드 DevKit 38핀)
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { endScene, startScene } from "./record.mjs";

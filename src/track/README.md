@@ -12,7 +12,7 @@
 
 ## 수업 보드 (plus · devkit)
 
-수업은 두 보드로 할 수 있다: **ESP32 Plus 확장 보드**(Keyestudio, `plus`, 기본)와 **기본 보드 (DevKit 30핀)**(ESP32 DevKit V1, `devkit`).
+수업은 두 보드로 할 수 있다: **ESP32 Plus 확장 보드**(Keyestudio, `plus`, 기본)와 **기본 보드 (DevKit 38핀)**(ESP32-DevKitC 38í, `devkit`).
 학생이 챕터 화면 위(단계 화면 윗줄)에서 고르고, 고른 값은 그 기기(localStorage `esp32-blocklab:board`)에 남아 모든 챕터에 적용된다.
 보드 고르는 칸은 배선도(`wiring`)가 있거나 아래 셋 가운데 하나라도 있는 챕터에만 보인다. 콘텐츠의 기본은 늘 `plus` 이고, 다른 보드용은 덧붙이기만 한다.
 
@@ -45,7 +45,7 @@ cover: images/cover.svg   # 선택. 표지 그림
 materials:                # 선택. 준비물(부품) 칩
   - { name: ESP32 보드, image: images/part-esp32.svg }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 }      # image·note 는 선택
-  - { name: ESP32 DevKit 30핀, board: devkit }     # board 는 선택: plus | devkit — 그 보드를 골랐을 때만 (아래 "수업 보드")
+  - { name: ESP32 DevKit 38핀, board: devkit }     # board 는 선택: plus | devkit — 그 보드를 골랐을 때만 (아래 "수업 보드")
 wiring: { image: images/wiring-led.svg, caption: "LED 긴 다리 → 저항 → 26번", captionDevkit: "LED 긴 다리 → 저항 → D26" }   # 선택. 배선도 (captionDevkit 선택)
 principle:                # 선택. 원리 카드 (아래 "Keyestudio 수업 구조")
   image: images/led-parts.svg   # 선택. 카드 왼쪽 그림

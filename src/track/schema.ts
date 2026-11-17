@@ -12,7 +12,7 @@ export const FileRef = z.string().regex(/^[\w.-]+\.py$/, "같은 폴더의 .py �
 /** 같은 폴더 images/ 의 .svg 파일 (예: images/wiring-led.svg) */
 export const ImageRef = z.string().regex(/^images\/[\w.-]+\.svg$/, "images/<이름>.svg 꼴이어야 합니다");
 
-/** 수업 보드: plus(ESP32 Plus 확장 보드, 기본) · devkit(기본 보드 DevKit 30핀). 고르는 법은 src/track/board.ts */
+/** 수업 보드: plus(ESP32 Plus 확장 보드, 기본) · devkit(기본 보드 DevKit 38핀). 고르는 법은 src/track/board.ts */
 export const BoardIdSchema = z.enum(BOARD_IDS);
 
 /**

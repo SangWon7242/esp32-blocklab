@@ -43,7 +43,7 @@ materials:
 wiring:
   image: images/wiring-breadboard.svg
   caption: "DHT11 의 G · V · S → 보드 위쪽 io13 기둥의 G · V · S 에 F-F 듀폰선으로 바로. 브레드보드는 보드 아래에 두어요: 아래 줄 3V3 → + 줄, GND → − 줄, + 줄 → 17번 줄 → 포토레지스터 → 20번 줄 ← 34번(아래 줄 io34), 10kΩ 저항은 20번 줄과 23번 줄 사이, 23번 줄 → − 줄"
-  captionDevkit: "브레드보드는 보드 위에 두어요. 3V3(아래 줄) → 보드 바깥으로 돌아 + 줄, GND → − 줄. DHT11 S → D13 바로, V → + 줄, G → − 줄. + 줄 → 14번 줄 → 포토레지스터 → 17번 줄 ← D34, 10kΩ 저항은 17번 줄과 21번 줄 사이, 21번 줄 → − 줄"
+  captionDevkit: "브레드보드는 보드 위에 두어요. 3V3(위 줄 오른쪽 끝) → 보드 바깥으로 돌아 + 줄, GND → − 줄. DHT11 S → D13 바로, V → + 줄, G → − 줄. + 줄 → 14번 줄 → 포토레지스터 → 17번 줄 ← D34, 10kΩ 저항은 17번 줄과 21번 줄 사이, 21번 줄 → − 줄"
 principle:
   image: images/page-vs-json.svg
   body: |

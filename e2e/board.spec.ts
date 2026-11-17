@@ -12,7 +12,7 @@ const DOOR_DEVKIT_SVG = path.resolve(import.meta.dirname, "../content/chapters/1
 
 const boardGroup = (page: Page) => page.getByRole("radiogroup", { name: "수업 보드" }).first();
 const plusRadio = (page: Page) => boardGroup(page).getByRole("radio", { name: "ESP32 Plus 확장 보드" });
-const devkitRadio = (page: Page) => boardGroup(page).getByRole("radio", { name: "기본 보드 (DevKit 30핀)" });
+const devkitRadio = (page: Page) => boardGroup(page).getByRole("radio", { name: "기본 보드 (DevKit 38핀)" });
 
 test("보드를 고르면 기억되고, 다른 챕터·단계 화면에도 같은 값 · 방향키로 바꾼다", async ({ page }) => {
   await page.goto("/#/track/10-auto-door");

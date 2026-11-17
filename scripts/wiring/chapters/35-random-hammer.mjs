@@ -95,7 +95,7 @@ function plus() {
   return { title, body: compose(b.draw(used), parts, wires, [table.svg, note(bb.x + bb.w + 8, btnY, "버튼", "start", 14)]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   // (초음파 GND · Echo 선이 센서 아래에서 꺾이는 두 가로 길만큼 브레드보드를 조금 내렸다)
   const bb = breadboard({ x: 96, y: 144, cols: 20, rails: { top: true, bottom: false } });
@@ -184,7 +184,7 @@ function devkit() {
     { colors: [C.blue, C.teal], part: "OLED SDA · SCL", to: "D21 · D22" },
   ];
   const table = connectionTable(oY + 150, "이렇게 꽂아요 — 5V 는 + 줄로 나눠 쓰고, Echo 는 저항 둘을 거쳐요", rows, "devkit", { columns: 1 });
-  const title = `기본 보드(ESP32 DevKit V1 30핀) 복불복 랜덤 망치 배선도: 브레드보드는 보드 위, + − 줄은 브레드보드 위쪽. 보드 VIN(5V) → + 줄, GND → − 줄. 초음파 센서 VCC → + 줄, GND → − 줄, Trig → D13. Echo 는 저항 둘을 거친다: Echo → ${div.cols.echo}번 줄 → 1kΩ 저항 → ${div.cols.mid}번 줄 → D12, ${div.cols.mid}번 줄 → 2kΩ 저항 → ${div.cols.gnd}번 줄 → − 줄. 서보 빨강 → + 줄, 갈색 → − 줄, 주황 → D4. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 10번 줄 → − 줄. OLED VCC → 3V3, GND → GND, SDA → D21, SCL → D22`;
+  const title = `기본 보드(ESP32 DevKit 38핀) 복불복 랜덤 망치 배선도: 브레드보드는 보드 위, + − 줄은 브레드보드 위쪽. 보드 VIN(5V) → + 줄, GND → − 줄. 초음파 센서 VCC → + 줄, GND → − 줄, Trig → D13. Echo 는 저항 둘을 거친다: Echo → ${div.cols.echo}번 줄 → 1kΩ 저항 → ${div.cols.mid}번 줄 → D12, ${div.cols.mid}번 줄 → 2kΩ 저항 → ${div.cols.gnd}번 줄 → − 줄. 서보 빨강 → + 줄, 갈색 → − 줄, 주황 → D4. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 10번 줄 → − 줄. OLED VCC → 3V3, GND → GND, SDA → D21, SCL → D22`;
   return { title, body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 

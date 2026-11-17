@@ -62,18 +62,18 @@ describe("Illustration 보드 그림", () => {
 describe("MaterialChips 보드 거르기", () => {
   const materials: NonNullable<Chapter["materials"]> = [
     { name: "Plus 확장 보드", board: "plus" },
-    { name: "DevKit 30핀 보드", board: "devkit" },
+    { name: "DevKit 38핀 보드", board: "devkit" },
     { name: "서보 모터" },
   ];
   it("그 보드의 부품과 공통 부품만", () => {
     const devkit = renderToStaticMarkup(createElement(MaterialChips, { chapterId: "zz-board", materials, board: "devkit" }));
-    expect(devkit).toContain("DevKit 30핀 보드");
+    expect(devkit).toContain("DevKit 38핀 보드");
     expect(devkit).toContain("서보 모터");
     expect(devkit).not.toContain("Plus 확장 보드");
     // 고른 보드 기본값(서버 렌더) = plus
     const plus = renderToStaticMarkup(createElement(MaterialChips, { chapterId: "zz-board", materials }));
     expect(plus).toContain("Plus 확장 보드");
-    expect(plus).not.toContain("DevKit 30핀 보드");
+    expect(plus).not.toContain("DevKit 38핀 보드");
   });
   it("남는 부품이 없으면 그리지 않는다", () => {
     expect(renderToStaticMarkup(createElement(MaterialChips, { chapterId: "zz-board", materials: [{ name: "a", board: "plus" }], board: "devkit" }))).toBe("");

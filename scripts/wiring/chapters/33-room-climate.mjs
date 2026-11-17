@@ -120,7 +120,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 228, y: 8, cols: 10, rails: { top: true, bottom: false } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 40 });
@@ -180,7 +180,7 @@ function devkit() {
     { color: C.green, part: "D25", to: "5번 줄 → 220Ω → RGB 초록 다리" },
     { color: C.blue, part: "D26", to: "7번 줄 → 220Ω → RGB 파랑 다리" },
     { color: C.black, part: "RGB 가장 긴 다리(−) 3번 줄", to: "위 − 줄 → 보드 바깥으로 돌아 아래 띠 − 줄" },
-    { colors: [C.red, C.black], part: "3V3 · GND (아래 줄)", to: "아래 띠 + 줄 · − 줄" },
+    { colors: [C.red, C.black], part: "3V3(위 줄 끝) · GND(아래 줄)", to: "아래 띠 + 줄 · − 줄" },
     { colors: [C.black, C.red], part: "DHT11 G · V", to: "아래 띠 − 줄 · + 줄" },
     { color: C.blue, part: "DHT11 S", to: "D4 (보드에 바로)" },
     { colors: [C.black, C.red], part: "OLED GND · VCC", to: "아래 띠 − 줄 · + 줄" },
@@ -192,7 +192,7 @@ function devkit() {
 
 const T = {
   plus: "교실 온습도 알리미 배선도(ESP32 Plus 확장 보드): 팬(130 모터) 모듈 G · V · IN+ · IN− 는 보드 위쪽 GND · 5V · io13 · io12 에, OLED 화면 GND · VCC · SDA · SCL 은 보드 가운데 빈 틈으로 내려 I2C 묶음 첫 줄 GND · 5V · SDA · SCL 에, DHT11 G · V · S 는 ANALOG 묶음 io4 줄 G · V · S 에 F-F 듀폰선으로 바로. RGB LED 만 보드 위 브레드보드: 다리는 1 · 3 · 5 · 7번 줄(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 1 · 5 · 7번 줄에서 가운데 홈을 건너고, io27 → 1번 줄, io25 → 5번 줄, io26 → 7번 줄. 3번 줄 → − 줄, − 줄은 보드 오른쪽 바깥으로 돌아 아래 줄 GND. 배터리 홀더(AA 6개)는 보드 외부 전원 단자에",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 교실 온습도 알리미 배선도: 팬(130 모터) 모듈 G · V · IN+ · IN− 는 GND · VIN · D13 · D12 에 F-F 듀폰선으로 바로. RGB LED 는 보드 위 브레드보드: 다리는 1 · 3 · 5 · 7번 줄(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 홈을 건너고, D27 → 1번 줄, D25 → 5번 줄, D26 → 7번 줄, 3번 줄 → − 줄. 보드 아래에 + − 줄 띠: 3V3 → + 줄, 아래 줄 GND → − 줄. DHT11 G · V → 띠 − · + 줄, S → D4. OLED GND · VCC → 띠 − · + 줄, SDA → D21, SCL → D22. 브레드보드 − 줄은 보드 오른쪽 바깥으로 돌아 띠의 − 줄에",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 교실 온습도 알리미 배선도: 팬(130 모터) 모듈 G · V · IN+ · IN− 는 GND · VIN · D13 · D12 에 F-F 듀폰선으로 바로. RGB LED 는 보드 위 브레드보드: 다리는 1 · 3 · 5 · 7번 줄(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 홈을 건너고, D27 → 1번 줄, D25 → 5번 줄, D26 → 7번 줄, 3번 줄 → − 줄. 보드 아래에 + − 줄 띠: 3V3 → + 줄, 아래 줄 GND → − 줄. DHT11 G · V → 띠 − · + 줄, S → D4. OLED GND · VCC → 띠 − · + 줄, SDA → D21, SCL → D22. 브레드보드 − 줄은 보드 오른쪽 바깥으로 돌아 띠의 − 줄에",
 };
 
 export default {

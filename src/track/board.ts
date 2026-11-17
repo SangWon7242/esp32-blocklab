@@ -3,7 +3,7 @@ import type { Chapter, Figure } from "./schema";
 /*
  * 수업 보드 고르기 (순수 — React·DOM 없음). 보드는 두 가지:
  *   plus   — Keyestudio "ESP32 Plus" 확장 보드 (기본값, 콘텐츠의 기본 그림·설명)
- *   devkit — 확장 보드 없는 "ESP32 DevKit V1 30핀" 기본 보드
+ *   devkit — 확장 보드 없는 "ESP32 DevKit 38핀" 기본 보드
  * 기본 보드용 그림은 같은 이름에 .devkit.svg (images/wiring-door.svg → images/wiring-door.devkit.svg). 없으면 기본 그림을 쓴다.
  * 그림 설명은 captionDevkit 이 있으면 그것, 준비물은 board 가 그 보드이거나 없는 것만.
  * 화면(src/app/board/boardChoice.ts)과 슬라이드 내보내기(scripts/export-slides.ts --board)가 함께 쓴다.
@@ -16,7 +16,7 @@ export const DEFAULT_BOARD: BoardId = "plus";
 /** 보드 이름 (고르는 칸·안내에 그대로 쓴다) */
 export const BOARD_LABELS: Record<BoardId, string> = {
   plus: "ESP32 Plus 확장 보드",
-  devkit: "기본 보드 (DevKit 30핀)",
+  devkit: "기본 보드 (DevKit 38핀)",
 };
 
 export function isBoardId(value: unknown): value is BoardId {

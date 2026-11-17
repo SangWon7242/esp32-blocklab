@@ -50,6 +50,6 @@ export default {
     plusId: "wl",
     devkitId: "wlk",
     plusTitle: "LED 배선도(ESP32 Plus 확장 보드): 보드 위쪽 io26 핀 → 브레드보드 22번 줄 → 220Ω 저항 → 17번 줄의 LED 긴 다리(+). 짧은 다리(−)는 16번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND",
-    devkitTitle: "기본 보드(ESP32 DevKit V1 30핀) LED 배선도: D26 핀 → 브레드보드 11번 줄 → 220Ω 저항 → 6번 줄의 LED 긴 다리(+). 짧은 다리(−)는 5번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND",
+    devkitTitle: "기본 보드(ESP32 DevKit 38핀) LED 배선도: D26 핀 → 브레드보드 11번 줄 → 220Ω 저항 → 6번 줄의 LED 긴 다리(+). 짧은 다리(−)는 5번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND",
   }),
 };

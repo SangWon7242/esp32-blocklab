@@ -91,7 +91,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 26, rails: { top: true, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 30 });
@@ -119,7 +119,7 @@ function devkit() {
   // GND(위 줄) → 아래 − 줄: 3 · 4번 열 사이로 올라가 + 줄 구멍을 피한다
   const gTop = b.power("GND", 0), mIn = rail("-", 4);
   wires.push(mfWire(gTop, mIn, C.black, [{ x: gTop.x, y: mIn.y + 8 }, { x: mIn.x, y: mIn.y + 8 }], "orth"));
-  // 3V3(아래 줄) → 보드 왼쪽 바깥 길 → 보드와 브레드보드 사이 → + 줄 2번 칸에 아래에서
+  // 3V3(위 줄 끝) → 보드 왼쪽 바깥 길 → 보드와 브레드보드 사이 → + 줄 2번 칸에 아래에서
   const v33 = b.power("3V3"), pIn = rail("+", 2), gapY = top - 12;
   wires.push(mfWire(v33, pIn, C.red, [{ x: v33.x, y: bot + 10 }, { x: 44, y: bot + 10 }, { x: 44, y: gapY }, { x: pIn.x, y: gapY }], "orth"));
   used.push(gTop, v33);
@@ -140,7 +140,7 @@ function devkit() {
   parts.push(tag(bb.hole(20, "a").x + 4, bb.hole(1, "b").y, "가변저항(선택)"));
 
   const rows = [
-    { colors: [C.red, C.black], part: "3V3 (아래 줄) · GND (위 줄)", to: "+ 줄 · − 줄 (위 − 줄 ↔ 아래 − 줄 점퍼)" },
+    { colors: [C.red, C.black], part: "3V3 (위 줄 끝) · GND (위 줄)", to: "+ 줄 · − 줄 (위 − 줄 ↔ 아래 − 줄 점퍼)" },
     { color: C.yellow, part: "D14", to: "8번 줄 버튼 한쪽 다리, 대각선 10번 줄 → 위 − 줄" },
     { colors: [C.black, C.blue, C.purple], part: "OLED GND · SDA · SCL", to: "GND · D21 · D22 (아래 줄, 바로)" },
     { color: C.red, part: "OLED VCC", to: "+ 줄 (보드 바깥으로 돌아서)" },
@@ -154,7 +154,7 @@ function devkit() {
 
 const T = {
   plus: "달리는 디콘 배선도(ESP32 Plus 확장 보드): OLED 의 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 보드 I2C 묶음 첫 줄 GND · 5V · SDA · SCL 에 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → 위 + 줄, GND → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: 위 줄 io14 → 보드 바깥으로 돌아 12번 줄, 대각선 14번 줄 → 아래 − 줄. 추가 미션(선택): 수동 부저 + 다리 6번 줄 ← 위 줄 io25(보드 바깥으로 돌아서), − 다리 8번 줄 → − 줄. 가변저항 23 · 24 · 25번 줄: 가운데 24번 ← 아래 줄 io39, 23번 → − 줄, 25번 → + 줄",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 달리는 디콘 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, 위 줄 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 10번 줄 → 위 − 줄. OLED 는 보드 아래: GND → GND, SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로, VCC → 보드 바깥으로 돌아 + 줄. 추가 미션(선택): 수동 부저 + 다리 12번 줄 ← D25, − 다리 14번 줄 → − 줄. 가변저항 18 · 19 · 20번 줄: 가운데 19번 ← VN(39), 18번 → + 줄, 20번 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 달리는 디콘 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, 위 줄 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 10번 줄 → 위 − 줄. OLED 는 보드 아래: GND → GND, SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로, VCC → 보드 바깥으로 돌아 + 줄. 추가 미션(선택): 수동 부저 + 다리 12번 줄 ← D25, − 다리 14번 줄 → − 줄. 가변저항 18 · 19 · 20번 줄: 가운데 19번 ← VN(39), 18번 → + 줄, 20번 → − 줄",
 };
 
 export default {

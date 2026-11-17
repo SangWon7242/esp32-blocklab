@@ -143,7 +143,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 40, y: 8, cols: 28, rails: { top: false, bottom: true } });
   const b = makeDevkit({ x: 110, y: 440 });
@@ -153,7 +153,7 @@ function devkit() {
   const minusY = rail("-", 1).y, plusY = rail("+", 1).y;
   const j = (c) => bb.hole(c, "j");
 
-  // 3V3(아래 줄) → 보드 왼쪽 바깥 길 → + 줄 2번 칸(아래에서)
+  // 3V3(위 줄 끝) → 보드 왼쪽 바깥 길 → + 줄 2번 칸(아래에서)
   const v33 = b.power("3V3");
   wires.push(mfWire(v33, rail("+", 2), C.red, [{ x: v33.x, y: bot + 8 }, { x: rail("+", 2).x, y: bot + 8 }], "orth"));
   used.push(v33);
@@ -231,7 +231,7 @@ function devkit() {
   used.push(gBot, sda, scl);
 
   const rows = [
-    { color: C.red, part: "3V3 (아래 줄)", to: "+ 줄 (보드 바깥 길)" }, { color: C.black, part: "GND (위 줄)", to: "− 줄" },
+    { color: C.red, part: "3V3 (위 줄 끝)", to: "+ 줄 (보드 바깥 길)" }, { color: C.black, part: "GND (위 줄)", to: "− 줄" },
     { color: C.blue, part: "DHT11 S", to: "D13 (보드에 바로)" },
     { color: C.orange, part: "소리 센서 S", to: "D35 (보드에 바로)" },
     { color: C.blue, part: "PIR S", to: "D23 (보드 바깥으로 돌아 아래 줄)" },
@@ -251,7 +251,7 @@ function devkit() {
 
 const T = {
   plus: "우리 반 센서 상황판 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SCL · SDA 는 보드 위쪽 한 줄 GND · 5V · SCL · SDA 에, DHT11 G · V · S 는 io13 기둥 G · V · S 에 F-F 듀폰선으로 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → + 줄, GND → − 줄. 포토레지스터 분압: + 줄 → 16번 줄 → 10kΩ 저항 → 19번 줄(← 아래 줄 io34) → 포토레지스터 → 21번 줄 → − 줄. 가변저항은 23 · 24 · 25번 줄, 가운데 24번 줄 ← 아래 줄 io39, 23번 줄 → − 줄, 25번 줄 → + 줄. 틸트 스위치(풀업): + 줄 → 31번 줄 → 10kΩ → 28번 줄 → 틸트 스위치 → 26번 줄 → − 줄, 28번 줄 ← 보드 바깥 길로 내려온 io14. 소리 센서 모듈 V · G → + − 줄, S → ANALOG 묶음 io35 줄 S. PIR 센서 모듈 V · G → + − 줄, S → 보드 바깥 길로 돌아 위쪽 io23",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 우리 반 센서 상황판 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 줄 GND → − 줄. DHT11 S → D13, 소리 센서 S → D35 에 F-F 듀폰선으로 바로, 두 모듈의 V · G 는 + − 줄. PIR 센서 V · G → + − 줄 끝, S → 보드 바깥으로 돌아 D23. 틸트 스위치(풀업): + 줄 → 8번 줄 → 10kΩ → 11번 줄(← D14) → 틸트 스위치 → 13번 줄 → − 줄. 포토레지스터 분압: + 줄 → 18번 줄 → 10kΩ → 21번 줄(← D34) → 포토레지스터 → 23번 줄 → − 줄. 가변저항 25 · 26 · 27번 줄, 가운데 26번 줄 ← VN(39), 25번 줄 → − 줄, 27번 줄 → + 줄. OLED 는 보드 아래: GND → 아래 줄 GND, SDA → D21, SCL → D22, VCC → 보드 바깥 길로 + 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 우리 반 센서 상황판 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 줄 GND → − 줄. DHT11 S → D13, 소리 센서 S → D35 에 F-F 듀폰선으로 바로, 두 모듈의 V · G 는 + − 줄. PIR 센서 V · G → + − 줄 끝, S → 보드 바깥으로 돌아 D23. 틸트 스위치(풀업): + 줄 → 8번 줄 → 10kΩ → 11번 줄(← D14) → 틸트 스위치 → 13번 줄 → − 줄. 포토레지스터 분압: + 줄 → 18번 줄 → 10kΩ → 21번 줄(← D34) → 포토레지스터 → 23번 줄 → − 줄. 가변저항 25 · 26 · 27번 줄, 가운데 26번 줄 ← VN(39), 25번 줄 → − 줄, 27번 줄 → + 줄. OLED 는 보드 아래: GND → 아래 줄 GND, SDA → D21, SCL → D22, VCC → 보드 바깥 길로 + 줄",
 };
 
 export default {

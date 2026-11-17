@@ -94,7 +94,7 @@ function devkit() {
 
 const T = {
   plus: "출입 통제 배선도(ESP32 Plus 확장 보드): RFID 모듈 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 보드 I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22) 에 바로. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로. 미션 LED 는 보드 위 브레드보드에: io26 → 22번 줄 → 220Ω 저항 → 17번 줄 LED 긴 다리(+), 짧은 다리(−) 16번 줄 → 점퍼선 → − 줄 → 보드 GND",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 출입 통제 배선도: 보드 VIN(5V) · GND 를 보드 위 브레드보드 + − 줄에 잇고, 서보 빨강은 + 줄, 갈색은 − 줄, 주황(신호)은 D4. RFID VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22 에 F-F 듀폰선으로 바로. 미션 LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 LED 긴 다리(+), 짧은 다리(−) 5번 줄 → 점퍼선 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 출입 통제 배선도: 보드 VIN(5V) · GND 를 보드 위 브레드보드 + − 줄에 잇고, 서보 빨강은 + 줄, 갈색은 − 줄, 주황(신호)은 D4. RFID VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22 에 F-F 듀폰선으로 바로. 미션 LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 LED 긴 다리(+), 짧은 다리(−) 5번 줄 → 점퍼선 → − 줄",
 };
 
 export default {

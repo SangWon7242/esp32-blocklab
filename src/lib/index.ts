@@ -36,7 +36,7 @@ export { CodeView, ProjectPreview } from "@/app/review/ProjectPreview";
 export { SubmitCard, SubmitCardView, canSubmitChapter, SUBMIT_TEXT, type SubmitStatus } from "@/app/track/SubmitCard";
 
 /*
- * 수업 보드 고르기: ESP32 Plus 확장 보드(기본) | 기본 보드(DevKit 30핀). 보는 사람 편의 설정이라 이 브라우저 localStorage
+ * 수업 보드 고르기: ESP32 Plus 확장 보드(기본) | 기본 보드(DevKit 38핀). 보는 사람 편의 설정이라 이 브라우저 localStorage
  * (esp32-blocklab:board)에만 둔다. 챕터·단계 화면이 스스로 BoardSelect 를 그리고 배선 그림·설명·준비물을 바꾼다 —
  * 호스트가 자기 화면(설정 등)에 같은 칸을 더 두고 싶을 때 쓴다. import 때 window 를 건드리지 않는다
  */

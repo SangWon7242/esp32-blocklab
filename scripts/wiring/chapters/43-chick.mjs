@@ -140,7 +140,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 40, cols: 22, rails: { top: true, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 30 });
@@ -208,7 +208,7 @@ function devkit() {
   used.push(sda, scl);
 
   const rows = [
-    { colors: [C.red, C.black], part: "3V3 · GND (아래 줄)", to: "아래 띠 + 줄 · − 줄" },
+    { colors: [C.red, C.black], part: "3V3(위 줄 끝) · GND(아래 줄)", to: "아래 띠 + 줄 · − 줄" },
     { color: C.red, part: "아래 띠 + 줄", to: "보드 바깥으로 돌아 브레드보드 위 + 줄" },
     { color: C.black, part: "GND (위 줄)", to: "브레드보드 아래 − 줄, + 줄끼리 · − 줄끼리 점퍼" },
     { color: C.green, part: "D14", to: `${spec.tilt.n}번 줄 (10kΩ 과 틸트 사이)` },
@@ -228,7 +228,7 @@ function devkit() {
 
 const T = {
   plus: "병아리 키우기 배선도(ESP32 Plus 확장 보드): 모듈은 F-F 듀폰선으로 보드에 바로 — DHT11 G · V · S 는 io13 기둥 G · V · S(선은 보드 가운데 틈으로), PIR 센서 G · V · S 는 io23 기둥 G · V · S, OLED GND · VCC · SCL · SDA 는 위 왼쪽 GND · 5V · SCL · SDA. 오른쪽 위 핀 묶음 위 브레드보드: 아래 줄 3V3 → 보드 바깥으로 돌아 위 + 줄, 아래 줄 GND → 아래 − 줄, + 줄끼리 · − 줄끼리 점퍼. 틸트 스위치: 10kΩ 저항 1 · 5번 줄(1번 줄 → + 줄), io14 → 5번 줄, 틸트 스위치 5 · 7번 줄(7번 줄 → − 줄). 버튼은 가운데 홈에 걸쳐 9 · 11번 줄: io27 → 9번 줄, 대각선 11번 줄 → 위 − 줄. 수동 부저 + 다리 13번 줄 ← io25, − 다리 15번 줄 → − 줄",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 병아리 키우기 배선도: 보드 위 브레드보드 — 틸트 스위치: 10kΩ 저항 4 · 8번 줄(4번 줄 → + 줄), D14 → 8번 줄, 틸트 스위치 8 · 10번 줄(10번 줄 → − 줄). 버튼은 가운데 홈에 걸쳐 11 · 13번 줄: D27 → 11번 줄, 대각선 13번 줄 → 위 − 줄. 수동 부저 + 다리 15번 줄 ← D25, − 다리 17번 줄 → − 줄. 위 줄 GND → − 줄, + 줄끼리 · − 줄끼리 점퍼. PIR 센서 V · G → + − 줄 오른쪽 끝, S → 보드 바깥으로 돌아 D23. 보드 아래 + − 줄 띠: 3V3 → + 줄, 아래 줄 GND → − 줄, 띠 + 줄 → 보드 바깥으로 돌아 브레드보드 + 줄. DHT11 V · G → 띠 + · − 줄, S → 보드 바깥으로 돌아 D13. OLED GND · VCC → 띠 − · + 줄, SDA → D21, SCL → D22",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 병아리 키우기 배선도: 보드 위 브레드보드 — 틸트 스위치: 10kΩ 저항 4 · 8번 줄(4번 줄 → + 줄), D14 → 8번 줄, 틸트 스위치 8 · 10번 줄(10번 줄 → − 줄). 버튼은 가운데 홈에 걸쳐 11 · 13번 줄: D27 → 11번 줄, 대각선 13번 줄 → 위 − 줄. 수동 부저 + 다리 15번 줄 ← D25, − 다리 17번 줄 → − 줄. 위 줄 GND → − 줄, + 줄끼리 · − 줄끼리 점퍼. PIR 센서 V · G → + − 줄 오른쪽 끝, S → 보드 바깥으로 돌아 D23. 보드 아래 + − 줄 띠: 3V3 → + 줄, 아래 줄 GND → − 줄, 띠 + 줄 → 보드 바깥으로 돌아 브레드보드 + 줄. DHT11 V · G → 띠 + · − 줄, S → 보드 바깥으로 돌아 D13. OLED GND · VCC → 띠 − · + 줄, SDA → D21, SCL → D22",
 };
 
 export default {

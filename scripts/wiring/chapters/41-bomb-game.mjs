@@ -76,7 +76,7 @@ function plus() {
   return { body: compose(b.draw(used), [bb.svg, ...c.svg, o.svg], wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 72, y: 8, cols: 26, rails: { top: true, bottom: true } });
   const b = makeDevkit({ x: 95, y: bb.y + bb.h + 24 });
@@ -110,7 +110,7 @@ function devkit() {
 
 const T = {
   plus: "바이러스 폭탄 피하기 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SDA · SCL 은 보드 I2C 묶음 첫 줄의 GND · 5V · SDA · SCL 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 버튼 a 는 가운데 홈에 걸쳐 13 · 15번 줄, 보드 위쪽 io14 → 13번 줄, 대각선 다리 15번 줄 → 위 − 줄. 버튼 b 는 17 · 19번 줄, io27 → 17번 줄, 대각선 다리 19번 줄 → 위 − 줄. (선택) 수동 부저 + 다리 22번 줄 ← io25, − 다리 25번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 바이러스 폭탄 피하기 배선도: OLED 화면 VCC → 3V3, GND → GND(아래 줄), SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 버튼 a 는 가운데 홈에 걸쳐 7 · 9번 줄, D14 → 7번 줄, 대각선 다리 9번 줄 → 위 − 줄. 버튼 b 는 11 · 13번 줄, D27 → 11번 줄, 대각선 다리 13번 줄 → 위 − 줄. (선택) 수동 부저 + 다리 16번 줄 ← D25, − 다리 19번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 바이러스 폭탄 피하기 배선도: OLED 화면 VCC → 3V3, GND → GND(아래 줄), SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 버튼 a 는 가운데 홈에 걸쳐 7 · 9번 줄, D14 → 7번 줄, 대각선 다리 9번 줄 → 위 − 줄. 버튼 b 는 11 · 13번 줄, D27 → 11번 줄, 대각선 다리 13번 줄 → 위 − 줄. (선택) 수동 부저 + 다리 16번 줄 ← D25, − 다리 19번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
 };
 
 export default {

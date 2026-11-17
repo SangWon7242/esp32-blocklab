@@ -71,7 +71,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 24, rails: { top: false, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 24 });
@@ -98,7 +98,7 @@ function devkit() {
   parts.push(pir.svg);
 
   const rows = [
-    { color: C.red, part: "3V3(아래 줄)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
+    { color: C.red, part: "3V3(위 줄 끝)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
     { color: C.blue, part: "PIR S", to: "D23 (보드 바깥으로 돌아 아래 줄)" },
     { colors: [C.red, C.black], part: "PIR V · G", to: "+ 줄 · − 줄" },
     { color: C.green, part: "D14", to: "8번 줄 (틸트 스위치와 10kΩ 사이)" },
@@ -113,7 +113,7 @@ function devkit() {
 
 const T = {
   plus: "기울기와 사람 감지 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 위. 아래 줄 3V3 → 보드 바깥으로 돌아 + 줄, 위쪽 GND → − 줄. 10kΩ 저항은 11번 줄과 15번 줄 사이, 11번 줄 → + 줄, 15번 줄 ← io14, 틸트 스위치는 15번 줄과 17번 줄 사이, 17번 줄 → − 줄. 능동 부저 + 다리 21번 줄 ← io25, − 다리 19번 줄 → − 줄. LED: io26 → 22번 줄 → 220Ω 저항 → 25번 줄 긴 다리(+), 짧은 다리(−) 26번 줄 → − 줄. PIR 센서 모듈 G · V · S 는 io23 기둥 G · V · S 에 F-F 듀폰선으로 바로",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 기울기와 사람 감지 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. 10kΩ 저항은 4번 줄과 8번 줄 사이, 4번 줄 → + 줄, 8번 줄 ← D14, 틸트 스위치는 8번 줄과 10번 줄 사이, 10번 줄 → − 줄. 능동 부저 + 다리 18번 줄 ← D25, − 다리 20번 줄 → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 15번 줄 긴 다리(+), 짧은 다리(−) 16번 줄 → − 줄. PIR 센서 모듈 V → + 줄, G → − 줄, S → 보드 바깥으로 돌아 D23",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 기울기와 사람 감지 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. 10kΩ 저항은 4번 줄과 8번 줄 사이, 4번 줄 → + 줄, 8번 줄 ← D14, 틸트 스위치는 8번 줄과 10번 줄 사이, 10번 줄 → − 줄. 능동 부저 + 다리 18번 줄 ← D25, − 다리 20번 줄 → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 15번 줄 긴 다리(+), 짧은 다리(−) 16번 줄 → − 줄. PIR 센서 모듈 V → + 줄, G → − 줄, S → 보드 바깥으로 돌아 D23",
 };
 
 export default {

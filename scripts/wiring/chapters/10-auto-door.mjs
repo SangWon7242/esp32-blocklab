@@ -41,7 +41,7 @@ function plus(which) {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀): 모듈은 F-F 로 바로, 5V 를 나눠 쓰는 곳만 브레드보드 + − 줄 ───── */
+/* ───── 기본 보드(DevKit 38핀): 모듈은 F-F 로 바로, 5V 를 나눠 쓰는 곳만 브레드보드 + − 줄 ───── */
 function devkit(which) {
   const b = makeDevkit({ x: 95, y: 206 });
   const parts = [], wires = [], used = [], rows = [];
@@ -122,9 +122,9 @@ function devkitDoor() {
 
 const T = {
   doorPlus: "자동문 배선도(ESP32 Plus 확장 보드): 초음파 센서 VCC 는 보드 위쪽 5V, Trig 는 io13 에 F-F 듀폰선으로 바로. Echo → 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → 12번 핀, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 GND. OLED 화면 GND·VCC·SDA·SCL 은 보드 I2C 묶음의 GND·5V·SDA·SCL 에. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로 꽂기",
-  doorDevkit: "기본 보드(ESP32 DevKit V1 30핀) 자동문 배선도: 보드 VIN(5V)과 GND 를 브레드보드 + − 줄에 잇고, 초음파 센서 VCC 와 서보 빨강은 + 줄, 초음파 GND 와 서보 갈색은 − 줄. 초음파 Trig 는 D13. Echo 는 작은 브레드보드 7번 줄 → 1kΩ 저항 → 4번 줄 → D12, 4번 줄 → 2kΩ 저항 → 1번 줄 → − 줄. 서보 주황은 D4. OLED VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22",
+  doorDevkit: "기본 보드(ESP32 DevKit 38핀) 자동문 배선도: 보드 VIN(5V)과 GND 를 브레드보드 + − 줄에 잇고, 초음파 센서 VCC 와 서보 빨강은 + 줄, 초음파 GND 와 서보 갈색은 − 줄. 초음파 Trig 는 D13. Echo 는 작은 브레드보드 7번 줄 → 1kΩ 저항 → 4번 줄 → D12, 4번 줄 → 2kΩ 저항 → 1번 줄 → − 줄. 서보 주황은 D4. OLED VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22",
   ultraPlus: "초음파 센서 배선도(ESP32 Plus 확장 보드): VCC 는 보드 위쪽 5V, Trig 는 io13 에 F-F 듀폰선으로 바로. Echo → 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → 12번 핀, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 GND",
-  ultraDevkit: "기본 보드(ESP32 DevKit V1 30핀) 초음파 센서 배선도: VCC 는 VIN(5V), Trig 는 D13 에 F-F 듀폰선으로 바로. Echo → 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → 12번 핀, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 GND",
+  ultraDevkit: "기본 보드(ESP32 DevKit 38핀) 초음파 센서 배선도: VCC 는 VIN(5V), Trig 는 D13 에 F-F 듀폰선으로 바로. Echo → 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → 12번 핀, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 GND",
 };
 
 export default {

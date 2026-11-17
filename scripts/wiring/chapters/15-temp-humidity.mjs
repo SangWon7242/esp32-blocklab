@@ -57,7 +57,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 26, rails: { top: false, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 24 });
@@ -78,7 +78,7 @@ function devkit() {
   parts.push(bb.svg, ...circ.svg, dht.svg);
   const rows = [
     { color: C.blue, part: "DHT11 S", to: "D13 (보드 바깥으로 돌아 위 줄)" },
-    { colors: [C.red, C.black], part: "DHT11 V · G", to: "3V3 · GND (아래 줄)" },
+    { colors: [C.red, C.black], part: "DHT11 V · G", to: "3V3(위 줄 끝) · GND(아래 줄)" },
     { color: C.yellow, part: "D26 핀", to: "11번 줄 → 220Ω 저항 → 6번 줄 LED 긴 다리(+)" },
     { color: C.black, part: "LED 짧은 다리(−) 5번 줄", to: "− 줄 → GND" },
   ];
@@ -88,7 +88,7 @@ function devkit() {
 
 const T = {
   plus: "온습도 센서 배선도(ESP32 Plus 확장 보드): DHT11 모듈의 G · V · S 를 보드 위쪽 io13 기둥의 G · V · S 에 F-F 듀폰선 세 가닥으로 바로. LED 는 1장과 같은 자리: 보드 위쪽 io26 → 브레드보드 22번 줄 → 220Ω 저항 → 17번 줄 긴 다리(+), 짧은 다리(−) 16번 줄 → − 줄 → 보드 GND",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 온습도 센서 배선도: DHT11 모듈 V → 3V3, G → GND(아래 줄), S → 보드 바깥으로 돌아 D13 에 F-F 듀폰선으로 바로. LED 는 1장과 같은 자리: D26 → 브레드보드 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄 → 보드 GND",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 온습도 센서 배선도: DHT11 모듈 V → 3V3, G → GND(아래 줄), S → 보드 바깥으로 돌아 D13 에 F-F 듀폰선으로 바로. LED 는 1장과 같은 자리: D26 → 브레드보드 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄 → 보드 GND",
 };
 
 export default {

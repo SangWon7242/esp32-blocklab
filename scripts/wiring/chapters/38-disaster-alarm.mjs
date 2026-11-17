@@ -104,7 +104,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀): 브레드보드는 보드 위, 부품은 아래 칸(f~j) ───── */
+/* ───── 기본 보드(DevKit 38핀): 브레드보드는 보드 위, 부품은 아래 칸(f~j) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 106, cols: 26, rails: { top: true, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 56 });
@@ -135,7 +135,7 @@ function devkit() {
   wires.push(mfWire(d25, bb.hole(16, "j"), C.orange, [{ x: d25.x, y: lane2 }, { x: bb.hole(16, "j").x, y: lane2 }], "orth"));
   used.push(d14, d27, d25);
 
-  // 전원: GND(위 줄) → 아래 − 줄, 3V3(아래 줄) → 보드 왼쪽 바깥 길 → 아래 + 줄 3번 칸(아래에서). + 끼리 · − 끼리 왼쪽 끝 바깥 점퍼
+  // 전원: GND(위 줄) → 아래 − 줄, 3V3(위 줄 끝) → 보드 왼쪽 바깥 길 → 아래 + 줄 3번 칸(아래에서). + 끼리 · − 끼리 왼쪽 끝 바깥 점퍼
   const gnd = b.power("GND", 0), v33 = b.power("3V3");
   wires.push(mfWire(gnd, D("-", 4), C.black));
   const l3 = below + 30;
@@ -161,7 +161,7 @@ function devkit() {
   parts.unshift(bb.svg);
   parts.push(btn.svg, dht.svg, fl.svg);
   const rows = [
-    { color: C.red, part: "3V3 (아래 줄)", to: "아래 + 줄 (보드 바깥으로)" },
+    { color: C.red, part: "3V3 (위 줄 끝)", to: "아래 + 줄 (보드 바깥으로)" },
     { color: C.black, part: "GND", to: "아래 − 줄" },
     { colors: [C.red, C.black], part: "위 + 줄 ↔ 아래 + 줄, 위 − 줄 ↔ 아래 − 줄", to: "점퍼" },
     { colors: [C.red, C.black], part: "DHT11 V · G", to: "위 + 줄 · 위 − 줄" },
@@ -180,7 +180,7 @@ function devkit() {
 
 const TT = {
   plus: "재난 알리미 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 아래. 아래 줄 3V3 → 위 + 줄, 아래 줄 GND → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. DHT11 모듈 G · V · S 는 보드 위쪽 io13 기둥 G · V · S 에 F-F 듀폰선으로 바로. 불꽃 센서 모듈 V → + 줄, G → − 줄, S → 아래 줄 io34. 틸트 스위치는 12번 줄과 14번 줄 사이, 10kΩ 저항은 9번 줄과 12번 줄 사이: 9번 줄 → + 줄, 14번 줄 → − 줄, 12번 줄 ← io14. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: io27 → 6번 줄, 대각선 8번 줄 → 아래 − 줄. 수동 부저 + 다리 2번 줄 ← io25, − 다리 4번 줄 → − 줄. io14 · io27 · io25 세 선은 보드 바깥으로 돌아 브레드보드로",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 재난 알리미 배선도: 브레드보드는 보드 위. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 + 줄과 아래 + 줄 · 위 − 줄과 아래 − 줄은 점퍼로. DHT11 모듈 V → 위 + 줄, G → 위 − 줄, S → D13. 불꽃 센서 모듈 V → 아래 + 줄, G → 아래 − 줄, S → D34. 틸트 스위치는 6번 줄과 8번 줄 사이, 10kΩ 저항은 8번 줄과 11번 줄 사이: 11번 줄 → + 줄, 6번 줄 → − 줄, 8번 줄 ← D14. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: D27 → 14번 줄, 대각선 12번 줄 → 위 − 줄. 수동 부저 + 다리 16번 줄 ← D25, − 다리 18번 줄 → 아래 − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 재난 알리미 배선도: 브레드보드는 보드 위. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 + 줄과 아래 + 줄 · 위 − 줄과 아래 − 줄은 점퍼로. DHT11 모듈 V → 위 + 줄, G → 위 − 줄, S → D13. 불꽃 센서 모듈 V → 아래 + 줄, G → 아래 − 줄, S → D34. 틸트 스위치는 6번 줄과 8번 줄 사이, 10kΩ 저항은 8번 줄과 11번 줄 사이: 11번 줄 → + 줄, 6번 줄 → − 줄, 8번 줄 ← D14. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: D27 → 14번 줄, 대각선 12번 줄 → 위 − 줄. 수동 부저 + 다리 16번 줄 ← D25, − 다리 18번 줄 → 아래 − 줄",
 };
 
 export default {

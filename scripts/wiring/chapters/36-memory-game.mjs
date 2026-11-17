@@ -93,7 +93,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg, note(bb.x - 10, bb.y + 40, "버튼", "end", 14)]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   // 패드 셋은 맨 위, 그 아래 브레드보드(왼쪽), 그 아래 보드
   const padTop = 100;
@@ -144,7 +144,7 @@ function devkit() {
 
 const T = {
   plus: "기억력 게임기 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SDA · SCL 은 I2C 묶음 GND · 5V · SDA · SCL 에 F-F 듀폰선으로 바로. 버튼은 브레드보드 가운데 홈에 걸쳐 4 · 6번 줄에 꽂고, 보드 위쪽 io14 → 6번 줄(버튼 한쪽 다리), 위쪽 GND → 4번 줄(대각선 다리). 호일 패드 a 는 아래 줄 io32, b 는 아래 줄 io33, c 는 위쪽 io27 에 꽂은 M-F 듀폰선 끝을 악어 클립으로",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 기억력 게임기 배선도: OLED 화면 VCC → 3V3, GND → GND, SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로. 버튼은 브레드보드 가운데 홈에 걸쳐 2 · 4번 줄에 꽂고, D14 → 4번 줄(버튼 한쪽 다리), GND → 2번 줄(대각선 다리). 호일 패드 a 는 D32, b 는 D33, c 는 D27 에 꽂은 M-F 듀폰선 끝을 악어 클립으로",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 기억력 게임기 배선도: OLED 화면 VCC → 3V3, GND → GND, SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로. 버튼은 브레드보드 가운데 홈에 걸쳐 2 · 4번 줄에 꽂고, D14 → 4번 줄(버튼 한쪽 다리), GND → 2번 줄(대각선 다리). 호일 패드 a 는 D32, b 는 D33, c 는 D27 에 꽂은 M-F 듀폰선 끝을 악어 클립으로",
 };
 
 export default {

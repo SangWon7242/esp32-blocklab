@@ -60,7 +60,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 24, rails: { top: false, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 30 });
@@ -90,7 +90,7 @@ function devkit() {
 
   parts.push(bb.svg, ldr.svg, r10k.svg, dht.svg);
   const rows = [
-    { color: C.red, part: "3V3(아래 줄)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
+    { color: C.red, part: "3V3(위 줄 끝)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
     { color: C.blue, part: "DHT11 S", to: "D13" },
     { colors: [C.red, C.black], part: "DHT11 V · G", to: "+ 줄 · − 줄" },
     { color: C.red, part: "+ 줄", to: "14번 줄 → 포토레지스터 → 17번 줄" },
@@ -103,7 +103,7 @@ function devkit() {
 
 const T = {
   plus: "폰에서 보는 센서 값 배선도(ESP32 Plus 확장 보드): DHT11 모듈의 G · V · S 를 보드 위쪽 io13 기둥의 G · V · S 에 F-F 듀폰선 세 가닥으로 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → + 줄, GND → − 줄. + 줄 → 17번 줄 → 포토레지스터 → 20번 줄, 20번 줄 ← 아래 줄 io34, 10kΩ 저항은 20번 줄과 23번 줄 사이, 23번 줄 → − 줄",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 폰에서 보는 센서 값 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. DHT11 모듈 V → + 줄, G → − 줄, S → D13. + 줄 → 14번 줄 → 포토레지스터 → 17번 줄, 17번 줄 ← D34, 10kΩ 저항은 17번 줄과 21번 줄 사이, 21번 줄 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 폰에서 보는 센서 값 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. DHT11 모듈 V → + 줄, G → − 줄, S → D13. + 줄 → 14번 줄 → 포토레지스터 → 17번 줄, 17번 줄 ← D34, 10kΩ 저항은 17번 줄과 21번 줄 사이, 21번 줄 → − 줄",
 };
 
 export default {

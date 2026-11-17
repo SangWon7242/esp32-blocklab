@@ -76,7 +76,7 @@ function devkit() {
 
 const T = {
   plus: "조이스틱 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): 조이스틱은 보드 아래에 핀이 위로 오게 놓고 F-F 듀폰선으로 X 는 아래 줄 io36, Y 는 io39, V 는 3V3, G 는 GND, B 는 보드 바깥으로 돌아 위쪽 한 줄 io26 에. 서보 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 조이스틱 배선도: 조이스틱 X 는 VP(36), Y 는 VN(39), B 는 D26, V 는 3V3, G 는 위 줄 GND 에 F-F 듀폰선으로. 서보 플러그 주황은 D4, 빨강은 VIN(5V), 갈색은 아래 줄 GND 에 M-F 듀폰선으로",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 조이스틱 배선도: 조이스틱 X 는 VP(36), Y 는 VN(39), B 는 D26, V 는 3V3, G 는 위 줄 GND 에 F-F 듀폰선으로. 서보 플러그 주황은 D4, 빨강은 VIN(5V), 갈색은 아래 줄 GND 에 M-F 듀폰선으로",
 };
 
 export default {

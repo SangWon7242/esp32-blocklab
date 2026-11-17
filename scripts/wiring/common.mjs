@@ -1,6 +1,6 @@
 /*
  * 배선도 공통 도구: 문서 틀, 글자, 선(F-F · M-F · M-M 듀폰선), 연결 표.
- * 보드 그림은 boards/plus.mjs(ESP32 Plus 확장 보드) · boards/devkit.mjs(기본 보드 DevKit V1 30핀),
+ * 보드 그림은 boards/plus.mjs(ESP32 Plus 확장 보드) · boards/devkit.mjs(기본 보드 DevKit 38핀),
  * 부품은 parts.mjs. 챕터 명세는 chapters/<id>.mjs (README.md 참고).
  *
  * 그림 규칙: 폭 640(글자 크기가 다른 그림과 같게), 높이는 내용에 맞춤, role="img" + <title>, 글자 12px 이상, 이모지 없음.

@@ -104,6 +104,6 @@ describe("boardChoice", () => {
 
   it("라벨은 한국어 두 개", () => {
     expect(BOARD_LABELS.plus).toBe("ESP32 Plus 확장 보드");
-    expect(BOARD_LABELS.devkit).toBe("기본 보드 (DevKit 30핀)");
+    expect(BOARD_LABELS.devkit).toBe("기본 보드 (DevKit 38핀)");
   });
 });

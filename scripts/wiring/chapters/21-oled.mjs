@@ -44,7 +44,7 @@ function devkit() {
 
 const T = {
   plus: "OLED 화면 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): OLED 의 GND · VCC · SDA · SCL 네 핀을 F-F 듀폰선으로 보드 I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22) 에",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) OLED 화면 배선도: OLED VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22 에 F-F 듀폰선 네 가닥으로 바로",
+  devkit: "기본 보드(ESP32 DevKit 38핀) OLED 화면 배선도: OLED VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22 에 F-F 듀폰선 네 가닥으로 바로",
 };
 
 export default {

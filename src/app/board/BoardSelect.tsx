@@ -29,7 +29,7 @@ type Props = {
 };
 
 /**
- * 수업 보드 고르기: ESP32 Plus 확장 보드(기본) | 기본 보드 (DevKit 30핀). 두 칸짜리 segmented control.
+ * 수업 보드 고르기: ESP32 Plus 확장 보드(기본) | 기본 보드 (DevKit 38핀). 두 칸짜리 segmented control.
  * radiogroup 의미(방향키로 옮기면 바로 고른다, Tab 은 고른 칸 하나에만 멈춘다)는 Radix RadioGroup 이 맡는다.
  * 고른 값은 이 기기 localStorage 에 남고 모든 챕터에 적용된다 (boardChoice.ts). 라우터·window 를 import 때 쓰지 않는다 (허브에서도 그대로).
  */

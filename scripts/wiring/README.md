@@ -5,7 +5,7 @@
 | 보드 | 파일 | 연결 방식 |
 |---|---|---|
 | ESP32 Plus 확장 보드 (Keyestudio KS5020, 기본) | `images/<이름>.svg` | 모듈은 F-F 듀폰선(서보는 플러그)으로 보드 핀 묶음에 **바로**. 맨 부품(LED·저항·버튼·부저·가변저항·포토레지스터·틸트 스위치)만 브레드보드 |
-| 기본 보드 ESP32 DevKit V1 30핀 | `images/<이름>.devkit.svg` | 모듈 신호선은 F-F 로 바로. 전원을 여러 부품이 나눠 쓰면 브레드보드 + − 줄. 맨 부품은 브레드보드 |
+| 기본 보드 ESP32 DevKit 38핀 | `images/<이름>.devkit.svg` | 모듈 신호선은 F-F 로 바로. 전원을 여러 부품이 나눠 쓰면 브레드보드 + − 줄. 맨 부품은 브레드보드 |
 
 ```bash
 node scripts/wiring/build.mjs 10-auto-door

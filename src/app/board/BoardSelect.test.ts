@@ -18,7 +18,7 @@ describe("BoardSelect", () => {
     expect(html).toContain('role="radiogroup"');
     expect(html.match(/role="radio"/g)).toHaveLength(2);
     expect(html).toContain('aria-label="ESP32 Plus 확장 보드"');
-    expect(html).toContain('aria-label="기본 보드 (DevKit 30핀)"');
+    expect(html).toContain('aria-label="기본 보드 (DevKit 38핀)"');
     expect(html).toMatch(/aria-checked="true"[^>]*data-testid="board-option-plus"|data-testid="board-option-plus"[^>]*aria-checked="true"/);
     expect(html).toContain('data-board="plus"');
     expect(html).toContain(BOARD_SELECT_TEXT.label);

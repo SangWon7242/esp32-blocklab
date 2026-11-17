@@ -86,7 +86,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 26, rails: { top: true, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 40 });
@@ -106,7 +106,7 @@ function devkit() {
   const btn = buttonUp(bb, 6);
   const s14 = b.gpio(14);
   wires.push(mfWire(s14, btn.sigHole, C.purple), btn.jumper);
-  // GND → 아래 − 줄, 3V3(아래 줄) → 보드 왼쪽 바깥 길 → 아래 + 줄, 두 − 줄 잇기
+  // GND → 아래 − 줄, 3V3(위 줄 끝) → 보드 왼쪽 바깥 길 → 아래 + 줄, 두 − 줄 잇기
   const gnd = b.power("GND", 0), v33 = b.power("3V3");
   wires.push(mfWire(gnd, R("-", 3), C.black));
   wires.push(mfWire(v33, R("+", 1), C.red, [{ x: v33.x, y: v33.y + 22 }, { x: 44, y: v33.y + 22 }, { x: 44, y: R("+", 1).y }], "orth"));
@@ -130,7 +130,7 @@ function devkit() {
     { color: C.black, part: "RGB 가장 긴 다리(−) 11번 줄", to: "위 − 줄" },
     { color: C.purple, part: "D14", to: "8번 줄 (버튼 한쪽 다리)" },
     { color: C.black, part: "버튼 대각선 다리 6번 줄", to: "위 − 줄" },
-    { color: C.red, part: "3V3 (아래 줄)", to: "아래 + 줄 (보드 바깥으로)" },
+    { color: C.red, part: "3V3 (위 줄 끝)", to: "아래 + 줄 (보드 바깥으로)" },
     { color: C.black, part: "GND", to: "아래 − 줄, 위 − 줄 ↔ 아래 − 줄 점퍼" },
     { color: C.teal, part: k39.label, to: "18번 줄 가변저항 가운데 다리" },
     { colors: [C.red, C.black], part: "가변저항 17 · 19번 줄", to: "아래 + 줄 · − 줄" },
@@ -141,7 +141,7 @@ function devkit() {
 
 const T = {
   plus: "감성 스마트 무드등 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 위. RGB LED 다리를 위 칸 d 의 19 · 21 · 23 · 25번 줄에(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 19 · 23 · 25번 줄에서 가운데 홈을 건너고, 보드 위쪽 io27 → 19번 줄, io25 → 23번 줄, io26 → 25번 줄. 21번 줄 → 위 − 줄. 버튼은 가운데 홈에 걸쳐 15 · 17번 줄: io14 → 17번 줄, 대각선 15번 줄 → 위 − 줄. 위쪽 GND → 아래 − 줄, 두 − 줄은 점퍼로. 가변저항은 2 · 3 · 4번 줄: 가운데 3번 줄 ← 아래 줄 io39, 4번 줄 ← 아래 줄 3V3 (두 선은 보드 바깥으로 돌아), 2번 줄 → 아래 − 줄",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 감성 스마트 무드등 배선도: 브레드보드는 보드 위. RGB LED 다리를 위 칸 d 의 9 · 11 · 13 · 15번 줄에(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 9 · 13 · 15번 줄에서 가운데 홈을 건너고, D27 → 9번 줄, D25 → 13번 줄, D26 → 15번 줄. 11번 줄 → 위 − 줄. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: D14 → 8번 줄, 대각선 6번 줄 → 위 − 줄. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 두 − 줄은 점퍼로. 가변저항은 17 · 18 · 19번 줄: 가운데 18번 줄 ← VN(39), 17번 줄 → + 줄, 19번 줄 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 감성 스마트 무드등 배선도: 브레드보드는 보드 위. RGB LED 다리를 위 칸 d 의 9 · 11 · 13 · 15번 줄에(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 9 · 13 · 15번 줄에서 가운데 홈을 건너고, D27 → 9번 줄, D25 → 13번 줄, D26 → 15번 줄. 11번 줄 → 위 − 줄. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: D14 → 8번 줄, 대각선 6번 줄 → 위 − 줄. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 두 − 줄은 점퍼로. 가변저항은 17 · 18 · 19번 줄: 가운데 18번 줄 ← VN(39), 17번 줄 → + 줄, 19번 줄 → − 줄",
 };
 
 export default {

@@ -79,7 +79,7 @@ function devkit() {
 
 const T = {
   plus: "RFID 배선도(ESP32 Plus 확장 보드): RFID 모듈 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 보드 I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22) 에 바로. 설계 단계 LED: ANALOG 묶음 io2 의 S 핀 → 브레드보드 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리(+), 짧은 다리(−) 11번 줄 → 점퍼선 → − 줄 → 보드 아래 줄 GND",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) RFID 배선도: 보드 3V3 · GND 를 브레드보드 + − 줄에 잇고, RFID VCC 는 + 줄, GND 는 − 줄. RFID SDA 는 D21, SCL 은 D22 에 F-F 듀폰선으로 바로. 설계 단계 LED: D2 → 브레드보드 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리(+), 짧은 다리(−) 11번 줄 → 점퍼선 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) RFID 배선도: 보드 3V3 · GND 를 브레드보드 + − 줄에 잇고, RFID VCC 는 + 줄, GND 는 − 줄. RFID SDA 는 D21, SCL 은 D22 에 F-F 듀폰선으로 바로. 설계 단계 LED: D2 → 브레드보드 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리(+), 짧은 다리(−) 11번 줄 → 점퍼선 → − 줄",
 };
 
 export default {

@@ -8,7 +8,7 @@ import { allSteps } from "./gating";
 import { ChapterSchema, FigureSchema } from "./schema";
 
 /*
- * 수업 보드 (plus = ESP32 Plus 확장 보드 · devkit = 기본 보드 DevKit 30핀): 스키마(captionDevkit·materials[].board),
+ * 수업 보드 (plus = ESP32 Plus 확장 보드 · devkit = 기본 보드 DevKit 38핀): 스키마(captionDevkit·materials[].board),
  * 그림 이름(.devkit.svg) 고르기와 없을 때 기본 그림, 설명·준비물 고르기, 슬라이드용 chapterForBoard.
  */
 
@@ -33,7 +33,7 @@ describe("이름·라벨", () => {
   it("보드는 plus(기본)·devkit 둘", () => {
     expect(BOARD_IDS).toEqual(["plus", "devkit"]);
     expect(DEFAULT_BOARD).toBe("plus");
-    expect(BOARD_LABELS).toEqual({ plus: "ESP32 Plus 확장 보드", devkit: "기본 보드 (DevKit 30핀)" });
+    expect(BOARD_LABELS).toEqual({ plus: "ESP32 Plus 확장 보드", devkit: "기본 보드 (DevKit 38핀)" });
     expect(isBoardId("devkit")).toBe(true);
     for (const v of ["uno", "", null, undefined, 1, "PLUS"]) expect(isBoardId(v)).toBe(false);
   });

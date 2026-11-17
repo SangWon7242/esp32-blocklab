@@ -54,7 +54,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 22, rails: { top: false, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 30 });
@@ -83,7 +83,7 @@ function devkit() {
 
   parts.push(bb.svg, res.svg, ledp.svg, r10k.svg, ldr.svg);
   const rows = [
-    { color: C.red, part: "3V3(아래 줄)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
+    { color: C.red, part: "3V3(위 줄 끝)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
     { color: C.red, part: "+ 줄", to: "13번 줄 → 10kΩ 저항 → 17번 줄" },
     { color: C.green, part: "D34", to: "17번 줄 (저항과 포토레지스터 사이)" },
     { color: C.black, part: "포토레지스터 19번 줄", to: "− 줄" },
@@ -96,7 +96,7 @@ function devkit() {
 
 const T = {
   plus: "밝기 센서 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 아래. 아래 줄 3V3 → 브레드보드 + 줄, GND → − 줄. + 줄 → 17번 줄 → 10kΩ 저항 → 20번 줄, 20번 줄 ← 아래 줄 io34, 포토레지스터는 20번 줄과 22번 줄 사이, 22번 줄 → − 줄. LED: 위 줄 io26 → 보드 바깥으로 돌아 6번 줄 → 220Ω 저항 → 10번 줄 긴 다리(+), 짧은 다리(−) 11번 줄 → − 줄",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 밝기 센서 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. + 줄 → 13번 줄 → 10kΩ 저항 → 17번 줄, 17번 줄 ← D34, 포토레지스터는 17번 줄과 19번 줄 사이, 19번 줄 → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 밝기 센서 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. + 줄 → 13번 줄 → 10kΩ 저항 → 17번 줄, 17번 줄 ← D34, 포토레지스터는 17번 줄과 19번 줄 사이, 19번 줄 → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄",
 };
 
 export default {

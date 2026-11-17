@@ -57,7 +57,7 @@ function plus() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
-/* ───── 기본 보드(DevKit V1 30핀) ───── */
+/* ───── 기본 보드(DevKit 38핀) ───── */
 function devkit() {
   const bb = breadboard({ x: 96, y: 8, cols: 22, rails: { top: false, bottom: true } });
   const b = makeDevkit({ x: 110, y: bb.y + bb.h + 30 });
@@ -66,7 +66,7 @@ function devkit() {
   used.push(v33, gnd, k39, s36, p26);
   const rail = (s, c) => bb.rail("bottom", s, c);
 
-  // 3V3(아래 줄) → 보드 왼쪽 바깥 길 → + 줄 1번 칸, GND(위 줄) → − 줄
+  // 3V3(위 줄 끝) → 보드 왼쪽 바깥 길 → + 줄 1번 칸, GND(위 줄) → − 줄
   const top = b.bounds.y;
   wires.push(mfWire(v33, rail("+", 1), C.red, [{ x: v33.x, y: v33.y + 22 }, { x: 44, y: v33.y + 22 }, { x: 44, y: rail("+", 1).y }], "orth"));
   wires.push(mfWire(gnd, rail("-", 3), C.black));
@@ -94,7 +94,7 @@ function devkit() {
 
   parts.push(bb.svg, res.svg, ledp.svg, pot.svg, snd.svg);
   const rows = [
-    { color: C.red, part: "3V3(아래 줄)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
+    { color: C.red, part: "3V3(위 줄 끝)", to: "+ 줄" }, { color: C.black, part: "GND", to: "− 줄" },
     { color: C.green, part: k39.label, to: "19번 줄 가변저항 가운데 다리" },
     { colors: [C.red, C.black], part: "가변저항 18 · 20번 줄", to: "+ 줄 · − 줄" },
     { color: C.blue, part: "소리 센서 S", to: s36.label },
@@ -108,7 +108,7 @@ function devkit() {
 
 const T = {
   plus: "박수 스위치와 다이얼 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 아래. 아래 줄 3V3 → 브레드보드 + 줄, GND → − 줄. 가변저항 다리 셋은 23 · 24 · 25번 줄: 가운데 24번 ← 아래 줄 io39, 23번 → − 줄, 25번 → + 줄. 소리 센서 모듈 S → 아래 줄 io36, V → + 줄, G → − 줄. LED: 위 줄 io26 → 보드 바깥으로 돌아 6번 줄 → 220Ω 저항 → 10번 줄 긴 다리(+), 짧은 다리(−) 11번 줄 → − 줄",
-  devkit: "기본 보드(ESP32 DevKit V1 30핀) 박수 스위치와 다이얼 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. 가변저항 다리 셋은 18 · 19 · 20번 줄: 가운데 19번 ← VN(39), 18번 → + 줄, 20번 → − 줄. 소리 센서 모듈 S → VP(36), V → + 줄, G → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄",
+  devkit: "기본 보드(ESP32 DevKit 38핀) 박수 스위치와 다이얼 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. 가변저항 다리 셋은 18 · 19 · 20번 줄: 가운데 19번 ← VN(39), 18번 → + 줄, 20번 → − 줄. 소리 센서 모듈 S → VP(36), V → + 줄, G → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄",
 };
 
 export default {
