@@ -449,7 +449,7 @@ function PinNames({ p, L, zz, y }: { p: Mod; L: Layout; zz: (y: number) => numbe
   return (
     <Decal w={span} d={12} at={[L.X(x0 - 12 + span / 2), y, zz(edge - dir * 14)]} px={Math.round(span * 4)} paint={(g, cw, ch) => {
       g.fillStyle = "#ffffff"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
-      p.pins.forEach((q) => g.fillText(q.name, ((q.x - x0 + 12) / span) * cw, ch / 2));
+      p.pins.forEach((q) => g.fillText(q.name === "-" ? "−" : q.name, ((q.x - x0 + 12) / span) * cw, ch / 2));
     }} />
   );
 }
@@ -531,6 +531,19 @@ function ModuleTop({ p, i, L, zz }: { p: Mod; i: number; L: Layout; zz: (y: numb
           <Box size={[w * 0.5, 15, h * 0.42]} at={[cx, 11.5, zz(mid)]} mat={toon("#2f6fdb")} />
           <Decal w={w * 0.44} d={h * 0.3} at={[cx, 19.1, zz(mid)]} px={160} paint={(g, cw, ch) => { g.fillStyle = "#ffffff"; g.font = `700 ${Math.round(ch * 0.28)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("SRD-05VDC", cw / 2, ch * 0.35); g.fillText("10A 250VAC", cw / 2, ch * 0.7); }} />
           <RelayLamp p={p} i={i} L={L} zz={zz} />
+        </>
+      );
+    }
+    case "rgb": {
+      // KY-016 꼴: 검은 기판 가운데 흰 5mm LED (원통 몸통 + 둥근 머리), 둘레에 얇은 받침
+      const cx = L.X(x + w / 2), cz = zz(y + 30);
+      const dome = toon("#fbfbf8", { rough: 0.25 });
+      return (
+        <>
+          <Cyl r={11} h={1.2} at={[cx, 4.6, cz]} mat={toon("#e9ecef", { outline: false })} seg={28} />
+          <Cyl r={9} h={9} at={[cx, 9.7, cz]} mat={dome} seg={28} />
+          <Ball r={9} at={[cx, 14.2, cz]} mat={dome} half />
+          <Cyl r={9.8} h={1.4} at={[cx, 5.8, cz]} mat={dome} seg={28} />
         </>
       );
     }

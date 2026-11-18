@@ -52,6 +52,7 @@ export const MODULE: Record<string, { name: string; text: string }> = {
   soil: { name: "토양 수분 센서", text: "두 갈래 다리를 흙에 꽂아요. 흙에 물이 많을수록 전기가 잘 통해서 값이 달라져요." },
   water: { name: "수위 센서", text: "줄무늬 판이 물에 잠긴 만큼 전기가 잘 통해서 물이 얼마나 남았는지 알려 줘요." },
   relay: { name: "릴레이 모듈", text: "보드의 작은 신호로 안의 스위치를 철컥 붙여서, 펌프처럼 큰 전기가 필요한 것을 켜고 꺼요." },
+  rgb: { name: "RGB LED 모듈", text: "빨강 · 초록 · 파랑 LED 셋이 한 몸에 들어 있어요. R · G · B 핀에 주는 세기를 섞어 여러 색을 만들어요." },
   generic: { name: "모듈", text: "보드와 선으로 이어 쓰는 부품이에요." },
 };
 

@@ -14,8 +14,8 @@ import { useViewerApi } from "./store";
  *   - 외곽선 없이 실사 재질 그대로 그린다
  */
 
-const AZ0 = Math.PI / 5;
-const EL_TILT = (36 * Math.PI) / 180;
+export const AZ0 = Math.PI / 5;
+export const EL_TILT = (36 * Math.PI) / 180;
 const EL_TOP = (89.5 * Math.PI) / 180;
 const TURN_MS = 520;
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);

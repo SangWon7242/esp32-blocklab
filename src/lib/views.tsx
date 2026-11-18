@@ -1,6 +1,8 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import type { CoachEditorViewProps } from "@/app/coach/types";
+import { cn } from "@/lib/utils";
 import type { TrackId } from "@/track/schema";
+import type { AssemblyStageProps } from "@/app/track/wiring3d/AssemblyStage";
 
 /*
  * 라이브러리 화면 (계획 13 인터페이스 계약). 화면 컴포넌트는 Blockly·CodeMirror 를 끌고 오므로 lazy 로 받아,
@@ -15,8 +17,12 @@ const ChapterPage = lazy(() => import("@/app/track/ChapterPage").then((m) => ({ 
 const StepPage = lazy(() => import("@/app/track/StepPage").then((m) => ({ default: m.StepPage })));
 const LabPage = lazy(() => import("@/app/lab/LabPage").then((m) => ({ default: m.LabPage })));
 const CoachEditor = lazy(() => import("@/app/coach/CoachEditor").then((m) => ({ default: m.CoachEditor })));
+const AssemblyStageImpl = lazy(() => import("@/app/track/wiring3d/AssemblyStage").then((m) => ({ default: m.AssemblyStage })));
 
 export type { CoachEditorViewProps, CoachProgram, CoachProposal, CoachRunEvent } from "@/app/coach/types";
+export type { AssemblyStageProps } from "@/app/track/wiring3d/AssemblyStage";
+export type { AssemblyCue } from "@/app/track/wiring3d/assemblyCue";
+export type { Scene3D } from "@/track/wiring3d";
 
 export type TrackListViewProps = {
   /** 호스트가 주소(?track=)에서 읽은 탭. 없거나 모르는 값이면 마지막으로 본 탭(없으면 센서 트랙) */
@@ -96,5 +102,18 @@ export function CoachEditorView(props: CoachEditorViewProps) {
     <Loading>
       <CoachEditor {...props} />
     </Loading>
+  );
+}
+
+/**
+ * 3D 조립 안내 무대 (lib-v1.6.0). 허브 행사 화면이 「보드 놓기 → 모듈 놓기 → 선 하나씩 → 다 보기」를 짧은 영상처럼 보여 준다.
+ * 차례(step)·다시 보기(replayKey)는 호스트가 정하고, 움직임이 끝나면 onMotionEnd 를 부른다. 단추 · 설명 판은 없다.
+ * three · R3F 를 끌고 오므로 lazy 조각이다 (import 때 DOM 을 건드리지 않는다). 부모가 높이를 준다 (무대가 꽉 채운다).
+ */
+export function AssemblyStage(props: AssemblyStageProps) {
+  return (
+    <Suspense fallback={<div className={cn("h-full w-full bg-[#f8f4ec]", props.className)} aria-busy="true" />}>
+      <AssemblyStageImpl {...props} />
+    </Suspense>
   );
 }

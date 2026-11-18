@@ -22,6 +22,7 @@ const DocsPage = lazy(() => import("./docs/DocsPage").then((m) => ({ default: m.
 const SettingsPage = lazy(() => import("./settings/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 // 확인용 숨은 화면 (lib-v1.1.0 코치 편집기, 메뉴에 없다. e2e 가 쓴다)
 const CoachEditorDemoPage = lazy(() => import("./pages/CoachEditorDemoPage").then((m) => ({ default: m.CoachEditorDemoPage })));
+const AssemblyDemoPage = lazy(() => import("./pages/AssemblyDemoPage").then((m) => ({ default: m.AssemblyDemoPage })));
 
 const navItems = [
   { to: "/lab", label: "자유 코딩", icon: Blocks },
@@ -144,6 +145,7 @@ function Screens() {
           <Route path="/docs" element={<DocsRoute />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/coach-editor-demo" element={<CoachEditorDemoPage />} />
+          <Route path="/assembly-demo" element={<AssemblyDemoPage />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

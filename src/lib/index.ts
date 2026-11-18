@@ -30,6 +30,8 @@ export { DEFAULT_BLOCKLY_MEDIA_PATH, blocklyMediaPath, setBlocklyMediaPath } fro
 export { ChapterView, LabView, StepView, TrackListView, type ChapterViewProps, type LabInitialProgram, type LabViewProps, type StepViewProps, type TrackListViewProps } from "./views";
 /* 코치 편집기 (lib-v1.1.0, 계획 14): 허브 코치 화면의 만들기 배치가 그린다 */
 export { CoachEditorView, type CoachEditorViewProps, type CoachProgram, type CoachProposal, type CoachRunEvent } from "./views";
+/* 3D 조립 안내 무대 (lib-v1.6.0): 허브 행사 화면(메이커 데이)이 보드 · 모듈 · 선을 차례대로 짧은 영상처럼 보여 준다 */
+export { AssemblyStage, type AssemblyCue, type AssemblyStageProps, type Scene3D } from "./views";
 /* 제출·열람 화면 — Blockly·CodeMirror 를 바로 불러오지 않으므로 lazy 없이 내보낸다 (ProjectPreview 의 블록 그림은 useEffect 안 동적 import) */
 export { ChapterReviewView } from "@/app/review/ChapterReviewView";
 export { CodeView, ProjectPreview } from "@/app/review/ProjectPreview";

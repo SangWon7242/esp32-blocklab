@@ -186,7 +186,7 @@ function OverlaySync({ anchors, L }: { anchors: Anchor[]; L: Layout }) {
 }
 
 /** 방 안 빛: 실사 재질이 비출 주변 (금속 핀 · 은색 통에 반사가 맺힌다) */
-function RoomLight() {
+export function RoomLight() {
   const { gl, scene } = useThree();
   useEffect(() => {
     const pm = new THREE.PMREMGenerator(gl);
@@ -268,7 +268,7 @@ export function Scene3DView({ scene, L, anchors, cardsRoom, site = false }: { sc
 }
 
 /** 부품 한 개의 3D 모습 */
-function partView(p: Scene3D["parts"][number], i: number, L: Layout) {
+export function partView(p: Scene3D["parts"][number], i: number, L: Layout) {
   switch (p.type) {
     case "led": return <Led key={i} p={p} i={i} L={L} />;
     case "resistor": return <Resistor key={i} p={p} i={i} L={L} />;
@@ -289,7 +289,7 @@ function partView(p: Scene3D["parts"][number], i: number, L: Layout) {
 }
 
 /** 바닥 모눈: 장면과 함께 돌아서 방향을 잃지 않는다 */
-function Floor({ r }: { r: number }) {
+export function Floor({ r }: { r: number }) {
   const cell = 24, cells = Math.ceil((r * 5) / cell / 10) * 10;
   const grid = useMemo(() => {
     const g = new THREE.GridHelper(cell * cells, cells / 5, "#cfc6b4", "#cfc6b4");
