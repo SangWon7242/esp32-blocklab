@@ -1,6 +1,7 @@
 // 메이커 데이 「색깔 카드 AI 불빛」 — RGB LED 모듈(R G B −)을 Plus 보드 io27 · io25 · io26 기둥 S 와 GND 에 F-F 로 바로.
 import { COLORS as C, compose, connectionTable, ffWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
+import { makeDevkit } from "../boards/devkit.mjs";
 import { module } from "../parts.mjs";
 
 function rgbModule(x, y) {
@@ -34,8 +35,32 @@ function plus() {
   return { body: compose(b.draw([t27.S, t25.S, t26.S, gnd]), [m.svg], wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 기본 보드(DevKit 38핀) — 행사에서 쓰는 보드. 위 줄 D27 · D26 · D25 · GND 에 F-F 로 바로 ───── */
+function devkit() {
+  const b = makeDevkit({ x: 110, y: 170 });
+  const d27 = b.gpio(27), d25 = b.gpio(25), d26 = b.gpio(26), gnd = b.power("GND", 0);
+  const m = rgbModule((d27.x + d25.x) / 2 - 50, 20);
+  // 모듈 아래에서 꺾는 높이를 선마다 달리 해 겹치지 않게 한다. 위 줄 핀으로는 위에서 곧장 내려온다
+  const jog = (from, to, color, y) => ffWire(from, to, color, [{ x: from.x, y }, { x: to.x, y }], "orth");
+  const wires = [
+    jog(m.pins.R, d27, C.red, 104),
+    jog(m.pins.G, d25, C.green, 116),
+    jog(m.pins.B, d26, C.blue, 128),
+    jog(m.pins["-"], gnd, C.black, 140),
+  ];
+  const rows = [
+    { color: C.red, part: "모듈 R", to: "D27" },
+    { color: C.green, part: "모듈 G", to: "D25" },
+    { color: C.blue, part: "모듈 B", to: "D26" },
+    { color: C.black, part: "모듈 −", to: "GND (위 줄)" },
+  ];
+  const table = connectionTable(b.bounds.y + b.bounds.h + 24, "이렇게 꽂아요 — 같은 색 스티커 자리에", rows, "devkit");
+  return { body: compose(b.draw([d27, d25, d26, gnd]), [m.svg], wires, [table.svg]), height: table.bottom };
+}
+
 export default {
   "wiring.svg": {
     plus: () => { const r = plus(); return svgDoc("mca", "배선도(ESP32 Plus 확장 보드): RGB LED 모듈 R → io27, G → io25, B → io26, − → GND. 모두 F-F 선으로 보드에 바로 꽂아요", r.body, r.height); },
+    devkit: () => { const r = devkit(); return svgDoc("mcak", "배선도(ESP32 DevKit 38핀): RGB LED 모듈 R → D27, G → D25, B → D26, − → GND. 모두 F-F 선으로 보드에 바로 꽂아요", r.body, r.height); },
   },
 };
