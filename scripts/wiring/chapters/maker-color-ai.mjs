@@ -58,7 +58,37 @@ function devkit() {
   return { body: compose(b.draw([d27, d25, d26, gnd]), [m.svg], wires, [table.svg]), height: table.bottom };
 }
 
+/*
+ * 조립 튜토리얼 그림(DevKit 38핀): 선을 하나씩. k 번째 그림은 앞의 선은 그대로, 지금 꽂을 선 하나만 새로 그리고
+ * 그 선이 닿는 보드 핀(노란 테)과 모듈 핀(노란 고리)을 강조한다. 표 대신 큰 글씨 한 줄로 무엇을 어디에 꽂는지 쓴다.
+ */
+const STEPS = [
+  { pin: "R", gpio: 27, color: C.red, text: "빨간 선: 모듈 R → 보드 27" },
+  { pin: "G", gpio: 25, color: C.green, text: "초록 선: 모듈 G → 보드 25" },
+  { pin: "B", gpio: 26, color: C.blue, text: "파란 선: 모듈 B → 보드 26" },
+  { pin: "-", gpio: null, color: C.black, text: "검정 선: 모듈 − → 보드 GND" },
+];
+const JOG = [104, 116, 128, 140];
+
+function devkitStep(k) {
+  const b = makeDevkit({ x: 110, y: 170 });
+  const d27 = b.gpio(27);
+  const d25 = b.gpio(25);
+  const m = rgbModule((d27.x + d25.x) / 2 - 50, 20);
+  const target = (st) => (st.gpio === null ? b.power("GND", 0) : b.gpio(st.gpio));
+  const wires = STEPS.slice(0, k + 1).map((st, i) =>
+    ffWire(m.pins[st.pin], target(st), st.color, [{ x: m.pins[st.pin].x, y: JOG[i] }, { x: target(st).x, y: JOG[i] }], "orth"));
+  const now = STEPS[k];
+  const ring = `<circle cx="${m.pins[now.pin].x}" cy="${m.pins[now.pin].y - 4}" r="13" fill="none" stroke="#fab005" stroke-width="5"/>`;
+  const y = b.bounds.y + b.bounds.h + 56;
+  const label = `<text x="${b.bounds.x + b.bounds.w / 2}" y="${y}" text-anchor="middle" font-size="34" font-weight="700" fill="${now.color}">${now.text}</text>`;
+  return { body: compose(b.draw([target(now)]), [m.svg], wires, [ring, label]), height: y + 24 };
+}
+
 export default {
+  ...Object.fromEntries(STEPS.map((st, k) => [`wiring-step-${k + 1}.svg`, {
+    devkit: () => { const r = devkitStep(k); return svgDoc(`mcas${k + 1}`, `조립 ${k + 1}단계(ESP32 DevKit 38핀): ${st.text}`, r.body, r.height); },
+  }])),
   "wiring.svg": {
     plus: () => { const r = plus(); return svgDoc("mca", "배선도(ESP32 Plus 확장 보드): RGB LED 모듈 R → io27, G → io25, B → io26, − → GND. 모두 F-F 선으로 보드에 바로 꽂아요", r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("mcak", "배선도(ESP32 DevKit 38핀): RGB LED 모듈 R → D27, G → D25, B → D26, − → GND. 모두 F-F 선으로 보드에 바로 꽂아요", r.body, r.height); },
