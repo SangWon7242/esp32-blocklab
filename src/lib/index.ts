@@ -54,3 +54,15 @@ export type BlockTools = typeof import("./blockTools");
 export * from "./core";
 /* localStorage 를 쓰는 진행 저장소 (브라우저 전용이라 core 에는 없다) */
 export { LocalProgressStore } from "@/track/progress";
+
+/* 보드 연결(Web Serial raw REPL). 허브의 행사 화면(메이커 데이)이 블록랩 화면 없이 보드만 쓴다 (lib-v1.5.0) */
+export {
+  DEVICE_ERROR_MESSAGES,
+  DeviceError,
+  FakeDevice,
+  WebSerialDevice,
+  type Device,
+  type DeviceErrorCode,
+  type DeviceStatus,
+  type RunResult,
+} from "@/device";
