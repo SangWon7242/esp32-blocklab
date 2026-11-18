@@ -67,8 +67,15 @@ export class MicroPythonGenerator extends PythonGenerator {
   /** 도우미 장부: provideHelper 이름 → 그 도우미를 준비한 블록 id 들 */
   private helperOwners = new Map<string, string[]>();
 
-  constructor() {
+  /**
+   * 호스트가 보드에 미리 정의해 두는 장치 도우미 이름 (행사용 AiCardEditor: set_color). 이 도우미를 부르는 블록이 있어도
+   * def 를 만들지 않고 그 이름을 그대로 부른다 (toCodegen.ts provide)
+   */
+  readonly hostHelpers: ReadonlySet<string>;
+
+  constructor(opts: { hostHelpers?: readonly string[] } = {}) {
     super("MicroPython");
+    this.hostHelpers = new Set(opts.hostHelpers ?? []);
     this.INDENT = "    ";
     // PythonGenerator 는 max·list 같은 내장 이름까지 피해 max2 로 바꾼다. 키워드만 피한다.
     // (nameDB_ 는 첫 init() 에서 이 값으로 만들어지므로 생성자에서 바꾸면 된다)

@@ -32,6 +32,8 @@ export { ChapterView, LabView, StepView, TrackListView, type ChapterViewProps, t
 export { CoachEditorView, type CoachEditorViewProps, type CoachProgram, type CoachProposal, type CoachRunEvent } from "./views";
 /* 3D 조립 안내 무대 (lib-v1.6.0): 허브 행사 화면(메이커 데이)이 보드 · 모듈 · 선을 차례대로 짧은 영상처럼 보여 준다 */
 export { AssemblyStage, type AssemblyCue, type AssemblyStageProps, type Scene3D } from "./views";
+/* 행사용 AI 카드 코딩 편집기 (lib-v1.7.0): 허브 행사 화면(메이커 데이 색깔 카드 AI)의 코딩 단계. 순수 도우미(aiCardStarterCode·AI_CARD_IDS·checkAiCardCode)는 core 에 */
+export { AiCardEditor, type AiCardEditorProps } from "./views";
 /* 제출·열람 화면 — Blockly·CodeMirror 를 바로 불러오지 않으므로 lazy 없이 내보낸다 (ProjectPreview 의 블록 그림은 useEffect 안 동적 import) */
 export { ChapterReviewView } from "@/app/review/ChapterReviewView";
 export { CodeView, ProjectPreview } from "@/app/review/ProjectPreview";

@@ -62,6 +62,12 @@ export const CATEGORY_COLORS: Record<CategoryId, CategoryColour> = {
 
 export const CATEGORY_IDS = Object.keys(CATEGORY_COLORS) as CategoryId[];
 
+/**
+ * 행사용 「AI 카드」 카테고리 색 (lib-v1.7.0, AiCardEditor 툴박스에만 나온다 — 기본 툴박스 17개 카테고리에는 없다).
+ * 밝은 주황: 모든 카테고리·장치 색과 OKLab ΔE 0.07 이상 떨어지고 진한 글자 대비 6:1 이상
+ */
+export const AI_CARD_COLOUR: CategoryColour = shadesOf("#ff6b00");
+
 /* ---------- 장치별 블록 색 ----------
  * 같은 카테고리 안 장치 블록은 카테고리 색 둘레(색상·밝기)에서 서로, 그리고 다른 카테고리 색과 눈에 띄게 떨어진 색을 고른다.
  * HSL 로 hue 를 돌리면 같은 L 이라도 노랑→빨강처럼 눈에 보이는 밝기가 크게 바뀌므로, 지각 균일 색 공간

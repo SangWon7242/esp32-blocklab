@@ -2,7 +2,7 @@ import type { BlockJson, FlatBlock, Issue, LintContext, LintWorkspaceJson } from
 import type { LineMap } from "@/codegen/linemap";
 
 /** 작업판 최상위에 있어도 실행되는 블록 (그 밖의 최상위 줄은 떨어진 블록) */
-export const TOP_OK = new Set(["start_program", "procedures_defnoreturn", "procedures_defreturn"]);
+export const TOP_OK = new Set(["start_program", "procedures_defnoreturn", "procedures_defreturn", "aicard_on_card"]);
 
 /** 작업판 JSON → 평탄화한 블록 목록과 검사 문맥 */
 export function buildContext(json: LintWorkspaceJson, map: LineMap | null): LintContext {

@@ -3,6 +3,7 @@ import type { CoachEditorViewProps } from "@/app/coach/types";
 import { cn } from "@/lib/utils";
 import type { TrackId } from "@/track/schema";
 import type { AssemblyStageProps } from "@/app/track/wiring3d/AssemblyStage";
+import type { AiCardEditorProps } from "@/app/aicard/AiCardEditor";
 
 /*
  * 라이브러리 화면 (계획 13 인터페이스 계약). 화면 컴포넌트는 Blockly·CodeMirror 를 끌고 오므로 lazy 로 받아,
@@ -17,10 +18,12 @@ const ChapterPage = lazy(() => import("@/app/track/ChapterPage").then((m) => ({ 
 const StepPage = lazy(() => import("@/app/track/StepPage").then((m) => ({ default: m.StepPage })));
 const LabPage = lazy(() => import("@/app/lab/LabPage").then((m) => ({ default: m.LabPage })));
 const CoachEditor = lazy(() => import("@/app/coach/CoachEditor").then((m) => ({ default: m.CoachEditor })));
+const AiCardEditorImpl = lazy(() => import("@/app/aicard/AiCardEditor").then((m) => ({ default: m.AiCardEditor })));
 const AssemblyStageImpl = lazy(() => import("@/app/track/wiring3d/AssemblyStage").then((m) => ({ default: m.AssemblyStage })));
 
 export type { CoachEditorViewProps, CoachProgram, CoachProposal, CoachRunEvent } from "@/app/coach/types";
 export type { AssemblyStageProps } from "@/app/track/wiring3d/AssemblyStage";
+export type { AiCardEditorProps } from "@/app/aicard/AiCardEditor";
 export type { AssemblyCue } from "@/app/track/wiring3d/assemblyCue";
 export type { Scene3D } from "@/track/wiring3d";
 
@@ -114,6 +117,19 @@ export function AssemblyStage(props: AssemblyStageProps) {
   return (
     <Suspense fallback={<div className={cn("h-full w-full bg-[#f8f4ec]", props.className)} aria-busy="true" />}>
       <AssemblyStageImpl {...props} />
+    </Suspense>
+  );
+}
+
+/**
+ * 행사용 AI 카드 코딩 편집기 (lib-v1.7.0). 메이커 데이 「색깔 카드 AI」의 코딩 단계: 아이가 블록으로 `def on_card(card): …` 를 만든다.
+ * 노트북 AI 가 카드를 알아보면 호스트가 보드에서 on_card("red" | … | "none") 을 부른다. 생성 코드에는 RGB 준비·set_color 정의가 없다
+ * (호스트가 연결 때 올린다). Blockly·CodeMirror 를 끌고 오므로 lazy 조각이다. BlocklabProvider 안에서 쓰고, 부모가 크기를 준다 (꽉 채운다).
+ */
+export function AiCardEditor(props: AiCardEditorProps) {
+  return (
+    <Suspense fallback={<div className={cn("flex h-full w-full items-center justify-center bg-background text-muted-foreground", props.className)} aria-busy="true">불러오는 중…</div>}>
+      <AiCardEditorImpl {...props} />
     </Suspense>
   );
 }

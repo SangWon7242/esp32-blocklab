@@ -1,5 +1,5 @@
 import * as Blockly from "blockly";
-import { CATEGORY_COLORS, CATEGORY_IDS, ENTRY_COLORS } from "./colors";
+import { AI_CARD_COLOUR, CATEGORY_COLORS, CATEGORY_IDS, ENTRY_COLORS } from "./colors";
 
 const style = (c: { primary: string; secondary: string; tertiary: string }) => ({
   colourPrimary: c.primary,
@@ -23,9 +23,15 @@ export const entryTheme = Blockly.Theme.defineTheme("entry", {
     // 장치 블록은 이 스타일을 쓰지 않고 장치마다의 colour 를 쓴다 (src/devices/toBlocks.ts). 예전 저장본·확장용으로 남긴다
     hardware_blocks: style(ENTRY_COLORS.HARDWARE),
     code_blocks: style(ENTRY_COLORS.CODE),
+    // 행사용 AI 카드 블록 (src/blocks/definitions/aicard.ts)
+    aicard_blocks: style(AI_CARD_COLOUR),
   },
   // 카테고리마다 <id>_category (start_category … list_category … input_category, code_category) — 카테고리 열 타일 색
-  categoryStyles: Object.fromEntries(CATEGORY_IDS.map((id) => [`${id}_category`, { colour: CATEGORY_COLORS[id].primary }])),
+  // 행사용 AiCardEditor 툴박스는 aicard_category 를 더 쓴다
+  categoryStyles: {
+    ...Object.fromEntries(CATEGORY_IDS.map((id) => [`${id}_category`, { colour: CATEGORY_COLORS[id].primary }])),
+    aicard_category: { colour: AI_CARD_COLOUR.primary },
+  },
   componentStyles: {
     workspaceBackgroundColour: "#f6f7f9",
     toolboxBackgroundColour: "#ffffff",

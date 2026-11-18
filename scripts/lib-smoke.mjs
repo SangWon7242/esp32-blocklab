@@ -40,9 +40,14 @@ const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
 assert.equal(lib.LIB_VERSION, pkg.version);
 assert.equal(JSON.parse(readFileSync(path.join(dist, "package.json"), "utf8")).version, pkg.version);
 
-for (const name of ["setBlocklyMediaPath", "blocklyMediaPath", "ChapterReviewView", "ProjectPreview", "CodeView", "SubmitCard", "SubmitCardView", "BoardSelect", "useBoardChoice", "setBoardChoice", "canSubmitChapter", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "loadBlockTools", "BlocklabProvider", "useHost", "TrackListView", "ChapterView", "StepView", "LabView", "CoachEditorView", "loadChapters", "getChapter", "judge", "codeToBlocks", "stepStates", "allSteps", "LocalProgressStore", "reflectMessage", "debugMessage", "parseReview"]) {
+for (const name of ["setBlocklyMediaPath", "blocklyMediaPath", "ChapterReviewView", "ProjectPreview", "CodeView", "SubmitCard", "SubmitCardView", "BoardSelect", "useBoardChoice", "setBoardChoice", "canSubmitChapter", "chapterSnapshot", "textAnswersOf", "judgeSnapshot", "loadBlockTools", "BlocklabProvider", "useHost", "TrackListView", "ChapterView", "StepView", "LabView", "CoachEditorView", "loadChapters", "getChapter", "judge", "codeToBlocks", "stepStates", "allSteps", "LocalProgressStore", "reflectMessage", "debugMessage", "parseReview", "AiCardEditor", "aiCardStarterCode", "checkAiCardCode"]) {
   assert.equal(typeof lib[name], "function", `${name} 이 함수가 아니에요`);
 }
+
+// 행사용 AI 카드 (lib-v1.7.0): 순수 도우미는 Node 에서도 쓴다
+assert.deepEqual([...lib.AI_CARD_IDS], ["red", "yellow", "green", "blue", "purple", "none"]);
+assert.equal(lib.checkAiCardCode(lib.aiCardStarterCode()).ok, true);
+assert.equal(lib.checkAiCardCode("").ok, false);
 
 // 수업 보드: window 없는 Node 에서도 부를 수 있다 (저장은 건너뛴다)
 assert.deepEqual(lib.BOARD_IDS, ["plus", "devkit"]);

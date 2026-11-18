@@ -57,6 +57,9 @@ const BUILTIN_LABELS: Record<string, string> = {
   procedures_callreturn: "함수 실행 값",
   code_stmt: "코드 …",
   code_expr: "식 …",
+  aicard_on_card: "AI 가 카드를 보면",
+  aicard_card: "AI 가 본 카드",
+  aicard_name: "카드 이름",
 };
 
 /** 블록 type → 한글 블록 이름 (장치 블록은 레지스트리 메시지의 %n 을 … 로) */

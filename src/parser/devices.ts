@@ -92,7 +92,7 @@ function kindOk(ctx: ParseContext, name: string | undefined, kinds: string[] | u
 
 /** 장치를 쓸 수 있는지: 준비가 없는 묶음(print)은 늘, 아니면 준비 줄이 접혔을 때 */
 function devicePresent(d: DeviceSpec, ctx: ParseContext): boolean {
-  if (!d.setup) return true;
+  if (!d.setup || ctx.hostDevices.has(d.id)) return true;
   for (const v of ctx.devices.values()) if (v.deviceId === d.id) return true;
   return false;
 }

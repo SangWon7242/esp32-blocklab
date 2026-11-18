@@ -8,16 +8,18 @@ import { judgeBlocks } from "./definitions/judge";
 import { calcBlocks } from "./definitions/calc";
 import { dataBlocks } from "./definitions/data";
 import { codeBlocks } from "./definitions/code";
+import { aiCardBlocks } from "./definitions/aicard";
 import { isValidPythonName } from "./names";
 import { deviceBlockDefinitions, textFieldValidators } from "@/devices/toBlocks";
 
 export { entryTheme } from "./theme";
 export { toolbox } from "./toolbox";
+export { aiCardToolbox, type AiCardToolboxLevel } from "./aiCardToolbox";
 export { registerEntryToolbox } from "./entryToolbox";
 export { registerVariableFlyout, variableFlyout } from "./variableFlyout";
 export { FUNCTION_NAME_HINT, isProgramName, isReservedName, isValidPythonName, PROGRAM_NAME_HINT, PYTHON_KEYWORDS, VARIABLE_NAME_HINT } from "./names";
 
-const definitions = [...startBlocks, ...flowBlocks, ...judgeBlocks, ...calcBlocks, ...dataBlocks, ...deviceBlockDefinitions(), ...codeBlocks];
+const definitions = [...startBlocks, ...flowBlocks, ...judgeBlocks, ...calcBlocks, ...dataBlocks, ...deviceBlockDefinitions(), ...codeBlocks, ...aiCardBlocks];
 
 export const CUSTOM_BLOCK_TYPES: readonly string[] = definitions.map((d) => d.type as string);
 

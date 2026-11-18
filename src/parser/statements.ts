@@ -7,6 +7,7 @@ import { callBlock, callParts, convertAllOrNull, convertExpr, isListVariable, is
 import { functionParts, isKnownImport, returnsValue } from "./patterns";
 import { bodyStatements, children, operands } from "./tree";
 import type { BlockJson } from "./types";
+import { AI_CARD_FUNCTION, AI_CARD_PARAM } from "@/aicard/cards";
 
 export type Converted = { blocks: BlockJson[]; tops: BlockJson[]; consumed: number };
 
@@ -282,6 +283,17 @@ function convertStatement(node: SyntaxNode, ctx: ParseContext, topLevel: boolean
     case "FunctionDefinition": {
       const { name, params, body, simple } = functionParts(node, ctx);
       if (!topLevel || ctx.duplicateDefs.has(node.from)) return unknown(node, ctx);
+      // 행사용 AI 카드: def on_card(card): (값을 돌려주지 않는다) → 「AI 가 카드를 보면」 블록
+      if (simple && name === AI_CARD_FUNCTION && params.length === 1 && params[0] === AI_CARD_PARAM && !returnsValue(body)) {
+        const stmts = body ? bodyStatements(body) : [];
+        ctx.inOnCard = true;
+        try {
+          const BODY = stmts.every((s) => s.name === "PassStatement") ? undefined : chain(convertStatements(stmts, ctx, false).blocks);
+          return { blocks: [], tops: [block("aicard_on_card", undefined, { BODY })], consumed: 1 };
+        } finally {
+          ctx.inOnCard = false;
+        }
+      }
       // 장치 도우미(get_distance·show …)도 숨기지 않고 함수 정의 블록으로 (생성기는 같은 이름의 함수 블록이 있으면 도우미를 다시 만들지 않는다)
       if (!simple) return unknown(node, ctx);
       const stmts = body ? bodyStatements(body) : [];

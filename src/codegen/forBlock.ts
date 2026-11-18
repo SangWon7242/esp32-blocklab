@@ -2,6 +2,7 @@ import type * as Blockly from "blockly";
 import { Order } from "blockly/python";
 import type { MicroPythonGenerator } from "./generator";
 import { registerDeviceGenerators } from "@/devices/toCodegen";
+import { AI_CARD_FUNCTION, AI_CARD_PARAM } from "@/aicard/cards";
 
 type Gen = MicroPythonGenerator;
 const value = (block: Blockly.Block, gen: Gen, name: string, order = Order.NONE, fallback = "0") => gen.valueToCode(block, name, order) || fallback;
@@ -194,6 +195,16 @@ export function registerForBlocks(gen: Gen): void {
   };
   f["procedures_defnoreturn"] = (block, g) => defGenerator(block, g as Gen);
   f["procedures_defreturn"] = (block, g) => defGenerator(block, g as Gen);
+
+  // 행사용 AI 카드 (lib-v1.7.0): 「AI 가 카드를 보면」은 def on_card(card): 정의 (함수 정의처럼 몸통 앞 함수 자리에 둔다)
+  f["aicard_on_card"] = (block, g) => {
+    const gen = g as Gen;
+    const body = gen.statementToCode(block, "BODY") || gen.PASS;
+    gen.setDefinition(`%${AI_CARD_FUNCTION}`, gen.scrubBlock(block, `${gen.markFor(block)}def ${AI_CARD_FUNCTION}(${AI_CARD_PARAM}):\n${body}`));
+    return null;
+  };
+  f["aicard_card"] = () => [AI_CARD_PARAM, Order.ATOMIC];
+  f["aicard_name"] = (block) => [JSON.stringify(String(block.getFieldValue("CARD"))), Order.ATOMIC];
 
   f["code_stmt"] = (block) => `${block.getFieldValue("CODE")}\n`;
   // 괄호 한 덩어리([1, 2]·(a + b))는 더 감쌀 필요가 없다(ATOMIC). 이름·속성·호출 하나(time.ticks_us(), Pin(26, Pin.OUT))면

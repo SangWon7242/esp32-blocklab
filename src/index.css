@@ -295,3 +295,26 @@
   fill: #6b7280;
   font: 600 12px "Pretendard Variable", Pretendard, sans-serif;
 }
+
+/*
+ * 행사용 AI 카드 편집기 (AiCardEditor, lib-v1.7.0): 아이 손가락·눈에 맞춰 카테고리 열을 넓히고 아이콘·이름을 키운다.
+ * 블록 자체는 작업판 zoom(1.25)으로 키운다
+ */
+.aiCardEditor .injectionDiv .blocklyToolbox {
+  width: 104px;
+}
+.aiCardEditor .injectionDiv .blocklyToolboxCategory.entryCategoryRow {
+  min-height: 92px;
+  padding: 12px 4px;
+}
+.aiCardEditor .injectionDiv .entryCategoryIcon,
+.aiCardEditor .injectionDiv .entryCategoryIcon > svg {
+  width: 36px;
+  height: 36px;
+}
+.aiCardEditor .injectionDiv .blocklyToolboxCategoryLabel.entryCategoryLabel {
+  font-size: 16px;
+}
+.aiCardEditor .injectionDiv .blocklyFlyoutLabelText {
+  font-size: 15px;
+}

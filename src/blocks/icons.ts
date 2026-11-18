@@ -1,5 +1,5 @@
 import {
-  Box, Calculator, Check, Code, createElement, Fan, Flag, Keyboard, Lightbulb, List, Monitor, Pin, Radar, Repeat,
+  Box, Calculator, Check, Code, createElement, Fan, Flag, Keyboard, Lightbulb, List, Monitor, Pin, Radar, Repeat, ScanEye,
   SquareFunction, ToggleLeft, Volume2, Wifi, type IconNode,
 } from "lucide";
 import type { CategoryId } from "./colors";
@@ -25,6 +25,9 @@ const CATEGORY_ICON_NODES: Record<CategoryId, IconNode> = {
   code: Code,
 };
 
+/** 기본 툴박스 밖 카테고리 아이콘 (행사용 AiCardEditor 의 「AI 카드」) */
+const EXTRA_ICON_NODES: Record<string, IconNode> = { aicard: ScanEye };
+
 const cache = new Map<string, string>();
 
 /**
@@ -34,7 +37,7 @@ const cache = new Map<string, string>();
 export function categoryIconSvg(id: string): string | null {
   const cached = cache.get(id);
   if (cached !== undefined) return cached;
-  const node = (CATEGORY_ICON_NODES as Record<string, IconNode | undefined>)[id];
+  const node = (CATEGORY_ICON_NODES as Record<string, IconNode | undefined>)[id] ?? EXTRA_ICON_NODES[id];
   if (!node) return null;
   const svg = createElement(node, { width: 26, height: 26, "aria-hidden": "true" }).outerHTML;
   cache.set(id, svg);

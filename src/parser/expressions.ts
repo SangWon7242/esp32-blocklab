@@ -6,6 +6,7 @@ import { isProgramName } from "@/blocks/names";
 import { matchCall, matchExpr } from "./devices";
 import { children, operands } from "./tree";
 import type { BlockJson } from "./types";
+import { AI_CARD_PARAM, isAiCardId } from "@/aicard/cards";
 
 const COMPARE: Record<string, string> = { "<": "LT", ">": "GT", "==": "EQ", "!=": "NEQ", "<=": "LTE", ">=": "GTE" };
 const ARITH: Record<string, string> = { "+": "ADD", "-": "MINUS", "*": "MULTIPLY", "/": "DIVIDE", "//": "FLOORDIV", "%": "MOD", "**": "POW" };
@@ -142,6 +143,7 @@ const OUTPUT_TYPES: Record<string, readonly string[]> = {
   calc_random: ["Number"], calc_round: ["Number"], calc_minmax: ["Number"], calc_len: ["Number"], calc_ticks: ["Number"],
   calc_elapsed: ["Number"], calc_ticks_diff: ["Number"], calc_map: ["Number"],
   list_index: ["Number"],
+  aicard_card: ["String"], aicard_name: ["String"],
   // calc_item 은 output null (리스트·글자의 항목은 어떤 값이든) 이라 여기에 넣지 않는다
 };
 
@@ -198,10 +200,14 @@ function convertAny(node: SyntaxNode, ctx: ParseContext): BlockJson {
     case "Number": return isCanonicalNumber(text) ? num(Number(text)) : fallback(node, ctx);
     case "String": {
       const decoded = isPlainString(text) ? decodeString(text) : null;
+      // 「AI 가 카드를 보면」 안의 카드 이름 글자("red" … "none")는 카드 이름 블록
+      if (decoded !== null && ctx.inOnCard && isAiCardId(decoded)) return block("aicard_name", { CARD: decoded });
       return decoded === null ? fallback(node, ctx) : str(decoded);
     }
     case "Boolean": return bool(text === "True");
-    case "VariableName": return ctx.hasVar(text) ? varGet(ctx.varId(text)) : fallback(node, ctx);
+    case "VariableName":
+      if (ctx.inOnCard && text === AI_CARD_PARAM) return block("aicard_card");
+      return ctx.hasVar(text) ? varGet(ctx.varId(text)) : fallback(node, ctx);
     case "ParenthesizedExpression": {
       // 학생이 적은 괄호는 괄호 블록으로 남긴다 (안이 code_expr 여도 감싸서 글자가 그대로). 튜플 (1, 2)·빈 () 는 코드로
       const kids = children(node);

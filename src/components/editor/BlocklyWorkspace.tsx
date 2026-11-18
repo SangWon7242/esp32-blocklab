@@ -35,6 +35,8 @@ export type BlocklyHandle = {
    * 보이기만 할 뿐 Blockly 선택·키보드 포커스와 상관없다. 같은 id 로 다시 만들어진 블록에도 다시 달도록 불릴 때마다 맞춘다
    */
   setFocusBlock(id: string | null): void;
+  /** 툴박스를 바꾼다 (AiCardEditor 의 basic ↔ full). 작업판 블록은 그대로 */
+  updateToolbox(def: Blockly.utils.toolbox.ToolboxDefinition): void;
 };
 
 type Props = {
@@ -47,6 +49,20 @@ type Props = {
   /** 블록 우클릭 메뉴 "이 블록 설명 보기" (작업판·팔레트 블록. 그림자 블록이면 담은 블록) */
   onDocRequest?: (req: BlockDocRequest) => void;
   className?: string;
+  /**
+   * 다른 편집기 꾸밈 (행사용 AiCardEditor, lib-v1.7.0). 처음 마운트할 때만 읽는다 — 툴박스만 나중에 바뀌면 updateToolbox.
+   * 없으면 자유 코딩 편집기 그대로(기본 툴박스·zoom 0.75·시작 블록 하나·생성기 generateCodeWithMap)
+   */
+  variant?: WorkspaceVariant;
+};
+
+export type WorkspaceVariant = {
+  toolbox?: Blockly.utils.toolbox.ToolboxDefinition;
+  startScale?: number;
+  maxScale?: number;
+  maxInstances?: Record<string, number>;
+  /** 작업판 → 코드와 코드 지도 (없으면 generateCodeWithMap) */
+  codegen?: (ws: Blockly.WorkspaceSvg) => { code: string; map: LineMap };
 };
 
 /** 검사가 단 경고 아이콘의 id (다른 경고와 섞이지 않게) */
@@ -81,7 +97,10 @@ function revealProgram(ws: Blockly.WorkspaceSvg): boolean {
   return true;
 }
 
-export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, onSelect, onWarningOpen, onDocRequest, className }, ref) {
+export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function BlocklyWorkspace({ onChange, onSelect, onWarningOpen, onDocRequest, className, variant }, ref) {
+  const variantRef = useRef(variant);
+  variantRef.current = variant;
+  const codeWithMap = (ws: Blockly.WorkspaceSvg) => (variantRef.current?.codegen ?? generateCodeWithMap)(ws);
   const hostRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<Blockly.WorkspaceSvg | null>(null);
   const loadingRef = useRef(false);
@@ -108,18 +127,19 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
     registerEntryToolbox();
     // 메뉴 항목은 전역에 한 번만 등록되고, 콜백은 지금 마운트된 작업판의 것으로 바뀐다
     registerBlockDocMenu((req) => onDocRequestRef.current?.(req));
+    const v = variantRef.current;
     const ws = Blockly.inject(host, {
       // 효과음·sprites.svg 를 자기 주소에서 (기본 static.blockly.com 은 허브 CSP 에 막힘)
       media: blocklyMediaPath(),
-      toolbox,
+      toolbox: v?.toolbox ?? toolbox,
       theme: entryTheme,
       renderer: "zelos",
       trashcan: true,
       grid: { spacing: 24, length: 2, colour: "#e5e7eb", snap: true },
-      zoom: { controls: true, wheel: true, startScale: 0.75, minScale: 0.4, maxScale: 1.5 },
+      zoom: { controls: true, wheel: true, startScale: v?.startScale ?? 0.75, minScale: 0.4, maxScale: v?.maxScale ?? 1.5 },
       move: { scrollbars: true, drag: true, wheel: false },
       // 프로그램 시작은 하나뿐 (둘이면 어느 쪽이 실행되는지 알 수 없다)
-      maxInstances: { start_program: 1 },
+      maxInstances: v?.maxInstances ?? { start_program: 1 },
     });
     wsRef.current = ws;
     // 변수 꾸러미에 "만큼 바꾸기" 를 정하기 블록 뒤에 끼운다 (Blockly 기본 꾸러미를 감싼다)
@@ -150,7 +170,7 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
         return;
       }
       if (loadingRef.current || e.isUiEvent || ws.isDragging()) return;
-      const { code, map } = generateCodeWithMap(ws);
+      const { code, map } = codeWithMap(ws);
       onChangeRef.current(Blockly.serialization.workspaces.save(ws) as WorkspaceJson, code, map);
     };
     ws.addChangeListener(listener);
@@ -196,8 +216,8 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
       ws.clearUndo();
     },
     getJson: () => Blockly.serialization.workspaces.save(wsRef.current!) as WorkspaceJson,
-    getCode: () => (wsRef.current ? generateCode(wsRef.current) : ""),
-    getCodeWithMap: () => (wsRef.current ? generateCodeWithMap(wsRef.current) : { code: "", map: emptyLineMap() }),
+    getCode: () => (wsRef.current ? (variantRef.current?.codegen ? codeWithMap(wsRef.current).code : generateCode(wsRef.current)) : ""),
+    getCodeWithMap: () => (wsRef.current ? codeWithMap(wsRef.current) : { code: "", map: emptyLineMap() }),
     setIssues(issues) {
       const ws = wsRef.current;
       if (!ws) return;
@@ -238,6 +258,9 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
       if (opts?.focus !== false) Blockly.getFocusManager().focusNode(block);
       ws.centerOnBlock(block.id, true);
       return block.id;
+    },
+    updateToolbox(def) {
+      wsRef.current?.updateToolbox(def);
     },
     setFocusBlock(id) {
       const ws = wsRef.current;

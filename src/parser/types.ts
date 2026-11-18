@@ -22,3 +22,12 @@ export type UnparsedItem = { line: number; text: string };
 export type ParseResult =
   | { ok: true; json: WorkspaceJson; unparsed: UnparsedItem[] }
   | { ok: false; error: { line: number; message: string } };
+
+/** codeToBlocks 의 선택 사항 */
+export type ParseOptions = {
+  /**
+   * 호스트가 보드에 미리 올려 두는 장치 id (예: 행사용 AI 카드 편집기의 ["rgb"]). 코드에 그 장치의 준비 줄·도우미 def 가 없어도
+   * 그 장치 블록 꼴(`set_color(255, 0, 0)` → RGB 색 블록)로 돌아온다
+   */
+  hostDevices?: readonly string[];
+};

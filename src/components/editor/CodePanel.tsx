@@ -21,6 +21,8 @@ type Props = {
   highlightLines?: LineHighlight[];
   /** 줄 번호를 누르면 그 줄 (1-based) */
   onLineClick?: (line: number) => void;
+  /** 학생이 고른 글자 크기가 이보다 작으면 이 크기 (px, 행사용 AiCardEditor 의 큰 글씨) */
+  minFontSize?: number;
   className?: string;
 };
 
@@ -82,7 +84,7 @@ const theme = EditorView.theme({
 /** 학생이 고른 글자 크기 (px). 기본 테마의 CSS 변수보다 앞선다 */
 const fontSizeTheme = (px: number) => EditorView.theme({ "&": { fontSize: `${px}px` } });
 
-export function CodePanel({ value, readOnly, onChange, errorLine = null, highlightLines = NO_HIGHLIGHTS, onLineClick, className }: Props) {
+export function CodePanel({ value, readOnly, onChange, errorLine = null, highlightLines = NO_HIGHLIGHTS, onLineClick, minFontSize = 0, className }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const readOnlyComp = useRef(new Compartment());
@@ -115,7 +117,7 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
       highlightActiveLine(), history(), python(), indentUnit.of("    "),
       syntaxHighlighting(defaultHighlightStyle), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       readOnlyComp.current.of(EditorState.readOnly.of(readOnly)),
-      errorLineField, highlightField, theme, fontSizeComp.current.of(fontSizeTheme(codeFontSize())),
+      errorLineField, highlightField, theme, fontSizeComp.current.of(fontSizeTheme(Math.max(minFontSize, codeFontSize()))),
       EditorView.updateListener.of((u) => {
         if (!u.docChanged || applyingRef.current) return;
         const text = u.state.doc.toString();
@@ -161,7 +163,7 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
 
   // 글자 크기를 바꾸면 크기 테마를 바꿔 끼운다. CSS 변수만 바뀌면 편집기가 줄 높이를 다시 재지 않아 줄 번호가 어긋난다
   // (테마가 바뀌면 CodeMirror 가 줄 높이·글자 폭을 다시 잰다)
-  const fontSize = useCodeFontSize();
+  const fontSize = Math.max(minFontSize, useCodeFontSize());
   useEffect(() => {
     viewRef.current?.dispatch({ effects: fontSizeComp.current.reconfigure(fontSizeTheme(fontSize)) });
   }, [fontSize]);

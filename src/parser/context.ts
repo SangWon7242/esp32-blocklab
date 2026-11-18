@@ -32,7 +32,18 @@ export class ParseContext {
   /** withSource 동안 조각의 1번 줄이 원문의 몇 번째 줄 다음인지 */
   private lineBase = 0;
 
-  constructor(text: string) { this.src = new Source(text); }
+  /**
+   * 호스트가 보드에 미리 준비해 두는 장치 id (행사용 AI 카드: rgb). 준비 줄이 없어도 그 장치의 call·lines 꼴이 맞는다
+   * (`set_color(255, 0, 0)` → RGB 색 블록). 그 장치 도우미도 standardHelpers 에 든다 (survey)
+   */
+  readonly hostDevices: ReadonlySet<string>;
+  /** 지금 「AI 가 카드를 보면」(def on_card(card):) 몸통 안인지. card → 「AI 가 본 카드」, "red" … → 카드 이름 블록 */
+  inOnCard = false;
+
+  constructor(text: string, hostDevices: readonly string[] = []) {
+    this.src = new Source(text);
+    this.hostDevices = new Set(hostDevices);
+  }
 
   varId(name: string): string {
     if (!this.variables.has(name)) this.variables.set(name, `var_${name}`);

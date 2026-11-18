@@ -1,16 +1,17 @@
 import { parser } from "@lezer/python";
 import type { SyntaxNode } from "@lezer/common";
 import { ParseContext } from "./context";
-import { allActionHelpers } from "@/devices/registry";
+import { actionHelpersOf, allActionHelpers, DEVICES } from "@/devices/registry";
 import { functionParts, returnsValue } from "./patterns";
 import { isStandardHelper, matchSetupAt, namesDefinedBy } from "./devices";
 import { escapeCommentLine, withComment } from "./builders";
 import { convertStatements } from "./statements";
 import { children } from "./tree";
-import type { BlockJson, ParseResult, WorkspaceJson } from "./types";
+import { AI_CARD_FUNCTION, AI_CARD_PARAM } from "@/aicard/cards";
+import type { BlockJson, ParseOptions, ParseResult, WorkspaceJson } from "./types";
 
 export { normalizeCode } from "./normalize";
-export type { BlockJson, ParseResult, UnparsedItem, WorkspaceJson } from "./types";
+export type { BlockJson, ParseOptions, ParseResult, UnparsedItem, WorkspaceJson } from "./types";
 
 /**
  * 대입·매개변수로 쓰인 이름을 모두 변수로 등록하고, 함수 표를 만들고, 레지스트리의 준비 선언으로 장치 변수(ctx.devices)를 정하고,
@@ -54,10 +55,14 @@ function survey(script: SyntaxNode, ctx: ParseContext): void {
     if (defs.has(name)) { ctx.duplicateDefs.add(node.from); continue; }
     defs.set(name, { paramText, body });
     ctx.calledNames.add(name);
-    if (simple) ctx.functions.set(name, { params, returns: returnsValue(body) });
+    // def on_card(card): 은 함수 블록이 아니라 「AI 가 카드를 보면」 블록이 된다 (statements.ts). 부르는 줄은 코드로 남는다
+    const aiCardEvent = name === AI_CARD_FUNCTION && params.length === 1 && params[0] === AI_CARD_PARAM && !returnsValue(body);
+    if (simple && !aiCardEvent) ctx.functions.set(name, { params, returns: returnsValue(body) });
   }
   // 장치 블록이 부르는 짧은 도우미(get_distance·show …) 중 표준 몸통의 최상위 def 로 있는 것: 그 호출이 장치 블록으로 돌아온다
   for (const h of allActionHelpers()) if (ctx.functions.has(h.name) && isStandardHelper(h, defs.get(h.name), ctx)) ctx.standardHelpers.add(h.name);
+  // 호스트가 미리 준비한 장치의 도우미(set_color)는 코드에 def 가 없어도 있는 것으로 본다. 코드가 같은 이름을 따로 정의하면 그 def 를 따른다
+  for (const d of DEVICES) if (ctx.hostDevices.has(d.id)) for (const h of actionHelpersOf(d)) if (!defs.has(h.name)) ctx.standardHelpers.add(h.name);
 
   // 문장 변환과 같은 순서로 준비 줄을 접어 보며 장치 변수를 미리 등록한다 (몸통 안의 메서드 호출이 쓴다)
   const texts = top.map((n) => ctx.src.slice(n).trim());
@@ -114,9 +119,9 @@ function usedVariableIds(roots: BlockJson[]): Set<string> {
   return ids;
 }
 
-export function codeToBlocks(code: string): ParseResult {
+export function codeToBlocks(code: string, options: ParseOptions = {}): ParseResult {
   const tree = parser.parse(code);
-  const ctx = new ParseContext(code);
+  const ctx = new ParseContext(code, options.hostDevices);
 
   let errorAt = -1;
   tree.iterate({ enter(n) { if (errorAt < 0 && n.type.isError) { errorAt = n.from; } } });

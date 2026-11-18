@@ -56,7 +56,8 @@ function userHelperFunction(workspace: Blockly.Workspace, h: HelperSpec, needsVa
  * provideFunction_ 은 앞쪽 공백 2칸을 INDENT(4칸)로 바꾸므로 도우미 본문은 2칸 단위로 적는다
  */
 function provide(G: MicroPythonGenerator, block: Blockly.Block, h: HelperSpec, helpers: string[], needsValue: boolean): void {
-  const own = userHelperFunction(block.workspace, h, needsValue);
+  // 호스트가 보드에 미리 정의해 둔 도우미(행사용 AI 카드 편집기의 set_color)는 def 를 만들지 않고 그 이름을 부른다
+  const own = G.hostHelpers.has(h.name) || userHelperFunction(block.workspace, h, needsValue);
   if (own) {
     G.useUserHelper(h.name);
     return;

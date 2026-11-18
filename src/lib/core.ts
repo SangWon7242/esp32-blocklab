@@ -68,5 +68,20 @@ export {
   type ReflectRequest,
 } from "@/ai/claude";
 
+/* 행사용 AI 카드 (lib-v1.7.0): 시작 뼈대·카드 id·아이 코드 검사 (보드에 올리기 전에 서버·호스트가 같은 규칙으로 본다) */
+export {
+  AI_CARD_FUNCTION,
+  AI_CARD_HOST_DEVICES,
+  AI_CARD_HOST_HELPERS,
+  AI_CARD_IDS,
+  AI_CARD_LABELS,
+  AI_CARD_PARAM,
+  aiCardStarterCode,
+  checkAiCardCode,
+  isAiCardId,
+  type AiCardCheck,
+  type AiCardId,
+} from "@/aicard/cards";
+
 /** package.json 의 version (vite.lib.config.ts 가 넣는다). 소스에서 바로 쓸 때는 개발 표시 */
 export const LIB_VERSION: string = typeof __LIB_VERSION__ === "string" ? __LIB_VERSION__ : "0.0.0-dev";
