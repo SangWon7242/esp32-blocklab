@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { DeviceError, FakeDevice, WebSerialDevice, type Device, type DeviceStatus, type RunError } from "@/device";
+import { DeviceError, type DeviceStatus, type RunError } from "@/device";
 import {
   appendDeviceRow, appendDeviceText, EMPTY_DEVICE_CONSOLE, tracebackRow, type DeviceConsole, type DeviceKind, type DeviceRow,
 } from "./deviceConsole";
 import { saveToBoard, syncLibs, type DeviceProgram } from "./saveToBoard";
+import { leaveDevice, sharedDevices } from "./sharedDevice";
 
 export type { DeviceProgram };
+export { createDevice } from "./sharedDevice";
 
 /** 실행 결과 (onRunEnd). ok 는 오류도 멈춤도 없이 끝났을 때만 true. error 는 보드 Traceback (lib-v1.1.0) */
 export type RunEndResult = { ok: boolean; stopped: boolean; error?: RunError };
@@ -36,26 +38,26 @@ export type UseDeviceOptions = {
 /** stdout 을 화면에 붙이는 것은 한 프레임에 한 번. 숨은 탭처럼 프레임이 오지 않아도 이만큼 쌓이면 바로 붙인다 */
 const MAX_PENDING_STDOUT = 64 * 1024;
 
-/** 가짜 장치는 print 줄 사이를 잠깐 쉬어 "실행 중" 상태와 멈춤을 볼 수 있게 한다 */
-const FAKE_LINE_DELAY_MS = 200;
-
-export function createDevice(fake: boolean): Device {
-  return fake ? new FakeDevice({ lineDelayMs: FAKE_LINE_DELAY_MS }) : new WebSerialDevice();
-}
-
 /**
  * 보드 연결·실행·저장·멈춤과 콘솔의 보드 행.
  * - 실행: "실행을 시작했어요" → 보드 출력 → "실행이 끝났어요" / "실행을 멈췄어요" / Traceback 행(영어 그대로) + 오류 줄 강조
  * - 저장: 쓰인 블록의 라이브러리 중 보드에 없는 것만 올리고 → main.py → 소프트 리셋(main.py 가 바로 돈다)
  * - 오류는 토스트 + 콘솔 system 행. 보드를 고르지 않은 것(cancelled)은 조용히 넘어간다.
+ * - 장치는 화면 사이에서 함께 쓴다(sharedDevice). 트랙 단계를 넘겨 편집기가 다시 마운트돼도 연결이 이어진다.
+ *   언마운트할 때 이 편집기의 실행은 멈추고(연결은 유지), 저장은 끝날 때까지 둔다. 콘솔 행은 화면마다 새로 시작한다.
  */
 export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd }: UseDeviceOptions) {
-  const [device] = useState(() => createDevice(fake));
+  // 장치(가짜/진짜)는 마운트 때 정해진다
+  const [{ device, deviceFake }] = useState(() => ({ device: sharedDevices().get(fake), deviceFake: fake }));
   const [status, setStatus] = useState<DeviceStatus>(device.status);
   const [consoleState, setConsoleState] = useState<DeviceConsole>(EMPTY_DEVICE_CONSOLE);
   /** 실행·저장 흐름이 진행 중인지 (저장은 여러 단계라 장치 상태가 사이사이 connected 로 돌아온다) */
   const [task, setTask] = useState<"run" | "save" | null>(null);
   const taskRef = useRef<"run" | "save" | null>(null);
+  /** 실행·저장 동안 공유 장치를 붙잡아 둔다 (편집기가 먼저 언마운트돼도 저장 중에 쉬는 시간 끊김이 오지 않게) */
+  const taskHold = useRef<(() => void) | null>(null);
+  /** 언마운트 뒤에 끝난 실행은 화면(오류 줄·완료 판정)에 알리지 않는다 */
+  const mounted = useRef(true);
 
   const optsRef = useRef({ getProgram, onErrorLine, showConsole, onRunEnd });
   optsRef.current = { getProgram, onErrorLine, showConsole, onRunEnd };
@@ -94,6 +96,8 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
   }, [flushStdout]);
 
   useEffect(() => {
+    mounted.current = true;
+    const release = sharedDevices().hold(deviceFake);
     const offStatus = device.onStatus(setStatus);
     const offOutput = device.onOutput((e) => {
       if (e.kind === "stdout" && taskRef.current === "run") runOutput.current += e.text;
@@ -107,10 +111,12 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
       offOutput();
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
-      // 화면을 떠나면 포트를 놓아 준다 (다른 탭·PyCharm 이 쓸 수 있게)
-      if (device.status !== "disconnected") void device.disconnect();
+      mounted.current = false;
+      // 연결은 다음 화면이 이어 쓴다. 이 편집기의 실행만 멈추고 저장은 끝날 때까지 둔다.
+      // 쓰는 곳이 하나도 없이 60초가 지나면 공유 장치가 포트를 놓아 준다 (다른 탭·PyCharm 이 쓸 수 있게)
+      leaveDevice(device, taskRef.current, release);
     };
-  }, [device, push]);
+  }, [device, deviceFake, push]);
 
   const report = useCallback((e: unknown) => {
     if (e instanceof DeviceError && e.code === "cancelled") return;
@@ -127,12 +133,15 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
     const program = optsRef.current.getProgram();
     if (!program) return null;
     taskRef.current = t;
+    taskHold.current = sharedDevices().hold(deviceFake);
     setTask(t);
     return program;
   };
   const end = () => {
     flushStdout();
     taskRef.current = null;
+    taskHold.current?.();
+    taskHold.current = null;
     setTask(null);
   };
 
@@ -171,9 +180,9 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
       else if (result.ok || !result.error) push("system", "실행이 끝났어요");
       else {
         pushRow(tracebackRow(result.error));
-        if (result.error.line !== null) optsRef.current.onErrorLine(code, result.error.line);
+        if (result.error.line !== null && mounted.current) optsRef.current.onErrorLine(code, result.error.line);
       }
-      optsRef.current.onRunEnd?.(
+      if (mounted.current) optsRef.current.onRunEnd?.(
         { ok: result.ok && !result.stopped, stopped: result.stopped === true, ...(result.error ? { error: result.error } : {}) },
         runOutput.current,
         code,
