@@ -1,10 +1,15 @@
-import { useMemo } from "react";
-import { Maximize2 } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Box, Image as ImageIcon, Loader2, Maximize2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { boardImageRef, type BoardId } from "@/track/board";
 import { chapterImage, sanitizeSvg } from "@/track/images";
+import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
 import { useBoardChoice } from "../board/boardChoice";
+
+// three.js 는 크게 보기 창에서 3D 를 처음 열 때만 불러온다
+const Wiring3DView = lazy(() => import("./wiring3d/Wiring3DView").then((m) => ({ default: m.Wiring3DView })));
 
 type Props = {
   /** 챕터 id (그림 폴더) */
@@ -31,6 +36,7 @@ type Props = {
 };
 
 const SVG_BOX = "[&>svg]:block [&>svg]:h-auto [&>svg]:w-full [&>svg]:max-w-full";
+const BIG_SVG = cn(SVG_BOX, "text-foreground [&>svg]:mx-auto [&>svg]:max-h-[calc(100dvh-9rem)]");
 const SVG_FIT = "h-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full";
 
 /** SVG 의 <title> 글 (크게 보기 창의 제목) */
@@ -49,6 +55,7 @@ export function resolveBoardImage(chapterId: string, image: string | undefined, 
  * 우리 파일만 쓰지만 script·on* 처리기는 한 번 더 거른 뒤 넣는다.
  * zoomable 이면 그림을 누를 때 큰 창(Dialog)에 같은 그림을 크게 보여 준다.
  * 기본 보드(devkit)를 고르면 같은 이름의 .devkit.svg 가 있을 때 그것을 그린다 (크게 보기 창도 같은 그림).
+ * 그 그림에 3D 장면(.3d.json)이 있으면 크게 보기 창은 「3D 시뮬레이션 | 그림」 으로 나뉘고 3D 가 먼저 열린다.
  */
 export function Illustration({ chapterId, image, caption, className, captionClassName, zoomable, fit, boardVariant = true, board: boardProp }: Props) {
   const chosen = useBoardChoice();
@@ -58,6 +65,8 @@ export function Illustration({ chapterId, image, caption, className, captionClas
     const raw = chapterImage(chapterId, shown);
     return raw ? sanitizeSvg(raw) : undefined;
   }, [chapterId, shown]);
+  // 배선 그림처럼 3D 장면이 있는 그림: 크게 보기 창에서 3D 시뮬레이션을 먼저 (기기가 3D 를 못 쓰면 창 안에서 그림으로)
+  const has3d = Boolean(zoomable) && hasScene3D(chapterId, shown);
   if (!svg) return null;
   const picture = <div className={fit ? SVG_FIT : SVG_BOX} dangerouslySetInnerHTML={{ __html: svg }} />;
   return (
@@ -83,15 +92,21 @@ export function Illustration({ chapterId, image, caption, className, captionClas
             </button>
           </DialogTrigger>
           <DialogContent
-            className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[min(72rem,calc(100vw-4rem))]"
+            className={cn(
+              "max-h-[calc(100dvh-2rem)] overflow-y-auto",
+              has3d ? "sm:max-w-[min(80rem,calc(100vw-4rem))]" : "sm:max-w-[min(72rem,calc(100vw-4rem))]",
+            )}
             data-testid="illustration-dialog"
           >
             <DialogTitle className="pr-8 leading-snug">{caption ?? svgTitle(svg) ?? "그림"}</DialogTitle>
-            <DialogDescription className="sr-only">그림을 크게 보여 줍니다. Esc 를 누르면 닫혀요.</DialogDescription>
-            <div
-              className={cn(SVG_BOX, "text-foreground [&>svg]:mx-auto [&>svg]:max-h-[calc(100dvh-9rem)]")}
-              dangerouslySetInnerHTML={{ __html: svg }}
-            />
+            {has3d ? (
+              <ZoomWith3D chapterId={chapterId} shown={shown} svg={svg} />
+            ) : (
+              <>
+                <DialogDescription className="sr-only">그림을 크게 보여 줍니다. Esc 를 누르면 닫혀요.</DialogDescription>
+                <div className={BIG_SVG} dangerouslySetInnerHTML={{ __html: svg }} />
+              </>
+            )}
           </DialogContent>
         </Dialog>
       ) : (
@@ -99,5 +114,59 @@ export function Illustration({ chapterId, image, caption, className, captionClas
       )}
       {caption && <figcaption className={cn("mt-2 text-sm text-muted-foreground", captionClassName)}>{caption}</figcaption>}
     </figure>
+  );
+}
+
+function Loading3D() {
+  return (
+    <div className="flex h-[min(70dvh,42rem)] w-full items-center justify-center gap-2 rounded-xl bg-muted/40 text-sm text-muted-foreground">
+      <Loader2 className="size-4 animate-spin" />3D 배선을 준비하고 있어요
+    </div>
+  );
+}
+
+/**
+ * 크게 보기 창의 본문 (창이 열릴 때만 그린다): 「3D 시뮬레이션 | 그림」. 3D 가 먼저.
+ * 그래픽 가속이 없는 기기이거나 3D 를 그리다 실패하면 전환 없이 그림만 (WiringFigure 와 같은 방식).
+ */
+function ZoomWith3D({ chapterId, shown, svg }: { chapterId: string; shown: string | undefined; svg: string }) {
+  const [unsupported, setUnsupported] = useState(() => !canShow3D());
+  const [tab, setTab] = useState("3d");
+  const [scene, setScene] = useState<Scene3D | null>(null);
+
+  useEffect(() => {
+    setScene(null);
+    if (unsupported) return;
+    let alive = true;
+    void loadScene3D(chapterId, shown)?.then((s) => { if (alive) setScene(s); });
+    return () => { alive = false; };
+  }, [unsupported, chapterId, shown]);
+
+  const onUnsupported = useCallback(() => { setUnsupported(true); setTab("picture"); }, []);
+  const picture = <div className={BIG_SVG} dangerouslySetInnerHTML={{ __html: svg }} />;
+  if (unsupported) {
+    return (
+      <>
+        <DialogDescription className="sr-only">그림을 크게 보여 줍니다. Esc 를 누르면 닫혀요.</DialogDescription>
+        {picture}
+      </>
+    );
+  }
+  return (
+    <Tabs value={tab} onValueChange={setTab} className="min-w-0 gap-3" data-testid="illustration-views">
+      <DialogDescription className="sr-only">배선을 3D 시뮬레이션이나 그림으로 크게 보여 줍니다. Esc 를 누르면 닫혀요.</DialogDescription>
+      <TabsList>
+        <TabsTrigger value="3d" data-testid="illustration-view-3d"><Box className="size-4" />3D 시뮬레이션</TabsTrigger>
+        <TabsTrigger value="picture" data-testid="illustration-view-picture"><ImageIcon className="size-4" />그림</TabsTrigger>
+      </TabsList>
+      <TabsContent value="3d" className="min-w-0">
+        {scene ? (
+          <Suspense fallback={<Loading3D />}>
+            <Wiring3DView scene={scene} chapterId={chapterId} large onUnsupported={onUnsupported} />
+          </Suspense>
+        ) : <Loading3D />}
+      </TabsContent>
+      <TabsContent value="picture">{picture}</TabsContent>
+    </Tabs>
   );
 }

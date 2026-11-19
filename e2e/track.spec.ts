@@ -319,6 +319,23 @@ test("안내 칸 그림: 크게 보기를 누르면 큰 창에 그림이 나오�
   await expect(dialog).toBeHidden();
 });
 
+test("배선 그림 크게 보기: 3D 장면이 있으면 창에서 3D 시뮬레이션이 먼저, 「그림」 으로 바꾸면 배선도", async ({ page }) => {
+  // 시험 브라우저는 그래픽 가속이 없어 3D 가 꺼지므로 이 시험에서만 켠다
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
+  await page.goto("/#/track/03-traffic-light/problem");
+  const kit = page.getByTestId("step-kit");
+  await kit.getByRole("button", { name: "부품과 배선" }).click();
+  await kit.getByTestId("illustration-zoom").click();
+  const dialog = page.getByTestId("illustration-dialog");
+  await expect(dialog.getByTestId("illustration-view-3d")).toHaveAttribute("aria-selected", "true");
+  await expect(dialog.getByTestId("wiring-3d")).toBeVisible();
+  await dialog.getByTestId("illustration-view-picture").click();
+  await expect(dialog.locator("svg[role=img]")).toBeVisible();
+  await expect(dialog.getByTestId("wiring-3d")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
 test("그래픽 가속이 없는 기기: 3D 대신 배선도 그림이 작업대에 바로 보인다", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "off"));
   await page.goto("/#/track/01-led");
