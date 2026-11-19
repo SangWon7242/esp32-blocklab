@@ -49,8 +49,41 @@ export function CodeNoteList({ notes, selected, onSelect }: {
 }
 
 /**
- * 접히는 "코드 설명" 칸. children 이 있으면(실행 단계: 읽기 전용 원본 코드) 넓은 칸에서 코드 옆, 좁은 칸에서 위에 둔다.
+ * 코드 설명 본문: 안내 한 줄 + 설명 목록. children 이 있으면(실행 단계: 읽기 전용 원본 코드) 넓은 칸에서 코드 옆, 좁은 칸에서 위에 둔다.
+ * 접는 칸(CodeNotesPanel)과 실행 단계의 한 줄 띠 아래 펼침 칸이 함께 쓴다
  */
+export function CodeNotesBody({ notes, selected, onSelect, children }: {
+  notes: readonly CodeNote[];
+  selected: number | undefined;
+  onSelect(line: number | undefined): void;
+  children?: ReactNode;
+}) {
+  return (
+    <>
+      <p className="text-sm text-muted-foreground">설명을 누르면 코드에서 그 줄이 표시돼요</p>
+      {children ? (
+        <div className="grid min-w-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] @2xl:items-start">
+          {children}
+          <CodeNoteList notes={notes} selected={selected} onSelect={onSelect} />
+        </div>
+      ) : (
+        <CodeNoteList notes={notes} selected={selected} onSelect={onSelect} />
+      )}
+    </>
+  );
+}
+
+/** 「코드 설명 N줄」 글 (버튼 이름) */
+export function CodeNotesLabel({ count }: { count: number }) {
+  return (
+    <>
+      <BookOpenText className="size-4" />코드 설명
+      <Badge variant="secondary" className="font-normal">{count}줄</Badge>
+    </>
+  );
+}
+
+/** 접히는 "코드 설명" 칸 (읽기 체크) */
 export function CodeNotesPanel({ notes, selected, onSelect, defaultOpen = false, children, className }: {
   notes: readonly CodeNote[];
   selected: number | undefined;
@@ -63,21 +96,12 @@ export function CodeNotesPanel({ notes, selected, onSelect, defaultOpen = false,
     <Collapsible defaultOpen={defaultOpen} className={cn("rounded-lg border", className)} data-testid="code-notes-panel">
       <CollapsibleTrigger asChild>
         <Button variant="ghost" className="group w-full justify-start rounded-lg">
-          <BookOpenText className="size-4" />코드 설명
-          <Badge variant="secondary" className="font-normal">{notes.length}줄</Badge>
+          <CodeNotesLabel count={notes.length} />
           <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]:rotate-180" />
         </Button>
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-2 px-3 pt-1 pb-3">
-        <p className="text-sm text-muted-foreground">설명을 누르면 코드에서 그 줄이 표시돼요</p>
-        {children ? (
-          <div className="grid min-w-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] @2xl:items-start">
-            {children}
-            <CodeNoteList notes={notes} selected={selected} onSelect={onSelect} />
-          </div>
-        ) : (
-          <CodeNoteList notes={notes} selected={selected} onSelect={onSelect} />
-        )}
+        <CodeNotesBody notes={notes} selected={selected} onSelect={onSelect}>{children}</CodeNotesBody>
       </CollapsibleContent>
     </Collapsible>
   );
