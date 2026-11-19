@@ -15,6 +15,7 @@ import { figureCaption, materialsForBoard } from "@/track/board";
 import { awaitingExplain, canComplete, isEditorStep, type MissionInput } from "@/track/completion";
 import { getChapter, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates } from "@/track/gating";
+import { carriedPinMap } from "@/track/pinCarry";
 import type { ProgressStore, StepRecord } from "@/track/progress";
 import type { Step } from "@/track/schema";
 import { BoardSelect, chapterShowsBoardSelect } from "../board/BoardSelect";
@@ -85,6 +86,7 @@ export function StepPage({ chapterId, stepId }: { chapterId: string; stepId: str
       index={index}
       steps={steps}
       record={records[step.id]}
+      records={records}
       states={states}
       teacherMode={teacherMode}
       explainGate={explainGate}
@@ -100,6 +102,8 @@ type BodyProps = {
   index: number;
   steps: Step[];
   record: StepRecord | undefined;
+  /** 챕터의 모든 단계 기록 (앞 단계에서 바꾼 핀을 이어 받으려고) */
+  records: Record<string, StepRecord>;
   states: Record<string, string>;
   teacherMode: boolean;
   /** 설정: 미션·디버깅은 교사 "설명 확인" 뒤 완료 */
@@ -109,7 +113,7 @@ type BodyProps = {
   store: ProgressStore;
 };
 
-function StepBody({ chapter, step, index, steps, record, states, teacherMode, explainGate, readOnly, store }: BodyProps) {
+function StepBody({ chapter, step, index, steps, record, records, states, teacherMode, explainGate, readOnly, store }: BodyProps) {
   const { nav } = useHost();
   const slots = useHostSlots();
   const [input, setInput] = useState<Record<string, unknown>>(record?.input ?? {});
@@ -125,6 +129,8 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   /** 하단 줄 「채점하기」가 부를 함수 (판정 패널이 있을 때만) */
   const [judge, setJudge] = useState<(() => void) | null>(null);
   const registerJudge = useCallback((fn: (() => void) | null) => setJudge(() => fn), []);
+  /** 앞 단계에서 바꾼 핀 바꿈 표. 단계를 열 때 한 번 (이 단계를 저장해도 앞 단계 기록은 그대로다) */
+  const [pinMap] = useState(() => carriedPinMap(chapter, records, step.id));
 
   const save =(nextInput: Record<string, unknown>, nextAttempts: number, status: "open" | "done") => {
     if (readOnly) return; // 열람 모드는 학생 기록을 바꾸지 않는다
@@ -148,7 +154,7 @@ function StepBody({ chapter, step, index, steps, record, states, teacherMode, ex
   };
 
   const saveTarget = useMemo(() => projectSaveTarget(chapter, step), [chapter, step]);
-  const props = { chapter, input, onInput, teacherMode, attempts, onComplete: complete, readOnly };
+  const props = { chapter, input, onInput, teacherMode, attempts, onComplete: complete, readOnly, pinMap };
   let activity: ReactNode;
   switch (step.type) {
     case "problem": activity = <Problem step={step} {...props} />; break;

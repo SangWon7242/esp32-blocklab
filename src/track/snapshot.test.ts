@@ -212,4 +212,26 @@ describe("judgeSnapshot", () => {
     expect(p1.notes).toEqual([`증상 2: ${NOTE_NO_PROGRAM}`]);
     expect(ok.missions).toBe(allSteps(door).filter((s) => s.type === "mission" || s.type === "debug" || s.type === "design").length);
   });
+
+  it("앞 단계에서 바꾼 핀(이어 받기)은 원래 번호로 되돌려 판정한다 — 디버깅·미션", () => {
+    const door = getChapter("10-auto-door")!;
+    // 실행 단계에서 trig 를 13 → 5 로 꽂았다. 디버깅 증상 1 을 학생 핀(5)으로 고쳤다
+    const run1 = rec({ program: { code: door.files["step1_distance.py"].replace("trig = Pin(13,", "trig = Pin(5,") }, ran: true });
+    const debug1 = rec({ programs: [{ code: "trig = Pin(5, Pin.OUT)\necho = Pin(12, Pin.IN)" }], passed: [true] }, "open");
+    const symptom1 = (records: Record<string, StepRecord>) =>
+      judgeSnapshot(door, { chapterId: door.id, takenAt: now, programs: [], records }).steps.find((s) => s.stepId === "debug1")!.failures.filter((f) => f.startsWith("증상 1"));
+    expect(symptom1({ run1, debug1 })).toEqual([]);
+    // 실행 단계 기록이 없으면 표가 없어 13번 규칙에 걸린다
+    expect(symptom1({ debug1 })).toEqual(["증상 1: 쏘는 선과 듣는 선, 어느 쪽이 13번이죠?"]);
+
+    // 07-fan extra2: 규칙이 PWM(Pin(13)) 을 본다. extra1 에서 motor1a 를 15 에 꽂았으면 PWM(Pin(15)) 도 통과
+    const fan = getChapter("07-fan")!;
+    const rule = (allSteps(fan).find((s) => s.id === "extra2") as { rules: { codeMatches?: string; fail: string }[] }).rules.find((r) => r.codeMatches?.includes("Pin\\(\\s*13"))!;
+    const extra1 = rec({ program: { code: fan.files["mission_forever.py"].replace("Pin(13, Pin.OUT)", "Pin(15, Pin.OUT)") } });
+    const extra2 = rec({ program: { code: "from machine import Pin, PWM\n\nmotor1a = PWM(Pin(15))\nmotor1b = Pin(12, Pin.OUT)\n" } }, "open");
+    const failures = (records: Record<string, StepRecord>) =>
+      judgeSnapshot(fan, { chapterId: fan.id, takenAt: now, programs: [], records }).steps.find((s) => s.stepId === "extra2")!.failures;
+    expect(failures({ extra1, extra2 })).not.toContain(rule.fail);
+    expect(failures({ extra2 })).toContain(rule.fail);
+  });
 });

@@ -55,6 +55,15 @@ export const findActionByBlock = (type: string): WithDevice<ActionSpec> | undefi
 export const findValueByBlock = (type: string): WithDevice<ValueSpec> | undefined => values.get(type);
 /** 모든 준비 선언 (DEVICES 우선순위 순) */
 export const setupSpecs = (): WithDevice<SetupSpec>[] => [...setups.values()];
+
+/** 블록 type → 핀 번호 칸 이름들 (명세의 `{kind:"pin"}` 칸: PIN, R/G/B, TRIG/ECHO, SCL/SDA, R1..C4 …) */
+const pinFields = new Map<string, Set<string>>(
+  [...setups.values(), ...actions.values(), ...values.values()]
+    .map((s): [string, Set<string>] => [s.blockType, new Set(s.parts.filter((p) => p.kind === "pin").map((p) => p.name))])
+    .filter(([, names]) => names.size > 0),
+);
+/** 이 블록의 이 칸이 핀 번호 칸인가 (핀을 바꾸면 블록 주석의 번호도 따라 바꾸려고) */
+export const isPinField = (blockType: string, field: string): boolean => pinFields.get(blockType)?.has(field) === true;
 export const devicesByCategory = (c: DeviceCategory): DeviceSpec[] => DEVICES.filter((d) => d.category === c);
 
 /**

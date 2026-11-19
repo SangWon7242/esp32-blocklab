@@ -7,6 +7,7 @@ import { syntaxHighlighting, defaultHighlightStyle, indentUnit } from "@codemirr
 import { cn } from "@/lib/utils";
 import { codeFontSize, CODE_FONT_FAMILY, CODE_FONT_SIZE_DEFAULT, CODE_FONT_SIZE_VAR, CODE_LINE_HEIGHT, useCodeFontSize } from "@/host/codeFontSize";
 import { createEchoGuard } from "./echoGuard";
+import { pinCommentFollow } from "./pinCommentFollow";
 
 type Props = {
   value: string;
@@ -115,6 +116,8 @@ export function CodePanel({ value, readOnly, onChange, errorLine = null, highlig
         },
       }),
       highlightActiveLine(), history(), python(), indentUnit.of("    "),
+      // 핀 숫자를 고치면 그 줄 주석의 번호도 (학생 입력에만. value 로 넣는 글은 그대로)
+      pinCommentFollow(),
       syntaxHighlighting(defaultHighlightStyle), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
       readOnlyComp.current.of(EditorState.readOnly.of(readOnly)),
       errorLineField, highlightField, theme, fontSizeComp.current.of(fontSizeTheme(Math.max(minFontSize, codeFontSize()))),

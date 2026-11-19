@@ -8,6 +8,7 @@ import type { AppInput } from "./appCheck";
 import { DESIGN_FAIL } from "./design";
 import { allSteps } from "./gating";
 import { judge, type JudgeInput } from "./judge";
+import { carriedPinMap, judgeCodeOf, type PinMap } from "./pinCarry";
 import type { Progress, StepRecord } from "./progress";
 
 /*
@@ -212,10 +213,13 @@ function withoutOutputRules(rules: readonly Rule[]): { rules: Rule[]; dropped: b
   return { rules: kept, dropped: kept.length !== rules.length };
 }
 
-function judgeRules(rules: readonly Rule[], program: SavedProgram, files: LoadedChapter["files"], opts: JudgeSnapshotOptions, notes: string[]) {
+/** 앞 단계에서 이어 받은 핀(pinCarry.ts)은 거꾸로 표로 원래 번호로 되돌려 판정한다 — 학생 화면(MissionStep·DebugStep)과 같은 기준 */
+type PinContext = { map: PinMap; startCode?: string };
+
+function judgeRules(rules: readonly Rule[], program: SavedProgram, files: LoadedChapter["files"], opts: JudgeSnapshotOptions, notes: string[], pins: PinContext) {
   const { rules: kept, dropped } = withoutOutputRules(rules);
   if (dropped && !notes.includes(NOTE_OUTPUT_RULES)) notes.push(NOTE_OUTPUT_RULES);
-  return judge(kept, inputOf(program, opts), files);
+  return judge(kept, inputOf({ ...program, code: judgeCodeOf(program.code, pins.map, pins.startCode) }, opts), files);
 }
 
 /** 학생 화면이 마지막으로 판정한 코드가 지금 코드와 같을 때만, 그 결과와 다르면 알린다 */
@@ -224,17 +228,17 @@ function compareWithScreen(notes: string[], passed: boolean, screenPassed: boole
   notes.push(screenPassed ? NOTE_SCREEN_PASSED : NOTE_SCREEN_FAILED);
 }
 
-function summarizeMission(step: StepOf<"mission">, rec: StepRecord | undefined, files: LoadedChapter["files"], opts: JudgeSnapshotOptions): JudgeStepSummary {
+function summarizeMission(step: StepOf<"mission">, rec: StepRecord | undefined, files: LoadedChapter["files"], opts: JudgeSnapshotOptions, pins: PinMap): JudgeStepSummary {
   const m = (rec?.input ?? {}) as MissionInput;
   const notes: string[] = [];
   if (!m.program) return { stepId: step.id, type: step.type, passed: null, failures: [], notes: [m.skipped ? NOTE_SKIPPED : NOTE_NO_PROGRAM] };
-  const r = judgeRules(step.rules, m.program, files, opts, notes);
+  const r = judgeRules(step.rules, m.program, files, opts, notes, { map: pins, startCode: step.code ? files[step.code] : undefined });
   compareWithScreen(notes, r.pass, m.passed, m.judgedCode, m.program.code);
   if (r.pass && m.judgedCode === m.program.code) notes.push(...(m.notes ?? []));
   return { stepId: step.id, type: step.type, passed: r.pass, failures: r.failures, notes };
 }
 
-function summarizeDebug(step: StepOf<"debug">, rec: StepRecord | undefined, files: LoadedChapter["files"], opts: JudgeSnapshotOptions): JudgeStepSummary {
+function summarizeDebug(step: StepOf<"debug">, rec: StepRecord | undefined, files: LoadedChapter["files"], opts: JudgeSnapshotOptions, pins: PinMap): JudgeStepSummary {
   const d = (rec?.input ?? {}) as DebugInput;
   const programs = step.symptoms.map((_, i) => d.programs?.[i] ?? null);
   if (programs.every((p) => !p)) return { stepId: step.id, type: step.type, passed: null, failures: [], notes: [d.skipped ? NOTE_SKIPPED : NOTE_NO_PROGRAM] };
@@ -249,7 +253,7 @@ function summarizeDebug(step: StepOf<"debug">, rec: StepRecord | undefined, file
       notes.push(`${label}: ${NOTE_NO_PROGRAM}`);
       return;
     }
-    const r = judgeRules([...symptom.rules, ...step.rules], program, files, opts, notes);
+    const r = judgeRules([...symptom.rules, ...step.rules], program, files, opts, notes, { map: pins, startCode: symptom.code });
     if (!r.pass) passed = false;
     failures.push(...r.failures.map((f) => `${label}: ${f}`));
     const screen = d.passed?.[i];
@@ -278,14 +282,15 @@ export function isJudgedStep(step: Step): step is StepOf<"mission"> | StepOf<"de
  * 스냅숏의 저장된 프로그램을 챕터 규칙으로 다시 판정한다 (미션은 rules, 디버깅은 증상 규칙 + 전체 규칙, 설계는 codeEquals targetCode).
  * 학생 화면이 남긴 passed 를 믿지 않고 코드로 다시 본다. Blockly 없이 judge + codeToBlocks 만 쓰므로 서버(Node)에서도 돈다.
  * 실행 출력 규칙(outputIncludes)은 출력이 기록에 없어 빼고 알린다.
+ * 앞 단계에서 바꾼 핀은 같은 기록으로 핀 바꿈 표(carriedPinMap)를 다시 만들어 원래 번호로 되돌려 판정한다 (스냅숏에 표를 따로 싣지 않는다).
  */
 export function judgeSnapshot(chapter: LoadedChapter, snapshot: ChapterSnapshot, opts: JudgeSnapshotOptions = {}): JudgeSummary {
   const steps: JudgeStepSummary[] = [];
   for (const step of allSteps(chapter)) {
     if (!isJudgedStep(step)) continue;
     const rec = snapshot.records[step.id];
-    if (step.type === "mission") steps.push(summarizeMission(step, rec, chapter.files, opts));
-    else if (step.type === "debug") steps.push(summarizeDebug(step, rec, chapter.files, opts));
+    if (step.type === "mission") steps.push(summarizeMission(step, rec, chapter.files, opts, carriedPinMap(chapter, snapshot.records, step.id)));
+    else if (step.type === "debug") steps.push(summarizeDebug(step, rec, chapter.files, opts, carriedPinMap(chapter, snapshot.records, step.id)));
     else steps.push(summarizeDesign(step, rec, chapter.files, opts));
   }
   return { steps, missions: steps.length, passed: steps.filter((s) => s.passed === true).length };

@@ -6,11 +6,13 @@ import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { cn } from "@/lib/utils";
 import { onEditedProgram, type MissionInput } from "@/track/completion";
 import { judge } from "@/track/judge";
+import { applyPinMap, judgeCodeOf } from "@/track/pinCarry";
 import { useSettings } from "../../settings/settings";
 import { GuideBody } from "../GuideBody";
 import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { JudgePanel } from "./JudgePanel";
+import { PinCarryNotice, useCarriedStart } from "./PinCarryNotice";
 import type { StepProps } from "./types";
 import { useStepInput } from "./useStepInput";
 
@@ -57,9 +59,10 @@ export function MissionBrief({ step, chapterId, failedOnce, teacherMode, classNa
 
 /**
  * 미션: 지시문 → 편집기에서 고치기 → 판정 (실패하면 되묻기 문장, 그 뒤에 힌트). 설정 explainGate 면 교사 "설명 확인" 뒤 완료.
- * 지시문은 안내 칸의 「미션」 탭에 있다. 안내 칸을 접었을 때(briefInActivity)만 여기 위에 다시 보인다
+ * 지시문은 안내 칸의 「미션」 탭에 있다. 안내 칸을 접었을 때(briefInActivity)만 여기 위에 다시 보인다.
+ * 앞 단계에서 바꾼 핀(pinMap)은 시작 코드에 이어서 싣고, 판정은 거꾸로 표로 원래 핀 번호로 되돌린 코드로 한다 (서버 재판정과 같은 기준)
  */
-export function MissionStep({ step, chapter, input, onInput, teacherMode, briefInActivity }: StepProps<"mission"> & { briefInActivity?: boolean }) {
+export function MissionStep({ step, chapter, input, onInput, teacherMode, briefInActivity, pinMap, readOnly }: StepProps<"mission"> & { briefInActivity?: boolean }) {
   const m = input as MissionInput;
   const update = useStepInput<MissionInput>(input, onInput);
   const { explainGate } = useSettings();
@@ -67,12 +70,18 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode, briefI
   /** 마지막 실행의 보드 출력 (outputIncludes 판정용) */
   const output = useRef("");
 
+  const startCode = step.code ? chapter.files[step.code] : undefined;
+  const carry = useCarriedStart(startCode, m.program !== undefined, readOnly ? undefined : pinMap);
+
   const onJudge = () => {
     const program = editor.current?.getProgram();
     if (!program) return;
-    const result = judge(step.rules, judgeInputOf(program, output.current), chapter.files);
-    // 주의(검사 warning·준비만 한 장치·시작 코드 그대로)는 통과했을 때만 모은다. 완료를 막지 않는다
-    const notes = result.pass ? judgeNotes({ program, startCode, rules: step.rules }) : undefined;
+    const judged = pinMap?.size ? { ...program, code: judgeCodeOf(program.code, pinMap, startCode) } : program;
+    const result = judge(step.rules, judgeInputOf(judged, output.current), chapter.files);
+    // 주의(검사 warning·준비만 한 장치·시작 코드 그대로)는 통과했을 때만 모은다. 완료를 막지 않는다.
+    // "시작 코드 그대로" 는 이어 받은 시작 코드(핀만 바뀐 것)와 비교한다
+    const notesStart = startCode !== undefined && pinMap?.size && !carry.reverted ? applyPinMap(startCode, pinMap).code : startCode;
+    const notes = result.pass ? judgeNotes({ program, startCode: notesStart, rules: step.rules }) : undefined;
     update((cur) => ({
       program: { code: program.code, blocksJson: program.blocksJson },
       passed: result.pass,
@@ -83,8 +92,7 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode, briefI
     }), { attempt: true });
   };
 
-  const startCode = step.code ? chapter.files[step.code] : undefined;
-  const initial = m.program?.code ?? startCode ?? "";
+  const initial = m.program?.code ?? carry.start ?? "";
   return (
     <div className="flex flex-1 flex-col gap-4">
       {/* 좁은 화면(md 미만)은 안내 칸이 늘 위에 쌓이므로 여기는 넓은 화면에서 접었을 때만 */}
@@ -99,6 +107,15 @@ export function MissionStep({ step, chapter, input, onInput, teacherMode, briefI
         notes={m.notes}
         explainGate={explainGate ? { teacherMode, explained: m.explained === true, onConfirm: () => update(() => ({ explained: true })) } : undefined}
       />
+      {carry.showNotice && carry.carried && (
+        <PinCarryNotice
+          carried={carry.carried}
+          onRevert={() => {
+            editor.current?.replaceCode(startCode ?? "");
+            carry.revert();
+          }}
+        />
+      )}
       <TrackEditor
         fill
         ref={editor}

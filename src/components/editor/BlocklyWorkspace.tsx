@@ -3,6 +3,8 @@ import * as Blockly from "blockly";
 import { blocklyMediaPath } from "@/host/mediaPath";
 import { entryTheme, registerBlocks, registerEntryToolbox, registerVariableFlyout, toolbox } from "@/blocks";
 import { emptyLineMap, generateCode, generateCodeWithMap, type LineMap, type WorkspaceJson } from "@/codegen";
+import { isPinField } from "@/devices/registry";
+import { renamePinInComment } from "@/track/pinComment";
 import type { Issue } from "@/lint";
 import { cn } from "@/lib/utils";
 import { registerBlockDocMenu, type BlockDocRequest } from "./blockDocMenu";
@@ -80,6 +82,32 @@ function realBlock(ws: Blockly.WorkspaceSvg, id: string): Blockly.BlockSvg | nul
   let block: Blockly.BlockSvg | null = ws.getBlockById(id);
   while (block?.isShadow()) block = block.getParent();
   return block;
+}
+
+/**
+ * 핀 번호 칸을 old → new 로 바꾸면 그 블록 주석의 번호도 따라 바꾼다 (`IO13 → 빨강` → `IO15 → 빨강`, 바뀐 칸의 옛 번호만).
+ * 입력 중 13 → 1 → 15 처럼 바뀌어도 이벤트마다 바로 앞 값 기준으로 따라간다. 핀 바꿈과 같은 이벤트 그룹에 넣어
+ * 실행 취소 한 번에 핀과 주석이 같이 되돌아가게 한다. 실행 취소·다시 실행이 되돌리는 이벤트(recordUndo 꺼짐)에는 반응하지 않는다.
+ */
+function followPinComment(ws: Blockly.WorkspaceSvg, e: Blockly.Events.Abstract) {
+  if (e.type !== Blockly.Events.BLOCK_CHANGE || !e.recordUndo) return;
+  const change = e as Blockly.Events.BlockChange;
+  if (change.element !== "field" || !change.name || !change.blockId) return;
+  const block = ws.getBlockById(change.blockId);
+  if (!block || !isPinField(block.type, change.name)) return;
+  const from = Number(change.oldValue);
+  const to = Number(change.newValue);
+  const comment = block.getCommentText();
+  if (!comment || !Number.isInteger(from) || !Number.isInteger(to) || from === to) return;
+  const next = renamePinInComment(comment, from, to);
+  if (next === comment) return;
+  const group = Blockly.Events.getGroup();
+  if (change.group) Blockly.Events.setGroup(change.group);
+  try {
+    block.setCommentText(next);
+  } finally {
+    if (change.group) Blockly.Events.setGroup(group);
+  }
 }
 
 const REVEAL_MARGIN = 24;
@@ -170,6 +198,7 @@ export const BlocklyWorkspace = forwardRef<BlocklyHandle, Props>(function Blockl
         return;
       }
       if (loadingRef.current || e.isUiEvent || ws.isDragging()) return;
+      followPinComment(ws, e);
       const { code, map } = codeWithMap(ws);
       onChangeRef.current(Blockly.serialization.workspaces.save(ws) as WorkspaceJson, code, map);
     };

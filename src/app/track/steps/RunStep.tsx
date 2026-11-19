@@ -3,8 +3,9 @@ import { CheckCircle2, ChevronDown, ChevronRight, Play, Square, Usb } from "luci
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { runSucceeded, type RunInput } from "@/track/completion";
-import { TrackEditor } from "../TrackEditor";
+import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { CodeNotesBody, CodeNotesLabel, noteHighlight } from "./CodeNotes";
+import { PinCarryNotice, useCarriedStart } from "./PinCarryNotice";
 import { ReadOnlyCode } from "./ReadOnlyCode";
 import type { StepProps } from "./types";
 import { useStepInput } from "./useStepInput";
@@ -14,11 +15,15 @@ import { useStepInput } from "./useStepInput";
  * 끝없이 도는 프로그램은 「멈춤」으로 끝내는 것도 해낸 것으로 센다 (runSucceeded).
  * 편집기 위는 한 줄 띠만: 할 일 흐름(보드 연결 → 실행 → 멈춤) · 성공 표시 · 「코드 설명 N줄」 단추.
  * 단추를 누르면 띠 아래에 원본 코드(읽기 전용, 학생이 고쳐도 줄 번호가 그대로)와 줄별 설명이 펼쳐진다 (처음엔 접힘).
+ * 앞 단계에서 바꾼 핀이 있으면 시작 코드에 이어서 싣고 띠 아래에 안내 한 줄(「원래 핀으로」). 원본 코드 설명은 원래 핀 그대로.
  */
-export function RunStep({ step, chapter, input, onInput, onComplete }: StepProps<"run">) {
+export function RunStep({ step, chapter, input, onInput, onComplete, pinMap, readOnly }: StepProps<"run">) {
   const r = input as RunInput;
   const update = useStepInput<RunInput>(input, onInput);
   const ranRef = useRef(r.ran === true);
+  const editor = useRef<TrackEditorHandle>(null);
+  const original = chapter.files[step.code] ?? "";
+  const carry = useCarriedStart(original, r.program !== undefined, readOnly ? undefined : pinMap);
   const [noteLine, setNoteLine] = useState<number | undefined>();
   const highlights = useMemo(() => noteHighlight(noteLine), [noteLine]);
 
@@ -48,14 +53,24 @@ export function RunStep({ step, chapter, input, onInput, onComplete }: StepProps
         {step.codeNotes && (
           <CollapsibleContent className="space-y-2 rounded-lg border p-3">
             <CodeNotesBody notes={step.codeNotes} selected={noteLine} onSelect={setNoteLine}>
-              <ReadOnlyCode code={chapter.files[step.code] ?? ""} name={`${step.code} (원본)`} highlightLines={highlights} panelClassName="h-56" />
+              <ReadOnlyCode code={original} name={`${step.code} (원본)`} highlightLines={highlights} panelClassName="h-56" />
             </CodeNotesBody>
           </CollapsibleContent>
         )}
       </Collapsible>
+      {carry.showNotice && carry.carried && (
+        <PinCarryNotice
+          carried={carry.carried}
+          onRevert={() => {
+            editor.current?.replaceCode(original);
+            carry.revert();
+          }}
+        />
+      )}
       <TrackEditor
         fill
-        initialCode={r.program?.code ?? chapter.files[step.code] ?? ""}
+        ref={editor}
+        initialCode={r.program?.code ?? carry.start ?? ""}
         onProgram={(code, blocksJson) => update(() => ({ program: { code, blocksJson } }))}
         onRunEnd={(result) => {
           if (!runSucceeded(result) || ranRef.current) return;

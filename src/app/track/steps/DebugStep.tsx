@@ -7,11 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { HostLink, useHost, withQuery } from "@/host/HostContext";
 import { filled, judgeIsStale, type DebugInput } from "@/track/completion";
 import { judge } from "@/track/judge";
+import { judgeCodeOf, type CarriedCode } from "@/track/pinCarry";
 import { useSettings } from "../../settings/settings";
 import { judgeNotes } from "../judgeNotes";
 import { TrackEditor, type TrackEditorHandle } from "../TrackEditor";
 import { AiCheck } from "./AiCheck";
 import { JudgePanel } from "./JudgePanel";
+import { carriedStart, PinCarryNotice } from "./PinCarryNotice";
 import type { StepProps } from "./types";
 import { useStepInput } from "./useStepInput";
 
@@ -26,8 +28,9 @@ function setAt<T>(list: readonly T[] | undefined, i: number, value: T, fill: T):
 /**
  * 디버깅: 증상마다 ① 증상 카드(고장 코드·되묻기) ② "왜 이런 증상일까?" 설명 저장 → 그 전에는 편집기 잠김
  * ③ 고장 코드가 실린 편집기에서 고치고 판정. 모든 증상을 통과하면 완료할 수 있다 (설정 explainGate 면 교사 "설명 확인" 뒤에).
+ * 앞 단계에서 바꾼 핀(pinMap)은 증상의 고장 코드에도 이어서 싣고(증상마다 처음 열 때 한 번 정한다), 판정은 거꾸로 표로 원래 핀 번호로 되돌려서.
  */
-export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly }: StepProps<"debug">) {
+export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly, pinMap }: StepProps<"debug">) {
   const { nav } = useHost();
   const d = input as DebugInput;
   const update = useStepInput<DebugInput>(input, onInput);
@@ -38,6 +41,14 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly
   const output = useRef("");
 
   const symptom = step.symptoms[current];
+  /** 증상마다 이어 받은 고장 코드 (처음 볼 때 한 번 정한다 — 고친 뒤에도 안내가 그대로 남게) */
+  const carriedRef = useRef(new Map<number, CarriedCode | null>());
+  if (!carriedRef.current.has(current)) {
+    carriedRef.current.set(current, carriedStart(symptom.code, d.programs?.[current] != null, readOnly ? undefined : pinMap));
+  }
+  const carried = carriedRef.current.get(current) ?? null;
+  const [reverted, setReverted] = useState<readonly number[]>([]);
+  const symptomCode = carried && !reverted.includes(current) ? carried.code : symptom.code;
   const explanation = d.explanations?.[current] ?? "";
   const saved = d.saved?.[current] === true;
   const passed = d.passed?.[current] === true;
@@ -48,7 +59,8 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly
     const program = editor.current?.getProgram();
     if (!program) return;
     const rules = [...symptom.rules, ...step.rules];
-    const result = judge(rules, judgeInputOf(program, output.current), chapter.files);
+    const judged = pinMap?.size ? { ...program, code: judgeCodeOf(program.code, pinMap, symptom.code) } : program;
+    const result = judge(rules, judgeInputOf(judged, output.current), chapter.files);
     // 통과했을 때만 주의를 모은다 (증상 코드는 한두 줄만 고치는 것이라 "바꾸지 않았어요" 는 보지 않는다)
     const notes = result.pass ? judgeNotes({ program, rules }) : null;
     update((cur) => ({
@@ -83,7 +95,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly
 
       <section className="rounded-lg border p-4" data-testid="symptom-card">
         <h3 className="font-semibold">증상 {current + 1}. {symptom.title}</h3>
-        <pre className="mt-2 overflow-x-auto rounded bg-muted p-2 text-xs">{symptom.code}</pre>
+        <pre className="mt-2 overflow-x-auto rounded bg-muted p-2 text-xs">{symptomCode}</pre>
         <p className="mt-2 text-sm">{symptom.question}</p>
       </section>
 
@@ -115,7 +127,7 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly
           questionsOnly
           disabled={!filled(explanation)}
           disabledTitle="내 생각을 먼저 적어 보세요"
-          ask={(ai) => ai.debug({ code: symptom.code, symptom: symptom.title, explanation })}
+          ask={(ai) => ai.debug({ code: symptomCode, symptom: symptom.title, explanation })}
           review={d.ai?.[current]}
           onReview={(ai) => update((cur) => ({ ai: setAt(cur.ai, current, ai, null) }))}
         />
@@ -140,11 +152,20 @@ export function DebugStep({ step, chapter, input, onInput, teacherMode, readOnly
                 : undefined
             }
           />
+          {carried && !reverted.includes(current) && (
+            <PinCarryNotice
+              carried={carried}
+              onRevert={() => {
+                editor.current?.replaceCode(symptom.code);
+                setReverted((r) => [...r, current]);
+              }}
+            />
+          )}
           <TrackEditor
             fill
             key={current}
             ref={editor}
-            initialCode={d.programs?.[current]?.code ?? symptom.code}
+            initialCode={d.programs?.[current]?.code ?? carried?.code ?? symptom.code}
             onProgram={(code, blocksJson) => update((cur) => ({
               programs: setAt(cur.programs, current, { code, blocksJson }, null),
               // 판정한 뒤 코드를 바꾸면 그 판정(통과·실패 문장)과 교사 확인은 낡았다
