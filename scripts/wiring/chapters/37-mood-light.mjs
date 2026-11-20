@@ -4,20 +4,23 @@
 // 버튼은 대각선: 한쪽 다리 줄(j 칸) ← 14번, 반대쪽 다리 줄(a 칸) → 위 − 줄.
 // Plus: 39 · 3V3 이 아래 줄이라 두 선만 보드 왼쪽 바깥 길로 올라와 가변저항 다리에 바로 (+ 줄 없이).
 // DevKit: VN(39) 이 위 줄이라 가변저항은 아래 + − 줄에서 3V3 · GND 를 받는다. 3V3(아래 줄)만 보드 왼쪽 바깥 길로 + 줄에.
+// 확장 보드: P14 · P27 · P26 · P25 · SVN(39) · GND 가 모두 위 줄 → 브레드보드는 보드 위(DevKit 과 같은 꼴). 아래 + 줄은 전원 헤더 3V
+//   (점퍼와 상관없이 3.3V — 가변저항이 39번에 3.3V 넘게 주지 않게), 아래 − 줄은 전원 헤더 GND. 두 − 줄은 왼쪽 끝 바깥 점퍼. 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, button, potentiometer, resistor, rgbLed } from "../parts.mjs";
 import { railCol } from "./35-random-hammer.mjs";
 
 /** RGB LED: 다리 (r,d)(r+2,d)(r+4,d)(r+6,d) = 빨강 · − · 초록 · 파랑. 빨강 · 초록 · 파랑 줄은 저항 (x,e)~(x,h) 로 홈을 건너 (x, j) 에서 신호 */
-function rgbCircuit(bb, r) {
+function rgbCircuit(bb, r, { labelOn = "B" } = {}) {
   const cols = { R: r, K: r + 2, G: r + 4, B: r + 6 };
   const svg = [];
   for (const c of [cols.R, cols.G, cols.B]) {
     bb.tint(c, "top");
     bb.tint(c, "bottom");
-    svg.push(resistor(bb.hole(c, "e"), bb.hole(c, "h"), { label: c === cols.B ? "220Ω" : undefined }).svg);
+    svg.push(resistor(bb.hole(c, "e"), bb.hole(c, "h"), { label: c === cols[labelOn] ? "220Ω" : undefined }).svg);
   }
   bb.tint(cols.K, "top");
   svg.push(rgbLed([cols.R, cols.K, cols.G, cols.B].map((c) => bb.hole(c, "d")), { lift: 30 }).svg);
@@ -139,8 +142,65 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 72, y: 12, cols: 28, rails: { top: true, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 46, jumper: "3V3" });
+  const parts = [bb.svg], wires = [], used = [];
+  const R = (s, c) => bb.rail("bottom", s, c);
+  const lane = (k) => bb.y + bb.h + 10 + k * 8;
+
+  // 버튼: 12 · 14번 줄. P14 → (14, j), (12, a) → 위 − 줄
+  const btn = buttonUp(bb, 12);
+  const s14 = b.gpio(14);
+  wires.push(mfWire(s14, btn.sigHole, C.purple, [{ x: s14.x, y: lane(2) }, { x: btn.sigHole.x, y: lane(2) }], "orth"), btn.jumper);
+  // RGB LED: 17 · 19 · 21 · 23번 줄. P27 → 17, P25 → 21, P26 → 23 (P26 이 P25 선을 한 번 건넌다 — 칸 순서가 27 · 26 · 25)
+  const rgb = rgbCircuit(bb, 17, { labelOn: "R" });
+  const sR = b.gpio(27), sG = b.gpio(25), sB = b.gpio(26);
+  const hR = rgb.sig(rgb.cols.R), hG = rgb.sig(rgb.cols.G), hB = rgb.sig(rgb.cols.B);
+  wires.push(mfWire(sR, hR, C.orange, [{ x: sR.x, y: lane(0) }, { x: hR.x, y: lane(0) }], "orth"));
+  wires.push(mfWire(sB, hB, C.blue, [{ x: sB.x, y: lane(1) }, { x: hB.x, y: lane(1) }], "orth"));
+  wires.push(mfWire(sG, hG, C.green));
+  wires.push(rgb.jumper);
+  used.push(s14, sR, sG, sB);
+
+  // 전원: 전원 헤더 GND → 아래 − 줄, 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 아래 + 줄, 두 − 줄은 왼쪽 끝 바깥 점퍼
+  const gnd = b.power("GND", 5), v33 = b.power("3V3", 1);
+  const p5 = R("+", 5);
+  wires.push(mfWire(gnd, R("-", 7), C.black));
+  wires.push(mfWire(v33, p5, C.red, [{ x: p5.x, y: v33.y }], "orth"));
+  { const t = bb.rail("top", "-", 1), u = R("-", 1), x = bb.x - 10; wires.push(mmWire(t, u, C.black, [{ x, y: t.y }, { x, y: u.y }], "orth")); }
+  used.push(gnd, v33);
+
+  // 가변저항: 26 · 27 · 28번 줄 (f 칸). 27(가운데) ← SVN(39), 26 → − 줄, 28 → + 줄
+  [26, 27, 28].forEach((c) => bb.tint(c, "bottom"));
+  parts.push(potentiometer(bb.hole(26, "f"), bb.hole(27, "f"), bb.hole(28, "f")).svg);
+  const k39 = b.gpio(39), hM = bb.hole(27, "j");
+  wires.push(mfWire(k39, hM, C.teal));
+  wires.push(mmWire(bb.hole(26, "j"), R("-", 26), C.black));
+  wires.push(mmWire(bb.hole(28, "j"), R("+", 28), C.red, [], "line"));
+  used.push(k39);
+
+  parts.push(...rgb.svg, btn.svg);
+  const rows = [
+    { color: C.orange, part: "P27 칸 S", to: "17번 줄 → 220Ω → RGB 빨강 다리" },
+    { color: C.green, part: "P25 칸 S", to: "21번 줄 → 220Ω → RGB 초록 다리" },
+    { color: C.blue, part: "P26 칸 S", to: "23번 줄 → 220Ω → RGB 파랑 다리" },
+    { color: C.black, part: "RGB 가장 긴 다리(−) 19번 줄", to: "위 − 줄" },
+    { color: C.purple, part: "P14 칸 S", to: "14번 줄 (버튼 한쪽 다리)" },
+    { color: C.black, part: "버튼 대각선 다리 12번 줄", to: "위 − 줄" },
+    { color: C.red, part: "전원 헤더 3V", to: "아래 + 줄 (헤더 GND 핀 사이로)" },
+    { color: C.black, part: "전원 헤더 GND", to: "아래 − 줄, 위 − 줄 ↔ 아래 − 줄 점퍼" },
+    { color: C.teal, part: "SVN(39) 칸 S", to: "27번 줄 가변저항 가운데 다리" },
+    { colors: [C.black, C.red], part: "가변저항 26 · 28번 줄", to: "아래 − 줄 · + 줄" },
+  ];
+  const table = connectionTable(b.bounds.y + b.bounds.h + 40, "이렇게 꽂아요 — 저항 셋은 가운데 홈을 건너", rows, b.legend, { columns: 1 });
+  return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "감성 스마트 무드등 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 위. RGB LED 다리를 위 칸 d 의 19 · 21 · 23 · 25번 줄에(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 19 · 23 · 25번 줄에서 가운데 홈을 건너고, 보드 위쪽 io27 → 19번 줄, io25 → 23번 줄, io26 → 25번 줄. 21번 줄 → 위 − 줄. 버튼은 가운데 홈에 걸쳐 15 · 17번 줄: io14 → 17번 줄, 대각선 15번 줄 → 위 − 줄. 위쪽 GND → 아래 − 줄, 두 − 줄은 점퍼로. 가변저항은 2 · 3 · 4번 줄: 가운데 3번 줄 ← 아래 줄 io39, 4번 줄 ← 아래 줄 3V3 (두 선은 보드 바깥으로 돌아), 2번 줄 → 아래 − 줄",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 감성 스마트 무드등 배선도: JUMP 점퍼는 3.3V 쪽(평소 자리). 브레드보드는 보드 위. RGB LED 다리를 위 칸 d 의 17 · 19 · 21 · 23번 줄에(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 17 · 21 · 23번 줄에서 가운데 홈을 건너고, P27 칸 S 핀 → 17번 줄, P25 칸 S 핀 → 21번 줄, P26 칸 S 핀 → 23번 줄. 19번 줄 → 위 − 줄. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: P14 칸 S 핀 → 14번 줄, 대각선 12번 줄 → 위 − 줄. 전원 헤더 GND → 아래 − 줄, 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 아래 + 줄, 두 − 줄은 점퍼로. 가변저항은 26 · 27 · 28번 줄: 가운데 27번 줄 ← SVN(39) 칸 S 핀, 26번 줄 → − 줄, 28번 줄 → + 줄",
   devkit: "기본 보드(ESP32 DevKit 38핀) 감성 스마트 무드등 배선도: 브레드보드는 보드 위. RGB LED 다리를 위 칸 d 의 9 · 11 · 13 · 15번 줄에(빨강 · 가장 긴 다리 − · 초록 · 파랑), 220Ω 저항 셋이 9 · 13 · 15번 줄에서 가운데 홈을 건너고, D27 → 9번 줄, D25 → 13번 줄, D26 → 15번 줄. 11번 줄 → 위 − 줄. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: D14 → 8번 줄, 대각선 6번 줄 → 위 − 줄. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 두 − 줄은 점퍼로. 가변저항은 17 · 18 · 19번 줄: 가운데 18번 줄 ← VN(39), 17번 줄 → + 줄, 19번 줄 → − 줄",
 };
 
@@ -148,5 +208,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wml", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wmlk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wmlx", T.expansion, r.body, r.height); },
   },
 };

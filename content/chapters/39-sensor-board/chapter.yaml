@@ -61,6 +61,9 @@ materials:
   - { name: M-F 듀폰선 9가닥, board: plus, note: "아래 줄 3V3 · GND · io34 · io39 와 위 줄 io14 → 브레드보드, 소리 센서 · PIR 의 V · G → + − 줄" }
   - { name: F-F 듀폰선 6가닥, board: devkit, note: "DHT11 S → D13, 소리 센서 S → D35, PIR S → D23, OLED GND · SDA · SCL → GND · D21 · D22" }
   - { name: M-F 듀폰선 12가닥, board: devkit, note: "3V3 · GND · D14 · D34 · VN → 브레드보드, 세 모듈의 V · G 와 OLED VCC → + − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
+  - { name: F-F 듀폰선 13가닥, board: expansion, note: "DHT11 → P13 칸, 소리 센서 → P35 칸, PIR → 아래 줄 P23 칸 G · V · S 에 3가닥씩, OLED 4 → I2C 헤더" }
+  - { name: M-F 듀폰선 5가닥, board: expansion, note: "전원 헤더 3V · GND → + − 줄, P14 · P34 · SVN(39) 칸 S → 브레드보드" }
   - { name: 점퍼선(M-M) 6가닥, note: "10kΩ 두 개와 가변저항 한쪽 → + 줄, 포토레지스터 · 틸트 스위치 · 가변저항 다른 쪽 → − 줄" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
   - { name: WiFi 공유기 또는 폰 핫스팟, note: 2부에서 보드와 폰이 같은 WiFi 에 있어야 해요 }
@@ -69,6 +72,7 @@ wiring:
   image: images/wiring-breadboard.svg
   caption: "OLED GND · VCC · SCL · SDA → 위 한 줄 GND · 5V · SCL · SDA, DHT11 G · V · S → io13 기둥 G · V · S 에 F-F 듀폰선으로 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → + 줄, GND → − 줄. 포토레지스터: + 줄 → 16번 줄 → 10kΩ → 19번 줄(← io34) → 포토레지스터 → 21번 줄 → − 줄. 가변저항 23 · 24 · 25번 줄(가운데 24 ← io39, 23 → − 줄, 25 → + 줄). 틸트 스위치: + 줄 → 31번 줄 → 10kΩ → 28번 줄(← io14, 보드 바깥 길) → 틸트 스위치 → 26번 줄 → − 줄. 소리 센서 V · G → + − 줄, S → ANALOG io35 줄 S. PIR V · G → + − 줄, S → 보드 바깥 길로 위 한 줄 io23 (WiFi 를 쓰니 아날로그는 32~39번)"
   captionDevkit: "브레드보드는 보드 위: 3V3 → 보드 바깥 길로 + 줄, 위 줄 GND → − 줄. DHT11 S → D13, 소리 센서 S → D35 에 바로, V · G 는 + − 줄. PIR V · G → + − 줄 끝, S → 보드 바깥 길로 D23. 틸트 스위치: + 줄 → 8번 줄 → 10kΩ → 11번 줄(← D14) → 틸트 스위치 → 13번 줄 → − 줄. 포토레지스터: + 줄 → 18번 줄 → 10kΩ → 21번 줄(← D34) → 포토레지스터 → 23번 줄 → − 줄. 가변저항 25 · 26 · 27번 줄(가운데 26 ← VN(39), 25 → − 줄, 27 → + 줄). OLED 는 보드 아래: GND · SDA · SCL → 아래 줄 GND · D21 · D22, VCC → 보드 바깥 길로 + 줄"
+  captionExpansion: "브레드보드는 보드 위: 전원 헤더 3V → 헤더 GND 핀 사이로 + 줄, 전원 헤더 GND → − 줄. DHT11 G · V · S → P13 칸, 소리 센서 G · V · S → P35 칸, PIR G · V · S → 아래 줄 P23 칸 G · V · S 에 바로. 틸트 스위치: + 줄 → 14번 줄 → 10kΩ → 17번 줄(← P14 칸 S) → 틸트 스위치 → 19번 줄 → − 줄. 포토레지스터: + 줄 → 22번 줄 → 10kΩ → 26번 줄(← P34 칸 S) → 포토레지스터 → 24번 줄 → − 줄. 가변저항 27 · 28 · 29번 줄(가운데 28 ← SVN(39) 칸 S, 27 → − 줄, 29 → + 줄). OLED → I2C 헤더 GND · VCC · D21 · D22"
 principle:
   image: images/senses-sensors.svg
   body: |
@@ -164,6 +168,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "OLED → 위 한 줄 SCL · SDA · 5V · GND, DHT11 → io13 기둥. 브레드보드: 포토레지스터 19번 줄 ← io34, 가변저항 24번 줄 ← io39, 틸트 스위치 28번 줄 ← io14. 소리 S → io35 줄 S, PIR S → io23. + 줄 3V3, − 줄 GND"
           captionDevkit: "DHT11 S → D13, 소리 S → D35, PIR S → D23. 브레드보드: 틸트 스위치 11번 줄 ← D14, 포토레지스터 21번 줄 ← D34, 가변저항 26번 줄 ← VN(39). OLED → GND · D21 · D22, VCC → + 줄. + 줄 3V3, − 줄 GND"
+          captionExpansion: "DHT11 → P13 칸, 소리 → P35 칸, PIR → P23 칸 G · V · S. 브레드보드: 틸트 스위치 17번 줄 ← P14 칸 S, 포토레지스터 26번 줄 ← P34 칸 S, 가변저항 28번 줄 ← SVN(39) 칸 S. OLED → I2C 헤더. + 줄 전원 헤더 3V, − 줄 전원 헤더 GND"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 브레드보드 + 줄(3V3) · − 줄(GND)을 먼저 보드와 이어요. 그다음 브레드보드에 맨 부품 셋(포토레지스터 · 가변저항 · 틸트 스위치, 10kΩ 저항과 함께)을 꽂고, OLED 와 모듈 셋(소리 · DHT11 · PIR)을 이어요. 그림 아래 연결 표를 한 줄씩 짚으며 꽂으면 빠뜨리지 않아요. 아날로그 셋(조도 34 · 소리 35 · 가변저항 39)은 2부에서 WiFi 와 함께 쓸 수 있는 **32~39번** 핀이에요.
 

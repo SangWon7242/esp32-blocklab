@@ -3,9 +3,13 @@
 // 그래서 3V3 — 10kΩ — 36번 — 포토레지스터 — GND.
 // Plus: 36 · 3V3 · GND 는 아래 줄 → 브레드보드를 보드 아래에. 26번(위 줄)만 보드 왼쪽 바깥 길로. OLED 는 I2C 묶음에 바로.
 // DevKit: VP(36) · D26 은 위 줄 → 브레드보드를 보드 위에(14장과 같은 꼴). OLED 는 보드 아래, SDA · SCL 은 아래 줄 D21 · D22.
+// 확장 보드: SVP(36) · P26 · GND 가 위 줄 → 브레드보드를 보드 위에(LED 는 1장과 같은 자리). + 줄은 전원 헤더 3V(점퍼와 상관없이 3.3V),
+//   OLED 는 I2C 헤더(10장과 같은 길). 5V 부품이 없어 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
+import { ledCircuit } from "./01-led.mjs";
 import { breadboard, led, oled, photoresistor, resistor } from "../parts.mjs";
 
 const TEN_K = ["#8b5a2b", "#212529", "#f76707"]; // 갈 검 주
@@ -114,8 +118,67 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 100, y: 8, cols: 26, rails: { top: false, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 36, jumper: "3V3" });
+  const Y0 = b.bounds.y;
+  const parts = [bb.svg], wires = [], used = [];
+  const rail = (s, c) => bb.rail("bottom", s, c);
+
+  // 전원: 전원 헤더 3V → 헤더 GND 핀 사이 틈으로 올라가 + 줄 2번 칸, 위 줄 GND 칸 S → − 줄 13번 칸
+  const v33 = b.power("3V3", 1), gnd = b.power("GND");
+  const p2 = rail("+", 2);
+  wires.push(mfWire(v33, p2, C.red, [{ x: p2.x, y: v33.y }], "orth"));
+  wires.push(mfWire(gnd, rail("-", 13), C.black));
+  used.push(v33, gnd);
+
+  // LED (1장과 같은 자리): P26 → 18번 줄 j → 220Ω → 13번 줄 긴 다리, 12번 줄 짧은 다리 → − 줄
+  const p26 = b.gpio(26);
+  const circ = ledCircuit(bb, 18);
+  parts.push(...circ.svg);
+  wires.push(mfWire(p26, circ.signalHole, C.yellow), circ.jumper);
+  used.push(p26);
+
+  // 전압 나누기: + 줄 → 21번 줄 → 10kΩ → 24번 줄(← SVP(36)) → 포토레지스터 → 26번 줄 → − 줄
+  [21, 24, 26].forEach((c) => bb.tint(c, "bottom"));
+  wires.push(mmWire(bb.hole(21, "j"), rail("+", 21), C.red, [], "line"));
+  parts.push(resistor(bb.hole(21, "h"), bb.hole(24, "h"), { bands: TEN_K, label: "10kΩ" }).svg, photoresistor(bb.hole(24, "f"), bb.hole(26, "f")).svg);
+  const s36 = b.gpio(36), hB = bb.hole(24, "j");
+  const laneY = bb.y + bb.h + 14;
+  wires.push(mfWire(s36, hB, C.green, [{ x: s36.x, y: laneY }, { x: hB.x, y: laneY }], "orth"));
+  wires.push(mmWire(bb.hole(26, "j"), rail("-", 26), C.black));
+  used.push(s36);
+
+  // OLED: I2C 헤더 안쪽 줄. 선은 바깥 줄(UART) 핀 사이 틈으로 올라가 옆에서 꽂는다 (10장과 같은 길)
+  const bus = b.i2c(0);
+  const o = oled(110, Y0 + 388, { titleAt: { x: 98, y: Y0 + 444, anchor: "end" } });
+  parts.push(o.svg);
+  const lanes = { GND: Y0 + 362, VCC: Y0 + 354, SDA: Y0 + 338, SCL: Y0 + 346 };
+  const oc = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const p = bus[k], from = o.pins[k], seam = p.x - 9.9;
+    wires.push(ffWire(from, p, oc[k], [{ x: from.x, y: lanes[k] }, { x: seam, y: lanes[k] }, { x: seam, y: p.y }], "orth"));
+    used.push(p);
+  }
+
+  const rows = [
+    { color: C.red, part: "전원 헤더 3V", to: "+ 줄 (헤더 GND 핀 사이로)" }, { color: C.black, part: "위 줄 GND 칸 S", to: "− 줄" },
+    { color: C.red, part: "+ 줄", to: "21번 줄 → 10kΩ 저항 → 24번 줄" },
+    { color: C.green, part: "SVP(36) 칸 S", to: "24번 줄 (저항과 포토레지스터 사이)" },
+    { color: C.black, part: "포토레지스터 26번 줄", to: "− 줄" },
+    { color: C.yellow, part: "P26 칸 S", to: `${circ.cols.sig}번 줄 → 220Ω → ${circ.cols.anode}번 줄 LED 긴 다리` },
+    { color: C.black, part: `LED 짧은 다리 ${circ.cols.cathode}번 줄`, to: "− 줄" },
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC (보드에 바로)" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22 (보드에 바로)" },
+  ];
+  const table = connectionTable(Y0 + 512, "이렇게 꽂아요 — OLED 는 보드에 바로, 나머지는 브레드보드에", rows, b.legend);
+  return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "밝기 단계 가로등 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 아래. 아래 줄 3V3 → 브레드보드 + 줄, 아래 줄 GND → − 줄. + 줄 → 20번 줄 → 10kΩ 저항 → 23번 줄, 23번 줄 ← 아래 줄 io36, 포토레지스터는 23번 줄과 25번 줄 사이, 25번 줄 → − 줄. LED: 위 줄 io26 → 보드 바깥으로 돌아 6번 줄 → 220Ω 저항 → 10번 줄 긴 다리(+), 짧은 다리(−) 11번 줄 → − 줄. OLED 화면 GND · VCC · SDA · SCL 은 보드 I2C 묶음 첫 줄의 GND · 5V · SDA · SCL 에 F-F 듀폰선으로 바로",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 밝기 단계 가로등 배선도: JUMP 점퍼는 3.3V 쪽(평소 자리). 브레드보드는 보드 위. 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄, 위 줄 GND 칸 S 핀 → − 줄. + 줄 → 21번 줄 → 10kΩ 저항 → 24번 줄, 24번 줄 ← SVP(36) 칸 S 핀, 포토레지스터는 24번 줄과 26번 줄 사이, 26번 줄 → − 줄. LED: P26 칸 S 핀 → 18번 줄 → 220Ω 저항 → 13번 줄 긴 다리(+), 짧은 다리(−) 12번 줄 → − 줄. OLED 화면 GND · VCC · SDA · SCL 은 I2C 헤더의 GND · VCC · D21 · D22 에 F-F 듀폰선으로 바로",
   devkit: "기본 보드(ESP32 DevKit 38핀) 밝기 단계 가로등 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, 위 줄 GND → − 줄. + 줄 → 16번 줄 → 10kΩ 저항 → 20번 줄, 20번 줄 ← VP(36), 포토레지스터는 20번 줄과 22번 줄 사이, 22번 줄 → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄. OLED 화면은 보드 아래: SDA → D21, SCL → D22, GND → 아래 줄 GND, VCC → 보드 바깥으로 돌아 VIN 에 F-F 듀폰선으로 바로",
 };
 
@@ -123,5 +186,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wsl", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wslk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wslx", T.expansion, r.body, r.height); },
   },
 };

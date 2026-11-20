@@ -7,9 +7,14 @@
 //   위 줄 14 · 27 · 25 세 선만 보드 왼쪽 바깥 길로 내려와 브레드보드 a 칸에 (서로 엇갈리지 않게 겹겹이).
 // DevKit: 브레드보드는 보드 위, + − 줄은 위 · 아래 둘(왼쪽 끝 바깥 점퍼로 + 끼리, − 끼리 잇는다). DHT11 은 브레드보드 위 —
 //   V · G 는 위 + − 줄, S 는 구멍 사이 빈 길로 내려가 D13. 불꽃 센서는 브레드보드 오른쪽 — V · G 는 아래 + − 줄, S 는 D34.
+// 확장 보드: DHT11 · 불꽃 센서는 P13 · P34 칸 G · V · S 기둥에 F-F 셋씩 바로(V 줄 = 3.3V). 맨 부품은 보드 위 브레드보드(아래 + − 줄),
+//   P14 · P27 · P25 세 선은 두 모듈 사이로 올라간다. + 줄은 전원 헤더 3V(점퍼와 상관없이 3.3V — 틸트 풀업이 14번에 3.3V 넘게 주지 않게),
+//   − 줄은 전원 헤더 GND. 5V 부품이 없어 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
+import { columnRun } from "./33-room-climate.mjs";
 import { breadboard, button, buzzer, module, resistor, sensor3, tiltSwitch } from "../parts.mjs";
 import { alley } from "./35-random-hammer.mjs";
 
@@ -178,8 +183,70 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 84, y: 8, cols: 26, rails: { top: false, bottom: true } });
+  const b = makeExpansion({ x: 22, y: 436, jumper: "3V3" });
+  const Y0 = b.bounds.y;
+  const D = (s, c) => bb.rail("bottom", s, c);
+  const parts = [bb.svg], wires = [], used = [];
+  const lane = (k) => bb.y + bb.h + 10 + k * 8;
+
+  // 틸트(풀업): 10kΩ (11,h)~(14,h), 틸트 (14,f)~(16,f). 11 → + 줄, 14 ← P14, 16 → − 줄
+  [11, 14, 16].forEach((c) => bb.tint(c, "bottom"));
+  parts.push(resistor(bb.hole(11, "h"), bb.hole(14, "h"), { bands: TEN_K, label: "10kΩ" }).svg);
+  parts.push(tiltSwitch(bb.hole(14, "f"), bb.hole(16, "f")).svg);
+  wires.push(mmWire(bb.hole(11, "j"), D("+", 11), C.red, [], "line"), mmWire(bb.hole(16, "j"), D("-", 16), C.black));
+  // 버튼: 다리 (19,e)(21,e)(19,f)(21,f). 신호 (21, j) ← P27, 같은 쪽 다른 다리 줄 (19, j) → − 줄
+  const btn = button(bb, 19);
+  [19, 21].forEach((c) => bb.tint(c, "bottom"));
+  wires.push(mmWire(bb.hole(19, "j"), D("-", 19), C.black));
+  // 수동 부저: + (24,f) ← P25, − (26,f) → − 줄
+  [24, 26].forEach((c) => bb.tint(c, "bottom"));
+  parts.push(buzzer(bb.hole(24, "f"), bb.hole(26, "f")).svg);
+  wires.push(mmWire(bb.hole(26, "j"), D("-", 26), C.black));
+
+  // 보드 → 브레드보드: 두 모듈 사이로 올라간다 (P27 이 P25 보다 위 길)
+  const s14 = b.gpio(14), s27 = b.gpio(27), s25 = b.gpio(25);
+  const h14 = bb.hole(14, "j"), h27 = bb.hole(21, "j"), h25 = bb.hole(24, "j");
+  wires.push(mfWire(s14, h14, C.green, [{ x: s14.x, y: lane(1) }, { x: h14.x, y: lane(1) }], "orth"));
+  wires.push(mfWire(s27, h27, C.purple, [{ x: s27.x, y: lane(0) }, { x: h27.x, y: lane(0) }], "orth"));
+  wires.push(mfWire(s25, h25, C.orange, [{ x: s25.x, y: lane(2) }, { x: h25.x, y: lane(2) }], "orth"));
+  used.push(s14, s27, s25);
+
+  // 전원: 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄 3번 칸, 전원 헤더 GND → − 줄 5번 칸
+  const v33 = b.power("3V3", 1), gnd = b.power("GND", 4);
+  const p3 = D("+", 3);
+  wires.push(mfWire(v33, p3, C.red, [{ x: p3.x, y: v33.y }], "orth"), mfWire(gnd, D("-", 5), C.black));
+  used.push(v33, gnd);
+
+  // DHT11 · 불꽃 센서: 핀이 아래로(G · V · S), P13 · P34 칸 G · V · S 기둥에 F-F 셋씩
+  const my = Y0 - 118;
+  const t13 = b.triple(13), t34 = b.triple(34);
+  const dht = dht11(t13.S.x - 38, my, { titleAt: { x: t13.S.x - 48, y: my + 35, anchor: "end" } });
+  const fl = sensor3(t34.S.x - 38, my, "flame", { titleAt: { x: t34.S.x + 48, y: my + 35, anchor: "start" } });
+  parts.push(dht.svg, fl.svg, columnRun(t13, dht.pins, { turnY: Y0 - 14 }), columnRun(t34, fl.pins, { turnY: Y0 - 14, colors: { G: C.black, V: C.red, S: C.yellow } }));
+  used.push(t13.G, t13.V, t13.S, t34.G, t34.V, t34.S);
+
+  parts.push(btn.svg);
+  const rows = [
+    { colors: [C.black, C.red, C.blue], part: "DHT11 G · V · S", to: "P13 칸 G · V · S" },
+    { colors: [C.black, C.red, C.yellow], part: "불꽃 센서 G · V · S", to: "P34 칸 G · V · S" },
+    { color: C.red, part: "전원 헤더 3V", to: "+ 줄 (헤더 GND 핀 사이로)" },
+    { color: C.black, part: "전원 헤더 GND", to: "− 줄" },
+    { color: C.green, part: "P14 칸 S", to: "14번 줄 (10kΩ 과 틸트 스위치 사이)" },
+    { colors: [C.red, C.black], part: "10kΩ 11번 줄 · 틸트 16번 줄", to: "+ 줄 · − 줄" },
+    { color: C.purple, part: "P27 칸 S", to: "21번 줄 (버튼 한쪽 다리)" },
+    { color: C.black, part: "버튼 19번 줄", to: "− 줄" },
+    { color: C.orange, part: "P25 칸 S", to: "24번 줄 부저 + 다리 (− 다리 26번 줄 → − 줄)" },
+  ];
+  const table = connectionTable(b.bounds.y + b.bounds.h + 40, "이렇게 꽂아요 — 모듈 둘은 기둥에 바로, 맨 부품은 브레드보드에", rows, b.legend, { columns: 1 });
+  return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
+}
+
 const TT = {
   plus: "재난 알리미 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 아래. 아래 줄 3V3 → 위 + 줄, 아래 줄 GND → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. DHT11 모듈 G · V · S 는 보드 위쪽 io13 기둥 G · V · S 에 F-F 듀폰선으로 바로. 불꽃 센서 모듈 V → + 줄, G → − 줄, S → 아래 줄 io34. 틸트 스위치는 12번 줄과 14번 줄 사이, 10kΩ 저항은 9번 줄과 12번 줄 사이: 9번 줄 → + 줄, 14번 줄 → − 줄, 12번 줄 ← io14. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: io27 → 6번 줄, 대각선 8번 줄 → 아래 − 줄. 수동 부저 + 다리 2번 줄 ← io25, − 다리 4번 줄 → − 줄. io14 · io27 · io25 세 선은 보드 바깥으로 돌아 브레드보드로",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 재난 알리미 배선도: JUMP 점퍼는 3.3V 쪽(평소 자리). DHT11 모듈 G · V · S 는 P13 칸 G · V · S, 불꽃 센서 모듈 G · V · S 는 P34 칸 G · V · S 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄, 전원 헤더 GND → − 줄. 10kΩ 저항은 11번 줄과 14번 줄 사이, 틸트 스위치는 14번 줄과 16번 줄 사이: 11번 줄 → + 줄, 16번 줄 → − 줄, 14번 줄 ← P14 칸 S 핀. 버튼은 가운데 홈에 걸쳐 19 · 21번 줄: P27 칸 S 핀 → 21번 줄, 19번 줄 → − 줄. 수동 부저 + 다리 24번 줄 ← P25 칸 S 핀, − 다리 26번 줄 → − 줄. P14 · P27 · P25 세 선은 두 모듈 사이로 올라가요",
   devkit: "기본 보드(ESP32 DevKit 38핀) 재난 알리미 배선도: 브레드보드는 보드 위. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 + 줄과 아래 + 줄 · 위 − 줄과 아래 − 줄은 점퍼로. DHT11 모듈 V → 위 + 줄, G → 위 − 줄, S → D13. 불꽃 센서 모듈 V → 아래 + 줄, G → 아래 − 줄, S → D34. 틸트 스위치는 6번 줄과 8번 줄 사이, 10kΩ 저항은 8번 줄과 11번 줄 사이: 11번 줄 → + 줄, 6번 줄 → − 줄, 8번 줄 ← D14. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: D27 → 14번 줄, 대각선 12번 줄 → 위 − 줄. 수동 부저 + 다리 16번 줄 ← D25, − 다리 18번 줄 → 아래 − 줄",
 };
 
@@ -187,5 +254,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wda", TT.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wdak", TT.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wdax", TT.expansion, r.body, r.height); },
   },
 };

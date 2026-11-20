@@ -3,9 +3,12 @@
 //   접지 = 대각선 왼쪽 위 다리 줄 — 접지 선은 열과 열 사이 빈 길로 올라가 c 칸에 꽂는다 (구멍 위를 지나지 않게).
 // 터치 패드는 선 끝(핀 쪽)을 악어 클립으로 호일에. Plus: OLED 는 I2C 묶음에 바로, a · b 는 아래 줄 io32 · io33, c 는 위 줄 io27.
 // DevKit: OLED 는 3V3 · GND · D21 · D22 에 바로, 패드 셋은 위 줄 D27 · D33 · D32 에서 보드 위로.
+// 확장 보드: OLED 는 I2C 헤더(10장과 같은 길). 버튼은 보드 위 왼쪽 브레드보드(P14 · 위 줄 GND 칸 S), 패드 셋은 위 줄 P27 · P33 · P32 에서
+//   보드 위로. 5V 부품이 없어 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, note, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, button, oled } from "../parts.mjs";
 import { mark, pt, rec } from "../record.mjs";
 import { alley } from "./35-random-hammer.mjs";
@@ -142,8 +145,58 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg, note(bb.x - 10, bb.y + 40, "버튼", "end", 14)]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 3.3V ───── */
+function expansion() {
+  const padTop = 130;
+  const bb = breadboard({ x: 150, y: 56, cols: 5, rails: { top: false, bottom: false } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 44, jumper: "3V3" });
+  const Y0 = b.bounds.y;
+  const parts = [], wires = [], used = [];
+  const lane = (k) => bb.y + bb.h + 10 + k * 10;
+
+  // 버튼: 다리 2 · 4번 줄. P14 칸 S → (4, j), 위 줄 GND 칸 S → 1 · 2번 열 사이 빈 길로 (2, c)
+  const btn = buttonCross(bb, 2);
+  const p14 = b.gpio(14), gnd = b.power("GND");
+  wires.push(mfWire(p14, btn.sigHole, C.green, [{ x: p14.x, y: lane(1) }, { x: btn.sigHole.x, y: lane(1) }], "orth"));
+  wires.push(mfWire(gnd, btn.gndHole, C.black, viaAlley(gnd, btn.gndHole, btn.gndAlley, lane(2)), "orth"));
+  used.push(p14, gnd);
+
+  // 패드 c · b · a ← P27 · P33 · P32 (보드 위, 서로 엇갈리지 않게)
+  const p27 = b.gpio(27), p33 = b.gpio(33), p32 = b.gpio(32);
+  const padC = foilPad(330, padTop, "c"), padB = foilPad(p33.x, padTop, "b"), padA = foilPad(546, padTop, "a");
+  wires.push(mfWire(p27, padC.clip, C.orange, [{ x: p27.x, y: lane(0) }, { x: padC.clip.x, y: lane(0) }], "orth"));
+  wires.push(mfWire(p33, padB.clip, C.teal));
+  wires.push(mfWire(p32, padA.clip, C.yellow, [{ x: p32.x, y: lane(0) }, { x: padA.clip.x, y: lane(0) }], "orth"));
+  used.push(p27, p33, p32);
+
+  // OLED: I2C 헤더 안쪽 줄. 선은 바깥 줄(UART) 핀 사이 틈으로 올라가 옆에서 꽂는다 (10장과 같은 길)
+  const bus = b.i2c(0);
+  const o = oled(110, Y0 + 388, { titleAt: { x: 98, y: Y0 + 444, anchor: "end" } });
+  const lanes = { GND: Y0 + 362, VCC: Y0 + 354, SDA: Y0 + 338, SCL: Y0 + 346 };
+  const oc = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const p = bus[k], from = o.pins[k], seam = p.x - 9.9;
+    wires.push(ffWire(from, p, oc[k], [{ x: from.x, y: lanes[k] }, { x: seam, y: lanes[k] }, { x: seam, y: p.y }], "orth"));
+    used.push(p);
+  }
+
+  parts.push(bb.svg, btn.svg, o.svg, ...padC.svg, ...padB.svg, ...padA.svg);
+  const rows = [
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22" },
+    { color: C.green, part: "P14 칸 S", to: "4번 줄 (버튼 한쪽 다리)" },
+    { color: C.black, part: "위 줄 GND 칸 S", to: "2번 줄 (버튼 대각선 다리)" },
+    { color: C.yellow, part: "P32 칸 S", to: "악어 클립 → 호일 패드 a" },
+    { color: C.teal, part: "P33 칸 S", to: "악어 클립 → 호일 패드 b" },
+    { color: C.orange, part: "P27 칸 S", to: "악어 클립 → 호일 패드 c" },
+  ];
+  const table = connectionTable(Y0 + 512, "이렇게 꽂아요 — OLED 는 보드에 바로, 버튼은 브레드보드, 패드는 악어 클립", rows, b.legend, { columns: 1 });
+  return { body: compose(b.draw(used), parts, wires, [table.svg, note(bb.x - 10, bb.y + 40, "버튼", "end", 14)]), height: table.bottom };
+}
+
 const T = {
   plus: "기억력 게임기 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SDA · SCL 은 I2C 묶음 GND · 5V · SDA · SCL 에 F-F 듀폰선으로 바로. 버튼은 브레드보드 가운데 홈에 걸쳐 4 · 6번 줄에 꽂고, 보드 위쪽 io14 → 6번 줄(버튼 한쪽 다리), 위쪽 GND → 4번 줄(대각선 다리). 호일 패드 a 는 아래 줄 io32, b 는 아래 줄 io33, c 는 위쪽 io27 에 꽂은 M-F 듀폰선 끝을 악어 클립으로",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 기억력 게임기 배선도: JUMP 점퍼는 3.3V 쪽(평소 자리). OLED 화면 GND · VCC · SDA · SCL 은 I2C 헤더의 GND · VCC · D21 · D22 에 F-F 듀폰선으로 바로. 버튼은 브레드보드 가운데 홈에 걸쳐 2 · 4번 줄에 꽂고, P14 칸 S 핀 → 4번 줄(버튼 한쪽 다리), 위 줄 GND 칸 S 핀 → 2번 줄(대각선 다리). 호일 패드 a 는 P32 칸, b 는 P33 칸, c 는 P27 칸 S 핀에 꽂은 M-F 듀폰선 끝을 악어 클립으로",
   devkit: "기본 보드(ESP32 DevKit 38핀) 기억력 게임기 배선도: OLED 화면 VCC → 3V3, GND → GND, SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로. 버튼은 브레드보드 가운데 홈에 걸쳐 2 · 4번 줄에 꽂고, D14 → 4번 줄(버튼 한쪽 다리), GND → 2번 줄(대각선 다리). 호일 패드 a 는 D32, b 는 D33, c 는 D27 에 꽂은 M-F 듀폰선 끝을 악어 클립으로",
 };
 
@@ -151,5 +204,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wmg", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wmgk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wmgx", T.expansion, r.body, r.height); },
   },
 };

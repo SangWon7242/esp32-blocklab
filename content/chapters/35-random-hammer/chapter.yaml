@@ -46,14 +46,20 @@ materials:
   - { name: F-F 듀폰선 5가닥, board: devkit, note: "초음파 Trig, OLED 네 핀을 보드 핀에 바로" }
   - { name: M-F 듀폰선 8가닥, board: devkit, note: "VIN · GND · 초음파 VCC · GND → + − 줄, D14 → 버튼, D4 → 서보 주황, 초음파 Echo 와 D12 → 저항 줄" }
   - { name: 점퍼선(M-M) 4가닥, board: devkit, note: "서보 빨강 · 갈색 → + − 줄, 버튼 대각선 다리 → − 줄, 2kΩ 저항 끝 줄 → − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로" }
+  - { name: 브레드보드, board: expansion, note: "위 칸에 저항 둘(초음파 Echo 의 5V 신호를 보드가 받을 수 있는 3.3V 로 낮춰요), 아래 칸에 버튼. OLED · 서보는 보드에 바로" }
+  - { name: F-F 듀폰선 6가닥, board: expansion, note: "초음파 VCC → 위 줄 5V 칸 S · Trig → P13 칸 S, OLED 네 핀 → I2C 헤더. 서보는 플러그째 아래 줄 P4 칸에" }
+  - { name: M-F 듀폰선 6가닥, board: expansion, note: "초음파 Echo · GND, P12 칸 S · 위 줄 GND 칸 S → 저항 줄, P14 칸 S · G → 버튼 두 다리 줄" }
   - { name: 종이컵 · 나무젓가락 · 테이프 · 박스지, note: "망치와 서보 받침을 만들어요. 종이컵을 젓가락 끝에 거꾸로 붙이면 망치" }
   - { name: (추가 미션) 수동 부저, board: plus, note: "브레드보드에 꽂고 + 다리 줄 → io25, − 다리 줄 → io25 기둥 G (M-F 2가닥 더)" }
   - { name: (추가 미션) 수동 부저, board: devkit, note: "브레드보드에 꽂고 + 다리 줄 → D25, − 다리 줄 → − 줄 (M-F 1 · 점퍼선 1 더)" }
+  - { name: (추가 미션) 수동 부저, board: expansion, note: "브레드보드 아래 칸에 꽂고 + 다리 줄 → P25 칸 S, − 다리 줄 → P25 칸 G (M-F 2가닥 더)" }
   - { name: USB 선, note: 배선할 때는 빼 두기. 서보가 많으면 5V 외부 전원도 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "초음파 VCC → 5V · GND → GND · Trig → io13 (위쪽 한 줄)은 보드에 바로 꽂아요. Echo 는 브레드보드 f~j 칸의 3번 줄 → 1kΩ 저항 → 6번 줄 → io12, 6번 줄 → 2kΩ 저항 → 9번 줄 → io12 기둥 G. OLED GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL, 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S). 버튼은 브레드보드 가운데 홈에 걸쳐 11 · 13번 줄에: io14 → 13번 줄, 대각선 다리 11번 줄 → io14 기둥 G"
   captionDevkit: "보드 VIN(5V) · GND 를 브레드보드 + − 줄에 잇고, 초음파 VCC · 서보 빨강은 + 줄, 초음파 GND · 서보 갈색은 − 줄에. 초음파 Trig → D13. Echo 는 a~e 칸의 12번 줄 → 1kΩ 저항 → 15번 줄 → D12, 15번 줄 → 2kΩ 저항 → 18번 줄 → − 줄. 서보 주황 → D4. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 다리 10번 줄 → − 줄. OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
+  captionExpansion: "JUMP 점퍼는 5V 쪽. 초음파 VCC → 위 줄 5V 칸 S · Trig → P13 칸 S 는 보드에 바로. Echo 는 위 칸(a~e)의 2번 줄 → 1kΩ 저항 → 5번 줄 → P12 칸 S, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 위 줄 GND 칸 S. 서보 플러그 → 아래 줄 P4 칸 (갈색 G · 빨강 V · 주황 S). 버튼은 가운데 홈에 걸쳐 11 · 13번 줄: P14 칸 S → 13번 줄, P14 칸 G → 11번 줄. OLED GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22"
 principle:
   image: images/relative-frequency.svg
   body: |
@@ -141,6 +147,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "1부에서는 버튼만 써요: 버튼을 가운데 홈에 걸쳐 11 · 13번 줄에 꽂고 io14 → 13번 줄, 대각선 다리 11번 줄 → io14 기둥 G"
           captionDevkit: "1부에서는 버튼만 써요: 버튼을 가운데 홈에 걸쳐 8 · 10번 줄에 꽂고 D14 → 8번 줄, 대각선 다리 10번 줄 → − 줄, 보드 GND → − 줄"
+          captionExpansion: "1부에서는 버튼만 써요: 버튼을 가운데 홈에 걸쳐 11 · 13번 줄에 꽂고 P14 칸 S → 13번 줄, P14 칸 G → 11번 줄"
         body: |
           1부에서는 **버튼만** 꽂아요. 버튼을 가운데 홈에 걸쳐 꽂고, 한쪽 다리 줄은 **14번** 핀에, 대각선 반대쪽 다리 줄은 **GND** 에 이어요. 배선 그림과 아래 표처럼 꽂으면 돼요. 나머지 부품은 2부에서 꽂아도 돼요.
 

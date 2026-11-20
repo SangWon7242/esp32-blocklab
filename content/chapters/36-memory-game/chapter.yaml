@@ -40,11 +40,13 @@ materials:
   - { name: 악어 클립 선, note: "3개. 한쪽은 호일 가장자리, 한쪽은 M-F 듀폰선의 핀 끝을 집어요" }
   - { name: F-F 듀폰선 4가닥, note: "양쪽 끝이 구멍인 선. OLED 네 핀을 보드 핀에 바로" }
   - { name: M-F 듀폰선 5가닥, note: "구멍 쪽은 보드 핀. 14번 · GND → 버튼 두 다리 줄, 32 · 33 · 27번 → 악어 클립" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "OLED GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL (F-F 로 바로). 버튼은 브레드보드 가운데 홈에 걸쳐 4 · 6번 줄: io14 → 6번 줄, 위쪽 GND → 대각선 다리 4번 줄. 호일 패드 a ← 아래 줄 io32, b ← 아래 줄 io33, c ← 위쪽 io27 (M-F 선 끝을 악어 클립으로)"
   captionDevkit: "OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22 (F-F 로 바로). 버튼은 브레드보드 가운데 홈에 걸쳐 2 · 4번 줄: D14 → 4번 줄, GND → 대각선 다리 2번 줄. 호일 패드 a ← D32, b ← D33, c ← D27 (M-F 선 끝을 악어 클립으로)"
+  captionExpansion: "OLED GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22 (F-F 로 바로). 버튼은 브레드보드 가운데 홈에 걸쳐 2 · 4번 줄: P14 칸 S → 4번 줄, 위 줄 GND 칸 S → 대각선 다리 2번 줄. 호일 패드 a ← P32 칸 S, b ← P33 칸 S, c ← P27 칸 S (M-F 선 끝을 악어 클립으로)"
 principle:
   image: images/list-compare.svg
   body: |
@@ -137,6 +139,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "오늘은 OLED 네 핀만 먼저 이어요: GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL"
           captionDevkit: "오늘은 OLED 네 핀만 먼저 이어요: VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
+          captionExpansion: "오늘은 OLED 네 핀만 먼저 이어요: I2C 헤더 GND · VCC · D21 · D22"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 OLED 를 먼저 이어요. 버튼과 호일 패드는 뒤에서 이어도 돼요. OLED 라이브러리(`ssd1306.py`)는 **실행**을 누르면 블록랩이 함께 올려 줘요.
 

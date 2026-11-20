@@ -8,10 +8,16 @@
 //   Trig 선은 구멍 사이 빈 길(열과 열 사이)로 내려가 D13 에. VIN · GND 선도 빈 길로 올라가 + − 줄에.
 //   Echo → 12번 줄(+ − 줄에 구멍이 없는 열이라 곧장 내려온다) → 1kΩ → 15번 줄 → 2kΩ → 18번 줄 → − 줄 점퍼.
 //   D12 → 16 · 17번 열 사이 빈 길로 올라가 가운데 홈에서 꺾어 15번 줄 맨 아래 칸(e).
+// 확장 보드: 서보(V 줄) · 초음파가 있어 점퍼는 5V. 초음파 VCC · Trig 는 위 줄 5V 칸 · P13 칸 S 에 바로, Echo · GND 는 위에서
+//   브레드보드 위 칸(a~e)의 전압 나누기로 (10장과 같은 꼴, 칸만 위 칸). P12 · 위 줄 GND 는 아래에서 빈 길로 올라가 가운데 홈에서 꺾어 e 칸에.
+//   버튼은 같은 브레드보드 아래 칸: P14 칸 S → 한쪽 다리 줄, P14 칸 G → 같은 쪽 반대 다리 줄 (두 선이 한 칸 기둥에서 나란히).
+//   서보는 아래 줄 P4 칸에 플러그째, OLED 는 I2C 헤더(10장과 같은 길).
 // 이 파일의 도우미(alley · upInto · TEN_K 등)는 36 · 37 · 38 장도 쓴다.
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { columnServo, makeExpansion } from "../boards/expansion.mjs";
+import { columnRun } from "./33-room-climate.mjs";
 import { breadboard, button, oled, servo, servoWithPlug, ultrasonic } from "../parts.mjs";
 import { echoDivider, echoRows } from "../echo-divider.mjs";
 
@@ -188,9 +194,82 @@ function devkit() {
   return { title, body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 5V ───── */
+function expansion() {
+  const bb = breadboard({ x: 380, y: 70, cols: 13, rails: { top: false, bottom: false } });
+  const b = makeExpansion({ x: 22, y: 362, jumper: "5V" });
+  const Y0 = b.bounds.y;
+  const parts = [], wires = [], used = [];
+  const under = bb.y + bb.h; // 브레드보드 아래 ~ 보드 위 사이 빈 띠
+
+  // 초음파: 보드 위 왼쪽. VCC · Trig 는 보드에 바로, Echo · GND 는 브레드보드 위로 돌아 위 칸 전압 나누기에
+  const u = ultrasonic(150, 20);
+  const t = { VCC: b.power("5V"), GND: b.power("GND"), Trig: b.gpio(13), Echo: b.gpio(12) };
+  wires.push(ffWire(u.pins.VCC, t.VCC, C.red), ffWire(u.pins.Trig, t.Trig, C.yellow));
+  used.push(t.VCC, t.GND, t.Trig, t.Echo);
+  // Echo → 2번 줄 → 1kΩ → 5번 줄 → 2kΩ → 8번 줄 (위 칸 a~e)
+  const div = echoDivider(bb, 2, { order: "echo-first", half: "top" });
+  const e = u.pins.Echo, g = u.pins.GND, turnX = 352;
+  wires.push(mfWire(e, div.holes.echo, C.green, [{ x: e.x, y: e.y + 16 }, { x: turnX + 8, y: e.y + 16 }, { x: turnX + 8, y: bb.y - 22 }, { x: div.holes.echo.x, y: bb.y - 22 }], "orth"));
+  wires.push(mfWire(g, div.holes.gndSensor, C.black, [{ x: g.x, y: g.y + 8 }, { x: turnX, y: g.y + 8 }, { x: turnX, y: bb.y - 30 }, { x: div.holes.gndSensor.x, y: bb.y - 30 }], "orth"));
+  // P12 · 위 줄 GND: 아래에서 빈 길로 올라가 가운데 홈에서 꺾어 e 칸 (가운데 줄 · GND 줄)
+  const groove = (bb.hole(1, "e").y + bb.hole(1, "f").y) / 2;
+  const upToE = (from, col, laneY, color) => {
+    const h = bb.hole(col, "e"), ax = alley(bb, col);
+    return mfWire(from, h, color, [{ x: from.x, y: laneY }, { x: ax, y: laneY }, { x: ax, y: groove }, { x: h.x, y: groove }], "orth");
+  };
+  wires.push(upToE(t.GND, div.cols.gnd, under + 12, C.black), upToE(t.Echo, div.cols.mid, under + 22, C.purple));
+
+  // 버튼: 아래 칸 11 · 13번 줄. P14 칸 S → 13번 줄(j), P14 칸 G → 11번 줄(j) — 버튼을 누르면 두 줄이 이어진다
+  const BTN = 11;
+  const btn = button(bb, BTN);
+  bb.tint(BTN, "bottom");
+  bb.tint(BTN + 2, "bottom");
+  const c14 = b.triple(14);
+  parts.push(columnRun(c14, { G: bb.hole(BTN, "j"), S: bb.hole(BTN + 2, "j") }, {
+    keys: ["G", "S"], ends: "m", dx: { G: -5, S: 5 }, turnY: { G: under + 32, S: under + 42 }, colors: { G: C.black, S: C.blue },
+  }));
+  used.push(c14.S, c14.G);
+
+  // 서보: 아래 줄 P4 칸 G · V · S 에 플러그 그대로
+  const sv = b.triple(4);
+  parts.push(columnServo(sv, { gap: 84 }).svg);
+  used.push(sv.G, sv.V, sv.S);
+
+  // OLED: I2C 헤더 안쪽 줄. 선은 바깥 줄(UART) 핀 사이 틈으로 올라가 옆에서 꽂는다 (10장과 같은 길)
+  const bus = b.i2c(0);
+  const o = oled(110, Y0 + 388, { titleAt: { x: 98, y: Y0 + 444, anchor: "end" } });
+  parts.push(o.svg);
+  const lanes = { GND: Y0 + 362, VCC: Y0 + 354, SDA: Y0 + 338, SCL: Y0 + 346 };
+  const oc = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.teal };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const p = bus[k], from = o.pins[k], seam = p.x - 9.9;
+    wires.push(ffWire(from, p, oc[k], [{ x: from.x, y: lanes[k] }, { x: seam, y: lanes[k] }, { x: seam, y: p.y }], "orth"));
+    used.push(p);
+  }
+
+  parts.unshift(bb.svg, ...div.svg, btn.svg, u.svg);
+  const rows = [
+    { color: C.red, part: "초음파 VCC", to: "위 줄 5V 칸 S" }, { color: C.yellow, part: "초음파 Trig", to: "P13 칸 S" },
+    { color: C.green, part: "초음파 Echo", to: `${div.cols.echo}번 줄 → 1kΩ → ${div.cols.mid}번 줄` },
+    { color: C.purple, part: "P12 칸 S", to: `${div.cols.mid}번 줄 (1kΩ 과 2kΩ 사이)` },
+    { color: C.black, part: "초음파 GND · 위 줄 GND 칸 S", to: `${div.cols.gnd}번 줄 ← 2kΩ ← ${div.cols.mid}번 줄` },
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC" },
+    { colors: [C.blue, C.teal], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22" },
+    { colors: [C.brown, C.red, C.orange], part: "서보 플러그", to: "아래 줄 P4 칸 G · V · S (V 는 점퍼 5V)" },
+    { color: C.blue, part: "P14 칸 S", to: `${BTN + 2}번 줄 (버튼 한쪽 다리)` },
+    { color: C.black, part: "P14 칸 G", to: `${BTN}번 줄 (버튼 같은 쪽 다른 다리)` },
+  ];
+  const table = connectionTable(Y0 + 526, "이렇게 꽂아요 — 버튼과 저항 둘만 브레드보드, 나머지는 보드에 바로", rows, b.legend, { columns: 1 });
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 복불복 랜덤 망치 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로. 초음파 센서 VCC 는 위 줄 5V 칸 S 핀, Trig 는 P13 칸 S 핀에 F-F 듀폰선으로 바로. Echo 는 브레드보드 위 칸의 저항 둘을 거친다: Echo → ${div.cols.echo}번 줄 → 1kΩ 저항 → ${div.cols.mid}번 줄 → P12 칸 S 핀, ${div.cols.mid}번 줄 → 2kΩ 저항 → ${div.cols.gnd}번 줄 ← 초음파 GND · 위 줄 GND 칸 S 핀. OLED 화면 GND · VCC · SDA · SCL 은 I2C 헤더의 GND · VCC · D21 · D22 에. 서보 모터 플러그는 아래 줄 P4 칸에 갈색 G, 빨강 V, 주황 S 가 맞도록. 버튼은 브레드보드 가운데 홈에 걸쳐 ${BTN} · ${BTN + 2}번 줄에 꽂고, P14 칸 S 핀 → ${BTN + 2}번 줄(버튼 한쪽 다리), P14 칸 G 핀 → ${BTN}번 줄(같은 쪽 다른 다리)`;
+  const btnY = (bb.hole(BTN, "e").y + bb.hole(BTN, "f").y) / 2;
+  return { title, body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom, btnY };
+}
+
 export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wrh", r.title, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wrhk", r.title, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wrhx", r.title, r.body, r.height); },
   },
 };

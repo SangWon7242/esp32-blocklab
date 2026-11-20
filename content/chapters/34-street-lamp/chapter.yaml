@@ -45,12 +45,15 @@ materials:
   - { name: 점퍼선(M-M) 3가닥, note: "+ 줄 → 10kΩ 저항, 포토레지스터 → − 줄, LED 짧은 다리 → − 줄" }
   - { name: F-F 듀폰선 4가닥, board: plus, note: "OLED GND · VCC · SDA · SCL → 보드 I2C 묶음 GND · 5V · SDA · SCL 에 바로" }
   - { name: F-F 듀폰선 4가닥, board: devkit, note: "OLED GND → GND, VCC → VIN, SDA → D21, SCL → D22 에 바로" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
+  - { name: F-F 듀폰선 4가닥, board: expansion, note: "OLED GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22 에 바로" }
   - { name: 휴대폰 손전등, note: 가장 밝을 때 값을 잴 때 (눈에 비추지 않기) }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "브레드보드는 보드 아래에 두어요. 아래 줄 3V3 → + 줄, 아래 줄 GND → − 줄. + 줄 → 20번 줄 → 10kΩ 저항 → 23번 줄 ← 36번(아래 줄 io36), 포토레지스터는 23번 줄과 25번 줄 사이, 25번 줄 → − 줄. LED: 26번(위 줄 io26) → 보드 바깥으로 돌아 6번 줄 → 220Ω 저항 → 10번 줄 긴 다리(+), 짧은 다리(−) 11번 줄 → − 줄. OLED GND · VCC · SDA · SCL → I2C 묶음 첫 줄 GND · 5V · SDA · SCL 에 F-F 듀폰선으로 바로"
   captionDevkit: "브레드보드는 보드 위에 두어요. 3V3(위 줄 오른쪽 끝) → 보드 바깥으로 돌아 + 줄, GND → − 줄. + 줄 → 16번 줄 → 10kΩ 저항 → 20번 줄 ← VP(36), 포토레지스터는 20번 줄과 22번 줄 사이, 22번 줄 → − 줄. LED 는 1장과 같은 자리: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄. OLED 는 보드 아래: SDA → D21, SCL → D22, GND → GND(아래 줄), VCC → 보드 바깥으로 돌아 VIN"
+  captionExpansion: "브레드보드는 보드 위에 두어요. 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄, 위 줄 GND 칸 S → − 줄. + 줄 → 21번 줄 → 10kΩ 저항 → 24번 줄 ← SVP(36) 칸 S, 포토레지스터는 24번 줄과 26번 줄 사이, 26번 줄 → − 줄. LED 는 1장과 같은 자리: P26 칸 S → 18번 줄 → 220Ω 저항 → 13번 줄 긴 다리(+), 짧은 다리(−) 12번 줄 → − 줄. OLED GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22"
 principle:
   image: images/level-graph.svg
   body: |
@@ -144,6 +147,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "포토레지스터와 10kΩ 사이 → 36번(아래 줄 io36), LED → 26번, OLED → I2C 묶음에 바로. + 줄은 3V3"
           captionDevkit: "포토레지스터와 10kΩ 사이 → VP(36), LED → D26, OLED SDA → D21 · SCL → D22. + 줄은 3V3"
+          captionExpansion: "포토레지스터와 10kΩ 사이 → SVP(36) 칸 S, LED → P26 칸 S, OLED → I2C 헤더에 바로. + 줄은 전원 헤더 3V"
         body: |
           **USB 를 뺀 채로** **부품과 배선**의 배선도를 보고 부품을 모두 꽂아요. 이번 실행은 포토레지스터만 쓰지만, LED 와 OLED 도 지금 꽂아 두면 미션에서 바로 쓸 수 있어요. 10kΩ 저항이 꽂힌 + 줄은 꼭 **3V3** 에 이어요.
 

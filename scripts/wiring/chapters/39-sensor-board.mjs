@@ -11,9 +11,15 @@
 // DevKit: 위 줄 D13 · D14 · D35 · D34 · VN 이 브레드보드 쪽이라 브레드보드는 보드 위(아래쪽 + − 줄).
 //   DHT11 · 소리 센서는 브레드보드와 보드 사이: S 는 D13 · D35 에 바로, V · G 는 모듈 왼쪽으로 돌아 + − 줄.
 //   PIR 은 브레드보드 오른쪽(16장과 같음). OLED 는 보드 아래: SDA · SCL · GND 는 아래 줄에 바로, VCC 는 보드 왼쪽 바깥 길로 + 줄.
-import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, name, svgDoc } from "../common.mjs";
+// 확장 보드: DHT11 은 P13 칸, 소리 센서는 P35 칸 G · V · S 기둥에 F-F 셋씩(보드 위), PIR 은 아래 줄 P23 칸 기둥에(보드 아래), V 줄 = 3.3V.
+//   소리 센서는 P34 · SVN 선이 곧게 올라가도록 왼쪽으로 비켜 두고 세 선을 계단처럼 꺾는다. 맨 부품은 보드 위 브레드보드(아래 + − 줄):
+//   + 줄은 전원 헤더 3V(점퍼와 상관없이 3.3V — 풀업 · 분압 · 가변저항이 핀에 3.3V 넘게 주지 않게), − 줄은 전원 헤더 GND.
+//   OLED 는 I2C 헤더(10장과 같은 길). 5V 부품이 없어 점퍼는 평소 자리(3.3V).
+import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, name, note, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
+import { columnRun } from "./33-room-climate.mjs";
 import { breadboard, module, oled, photoresistor, potentiometer, resistor, sensor3, tiltSwitch } from "../parts.mjs";
 
 const TEN_K = ["#8b5a2b", "#212529", "#f76707"]; // 갈 검 주
@@ -249,8 +255,94 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 40, y: 8, cols: 30, rails: { top: false, bottom: true } });
+  const b = makeExpansion({ x: 22, y: 436, jumper: "3V3" });
+  const Y0 = b.bounds.y;
+  const parts = [bb.svg], wires = [], used = [];
+  const rail = (s, c) => bb.rail("bottom", s, c);
+  const j = (c) => bb.hole(c, "j");
+  const lane = (k) => bb.y + bb.h + 10 + k * 8;
+  const toRail = (c, s, rc = c) => mmWire(j(c), rail(s, rc), s === "+" ? C.red : C.black, [], "line");
+
+  // 전원: 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄 7번 칸, 전원 헤더 GND → − 줄 9번 칸
+  const v33 = b.power("3V3", 1), gnd = b.power("GND", 5);
+  const p7 = rail("+", 7);
+  wires.push(mfWire(v33, p7, C.red, [{ x: p7.x, y: v33.y }], "orth"), mfWire(gnd, rail("-", 9), C.black));
+  used.push(v33, gnd);
+
+  // 틸트 스위치(풀업): + 줄 → 14번 줄 → 10kΩ → 17번 줄(← P14) → 틸트 스위치 → 19번 줄 → − 줄
+  [14, 17, 19].forEach((c) => bb.tint(c, "bottom"));
+  parts.push(resistor(bb.hole(14, "h"), bb.hole(17, "h"), { bands: TEN_K, label: "10kΩ" }).svg, tiltSwitch(bb.hole(17, "f"), bb.hole(19, "f")).svg);
+  wires.push(toRail(14, "+"), toRail(19, "-"));
+  // 포토레지스터 분압: + 줄 → 22번 줄 → 10kΩ → 26번 줄(← P34) → 포토레지스터 → 24번 줄 → − 줄
+  [22, 24, 26].forEach((c) => bb.tint(c, "bottom"));
+  parts.push(resistor(bb.hole(22, "h"), bb.hole(26, "h"), { bands: TEN_K, label: "10kΩ" }).svg, photoresistor(bb.hole(24, "f"), bb.hole(26, "f")).svg);
+  wires.push(toRail(22, "+"), toRail(24, "-", 23));
+  // 가변저항: 27 · 28 · 29번 줄, 가운데 28 ← SVN(39), 27 → − 줄, 29 → + 줄
+  [27, 28, 29].forEach((c) => bb.tint(c, "bottom"));
+  parts.push(potentiometer(bb.hole(27, "f"), bb.hole(28, "f"), bb.hole(29, "f")).svg);
+  wires.push(toRail(27, "-"), toRail(29, "+"));
+
+  // 보드 → 브레드보드 (위 줄): P14 → 17, P34 → 26, SVN(39) → 28. SVN 선이 P34 선보다 위 길
+  const s14 = b.gpio(14), s34 = b.gpio(34), s39 = b.gpio(39);
+  wires.push(mfWire(s14, j(17), C.yellow, [{ x: s14.x, y: lane(2) }, { x: j(17).x, y: lane(2) }], "orth"));
+  wires.push(mfWire(s34, j(26), C.green, [{ x: s34.x, y: lane(1) }, { x: j(26).x, y: lane(1) }], "orth"));
+  wires.push(mfWire(s39, j(28), C.teal, [{ x: s39.x, y: lane(0) }, { x: j(28).x, y: lane(0) }], "orth"));
+  used.push(s14, s34, s39);
+
+  // DHT11: P13 칸 바로 위(핀이 아래로). 소리 센서: P35 칸 왼쪽 위로 비켜(핀이 아래로), 세 선을 계단처럼
+  const my = Y0 - 118;
+  const t13 = b.triple(13), t35 = b.triple(35);
+  const dht = dht11(t13.S.x - 38, my, { titleAt: { x: t13.S.x - 48, y: my + 35, anchor: "end" } });
+  const snd = sensor3(380, my, "sound", { titleAt: { x: 418, y: my - 14 } });
+  parts.push(dht.svg, snd.svg);
+  parts.push(columnRun(t13, dht.pins, { turnY: Y0 - 14 }));
+  parts.push(columnRun(t35, snd.pins, { turnY: { S: Y0 - 26, V: Y0 - 18, G: Y0 - 10 }, colors: { G: C.black, V: C.red, S: C.orange } }));
+  used.push(t13.G, t13.V, t13.S, t35.G, t35.V, t35.S);
+
+  // PIR: 아래 줄 P23 칸 기둥 바로 아래(핀이 위로)
+  const t23 = b.triple(23);
+  const py = Y0 + 380;
+  const pir = sensor3(t23.S.x - 38, py, "pir", { side: "top", titleAt: { x: t23.S.x - 48, y: py + 35, anchor: "end" } });
+  parts.push(pir.svg, columnRun(t23, pir.pins, { turnY: Y0 + 340, colors: { G: C.black, V: C.red, S: C.purple } }));
+  used.push(t23.G, t23.V, t23.S);
+
+  // OLED: I2C 헤더 안쪽 줄. 선은 바깥 줄(UART) 핀 사이 틈으로 올라가 옆에서 꽂는다 (10장과 같은 길)
+  const bus = b.i2c(0);
+  const o = oled(110, Y0 + 388, { titleAt: { x: 98, y: Y0 + 444, anchor: "end" } });
+  parts.push(o.svg);
+  const lanes = { GND: Y0 + 362, VCC: Y0 + 354, SDA: Y0 + 338, SCL: Y0 + 346 };
+  const oc = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const p = bus[k], from = o.pins[k], seam = p.x - 9.9;
+    wires.push(ffWire(from, p, oc[k], [{ x: from.x, y: lanes[k] }, { x: seam, y: lanes[k] }, { x: seam, y: p.y }], "orth"));
+    used.push(p);
+  }
+
+  const rows = [
+    { colors: [C.black, C.red, C.blue], part: "DHT11 G · V · S", to: "P13 칸 G · V · S (보드에 바로)" },
+    { colors: [C.black, C.red, C.orange], part: "소리 센서 G · V · S", to: "P35 칸 G · V · S (보드에 바로)" },
+    { colors: [C.black, C.red, C.purple], part: "PIR G · V · S", to: "아래 줄 P23 칸 G · V · S (보드에 바로)" },
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22" },
+    { colors: [C.red, C.black], part: "전원 헤더 3V · GND", to: "+ 줄 · − 줄 (3V 는 헤더 GND 핀 사이로)" },
+    { color: C.yellow, part: "P14 칸 S", to: "17번 줄 (10kΩ 과 틸트 스위치 사이)" },
+    { colors: [C.red, C.black], part: "10kΩ 14번 줄 · 틸트 19번 줄", to: "+ 줄 · − 줄" },
+    { color: C.green, part: "P34 칸 S", to: "26번 줄 (10kΩ 과 포토레지스터 사이)" },
+    { colors: [C.red, C.black], part: "10kΩ 22번 줄 · 포토레지스터 24번 줄", to: "+ 줄 · − 줄" },
+    { color: C.teal, part: "SVN(39) 칸 S", to: "28번 줄 (가변저항 가운데 다리)" },
+    { colors: [C.black, C.red], part: "가변저항 27번 줄 · 29번 줄", to: "− 줄 · + 줄" },
+  ];
+  const table = connectionTable(Y0 + 512, "이렇게 꽂아요 — 모듈은 기둥에 바로, 맨 부품은 브레드보드에", rows, b.legend, { columns: 1 });
+  const jumperNote = note(232, Y0 + 328, "JUMP 점퍼는 3.3V 쪽 (V 줄 = 3.3V)", "start", 12);
+  return { body: compose(b.draw(used, { note: false }), parts, wires, [jumperNote, table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "우리 반 센서 상황판 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SCL · SDA 는 보드 위쪽 한 줄 GND · 5V · SCL · SDA 에, DHT11 G · V · S 는 io13 기둥 G · V · S 에 F-F 듀폰선으로 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → + 줄, GND → − 줄. 포토레지스터 분압: + 줄 → 16번 줄 → 10kΩ 저항 → 19번 줄(← 아래 줄 io34) → 포토레지스터 → 21번 줄 → − 줄. 가변저항은 23 · 24 · 25번 줄, 가운데 24번 줄 ← 아래 줄 io39, 23번 줄 → − 줄, 25번 줄 → + 줄. 틸트 스위치(풀업): + 줄 → 31번 줄 → 10kΩ → 28번 줄 → 틸트 스위치 → 26번 줄 → − 줄, 28번 줄 ← 보드 바깥 길로 내려온 io14. 소리 센서 모듈 V · G → + − 줄, S → ANALOG 묶음 io35 줄 S. PIR 센서 모듈 V · G → + − 줄, S → 보드 바깥 길로 돌아 위쪽 io23",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 우리 반 센서 상황판 배선도: JUMP 점퍼는 3.3V 쪽(평소 자리). DHT11 G · V · S 는 P13 칸 G · V · S, 소리 센서 G · V · S 는 P35 칸 G · V · S, PIR 센서 G · V · S 는 아래 줄 P23 칸 G · V · S 에 F-F 듀폰선으로 바로. OLED 화면 GND · VCC · SDA · SCL 은 I2C 헤더의 GND · VCC · D21 · D22 에. 브레드보드는 보드 위: 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄, 전원 헤더 GND → − 줄. 틸트 스위치(풀업): + 줄 → 14번 줄 → 10kΩ → 17번 줄(← P14 칸 S 핀) → 틸트 스위치 → 19번 줄 → − 줄. 포토레지스터 분압: + 줄 → 22번 줄 → 10kΩ → 26번 줄(← P34 칸 S 핀) → 포토레지스터 → 24번 줄 → − 줄. 가변저항 27 · 28 · 29번 줄, 가운데 28번 줄 ← SVN(39) 칸 S 핀, 27번 줄 → − 줄, 29번 줄 → + 줄",
   devkit: "기본 보드(ESP32 DevKit 38핀) 우리 반 센서 상황판 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 줄 GND → − 줄. DHT11 S → D13, 소리 센서 S → D35 에 F-F 듀폰선으로 바로, 두 모듈의 V · G 는 + − 줄. PIR 센서 V · G → + − 줄 끝, S → 보드 바깥으로 돌아 D23. 틸트 스위치(풀업): + 줄 → 8번 줄 → 10kΩ → 11번 줄(← D14) → 틸트 스위치 → 13번 줄 → − 줄. 포토레지스터 분압: + 줄 → 18번 줄 → 10kΩ → 21번 줄(← D34) → 포토레지스터 → 23번 줄 → − 줄. 가변저항 25 · 26 · 27번 줄, 가운데 26번 줄 ← VN(39), 25번 줄 → − 줄, 27번 줄 → + 줄. OLED 는 보드 아래: GND → 아래 줄 GND, SDA → D21, SCL → D22, VCC → 보드 바깥 길로 + 줄",
 };
 
@@ -258,5 +350,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wsb", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wsbk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wsbx", T.expansion, r.body, r.height); },
   },
 };

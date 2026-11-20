@@ -58,12 +58,17 @@ materials:
   - { name: F-F 듀폰선 2가닥, board: devkit, note: "DHT11 S → D13, 불꽃 센서 S → D34" }
   - { name: M-F 듀폰선 9가닥, board: devkit, note: "3V3 · GND · DHT11 V · G · 불꽃 V · G → + − 줄, D14 · D27 · D25 → 브레드보드" }
   - { name: 점퍼선(M-M) 6가닥, board: devkit, note: "10kΩ · 틸트 · 부저 − · 버튼 대각선 다리 → + − 줄, + 끼리 · − 끼리 잇기" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
+  - { name: F-F 듀폰선 6가닥, board: expansion, note: "DHT11 G · V · S → P13 칸 G · V · S, 불꽃 센서 G · V · S → P34 칸 G · V · S" }
+  - { name: M-F 듀폰선 5가닥, board: expansion, note: "전원 헤더 3V · GND → + − 줄, P14 · P27 · P25 칸 S → 브레드보드" }
+  - { name: 점퍼선(M-M) 4가닥, board: expansion, note: "10kΩ → + 줄, 틸트 · 버튼 · 부저 − → − 줄" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
   - { name: 폰 또는 태블릿, note: 2부에서 보드와 같은 WiFi 에 붙여 상태판을 열어요 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "브레드보드는 보드 아래. 아래 줄 3V3 → 위 + 줄, 아래 줄 GND → 위 − 줄, 두 − 줄은 점퍼로. DHT11 G · V · S → io13 기둥 G · V · S (F-F 로 바로). 불꽃 센서 V · G → + − 줄, S → 아래 줄 io34. 10kΩ 은 9 · 12번 줄, 틸트 스위치는 12 · 14번 줄: 9번 줄 → + 줄, 12번 줄 ← io14, 14번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: io27 → 6번 줄, 대각선 다리 8번 줄 → 아래 − 줄. 수동 부저 + 다리 2번 줄 ← io25, − 다리 4번 줄 → − 줄. io14 · io27 · io25 세 선은 보드 바깥으로 돌아 와요"
   captionDevkit: "브레드보드는 보드 위. GND → 아래 − 줄, 3V3 → 보드 바깥으로 돌아 아래 + 줄, 위 · 아래 + 줄끼리 · − 줄끼리 점퍼로. DHT11 V · G → 위 + − 줄, S → D13. 불꽃 센서 V · G → 아래 + − 줄, S → D34. 틸트 스위치는 6 · 8번 줄, 10kΩ 은 8 · 11번 줄: 8번 줄 ← D14, 11번 줄 → + 줄, 6번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: D27 → 14번 줄, 대각선 다리 12번 줄 → 위 − 줄. 수동 부저 + 다리 16번 줄 ← D25, − 다리 18번 줄 → − 줄"
+  captionExpansion: "브레드보드는 보드 위. 전원 헤더 3V → 헤더 GND 핀 사이로 올라가 + 줄, 전원 헤더 GND → − 줄. DHT11 G · V · S → P13 칸 G · V · S, 불꽃 센서 G · V · S → P34 칸 G · V · S (보드에 바로). 10kΩ 은 11 · 14번 줄, 틸트 스위치는 14 · 16번 줄: 14번 줄 ← P14 칸 S, 11번 줄 → + 줄, 16번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 19 · 21번 줄: P27 칸 S → 21번 줄, 19번 줄 → − 줄. 수동 부저 + 다리 24번 줄 ← P25 칸 S, − 다리 26번 줄 → − 줄"
 principle:
   image: images/fire-two-conditions.svg
   body: |
@@ -159,6 +164,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "불꽃 S → io34, DHT11 → io13 기둥, 틸트 스위치 줄 ← io14, 버튼 ← io27. 3V3 · GND 는 + − 줄로 나눠 써요. 부저는 미션에서 꽂아요"
           captionDevkit: "불꽃 S → D34, DHT11 S → D13, 틸트 스위치 줄 ← D14, 버튼 ← D27. 3V3 · GND 는 + − 줄로 나눠 써요. 부저는 미션에서 꽂아요"
+          captionExpansion: "불꽃 센서 → P34 칸, DHT11 → P13 칸 G · V · S 에 바로, 틸트 스위치 줄 ← P14 칸 S, 버튼 ← P27 칸 S. + 줄은 전원 헤더 3V, − 줄은 전원 헤더 GND. 부저는 미션에서 꽂아요"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 + 줄(3V3) · − 줄(GND)을 먼저 보드와 이어요. 그다음 불꽃 센서 · DHT11 모듈(G · V · S)을 잇고, 틸트 스위치와 10kΩ 저항, 푸시 버튼을 브레드보드에 꽂아요. 배선 그림과 아래 표처럼 꽂으면 돼요. 버튼은 **27번**이에요(14번은 틸트 스위치가 써요).
 
