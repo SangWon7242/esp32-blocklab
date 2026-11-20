@@ -2,8 +2,9 @@
 // 가변저항 양 끝과 소리 센서 V·G 는 브레드보드 + 줄(3V3) · − 줄(GND)을 나눠 쓴다 (3V3 핀은 하나뿐).
 // Plus: 39·36·3V3·GND 가 모두 아래 줄이라 브레드보드를 보드 **아래**에 둔다. 26번(위 줄)만 보드 왼쪽 바깥 길로.
 // DevKit: 26·VN(39)·VP(36) 이 위 줄이라 브레드보드를 보드 **위**에 둔다. 3V3(아래 줄)만 보드 왼쪽 바깥 길로.
-// 확장 보드: P26 · SVN(39) · SVP(36) 모두 위 줄 → 브레드보드를 보드 위에. 가변저항 세 다리는 SVN 칸 G · S · V 에,
-//   소리 센서는 F-F 3가닥으로 SVP 칸 G · V · S 에 바로 (+ − 줄 나눠 쓰기 없음). V 줄이 3.3V 여야 하므로 점퍼는 평소 자리(3.3V).
+// 확장 보드: P26 · SVN(39) · SVP(36) 모두 위 줄 → 브레드보드를 보드 위에. + 줄은 왼쪽 전원 헤더의 3V 핀(점퍼와 상관없이 늘 3.3V),
+//   − 줄은 위 줄 GND 칸 S 핀. 가변저항 양 끝 · 소리 센서 V · G 는 + − 줄 (V 줄을 쓰지 않아, 점퍼가 5V 에 남아 있어도 39 · 36번에 3.3V 를 넘지 않는다).
+//   점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, name, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
@@ -117,48 +118,53 @@ const potLabel = (p) =>
   `<text x="${p.x}" y="${p.y}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="4" paint-order="stroke">가변저항</text>`;
 
 function expansion() {
-  const bb = breadboard({ x: 100, y: 8, cols: 23, rails: { top: false, bottom: true } });
+  const bb = breadboard({ x: 100, y: 8, cols: 25, rails: { top: false, bottom: true } });
   const b = makeExpansion({ x: 22, y: bb.y + bb.h + 30, jumper: "3V3" });
   const parts = [], wires = [], used = [];
-  const p26 = b.gpio(26), gnd = b.power("GND"), pot = b.triple(39), snd = b.triple(36);
+  const rail = (sg, c) => bb.rail("bottom", sg, c);
+  const v3 = b.power("3V3"), gnd = b.power("GND"), p26 = b.gpio(26), k39 = b.gpio(39), s36 = b.gpio(36);
   const top = b.bounds.y;
 
-  // LED (1장과 같은 꼴): P26 칸 S 핀 → 바로 위 열 → 220Ω → 긴 다리, 짧은 다리 → − 줄 ← 위 줄 GND 칸 S 핀
-  const circ = ledCircuit(bb, Math.round((p26.x - (bb.x + 28)) / 16) + 1);
-  wires.push(mfWire(p26, circ.signalHole, C.yellow), mfWire(gnd, bb.rail("bottom", "-", bb.nearestCol(gnd.x, true)), C.black), circ.jumper);
-  used.push(p26, gnd);
+  // 전원 헤더 3V → (헤더 GND 핀 사이 틈으로) + 줄, 위 줄 GND 칸 S 핀 → − 줄
+  const pIn = rail("+", 2), seam = pIn.x;
+  wires.push(mfWire(v3, pIn, C.red, [{ x: seam, y: v3.y }], "orth"));
+  wires.push(mfWire(gnd, rail("-", bb.nearestCol(gnd.x, true)), C.black));
+  used.push(v3, gnd);
 
-  // 가변저항: 다리 21 · 22 · 23번 줄 (f 칸). 왼쪽 → SVN 칸 G, 가운데 → SVN 칸 S, 오른쪽 → SVN 칸 V
+  // LED (1장과 같은 꼴): P26 칸 S 핀 → 바로 위 열 → 220Ω → 긴 다리, 짧은 다리 → − 줄
+  const circ = ledCircuit(bb, Math.round((p26.x - (bb.x + 28)) / 16) + 1);
+  wires.push(mfWire(p26, circ.signalHole, C.yellow), circ.jumper);
+  used.push(p26);
+
+  // 가변저항: 다리 21 · 22 · 23번 줄 (f 칸). 21 → − 줄, 22(가운데) → SVN(39) 칸 S 핀, 23 → + 줄
   const L = 21;
   [L, L + 1, L + 2].forEach((c) => bb.tint(c, "bottom"));
   const pk = potentiometer(bb.hole(L, "f"), bb.hole(L + 1, "f"), bb.hole(L + 2, "f"));
-  const mf = { ends: ["m", "f"] };
-  wires.push(
-    columnRun(bb.hole(L, "j"), pot.G, C.black, { lane: top - 8, x: pot.G.x - 4, ...mf }),
-    columnRun(bb.hole(L + 2, "j"), pot.V, C.red, { lane: top - 24, x: pot.V.x + 4, ...mf }),
-    columnRun(bb.hole(L + 1, "j"), pot.S, C.green, { lane: top - 16, x: pot.S.x, ...mf }),
-  );
-  used.push(pot.G, pot.S, pot.V);
+  wires.push(mmWire(bb.hole(L, "j"), rail("-", L), C.black), mmWire(bb.hole(L + 2, "j"), rail("+", L + 2), C.red));
+  wires.push(columnRun(bb.hole(L + 1, "j"), k39, C.green, { lane: top - 20, x: k39.x, ends: ["m", "f"] }));
+  used.push(k39);
 
-  // 소리 센서: 브레드보드 오른쪽, 핀이 아래로 (왼→오 G V S). F-F 로 SVP 칸 G · V · S
+  // 소리 센서: 브레드보드 오른쪽, 핀이 아래로 (왼→오 G V S). S → SVP(36) 칸 S 핀 F-F, V · G → + − 줄 오른쪽 끝 M-F
   const sm = sensor3(548, 96, "sound", { titleAt: { x: 586, y: 80 } });
-  wires.push(
-    columnRun(sm.pins.G, snd.G, C.black, { lane: top - 24, x: snd.G.x - 4 }),
-    columnRun(sm.pins.V, snd.V, C.red, { lane: top - 16, x: snd.V.x }),
-    columnRun(sm.pins.S, snd.S, C.blue, { lane: top - 8, x: snd.S.x + 4 }),
-  );
-  used.push(snd.G, snd.V, snd.S);
+  const pEnd = rail("+", 25), mEnd = rail("-", 25);
+  wires.push(mfWire(sm.pins.G, mEnd, C.black, [{ x: sm.pins.G.x, y: mEnd.y }], "orth"));
+  wires.push(mfWire(sm.pins.V, pEnd, C.red, [{ x: sm.pins.V.x, y: pEnd.y }], "orth"));
+  wires.push(columnRun(sm.pins.S, s36, C.blue, { lane: top - 12, x: s36.x }));
+  used.push(s36);
 
   parts.push(bb.svg, ...circ.svg, pk.svg, sm.svg, potLabel(bb.hole(L + 1, "c")));
   const c = circ.cols;
   const rows = [
-    { colors: [C.black, C.green, C.red], part: `가변저항 ${L} · ${L + 1} · ${L + 2}번 줄`, to: "SVN(39) 칸 G · S · V (가운데 다리가 S)" },
-    { colors: [C.black, C.red, C.blue], part: "소리 센서 G · V · S", to: "SVP(36) 칸 G · V · S" },
+    { colors: [C.red, C.black], part: "전원 헤더 3V · 위 줄 GND 칸 S 핀", to: "+ 줄 · − 줄" },
+    { color: C.green, part: "SVN(39) 칸 S 핀", to: `${L + 1}번 줄 가변저항 가운데 다리` },
+    { colors: [C.red, C.black], part: `가변저항 ${L + 2} · ${L}번 줄`, to: "+ 줄 · − 줄" },
+    { color: C.blue, part: "소리 센서 S", to: "SVP(36) 칸 S 핀" },
+    { colors: [C.red, C.black], part: "소리 센서 V · G", to: "+ 줄 · − 줄" },
     { color: C.yellow, part: "P26 칸 S 핀", to: `${c.sig}번 줄 → 220Ω → ${c.anode}번 줄 LED 긴 다리` },
-    { color: C.black, part: `LED 짧은 다리 ${c.cathode}번 줄`, to: "− 줄 → 위 줄 GND 칸 S 핀" },
+    { color: C.black, part: `LED 짧은 다리 ${c.cathode}번 줄`, to: "− 줄" },
   ];
-  const table = connectionTable(b.bounds.y + b.bounds.h + 12, "이렇게 꽂아요 — 가변저항 · 소리 센서는 칸의 G · V · S 에", rows, b.legend);
-  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 박수 스위치와 다이얼 배선도: 브레드보드는 보드 위. 가변저항 다리 셋은 ${L} · ${L + 1} · ${L + 2}번 줄: 가운데 ${L + 1}번 줄 → 위 줄 SVN(39) 칸 S 핀, ${L}번 줄 → SVN 칸 G 핀, ${L + 2}번 줄 → SVN 칸 V 핀. 소리 센서 모듈 G · V · S → 위 줄 SVP(36) 칸 G · V · S 핀에 F-F 듀폰선으로 바로. LED: 위 줄 P26 칸 S 핀 → ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 긴 다리(+), 짧은 다리(−) ${c.cathode}번 줄 → − 줄 → 위 줄 GND 칸 S 핀. JUMP 점퍼는 3.3V 쪽 (V 핀 = 3.3V)`;
+  const table = connectionTable(b.bounds.y + b.bounds.h + 12, "이렇게 꽂아요 — 3.3V 는 전원 헤더 3V 에서 + 줄로", rows, b.legend);
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 박수 스위치와 다이얼 배선도: 브레드보드는 보드 위. 왼쪽 전원 헤더의 3V 핀 → 브레드보드 + 줄, 위 줄 GND 칸 S 핀 → − 줄. 가변저항 다리 셋은 ${L} · ${L + 1} · ${L + 2}번 줄: 가운데 ${L + 1}번 줄 → 위 줄 SVN(39) 칸 S 핀, ${L}번 → − 줄, ${L + 2}번 → + 줄. 소리 센서 모듈 S → 위 줄 SVP(36) 칸 S 핀에 바로, V → + 줄, G → − 줄. LED: 위 줄 P26 칸 S 핀 → ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 긴 다리(+), 짧은 다리(−) ${c.cathode}번 줄 → − 줄. JUMP 점퍼는 3.3V 쪽`;
   return svgDoc("wcdx", title, compose(b.draw(used), parts, wires, [table.svg]), table.bottom);
 }
 

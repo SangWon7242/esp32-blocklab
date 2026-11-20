@@ -4,15 +4,15 @@
 // (어두우면 포토레지스터 저항이 커져 34번 전압이 3.3V 쪽으로 올라간다)
 // Plus: 34·3V3·GND 는 아래 줄 → 브레드보드를 보드 아래에. 26번(위 줄)만 보드 왼쪽 바깥 길로.
 // DevKit: D34·D26 은 위 줄 → 브레드보드를 보드 위에. 3V3(아래 줄)만 보드 왼쪽 바깥 길로.
-// 확장 보드: P34 · P26 모두 위 줄 → 브레드보드를 보드 위에. 전압 나누기의 세 줄을 P34 칸 V · S · G 에 바로
-//   (V 핀 — 10kΩ — S 핀 — 포토레지스터 — G 핀). V 줄이 3.3V 여야 34번이 3.3V 를 넘지 않으므로 점퍼는 평소 자리(3.3V).
+// 확장 보드: P34 · P26 모두 위 줄 → 브레드보드를 보드 위에. + 줄은 왼쪽 전원 헤더의 3V 핀(점퍼와 상관없이 늘 3.3V),
+//   − 줄은 위 줄 GND 칸 S 핀: + 줄 — 10kΩ — 34번(P34 칸 S 핀) — 포토레지스터 — − 줄. V 줄을 쓰지 않아 점퍼가 5V 에 남아 있어도
+//   34번에 3.3V 를 넘지 않는다. 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
 import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, led, photoresistor, resistor } from "../parts.mjs";
 import { ledCircuit } from "./01-led.mjs";
-import { columnRun } from "./15-temp-humidity.mjs";
 
 const TEN_K = ["#8b5a2b", "#212529", "#f76707"]; // 갈 검 주
 
@@ -104,38 +104,41 @@ function expansion() {
   const bb = breadboard({ x: 100, y: 8, cols: 26, rails: { top: false, bottom: true } });
   const b = makeExpansion({ x: 22, y: bb.y + bb.h + 30, jumper: "3V3" });
   const parts = [], wires = [], used = [];
-  const p26 = b.gpio(26), gnd = b.power("GND"), t = b.triple(34);
-  const top = b.bounds.y;
+  const rail = (sg, c) => bb.rail("bottom", sg, c);
+  const v3 = b.power("3V3"), gnd = b.power("GND"), p26 = b.gpio(26), s34 = b.gpio(34);
 
-  // LED (1장과 같은 꼴): P26 칸 S 핀 → 바로 위 열 → 220Ω → 긴 다리, 짧은 다리 → − 줄 ← 위 줄 GND 칸 S 핀
+  // 전원 헤더 3V → (헤더 GND 핀 사이 틈으로) + 줄, 위 줄 GND 칸 S 핀 → − 줄
+  const pIn = rail("+", 2);
+  wires.push(mfWire(v3, pIn, C.red, [{ x: pIn.x, y: v3.y }], "orth"));
+  wires.push(mfWire(gnd, rail("-", bb.nearestCol(gnd.x, true)), C.black));
+  used.push(v3, gnd);
+
+  // LED (1장과 같은 꼴): P26 칸 S 핀 → 바로 위 열 → 220Ω → 긴 다리, 짧은 다리 → − 줄
   const circ = ledCircuit(bb, Math.round((p26.x - (bb.x + 28)) / 16) + 1);
-  wires.push(mfWire(p26, circ.signalHole, C.yellow), mfWire(gnd, bb.rail("bottom", "-", bb.nearestCol(gnd.x, true)), C.black), circ.jumper);
-  used.push(p26, gnd);
+  wires.push(mfWire(p26, circ.signalHole, C.yellow), circ.jumper);
+  used.push(p26);
 
-  // 전압 나누기: 21번 줄 — 10kΩ(h) — 24번 줄 — 포토레지스터(f) — 26번 줄. 21 → P34 V, 24 → P34 S, 26 → P34 G (줄 번호 글자를 피해)
-  const A = 21, M = 24, Z = 26;
+  // 전압 나누기: + 줄 → 21번 줄 — 10kΩ(h) — 24번 줄(← P34 칸 S 핀, 칸 바로 위) — 포토레지스터(f) — 26번 줄 → − 줄
+  const A = 21, M = Math.round((s34.x - (bb.x + 28)) / 16) + 1, Z = M + 2;
   [A, M, Z].forEach((c) => bb.tint(c, "bottom"));
   const r10k = resistor(bb.hole(A, "h"), bb.hole(M, "h"), { bands: TEN_K, label: "10kΩ" });
   const ldr = photoresistor(bb.hole(M, "f"), bb.hole(Z, "f"));
-  const mf = { ends: ["m", "f"] };
-  wires.push(
-    columnRun(bb.hole(Z, "j"), t.G, C.black, { lane: top - 16, x: t.G.x + 4, ...mf }),
-    columnRun(bb.hole(A, "j"), t.V, C.red, { lane: top - 8, x: t.V.x - 4, ...mf }),
-    columnRun(bb.hole(M, "j"), t.S, C.green, { lane: top - 24, x: t.S.x, ...mf }),
-  );
-  used.push(t.G, t.V, t.S);
+  wires.push(mmWire(bb.hole(A, "j"), rail("+", A), C.red), mmWire(bb.hole(Z, "j"), rail("-", Z), C.black));
+  wires.push(mfWire(s34, bb.hole(M, "j"), C.green));
+  used.push(s34);
 
   parts.push(bb.svg, ...circ.svg, r10k.svg, ldr.svg);
   const c = circ.cols;
   const rows = [
-    { color: C.red, part: "P34 칸 V 핀(3.3V)", to: `${A}번 줄 → 10kΩ 저항 → ${M}번 줄` },
+    { colors: [C.red, C.black], part: "전원 헤더 3V · 위 줄 GND 칸 S 핀", to: "+ 줄 · − 줄" },
+    { color: C.red, part: "+ 줄", to: `${A}번 줄 → 10kΩ 저항 → ${M}번 줄` },
     { color: C.green, part: "P34 칸 S 핀", to: `${M}번 줄 (저항과 포토레지스터 사이)` },
-    { color: C.black, part: `포토레지스터 ${Z}번 줄`, to: "P34 칸 G 핀" },
+    { color: C.black, part: `포토레지스터 ${Z}번 줄`, to: "− 줄" },
     { color: C.yellow, part: "P26 칸 S 핀", to: `${c.sig}번 줄 → 220Ω → ${c.anode}번 줄 LED 긴 다리` },
-    { color: C.black, part: `LED 짧은 다리 ${c.cathode}번 줄`, to: "− 줄 → 위 줄 GND 칸 S 핀" },
+    { color: C.black, part: `LED 짧은 다리 ${c.cathode}번 줄`, to: "− 줄" },
   ];
   const table = connectionTable(b.bounds.y + b.bounds.h + 12, "이렇게 꽂아요 — 포토레지스터는 10kΩ 저항과 함께", rows, b.legend);
-  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 밝기 센서 배선도: 브레드보드는 보드 위. 위 줄 P34 칸 V 핀(3.3V) → ${A}번 줄 → 10kΩ 저항 → ${M}번 줄, ${M}번 줄 → P34 칸 S 핀, 포토레지스터는 ${M}번 줄과 ${Z}번 줄 사이, ${Z}번 줄 → P34 칸 G 핀. LED: 위 줄 P26 칸 S 핀 → ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 긴 다리(+), 짧은 다리(−) ${c.cathode}번 줄 → − 줄 → 위 줄 GND 칸 S 핀. JUMP 점퍼는 3.3V 쪽 (V 핀 = 3.3V)`;
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 밝기 센서 배선도: 브레드보드는 보드 위. 왼쪽 전원 헤더의 3V 핀 → 브레드보드 + 줄, 위 줄 GND 칸 S 핀 → − 줄. + 줄 → ${A}번 줄 → 10kΩ 저항 → ${M}번 줄, ${M}번 줄 ← 위 줄 P34 칸 S 핀, 포토레지스터는 ${M}번 줄과 ${Z}번 줄 사이, ${Z}번 줄 → − 줄. LED: 위 줄 P26 칸 S 핀 → ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 긴 다리(+), 짧은 다리(−) ${c.cathode}번 줄 → − 줄. JUMP 점퍼는 3.3V 쪽`;
   return svgDoc("wlsx", title, compose(b.draw(used), parts, wires, [table.svg]), table.bottom);
 }
 
