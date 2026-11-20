@@ -16,11 +16,13 @@ materials:
   - { name: 220Ω 저항 5개, note: "LED 마다 하나씩. 빨강-빨강-갈색 띠" }
   - { name: M-F 듀폰선 6가닥, note: "보드의 18 · 5 · 14 · 17 · 26번 핀과 GND 핀 → 브레드보드" }
   - { name: 점퍼선(M-M) 5가닥, note: "LED 짧은 다리 줄 → 브레드보드 − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "브레드보드 6 · 12 · 18 · 24 · 30번 줄에 차례로 io18 · io5 · io14 · io17 · io26: 줄마다 220Ω 저항 → 3칸 옆 LED 긴 다리(+). LED 짧은 다리(−) 줄(2 · 8 · 14 · 20 · 26번)은 점퍼선으로 모두 − 줄에 모으고, − 줄 하나를 보드 GND 에 이어요"
   captionDevkit: "브레드보드 6 · 12 · 18 · 24 · 30번 줄에 차례로 D18 · D5 · D14 · TX2(17) · D26: 줄마다 220Ω 저항 → 3칸 옆 LED 긴 다리(+). D18 · D5 · TX2 는 아래 줄 핀이라 선이 보드 바깥으로 돌아와요. LED 짧은 다리(−) 줄(2 · 8 · 14 · 20 · 26번)은 점퍼선으로 모두 − 줄에 모으고, − 줄 하나를 보드 GND 에 이어요"
+  captionExpansion: "브레드보드 6 · 12 · 18 · 26 · 31번 줄에 차례로 확장 보드 P18 · P5 · P14 · P17 · P26 칸 S 핀: 줄마다 220Ω 저항 → 3칸 옆 LED 긴 다리(+). P18 · P5 · P17 은 아래 줄 핀이라 선이 보드 아래로 나와 보드를 건너 올라와요. LED 짧은 다리(−) 줄(2 · 8 · 14 · 22 · 27번)은 점퍼선으로 모두 − 줄에 모으고, − 줄 하나를 보드 왼쪽 전원 헤더 GND 에 이어요"
 principle:
   image: images/list-loop.svg
   body: |
@@ -112,6 +114,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "줄 번호가 작은 쪽부터 io18 · io5 · io14 · io17 · io26. 핀마다 저항 하나, LED 짧은 다리 쪽은 모두 같은 − 줄로"
           captionDevkit: "줄 번호가 작은 쪽부터 D18 · D5 · D14 · TX2(17) · D26. 핀마다 저항 하나, LED 짧은 다리 쪽은 모두 같은 − 줄로"
+          captionExpansion: "줄 번호가 작은 쪽부터 P18 · P5 · P14 · P17 · P26 칸 S 핀. 핀마다 저항 하나, LED 짧은 다리 쪽은 모두 같은 − 줄로"
         body: |
           이제 LED 다섯 개를 **브레드보드**에 꽂아요. 핀마다 220Ω 저항을 하나씩 거쳐 LED 긴 다리(+)로 가고, 짧은 다리(−) 쪽은 모두 **같은 − 줄**에 모아 GND 하나로 이어요.
 

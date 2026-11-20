@@ -1,4 +1,5 @@
 // 센서 S2 "숨쉬는 LED" — 1장과 같은 배선(LED 26번 + 220Ω 저항). 26번으로 PWM 신호가 나간다.
+// 확장 보드 판도 1장 그대로 (P26 칸 S 핀, 맨 부품뿐이라 점퍼 3.3V).
 import { ledWiring } from "./01-led.mjs";
 
 export default {
@@ -7,5 +8,7 @@ export default {
     devkitId: "wb2k",
     plusTitle: "숨쉬는 LED 배선도(ESP32 Plus 확장 보드, 1장과 같은 배선): 보드 위쪽 io26 핀 → 브레드보드 22번 줄 → 220Ω 저항 → 17번 줄의 LED 긴 다리(+). 짧은 다리(−)는 16번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND. io26 으로 PWM 신호가 나가요",
     devkitTitle: "기본 보드(ESP32 DevKit 38핀) 숨쉬는 LED 배선도(1장과 같은 배선): D26 핀 → 브레드보드 11번 줄 → 220Ω 저항 → 6번 줄의 LED 긴 다리(+). 짧은 다리(−)는 5번 줄 → 점퍼선 → 브레드보드 − 줄 → 보드 GND. D26 으로 PWM 신호가 나가요",
+    expansionId: "wb2x",
+    expansionTitle: (c) => `확장 보드(ESP32 38핀 확장 보드 + DevKit) 숨쉬는 LED 배선도(1장과 같은 배선): 위 줄 P26 칸 S 핀 → 브레드보드 ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄의 LED 긴 다리(+). 짧은 다리(−)는 ${c.cathode}번 줄 → 점퍼선 → 브레드보드 − 줄 → 위 줄 GND 칸 S 핀. P26 으로 PWM 신호가 나가요. JUMP 점퍼는 3.3V 쪽`,
   }),
 };

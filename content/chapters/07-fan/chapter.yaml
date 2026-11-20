@@ -15,11 +15,13 @@ materials:
   - { name: 팬 날개, note: 배선이 모두 끝난 뒤에 모터 축에 끼워요 }
   - { name: 배터리 홀더 (AA 6개), board: plus, note: 건전지 6개는 따로 준비. 보드의 외부 전원 단자에 꽂아요 }
   - { name: F-F 듀폰선 4가닥, note: "양쪽 끝이 구멍인 선. 모듈 핀(G · V · IN+ · IN−)과 보드 핀에 바로 씌워요. 브레드보드는 안 써요" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로 — 팬 V 는 점퍼와 상관없이 늘 5V 인 위 줄 5V 칸에 꽂아요. 전원은 USB 로" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-motor.svg
   caption: "브레드보드 없이 보드 위쪽 한 줄에 바로 꽂아요. 모터 모듈 G → GND, V → 5V, IN+ → 13(motor1a), IN− → 12(motor1b). AA 6개를 넣은 배터리 홀더는 보드의 외부 전원 단자에 꽂아요. 팬 날개는 배선이 끝난 뒤에 끼워요"
   captionDevkit: "보드 위 줄에 바로 꽂아요. 모터 모듈 G → GND, V → VIN, IN+ → D13(motor1a), IN− → D12(motor1b). 기본 보드에는 외부 전원 단자가 없어 USB 전원으로 돌려요. 보드가 저절로 다시 시작되면 다른 USB 포트에 꽂아 봐요. 팬 날개는 배선이 끝난 뒤에 끼워요"
+  captionExpansion: "확장 보드 바깥 줄 핀에 바로 꽂아요. 모터 모듈 G → 왼쪽 전원 헤더 GND, V → 위 줄 5V 칸 S 핀(늘 5V), IN+ → P13 칸 S 핀(motor1a), IN− → P12 칸 S 핀(motor1b). JUMP 점퍼는 3.3V 쪽 그대로, USB 전원으로 돌려요. 보드가 저절로 다시 시작되면 다른 USB 포트에 꽂아 봐요. 팬 날개는 배선이 끝난 뒤에 끼워요"
 principle:
   image: images/direction-table.svg
   body: |

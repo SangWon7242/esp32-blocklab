@@ -18,11 +18,13 @@ materials:
   - { name: 220Ω 저항 8개, note: "Q0~Q7 에 하나씩. 빨강-빨강-갈색 띠. 다리를 구부려 칩 Q 줄과 튜브 줄을 이어요" }
   - { name: M-F 듀폰선 5가닥, note: "한쪽은 구멍, 한쪽은 핀. 보드의 5 · 18 · 23번 핀과 3V3 · GND 핀 → 브레드보드" }
   - { name: 점퍼선(M-M) 6가닥, note: "칩 VCC · MR → + 줄, 칩 OE → − 줄, 칩 GND · 튜브 COM → 위 − 줄, 위 − 줄 ↔ 아래 − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로. 칩 전원은 왼쪽 전원 헤더의 3V · GND 에서" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "74HC595 는 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽으로(SI · SCK · RCK · VCC 가 보드 가까운 칸에 와요). io5 → SI(9번 줄), io18 → SCK(6번 줄), io23 → RCK(7번 줄). 보드 아래 줄 3V3 → 보드 바깥으로 돌아 아래 + 줄, GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. Q0~Q7 → 220Ω 저항 하나씩 → 17~21번 줄의 튜브 a~g · dp (Q0→a … Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼선으로"
   captionDevkit: "74HC595 는 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽으로. D5 → SI(9번 줄), D18 → SCK(6번 줄), D23 → RCK(7번 줄) — 셋 다 보드 아래 줄이라 선이 보드 바깥으로 돌아와요. 3V3 → 보드 바깥으로 돌아 아래 + 줄, GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. Q0~Q7 → 220Ω 저항 하나씩 → 17~21번 줄의 튜브 a~g · dp (Q0→a … Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼선으로"
+  captionExpansion: "74HC595 는 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽으로. 확장 보드 아래 줄 P5 칸 S 핀 → SI(9번 줄), P18 칸 S 핀 → SCK(6번 줄), P23 칸 S 핀 → RCK(7번 줄) — 셋 다 아래 줄이라 선이 보드 아래로 나와 보드를 건너 올라와요. 왼쪽 전원 헤더 3V → 아래 + 줄, 전원 헤더 GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. Q0~Q7 → 220Ω 저항 하나씩 → 17~21번 줄의 튜브 a~g · dp (Q0→a … Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼선으로"
 principle:
   image: images/shift-register.svg
   body: |
@@ -113,6 +115,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "칩은 가운데 홈을 건너, 반달 홈은 튜브 쪽. io5 → SI, io18 → SCK, io23 → RCK. Q0~Q7 은 저항을 하나씩 거쳐 튜브 a~dp 로"
           captionDevkit: "칩은 가운데 홈을 건너, 반달 홈은 튜브 쪽. D5 → SI, D18 → SCK, D23 → RCK (보드 아래 줄이라 선이 바깥으로 돌아와요). Q0~Q7 은 저항을 하나씩 거쳐 튜브 a~dp 로"
+          captionExpansion: "칩은 가운데 홈을 건너, 반달 홈은 튜브 쪽. P5 → SI, P18 → SCK, P23 → RCK (확장 보드 아래 줄 칸 S 핀이라 선이 보드를 건너 올라와요). Q0~Q7 은 저항을 하나씩 거쳐 튜브 a~dp 로"
         body: |
           이번 배선은 선이 많아요. **USB 를 뺀 채로** 배선도와 연결표를 한 줄씩 짚으며 꽂아요. 74HC595N 의 **반달 모양 홈**이 배선도와 같은 쪽을 보는지, 튜브의 **점(dp)이 아래쪽**에 오는지 먼저 확인해요.
 

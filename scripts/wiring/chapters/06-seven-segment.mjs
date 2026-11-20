@@ -2,12 +2,16 @@
 // 칩은 반달 홈이 오른쪽을 보게(1번 핀이 위 칸 오른쪽) 꽂아서 SI · SCK · RCK · VCC · MR · OE 가 모두 아래 칸에 온다 → 보드에서 오는 선이 짧다.
 // 칩 Q0~Q7 → 저항 다리(회색 선, 가운데 저항) → 튜브 a~dp. 칩 GND · 튜브 COM 은 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로.
 // 두 보드 모두 브레드보드를 보드 위에(Plus 는 5V · GND · io18 · io23 · io5 가 위 한 줄, 기본 보드는 VIN 이 위 줄이고 D5 · D18 · D23 은 아래 줄이라 보드 아래로 돌아온다).
+// 확장 보드: P5 · P18 · P23 이 모두 아래 줄 → 보드 아래로 나와 안 쓰는 칸 사이 틈으로 보드를 건너 올라온다 (03-traffic-light.mjs 의 seamVia).
+// 칩 전원은 왼쪽 전원 헤더 3V(점퍼와 상관없이 3.3V) · GND. 맨 부품뿐이라 점퍼 3.3V.
 import { COLORS as C, compose, connectionTable, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard } from "../parts.mjs";
 import { mark, moveSince, pt, rec, recCount } from "../record.mjs";
 import { railCol, railLink } from "./11-button-touch.mjs";
+import { seamVia, seamX } from "./03-traffic-light.mjs";
 
 const CHIP = 4; // 칩 왼쪽 열
 const SEG = 17; // 튜브 왼쪽 열
@@ -178,8 +182,48 @@ function devkit() {
   return { body: compose(b.draw([sig.SI, sig.SCK, sig.RCK, vin, gnd]), [pl.g], wires, [table.svg]), height: table.bottom };
 }
 
+/**
+ * 확장 보드: 브레드보드는 위(다른 보드와 같은 자리), 보드는 그 아래.
+ * 아래 줄 P5 · P18 · P23 → 보드 아래 고리(P5 가 안쪽) → 칸 7·8 · 6·7 · 5·6 사이 틈(위아래 모두 안 쓰는 칸)으로 올라와 SI · SCK · RCK.
+ * 전원 헤더 3V(안쪽 줄)는 헤더 왼쪽 바깥으로 비켜 올라가 아래 + 줄, 전원 헤더 GND(바깥 줄 맨 오른쪽) → 아래 − 줄.
+ * 보드 위 가로 길 다섯 층(1 = 보드 쪽): 3V · GND · RCK · SCK · SI. 엇갈림은 SCK 와 RCK 한 번.
+ */
+function expansion() {
+  const pl = placed(20, 8);
+  const bx = 22, gap = 72;
+  const b = makeExpansion({ x: bx, y: pl.bottom + gap, jumper: "3V3" });
+  const { T, bb, c } = pl;
+  const L = (k) => b.bounds.y - 10 * k - 2; // 보드 위 가로 길 k 층
+  const U = (k) => b.bounds.y + 312 + 8 * k; // 보드 아래 가로 길
+  const sig = { SI: b.gpio(5), SCK: b.gpio(18), RCK: b.gpio(23) };
+  const v33 = b.power("3V3", 0), gnd = b.power("GND", 5);
+  const plusRail = T(bb.rail("bottom", "+", 2)), minusRail = T(bb.rail("bottom", "-", 3));
+  const sx = v33.x - 30; // 3V 핀 왼쪽, 헤더 테두리와 고정 구멍 바깥
+  const wires = [
+    mfWire(sig.SI, T(c.hole.SI), C.yellow, seamVia(sig.SI, T(c.hole.SI), seamX(bx, 7), L(5), U(1)), "orth"),
+    mfWire(sig.SCK, T(c.hole.SCK), C.green, seamVia(sig.SCK, T(c.hole.SCK), seamX(bx, 6), L(4), U(2)), "orth"),
+    mfWire(sig.RCK, T(c.hole.RCK), C.blue, seamVia(sig.RCK, T(c.hole.RCK), seamX(bx, 5), L(3), U(3)), "orth"),
+    mfWire(v33, plusRail, C.red, [{ x: sx, y: v33.y }, { x: sx, y: L(1) }, { x: plusRail.x, y: L(1) }], "orth"),
+    mfWire(gnd, minusRail, C.black, [{ x: gnd.x, y: L(2) }, { x: minusRail.x, y: L(2) }], "orth"),
+  ];
+  const cols = c.cols;
+  const rows = [
+    { color: C.yellow, part: `${sig.SI.label} 칸 S 핀`, to: `칩 SI (${cols.SI}번 줄)` },
+    { color: C.green, part: `${sig.SCK.label} 칸 S 핀`, to: `칩 SCK (${cols.SCK}번 줄)` },
+    { color: C.blue, part: `${sig.RCK.label} 칸 S 핀`, to: `칩 RCK (${cols.RCK}번 줄)` },
+    { color: C.red, part: "전원 헤더 3V · 칩 VCC · MR", to: "아래 + 줄" },
+    { color: C.black, part: "전원 헤더 GND · 칩 OE", to: "아래 − 줄 (위 − 줄과 점퍼로)" },
+    { color: C.black, part: "칩 GND · 튜브 COM", to: "위 − 줄" },
+    { color: "#5c636a", part: `칩 Q0~Q7 (${cols.chip[0]}~${cols.chip[1]}번 줄)`, to: `220Ω 하나씩 → 튜브 a~g · dp (${cols.seg[0]}~${cols.seg[1]}번 줄)` },
+  ];
+  const table = connectionTable(U(3) + 18, "이렇게 꽂아요 — 칩은 반달 홈이 그림과 같은 쪽", rows, b.legend);
+  const board = b.draw([sig.SI, sig.SCK, sig.RCK, v33, gnd], { note: "left" });
+  return { body: compose(board, [pl.g], wires, [table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "7세그먼트 배선도(ESP32 Plus 확장 보드): 74HC595 칩은 브레드보드 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽. 보드 위쪽 io5 → 칩 SI(9번 줄), io18 → SCK(6번 줄), io23 → RCK(7번 줄). 보드 아래 줄 3V3 → 보드 왼쪽 바깥으로 돌아 아래 + 줄, GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. 칩 Q0~Q7 은 220Ω 저항을 하나씩 거쳐 17~21번 줄의 디지털 튜브 a~g · dp 로(Q0→a, Q1→b, Q2→c, Q3→d, Q4→e, Q5→f, Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 7세그먼트 배선도: 74HC595 칩은 브레드보드 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽. 아래 줄 P5 칸 S 핀 → 칩 SI(9번 줄), P18 칸 S 핀 → SCK(6번 줄), P23 칸 S 핀 → RCK(7번 줄) — 세 선은 보드 아래로 나와 안 쓰는 칸 사이 틈으로 보드를 건너 올라와요. 왼쪽 전원 헤더 3V → 아래 + 줄, 전원 헤더 GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. 칩 Q0~Q7 은 220Ω 저항을 하나씩 거쳐 17~21번 줄의 디지털 튜브 a~g · dp 로(Q0→a, Q1→b, Q2→c, Q3→d, Q4→e, Q5→f, Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. JUMP 점퍼는 3.3V 쪽",
   devkit: "기본 보드(ESP32 DevKit 38핀) 7세그먼트 배선도: 74HC595 칩은 브레드보드 4~11번 줄에서 가운데 홈을 건너 꽂고 반달 홈은 튜브 쪽. 아래 줄 D5 → 칩 SI(9번 줄), D18 → SCK(6번 줄), D23 → RCK(7번 줄) — 세 선은 보드 아래로 돌아와요. 보드 3V3(위 줄 오른쪽 끝) → 보드 바깥으로 돌아 아래 + 줄, GND → 아래 − 줄. 칩 VCC · MR → + 줄, OE → − 줄, 칩 GND → 위 − 줄. 칩 Q0~Q7 은 220Ω 저항을 하나씩 거쳐 17~21번 줄의 디지털 튜브 a~g · dp 로(Q0→a, Q1→b, Q2→c, Q3→d, Q4→e, Q5→f, Q6→g, Q7→dp). 튜브 COM → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로",
 };
 
@@ -187,5 +231,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wsg", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wsgk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wsgx", T.expansion, r.body, r.height); },
   },
 };
