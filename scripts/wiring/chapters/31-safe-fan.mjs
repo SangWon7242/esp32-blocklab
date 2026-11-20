@@ -13,9 +13,10 @@
 //       D18 이라 보드 아래(핀이 위로), VCC 는 보드 왼쪽 바깥으로 띠 + 줄, GND 는 아래 줄 GND.
 //       전압 나누기는 18 · 21 · 24번 줄: Echo · D19(아래 줄) 선은 보드 오른쪽 바깥으로 돌아 올라가
 //       Echo → 24번 열(+ − 줄에 구멍이 없는 열) → 24번 줄, D19 → 17 · 18번 열 사이 빈 길 → 홈에서 꺾어 21번 줄, 18번 줄 → 위 − 줄.
-import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc } from "../common.mjs";
+import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, button, fan, led, powerJack, resistor, ultrasonic } from "../parts.mjs";
 import { mark } from "../record.mjs";
 import { echoDivider, echoRows } from "../echo-divider.mjs";
@@ -226,6 +227,88 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/** 확장 보드 S · V · G 기둥 한 칸에 꽂는 선: from → 세로 lane → 가로 x → 세로 핀 높이 → 핀. 안쪽 핀 선부터 그리면 바깥 핀 선 머리가 덮는다 */
+const columnRun = (from, pin, color, { lane, x }) => wire(from, pin, color, { via: [{ x: from.x, y: lane }, { x, y: lane }, { x, y: pin.y }], style: "orth", ends: ["f", "f"] });
+
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 5V (팬 · 초음파가 V 줄 전기를 쓴다) ─────
+ * 맨 위 브레드보드(버튼 · LED)는 Plus · DevKit 과 같은 줄 번호. 신호선은 위 줄 P14 · P27 · P26 · P25 · P33 칸 S 핀에서 계단처럼.
+ *   (P26 이 P25 보다 왼쪽이라 LED 1 · LED 2 선은 한 번 엇갈린다.) 브레드보드 − 줄 ← 전원 헤더 GND (보드 위 왼쪽으로 돌아).
+ * 팬: 브레드보드와 보드 사이, P13 칸 왼쪽 위. G · V · IN+ → P13 칸 G · V · S, IN− → P12 칸 S (V 줄 = 점퍼 5V).
+ * 초음파: 보드 아래(핀이 위로). VCC · Trig → 아래 줄 P18 칸 V · S, Echo · GND → 작은 브레드보드의 전압 나누기
+ *   (Echo → 1kΩ → 가운데 줄 → P19 칸 S, 가운데 줄 → 2kΩ → GND 줄 ← 아래 줄 GND 칸 S). 보드 핀 선은 위(f)로, 센서 선은 아래(j)로 꽂는다.
+ * 점퍼 메모는 왼쪽(오른쪽 메모 자리를 P18 · P19 · GND 선이 지나가서).
+ */
+function expansion() {
+  const bb = breadboard({ x: 40, y: 8, cols: 30, rails: { top: true, bottom: true } });
+  const btnA = buttonPullup(bb, 3, "A"), btnB = buttonPullup(bb, 7, "B");
+  const leds = [ledRight(bb, 11, LED_COLORS[0]), ledRight(bb, 18, LED_COLORS[1]), ledRight(bb, 25, LED_COLORS[2], 28)];
+  const b = makeExpansion({ x: 22, y: 536, jumper: "5V" });
+  const top = b.bounds.y, bot = top + 314;
+  const parts = [bb.svg, btnA.svg, btnB.svg, ...leds.map((l) => l.svg)], wires = [], used = [];
+
+  // 버튼 · LED 신호: 계단 (왼쪽 핀일수록 낮은 가로 길)
+  const sA = b.gpio(14), sB = b.gpio(27), s25 = b.gpio(25), s26 = b.gpio(26), s33 = b.gpio(33);
+  wires.push(stair(btnA.hole, sA, C.blue, 358), stair(btnB.hole, sB, C.purple, 350), stair(leds[1].hole, s26, C.yellow, 342), stair(leds[0].hole, s25, C.green, 334), stair(leds[2].hole, s33, C.orange, 326));
+  used.push(sA, sB, s25, s26, s33);
+  wires.push(btnA.jumper, btnB.jumper, ...leds.map((l) => l.jumper), railLink(bb, 1));
+  // 브레드보드 아래 − 줄 ← 전원 헤더 GND: 곧게 올라가 보드 바로 위에서 왼쪽으로, 버튼 선들 왼쪽으로 올라간다
+  const gH = b.power("GND", 2), gr = bb.rail("bottom", "-", 2);
+  wires.push(mfWire(gH, gr, C.black, [{ x: gH.x, y: top - 6 }, { x: gr.x, y: top - 6 }], "orth"));
+  used.push(gH);
+
+  // 팬: G · V · IN+ → P13 칸 G · V · S, IN− → P12 칸 S. 왼쪽 핀일수록 낮은 길
+  const f = fan(200, 390, { titleAt: { x: 255, y: 376 } });
+  parts.push(f.svg);
+  const t13 = b.triple(13), p12 = b.gpio(12);
+  wires.push(
+    columnRun(f.pins.G, t13.G, C.black, { lane: top - 8, x: t13.G.x - 4 }),
+    columnRun(f.pins.V, t13.V, C.red, { lane: top - 16, x: t13.V.x }),
+    columnRun(f.pins["IN+"], t13.S, C.teal, { lane: top - 24, x: t13.S.x + 4 }),
+    ffWire(f.pins["IN−"], p12, C.pink, [{ x: f.pins["IN−"].x, y: top - 32 }, { x: p12.x, y: top - 32 }], "orth"),
+  );
+  used.push(t13.G, t13.V, t13.S, p12);
+
+  // 초음파 Echo 전압 나누기: 보드 아래 오른쪽 작은 브레드보드(f~j) 3 · 6 · 9번 줄 (Echo · 가운데 · GND)
+  const sb = breadboard({ x: 432, y: bot + 26, cols: 9, half: "bottom" });
+  const div = echoDivider(sb, 3, { order: "echo-first" });
+  parts.push(sb.svg, ...div.svg);
+  const h = { echo: sb.hole(div.cols.echo, "j"), pin: sb.hole(div.cols.mid, "f"), gndBoard: sb.hole(div.cols.gnd, "f"), gndSensor: sb.hole(div.cols.gnd, "j") };
+  const s19 = b.gpio(19), gB = b.power("GND", 1);
+  wires.push(mfWire(s19, h.pin, C.brown, [{ x: s19.x, y: bot + 18 }, { x: h.pin.x, y: bot + 18 }], "orth"));
+  wires.push(mfWire(gB, h.gndBoard, C.black, [{ x: gB.x, y: bot + 10 }, { x: h.gndBoard.x, y: bot + 10 }], "orth"));
+  used.push(s19, gB);
+  // 초음파: 보드 아래 왼쪽, 핀이 위로. VCC · Trig → P18 칸 V · S, Echo · GND → 작은 브레드보드 아래(j)
+  const u = ultrasonic(230, sb.y + sb.h + 44, { side: "top", title: "초음파 센서", titleAt: { x: 306, y: sb.y + sb.h + 158 } });
+  parts.push(u.svg);
+  const t18 = b.triple(18);
+  const yb = sb.y + sb.h;
+  wires.push(
+    columnRun(u.pins.VCC, t18.V, C.red, { lane: yb - 26, x: t18.V.x - 2 }),
+    columnRun(u.pins.Trig, t18.S, C.yellow, { lane: yb - 16, x: t18.S.x + 2 }),
+    mfWire(u.pins.Echo, h.echo, C.green, [{ x: u.pins.Echo.x, y: yb + 12 }, { x: h.echo.x, y: yb + 12 }], "orth"),
+    mfWire(u.pins.GND, h.gndSensor, C.black, [{ x: u.pins.GND.x, y: yb + 22 }, { x: h.gndSensor.x, y: yb + 22 }], "orth"),
+  );
+  used.push(t18.V, t18.S);
+
+  const [echoRow, pinRow, gndRow] = echoRows(div, { echoColor: C.green, pinColor: C.brown, gndColor: C.black, pinLabel: "P19 칸 S 핀 (아래 줄)", gndLabel: "아래 줄 GND 칸 S" });
+  const small = (r) => ({ ...r, to: `작은 브레드보드 ${r.to}` });
+  const rows = [
+    { colors: [C.red, C.yellow], part: "초음파 VCC · Trig", to: "아래 줄 P18 칸 V · S" },
+    small(echoRow), small(pinRow), small(gndRow),
+    { colors: [C.black, C.red, C.teal], part: "팬 G · V · IN+", to: "위 줄 P13 칸 G · V · S" },
+    { color: C.pink, part: "팬 IN−", to: "위 줄 P12 칸 S" },
+    { color: C.blue, part: "P14 칸 (버튼 A)", to: "3번 줄, 대각선 5번 줄 → 위 − 줄" },
+    { color: C.purple, part: "P27 칸 (버튼 B)", to: "7번 줄, 대각선 9번 줄 → 위 − 줄" },
+    { color: C.green, part: "P25 칸 (LED 1)", to: "11번 줄 → 220Ω → 15번 줄 긴 다리" },
+    { color: C.yellow, part: "P26 칸 (LED 2)", to: "18번 줄 → 220Ω → 22번 줄 긴 다리" },
+    { color: C.orange, part: "P33 칸 (LED 3)", to: "25번 줄 → 220Ω → 29번 줄 긴 다리" },
+    { color: C.black, part: "LED 짧은 다리 16 · 23 · 30번 줄", to: "아래 − 줄 (위 − 줄과 점퍼로)" },
+    { color: C.black, part: "아래 − 줄", to: "전원 헤더 GND (보드 왼쪽 위로 돌아)" },
+  ];
+  const table = connectionTable(u.pins.GND.y + 12 + 98 + 34, "이렇게 꽂아요 — 모듈은 보드에 바로, Echo 만 저항 둘을 거쳐요 (점퍼 5V)", rows, b.legend);
+  return { body: compose(b.draw(used, { note: "left" }), parts, wires, [table.svg]), height: table.bottom, div: div.cols };
+}
+
 const T = {
   plus: "안전 선풍기 배선도(ESP32 Plus 확장 보드): 맨 위 브레드보드에 버튼 A(3 · 5번 줄)와 버튼 B(7 · 9번 줄), LED 1 · 2 · 3(11 · 18 · 25번 줄에서 220Ω 저항 → 15 · 22 · 29번 줄 긴 다리, 짧은 다리 16 · 23 · 30번 줄 → 아래 − 줄). io14 → 3번 줄, io27 → 7번 줄, 버튼 대각선 5 · 9번 줄 → 위 − 줄, io25 → 11번 줄, io26 → 18번 줄, 아래 줄 io33 → 보드 오른쪽 바깥으로 돌아 25번 줄. 위 − 줄과 아래 − 줄은 점퍼로 잇고, 아래 − 줄 → 보드 오른쪽 바깥으로 돌아 아래 줄 GND. 초음파 센서 VCC · GND · Trig → 위 줄 5V · GND · io18, 팬 모듈 IN+ · IN− → io13 · io12, 팬 G · V → io12 와 io14 사이 빈 틈으로 내려 I2C 묶음 GND · 5V 에 F-F 듀폰선으로 바로. 초음파 Echo 는 저항 둘을 거친다: Echo → 브레드보드 a~e 칸 1번 줄 → 1kΩ 저항 → 6번 줄 → io19, 6번 줄 → 2kΩ 저항 → 11번 줄 → 위 − 줄. 배터리 홀더(AA 6개)는 외부 전원 단자에",
   devkit: "기본 보드(ESP32 DevKit 38핀) 안전 선풍기 배선도: 맨 위 브레드보드에 버튼 A(3 · 5번 줄)와 버튼 B(7 · 9번 줄), LED 1 · 2 · 3(11 · 18 · 25번 줄에서 220Ω 저항 → 15 · 22 · 29번 줄 긴 다리, 짧은 다리 16 · 23 · 30번 줄 → 아래 − 줄). D14 → 3번 줄, D27 → 7번 줄, 버튼 대각선 5 · 9번 줄 → 위 − 줄, D25 → 11번 줄, D26 → 18번 줄, D33 → 25번 줄. 보드 위 왼쪽에 + − 줄 띠: VIN → + 줄, GND → − 줄, 팬 모듈 G · V → 띠 − · + 줄, 팬 IN+ · IN− → D13 · D12. 브레드보드 아래 − 줄 ↔ 띠 − 줄. 초음파 센서는 보드 아래: Trig → D18, GND → 아래 줄 GND, VCC → 보드 왼쪽 바깥으로 돌아 띠 + 줄. 초음파 Echo 는 저항 둘을 거친다: Echo → 브레드보드 a~e 칸 24번 줄 → 1kΩ 저항 → 21번 줄 → D19(아래 줄), 21번 줄 → 2kΩ 저항 → 18번 줄 → 위 − 줄. Echo 선과 D19 선은 보드 오른쪽 바깥으로 돌아 올라간다",
@@ -235,5 +318,10 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wsf", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wsfk", T.devkit, r.body, r.height); },
+    expansion: () => {
+      const r = expansion(), d = r.div;
+      const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 안전 선풍기 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로. 맨 위 브레드보드에 버튼 A(3 · 5번 줄)와 버튼 B(7 · 9번 줄), LED 1 · 2 · 3(11 · 18 · 25번 줄에서 220Ω 저항 → 15 · 22 · 29번 줄 긴 다리, 짧은 다리 16 · 23 · 30번 줄 → 아래 − 줄). 위 줄 P14 칸 S 핀 → 3번 줄, P27 → 7번 줄, 버튼 대각선 5 · 9번 줄 → 위 − 줄, P25 → 11번 줄, P26 → 18번 줄, P33 → 25번 줄. 위 − 줄과 아래 − 줄은 점퍼로 잇고, 아래 − 줄 → 전원 헤더 GND. 팬 모듈 G · V · IN+ → 위 줄 P13 칸 G · V · S, IN− → P12 칸 S 핀에 F-F 듀폰선으로 바로. 초음파 센서는 보드 아래: VCC · Trig → 아래 줄 P18 칸 V · S. Echo 는 저항 둘을 거친다: Echo → 작은 브레드보드 ${d.echo}번 줄 → 1kΩ 저항 → ${d.mid}번 줄 → 아래 줄 P19 칸 S 핀, ${d.mid}번 줄 → 2kΩ 저항 → ${d.gnd}번 줄 ← 초음파 GND · 아래 줄 GND 칸 S 핀`;
+      return svgDoc("wsfx", title, r.body, r.height);
+    },
   },
 };

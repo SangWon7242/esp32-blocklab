@@ -9,9 +9,10 @@
 //       (큰 브레드보드의 빈 칸은 그 세 선에 둘러싸인 센서 · io12 에서 닿으려면 선을 여러 번 가로질러야 해서 작은 띠를 썼다)
 // DevKit: 초음파 VCC · GND · Trig 는 VIN · GND · D13 에 바로. Echo 는 큰 브레드보드 2 · 5 · 8번 줄의 저항 둘을 거쳐 D12 로,
 //       8번 줄은 − 줄로 점퍼. 브레드보드는 보드 위, 3V3 · GND(아래 줄)만 보드 왼쪽 바깥 길로.
-import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc } from "../common.mjs";
+import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, buzzer, led, photoresistor, resistor, tiltSwitch, ultrasonic } from "../parts.mjs";
 import { echoDivider, echoRows } from "../echo-divider.mjs";
 
@@ -178,6 +179,83 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/** 확장 보드 S · V · G 기둥 한 칸에 꽂는 선: from → 세로 lane → 가로 x → 세로 핀 높이 → 핀 */
+const columnRun = (from, pin, color, { lane, x, ends = ["f", "f"] }) => wire(from, pin, color, { via: [{ x: from.x, y: lane }, { x, y: lane }, { x, y: pin.y }], style: "orth", ends });
+
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 5V (초음파가 V 줄 전기를 쓴다) ─────
+ * 핀이 모두 위 줄 칸이라 브레드보드를 보드 위에. 틸트 풀업 · 포토레지스터 10kΩ 의 3.3V 는 전원 헤더 3V(점퍼와 상관없이 3.3V),
+ * GND 는 전원 헤더 GND — 둘 다 보드 왼쪽 바깥으로 올라가 큰 브레드보드 + − 줄 왼쪽 끝으로.
+ * 초음파(핀이 위로)는 큰 브레드보드와 보드 사이 왼쪽: VCC · Trig 는 센서 왼쪽으로 돌아 P13 칸 V · S, GND 는 오른쪽으로 돌아 위 줄 GND 칸 S,
+ * Echo 는 곧게 올라가 작은 브레드보드(f~j)의 전압 나누기로 (Echo 2번 줄 → 1kΩ → 5번 줄 ← P12 칸 S, 5번 줄 → 2kΩ → 8번 줄 → 큰 브레드보드 − 줄).
+ * 큰 브레드보드 회로는 P14 · P26 · P25 · SVP 칸 바로 위 오른쪽에 차례로 (선이 엇갈리지 않게).
+ */
+function expansion() {
+  const bb = breadboard({ x: 36, y: 44, cols: 35, rails: { top: false, bottom: true } });
+  const spec = { tilt: { t: 17, n: 19, r: 21 }, led: { cathode: 22, anode: 23, sig: 26 }, buz: { minus: 27, plus: 29 }, ldr: { p: 30, s: 33, l: 35 } };
+  const c = circuits(bb, "bottom", spec, railHole);
+  const b = makeExpansion({ x: 22, y: 702, jumper: "5V" });
+  const top = b.bounds.y;
+  const parts = [bb.svg, ...c.svg], wires = [], used = [];
+
+  // 큰 브레드보드 회로 신호: 위 줄 칸 S 핀에서 곧게
+  const p14 = b.gpio(14), p26 = b.gpio(26), p25 = b.gpio(25), p36 = b.gpio(36);
+  wires.push(mfWire(p14, c.hole(spec.tilt.n), C.blue), mfWire(p26, c.hole(spec.led.sig), C.orange), mfWire(p25, c.hole(spec.buz.plus), C.purple), mfWire(p36, c.hole(spec.ldr.s), C.teal));
+  used.push(p14, p26, p25, p36);
+
+  // 전원 헤더 3V · GND → 보드 왼쪽 바깥 길(3V 가 바깥) → + − 줄 왼쪽 끝 (GND 길이 3V 길보다 아래)
+  const v33 = b.power("3V3", 0), gH = b.power("GND", 3);
+  const plus1 = c.R("+", 1), minus2 = c.R("-", 2), under = bb.y + bb.h;
+  wires.push(mfWire(v33, plus1, C.red, [{ x: v33.x - 30, y: v33.y }, { x: v33.x - 30, y: top - 6 }, { x: 12, y: top - 6 }, { x: 12, y: under + 12 }, { x: plus1.x, y: under + 12 }], "orth"));
+  wires.push(mfWire(gH, minus2, C.black, [{ x: gH.x, y: top - 14 }, { x: 20, y: top - 14 }, { x: 20, y: under + 20 }, { x: minus2.x, y: under + 20 }], "orth"));
+  used.push(v33, gH);
+
+  // 작은 브레드보드(f~j): Echo 2 · 가운데 5 · GND 8번 줄
+  const sb = breadboard({ x: 82, y: under + 30, cols: 8, half: "bottom" });
+  const div = echoDivider(sb, 2, { order: "echo-first" });
+  parts.push(sb.svg, ...div.svg, note(sb.x + sb.w + 8, sb.y + 20, "작은 브레드보드", "start", 13));
+  const h = { echo: sb.hole(div.cols.echo, "j"), pin: sb.hole(div.cols.mid, "j"), gnd: sb.hole(div.cols.gnd, "f") };
+  // GND 줄(f) → 바로 위 큰 브레드보드 − 줄
+  wires.push(mmWire(h.gnd, c.R("-", bb.nearestCol(h.gnd.x, true)), C.black));
+  // P12 칸 S → 센서 위 가로 길 → 가운데 줄(j)
+  const p12 = b.gpio(12), sbot = sb.y + sb.h;
+  wires.push(mfWire(p12, h.pin, C.pink, [{ x: p12.x, y: sbot + 16 }, { x: h.pin.x, y: sbot + 16 }], "orth"));
+  used.push(p12);
+
+  // 초음파: 핀이 위로, Echo 핀이 작은 브레드보드 Echo 줄 바로 아래
+  const u = ultrasonic(h.echo.x - 86, sbot + 54, { side: "top", title: "초음파 센서", titleAt: { x: h.echo.x - 10, y: sbot + 54 + 114 } });
+  parts.push(u.svg);
+  const t13 = b.triple(13), gT = b.power("GND", 0);
+  const pin = u.pins, upY = pin.VCC.y - 10;
+  wires.push(mfWire(pin.Echo, h.echo, C.green));
+  // VCC · Trig: 센서 왼쪽 바깥으로 내려와 P13 칸 V · S (V 는 점퍼 5V)
+  wires.push(wire(pin.VCC, t13.V, C.red, { via: [{ x: pin.VCC.x, y: upY }, { x: 36, y: upY }, { x: 36, y: top - 34 }, { x: t13.V.x + 4, y: top - 34 }, { x: t13.V.x + 4, y: t13.V.y }], style: "orth" }));
+  wires.push(wire(pin.Trig, t13.S, C.yellow, { via: [{ x: pin.Trig.x, y: upY - 8 }, { x: 28, y: upY - 8 }, { x: 28, y: top - 26 }, { x: t13.S.x - 4, y: top - 26 }, { x: t13.S.x - 4, y: t13.S.y }], style: "orth" }));
+  // GND: 센서 오른쪽으로 돌아 위 줄 GND 칸 S
+  const gx = u.pins.GND.x + 54;
+  wires.push(ffWire(pin.GND, gT, C.black, [{ x: pin.GND.x, y: upY }, { x: gx, y: upY }, { x: gx, y: top - 42 }, { x: gT.x, y: top - 42 }], "orth"));
+  used.push(t13.V, t13.S, gT);
+  wires.push(...c.jumpers);
+
+  const small = (r) => ({ ...r, to: `작은 브레드보드 ${r.to}` });
+  const [echoRow, pinRow] = echoRows(div, { echoColor: C.green, pinColor: C.pink, gndColor: C.black, pinLabel: "P12 칸 S", gndLabel: "" });
+  const rows = [
+    { colors: [C.red, C.yellow], part: "초음파 VCC · Trig", to: "위 줄 P13 칸 V · S (센서 왼쪽으로 돌아)" },
+    { color: C.black, part: "초음파 GND", to: "위 줄 GND 칸 S" },
+    small(echoRow), small(pinRow),
+    { color: C.black, part: `작은 브레드보드 ${div.cols.mid}번 줄 → 2kΩ → ${div.cols.gnd}번 줄`, to: "큰 브레드보드 − 줄" },
+    { colors: [C.red, C.black], part: "전원 헤더 3V · GND", to: "+ 줄 · − 줄 (보드 왼쪽 바깥으로)" },
+    { color: C.blue, part: "P14 칸 S", to: `${spec.tilt.n}번 줄 (10kΩ 저항과 틸트 스위치 사이)` },
+    { colors: [C.red, C.black], part: `10kΩ ${spec.tilt.r}번 줄 · 틸트 ${spec.tilt.t}번 줄`, to: "+ 줄 · − 줄" },
+    { color: C.orange, part: "P26 칸 S", to: `${spec.led.sig}번 줄 → 220Ω → ${spec.led.anode}번 줄 LED 긴 다리` },
+    { color: C.purple, part: "P25 칸 S", to: `${spec.buz.plus}번 줄 수동 부저 + 다리` },
+    { color: C.black, part: `LED 짧은 다리 ${spec.led.cathode}번 · 부저 − 다리 ${spec.buz.minus}번 줄`, to: "− 줄" },
+    { color: C.teal, part: "SVP(36) 칸 S", to: `${spec.ldr.s}번 줄 (10kΩ 저항과 포토레지스터 사이)` },
+    { colors: [C.red, C.black], part: `10kΩ ${spec.ldr.p}번 줄 · 포토레지스터 ${spec.ldr.l}번 줄`, to: "+ 줄 · − 줄" },
+  ];
+  const table = connectionTable(b.bounds.y + b.bounds.h + 12, "이렇게 꽂아요 — 초음파 Echo 는 저항 둘을 거쳐 보드로 (점퍼 5V)", rows, b.legend);
+  return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom, spec, div: div.cols };
+}
+
 const T = {
   plus: "스마트 지팡이 배선도(ESP32 Plus 확장 보드): 초음파 센서 VCC · Trig 는 보드 위쪽 5V · io13 에 F-F 듀폰선으로 바로. Echo 는 센서 옆 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → io12, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 위쪽 GND. 큰 브레드보드는 보드 아래, 아래 줄 3V3 → + 줄, GND → − 줄. 위 줄 io26 · io25 · io14 는 보드 왼쪽 바깥으로 돌아 내려와요. io26 → 2번 줄 → 220Ω → 6번 줄 LED 긴 다리, 짧은 다리 7번 줄 → − 줄. io25 → 9번 줄 수동 부저 + 다리, − 다리 11번 줄 → − 줄. io14 → 15번 줄, 10kΩ 저항 15~20번 줄(20번 → + 줄), 틸트 스위치 13 · 15번 줄(13번 → − 줄). 아래 줄 io36 → 26번 줄, 10kΩ 저항 23~26번 줄(23번 → + 줄), 포토레지스터 26 · 28번 줄(28번 → − 줄)",
   devkit: "기본 보드(ESP32 DevKit 38핀) 스마트 지팡이 배선도: 초음파 센서 VCC · GND · Trig 는 VIN · GND · D13 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위. Echo → 2번 줄 → 1kΩ 저항 → 5번 줄 → D12, 5번 줄 → 2kΩ 저항 → 8번 줄 → − 줄. 3V3 · GND(아래 줄) → 보드 왼쪽 바깥으로 돌아 + 줄 · − 줄. D14 → 12번 줄, 10kΩ 저항 9~12번 줄(9번 → + 줄), 틸트 스위치 12 · 14번 줄(14번 → − 줄). D26 → 19번 줄 → 220Ω → 16번 줄 LED 긴 다리, 짧은 다리 15번 줄 → − 줄. D25 → 22번 줄 수동 부저 + 다리, − 다리 20번 줄 → − 줄. VP(36) → 26번 줄, 10kΩ 저항 23~26번 줄(23번 → + 줄), 포토레지스터 26 · 28번 줄(28번 → − 줄)",
@@ -187,5 +265,10 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wsc", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wsck", T.devkit, r.body, r.height); },
+    expansion: () => {
+      const r = expansion(), { tilt, led, buz, ldr } = r.spec, d = r.div;
+      const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 스마트 지팡이 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로. 초음파 센서 VCC · Trig 는 위 줄 P13 칸 V · S, GND 는 위 줄 GND 칸 S 핀에 F-F 듀폰선으로 바로. Echo 는 작은 브레드보드 ${d.echo}번 줄 → 1kΩ 저항 → ${d.mid}번 줄 → P12 칸 S 핀, ${d.mid}번 줄 → 2kΩ 저항 → ${d.gnd}번 줄 → 큰 브레드보드 − 줄. 큰 브레드보드는 보드 위: 전원 헤더 3V → + 줄, 전원 헤더 GND → − 줄 (보드 왼쪽 바깥으로 돌아). P14 칸 → ${tilt.n}번 줄, 10kΩ 저항 ${tilt.n}~${tilt.r}번 줄(${tilt.r}번 → + 줄), 틸트 스위치 ${tilt.t} · ${tilt.n}번 줄(${tilt.t}번 → − 줄). P26 칸 → ${led.sig}번 줄 → 220Ω → ${led.anode}번 줄 LED 긴 다리, 짧은 다리 ${led.cathode}번 줄 → − 줄. P25 칸 → ${buz.plus}번 줄 수동 부저 + 다리, − 다리 ${buz.minus}번 줄 → − 줄. SVP(36) 칸 → ${ldr.s}번 줄, 10kΩ 저항 ${ldr.p}~${ldr.s}번 줄(${ldr.p}번 → + 줄), 포토레지스터 ${ldr.s} · ${ldr.l}번 줄(${ldr.l}번 → − 줄)`;
+      return svgDoc("wscx", title, r.body, r.height);
+    },
   },
 };

@@ -35,6 +35,10 @@ materials:
   - { name: F-F 듀폰선 2가닥, board: devkit, note: "양쪽 끝이 구멍인 선. RFID SDA · SCL 을 D21 · D22 에 바로" }
   - { name: M-F 듀폰선 2가닥, board: plus, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 2번 → 6번 줄, 아래 줄 GND → − 줄" }
   - { name: M-F 듀폰선 5가닥, board: devkit, note: "한쪽은 핀, 한쪽은 구멍인 선. 보드 3V3 · GND 와 RFID VCC · GND 를 + − 줄에, 보드 2번 → 6번 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로. RFID VCC 는 점퍼와 상관없이 늘 3.3V 인 전원 헤더 3V 에" }
+  - { name: 브레드보드, board: expansion, note: "(설계) LED 와 저항만 꽂아요. 2번이 아래 줄 칸이라 보드 아래에 둬요. RFID 는 보드에 바로" }
+  - { name: F-F 듀폰선 4가닥, board: expansion, note: "양쪽 끝이 구멍인 선. RFID GND · SDA · SCL → I2C 헤더 GND · D21 · D22, VCC → 전원 헤더 3V" }
+  - { name: M-F 듀폰선 2가닥, board: expansion, note: "한쪽은 핀, 한쪽은 구멍인 선. 아래 줄 P2 칸 S 핀 → 6번 줄, 아래 줄 GND 칸 S 핀 → − 줄" }
   - { name: 점퍼선(M-M) 1가닥, note: "LED 짧은 다리 줄(11번) → − 줄" }
   - { name: (설계) LED · 220Ω 저항, note: "빨강 LED 1개와 저항 1개. 2번 → 6번 줄 → 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
@@ -42,6 +46,7 @@ wiring:
   image: images/wiring-breadboard.svg
   caption: "RFID 는 보드에 바로: GND · VCC · SDA · SCL → I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22). (설계) ANALOG 묶음 io2 의 S → 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄, − 줄 → 아래 줄 GND"
   captionDevkit: "보드 3V3 · GND 를 브레드보드 + − 줄에 잇고 RFID VCC → + 줄 · GND → − 줄, SDA → D21 · SCL → D22 (F-F 선으로 바로). (설계) D2 → 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄"
+  captionExpansion: "RFID GND · SDA · SCL → I2C 헤더 GND · D21 · D22 (F-F 선으로 바로), VCC → 전원 헤더 3V (점퍼와 상관없이 3.3V, 보드 안 틈으로 내려와요). (설계) 아래 줄 P2 칸 S 핀 → 보드 아래 브레드보드 6번 줄 → 220Ω 저항 → 10번 줄 LED 긴 다리, 짧은 다리 11번 줄 → − 줄, − 줄 → 아래 줄 GND 칸 S 핀"
 principle:
   image: images/rf-principle.svg
   body: |
@@ -133,6 +138,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "지금은 RFID 만: F-F 선 4가닥으로 I2C 묶음 첫 줄의 GND · 5V · SDA(21번) · SCL(22번)에"
           captionDevkit: "지금은 RFID 만: 3V3 · GND → 브레드보드 + − 줄, RFID VCC → + 줄 · GND → − 줄, SDA → D21 · SCL → D22"
+          captionExpansion: "지금은 RFID 만: GND · SDA · SCL → I2C 헤더 GND · D21 · D22, VCC → 전원 헤더 3V (F-F 선 4가닥)"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 RFID 모듈을 이어요. SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 가요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요. LED 는 설계 단계에서 꽂아도 돼요.
 
