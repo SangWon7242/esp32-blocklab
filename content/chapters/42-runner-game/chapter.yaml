@@ -46,11 +46,15 @@ materials:
   - { name: F-F 듀폰선 3가닥, board: devkit, note: "양쪽 끝이 구멍인 선. OLED GND · SDA · SCL → GND · D21 · D22" }
   - { name: M-F 듀폰선 4가닥, board: devkit, note: "보드 3V3 · GND · D14 → 브레드보드, OLED VCC → + 줄. 선택 부품은 2가닥 더(D25 · VN)" }
   - { name: 점퍼선(M-M) 2개, note: "버튼 대각선 다리 → − 줄, 위 − 줄 ↔ 아래 − 줄. 선택 부품은 3개 더(부저 −, 가변저항 양 끝)" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로. + 줄의 3.3V 는 전원 헤더 3V 핀에서" }
+  - { name: F-F 듀폰선 4가닥, board: expansion, note: "양쪽 끝이 구멍인 선. OLED 네 핀 → 왼쪽 아래 I2C 헤더 GND · VCC · D21 · D22" }
+  - { name: M-F 듀폰선 3가닥, board: expansion, note: "전원 헤더 3V · 위 줄 GND 칸 S · P14 칸 S → 브레드보드. 선택 부품은 2가닥 더(P25 · SVN 칸 S)" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "OLED 는 F-F 듀폰선으로 I2C 묶음 첫 줄 GND · 5V · SDA · SCL 에 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → 위 + 줄, GND → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: io14 → 12번 줄, 대각선 14번 줄 → 아래 − 줄. 선택 부품은 추가 미션에서: 수동 부저 6 · 8번 줄(+ → io25), 가변저항 23 · 24 · 25번 줄(가운데 → 아래 줄 io39)"
   captionDevkit: "브레드보드는 보드 위: 3V3 → + 줄, GND → − 줄, 위 − 줄과 아래 − 줄은 점퍼로. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 10번 줄 → 위 − 줄. OLED GND → GND · SDA → D21 · SCL → D22 는 F-F 로 바로, VCC → + 줄. 선택 부품은 추가 미션에서: 수동 부저 12 · 14번 줄(+ → D25), 가변저항 18 · 19 · 20번 줄(가운데 → VN)"
+  captionExpansion: "브레드보드는 보드 위: 왼쪽 위 전원 헤더 3V → 아래 + 줄, 위 줄 GND 칸 S → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: P14 칸 S → 6번 줄, 대각선 8번 줄 → 위 − 줄. OLED 네 핀 → 왼쪽 아래 I2C 헤더 GND · VCC · D21 · D22 에 F-F 로 바로. 선택 부품은 추가 미션에서: 수동 부저 12 · 14번 줄(+ ← P25 칸 S), 가변저항 17 · 18 · 19번 줄(가운데 ← SVN(39) 칸 S)"
 principle:
   image: images/game-loop.svg
   body: |
@@ -142,6 +146,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "오늘은 OLED 네 핀(I2C 묶음에 바로)과 버튼만 이어요. 가변저항 · 부저는 추가 미션용"
           captionDevkit: "오늘은 OLED 네 핀과 버튼만 이어요. OLED VCC 는 + 줄(3V3). 가변저항 · 부저는 추가 미션용"
+          captionExpansion: "오늘은 OLED 네 핀(I2C 헤더에 바로)과 버튼만 이어요. 가변저항 · 부저는 추가 미션용"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 OLED 네 핀과 버튼을 이어요. OLED 라이브러리(`ssd1306.py`)는 **실행**을 누르면 블록랩이 함께 올려 줘요.
 
@@ -478,6 +483,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "선택 부품을 이어요: 수동 부저 + → io25, − → − 줄. 가변저항 가운데 → 아래 줄 io39, 양 끝 → + 줄 · − 줄"
           captionDevkit: "선택 부품을 이어요: 수동 부저 + → D25, − → − 줄. 가변저항 가운데 → VN(39), 양 끝 → + 줄 · − 줄"
+          captionExpansion: "선택 부품을 이어요: 수동 부저 + ← P25 칸 S, − → − 줄. 가변저항 가운데 ← SVN(39) 칸 S, 양 끝 → + 줄(전원 헤더 3V) · − 줄"
         body: |
           먼저 끝낸 사람을 위한 미션이에요. **수동 부저**(25번)로 점프할 때 높은 음(880 Hz)을 0.03초, 부딪힐 때 낮은 음(220 Hz)을 0.5초 울려요. **가변저항**(39번)으로 프레임 간격을 정해요. 다이얼 값 0 ~ 4095 를 **범위 바꾸기** 블록으로 160 ~ 60 ms 로 바꿔 기다려요. 돌릴수록 빨라져요.
 

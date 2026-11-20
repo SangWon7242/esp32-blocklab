@@ -3,9 +3,13 @@
 // 두 보드 모두 브레드보드를 보드 위에 두고 버튼 · 부저를 꽂는다(11장 · 12장과 같은 꼴, 버튼은 대각선 다리 → 위 − 줄).
 // Plus: OLED 는 F-F 로 I2C 묶음 첫 줄에 바로 — 선은 위 G 줄과 ESP32 사이 빈 띠로(10장 자동문과 같은 길).
 // DevKit: OLED 는 보드 아래에서 F-F 로 3V3 · GND(아래 줄) · D21 · D22 에 바로(10장 자동문과 같음).
+// 확장 보드: 브레드보드는 보드 위(버튼 a · b · 부저 신호는 + − 줄에 구멍이 없는 6 · 12 · 18번 열로 내려 꽂는다),
+//   OLED 는 보드 왼쪽 아래에서 I2C 헤더(GND · VCC · D21 · D22)로 — 선은 UART 핀 사이 틈으로(10장 본보기와 같은 길).
+//   맨 부품과 OLED 뿐이라 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, button, buzzer, oled } from "../parts.mjs";
 import { railCol, railLink } from "./11-button-touch.mjs";
 
@@ -108,14 +112,59 @@ function devkit() {
   return { body: compose(b.draw(used), [bb.svg, ...c.svg, o.svg], wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit), 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 100, y: 8, cols: 26, rails: { top: true, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 56, jumper: "3V3" });
+  const c = circuits(bb, { a: 6, b: 12, buz: 18 });
+  const p = { a: b.gpio(14), b: b.gpio(27), buz: b.gpio(25), gnd: b.power("GND") };
+  const top = b.bounds.y;
+  // 보드 위 가로 길: 왼쪽 선일수록 보드에 가깝게 (선이 서로 건너지 않는다)
+  const lane = (k) => top - 12 - k * 9;
+  const go = (pin, hole, color, k) => mfWire(pin, hole, color, [{ x: pin.x, y: lane(k) }, { x: hole.x, y: lane(k) }], "orth");
+  // GND → 아래 − 줄 4번 칸: 3 · 4번 열 사이로 올라가 + 줄 구멍을 피한다
+  const gRail = bb.rail("bottom", "-", 4), gapX = (bb.hole(3, "a").x + gRail.x) / 2;
+  const wires = [
+    mfWire(p.gnd, gRail, C.black, [{ x: p.gnd.x, y: lane(0) }, { x: gapX, y: lane(0) }, { x: gapX, y: gRail.y + 8 }, { x: gRail.x, y: gRail.y + 8 }], "orth"), go(p.a, c.btnA.signalHole, C.green, 1), go(p.b, c.btnB.signalHole, C.yellow, 2), go(p.buz, c.bz.signalHole, C.orange, 3),
+    ...c.jumpers,
+  ];
+  const used = [p.a, p.b, p.buz, p.gnd];
+
+  // OLED: 보드 왼쪽 아래, 핀이 위로. I2C 헤더 안쪽 줄로 — 선은 바깥 줄(UART) 핀 사이 틈으로 올라가 옆에서 꽂는다
+  const bus = b.i2c(0);
+  const bot = top + b.bounds.h;
+  const o = oled(110, bot + 30, { titleAt: { x: 98, y: bot + 86, anchor: "end" } });
+  const lanes = { GND: bot + 4, VCC: bot - 4, SDA: bot - 20, SCL: bot - 12 };
+  const color = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const q = bus[k], from = o.pins[k], seam = q.x - 9.9;
+    wires.push(ffWire(from, q, color[k], [{ x: from.x, y: lanes[k] }, { x: seam, y: lanes[k] }, { x: seam, y: q.y }], "orth"));
+    used.push(q);
+  }
+
+  const rows = [
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC (보드에 바로)" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22 (보드에 바로)" },
+    { color: C.green, part: `${p.a.label} 칸 S`, to: `${c.btnA.cols.sig}번 줄 (버튼 a 한쪽 다리)` },
+    { color: C.yellow, part: `${p.b.label} 칸 S`, to: `${c.btnB.cols.sig}번 줄 (버튼 b 한쪽 다리)` },
+    { color: C.black, part: `버튼 대각선 다리 ${c.btnA.cols.gnd} · ${c.btnB.cols.gnd}번 줄`, to: "위 − 줄" },
+    { color: C.orange, part: `(선택) ${p.buz.label} 칸 S`, to: `${c.bz.cols.plus}번 줄 수동 부저 + 다리 (− 다리 ${c.bz.cols.minus}번 줄 → 아래 − 줄)` },
+    { color: C.black, part: "위 줄 GND 칸 S", to: "아래 − 줄, 위 − 줄 ↔ 아래 − 줄 점퍼" },
+  ];
+  const table = connectionTable(o.pins.GND.y + 112 + 24, "이렇게 꽂아요 — OLED 는 보드에 바로, 버튼 · 부저는 브레드보드에", rows, b.legend);
+  return { body: compose(b.draw(used), [bb.svg, ...c.svg, o.svg], wires, [table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "바이러스 폭탄 피하기 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SDA · SCL 은 보드 I2C 묶음 첫 줄의 GND · 5V · SDA · SCL 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 버튼 a 는 가운데 홈에 걸쳐 13 · 15번 줄, 보드 위쪽 io14 → 13번 줄, 대각선 다리 15번 줄 → 위 − 줄. 버튼 b 는 17 · 19번 줄, io27 → 17번 줄, 대각선 다리 19번 줄 → 위 − 줄. (선택) 수동 부저 + 다리 22번 줄 ← io25, − 다리 25번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
   devkit: "기본 보드(ESP32 DevKit 38핀) 바이러스 폭탄 피하기 배선도: OLED 화면 VCC → 3V3, GND → GND(아래 줄), SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 버튼 a 는 가운데 홈에 걸쳐 7 · 9번 줄, D14 → 7번 줄, 대각선 다리 9번 줄 → 위 − 줄. 버튼 b 는 11 · 13번 줄, D27 → 11번 줄, 대각선 다리 13번 줄 → 위 − 줄. (선택) 수동 부저 + 다리 16번 줄 ← D25, − 다리 19번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 바이러스 폭탄 피하기 배선도: JUMP 점퍼는 평소 자리(3.3V 쪽). OLED 화면 GND · VCC · SDA · SCL 은 보드 왼쪽 아래 I2C 헤더의 GND · VCC · D21 · D22 에 F-F 듀폰선으로 바로. 브레드보드는 보드 위: 버튼 a 는 가운데 홈에 걸쳐 6 · 8번 줄, 위 줄 P14 칸 S 핀 → 6번 줄, 대각선 다리 8번 줄 → 위 − 줄. 버튼 b 는 12 · 14번 줄, P27 칸 S 핀 → 12번 줄, 대각선 다리 14번 줄 → 위 − 줄. (선택) 수동 부저 + 다리 18번 줄 ← P25 칸 S 핀, − 다리 21번 줄 → 아래 − 줄. 위 줄 GND 칸 S 핀 → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
 };
 
 export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wbg", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wbgk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wbgx", T.expansion, r.body, r.height); },
   },
 };

@@ -11,9 +11,17 @@
 // DevKit: 보드 위 왼쪽에 물통 · 릴레이 · 5V 띠(VIN · 위 줄 GND), 오른쪽에 두 센서 · 3V3 띠(3V3). 두 띠의 − 줄은 점퍼로.
 //   릴레이 S · 두 센서 S 는 띠의 구멍 없는 열(12 · 6번)로 지나 D26 · D35 · D34 에 바로. OLED 는 보드 아래(39장과 같은 꼴):
 //   GND · SDA · SCL 은 아래 줄에 바로, VCC 는 보드 왼쪽 바깥 길로 5V 띠 + 줄.
+// 확장 보드: 릴레이(5V)를 P26 칸 G · V · S 에 바로 꽂으니 V 줄이 5V 여야 한다 → 이번 수업은 점퍼 5V.
+//   두 센서는 34 · 35번에 3.3V 넘게 들어가면 안 되니 G · V 를 왼쪽 위 전원 헤더 GND · 3V 에(3V 핀은 점퍼와 상관없이 3.3V),
+//   S 만 위 줄 P34 · P35 칸 S 에. 선이 서로 건너지 않게 두 센서는 맨 위에 겹쳐 두고(토양 수분 위, 수위 아래)
+//   G · V 는 왼쪽으로 곧게 내려 전원 헤더로, S 는 오른쪽으로 넘어가 P34 · P35 로. 그 안쪽에 물통 · 릴레이:
+//   릴레이 COM ← 위 줄 5V 칸 S, NO → 펌프 빨강(+), 펌프 검정(−) → 위 줄 GND 칸 S (F-F 듀폰선 구멍에 펌프 선 끝을 꽂아요).
+//   OLED → I2C 헤더 (VCC 는 V 줄을 따라 약 4.6V — OLED 모듈은 괜찮다).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, name, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
+import { columnWires } from "./43-chick.mjs";
 import { breadboard, oled, relay, sensor3, waterPump } from "../parts.mjs";
 
 /** 나사 단자 · 펌프 선 끝 (벗긴 선 끝을 꽂는다) */
@@ -184,14 +192,85 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit), 점퍼 5V ───── */
+function expansion() {
+  const Y = 498;
+  const b = makeExpansion({ x: 22, y: Y, jumper: "5V" });
+  const parts = [], wires = [], used = [];
+  const lane = (k) => Y - 12 - k * 9;
+
+  // 두 센서(핀이 아래로, G V S): 토양 수분이 맨 위, 수위가 그 아래 — G · V 는 왼쪽으로 곧게 전원 헤더, S 는 오른쪽으로
+  const soil = sensor3(116, 30, "soil", { title: false });
+  const water = sensor3(150, 184, "water", { title: false });
+  parts.push(soil.svg, water.svg, tag(206, 84, "토양 수분 센서", "start"), tag(240, 238, "수위 센서", "start"));
+  const hdr = { g0: b.power("GND", 2), g1: b.power("GND", 3), v0: b.power("3V3", 0), v1: b.power("3V3", 1) };
+  // 토양: G → 전원 헤더 GND(첫째) 위에서 바로, V → 3V(첫째) (GND 핀 사이 틈으로), S → P34 칸 S (맨 위 길로)
+  const s34 = b.gpio(34), s35 = b.gpio(35);
+  const sp = soil.pins, wp = water.pins, sBot = sp.G.y;
+  wires.push(ffWire(sp.G, hdr.g0, C.black, [], "line"));
+  wires.push(ffWire(sp.V, hdr.v0, C.red, [{ x: sp.V.x, y: sBot + 8 }, { x: hdr.v0.x + 10, y: sBot + 8 }, { x: hdr.v0.x + 10, y: hdr.v0.y }], "orth"));
+  wires.push(ffWire(sp.S, s34, C.green, [{ x: sp.S.x, y: sBot + 16 }, { x: s34.x, y: sBot + 16 }], "orth"));
+  // 수위: G → GND(둘째), V → 3V(둘째) (틈으로), S → P35 칸 S
+  const wBot = wp.G.y;
+  wires.push(ffWire(wp.G, hdr.g1, C.black, [{ x: wp.G.x, y: wBot + 8 }, { x: hdr.g1.x, y: wBot + 8 }], "orth"));
+  wires.push(ffWire(wp.V, hdr.v1, C.red, [{ x: wp.V.x, y: wBot + 16 }, { x: hdr.v1.x + 10, y: wBot + 16 }, { x: hdr.v1.x + 10, y: hdr.v1.y }], "orth"));
+  wires.push(ffWire(wp.S, s35, C.teal, [{ x: wp.S.x, y: wBot + 4 }, { x: s35.x, y: wBot + 4 }], "orth"));
+  used.push(hdr.g0, hdr.g1, hdr.v0, hdr.v1, s34, s35);
+
+  // 릴레이(입력 핀이 아래로 G · V · S, 단자가 위로 NO · COM): P26 칸에 바로 — S 는 곧게, V · G 는 왼쪽 틈으로
+  const t26 = b.triple(26);
+  const r = relay(t26.S.x - 65, 370, { title: false, terminals: ["NO", "COM"] });
+  parts.push(r.svg, tag(r.pins.V.x + 10, 323, "릴레이 모듈"));
+  wires.push(...columnWires(t26, r.pins, { S: lane(2), V: lane(1), G: lane(0) }, -1, { S: C.yellow, V: C.red, G: C.black }));
+  used.push(t26.S, t26.V, t26.G);
+
+  // 물통 · 펌프: 릴레이 왼쪽. COM ← 위 줄 5V 칸 S (물통 위를 넘어 왼쪽으로), NO → 펌프 +, 펌프 − → 위 줄 GND 칸 S
+  const tank = waterPump(232, 364, { w: 80, h: 100, hose: "left" });
+  parts.push(tank.svg);
+  const v5 = b.power("5V"), gnd = b.power("GND");
+  wires.push(wire(v5, r.pins.COM, C.red, { via: [{ x: v5.x, y: 336 }, { x: r.pins.COM.x, y: 336 }], style: "orth", ends: ["f", "m"] }));
+  wires.push(wire(r.pins.NO, tank.plus, C.red, { via: [{ x: r.pins.NO.x, y: 346 }, { x: tank.plus.x, y: 346 }], style: "orth", ends: ["m", "m"] }));
+  wires.push(ffWire(tank.minus, gnd, C.black, [{ x: tank.minus.x, y: 356 }, { x: gnd.x, y: 356 }], "orth"));
+  used.push(v5, gnd);
+
+  // OLED: 보드 왼쪽 아래, 핀이 위로. I2C 헤더 안쪽 줄로 — 선은 바깥 줄(UART) 핀 사이 틈으로 (10장 본보기와 같은 길)
+  const bus = b.i2c(0);
+  const bot = Y + b.bounds.h;
+  const o = oled(110, bot + 30, { titleAt: { x: 98, y: bot + 86, anchor: "end" } });
+  parts.push(o.svg);
+  const lanes = { GND: bot + 4, VCC: bot - 4, SDA: bot - 20, SCL: bot - 12 };
+  const oc = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const q = bus[k], from = o.pins[k], sx = q.x - 9.9;
+    wires.push(ffWire(from, q, oc[k], [{ x: from.x, y: lanes[k] }, { x: sx, y: lanes[k] }, { x: sx, y: q.y }], "orth"));
+    used.push(q);
+  }
+
+  const rows = [
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22" },
+    { colors: [C.black, C.red], part: "두 센서 G · V", to: "전원 헤더 GND · 3V (3.3V — 점퍼와 상관없이)" },
+    { color: C.green, part: "토양 수분 센서 S", to: "위 줄 P34 칸 S" },
+    { color: C.teal, part: "수위 센서 S", to: "위 줄 P35 칸 S" },
+    { colors: [C.black, C.red, C.yellow], part: "릴레이 G · V · S", to: "P26 칸 G · V · S (V 는 점퍼 5V)" },
+    { color: C.red, part: "릴레이 COM", to: "위 줄 5V 칸 S" },
+    { color: C.red, part: "릴레이 NO", to: "펌프 빨강(+)" },
+    { color: C.black, part: "펌프 검정(−)", to: "위 줄 GND 칸 S" },
+  ];
+  const table = connectionTable(o.pins.GND.y + 112 + 24, "이렇게 꽂아요 — 센서는 전원 헤더 3V, 릴레이 · 펌프는 5V", rows, b.legend);
+  return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "스마트 화분 배선도(ESP32 Plus 확장 보드): OLED 화면 GND · VCC · SCL · SDA 는 보드 위쪽 한 줄 GND · 5V · SCL · SDA 에 F-F 듀폰선으로 바로. 릴레이 모듈은 보드 옆: 입력 G · V · S → io26 기둥 G · V · S, 단자 COM → 보드 아래로 돌아 아래 줄 VIN, 단자 NO → 물통 속 미니 워터 펌프 빨강(+). 보드 아래에 토양 수분 센서와 수위 센서: S 는 아래 줄 io34 · io35, V · G 는 맨 아래 + − 줄 띠(아래 줄 3V3 → + 줄, GND → − 줄). 펌프 검정(−) → 물통 바깥으로 돌아 − 줄 끝",
   devkit: "기본 보드(ESP32 DevKit 38핀) 스마트 화분 배선도: 보드 위에 + − 줄 띠 둘 — 5V 띠는 VIN → + 줄, 위 줄 GND → − 줄, 3V3 띠는 3V3 → + 줄, − 줄은 5V 띠 − 줄과 점퍼. 릴레이 모듈 G · V → 5V 띠 − · + 줄, S → D26, 단자 COM → 5V 띠 + 줄, NO → 물통 속 미니 워터 펌프 빨강(+), 펌프 검정(−) → 5V 띠 − 줄. 수위 센서 S → D35, 토양 수분 센서 S → D34(두 선과 릴레이 S 는 띠의 구멍 없는 칸으로 지난다), 두 센서 V · G → 3V3 띠 + · − 줄. OLED 는 보드 아래: GND → 아래 줄 GND, SDA → D21, SCL → D22, VCC → 보드 바깥 길로 5V 띠 + 줄",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 스마트 화분 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로 (릴레이가 V 줄 5V 를 써요). 토양 수분 센서와 수위 센서는 보드 위 맨 위에: G · V 는 왼쪽 위 전원 헤더 GND · 3V 에(3V 핀은 점퍼와 상관없이 3.3V), S 는 위 줄 P34 · P35 칸 S 핀에 F-F 듀폰선으로 바로. 릴레이 모듈 입력 G · V · S 는 P26 칸 G · V · S, 단자 COM ← 위 줄 5V 칸 S 핀, 단자 NO → 물통 속 미니 워터 펌프 빨강(+), 펌프 검정(−) → 위 줄 GND 칸 S 핀. OLED 화면 GND · VCC · SDA · SCL 은 I2C 헤더 GND · VCC · D21 · D22",
 };
 
 export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wsp", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wspk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wspx", T.expansion, r.body, r.height); },
   },
 };

@@ -63,6 +63,9 @@ materials:
   - { name: F-F 듀폰선 6가닥, board: devkit, note: "릴레이 S → D26, 수위 S → D35, 토양 S → D34, OLED GND · SDA · SCL → 아래 줄 GND · D21 · D22" }
   - { name: M-F 듀폰선 10가닥, board: devkit, note: "VIN · GND · 3V3 → 띠, 릴레이 G · V 와 두 센서 V · G → 띠, OLED VCC → 5V 띠 (보드 바깥 길)" }
   - { name: 점퍼선(M-M) 2가닥, board: devkit, note: "릴레이 COM → 5V 띠 + 줄 (핀 끝을 나사 단자에), 두 띠의 − 줄 잇기" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 릴레이가 V 줄 5V 를 써요. 두 센서는 전원 헤더 3V 핀(점퍼와 상관없이 3.3V)에. 끝나면 3.3V 로" }
+  - { name: F-F 듀폰선 14가닥, board: expansion, note: "OLED 4 → I2C 헤더, 두 센서 G · V 4 → 전원 헤더 GND · 3V, S 2 → P34 · P35 칸 S, 릴레이 G · V · S 3 → P26 칸, 펌프 검정(−) 1 → 위 줄 GND 칸 S (펌프 선 끝을 듀폰선 구멍에 꽂아요)" }
+  - { name: M-F 듀폰선 1가닥, board: expansion, note: "위 줄 5V 칸 S → 릴레이 COM (핀 끝을 나사 단자에)" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
   - { name: WiFi 공유기 또는 폰 핫스팟, note: 2부에서 보드와 폰이 같은 WiFi 에 있어야 해요 }
   - { name: 폰 또는 태블릿, note: 2부에서 브라우저 주소창에 보드의 IP 주소를 쳐요 }
@@ -70,6 +73,7 @@ wiring:
   image: images/wiring-breadboard.svg
   caption: "OLED GND · VCC · SCL · SDA → 위 한 줄 GND · 5V · SCL · SDA, 릴레이 G · V · S → io26 기둥 G · V · S 에 F-F 듀폰선으로 바로. 릴레이 COM → 아래 줄 VIN, NO → 펌프 빨강(+). 보드 아래 + − 줄 띠: 아래 줄 3V3 → + 줄, GND → − 줄. 토양 수분 센서 S → 아래 줄 io34, 수위 센서 S → 아래 줄 io35, 두 센서 V · G → + − 줄(3V3), 펌프 검정(−) → − 줄 (WiFi 를 쓰니 아날로그는 32~39번)"
   captionDevkit: "보드 위에 + − 줄 띠 둘: 5V 띠(VIN → + 줄, 위 줄 GND → − 줄), 3V3 띠(3V3 → + 줄), 두 띠 − 줄은 점퍼. 릴레이 G · V → 5V 띠, S → D26, COM → 5V 띠 + 줄, NO → 펌프 빨강(+), 펌프 검정(−) → 5V 띠 − 줄. 수위 센서 S → D35, 토양 수분 센서 S → D34, 두 센서 V · G → 3V3 띠. OLED 는 보드 아래: GND · SDA · SCL → 아래 줄 GND · D21 · D22, VCC → 보드 바깥 길로 5V 띠 + 줄"
+  captionExpansion: "JUMP 점퍼는 5V 쪽 (릴레이가 V 줄 5V 를 써요). 두 센서 G · V → 왼쪽 위 전원 헤더 GND · 3V (3V 핀은 점퍼와 상관없이 3.3V), 토양 수분 센서 S → P34 칸 S, 수위 센서 S → P35 칸 S. 릴레이 G · V · S → P26 칸 G · V · S, COM ← 위 줄 5V 칸 S, NO → 펌프 빨강(+), 펌프 검정(−) → 위 줄 GND 칸 S. OLED 네 핀 → I2C 헤더 GND · VCC · D21 · D22"
 principle:
   image: images/soil-water.svg
   body: |
@@ -165,6 +169,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "1부 실행 1 에서는 OLED 와 두 센서만 먼저 꽂아요. 토양 수분 S → 아래 줄 io34, 수위 S → io35, 두 센서 V · G → + − 줄(3V3)"
           captionDevkit: "1부 실행 1 에서는 OLED 와 두 센서만 먼저 꽂아요. 수위 S → D35, 토양 수분 S → D34, 두 센서 V · G → 3V3 띠"
+          captionExpansion: "1부 실행 1 에서는 OLED 와 두 센서만 먼저 꽂아요. 토양 수분 S → P34 칸 S, 수위 S → P35 칸 S, 두 센서 G · V → 전원 헤더 GND · 3V(3.3V)"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 OLED 와 두 센서를 먼저 꽂아요. 두 센서의 V 는 **3V3** 이에요. 릴레이와 펌프는 실행 2 에서 꽂아요. 두 센서 S 는 2부에서 WiFi 와 함께 쓸 수 있는 **32~39번** 핀이에요.
 

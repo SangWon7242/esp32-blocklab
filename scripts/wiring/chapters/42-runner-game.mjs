@@ -4,9 +4,13 @@
 //   위 줄의 io14 · io25 두 선만 보드 왼쪽 바깥 길로 돌아 내려온다. 신호선은 + − 줄에 구멍이 없는 열(6 · 12 · 24)로 내려 꽂는다.
 // DevKit: 브레드보드는 보드 위(D14 · D25 · VN 이 위 줄). OLED 는 보드 아래 — GND · SDA · SCL 은 보드에 바로,
 //   VCC 는 3V3 을 나눠 써야 해서 + 줄로(보드 바깥 길). 3V3 은 + 줄에 아래에서 꽂는다.
+// 확장 보드: P14 · P25 · SVN(39) · GND 칸이 모두 위 줄이라 브레드보드는 보드 위. 신호는 + − 줄에 구멍이 없는 6 · 12 · 18번 열로.
+//   + 줄(3.3V)은 왼쪽 위 전원 헤더 3V 핀에서 (GND 핀 사이 틈으로 올라간다). OLED 는 I2C 헤더(41장과 같은 꼴).
+//   맨 부품과 OLED 뿐이라 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, buzzer, oled, potentiometer } from "../parts.mjs";
 import { buttonPullup, railCol, railLink } from "./11-button-touch.mjs";
 import { button } from "../parts.mjs";
@@ -152,14 +156,79 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit), 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 100, y: 8, cols: 26, rails: { top: true, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 64, jumper: "3V3" });
+  const top = b.bounds.y, bot = top + b.bounds.h;
+  const parts = [], wires = [], used = [];
+  const rail = (s, c) => bb.rail("bottom", s, c);
+
+  // 버튼: 6 · 8번 줄 — P14 → 6번 줄 j, 대각선 8번 줄 a → 위 − 줄 (11장과 같은 꼴)
+  const btn = buttonPullup(bb, 6);
+  wires.push(btn.jumper, railLink(bb));
+  // 수동 부저(선택): + 12번 줄 ← P25, − 14번 줄 → 아래 − 줄
+  [12, 14].forEach((c) => bb.tint(c, "bottom"));
+  const bz = buzzer(bb.hole(12, "f"), bb.hole(14, "f"));
+  wires.push(mmWire(bb.hole(14, "j"), rail("-", 14), C.black));
+  // 가변저항(선택): 17 · 18 · 19번 줄, 가운데 18 ← SVN(39), 17 → + 줄, 19 → − 줄
+  [17, 18, 19].forEach((c) => bb.tint(c, "bottom"));
+  const pot = potentiometer(bb.hole(17, "f"), bb.hole(18, "f"), bb.hole(19, "f"));
+  wires.push(mmWire(bb.hole(17, "j"), rail("+", 16), C.red, [], "line"), mmWire(bb.hole(19, "j"), rail("-", 20), C.black, [], "line"));
+
+  // 위 줄 칸 → 보드 위 가로 길 → 브레드보드 (왼쪽 선일수록 보드에 가깝게, 서로 건너지 않는다)
+  const lane = (k) => top - 12 - k * 9;
+  const go = (pin, hole, color, k) => mfWire(pin, hole, color, [{ x: pin.x, y: lane(k) }, { x: hole.x, y: lane(k) }], "orth");
+  const p = { btn: b.gpio(14), buz: b.gpio(25), pot: b.gpio(39), gnd: b.power("GND") };
+  // GND → 아래 − 줄 4번 칸: 3 · 4번 열 사이로 올라가 + 줄 구멍을 피한다
+  const gIn = rail("-", 4), gapX = (bb.hole(3, "a").x + gIn.x) / 2;
+  wires.push(mfWire(p.gnd, gIn, C.black, [{ x: p.gnd.x, y: lane(0) }, { x: gapX, y: lane(0) }, { x: gapX, y: gIn.y + 8 }, { x: gIn.x, y: gIn.y + 8 }], "orth"));
+  wires.push(go(p.btn, btn.signalHole, C.yellow, 1), go(p.buz, bb.hole(12, "j"), C.orange, 2), go(p.pot, bb.hole(18, "j"), C.green, 3));
+  used.push(p.gnd, p.btn, p.buz, p.pot);
+  // 3.3V: 전원 헤더 3V 핀 → 옆 틈(GND 핀 사이)으로 곧게 올라가 아래 + 줄 2번 칸
+  const v33 = b.power("3V3"), pIn = rail("+", 2), seam = v33.x + 10;
+  wires.push(mfWire(v33, pIn, C.red, [{ x: seam, y: v33.y }, { x: seam, y: pIn.y + 10 }, { x: pIn.x, y: pIn.y + 10 }], "orth"));
+  used.push(v33);
+
+  // OLED: 보드 왼쪽 아래, 핀이 위로. I2C 헤더 안쪽 줄로 — 선은 바깥 줄(UART) 핀 사이 틈으로 (41장과 같은 꼴)
+  const bus = b.i2c(0);
+  const o = oled(110, bot + 30, { titleAt: { x: 98, y: bot + 86, anchor: "end" } });
+  const lanes = { GND: bot + 4, VCC: bot - 4, SDA: bot - 20, SCL: bot - 12 };
+  const color = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const q = bus[k], from = o.pins[k], sx = q.x - 9.9;
+    wires.push(ffWire(from, q, color[k], [{ x: from.x, y: lanes[k] }, { x: sx, y: lanes[k] }, { x: sx, y: q.y }], "orth"));
+    used.push(q);
+  }
+
+  parts.push(bb.svg, ...btn.svg, bz.svg, pot.svg, o.svg);
+  parts.push(tag(bb.hole(6, "a").x + 8, bb.hole(1, "b").y, "버튼"));
+  parts.push(tag(bb.hole(13, "a").x, bb.hole(1, "c").y, "수동 부저(선택)"));
+  parts.push(tag(bb.hole(19, "a").x + 12, bb.hole(1, "b").y, "가변저항(선택)"));
+
+  const rows = [
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC (보드에 바로)" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22 (보드에 바로)" },
+    { colors: [C.red, C.black], part: "전원 헤더 3V · 위 줄 GND 칸 S", to: "아래 + 줄 · 아래 − 줄 (위 − 줄 ↔ 아래 − 줄 점퍼)" },
+    { color: C.yellow, part: "P14 칸 S", to: "6번 줄 버튼 한쪽 다리, 대각선 8번 줄 → 위 − 줄" },
+    { color: C.orange, part: "(선택) P25 칸 S", to: "12번 줄 부저 + 다리, − 다리 14번 줄 → − 줄" },
+    { color: C.green, part: "(선택) SVN(39) 칸 S", to: "18번 줄 가변저항 가운데 다리" },
+    { colors: [C.red, C.black], part: "(선택) 가변저항 17 · 19번 줄", to: "+ 줄 · − 줄" },
+  ];
+  const table = connectionTable(o.pins.GND.y + 112 + 24, "이렇게 꽂아요 — OLED 는 보드에 바로, 버튼 · 부저 · 가변저항은 브레드보드에", rows, b.legend);
+  return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "달리는 디콘 배선도(ESP32 Plus 확장 보드): OLED 의 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 보드 I2C 묶음 첫 줄 GND · 5V · SDA · SCL 에 바로. 브레드보드는 보드 아래: 아래 줄 3V3 → 위 + 줄, GND → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: 위 줄 io14 → 보드 바깥으로 돌아 12번 줄, 대각선 14번 줄 → 아래 − 줄. 추가 미션(선택): 수동 부저 + 다리 6번 줄 ← 위 줄 io25(보드 바깥으로 돌아서), − 다리 8번 줄 → − 줄. 가변저항 23 · 24 · 25번 줄: 가운데 24번 ← 아래 줄 io39, 23번 → − 줄, 25번 → + 줄",
   devkit: "기본 보드(ESP32 DevKit 38핀) 달리는 디콘 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, 위 줄 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 버튼은 가운데 홈에 걸쳐 8 · 10번 줄: D14 → 8번 줄, 대각선 10번 줄 → 위 − 줄. OLED 는 보드 아래: GND → GND, SDA → D21, SCL → D22 에 F-F 듀폰선으로 바로, VCC → 보드 바깥으로 돌아 + 줄. 추가 미션(선택): 수동 부저 + 다리 12번 줄 ← D25, − 다리 14번 줄 → − 줄. 가변저항 18 · 19 · 20번 줄: 가운데 19번 ← VN(39), 18번 → + 줄, 20번 → − 줄",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 달리는 디콘 배선도: JUMP 점퍼는 평소 자리(3.3V 쪽). OLED 의 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 보드 왼쪽 아래 I2C 헤더 GND · VCC · D21 · D22 에 바로. 브레드보드는 보드 위: 왼쪽 위 전원 헤더 3V 핀 → 아래 + 줄, 위 줄 GND 칸 S 핀 → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 버튼은 가운데 홈에 걸쳐 6 · 8번 줄: P14 칸 S 핀 → 6번 줄, 대각선 8번 줄 → 위 − 줄. 추가 미션(선택): 수동 부저 + 다리 12번 줄 ← P25 칸 S 핀, − 다리 14번 줄 → − 줄. 가변저항 17 · 18 · 19번 줄: 가운데 18번 ← SVN(39) 칸 S 핀, 17번 → + 줄, 19번 → − 줄",
 };
 
 export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wrg", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wrgk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wrgx", T.expansion, r.body, r.height); },
   },
 };

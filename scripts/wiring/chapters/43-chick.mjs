@@ -9,9 +9,15 @@
 //   틸트 · 버튼 · 부저는 오른쪽 위 핀 묶음 위의 작은 브레드보드. 3V3 · GND(아래 줄)는 보드 오른쪽 바깥 길로 브레드보드 + − 줄에.
 // DevKit: 틸트 · 버튼 · 부저는 보드 위 브레드보드(16장 자리), PIR 은 그 오른쪽(V · G → + − 줄, S → D23).
 //   보드 아래 + − 줄 띠(3V3 · GND)를 DHT11 · OLED 가 나눠 쓰고, 띠의 + 줄은 보드 바깥으로 돌아 위 브레드보드 + 줄에.
-import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc, wire } from "../common.mjs";
+// 확장 보드(점퍼 3.3V): 3.3V 가 꼭 있어야 하는 것(10kΩ 풀업, DHT11 — 모듈 안 풀업이 13번에 걸린다)은 왼쪽 위 전원 헤더 3V 핀에서
+//   (3V 핀은 점퍼와 상관없이 3.3V — 점퍼를 5V 에 둔 채여도 핀에 3.3V 넘게 들어가지 않는다).
+//   DHT11 → G · V 는 전원 헤더 GND · 3V, S 는 위 줄 P13 칸 S (보드 위 왼쪽). PIR → 아래 줄 P23 칸 S · V · G (출력이 3.3V 라 V 줄 그대로).
+//   OLED → I2C 헤더. 틸트 · 버튼 · 부저는 보드 위 오른쪽 브레드보드: 위 + 줄 ← 전원 헤더 3V(맨 왼쪽으로 올라가 보드 위를 넘어),
+//   + 줄끼리 점퍼로 아래 + 줄(10kΩ). 아래 − 줄 ← 위 줄 GND 칸 S. 신호는 + − 줄에 구멍이 없는 6 · 12 · 18번 열로.
+import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, buzzer, module, oled, resistor, sensor3, tiltSwitch } from "../parts.mjs";
 import { buttonPullup, railCol, railLink } from "./11-button-touch.mjs";
 
@@ -226,14 +232,110 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/**
+ * 확장 보드 한 칸(t = b.triple(n))의 S · V · G 에 F-F 선 셋 (3핀 모듈) — 다른 핀 위를 지나지 않게:
+ *   S 는 기둥 한가운데로 곧게 바깥 줄 S 핀에, V 는 옆 칸과의 틈(dir 쪽, 9.9)으로 들어가 V 줄 높이에서 옆으로,
+ *   G 는 한 칸 더 바깥 틈(29.7)으로 들어가 V 줄과 G 줄 사이 틈으로 옆 칸을 건너 V 와 같은 틈에서 G 줄로.
+ *   그래서 모듈 핀 차례가 dir = -1 이면 왼→오 G V S, dir = 1 이면 S V G 일 때 선이 서로 건너지 않는다.
+ * from: 모듈 핀 { S, V, G }, lane: 선마다 가로 길 y { S, V, G }
+ */
+export function columnWires(t, from, lane, dir = -1, colors = { S: C.blue, V: C.red, G: C.black }) {
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const near = r1(t.S.x + dir * 9.9), far = r1(t.S.x + dir * 29.7), gapY = r1((t.V.y + t.G.y) / 2);
+  const run = (k, via) => ffWire(from[k], t[k], colors[k], [{ x: from[k].x, y: lane[k] }, ...via], "orth");
+  return [
+    run("S", [{ x: t.S.x, y: lane.S }]),
+    run("V", [{ x: near, y: lane.V }, { x: near, y: t.V.y }]),
+    run("G", [{ x: far, y: lane.G }, { x: far, y: gapY }, { x: near, y: gapY }, { x: near, y: t.G.y }]),
+  ];
+}
+
+/** 확장 보드 점퍼 메모 (보드 그림의 아래 메모와 같은 글) — 메모 자리에 선이 지나갈 때 보드 메모를 빼고 다른 자리에 */
+export const jumperNote = (b, x, anchor = "middle") =>
+  note(x, b.bounds.y + b.bounds.h - 10, "JUMP 점퍼는 3.3V 쪽 (V 줄 = 3.3V)", anchor, 12);
+
+/* ───── 확장 보드(38핀 확장 보드 + DevKit), 점퍼 3.3V ───── */
+function expansion() {
+  const bb = breadboard({ x: 240, y: 48, cols: 20, rails: { top: true, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 48, jumper: "3V3" });
+  const top = b.bounds.y, bot = top + b.bounds.h - 24; // 기판 아래 끝 (메모 줄 빼고)
+  const parts = [], wires = [], used = [];
+  const lane = (k) => top - 12 - k * 9;
+
+  // 브레드보드: 틸트(틸트 4 · 6번 줄, 10kΩ 6 · 10번 줄) · 버튼 12 · 14 · 수동 부저 18 · 20
+  const spec = { tilt: { r: 10, n: 6, t: 4 }, btn: 12, buz: { plus: 18, minus: 20 } };
+  const c = circuits(bb, spec);
+  parts.push(bb.svg, ...c.svg);
+  wires.push(...c.jumpers, railLink(bb), plusLink(bb));
+  parts.push(tag(bb.hole(7, "a").x, bb.hole(1, "c").y, "틸트 스위치"), tag(bb.hole(12, "a").x - 4, bb.hole(1, "b").y, "버튼"), tag(bb.hole(19, "a").x, bb.hole(1, "c").y, "수동 부저"));
+
+  // 3.3V: 전원 헤더 3V(첫째) → 왼쪽 틈으로 맨 위까지 올라가 보드 · DHT11 위를 넘어 위 + 줄 2번 칸 (+ 줄끼리 점퍼로 아래 + 줄)
+  const v33 = b.power("3V3", 0), tIn = bb.rail("top", "+", 2), feedX = v33.x - 10, feedY = bb.y - 24;
+  wires.push(mfWire(v33, tIn, C.red, [{ x: feedX, y: v33.y }, { x: feedX, y: feedY }, { x: tIn.x, y: feedY }], "orth"));
+  // GND: 위 줄 GND 칸 S → 아래 − 줄 5번 칸 (4 · 5번 열 사이로 올라가 + 줄 구멍을 피한다)
+  const gnd = b.power("GND"), gIn = c.R("-", 5), gapX = (bb.hole(4, "a").x + gIn.x) / 2;
+  wires.push(mfWire(gnd, gIn, C.black, [{ x: gnd.x, y: lane(0) }, { x: gapX, y: lane(0) }, { x: gapX, y: gIn.y + 8 }, { x: gIn.x, y: gIn.y + 8 }], "orth"));
+  // P14 · P27 · P25 칸 S → 틸트 · 버튼 · 부저 줄 (오른쪽으로 가는 선은 왼쪽 것일수록 브레드보드에 가까운 길로)
+  const s14 = b.gpio(14), s27 = b.gpio(27), s25 = b.gpio(25);
+  const up = (p, hole, color, k) => mfWire(p, hole, color, [{ x: p.x, y: lane(k) }, { x: hole.x, y: lane(k) }], "orth");
+  wires.push(up(s14, c.j(spec.tilt.n), C.green, 1), up(s27, c.j(spec.btn), C.yellow, 1), up(s25, c.j(spec.buz.plus), C.orange, 0));
+  used.push(v33, gnd, s14, s27, s25);
+
+  // DHT11: 보드 위 왼쪽, 핀이 아래로(G V S). G → 전원 헤더 GND(첫째, 위에서 바로), V → 전원 헤더 3V(둘째, GND 핀 사이 틈으로), S → P13 칸 S
+  const dht = dht11(140, bb.y + bb.h - 102);
+  parts.push(dht.svg);
+  const dg = b.power("GND", 2), dv = b.power("3V3", 1), t13 = b.gpio(13), vSeam = dg.x + 10;
+  wires.push(ffWire(dht.pins.G, dg, C.black, [{ x: dht.pins.G.x, y: lane(1) }, { x: dg.x, y: lane(1) }], "orth"));
+  wires.push(ffWire(dht.pins.V, dv, C.red, [{ x: dht.pins.V.x, y: lane(0) }, { x: vSeam, y: lane(0) }, { x: vSeam, y: dv.y }], "orth"));
+  wires.push(ffWire(dht.pins.S, t13, C.blue, [{ x: dht.pins.S.x, y: lane(1) }, { x: t13.x, y: lane(1) }], "orth"));
+  used.push(dg, dv, t13);
+
+  // PIR: 보드 아래 오른쪽, 핀이 위로(G V S). P23 칸(아래 줄): S 는 곧게, V · G 는 왼쪽 틈으로
+  const t23 = b.triple(23);
+  const pir = sensor3(t23.S.x - 88, bot + 70, "pir", { side: "top", titleAt: { x: t23.S.x - 102, y: bot + 104, anchor: "end" } });
+  parts.push(pir.svg);
+  wires.push(...columnWires(t23, pir.pins, { S: bot + 42, V: bot + 34, G: bot + 26 }));
+  used.push(t23.S, t23.V, t23.G);
+
+  // OLED: 보드 왼쪽 아래, 핀이 위로. I2C 헤더 안쪽 줄로 — 선은 바깥 줄(UART) 핀 사이 틈으로 (10장 본보기와 같은 길)
+  const bus = b.i2c(0);
+  const o = oled(110, bot + 54, { titleAt: { x: 98, y: bot + 110, anchor: "end" } });
+  parts.push(o.svg);
+  const lanes = { GND: bot + 28, VCC: bot + 20, SDA: bot + 4, SCL: bot + 12 };
+  const color = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const q = bus[k], from = o.pins[k], sx = q.x - 9.9;
+    wires.push(ffWire(from, q, color[k], [{ x: from.x, y: lanes[k] }, { x: sx, y: lanes[k] }, { x: sx, y: q.y }], "orth"));
+    used.push(q);
+  }
+
+  const rows = [
+    { colors: [C.black, C.red], part: "DHT11 G · V", to: "전원 헤더 GND · 3V (3.3V)" },
+    { color: C.blue, part: "DHT11 S", to: "위 줄 P13 칸 S" },
+    { colors: [C.black, C.red, C.blue], part: "PIR G · V · S", to: "아래 줄 P23 칸 G · V · S" },
+    { colors: [C.black, C.red], part: "OLED GND · VCC", to: "I2C 헤더 GND · VCC" },
+    { colors: [C.blue, C.purple], part: "OLED SDA · SCL", to: "I2C 헤더 D21 · D22" },
+    { color: C.red, part: "전원 헤더 3V", to: "위 + 줄 (보드 위를 넘어), + 줄끼리 점퍼" },
+    { color: C.black, part: "위 줄 GND 칸 S", to: "아래 − 줄, − 줄끼리 점퍼" },
+    { color: C.green, part: "P14 칸 S", to: `${spec.tilt.n}번 줄 (10kΩ 과 틸트 사이)` },
+    { colors: [C.red, C.black], part: `10kΩ ${spec.tilt.r}번 줄 · 틸트 ${spec.tilt.t}번 줄`, to: "아래 + 줄 · 아래 − 줄" },
+    { color: C.yellow, part: "P27 칸 S", to: `${spec.btn}번 줄 버튼 한쪽 다리, 대각선 ${spec.btn + 2}번 줄 → 위 − 줄` },
+    { color: C.orange, part: "P25 칸 S", to: `${spec.buz.plus}번 줄 부저 + 다리 (− 다리 ${spec.buz.minus}번 줄 → − 줄)` },
+  ];
+  const table = connectionTable(o.pins.GND.y + 112 + 24, "이렇게 꽂아요 — 3.3V 는 전원 헤더 3V 에서, 틸트 · 버튼 · 부저는 브레드보드에", rows, b.legend);
+  return { body: compose(b.draw(used, { note: false }), parts, wires, [jumperNote(b, 330), table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "병아리 키우기 배선도(ESP32 Plus 확장 보드): 모듈은 F-F 듀폰선으로 보드에 바로 — DHT11 G · V · S 는 io13 기둥 G · V · S(선은 보드 가운데 틈으로), PIR 센서 G · V · S 는 io23 기둥 G · V · S, OLED GND · VCC · SCL · SDA 는 위 왼쪽 GND · 5V · SCL · SDA. 오른쪽 위 핀 묶음 위 브레드보드: 아래 줄 3V3 → 보드 바깥으로 돌아 위 + 줄, 아래 줄 GND → 아래 − 줄, + 줄끼리 · − 줄끼리 점퍼. 틸트 스위치: 10kΩ 저항 1 · 5번 줄(1번 줄 → + 줄), io14 → 5번 줄, 틸트 스위치 5 · 7번 줄(7번 줄 → − 줄). 버튼은 가운데 홈에 걸쳐 9 · 11번 줄: io27 → 9번 줄, 대각선 11번 줄 → 위 − 줄. 수동 부저 + 다리 13번 줄 ← io25, − 다리 15번 줄 → − 줄",
   devkit: "기본 보드(ESP32 DevKit 38핀) 병아리 키우기 배선도: 보드 위 브레드보드 — 틸트 스위치: 10kΩ 저항 4 · 8번 줄(4번 줄 → + 줄), D14 → 8번 줄, 틸트 스위치 8 · 10번 줄(10번 줄 → − 줄). 버튼은 가운데 홈에 걸쳐 11 · 13번 줄: D27 → 11번 줄, 대각선 13번 줄 → 위 − 줄. 수동 부저 + 다리 15번 줄 ← D25, − 다리 17번 줄 → − 줄. 위 줄 GND → − 줄, + 줄끼리 · − 줄끼리 점퍼. PIR 센서 V · G → + − 줄 오른쪽 끝, S → 보드 바깥으로 돌아 D23. 보드 아래 + − 줄 띠: 3V3 → + 줄, 아래 줄 GND → − 줄, 띠 + 줄 → 보드 바깥으로 돌아 브레드보드 + 줄. DHT11 V · G → 띠 + · − 줄, S → 보드 바깥으로 돌아 D13. OLED GND · VCC → 띠 − · + 줄, SDA → D21, SCL → D22",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 병아리 키우기 배선도: JUMP 점퍼는 평소 자리(3.3V 쪽). 3.3V 가 꼭 있어야 하는 것은 왼쪽 위 전원 헤더 3V 핀에서. DHT11 G · V 는 전원 헤더 GND · 3V, S 는 위 줄 P13 칸 S 핀에 F-F 듀폰선으로 바로. PIR 센서 G · V · S 는 아래 줄 P23 칸 G · V · S, OLED GND · VCC · SDA · SCL 은 I2C 헤더 GND · VCC · D21 · D22. 보드 위 오른쪽 브레드보드: 전원 헤더 3V → 보드 위를 넘어 위 + 줄, 위 줄 GND 칸 S 핀 → 아래 − 줄, + 줄끼리 · − 줄끼리 점퍼. 틸트 스위치 4 · 6번 줄, 10kΩ 저항 6 · 10번 줄: P14 칸 S 핀 → 6번 줄, 10번 줄 → + 줄, 4번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: P27 칸 S 핀 → 12번 줄, 대각선 14번 줄 → 위 − 줄. 수동 부저 + 다리 18번 줄 ← P25 칸 S 핀, − 다리 20번 줄 → − 줄",
 };
 
 export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wck", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wckk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wckx", T.expansion, r.body, r.height); },
   },
 };

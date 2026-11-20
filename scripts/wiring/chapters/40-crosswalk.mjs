@@ -11,9 +11,14 @@
 //       초음파는 브레드보드와 보드 사이: Trig 는 D13 에 F-F 로 바로, VCC · GND 는 + − 줄로,
 //       Echo 는 18번 줄 → 1kΩ → 15번 줄 → D12, 15번 줄 → 2kΩ → 12번 줄 → 아래 − 줄.
 //       서보는 보드 아래: 주황 → D4, 빨강 · 갈색 → 보드 바깥 길로 + − 줄 끝.
-import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc, wire } from "../common.mjs";
+// 확장 보드: 서보 · 초음파 수업이라 점퍼 5V (서보 플러그가 P4 칸 V 줄을 쓴다). 브레드보드는 보드 위 오른쪽, 초음파는 그 왼쪽.
+//       초음파 VCC → 위 줄 5V 칸 S, Trig → P13 칸 S 에 F-F 로 바로. Echo → 3번 줄 → 1kΩ → 6번 줄 → P12 칸 S, 6번 줄 → 2kΩ → 9번 줄 → 아래 − 줄.
+//       초음파 GND → 아래 − 줄(1 · 2번 열 사이로), 위 줄 GND 칸 S → 아래 − 줄. RGB 는 12번 줄부터(빨강 12 · − 14 · 초록 16 · 파랑 18).
+//       서보는 플러그째 아래 줄 P4 칸에, 수동 부저(16번 = 아래 줄 P16)는 보드 아래 작은 브레드보드에 (− 다리 → 아래 줄 GND 칸 S).
+import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, note, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { columnServo, makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, buzzer, resistor, rgbSpread, servo, servoWithPlug, ultrasonic } from "../parts.mjs";
 import { railCol } from "./11-button-touch.mjs";
 import { echoDivider, echoRows } from "../echo-divider.mjs";
@@ -189,14 +194,93 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit), 점퍼 5V ───── */
+function expansion() {
+  const bb = breadboard({ x: 200, y: 8, cols: 20, rails: { top: true, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 62, jumper: "5V" });
+  const top = b.bounds.y, bot = top + b.bounds.h - 24; // 기판 아래 끝 (메모 줄 빼고)
+  const parts = [bb.svg], wires = [], used = [];
+  const L = (k) => top - 12 - (k - 1) * 9; // 보드 위 가로 길 L1(보드에 가장 가까움) ~ L5
+
+  // RGB (S5 꼴): 빨강 12 · − 14 · 초록 16 · 파랑 18번 줄 d 칸, 220Ω 셋이 가운데 홈을 건너고 신호는 j 칸. − 다리 → 위 − 줄
+  const col = { R: 12, K: 14, G: 16, B: 18 };
+  [col.R, col.K, col.G, col.B].forEach((k) => bb.tint(k, "top"));
+  [col.R, col.G, col.B].forEach((k) => bb.tint(k, "bottom"));
+  for (const k of ["R", "G", "B"]) parts.push(resistor(bb.hole(col[k], "e"), bb.hole(col[k], "g"), { label: k === "B" ? "220Ω" : undefined }).svg);
+  parts.push(rgbSpread([bb.hole(col.R, "d"), bb.hole(col.K, "d"), bb.hole(col.G, "d"), bb.hole(col.B, "d")]));
+  wires.push(mmWire(bb.hole(col.K, "a"), bb.rail("top", "-", railCol(col.K)), C.black, [], "line"));
+  wires.push(minusLink(bb, "left"));
+  // Echo 전압 나누기: Echo 3번 줄 → 1kΩ → 6번 줄(→ P12) → 2kΩ → 9번 줄(→ 아래 − 줄)
+  const div = echoDivider(bb, 3, { order: "echo-first" });
+  parts.push(...div.svg);
+  wires.push(mmWire(div.holes.gndBoard, bb.rail("bottom", "-", railCol(div.cols.gnd)), C.black, [], "line"));
+
+  // 초음파: 브레드보드 왼쪽. 선 넷이 서로 건너지 않게 — VCC 가 가장 낮은 길(L1), Trig L2, Echo L4, GND L5
+  const u = ultrasonic(20, 190, { titleAt: { x: 96, y: 174 } });
+  parts.push(u.svg);
+  const v5 = b.power("5V"), trig = b.gpio(13), echo = b.gpio(12), gTop = b.power("GND");
+  const ugRail = bb.rail("bottom", "-", 2), ugX = (bb.hole(1, "a").x + ugRail.x) / 2;
+  wires.push(
+    ffWire(u.pins.VCC, v5, C.red, [{ x: u.pins.VCC.x, y: L(1) }, { x: v5.x, y: L(1) }], "orth"),
+    ffWire(u.pins.Trig, trig, C.yellow, [{ x: u.pins.Trig.x, y: L(2) }, { x: trig.x, y: L(2) }], "orth"),
+    mfWire(u.pins.Echo, div.holes.echo, C.purple, [{ x: u.pins.Echo.x, y: L(4) }, { x: div.holes.echo.x, y: L(4) }], "orth"),
+    mfWire(u.pins.GND, ugRail, C.black, [{ x: u.pins.GND.x, y: L(5) }, { x: ugX, y: L(5) }, { x: ugX, y: ugRail.y + 8 }, { x: ugRail.x, y: ugRail.y + 8 }], "orth"),
+  );
+  // 위 줄 GND 칸 S → 아래 − 줄 5번 칸 (4 · 5번 열 사이로), P12 칸 S → 6번 줄 (가운데 줄)
+  const gIn = bb.rail("bottom", "-", 5), gX = (bb.hole(4, "a").x + gIn.x) / 2;
+  wires.push(mfWire(gTop, gIn, C.black, [{ x: gTop.x, y: L(3) }, { x: gX, y: L(3) }, { x: gX, y: gIn.y + 8 }, { x: gIn.x, y: gIn.y + 8 }], "orth"));
+  wires.push(mfWire(echo, div.holes.pin, C.teal, [{ x: echo.x, y: L(4) }, { x: div.holes.pin.x, y: L(4) }], "orth"));
+  used.push(v5, trig, echo, gTop);
+
+  // RGB 신호: P27 → 12번 줄(L5), P26 → 18번 줄(L4), P25 → 16번 줄(L2) — 초록 선이 파랑 선을 한 번 건넌다(기본 보드판과 같다)
+  const p = { R: b.gpio(27), G: b.gpio(25), B: b.gpio(26) };
+  const sig = (k) => bb.hole(col[k], "j");
+  for (const [k, color, lv] of [["R", C.red, 5], ["B", C.blue, 4], ["G", C.green, 2]]) wires.push(mfWire(p[k], sig(k), color, [{ x: p[k].x, y: L(lv) }, { x: sig(k).x, y: L(lv) }], "orth"));
+  used.push(p.R, p.G, p.B);
+
+  // 서보: 플러그를 아래 줄 P4 칸 G · V · S 에 그대로 (V 줄 = 점퍼 5V)
+  const sv = b.triple(4);
+  parts.push(columnServo(sv, { gap: 84 }).svg);
+  used.push(sv.G, sv.V, sv.S);
+
+  // 수동 부저: 보드 아래 작은 브레드보드. + 다리 2번 줄 ← 아래 줄 P16 칸 S, − 다리 5번 줄 ← 아래 줄 GND 칸 S
+  const sb = breadboard({ x: 412, y: bot + 26, cols: 6, half: "bottom" });
+  [2, 5].forEach((k) => sb.tint(k, "bottom"));
+  const bz = buzzer(sb.hole(2, "h"), sb.hole(5, "h"), { up: false });
+  parts.push(sb.svg, bz.svg, note(sb.x + sb.w / 2, sb.y + sb.h + 14, "수동 부저", "middle", 13));
+  const s16 = b.gpio(16), gBot = b.power("GND", 1);
+  wires.push(mfWire(s16, sb.hole(2, "f"), C.orange, [{ x: s16.x, y: bot + 12 }, { x: sb.hole(2, "f").x, y: bot + 12 }], "orth"));
+  wires.push(mfWire(gBot, sb.hole(5, "f"), C.black, [{ x: gBot.x, y: bot + 12 }, { x: sb.hole(5, "f").x, y: bot + 12 }], "orth"));
+  used.push(s16, gBot);
+
+  const rows = [
+    { colors: [C.red, C.yellow], part: "초음파 VCC · Trig", to: "위 줄 5V 칸 S · P13 칸 S (바로)" },
+    ...echoRows(div, { echoColor: C.purple, pinColor: C.teal, pinLabel: "P12 칸 S" }).slice(0, 2),
+    { color: C.black, part: `${div.cols.mid}번 줄 → 2kΩ → ${div.cols.gnd}번 줄`, to: "아래 − 줄 (점퍼)" },
+    { color: C.black, part: "초음파 GND · 위 줄 GND 칸 S", to: "아래 − 줄" },
+    { colors: [C.brown, C.red, C.orange], part: "서보 플러그", to: "아래 줄 P4 칸 G · V · S (V 는 점퍼 5V)" },
+    { color: C.red, part: "P27 칸 S", to: `${col.R}번 줄 → 220Ω(홈 건너) → 빨강(R) 다리` },
+    { color: C.green, part: "P25 칸 S", to: `${col.G}번 줄 → 220Ω(홈 건너) → 초록(G) 다리` },
+    { color: C.blue, part: "P26 칸 S", to: `${col.B}번 줄 → 220Ω(홈 건너) → 파랑(B) 다리` },
+    { color: C.black, part: `RGB 가장 긴 다리(−) ${col.K}번 줄`, to: "위 − 줄, 위 − 줄 ↔ 아래 − 줄 점퍼" },
+    { color: C.orange, part: "아래 줄 P16 칸 S", to: "작은 브레드보드 2번 줄 수동 부저 + 다리" },
+    { color: C.black, part: "아래 줄 GND 칸 S", to: "5번 줄 수동 부저 − 다리" },
+  ];
+  const table = connectionTable(sb.y + sb.h + 34, "이렇게 꽂아요 — 초음파 Echo 는 저항 둘을 거쳐 P12 로, 서보는 플러그째", rows, b.legend);
+  const jn = note(22, bot + 14, "JUMP 점퍼를 5V 쪽으로 (V 줄 = 5V, 끝나면 3.3V 로)", "start", 12);
+  return { body: compose(b.draw(used, { note: false }), parts, wires, [jn, table.svg]), height: table.bottom };
+}
+
 const T = {
   plus: "보행자 신호등 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 위, 초음파 센서는 브레드보드 옆. 초음파 VCC · Trig 는 보드 위쪽 5V · io13 에 F-F 듀폰선으로 바로. Echo 는 브레드보드 3번 줄 → 1kΩ 저항 → 6번 줄 → io12, 6번 줄 → 2kΩ 저항 → 9번 줄 → 아래 − 줄. 초음파 GND 도 아래 − 줄. 서보 플러그는 ANALOG 묶음 io4 줄에 갈색 G · 빨강 V · 주황 S 가 맞게. RGB LED 다리를 d 칸 11 · 13 · 15 · 17번 줄에(빨강 · − · 초록 · 파랑), 11 · 15 · 17번 줄마다 220Ω 저항이 가운데 홈을 건너고 io27 → 11번 줄, io25 → 15번 줄, io26 → 17번 줄. 가장 긴 − 다리(13번 줄)는 위 − 줄. 수동 부저 + 다리 12번 줄 ← io16, − 다리 14번 줄 → 아래 − 줄. 아래 줄 GND → 보드 바깥으로 돌아 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요",
   devkit: "기본 보드(ESP32 DevKit 38핀) 보행자 신호등 배선도: 브레드보드는 보드 위. VIN(5V) → 아래 + 줄, 아래 줄 GND → 보드 바깥으로 돌아 아래 − 줄. 초음파 센서는 브레드보드와 보드 사이: Trig → D13 에 F-F 듀폰선으로 바로, VCC → + 줄, GND → − 줄. Echo 는 브레드보드 18번 줄 → 1kΩ 저항 → 15번 줄 → D12, 15번 줄 → 2kΩ 저항 → 12번 줄 → 아래 − 줄. 서보는 보드 아래: 주황 → D4, 빨강 · 갈색 → 보드 바깥으로 돌아 + − 줄 끝. RGB LED 다리를 d 칸 19 · 21 · 23 · 25번 줄에(빨강 · − · 초록 · 파랑), 19 · 23 · 25번 줄마다 220Ω 저항이 가운데 홈을 건너고 D27 → 19번 줄, D25 → 23번 줄, D26 → 25번 줄. 가장 긴 − 다리(21번 줄)는 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. 수동 부저 + 다리 27번 줄 ← RX2(16, 보드 바깥 길), − 다리 29번 줄 → 아래 − 줄",
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 보행자 신호등 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로 (서보가 V 줄 5V 를 써요). 브레드보드는 보드 위, 초음파 센서는 그 왼쪽. 초음파 VCC 는 위 줄 5V 칸 S 핀, Trig 는 P13 칸 S 핀에 F-F 듀폰선으로 바로. Echo 는 브레드보드 3번 줄 → 1kΩ 저항 → 6번 줄 → P12 칸 S 핀, 6번 줄 → 2kΩ 저항 → 9번 줄 → 아래 − 줄. 초음파 GND 와 위 줄 GND 칸 S 핀도 아래 − 줄. RGB LED 다리를 d 칸 12 · 14 · 16 · 18번 줄에(빨강 · − · 초록 · 파랑), 12 · 16 · 18번 줄마다 220Ω 저항이 가운데 홈을 건너고 P27 칸 S → 12번 줄, P25 칸 S → 16번 줄, P26 칸 S → 18번 줄. 가장 긴 − 다리(14번 줄)는 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼로. 서보 모터 플러그는 아래 줄 P4 칸에 갈색 G · 빨강 V · 주황 S 가 맞게 그대로. 수동 부저는 보드 아래 작은 브레드보드: + 다리 2번 줄 ← 아래 줄 P16 칸 S 핀, − 다리 5번 줄 ← 아래 줄 GND 칸 S 핀",
 };
 
 export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wcw", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wcwk", T.devkit, r.body, r.height); },
+    expansion: () => { const r = expansion(); return svgDoc("wcwx", T.expansion, r.body, r.height); },
   },
 };

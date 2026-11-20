@@ -54,11 +54,16 @@ materials:
   - { name: F-F 듀폰선 4가닥, board: devkit, note: "PIR S → D23, DHT11 S → D13, OLED SDA → D21 · SCL → D22" }
   - { name: M-F 듀폰선 12가닥, board: devkit, note: "D14 · D27 · D25 · 위 줄 GND → 브레드보드, PIR V · G → + − 줄, 3V3 · 아래 줄 GND → 띠, DHT11 V · G · OLED VCC · GND → 띠" }
   - { name: 점퍼선(M-M) 7가닥, board: devkit, note: "브레드보드 안 6 (10kΩ → + 줄, 틸트 · 버튼 · 부저 → − 줄, + 줄끼리 · − 줄끼리), 띠 + 줄 → 브레드보드 + 줄 1 (긴 것)" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로. DHT11 과 10kΩ 의 3.3V 는 왼쪽 위 전원 헤더 3V 핀에서 (점퍼와 상관없이 3.3V)" }
+  - { name: F-F 듀폰선 10가닥, board: expansion, note: "모듈 핀 → 보드 핀에 바로: DHT11 3 (G · V → 전원 헤더 GND · 3V, S → P13 칸 S), PIR 3 (아래 줄 P23 칸 G · V · S), OLED 4 (I2C 헤더)" }
+  - { name: M-F 듀폰선 5가닥, board: expansion, note: "보드 핀 → 브레드보드: 전원 헤더 3V → 위 + 줄, 위 줄 GND 칸 S → 아래 − 줄, P14 · P27 · P25 칸 S" }
+  - { name: 점퍼선(M-M) 6가닥, board: expansion, note: "10kΩ → + 줄, 틸트 · 버튼 · 부저 → − 줄, + 줄끼리 · − 줄끼리" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "모듈은 F-F 듀폰선으로 보드에 바로: DHT11 G · V · S → io13 기둥 G · V · S, PIR G · V · S → io23 기둥 G · V · S, OLED GND · VCC · SCL · SDA → 위 왼쪽 GND · 5V · SCL · SDA. 오른쪽 위 핀 묶음 위 브레드보드: 아래 줄 3V3 → 위 + 줄, GND → 아래 − 줄, + 줄끼리 · − 줄끼리 점퍼. 10kΩ 1 · 5번 줄, 틸트 스위치 5 · 7번 줄: io14 → 5번 줄, 1번 줄 → + 줄, 7번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 9 · 11번 줄: io27 → 9번 줄, 대각선 11번 줄 → − 줄. 수동 부저 + 다리 13번 줄 ← io25, − 다리 15번 줄 → − 줄"
   captionDevkit: "보드 위 브레드보드: 위 줄 GND → − 줄, + 줄끼리 · − 줄끼리 점퍼. 10kΩ 4 · 8번 줄, 틸트 스위치 8 · 10번 줄: D14 → 8번 줄, 4번 줄 → + 줄, 10번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 11 · 13번 줄: D27 → 11번 줄, 대각선 13번 줄 → − 줄. 수동 부저 + 다리 15번 줄 ← D25, − 다리 17번 줄 → − 줄. PIR V · G → + − 줄, S → D23. 보드 아래 + − 줄 띠: 3V3(위 줄 끝) · GND(아래 줄) → 띠, 띠 + 줄 → 브레드보드 + 줄. DHT11 V · G → 띠, S → D13. OLED GND · VCC → 띠, SDA → D21, SCL → D22"
+  captionExpansion: "3.3V 는 왼쪽 위 전원 헤더 3V 핀에서. DHT11 G · V → 전원 헤더 GND · 3V, S → P13 칸 S. PIR G · V · S → 아래 줄 P23 칸 G · V · S, OLED → I2C 헤더 GND · VCC · D21 · D22. 보드 위 오른쪽 브레드보드: 전원 헤더 3V → 보드 위를 넘어 위 + 줄, 위 줄 GND 칸 S → 아래 − 줄, + 줄끼리 · − 줄끼리 점퍼. 틸트 스위치 4 · 6번 줄, 10kΩ 6 · 10번 줄: P14 칸 S → 6번 줄, 10번 줄 → + 줄, 4번 줄 → − 줄. 버튼은 가운데 홈에 걸쳐 12 · 14번 줄: P27 칸 S → 12번 줄, 대각선 14번 줄 → 위 − 줄. 수동 부저 + 다리 18번 줄 ← P25 칸 S, − 다리 20번 줄 → − 줄"
 principle:
   image: images/chick-states.svg
   body: |
@@ -153,6 +158,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "1부에서는 OLED(위 왼쪽 SCL · SDA · 5V · GND), DHT11(io13 기둥), 버튼(io27)만 먼저 꽂아요. 브레드보드 + 줄은 3V3, − 줄은 GND"
           captionDevkit: "1부에서는 OLED(SDA → D21 · SCL → D22, GND · VCC → 아래 띠), DHT11(S → D13, V · G → 아래 띠), 버튼(D27)만 먼저 꽂아요. 띠와 브레드보드의 + 줄은 3V3, − 줄은 GND"
+          captionExpansion: "1부에서는 OLED(I2C 헤더), DHT11(G · V → 전원 헤더 GND · 3V, S → P13 칸 S), 버튼(P27 칸 S)만 먼저 꽂아요. 브레드보드 + 줄은 전원 헤더 3V(3.3V), − 줄은 GND"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 먼저 브레드보드 + 줄 · − 줄을 보드의 3V3 · GND 와 이어요. 그다음 OLED(GND · VCC · SCL · SDA), DHT11(G · V · S), 버튼을 배선도와 아래 표처럼 꽂아요. 버튼은 가운데 홈에 걸쳐 꽂고 한쪽 다리는 27번, 대각선 다리는 − 줄로 가요. 틸트 스위치 · PIR · 부저는 2부에서 꽂아요.
 

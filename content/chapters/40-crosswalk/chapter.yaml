@@ -55,11 +55,18 @@ materials:
   - { name: F-F 듀폰선 1가닥, board: devkit, note: "초음파 Trig → D13 에 바로" }
   - { name: M-F 듀폰선 11가닥, board: devkit, note: "VIN · 아래 줄 GND · 초음파 VCC · 초음파 GND → + − 줄, D27 · D25 · D26 · RX2(16) · D12 → 브레드보드, 초음파 Echo → 저항 줄, D4 → 서보 주황" }
   - { name: 점퍼선(M-M) 6가닥, board: devkit, note: "서보 빨강 · 갈색 → + − 줄, RGB 가장 긴 다리 줄 → 위 − 줄, 부저 − 다리 줄 → 아래 − 줄, 2kΩ 저항 끝 줄 → 아래 − 줄, 위 − 줄 ↔ 아래 − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로" }
+  - { name: 브레드보드, board: expansion, note: "보드 위에 두고 RGB LED · 저항을 꽂아요. 저항 둘(1kΩ · 2kΩ)로 초음파 Echo 신호를 3.3V 로 낮춰요. − 줄은 GND" }
+  - { name: 작은 브레드보드, board: expansion, note: "보드 아래에 두고 수동 부저를 꽂아요 (16번은 아래 줄 P16 칸)" }
+  - { name: F-F 듀폰선 2가닥, board: expansion, note: "초음파 VCC → 위 줄 5V 칸 S 핀, Trig → P13 칸 S 핀에 바로. 서보는 플러그째 아래 줄 P4 칸에" }
+  - { name: M-F 듀폰선 9가닥, board: expansion, note: "P27 · P25 · P26 · P12 칸과 위 줄 GND 칸 S 핀 → 브레드보드, 초음파 Echo → 저항 줄, 초음파 GND → 아래 − 줄, 아래 줄 P16 · GND 칸 S 핀 → 작은 브레드보드" }
+  - { name: 점퍼선(M-M) 3가닥, board: expansion, note: "RGB 가장 긴 다리 줄 → 위 − 줄, 2kΩ 저항 끝 줄 → 아래 − 줄, 위 − 줄 ↔ 아래 − 줄" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "초음파 VCC · Trig → 보드 위 한 줄 5V · io13 에 F-F 듀폰선으로 바로, 서보 플러그 → ANALOG io4 줄(갈색 G · 빨강 V · 주황 S). 브레드보드는 보드 위: 초음파 Echo → 3번 줄 → 1kΩ 저항 → 6번 줄 → io12, 6번 줄 → 2kΩ 저항 → 9번 줄 → 아래 − 줄, 초음파 GND → 아래 − 줄. RGB LED 는 S5 꼴로 d 칸 11 · 13 · 15 · 17번 줄(빨강 · GND · 초록 · 파랑), 220Ω 저항 셋이 가운데 홈을 건너고 io27 → 11번 줄, io25 → 15번 줄, io26 → 17번 줄, 가장 긴 다리 줄(13번) → 위 − 줄. 수동 부저 + 다리 12번 줄 ← io16, − 다리 14번 줄 → 아래 − 줄. 아래 줄 GND → 보드 바깥으로 돌아 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼선으로"
   captionDevkit: "5V 핀이 VIN 하나라 브레드보드 아래 + 줄에 VIN · 초음파 VCC · 서보 빨강을, 아래 − 줄에 아래 줄 GND · 초음파 GND · 서보 갈색을 모아요. 초음파 Trig → D13 은 F-F 듀폰선으로 바로, Echo → 18번 줄 → 1kΩ 저항 → 15번 줄 → D12, 15번 줄 → 2kΩ 저항 → 12번 줄 → 아래 − 줄. 서보 주황 → D4. RGB LED 는 S5 꼴로 d 칸 19 · 21 · 23 · 25번 줄(빨강 · GND · 초록 · 파랑), 220Ω 저항 셋이 가운데 홈을 건너고 D27 → 19번 줄, D25 → 23번 줄, D26 → 25번 줄, 가장 긴 다리 줄(21번) → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼선으로. 수동 부저 + 다리 27번 줄 ← RX2(16), − 다리 29번 줄 → 아래 − 줄"
+  captionExpansion: "JUMP 점퍼는 5V 쪽. 초음파 VCC → 위 줄 5V 칸 S · Trig → P13 칸 S 는 F-F 듀폰선으로 바로, 서보 플러그 → 아래 줄 P4 칸(갈색 G · 빨강 V · 주황 S). 브레드보드는 보드 위: 초음파 Echo → 3번 줄 → 1kΩ 저항 → 6번 줄 → P12 칸 S, 6번 줄 → 2kΩ 저항 → 9번 줄 → 아래 − 줄, 초음파 GND · 위 줄 GND 칸 S → 아래 − 줄. RGB LED 는 S5 꼴로 d 칸 12 · 14 · 16 · 18번 줄(빨강 · GND · 초록 · 파랑), 220Ω 저항 셋이 가운데 홈을 건너고 P27 칸 S → 12번 줄, P25 칸 S → 16번 줄, P26 칸 S → 18번 줄, 가장 긴 다리 줄(14번) → 위 − 줄, 위 − 줄과 아래 − 줄은 점퍼선으로. 수동 부저는 보드 아래 작은 브레드보드: + 다리 2번 줄 ← 아래 줄 P16 칸 S, − 다리 5번 줄 ← 아래 줄 GND 칸 S"
 principle:
   image: images/signal-states.svg
   body: |
@@ -155,6 +162,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "초음파 VCC · Trig → 위 한 줄 5V · io13, Echo → 3번 줄 → 1kΩ → 6번 줄 → io12, 6번 줄 → 2kΩ → 9번 줄 → − 줄, GND → − 줄. 서보 플러그 → io4 줄. RGB d 칸 11 · 13 · 15 · 17번 줄, 부저 12 · 14번 줄 ← io16"
           captionDevkit: "초음파 Trig → D13, Echo → 18번 줄 → 1kΩ → 15번 줄 → D12, 15번 줄 → 2kΩ → 12번 줄 → − 줄, VCC · GND → + − 줄(5V · GND). 서보 주황 → D4, 빨강 · 갈색 → + − 줄. RGB d 칸 19 · 21 · 23 · 25번 줄, 부저 27 · 29번 줄 ← RX2(16)"
+          captionExpansion: "초음파 VCC · Trig → 위 줄 5V 칸 S · P13 칸 S, Echo → 3번 줄 → 1kΩ → 6번 줄 → P12 칸 S, 6번 줄 → 2kΩ → 9번 줄 → − 줄, GND → − 줄. 서보 플러그 → 아래 줄 P4 칸. RGB d 칸 12 · 14 · 16 · 18번 줄, 부저는 보드 아래 작은 브레드보드 ← 아래 줄 P16 칸 S"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**을 보고 장치 넷을 모두 꽂아요. **GND 선을 가장 먼저**, 초음파 VCC 와 서보 빨강 선은 **5V** 에 이어져야 해요(그림 아래 설명에서 확인). 초음파 Echo 는 센서가 5V 로 대답하는데 보드 핀은 3.3V 까지만 받아서, 브레드보드의 **저항 둘(1kΩ · 2kΩ)** 을 거쳐 12번 핀으로 가요. 이 코드는 초음파와 RGB 만 쓰지만, 부저와 서보도 지금 꽂아 두면 미션에서 바로 쓸 수 있어요.
 
