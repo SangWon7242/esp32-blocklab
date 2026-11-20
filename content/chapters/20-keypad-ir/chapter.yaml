@@ -30,12 +30,17 @@ materials:
   - { name: 빨강 LED, note: "긴 다리가 +. 설계 단계에서 써요" }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 띠 }
   - { name: 브레드보드, note: "IR 수신기와 LED 를 꽂는 판. 키패드는 꽂지 않고 선으로 보드에 바로 이어요" }
-  - { name: M-F 듀폰선 13가닥, note: "한쪽은 핀, 한쪽은 구멍인 선. 키패드 커넥터 → 보드 핀 8, 보드 핀 → 브레드보드: IR 수신기 3, (설계) LED 2" }
+  - { name: M-F 듀폰선 13가닥, board: plus, note: "한쪽은 핀, 한쪽은 구멍인 선. 키패드 커넥터 → 보드 핀 8, 보드 핀 → 브레드보드: IR 수신기 3, (설계) LED 2" }
+  - { name: M-F 듀폰선 13가닥, board: devkit, note: "한쪽은 핀, 한쪽은 구멍인 선. 키패드 커넥터 → 보드 핀 8, 보드 핀 → 브레드보드: IR 수신기 3, (설계) LED 2" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로. IR 수신기 V 는 왼쪽 위 전원 헤더 3V 에" }
+  - { name: M-F 듀폰선 12가닥, board: expansion, note: "한쪽은 핀, 한쪽은 구멍인 선. 키패드 커넥터 → 보드 칸 S 8, 보드 → 브레드보드: P5 · 전원 헤더 3V(IR 수신기), UART 헤더 GND(− 줄), (설계) P2(LED)" }
+  - { name: 점퍼선(M-M) 2가닥, board: expansion, note: "IR 수신기 G 줄 · (설계) LED 짧은 다리 줄 → − 줄" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "키패드 커넥터 1~8번 칸 → 위쪽 한 줄 io26 · io25 · io17 · io16(행) · io27 · io14 · io12 · io13(열), M-F 선 8가닥으로 바로. 보드 아래 브레드보드: IR 수신기 OUT · G · V 는 2 · 3 · 4번 줄 — OUT → io5(보드 왼쪽 바깥으로 돌아서), G → ANALOG io2 줄 G, V → 아래 줄 3V3. LED(설계): io2(ANALOG S) → 6번 줄 → 220Ω 저항 → 11번 줄 긴 다리, 12번 줄 짧은 다리 → 아래 줄 GND"
   captionDevkit: "키패드 커넥터 1~8번 칸 → D26 · D25 · TX2(17) · RX2(16)(행) · D27 · D14 · D12 · D13(열), M-F 선 8가닥으로 바로 (TX2 · RX2 는 아래 줄). 보드 아래 브레드보드: IR 수신기 V · G · OUT 은 5 · 6 · 7번 줄 — V → 3V3, G → 아래 줄 GND, OUT → D5. LED(설계): D2 → 9번 줄 → 220Ω 저항 → 3번 줄 긴 다리, 2번 줄 짧은 다리 → 위 줄 GND(보드 왼쪽 바깥으로 돌아서)"
+  captionExpansion: "JUMP 점퍼는 3.3V 쪽. 키패드 커넥터 1~8번 칸 → P26 · P25 · P17 · P16(행) · P27 · P14 · P12 · P13(열) 칸 S, M-F 선 8가닥으로 바로 (P17 · P16 은 아래 줄이라 보드 오른쪽 가장자리로 돌아서). 보드 아래 브레드보드: UART 헤더 GND → − 줄. IR 수신기 OUT · G · V 는 18 · 19 · 20번 줄 — OUT → 아래 줄 P5 칸 S, G → 점퍼선 → − 줄, V → 전원 헤더 3V(보드 오른쪽과 키패드 위로 돌아서). LED(설계): 아래 줄 P2 칸 S → 12번 줄 → 220Ω 저항 → 8번 줄 긴 다리, 7번 줄 짧은 다리 → 점퍼선 → − 줄"
 principle:
   image: images/keypad-matrix.svg
   body: |
@@ -128,6 +133,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "키패드 커넥터 1~8번 칸 → io26 · io25 · io17 · io16 · io27 · io14 · io12 · io13 (위쪽 한 줄). 브레드보드 없이 M-F 선으로 바로"
           captionDevkit: "키패드 커넥터 1~8번 칸 → D26 · D25 · TX2(17) · RX2(16) · D27 · D14 · D12 · D13. 브레드보드 없이 M-F 선으로 바로"
+          captionExpansion: "키패드 커넥터 1~8번 칸 → P26 · P25 · P17 · P16 · P27 · P14 · P12 · P13 칸 S (P17 · P16 은 아래 줄). 브레드보드 없이 M-F 선으로 바로"
         body: |
           키패드 끝의 커넥터에 M-F 듀폰선 8개를 꽂고, 1번 칸부터 차례로 보드의 **26 · 25 · 17 · 16 · 27 · 14 · 12 · 13**번 핀에 이어요. 앞의 넷은 행, 뒤의 넷은 열이에요. 보드의 핀 순서가 커넥터 순서와 달라서 선이 엇갈려요. 한 칸만 어긋나도 엉뚱한 키가 나오니 배선 그림과 아래 표를 한 줄씩 짚으며 꽂아요.
 
@@ -347,6 +353,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "LED 는 io2(ANALOG S) → 6번 줄 → 220Ω 저항 → 11번 줄 긴 다리, 12번 줄 짧은 다리 → 아래 줄 GND. IR 수신기는 그대로"
           captionDevkit: "LED 는 D2 → 9번 줄 → 220Ω 저항 → 3번 줄 긴 다리, 2번 줄 짧은 다리 → 위 줄 GND(보드 왼쪽 바깥으로 돌아서). IR 수신기는 그대로"
+          captionExpansion: "LED 는 아래 줄 P2 칸 S → 12번 줄 → 220Ω 저항 → 8번 줄 긴 다리, 7번 줄 짧은 다리 → 점퍼선 → − 줄. IR 수신기는 그대로"
         body: |
           이번엔 리모컨으로 LED 를 켜고 끄는 전등을 설계해요. **OK 버튼**(예: `"0xff02fd"`)을 누르면 켜고, **다른 버튼**을 누르면 꺼요.
 

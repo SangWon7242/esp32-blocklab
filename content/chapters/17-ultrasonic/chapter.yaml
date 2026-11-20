@@ -36,12 +36,17 @@ materials:
   - { name: 2kΩ 저항, note: "빨강-검정-빨강 띠. Echo 가운데 줄과 GND 줄 사이" }
   - { name: 브레드보드, note: LED 와 저항을 꽂는 판 }
   - { name: F-F 듀폰선 2가닥, note: "양쪽 끝이 구멍인 선. 초음파 VCC · Trig 를 보드 핀에 바로 씌워요" }
-  - { name: M-F 듀폰선 6가닥, note: "한쪽은 핀, 한쪽은 구멍인 선. 초음파 Echo · GND, 보드 12번 핀 · GND, 26번 핀 → 브레드보드. LED 짧은 다리 줄 → 보드 GND" }
+  - { name: M-F 듀폰선 6가닥, board: plus, note: "한쪽은 핀, 한쪽은 구멍인 선. 초음파 Echo · GND, 보드 12번 핀 · GND, 26번 핀 → 브레드보드. LED 짧은 다리 줄 → 보드 GND" }
+  - { name: M-F 듀폰선 6가닥, board: devkit, note: "한쪽은 핀, 한쪽은 구멍인 선. 초음파 Echo · GND, 보드 12번 핀 · GND, 26번 핀 → 브레드보드. LED 짧은 다리 줄 → 보드 GND" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 초음파 수업이에요. 끝나면 3.3V 로" }
+  - { name: M-F 듀폰선 5가닥, board: expansion, note: "한쪽은 핀, 한쪽은 구멍인 선. 초음파 Echo · GND, P12 칸 S · 위 줄 GND 칸 S, P26 칸 S → 브레드보드" }
+  - { name: 점퍼선(M-M) 1가닥, board: expansion, note: "LED 짧은 다리 8번 줄 → 7번 줄(GND 줄)" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "초음파 VCC → 5V · Trig → io13 은 보드에 바로. Echo 는 브레드보드 7번 줄 → 1kΩ 저항 → 4번 줄 → io12, 4번 줄 → 2kΩ 저항 → 1번 줄 ← 초음파 GND · 보드 GND. LED 는 보드 위 브레드보드에: io26 → 9번 줄 → 220Ω 저항 → 15번 줄의 긴 다리(+), 짧은 다리(−)는 16번 줄 → io26 기둥 맨 아래 G"
   captionDevkit: "초음파 VCC → VIN(5V) · Trig → D13 은 보드에 바로. Echo 는 브레드보드 19번 줄 → 1kΩ 저항 → 16번 줄 → D12, 16번 줄 → 2kΩ 저항 → 13번 줄 ← 초음파 GND · GND(위 줄). LED 는 보드 위 브레드보드에: D26 → 3번 줄 → 220Ω 저항 → 8번 줄의 긴 다리(+), 짧은 다리(−)는 9번 줄 → GND(아래 줄)"
+  captionExpansion: "JUMP 점퍼는 5V 쪽. 초음파 VCC → 위 줄 5V 칸 S · Trig → P13 칸 S 는 보드에 바로. Echo 는 브레드보드 1번 줄 → 1kΩ 저항 → 4번 줄 → P12 칸 S, 4번 줄 → 2kΩ 저항 → 7번 줄 ← 초음파 GND · 위 줄 GND 칸 S. LED 는 같은 브레드보드에: P26 칸 S → 12번 줄 → 220Ω 저항 → 9번 줄의 긴 다리(+), 짧은 다리(−)는 8번 줄 → 점퍼선 → 7번 줄(GND 줄)"
 principle:
   image: images/formula-steps.svg
   body: |
@@ -133,6 +138,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "초음파 VCC → 5V, Trig → io13 에 바로. Echo → 7번 줄 → 1kΩ → 4번 줄 → io12, 4번 줄 → 2kΩ → 1번 줄(초음파 GND · 보드 GND). LED 는 io26 → 9번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → io26 기둥 G"
           captionDevkit: "초음파 VCC → VIN(5V), Trig → D13 에 바로. Echo → 19번 줄 → 1kΩ → 16번 줄 → D12, 16번 줄 → 2kΩ → 13번 줄(초음파 GND · 보드 GND). LED 는 D26 → 3번 줄 → 저항 → 긴 다리, 짧은 다리 줄 → 아래 줄 GND"
+          captionExpansion: "초음파 VCC → 위 줄 5V 칸 S, Trig → P13 칸 S 에 바로. Echo → 1번 줄 → 1kΩ → 4번 줄 → P12 칸 S, 4번 줄 → 2kΩ → 7번 줄(초음파 GND · 위 줄 GND 칸 S). LED 는 P26 칸 S → 12번 줄 → 저항 → 긴 다리, 짧은 다리 8번 줄 → 점퍼선 → 7번 줄"
         body: |
           **USB 를 뺀 채로** 안내 칸의 **부품과 배선**의 배선도를 보고 센서를 꽂아요. **GND 선을 가장 먼저** 꽂고, VCC 는 3V3 이 아니라 **5V**(VIN) 핀에 이어요. LED도 지금 같이 꽂아 두면 미션에서 바로 쓸 수 있어요.
 

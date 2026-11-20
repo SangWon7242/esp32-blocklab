@@ -29,10 +29,14 @@ materials:
   - { name: 브레드보드, note: 가변저항을 꽂는 판 }
   - { name: M-F 듀폰선 3가닥, board: plus, note: "보드 아래 줄 3V3 · io39 · GND → 브레드보드. 서보는 플러그째 ANALOG io4 줄에 꽂아요" }
   - { name: M-F 듀폰선 6가닥, board: devkit, note: "서보 플러그 구멍 3개 → D4 · VIN · GND, 그리고 3V3 · VN · GND → 브레드보드" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로. 가변저항은 V 줄 말고 전원 헤더 3V 에" }
+  - { name: M-F 듀폰선 3가닥, board: expansion, note: "전원 헤더 3V · 위 줄 GND 칸 S → + − 줄, SVN(39) 칸 S → 브레드보드. 서보는 플러그째 아래 줄 P4 칸에 꽂아요" }
+  - { name: 점퍼선(M-M) 2가닥, board: expansion, note: "가변저항 양 끝 줄 → + 줄 · − 줄" }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "서보 플러그는 ANALOG 묶음 io4 줄에 그대로 꽂아요 (갈색 G · 빨강 V · 주황 S). 가변저항은 보드 아래 브레드보드 15 · 16 · 17번 줄에: 보드 아래 줄 3V3 → 15번 줄, io39 → 가운데 16번 줄(초록), GND → 17번 줄"
   captionDevkit: "서보 플러그 구멍에 M-F 선: 주황 → D4, 빨강 → VIN(5V), 갈색 → 아래 줄 GND. 가변저항은 보드 위 브레드보드 3 · 4 · 5번 줄에: 3V3 → 3번 줄(보드 왼쪽 바깥으로 돌아서), VN(39) → 가운데 4번 줄(초록), 위 줄 GND → 5번 줄"
+  captionExpansion: "JUMP 점퍼는 5V 쪽 (서보가 V 줄을 써요). 서보 플러그는 아래 줄 P4 칸에 그대로 꽂아요 (갈색 G · 빨강 V · 주황 S). 가변저항은 보드 위 브레드보드 23 · 24 · 25번 줄에: 전원 헤더 3V → + 줄, 위 줄 GND 칸 S → − 줄, SVN(39) 칸 S → 가운데 24번 줄(초록). 23번 줄 → 점퍼선 → + 줄, 25번 줄 → 점퍼선 → − 줄"
 principle:
   image: images/servo-pulse.svg
   body: |
@@ -127,6 +131,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "서보 플러그는 io4 줄에 그대로 (갈색 G · 빨강 V · 주황 S). 가변저항 양 끝은 3V3 · GND, 가운데 다리는 io39"
           captionDevkit: "서보 주황 → D4, 빨강 → VIN(5V), 갈색 → GND. 가변저항 양 끝은 3V3 · GND, 가운데 다리는 VN(39)"
+          captionExpansion: "서보 플러그는 아래 줄 P4 칸에 그대로 (갈색 G · 빨강 V · 주황 S). 가변저항 양 끝은 + 줄(전원 헤더 3V) · − 줄(GND), 가운데 다리는 SVN(39) 칸 S"
         body: |
           **USB 를 뺀 채로** **부품과 배선**의 배선도를 보고 오늘 쓸 부품을 모두 꽂아요. 서보 빨강은 **5V**, 가변저항 양 끝은 **3V3** 과 GND 예요. 둘이 바뀌지 않게 배선 그림과 아래 표를 한 줄씩 짚으며 꽂아요.
 

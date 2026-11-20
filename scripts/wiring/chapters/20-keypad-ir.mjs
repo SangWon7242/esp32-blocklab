@@ -2,9 +2,13 @@
 // IR 수신기 VS1838B(OUT 5, V 3V3, G GND) · 설계 단계 LED(2) + 220Ω — 브레드보드.
 // 키패드 커넥터 1~8번 칸 순서와 보드 핀 순서가 서로 반대라, 키패드 선은 보드 위 빈 곳에서 계단처럼 엇갈린다(어떻게 놓아도 생긴다).
 // 엇갈림은 키패드 쪽에만 모으고, 보드 핀으로 내려가는 끝은 곧게 둔다.
-import { COLORS as C, compose, connectionTable, mfWire, note, svgDoc } from "../common.mjs";
+// 확장 보드(점퍼 3.3V): 키패드는 보드 위 — 행 1 · 2 와 열 1~4 는 위 줄 칸 S 에 위에서, 행 3 · 4(P17 · P16 은 아래 줄)는 보드 오른쪽 가장자리로 내려가 아래에서.
+//   브레드보드는 보드 아래: IR OUT ← P5 칸 S, LED ← P2 칸 S, − 줄 ← UART 헤더 GND (IR G · LED 짧은 다리는 점퍼선으로 − 줄).
+//   IR 수신기 V 는 3.3V 만 — 전원 헤더 3V (보드 오른쪽 가장자리 → 키패드 위 → 왼쪽으로 돌아 헤더 왼쪽에서).
+import { COLORS as C, compose, connectionTable, mfWire, mmWire, note, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, keypad, led, resistor } from "../parts.mjs";
 import { mark, pt, rec } from "../record.mjs";
 
@@ -121,11 +125,59 @@ function devkit() {
   return svgDoc("wbkk", T.devkit, compose(b.draw(used), [kp.svg, bb.svg, ...ps], wires, extra), table.bottom);
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 3.3V ───── */
+function expansion() {
+  const b = makeExpansion({ x: 22, y: 370, jumper: "3V3" });
+  const kp = keypad(440, 64, { titleAt: { x: 428, y: 94, anchor: "end" } });
+  const wires = keypadWires(kp, ["R2", "R1", "C1", "C2", "C3", "C4"], (n) => b.gpio(KEY_GPIO[n]), b.bounds.y - 30);
+  // 행 3 · 4 (P17 · P16 은 아래 줄): 키패드 바로 아래 길 → 보드 오른쪽 가장자리 → 보드 아래 → 아래에서
+  const yp = kp.pins.R3.y, bot = b.bounds.y + 314;
+  const route = { R3: { lane: yp + 28, x: 620, under: bot + 12 }, R4: { lane: yp + 14, x: 628, under: bot + 22 } };
+  for (const n of ["R3", "R4"]) {
+    const t = b.gpio(KEY_GPIO[n]), p = kp.pins[n], r = route[n];
+    wires.push(mfWire(t, p, KEY_COLOR[n], [{ x: t.x, y: r.under }, { x: r.x, y: r.under }, { x: r.x, y: r.lane }, { x: p.x, y: r.lane }], "orth"));
+  }
+  // 브레드보드: 보드 아래, 위쪽 + − 줄. LED 는 P2 칸 바로 아래, IR 수신기는 P5 칸 바로 아래
+  const bb = breadboard({ x: 100, y: bot + 50, cols: 24, rails: { top: true, bottom: false } });
+  const ir = { OUT: 18, G: 19, V: 20 }, led = { sig: 12, anode: 8, cathode: 7 };
+  const ps = parts(bb, { ir, ledAnode: led.anode, ledCathode: led.cathode, sig: led.sig });
+  const p5 = b.gpio(5), p2 = b.gpio(2), gnd = b.uart().GND, v33 = b.power("3V3", 0);
+  const R = (c) => bb.rail("top", "-", c);
+  const vHole = bb.hole(ir.V, "a"), vLane = bot + 34, side = v33.x - 30;
+  wires.push(
+    mfWire(p5, bb.hole(ir.OUT, "a"), C.white),
+    mfWire(p2, bb.hole(led.sig, "a"), OLIVE),
+    mfWire(gnd, R(bb.nearestCol(gnd.x, true)), C.black),
+    mmWire(bb.hole(ir.G, "a"), R(ir.G), C.black),
+    mmWire(bb.hole(led.cathode, "a"), R(led.cathode), C.black),
+    // IR V → 전원 헤더 3V: 오른쪽 가장자리로 올라가 키패드 위를 지나 헤더 왼쪽에서 옆으로
+    mfWire(v33, vHole, C.red, [{ x: side, y: v33.y }, { x: side, y: 52 }, { x: 636, y: 52 }, { x: 636, y: vLane }, { x: vHole.x, y: vLane }], "orth"),
+  );
+  const rows = [
+    { colors: [C.orange, C.yellow, C.brown, C.pink], part: "키패드 1~4번 칸 (행)", to: "P26 · P25 칸 S · 아래 줄 P17 · P16 칸 S" },
+    { colors: [C.blue, C.teal, C.purple, C.green], part: "키패드 5~8번 칸 (열)", to: "P27 · P14 · P12 · P13 칸 S" },
+    { color: C.white, part: `IR 수신기 OUT ${ir.OUT}번 줄`, to: "아래 줄 P5 칸 S" },
+    { color: C.black, part: `IR 수신기 G ${ir.G}번 줄`, to: "점퍼선 → − 줄" },
+    { color: C.red, part: `IR 수신기 V ${ir.V}번 줄`, to: "전원 헤더 3V (보드 오른쪽 · 위로 돌아서)" },
+    { color: C.black, part: "UART 헤더 GND", to: "− 줄" },
+    { color: OLIVE, part: "(설계) 아래 줄 P2 칸 S", to: `${led.sig}번 줄 → 220Ω 저항 → ${led.anode}번 줄 LED 긴 다리(+)` },
+    { color: C.black, part: `(설계) LED 짧은 다리(−) ${led.cathode}번 줄`, to: "점퍼선 → − 줄" },
+  ];
+  const table = connectionTable(bb.y + bb.h + 34, "이렇게 꽂아요 — 키패드는 M-F 선 8가닥으로 보드에 바로", rows, b.legend);
+  const used = [...KEY_PINS.map((n) => b.gpio(KEY_GPIO[n])), p5, p2, gnd, v33];
+  const extra = [
+    note(428, 118, "커넥터 1~8번 칸", "end"), note(428, 136, "(왼쪽부터)", "end"),
+    note(22, bb.y + bb.h + 16, "JUMP 점퍼는 3.3V 쪽 (V 줄 = 3.3V)", "start", 12), table.svg,
+  ];
+  return svgDoc("wbkx", T.expansion({ ir, led }), compose(b.draw(used, { note: false }), [kp.svg, bb.svg, ...ps], wires, extra), table.bottom);
+}
+
 const T = {
+  expansion: ({ ir, led }) => `확장 보드(ESP32 38핀 확장 보드 + DevKit) 키패드와 IR 배선도: JUMP 점퍼는 3.3V 쪽. 키패드 커넥터 1~8번 칸을 M-F 듀폰선으로 P26 · P25 · P17 · P16(행) · P27 · P14 · P12 · P13(열) 칸 S 핀에 바로 — P17 · P16 은 아래 줄이라 보드 오른쪽 가장자리로 돌아서. 보드 아래 브레드보드: UART 헤더 GND → − 줄. IR 수신기 OUT · G · V 는 ${ir.OUT} · ${ir.G} · ${ir.V}번 줄 — OUT 은 아래 줄 P5 칸 S 핀, G 는 점퍼선으로 − 줄, V 는 전원 헤더 3V(보드 오른쪽과 키패드 위로 돌아서). 설계 단계 LED: 아래 줄 P2 칸 S 핀 → ${led.sig}번 줄 → 220Ω 저항 → ${led.anode}번 줄 긴 다리(+), 짧은 다리(−) ${led.cathode}번 줄 → 점퍼선 → − 줄`,
   plus: "키패드와 IR 배선도(ESP32 Plus 확장 보드): 키패드 커넥터 1~8번 칸을 M-F 듀폰선으로 보드 위쪽 한 줄 io26 · io25 · io17 · io16(행) · io27 · io14 · io12 · io13(열)에 바로. 보드 아래 브레드보드: IR 수신기 OUT · G · V 는 2 · 3 · 4번 줄 — OUT 은 io5(보드 왼쪽 바깥으로 돌아서), G 는 ANALOG io2 줄 G, V 는 아래 줄 3V3. 설계 단계 LED: io2 → 6번 줄 → 220Ω 저항 → 11번 줄 긴 다리(+), 짧은 다리(−) 12번 줄 → 아래 줄 GND",
   devkit: "기본 보드(ESP32 DevKit 38핀) 키패드와 IR 배선도: 키패드 커넥터 1~8번 칸을 M-F 듀폰선으로 D26 · D25 · TX2(17) · RX2(16)(행) · D27 · D14 · D12 · D13(열)에 바로. 보드 아래 브레드보드: IR 수신기 V · G · OUT 은 5 · 6 · 7번 줄 — V 는 3V3, G 는 아래 줄 GND, OUT 은 D5. 설계 단계 LED: D2 → 9번 줄 → 220Ω 저항 → 3번 줄 긴 다리(+), 짧은 다리(−) 2번 줄 → 위 줄 GND(보드 왼쪽 바깥으로 돌아서)",
 };
 
 export default {
-  "wiring-breadboard.svg": { plus, devkit },
+  "wiring-breadboard.svg": { plus, devkit, expansion },
 };

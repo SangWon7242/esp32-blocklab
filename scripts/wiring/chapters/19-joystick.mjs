@@ -2,9 +2,13 @@
 // 조이스틱 핀 순서(X Y B V G)와 보드 핀 순서가 서로 반대라 선이 몇 번 엇갈린다(어떻게 놓아도 생긴다). 엇갈림은 핀이 없는 빈 곳에서만.
 // Plus: 조이스틱은 보드 아래에 핀이 위로 오게 놓고 F-F 로 바로, 서보 플러그는 ANALOG io4 줄에 바로.
 // DevKit: 서보는 보드 아래 왼쪽(플러그에 M-F), 조이스틱은 그 아래(F-F) — 위 줄 핀은 보드 바깥 길로 돌아 들어간다.
+// 확장 보드: 서보 플러그는 아래 줄 P4 칸에 바로(V 줄을 쓰므로 점퍼 5V). 조이스틱은 보드 위(핀이 아래) — X · Y · B 는 SVP · SVN · P26 칸 S 에 위에서.
+//   V 줄이 5V 라 조이스틱 V 는 전원 헤더 3V, G 는 전원 헤더 GND (3.3V 를 넘으면 안 됨). 이 두 선은 조이스틱 오른쪽 · 위로 돌아 왼쪽 전원 헤더로
+//   (X Y B 선과 엇갈리지 않게). X · Y · B 셋은 순서가 서로 반대라 조이스틱 바로 아래에서 세 번 엇갈린다.
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { columnServo, makeExpansion } from "../boards/expansion.mjs";
 import { joystick, servo, servoWithPlug } from "../parts.mjs";
 
 // 조이스틱을 보드 아래에 놓으면 핀이 위로 오고, 왼→오 순서가 G V B Y X 가 된다 (모듈을 180° 돌린 모습)
@@ -74,11 +78,42 @@ function devkit() {
   return svgDoc("wbjk", T.devkit, compose(b.draw(used), [s.svg, j.svg], wires, [table.svg]), table.bottom);
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): 점퍼 5V ───── */
+function expansion() {
+  const b = makeExpansion({ x: 22, y: 250, jumper: "5V" });
+  const jy = 70;
+  const j = joystick(420, jy, { titleAt: { x: 404, y: jy + 50, anchor: "end" } });
+  const t = { X: b.gpio(36), Y: b.gpio(39), B: b.gpio(26), V: b.power("3V3", 0), G: b.power("GND", 2) };
+  const py = j.pins.X.y;
+  const wires = [
+    // X · Y · B: 조이스틱 바로 아래 가로 길(B 가 가장 낮다)에서 엇갈리고, 보드 핀에는 위에서 곧게
+    ffWire(j.pins.X, t.X, C.green, [{ x: j.pins.X.x, y: py + 30 }, { x: t.X.x, y: py + 30 }], "orth"),
+    ffWire(j.pins.Y, t.Y, C.blue, [{ x: j.pins.Y.x, y: py + 42 }, { x: t.Y.x, y: py + 42 }], "orth"),
+    ffWire(j.pins.B, t.B, C.yellow, [{ x: j.pins.B.x, y: py + 54 }, { x: t.B.x, y: py + 54 }], "orth"),
+    // G: 조이스틱 오른쪽 → 위 → 왼쪽 전원 헤더 GND 에 위에서
+    ffWire(j.pins.G, t.G, C.black, [{ x: j.pins.G.x, y: py + 8 }, { x: 556, y: py + 8 }, { x: 556, y: jy - 10 }, { x: t.G.x, y: jy - 10 }], "orth"),
+    // V: G 바깥으로 돌아 헤더 왼쪽에서 내려와 옆에서 3V
+    ffWire(j.pins.V, t.V, C.pink, [{ x: j.pins.V.x, y: py + 16 }, { x: 566, y: py + 16 }, { x: 566, y: jy - 20 }, { x: t.V.x - 30, y: jy - 20 }, { x: t.V.x - 30, y: t.V.y }], "orth"),
+  ];
+  const sv = b.triple(4);
+  const s = columnServo(sv, { gap: 60 });
+  const rows = [
+    { color: C.green, part: "조이스틱 X", to: "SVP(36) 칸 S" }, { color: C.blue, part: "조이스틱 Y", to: "SVN(39) 칸 S" },
+    { color: C.yellow, part: "조이스틱 B", to: "P26 칸 S" }, { color: C.pink, part: "조이스틱 V", to: "전원 헤더 3V (V 줄은 5V 라 안 돼요)" },
+    { color: C.black, part: "조이스틱 G", to: "전원 헤더 GND" },
+    { colors: [C.brown, C.red, C.orange], part: "서보 플러그", to: "아래 줄 P4 칸 G · V · S (V 는 점퍼 5V)" },
+  ];
+  const table = connectionTable(sv.S.y + 60 + 44 + 24, "이렇게 꽂아요 — 조이스틱은 F-F, 서보는 플러그째", rows, b.legend);
+  const used = [t.X, t.Y, t.B, t.V, t.G, sv.G, sv.V, sv.S];
+  return svgDoc("wbjx", T.expansion, compose(b.draw(used), [j.svg, s.svg], wires, [table.svg]), table.bottom);
+}
+
 const T = {
+  expansion: "확장 보드(ESP32 38핀 확장 보드 + DevKit) 조이스틱 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로. 조이스틱은 보드 위에 핀이 아래로 오게 놓고 F-F 듀폰선으로 X 는 SVP(36) 칸 S 핀, Y 는 SVN(39) 칸 S 핀, B 는 P26 칸 S 핀에. V 는 전원 헤더 3V, G 는 전원 헤더 GND 에 (조이스틱 오른쪽 위로 돌아서). 서보 플러그는 아래 줄 P4 칸에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로",
   plus: "조이스틱 배선도(ESP32 Plus 확장 보드, 브레드보드 없이 보드에 바로): 조이스틱은 보드 아래에 핀이 위로 오게 놓고 F-F 듀폰선으로 X 는 아래 줄 io36, Y 는 io39, V 는 3V3, G 는 GND, B 는 보드 바깥으로 돌아 위쪽 한 줄 io26 에. 서보 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로",
   devkit: "기본 보드(ESP32 DevKit 38핀) 조이스틱 배선도: 조이스틱 X 는 VP(36), Y 는 VN(39), B 는 D26, V 는 3V3, G 는 위 줄 GND 에 F-F 듀폰선으로. 서보 플러그 주황은 D4, 빨강은 VIN(5V), 갈색은 아래 줄 GND 에 M-F 듀폰선으로",
 };
 
 export default {
-  "wiring-breadboard.svg": { plus, devkit },
+  "wiring-breadboard.svg": { plus, devkit, expansion },
 };

@@ -29,10 +29,12 @@ materials:
   - { name: 서보 모터(SG90), note: "선 3가닥: 주황 신호 → 4번, 빨강 → 5V, 갈색 → GND" }
   - { name: F-F 듀폰선 5가닥, note: "양쪽 끝이 구멍인 선. 조이스틱 핀 5개를 보드 핀에 바로 씌워요 (브레드보드 없이)" }
   - { name: M-F 듀폰선 3가닥, board: devkit, note: "서보 플러그 구멍 3개 → D4 · VIN · GND" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로. 조이스틱 V 는 V 줄 말고 전원 헤더 3V 에. 서보는 플러그째 아래 줄 P4 칸에" }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "브레드보드 없이 보드에 바로 꽂아요. 조이스틱(보드 아래, 핀이 위로): X → io36(초록), Y → io39(파랑), V → 3V3, G → GND (모두 아래 줄), B → 위쪽 한 줄 io26(노랑, 보드 바깥으로 돌아서). 서보 플러그는 ANALOG io4 줄에 그대로 (갈색 G · 빨강 V · 주황 S)"
   captionDevkit: "조이스틱은 F-F 선으로 바로: X → VP(36, 초록), Y → VN(39, 파랑), B → D26(노랑), G → 위 줄 GND, V → 3V3. 서보 플러그 구멍에 M-F 선: 주황 → D4, 빨강 → VIN(5V), 갈색 → 아래 줄 GND"
+  captionExpansion: "JUMP 점퍼는 5V 쪽 (서보가 V 줄을 써요). 조이스틱(보드 위, 핀이 아래로)은 F-F 선으로 바로: X → SVP(36) 칸 S(초록), Y → SVN(39) 칸 S(파랑), B → P26 칸 S(노랑). V → 전원 헤더 3V, G → 전원 헤더 GND (V 줄은 5V 라 안 돼요). 서보 플러그는 아래 줄 P4 칸에 그대로 (갈색 G · 빨강 V · 주황 S)"
 principle:
   image: images/joystick-axes.svg
   body: |
@@ -127,6 +129,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "조이스틱 X → io36(초록), Y → io39(파랑), B → io26(노랑), V → 3V3, G → GND. 서보 플러그는 io4 줄에 그대로"
           captionDevkit: "조이스틱 X → VP(36, 초록), Y → VN(39, 파랑), B → D26(노랑), V → 3V3, G → GND. 서보 주황 → D4, 빨강 → VIN(5V)"
+          captionExpansion: "조이스틱 X → SVP(36) 칸 S(초록), Y → SVN(39) 칸 S(파랑), B → P26 칸 S(노랑), V → 전원 헤더 3V, G → 전원 헤더 GND. 서보 플러그는 P4 칸에 그대로"
         body: |
           **USB 를 뺀 채로** **부품과 배선**의 배선도를 보고 오늘 쓸 부품을 모두 꽂아요. 서보 빨강은 **5V**, 조이스틱 V 는 **3V3** 이에요. 조이스틱 V 를 5V 에 꽂으면 안 돼요. 선이 몇 군데 엇갈리니 배선 그림과 아래 표를 한 줄씩 짚으며 꽂아요.
 
