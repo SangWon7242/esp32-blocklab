@@ -10,6 +10,7 @@
  * 핀은 모두 수 핀이라 모듈은 F-F 듀폰선으로 바로, 여러 부품이 전원을 나눠 쓸 때는 브레드보드 + − 줄을 거친다.
  *
  * makeDevkit({ x, y }) 는 보드 왼쪽 위 모서리를 받는다. 그림 자리 470×150 (안테나가 오른쪽 끝까지).
+ * usbLabel: false 면 보드 밖 "USB-C" 글자를 빼고 그린다 (확장 보드 expansion.mjs 가 이 그림을 얹고 글자는 따로 쓴다).
  * 모양은 실물 보드 그림(espboards.dev 의 38핀 보드 그림)을 보고 다시 그렸다 — 검은 기판 · 은색 둥근 패드 · 흰 글자.
  */
 import { vtext, vtextDown } from "../common.mjs";
@@ -26,7 +27,7 @@ const FLASH = new Set(["CLK", "CMD", "SD0", "SD1", "SD2", "SD3"]);
 
 const P = 22;
 
-export function makeDevkit({ x = 85, y = 260 } = {}) {
+export function makeDevkit({ x = 85, y = 260, usbLabel = true } = {}) {
   const BOARD = { x, y, w: 470, h: 150 };
   const TOP_Y = y + 16;
   const BOT_Y = y + BOARD.h - 16;
@@ -80,7 +81,7 @@ export function makeDevkit({ x = 85, y = 260 } = {}) {
     // USB-C (왼쪽 끝): 은색 통 · 검은 구멍
     base.push(R(-14, 57, 34, 36, "#cfd4da", 'rx="6" stroke="#868e96"'));
     base.push(R(-12, 68, 6, 14, "#1b1b1f", 'rx="3"'));
-    labels.push(`<text x="${x - 18}" y="${y + 75}" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="currentColor" stroke="none">USB-C</text>`);
+    if (usbLabel) labels.push(`<text x="${x - 18}" y="${y + 75}" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="700" fill="currentColor" stroke="none">USB-C</text>`);
     // BOOT · EN 버튼
     for (const [ry, t] of [[103, "Boot"], [33, "EN"]]) {
       base.push(R(26, ry, 20, 15, "#c9cdd2", 'rx="2"'));

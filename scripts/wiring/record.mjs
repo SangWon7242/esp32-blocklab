@@ -38,6 +38,13 @@ export function recCount() {
  */
 export function moveSince(since, tx, ty, s) {
   if (!scene || !since) return;
+  const move = mover(tx, ty, s);
+  for (const kind of ["breadboards", "parts", "wires"]) {
+    for (let i = since[kind]; i < scene[kind].length; i++) scene[kind][i] = move(scene[kind][i]);
+  }
+}
+/** SVG transform="translate(tx ty) scale(s)" 처럼 기록 하나를 옮기는 함수 (x · y · w · h · holes · xs · gap) */
+function mover(tx, ty, s) {
   const X = (x) => r1(tx + s * x), Y = (y) => r1(ty + s * y), L = (n) => r1(s * n);
   const move = (v) => {
     if (Array.isArray(v)) return v.map(move);
@@ -54,9 +61,16 @@ export function moveSince(since, tx, ty, s) {
     }
     return o;
   };
-  for (const kind of ["breadboards", "parts", "wires"]) {
-    for (let i = since[kind]; i < scene[kind].length; i++) scene[kind][i] = move(scene[kind][i]);
-  }
+  return move;
+}
+/**
+ * 마지막으로 기록된 보드를 translate(tx ty) scale(s) 로 옮기고 extra 를 덧붙인다.
+ * 확장 보드(boards/expansion.mjs)가 기본 보드 DevKit 그림을 줄여 얹을 때 DevKit 기록도 그림과 같은 자리로.
+ */
+export function moveLastBoard(tx, ty, s, extra = {}) {
+  if (!scene || !scene.boards.length) return;
+  const i = scene.boards.length - 1;
+  scene.boards[i] = { ...mover(tx, ty, s)(scene.boards[i]), ...extra };
 }
 export function recTitle(title) {
   if (scene) scene.title = title;
