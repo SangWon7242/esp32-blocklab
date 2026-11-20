@@ -26,12 +26,17 @@ materials:
   - { name: F-F 듀폰선 5가닥, board: devkit, note: "초음파 Trig, OLED 네 핀을 보드 핀에 바로" }
   - { name: M-F 듀폰선 7가닥, board: devkit, note: "보드 VIN · GND, 초음파 VCC · GND 를 + − 줄로, 4번 핀을 서보 주황으로, 초음파 Echo 와 12번 핀을 저항 줄로" }
   - { name: 점퍼선(M-M) 3가닥, board: devkit, note: "서보 빨강 · 갈색을 + − 줄로, 2kΩ 저항 끝 줄을 − 줄로" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로" }
+  - { name: 브레드보드, board: expansion, note: "저항 둘을 꽂아요. 초음파 Echo 의 5V 신호를 보드가 받을 수 있는 3.3V 로 낮춰요" }
+  - { name: F-F 듀폰선 6가닥, board: expansion, note: "초음파 VCC → 위 줄 5V 칸 S 핀 · Trig → P13 칸 S 핀, OLED 네 핀 → I2C 헤더. 서보는 플러그째 P4 칸에 꽂아요" }
+  - { name: M-F 듀폰선 4가닥, board: expansion, note: "초음파 Echo · GND, P12 칸 S 핀 · 위 줄 GND 칸 S 핀을 브레드보드로" }
   - { name: (추가 미션) LED · 220Ω 저항, note: "LED 는 저항과 함께 브레드보드에 꽂아요. 챕터 1 배선과 같아요" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-door.svg
   caption: "초음파 VCC → 5V · Trig → 13 은 보드에 바로. Echo → 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → 12번 핀, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 보드 GND. OLED GND · VCC · SDA · SCL → I2C 묶음 GND · 5V · SDA · SCL, 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)"
   captionDevkit: "보드 VIN(5V) · GND 를 브레드보드 + − 줄에 잇고 초음파 VCC · 서보 빨강은 + 줄, 초음파 GND · 서보 갈색은 − 줄에. 초음파 Trig → D13. Echo → 작은 브레드보드 7번 줄 → 1kΩ 저항 → 4번 줄 → D12, 4번 줄 → 2kΩ 저항 → 1번 줄 → − 줄. 서보 주황 → D4, OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
+  captionExpansion: "JUMP 점퍼는 5V 쪽. 초음파 VCC → 위 줄 5V 칸 S · Trig → P13 칸 S 는 보드에 바로. Echo → 작은 브레드보드 2번 줄 → 1kΩ 저항 → 5번 줄 → P12 칸 S, 5번 줄 → 2kΩ 저항 → 8번 줄 ← 초음파 GND · 위 줄 GND 칸 S. OLED GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22, 서보 플러그 → 아래 줄 P4 칸 (갈색 G · 빨강 V · 주황 S)"
 principle:
   image: images/ultrasonic-principle.svg
   body: |
@@ -119,6 +124,7 @@ parts:
           image: images/wiring-ultrasonic.svg
           caption: "보드 위쪽 한 줄의 글자를 읽어요: 5V · GND 옆에 18 19 23 5 13 12. VCC · Trig 는 바로, Echo 는 2번 줄 → 1kΩ → 5번 줄 → 12번, 5번 줄 → 2kΩ → 8번 줄(초음파 GND · 보드 GND)"
           captionDevkit: "보드 위 줄의 글자를 읽어요: VIN · GND · D13 · D12. VCC · Trig 는 바로, Echo 는 2번 줄 → 1kΩ → 5번 줄 → D12, 5번 줄 → 2kΩ → 8번 줄(초음파 GND · 보드 GND)"
+          captionExpansion: "보드 위 줄의 칸 이름을 읽어요: 5V · GND · P13 · P12. VCC · Trig 는 그 칸 S 핀에 바로, Echo 는 2번 줄 → 1kΩ → 5번 줄 → P12 칸 S, 5번 줄 → 2kΩ → 8번 줄(초음파 GND · 위 줄 GND 칸 S)"
         body: |
           이제 센서를 보드에 이어요. VCC → 5V(기본 보드는 `VIN`), Trig → `13`번은 F-F 듀폰선(양쪽 끝이 구멍인 선)으로 **바로** 이어요. Echo 는 센서가 5V 로 대답하는데 보드 핀은 3.3V 까지만 받아서, 브레드보드의 **저항 둘(1kΩ · 2kΩ)** 을 거쳐 `12`번으로 가요. 초음파 GND 와 보드 `GND` 는 2kΩ 저항 끝 줄에서 만나요. 보드 핀 옆에 적힌 글자를 손가락으로 짚으며 그림 아래 표처럼 찾아요.
 
@@ -276,6 +282,7 @@ parts:
           image: images/wiring-door.svg
           caption: "서보 플러그 → ANALOG io4 줄(갈색 G · 빨강 V · 주황 S), OLED → I2C 묶음(GND · 5V · SDA · SCL). 핀이 겹치지 않는지 확인!"
           captionDevkit: "서보 빨강 · 갈색 → 브레드보드 + − 줄, 주황 → D4. OLED VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22. 핀이 겹치지 않는지 확인!"
+          captionExpansion: "서보 플러그 → 아래 줄 P4 칸(갈색 G · 빨강 V · 주황 S), OLED → I2C 헤더(GND · VCC · D21 · D22). JUMP 점퍼가 5V 쪽인지 확인!"
         body: |
           이제 서보(문)와 OLED(화면)를 더 연결해요. 이번에도 **USB 를 뺀 채로** 꽂아요. 서보는 세 색 선이 모인 **플러그**예요: 주황(S)은 신호라 `4`번 핀, 빨강(V)은 5V, 갈색(G)은 GND 로 가요. OLED 는 SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 이어요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요. 핀이 겹치지 않는지 짝과 확인해요.
 
