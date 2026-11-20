@@ -1,9 +1,11 @@
 // 센서 S8 "버튼과 터치" — 풀업 버튼(14번) + LED(26번, 220Ω) 은 브레드보드, 터치 패드(4번)는 호일에 악어 클립.
 // 두 보드 모두 브레드보드를 보드 위에 둔다. 버튼은 대각선 다리: 한쪽 → 14번, 반대쪽 → 위 − 줄.
 // 이 파일의 도우미(buttonPullup · ledRight · ledLeft · railLink · foil · board 그리기 틀)는 23 · 24 · 25 장도 쓴다.
+// 확장 보드 판: 맨 부품 + 호일뿐이라 점퍼는 평소 자리(3.3V). 버튼 · LED 는 위 줄 P14 · P26 칸 위 브레드보드, 터치는 아래 줄 P4 칸 S 핀.
 import { COLORS as C, compose, connectionTable, mfWire, mmWire, note, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, button, led, resistor } from "../parts.mjs";
 import { mark, pt, rec } from "../record.mjs";
 
@@ -111,6 +113,33 @@ function devkit() {
   return { body: compose(b.draw([s14, s26, gnd, t4]), [bb.svg, ...btn.svg, ...lc.svg, ...pad.svg], wires, [table.svg]), height: table.bottom };
 }
 
+/** 확장 보드(38핀 확장 보드 + DevKit): 버튼 신호 줄은 P14 칸 위, LED 신호 줄은 P26 칸 위. P4 칸 S 핀 → 아래로 악어 클립 */
+function expansion() {
+  const bb = breadboard({ x: 92, y: 8, cols: 26, rails: { top: true, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 30, jumper: "3V3" });
+  const s14 = b.gpio(14), s26 = b.gpio(26), gnd = b.power("GND"), t4 = b.gpio(4);
+  const col = (px) => Math.round((px - (bb.x + 28)) / 16) + 1;
+  const btn = buttonPullup(bb, col(s14.x)), lc = ledRight(bb, col(s26.x));
+  const pad = foil(t4.x, b.bounds.y + b.bounds.h + 22);
+  const wires = [
+    mfWire(s14, btn.signalHole, C.green), mfWire(s26, lc.signalHole, C.yellow),
+    mfWire(gnd, bb.rail("bottom", "-", railCol(bb.nearestCol(gnd.x, true))), C.black),
+    btn.jumper, lc.jumper, railLink(bb),
+    mfWire(t4, pad.clip, C.orange),
+  ];
+  const rows = [
+    { color: C.green, part: `${s14.label} 칸 S 핀`, to: `${btn.cols.sig}번 줄 (버튼 한쪽 다리)` },
+    { color: C.black, part: `버튼 대각선 다리 ${btn.cols.gnd}번 줄`, to: "위 − 줄" },
+    { color: C.yellow, part: `${s26.label} 칸 S 핀`, to: `${lc.cols.sig}번 줄 → 220Ω 저항 → ${lc.cols.anode}번 줄 LED 긴 다리(+)` },
+    { color: C.black, part: `LED 짧은 다리(−) ${lc.cols.cathode}번 줄`, to: "아래 − 줄" },
+    { color: C.black, part: "위 줄 GND 칸 S 핀", to: "아래 − 줄, 위 − 줄 ↔ 아래 − 줄 점퍼" },
+    { color: C.orange, part: `아래 줄 ${t4.label} 칸 S 핀`, to: "악어 클립 → 호일" },
+  ];
+  const table = connectionTable(pad.clip.y + 92, "이렇게 꽂아요 — 버튼 · LED 는 브레드보드, 터치는 호일", rows, b.legend);
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 버튼과 터치 배선도: 버튼은 브레드보드 가운데 홈에 걸쳐 ${btn.cols.sig} · ${btn.cols.gnd}번 줄에 꽂고, 위 줄 P14 칸 S 핀 → ${btn.cols.sig}번 줄(버튼 한쪽 다리), 대각선 반대쪽 ${btn.cols.gnd}번 줄 → 위 − 줄. LED 는 위 줄 P26 칸 S 핀 → ${lc.cols.sig}번 줄 → 220Ω 저항 → ${lc.cols.anode}번 줄의 긴 다리(+), 짧은 다리(−) ${lc.cols.cathode}번 줄 → 아래 − 줄. 위 줄 GND 칸 S 핀 → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. 아래 줄 P4 칸 S 핀에 꽂은 선 끝을 악어 클립으로 호일에. JUMP 점퍼는 3.3V 쪽`;
+  return svgDoc("wbtx", title, compose(b.draw([s14, s26, gnd, t4]), [bb.svg, ...btn.svg, ...lc.svg, ...pad.svg], wires, [table.svg]), table.bottom);
+}
+
 const T = {
   plus: "버튼과 터치 배선도(ESP32 Plus 확장 보드): 버튼은 브레드보드 가운데 홈에 걸쳐 15 · 17번 줄에 꽂고, 보드 위쪽 io14 핀 → 15번 줄(버튼 한쪽 다리), 대각선 반대쪽 17번 줄 → 위 − 줄. LED 는 io26 핀 → 21번 줄 → 220Ω 저항 → 25번 줄의 긴 다리(+), 짧은 다리(−) 26번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. ANALOG 묶음 io4 의 S 핀에 꽂은 선 끝을 악어 클립으로 호일에",
   devkit: "기본 보드(ESP32 DevKit 38핀) 버튼과 터치 배선도: 버튼은 브레드보드 가운데 홈에 걸쳐 7 · 9번 줄에 꽂고, D14 핀 → 7번 줄(버튼 한쪽 다리), 대각선 반대쪽 9번 줄 → 위 − 줄. LED 는 D26 핀 → 11번 줄 → 220Ω 저항 → 15번 줄의 긴 다리(+), 짧은 다리(−) 16번 줄 → 아래 − 줄. 보드 GND → 아래 − 줄, 위 − 줄과 아래 − 줄은 점퍼로 이어요. D4 핀에 꽂은 선 끝을 악어 클립으로 호일에",
@@ -120,5 +149,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wbt", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wbtk", T.devkit, r.body, r.height); },
+    expansion,
   },
 };

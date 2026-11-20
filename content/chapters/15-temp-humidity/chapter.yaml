@@ -34,11 +34,13 @@ materials:
   - { name: F-F 듀폰선 3가닥, note: "DHT11 G · V · S → 보드 핀에 바로" }
   - { name: M-F 듀폰선 2가닥, note: "26번 · GND → 브레드보드" }
   - { name: 점퍼선(M-M) 1가닥, note: "LED 짧은 다리 → − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
   - { name: USB 선, note: 마이크로 USB. 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "DHT11 의 G · V · S → 보드 위쪽 io13 기둥의 G · V · S 에 F-F 듀폰선으로 바로. LED 는 1장과 같은 자리: 26번(io26) → 22번 줄 → 220Ω 저항 → 17번 줄 긴 다리(+), 짧은 다리(−) 16번 줄 → − 줄 → GND"
   captionDevkit: "DHT11 S → D13, V → 3V3, G → GND(아래 줄)에 F-F 듀폰선으로 바로. LED 는 1장과 같은 자리: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄 → GND"
+  captionExpansion: "DHT11 의 G · V · S → 위 줄 P13 칸의 G · V · S 핀에 F-F 듀폰선으로 바로. LED 는 1장과 같은 꼴: P26 칸 S 핀 → 7번 줄 → 220Ω 저항 → 2번 줄 긴 다리(+), 짧은 다리(−) 1번 줄 → − 줄 → 위 줄 GND 칸 S 핀"
 principle:
   image: images/dht-principle.svg
   body: |
@@ -131,6 +133,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "DHT11 의 G · V · S → io13 기둥의 G · V · S (F-F 듀폰선 세 가닥으로 바로)"
           captionDevkit: "DHT11 S → D13, V → 3V3, G → GND (F-F 듀폰선 세 가닥으로 바로)"
+          captionExpansion: "DHT11 의 G · V · S → P13 칸의 G · V · S 핀 (F-F 듀폰선 세 가닥으로 바로)"
         body: |
           **USB를 뺀 채로** 안내 칸의 **부품과 배선**의 배선 그림과 아래 표처럼 DHT11 모듈을 F-F 듀폰선 세 가닥으로 보드에 바로 꽂아요. S 선은 13번 핀이에요. 핀 이름(G · V · S)이 모듈에 적혀 있어요. V 와 G 가 바뀌면 센서가 뜨거워질 수 있으니 꼭 확인해요. LED도 지금 같이 꽂아 두면 다음 실행에서 바로 쓸 수 있어요.
 

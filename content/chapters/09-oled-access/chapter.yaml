@@ -21,11 +21,14 @@ materials:
   - { name: F-F 듀폰선 8가닥, board: plus, note: "양쪽 끝이 구멍인 선. RFID 4 · OLED 4, 모듈 핀과 보드 핀에 바로. 서보는 플러그째 꽂아요" }
   - { name: 브레드보드, board: devkit, note: "+ 줄(3V3)·− 줄(GND)과 세로줄 둘(SDA 줄 · SCL 줄)에 OLED · RFID 선을 모아요" }
   - { name: M-F 듀폰선 15가닥, board: devkit, note: "보드 3V3 · GND · D21 · D22 → 브레드보드 4, OLED 4 · RFID 4 → 브레드보드, 보드 VIN · GND · D4 → 서보 플러그 3" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로" }
+  - { name: F-F 듀폰선 8가닥, board: expansion, note: "양쪽 끝이 구멍인 선. OLED 4 → I2C 헤더, RFID 4 → 아래 줄 P21 칸 G · V · S 와 P22 칸 S. 서보는 플러그째 P4 칸에" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-oled-rfid.svg
   caption: "브레드보드 없이 보드에 바로 꽂아요. RFID → I2C 묶음 첫 줄(8장과 같아요), OLED GND · VCC · SDA · SCL → 보드 위쪽 한 줄의 GND · 5V · SDA · SCL(I2C 묶음과 같은 21 · 22번 선), 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S)"
   captionDevkit: "보드 아래 브레드보드에 모아요. 3V3 → + 줄, GND → − 줄, D21 → 14번 줄(SDA 줄), D22 → 9번 줄(SCL 줄). OLED · RFID 의 VCC → + 줄, GND → − 줄, SDA → 14번 줄, SCL → 9번 줄. 서보 빨강 → VIN · 갈색 → GND · 주황 → D4"
+  captionExpansion: "브레드보드 없이 보드에 바로, JUMP 점퍼는 5V 쪽. OLED GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22, RFID GND · VCC · SDA → 아래 줄 P21 칸 G · V · S, SCL → 아래 줄 P22 칸 S (I2C 헤더와 같은 21 · 22번 선), 서보 플러그 → 아래 줄 P4 칸 (갈색 G · 빨강 V · 주황 S)"
 principle:
   image: images/i2c-shared.svg
   body: |
@@ -116,6 +119,7 @@ parts:
           image: images/wiring-oled-rfid.svg
           caption: "8장의 RFID · 서보는 그대로 두고 OLED 4선만 새로 꽂아요: 보드 위쪽 한 줄의 GND · 5V · SDA(21번) · SCL(22번)"
           captionDevkit: "OLED 4선: VCC → + 줄 · GND → − 줄 · SDA → 14번 줄 · SCL → 9번 줄. 브레드보드의 3V3 · GND · D21 · D22 선과 RFID 선도 배선 그림처럼"
+          captionExpansion: "OLED 4선: GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22. RFID 는 아래 줄 P21 칸 G · V · S 와 P22 칸 S, 서보는 P4 칸 — 배선 그림처럼"
         body: |
           **USB 를 뺀 채로** OLED 를 연결해요. SCL → `22`번, SDA → `21`번, VCC · GND 는 전원으로 가요. OLED 와 RFID 는 **같은 21 · 22번 두 선**을 나눠 써요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요.
 

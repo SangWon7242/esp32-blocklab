@@ -1,10 +1,14 @@
 // 융합 F1 "스마트 출입 통제 시스템" — RFID(I2C: SCL 22 · SDA 21), 서보(4), (미션) LED(26) + 220Ω 저항.
 // ESP32 Plus: RFID 는 I2C 묶음 첫 줄, 서보 플러그는 ANALOG io4 줄에 바로. LED 만 보드 위 브레드보드(01 장과 같은 꼴).
 // 기본 보드: 보드 위 브레드보드 + − 줄(VIN · GND)을 서보와 LED 가 나눠 쓰고, RFID 는 아래 줄 3V3 · GND · D21 · D22 에 바로.
+// 확장 보드: RFID 는 I2C 헤더(GND · VCC · D21 · D22), 서보 플러그는 아래 줄 P4 칸 기둥에 그대로, (미션) LED 만 보드 위 브레드보드.
+//   서보가 P4 칸 V 줄(점퍼로 정하는 전압)을 쓰므로 이 수업은 점퍼를 5V 쪽으로.
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { columnServo, makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, led, resistor, rfid, servo, servoWithPlug } from "../parts.mjs";
+import { ledCircuit as ledLeft } from "./01-led.mjs";
 
 /** 01 장과 같은 LED 회로 (보드 위 브레드보드, + − 줄이 아래): 신호 (k, j) → 저항 (k, h)~(k-5, h) → LED 긴 다리 (k-5, f), 짧은 다리 (k-6, f) → (k-6, j) → − 줄 */
 function ledCircuit(bb, k) {
@@ -92,6 +96,45 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit): RFID 는 I2C 헤더, 서보는 P4 기둥에 플러그째, 점퍼 5V ───── */
+function expansion() {
+  const bb = breadboard({ x: 100, y: 8, cols: 26, rails: { top: false, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 30, jumper: "5V" });
+  const parts = [], wires = [], used = [];
+  const Y = b.bounds.y;
+  // (미션) LED: P26 칸 S 핀 → 바로 위 열 (1장과 같은 꼴)
+  const p26 = b.gpio(26), gnd = b.power("GND");
+  const circ = ledLeft(bb, Math.round((p26.x - (bb.x + 28)) / 16) + 1);
+  parts.push(bb.svg, ...circ.svg);
+  wires.push(mfWire(p26, circ.signalHole, C.orange), mfWire(gnd, bb.rail("bottom", "-", bb.nearestCol(gnd.x, true)), C.black), circ.jumper);
+  used.push(p26, gnd);
+  // RFID: 보드 아래, 핀이 위로 — 핀 자리가 I2C 헤더 네 핀과 같은 x. 선은 바깥 줄(UART) 핀 사이 틈으로 올라가 옆에서 꽂는다
+  const bus = b.i2c(0);
+  const r = rfid(bus.GND.x - 35, Y + 388, { titleAt: { x: bus.GND.x - 47, y: Y + 443, anchor: "end" } });
+  parts.push(r.svg);
+  const color = { GND: C.black, VCC: C.red, SDA: C.blue, SCL: C.purple };
+  for (const k of ["GND", "VCC", "SDA", "SCL"]) {
+    const p = bus[k], from = r.pins[k], seam = p.x - 9.9, lane = Y + 352;
+    wires.push(ffWire(from, p, color[k], [{ x: from.x, y: lane }, { x: seam, y: lane }, { x: seam, y: p.y }], "orth"));
+    used.push(p);
+  }
+  // 서보: 4번 칸(아래 줄)의 G · V · S 에 플러그 그대로
+  const sv = b.triple(4);
+  parts.push(columnServo(sv, { gap: 84, titleSide: "right" }).svg);
+  used.push(sv.G, sv.V, sv.S);
+  const c = circ.cols;
+  const rows = [
+    { colors: [C.black, C.red], part: "RFID GND · VCC", to: "I2C 헤더 GND · VCC" },
+    { colors: [C.blue, C.purple], part: "RFID SDA · SCL", to: "I2C 헤더 D21 · D22" },
+    { colors: [C.brown, C.red, C.orange], part: "서보 플러그", to: "아래 줄 P4 칸 G · V · S (V 는 점퍼 5V)" },
+    { color: C.orange, part: "(미션) P26 칸 S 핀", to: `${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 LED 긴 다리(+)` },
+    { color: C.black, part: `LED 짧은 다리(−) ${c.cathode}번 줄`, to: "− 줄 → 위 줄 GND 칸 S 핀" },
+  ];
+  const table = connectionTable(Y + 520, "이렇게 꽂아요 — RFID · 서보는 보드에 바로, LED 만 브레드보드에", rows, b.legend);
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 출입 통제 배선도: 이번 수업은 JUMP 점퍼를 5V 쪽으로. RFID 모듈 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 I2C 헤더의 GND · VCC · D21 · D22 에 바로. 서보 모터 플러그는 아래 줄 P4 칸에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로. 미션 LED 는 보드 위 브레드보드에: 위 줄 P26 칸 S 핀 → ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 LED 긴 다리(+), 짧은 다리(−) ${c.cathode}번 줄 → 점퍼선 → − 줄 → 위 줄 GND 칸 S 핀`;
+  return svgDoc("arx", title, compose(b.draw(used), parts, wires, [table.svg]), table.bottom);
+}
+
 const T = {
   plus: "출입 통제 배선도(ESP32 Plus 확장 보드): RFID 모듈 GND · VCC · SDA · SCL 은 F-F 듀폰선으로 보드 I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22) 에 바로. 서보 모터 플러그는 ANALOG 묶음 io4 줄에 갈색 G, 빨강 V, 주황 S 가 맞도록 그대로. 미션 LED 는 보드 위 브레드보드에: io26 → 22번 줄 → 220Ω 저항 → 17번 줄 LED 긴 다리(+), 짧은 다리(−) 16번 줄 → 점퍼선 → − 줄 → 보드 GND",
   devkit: "기본 보드(ESP32 DevKit 38핀) 출입 통제 배선도: 보드 VIN(5V) · GND 를 보드 위 브레드보드 + − 줄에 잇고, 서보 빨강은 + 줄, 갈색은 − 줄, 주황(신호)은 D4. RFID VCC 는 3V3, GND 는 GND, SDA 는 D21, SCL 은 D22 에 F-F 듀폰선으로 바로. 미션 LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 LED 긴 다리(+), 짧은 다리(−) 5번 줄 → 점퍼선 → − 줄",
@@ -101,5 +144,6 @@ export default {
   "wiring-rfid-servo.svg": {
     plus: () => { const r = plus(); return svgDoc("ar", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("ark", T.devkit, r.body, r.height); },
+    expansion,
   },
 };

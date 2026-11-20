@@ -23,12 +23,16 @@ materials:
   - { name: 브레드보드, board: devkit, note: "+ 줄(VIN 5V)·− 줄(GND)을 서보와 미션 LED 가 나눠 써요" }
   - { name: M-F 듀폰선 4가닥, board: devkit, note: "보드 VIN · GND → + − 줄, D4 → 서보 주황, (미션) D26 → 11번 줄" }
   - { name: 점퍼선(M-M) 2가닥, board: devkit, note: "서보 빨강 · 갈색 → + − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. 이번 수업은 JUMP 점퍼를 5V 쪽으로 옮겨요 — 서보가 V 줄 전기를 써요. 끝나면 3.3V 로" }
+  - { name: 브레드보드, board: expansion, note: "(미션) LED 와 저항만 꽂아요. RFID 는 I2C 헤더, 서보는 플러그째 P4 칸에" }
+  - { name: M-F 듀폰선 2가닥, board: expansion, note: "(미션) P26 칸 S 핀 → 18번 줄, 위 줄 GND 칸 S 핀 → − 줄" }
   - { name: (미션) LED · 220Ω 저항, note: "빨강 LED 1개와 저항 1개, 점퍼선(M-M) 1가닥. 26번 → 저항 → LED 긴 다리, 짧은 다리 → − 줄" }
   - { name: USB 선, note: 배선할 때는 빼 두기 }
 wiring:
   image: images/wiring-rfid-servo.svg
   caption: "RFID 와 서보는 보드에 바로: RFID GND · VCC · SDA · SCL → I2C 묶음 첫 줄의 GND · 5V · SDA(21) · SCL(22), 서보 플러그 → ANALOG io4 줄 (갈색 G · 빨강 V · 주황 S). (미션) 26번 → 22번 줄 → 220Ω → 17번 줄 LED 긴 다리, 짧은 다리 16번 줄 → − 줄 → GND"
   captionDevkit: "보드 VIN(5V) · GND 를 브레드보드 + − 줄에 잇고 서보 빨강 → + 줄 · 갈색 → − 줄 · 주황 → D4. RFID VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22 (F-F 선으로 바로). (미션) D26 → 11번 줄 → 220Ω → 6번 줄 LED 긴 다리, 짧은 다리 5번 줄 → − 줄"
+  captionExpansion: "JUMP 점퍼는 5V 쪽. RFID GND · VCC · SDA · SCL → I2C 헤더 GND · VCC · D21 · D22 (F-F 선으로 바로), 서보 플러그 → 아래 줄 P4 칸 (갈색 G · 빨강 V · 주황 S). (미션) 위 줄 P26 칸 S 핀 → 18번 줄 → 220Ω → 13번 줄 LED 긴 다리, 짧은 다리 12번 줄 → − 줄 → 위 줄 GND 칸 S 핀"
 principle:
   image: images/uid-compare.svg
   body: |
@@ -120,6 +124,7 @@ parts:
           image: images/wiring-rfid-servo.svg
           caption: "지금은 RFID 만: F-F 선 4가닥으로 I2C 묶음 첫 줄의 GND · 5V · SDA(21번) · SCL(22번)에"
           captionDevkit: "지금은 RFID 만: F-F 선 4가닥으로 VCC → 3V3 · GND → GND · SDA → D21 · SCL → D22"
+          captionExpansion: "지금은 RFID 만: F-F 선 4가닥으로 I2C 헤더의 GND · VCC · D21 · D22 에"
         body: |
           **USB 를 뺀 채로** RFID 모듈을 F-F 듀폰선 4가닥으로 보드에 바로 이어요. SDA → `21`번, SCL → `22`번, VCC · GND 는 전원으로 가요. 어디에 꽂는지는 배선 그림과 아래 표를 보세요.
 
@@ -202,6 +207,7 @@ parts:
           image: images/wiring-rfid-servo.svg
           caption: "RFID 는 I2C 묶음 첫 줄, 서보 플러그는 ANALOG io4 줄에 바로. 서보 신호는 4번, RFID 는 21·22번"
           captionDevkit: "서보 빨강 · 갈색은 브레드보드 + − 줄(VIN · GND), 주황은 D4. RFID 는 3V3 · GND · D21 · D22. 서보 신호는 4번, RFID 는 21·22번"
+          captionExpansion: "RFID 는 I2C 헤더, 서보 플러그는 아래 줄 P4 칸에 바로. 서보 신호는 4번, RFID 는 21·22번. JUMP 점퍼가 5V 쪽인지 확인!"
         body: |
           이제 1부의 두 코드를 합쳐요. `step3_access_control.py` 는 카드 번호를 읽어 `uid1` 과 **같으면** 문을 열고, 다르면 닫아 둬요.
 

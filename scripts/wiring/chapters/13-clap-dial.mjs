@@ -2,10 +2,15 @@
 // 가변저항 양 끝과 소리 센서 V·G 는 브레드보드 + 줄(3V3) · − 줄(GND)을 나눠 쓴다 (3V3 핀은 하나뿐).
 // Plus: 39·36·3V3·GND 가 모두 아래 줄이라 브레드보드를 보드 **아래**에 둔다. 26번(위 줄)만 보드 왼쪽 바깥 길로.
 // DevKit: 26·VN(39)·VP(36) 이 위 줄이라 브레드보드를 보드 **위**에 둔다. 3V3(아래 줄)만 보드 왼쪽 바깥 길로.
+// 확장 보드: P26 · SVN(39) · SVP(36) 모두 위 줄 → 브레드보드를 보드 위에. 가변저항 세 다리는 SVN 칸 G · S · V 에,
+//   소리 센서는 F-F 3가닥으로 SVP 칸 G · V · S 에 바로 (+ − 줄 나눠 쓰기 없음). V 줄이 3.3V 여야 하므로 점퍼는 평소 자리(3.3V).
 import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, name, svgDoc } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, led, potentiometer, resistor, sensor3 } from "../parts.mjs";
+import { ledCircuit } from "./01-led.mjs";
+import { columnRun } from "./15-temp-humidity.mjs";
 
 /* ───── ESP32 Plus ───── */
 function plus() {
@@ -106,6 +111,57 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/* ───── 확장 보드(38핀 확장 보드 + DevKit) ───── */
+/** 브레드보드 위 글자 (밝은 판 위라 어두운 화면에서도 진한 글자 + 판 색 테두리) */
+const potLabel = (p) =>
+  `<text x="${p.x}" y="${p.y}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#343a40" stroke="#f1f3f5" stroke-width="4" paint-order="stroke">가변저항</text>`;
+
+function expansion() {
+  const bb = breadboard({ x: 100, y: 8, cols: 23, rails: { top: false, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 30, jumper: "3V3" });
+  const parts = [], wires = [], used = [];
+  const p26 = b.gpio(26), gnd = b.power("GND"), pot = b.triple(39), snd = b.triple(36);
+  const top = b.bounds.y;
+
+  // LED (1장과 같은 꼴): P26 칸 S 핀 → 바로 위 열 → 220Ω → 긴 다리, 짧은 다리 → − 줄 ← 위 줄 GND 칸 S 핀
+  const circ = ledCircuit(bb, Math.round((p26.x - (bb.x + 28)) / 16) + 1);
+  wires.push(mfWire(p26, circ.signalHole, C.yellow), mfWire(gnd, bb.rail("bottom", "-", bb.nearestCol(gnd.x, true)), C.black), circ.jumper);
+  used.push(p26, gnd);
+
+  // 가변저항: 다리 21 · 22 · 23번 줄 (f 칸). 왼쪽 → SVN 칸 G, 가운데 → SVN 칸 S, 오른쪽 → SVN 칸 V
+  const L = 21;
+  [L, L + 1, L + 2].forEach((c) => bb.tint(c, "bottom"));
+  const pk = potentiometer(bb.hole(L, "f"), bb.hole(L + 1, "f"), bb.hole(L + 2, "f"));
+  const mf = { ends: ["m", "f"] };
+  wires.push(
+    columnRun(bb.hole(L, "j"), pot.G, C.black, { lane: top - 8, x: pot.G.x - 4, ...mf }),
+    columnRun(bb.hole(L + 2, "j"), pot.V, C.red, { lane: top - 24, x: pot.V.x + 4, ...mf }),
+    columnRun(bb.hole(L + 1, "j"), pot.S, C.green, { lane: top - 16, x: pot.S.x, ...mf }),
+  );
+  used.push(pot.G, pot.S, pot.V);
+
+  // 소리 센서: 브레드보드 오른쪽, 핀이 아래로 (왼→오 G V S). F-F 로 SVP 칸 G · V · S
+  const sm = sensor3(548, 96, "sound", { titleAt: { x: 586, y: 80 } });
+  wires.push(
+    columnRun(sm.pins.G, snd.G, C.black, { lane: top - 24, x: snd.G.x - 4 }),
+    columnRun(sm.pins.V, snd.V, C.red, { lane: top - 16, x: snd.V.x }),
+    columnRun(sm.pins.S, snd.S, C.blue, { lane: top - 8, x: snd.S.x + 4 }),
+  );
+  used.push(snd.G, snd.V, snd.S);
+
+  parts.push(bb.svg, ...circ.svg, pk.svg, sm.svg, potLabel(bb.hole(L + 1, "c")));
+  const c = circ.cols;
+  const rows = [
+    { colors: [C.black, C.green, C.red], part: `가변저항 ${L} · ${L + 1} · ${L + 2}번 줄`, to: "SVN(39) 칸 G · S · V (가운데 다리가 S)" },
+    { colors: [C.black, C.red, C.blue], part: "소리 센서 G · V · S", to: "SVP(36) 칸 G · V · S" },
+    { color: C.yellow, part: "P26 칸 S 핀", to: `${c.sig}번 줄 → 220Ω → ${c.anode}번 줄 LED 긴 다리` },
+    { color: C.black, part: `LED 짧은 다리 ${c.cathode}번 줄`, to: "− 줄 → 위 줄 GND 칸 S 핀" },
+  ];
+  const table = connectionTable(b.bounds.y + b.bounds.h + 12, "이렇게 꽂아요 — 가변저항 · 소리 센서는 칸의 G · V · S 에", rows, b.legend);
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 박수 스위치와 다이얼 배선도: 브레드보드는 보드 위. 가변저항 다리 셋은 ${L} · ${L + 1} · ${L + 2}번 줄: 가운데 ${L + 1}번 줄 → 위 줄 SVN(39) 칸 S 핀, ${L}번 줄 → SVN 칸 G 핀, ${L + 2}번 줄 → SVN 칸 V 핀. 소리 센서 모듈 G · V · S → 위 줄 SVP(36) 칸 G · V · S 핀에 F-F 듀폰선으로 바로. LED: 위 줄 P26 칸 S 핀 → ${c.sig}번 줄 → 220Ω 저항 → ${c.anode}번 줄 긴 다리(+), 짧은 다리(−) ${c.cathode}번 줄 → − 줄 → 위 줄 GND 칸 S 핀. JUMP 점퍼는 3.3V 쪽 (V 핀 = 3.3V)`;
+  return svgDoc("wcdx", title, compose(b.draw(used), parts, wires, [table.svg]), table.bottom);
+}
+
 const T = {
   plus: "박수 스위치와 다이얼 배선도(ESP32 Plus 확장 보드): 브레드보드는 보드 아래. 아래 줄 3V3 → 브레드보드 + 줄, GND → − 줄. 가변저항 다리 셋은 23 · 24 · 25번 줄: 가운데 24번 ← 아래 줄 io39, 23번 → − 줄, 25번 → + 줄. 소리 센서 모듈 S → 아래 줄 io36, V → + 줄, G → − 줄. LED: 위 줄 io26 → 보드 바깥으로 돌아 6번 줄 → 220Ω 저항 → 10번 줄 긴 다리(+), 짧은 다리(−) 11번 줄 → − 줄",
   devkit: "기본 보드(ESP32 DevKit 38핀) 박수 스위치와 다이얼 배선도: 브레드보드는 보드 위. 3V3 → 보드 바깥으로 돌아 + 줄, GND → − 줄. 가변저항 다리 셋은 18 · 19 · 20번 줄: 가운데 19번 ← VN(39), 18번 → + 줄, 20번 → − 줄. 소리 센서 모듈 S → VP(36), V → + 줄, G → − 줄. LED: D26 → 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄",
@@ -115,5 +171,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wcd", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wcdk", T.devkit, r.body, r.height); },
+    expansion,
   },
 };

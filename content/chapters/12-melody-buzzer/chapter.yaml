@@ -34,11 +34,13 @@ materials:
   - { name: 브레드보드, note: 부품을 꽂고 선으로 잇는 판. 납땜 없이 빼고 꽂을 수 있어요 }
   - { name: M-F 듀폰선 2가닥, note: "한쪽은 구멍, 한쪽은 핀. 보드의 25번 핀과 GND 핀에 씌우고 핀 끝은 브레드보드에" }
   - { name: 점퍼선(M-M) 1가닥, note: "부저 − 다리 줄 → 브레드보드 − 줄" }
+  - { name: 확장 보드 (38핀), board: expansion, note: "DevKit 38핀을 노란 암 헤더에 꽂아요. JUMP 점퍼는 평소 자리(V–3.3V) 그대로" }
   - { name: USB 선, note: 충전 전용 말고 데이터가 되는 선 }
 wiring:
   image: images/wiring-breadboard.svg
   caption: "부저 + 다리 → 20번 줄 → 노란 선 → 보드 위쪽 io25 핀. − 다리 → 23번 줄 → 점퍼선 → − 줄 → 검은 선 → GND. 1단계는 능동 부저, 2단계부터는 같은 자리에 수동 부저를 꽂아요"
   captionDevkit: "부저 + 다리 → 13번 줄 → 노란 선 → D25 핀. − 다리 → 16번 줄 → 점퍼선 → − 줄 → 검은 선 → GND. 1단계는 능동 부저, 2단계부터는 같은 자리에 수동 부저를 꽂아요"
+  captionExpansion: "부저 + 다리 → 19번 줄 → 노란 선 → 위 줄 P25 칸 S 핀. − 다리 → 22번 줄 → 점퍼선 → − 줄 → 검은 선 → 위 줄 GND 칸 S 핀. 1단계는 능동 부저, 2단계부터는 같은 자리에 수동 부저를 꽂아요"
 principle:
   image: images/frequency-wave.svg
   body: |
@@ -108,6 +110,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "먼저 능동 부저(검은 스티커)를 꽂아요. + 다리는 io25 핀, − 다리는 GND 로 가요"
           captionDevkit: "먼저 능동 부저(검은 스티커)를 꽂아요. + 다리는 D25 핀, − 다리는 GND 로 가요"
+          captionExpansion: "먼저 능동 부저(검은 스티커)를 꽂아요. + 다리는 P25 칸 S 핀, − 다리는 GND 칸 S 핀으로 가요"
         body: |
           아직 실행하지 않아요. 먼저 **능동 부저**부터 울려 봐요. 능동 부저는 안에 떨림 회로가 있어서, 1장의 LED 처럼 `1`(켜기)과 `0`(끄기)만 보내면 돼요.
 
@@ -132,6 +135,7 @@ parts:
           image: images/wiring-breadboard.svg
           caption: "부저 + 다리 → 20번 줄 → io25 핀, − 다리 → 23번 줄 → − 줄 → GND"
           captionDevkit: "부저 + 다리 → 13번 줄 → D25 핀, − 다리 → 16번 줄 → − 줄 → GND"
+          captionExpansion: "부저 + 다리 → 19번 줄 → P25 칸 S 핀, − 다리 → 22번 줄 → − 줄 → 위 줄 GND 칸 S 핀"
         body: |
           USB 를 뺀 채 **능동 부저**를 브레드보드에 꽂아요. 능동 부저는 다리 방향이 있어요. 스티커의 **+** 쪽(긴 다리)이 25번 핀으로, 다른 다리가 GND 로 가야 해요. 줄 번호는 배선 그림과 아래 표를 봐요.
 

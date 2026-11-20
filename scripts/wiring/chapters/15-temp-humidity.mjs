@@ -1,9 +1,11 @@
 // 센서 S12 "온습도 센서" — DHT11 모듈(G V S) S → 13번, LED(26번) + 220Ω (1장과 같은 자리).
 // Plus: DHT11 은 F-F 3가닥으로 io13 기둥의 S · V · G 에 바로. 세 선은 기둥 아래로 나와 위 G 줄과 ESP32 사이 빈 띠를 지나 보드 오른쪽 모듈로.
 // DevKit: DHT11 은 보드 아래(핀이 위로, 그래서 왼→오 S V G): V → 3V3, G → GND(아래 줄) 바로, S → 보드 왼쪽 바깥 길로 D13.
-import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc } from "../common.mjs";
+// 확장 보드: DHT11 은 F-F 3가닥으로 위 줄 P13 칸 S · V · G 에 바로(보드 위 왼쪽에서 내려온다), LED 는 P26 칸 위 브레드보드. 점퍼 3.3V(평소 자리).
+import { COLORS as C, compose, connectionTable, ffWire, mfWire, mmWire, svgDoc, wire } from "../common.mjs";
 import { makePlus } from "../boards/plus.mjs";
 import { makeDevkit } from "../boards/devkit.mjs";
+import { makeExpansion } from "../boards/expansion.mjs";
 import { breadboard, led, module, resistor } from "../parts.mjs";
 
 /**
@@ -86,6 +88,48 @@ function devkit() {
   return { body: compose(b.draw(used), parts, wires, [table.svg]), height: table.bottom };
 }
 
+/**
+ * 확장 보드 S · V · G 기둥 한 칸에 선 셋을 모아 꽂는 길: from 에서 세로로 lane 까지, 가로로 x 까지, 다시 세로로 핀 높이까지 와서 핀에.
+ * 셋을 G → V → S 차례로 그리면 바깥 핀(S)의 선 머리가 안쪽 핀으로 가는 선을 덮어, 세 선이 기둥에 묶여 꽂힌 모습이 된다.
+ * 13 · 14 장(가변저항 · 포토레지스터를 칸 S · V · G 에)도 쓴다. ends: ["f","f"] 모듈 핀, ["m","f"] 브레드보드 구멍
+ */
+export function columnRun(from, pin, color, { lane, x, ends = ["f", "f"] }) {
+  return wire(from, pin, color, { via: [{ x: from.x, y: lane }, { x, y: lane }, { x, y: pin.y }], style: "orth", ends });
+}
+
+/* ───── 확장 보드(38핀 확장 보드 + DevKit) ───── */
+function expansion() {
+  const bb = breadboard({ x: 276, y: 8, cols: 15, rails: { top: false, bottom: true } });
+  const b = makeExpansion({ x: 22, y: bb.y + bb.h + 30, jumper: "3V3" });
+  const parts = [], wires = [], used = [];
+  const p26 = b.gpio(26), gnd = b.power("GND");
+  const k = Math.round((p26.x - (bb.x + 28)) / 16) + 1; // P26 칸 바로 위 열
+  const circ = ledCircuit(bb, k);
+  wires.push(mfWire(p26, circ.signalHole, C.yellow), mfWire(gnd, bb.rail("bottom", "-", bb.nearestCol(gnd.x, true)), C.black), circ.jumper);
+  used.push(p26, gnd);
+
+  // DHT11: 브레드보드 왼쪽, 핀이 아래로 (왼→오 G V S). 세 선은 보드 위 빈 띠에서 오른쪽으로 꺾어 P13 칸으로
+  const t = b.triple(13);
+  const dht = dht11(120, 150, { titleAt: { x: 158, y: 136 } });
+  const top = b.bounds.y;
+  wires.push(
+    columnRun(dht.pins.G, t.G, C.black, { lane: top - 8, x: t.G.x - 4 }),
+    columnRun(dht.pins.V, t.V, C.red, { lane: top - 16, x: t.V.x }),
+    columnRun(dht.pins.S, t.S, C.blue, { lane: top - 24, x: t.S.x + 4 }),
+  );
+  used.push(t.S, t.V, t.G);
+
+  parts.push(bb.svg, ...circ.svg, dht.svg);
+  const rows = [
+    { colors: [C.black, C.red, C.blue], part: "DHT11 G · V · S", to: "위 줄 P13 칸 G · V · S" },
+    { color: C.yellow, part: "P26 칸 S 핀", to: `${k}번 줄 → 220Ω 저항 → ${k - 5}번 줄 LED 긴 다리(+)` },
+    { color: C.black, part: `LED 짧은 다리(−) ${k - 6}번 줄`, to: "− 줄 → 위 줄 GND 칸 S 핀" },
+  ];
+  const table = connectionTable(b.bounds.y + b.bounds.h + 12, "이렇게 꽂아요 — DHT11 은 보드에 바로, LED 는 브레드보드에", rows, b.legend);
+  const title = `확장 보드(ESP32 38핀 확장 보드 + DevKit) 온습도 센서 배선도: DHT11 모듈의 G · V · S 를 위 줄 P13 칸의 G · V · S 핀에 F-F 듀폰선 세 가닥으로 바로. LED: 위 줄 P26 칸 S 핀 → 브레드보드 ${k}번 줄 → 220Ω 저항 → ${k - 5}번 줄 긴 다리(+), 짧은 다리(−) ${k - 6}번 줄 → − 줄 → 위 줄 GND 칸 S 핀. JUMP 점퍼는 3.3V 쪽`;
+  return svgDoc("wthx", title, compose(b.draw(used), parts, wires, [table.svg]), table.bottom);
+}
+
 const T = {
   plus: "온습도 센서 배선도(ESP32 Plus 확장 보드): DHT11 모듈의 G · V · S 를 보드 위쪽 io13 기둥의 G · V · S 에 F-F 듀폰선 세 가닥으로 바로. LED 는 1장과 같은 자리: 보드 위쪽 io26 → 브레드보드 22번 줄 → 220Ω 저항 → 17번 줄 긴 다리(+), 짧은 다리(−) 16번 줄 → − 줄 → 보드 GND",
   devkit: "기본 보드(ESP32 DevKit 38핀) 온습도 센서 배선도: DHT11 모듈 V → 3V3, G → GND(아래 줄), S → 보드 바깥으로 돌아 D13 에 F-F 듀폰선으로 바로. LED 는 1장과 같은 자리: D26 → 브레드보드 11번 줄 → 220Ω 저항 → 6번 줄 긴 다리(+), 짧은 다리(−) 5번 줄 → − 줄 → 보드 GND",
@@ -95,5 +139,6 @@ export default {
   "wiring-breadboard.svg": {
     plus: () => { const r = plus(); return svgDoc("wth", T.plus, r.body, r.height); },
     devkit: () => { const r = devkit(); return svgDoc("wthk", T.devkit, r.body, r.height); },
+    expansion,
   },
 };
