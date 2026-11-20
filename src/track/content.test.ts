@@ -341,3 +341,44 @@ describe("src/track 은 React·Blockly 에 기대지 않는다", () => {
     });
   }
 });
+
+describe("확장 보드 그림 (.expansion.svg)", () => {
+  const all = () => chapterDirs().map((dir) => {
+    const { yaml, files, images } = readDir(dir);
+    return { dir, ch: parseChapter(yaml, files, dir, images), images };
+  });
+  const figures = (ch: LoadedChapter) => [
+    ...(ch.wiring ? [{ at: "wiring", f: ch.wiring }] : []),
+    ...allSteps(ch).flatMap((s) => (s.scene ? [{ at: s.id, f: s.scene }] : [])),
+  ];
+  const variant = (ref: string) => ref.replace(/\.svg$/, ".expansion.svg");
+
+  it("확장 보드판이 있는 그림의 설명이 보드마다 다르면(captionDevkit) captionExpansion 도 있고, captionExpansion 은 확장 보드판이 있는 그림에만", () => {
+    for (const { dir, ch, images } of all()) {
+      for (const { at, f } of figures(ch)) {
+        const has = images.includes(variant(f.image));
+        if (has && f.captionDevkit) expect(f.captionExpansion, `${dir} ${at}: ${variant(f.image)} 의 captionExpansion`).toBeTruthy();
+        if (f.captionExpansion) expect(has, `${dir} ${at}: captionExpansion 이 있는데 ${variant(f.image)} 가 없음`).toBe(true);
+      }
+    }
+  });
+
+  it("확장 보드 그림: 제목은 「확장 보드」 로 시작, 점퍼 표시가 있고 한 챕터 안에서 모두 같다. 확장 보드 배선도가 있으면 준비물에 board: expansion", () => {
+    for (const { dir, ch, images } of all()) {
+      const xs = images.filter((r) => r.endsWith(".expansion.svg"));
+      if (!xs.length) continue;
+      const jumpers = new Set<string>();
+      for (const ref of xs) {
+        const svg = chapterImage(dir, ref)!;
+        expect(/<title[^>]*>([^<]*)</.exec(svg)?.[1].trim().startsWith("확장 보드"), `${dir}/${ref} 제목`).toBe(true);
+        const j = /data-expansion-jumper="(3V3|5V)"/.exec(svg)?.[1];
+        expect(j, `${dir}/${ref} 점퍼 표시`).toBeTruthy();
+        jumpers.add(j!);
+      }
+      expect([...jumpers], `${dir}: 확장 보드 그림의 점퍼가 서로 다름`).toHaveLength(1);
+      if (ch.wiring && images.includes(variant(ch.wiring.image))) {
+        expect(ch.materials?.some((m) => m.board === "expansion"), `${dir}: board: expansion 준비물`).toBe(true);
+      }
+    }
+  });
+});

@@ -402,7 +402,7 @@ function StageCamera() {
     // 실제로 놓이는 것들의 바깥 점: 보드(USB 포함) · 부품 둘레 · 선의 길
     const rectPts = (x: number, y: number, w: number, h: number, hgt: number) =>
       [x, x + w].flatMap((px) => [y, y + h].flatMap((py) => [0, hgt].map((yy) => new THREE.Vector3(L.X(px), yy, L.Z(py)))));
-    const boardPts = scene.boards.map((b) => [...rectPts(b.x, b.y, b.w, b.h, 30), ...rectPts(b.usb.x, b.usb.y, b.usb.w, b.usb.h, 30)]);
+    const boardPts = scene.boards.map((b) => [...rectPts(b.x, b.y, b.w, b.h, 30), ...("usb" in b ? rectPts(b.usb.x, b.usb.y, b.usb.w, b.usb.h, 30) : [])]);
     const partPts = scene.parts.map((p) => { const s = partSpot(p, L); return box(s.at, s.r * 0.8, 30); });
     const wirePts = scene.wires.map((_, i) => orientedWire(scene, L, i).curve.getPoints(12));
     const everything = [...boardPts.flat(), ...partPts.flat(), ...wirePts.flat()];

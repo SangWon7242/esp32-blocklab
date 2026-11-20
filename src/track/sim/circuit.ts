@@ -12,18 +12,21 @@ import type { Part3D, Pt, Scene3D } from "../wiring3d";
 
 export type PinKind = { kind: "gpio"; n: number } | { kind: "gnd" } | { kind: "v33" } | { kind: "v5" } | { kind: "other" };
 
-/** 보드 핀 이름 → 종류. Plus: "io13" · "io13 S" · "io13 V" · "I2C SDA" · "SCL" … DevKit: "D13" · "VP" · "RX2" … */
+/**
+ * 보드 핀 이름 → 종류. Plus: "io13" · "io13 S" · "io13 V" · "I2C SDA" · "SCL" … DevKit: "D13" · "VP" · "RX2" …
+ * 확장 보드: "P13 S" · "P13 V" · "SVP S" · "D21" · "VCC" (V 줄 · I2C VCC 는 점퍼 전압이지만 전원이라 v5 로 본다)
+ */
 export function pinKind(label: string): PinKind {
   const l = label.trim();
   if (/GND|\bG$/.test(l)) return { kind: "gnd" };
   if (/3V3/.test(l)) return { kind: "v33" };
-  if (/5V|VIN|\bV$/.test(l)) return { kind: "v5" };
+  if (/5V|VIN|VCC|\bV$/.test(l)) return { kind: "v5" };
   if (/SDA/.test(l)) return { kind: "gpio", n: 21 };
   if (/SCL/.test(l)) return { kind: "gpio", n: 22 };
-  const alias: Record<string, number> = { VP: 36, VN: 39, RX2: 16, TX2: 17, RX0: 3, TX0: 1, RX: 3, TX: 1 };
+  const alias: Record<string, number> = { VP: 36, VN: 39, SVP: 36, SVN: 39, RX2: 16, TX2: 17, RX0: 3, TX0: 1, RX: 3, TX: 1 };
   const word = l.split(/[\s(]/)[0];
   if (word in alias) return { kind: "gpio", n: alias[word] };
-  const m = /^(?:io|D)(\d+)/.exec(l);
+  const m = /^(?:io|D|P)(\d+)/.exec(l);
   if (m) return { kind: "gpio", n: Number(m[1]) };
   return { kind: "other" };
 }

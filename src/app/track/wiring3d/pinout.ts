@@ -54,8 +54,8 @@ export const ADC2_NOTE = "ADC2 핀은 WiFi 를 켜면 아날로그 값을 읽을
 
 /** 보드에 적힌 이름 → 핀 정보 */
 export function pinInfo(label: string): PinInfo {
-  const l = label.replace(/^io\s*/i, "").replace(/^D(?=\d)/, "").trim();
-  const alias: Record<string, number> = { VP: 36, VN: 39, TX: 1, TX0: 1, RX: 3, RX0: 3, RX2: 16, TX2: 17, CLK: 6, D0: 7, D1: 8, D2: 9, D3: 10, CMD: 11, SCL: 22, SDA: 21 };
+  const l = label.replace(/^io\s*/i, "").replace(/^[DP](?=\d)/, "").trim();
+  const alias: Record<string, number> = { VP: 36, VN: 39, SVP: 36, SVN: 39, TX: 1, TX0: 1, RX: 3, RX0: 3, RX2: 16, TX2: 17, CLK: 6, D0: 7, D1: 8, D2: 9, D3: 10, SD0: 7, SD1: 8, SD2: 9, SD3: 10, CMD: 11, SCL: 22, SDA: 21 };
   if (/^(5V|VIN)$/.test(l)) return { label, gpio: null, kind: "power", tags: ["5V"], note: "USB 로 켜면 5V 가 나와요. 모터 · 초음파 센서처럼 힘이 필요한 부품에 써요." };
   if (/^(3V3|3\.3V)$/.test(l)) return { label, gpio: null, kind: "power", tags: ["3.3V"], note: "센서 대부분은 3.3V 로 충분해요." };
   if (/^GND$/.test(l)) return { label, gpio: null, kind: "gnd", tags: ["0V"] };

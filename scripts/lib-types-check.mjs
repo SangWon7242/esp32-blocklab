@@ -82,9 +82,11 @@ const codeOnly: LabViewProps = { initialProgram: { code: "" }, codeRef: null };
 const noCode: LabViewProps = { initialProgram: { blocksJson: {} } };
 // @ts-expect-error title 은 글
 const badTitle: LabViewProps = { initialProgram: { code: "", title: 1 } };
-// 수업 보드 고르기: BoardId 는 "plus" | "devkit", 준비물 board·그림 captionDevkit 이 Chapter 타입에 있다
+// 수업 보드 고르기: BoardId 는 "plus" | "devkit" | "expansion", 준비물 board·그림 captionDevkit·captionExpansion 이 Chapter 타입에 있다
 const boardChecks: [NotAny<BoardId>, NotAny<typeof useBoardChoice>, NotAny<typeof setBoardChoice>, NotAny<typeof BoardSelect>] = [true, true, true, true];
 const devkit: BoardId = "devkit";
+const expansionBoard: BoardId = "expansion";
+const expansionCaption = (c: Chapter): string | undefined => c.wiring?.captionExpansion;
 // @ts-expect-error 없는 보드
 const badBoard: BoardId = "uno";
 const boardOfFirst = (c: Chapter): BoardId | undefined => c.materials?.[0]?.board;
@@ -113,7 +115,7 @@ const slotChecks: [NotAny<HostSlots>, NotAny<NonNullable<HostProps["slots"]>>] =
 const slots: HostProps["slots"] = { headerStart: "메뉴", headerEnd: null };
 // @ts-expect-error 끼움 자리는 headerStart·headerEnd 만
 const badSlots: HostSlots = { footer: "x" };
-export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, badBoard, boardOfFirst, devkitCaption, boardLabel, coachChecks, coachProps, coachElement, badSource, badProposal, slotChecks, slots, badSlots };
+export { checks, rec, badStatus, badAttempts, progress, badVersion, type, badType, track, firstStep, labChecks, sameProgram, codeOnly, noCode, badTitle, boardChecks, devkit, expansionBoard, expansionCaption, badBoard, boardOfFirst, devkitCaption, boardLabel, coachChecks, coachProps, coachElement, badSource, badProposal, slotChecks, slots, badSlots };
 `,
   );
   tscIn(hub, "zod 없는 폴더");

@@ -62,9 +62,10 @@ export function loadChapter(root: string, id: string): LoadedSlideChapter {
 }
 
 /**
- * 그 보드에 맞춘 챕터 (--board devkit): 그림은 같은 이름의 .devkit.svg 가 있으면 그것으로, 설명은 captionDevkit,
- * 준비물은 board 가 그 보드이거나 없는 것만. plus(기본)는 그림·설명 그대로, devkit 전용 준비물만 빠진다.
+ * 그 보드에 맞춘 챕터 (--board devkit | expansion): 그림은 같은 이름의 보드 그림(.devkit.svg · .expansion.svg, expansion 은 없으면 .devkit.svg)이
+ * 있으면 그것으로, 설명은 captionDevkit · captionExpansion, 준비물은 board 가 그 보드이거나 없는 것만. plus(기본)는 그림·설명 그대로.
+ * 확장 보드 그림이 점퍼 5V 면 설명 끝에 점퍼 안내를 붙인다.
  */
 export function chapterForSlideBoard(loaded: LoadedSlideChapter, board: BoardId): LoadedSlideChapter {
-  return { ...loaded, chapter: chapterForBoard(loaded.chapter, board, (ref) => ref in loaded.images) };
+  return { ...loaded, chapter: chapterForBoard(loaded.chapter, board, (ref) => ref in loaded.images, { svgOf: (ref) => loaded.images[ref] }) };
 }

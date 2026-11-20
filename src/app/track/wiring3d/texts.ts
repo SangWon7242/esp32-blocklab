@@ -34,7 +34,31 @@ export const TEXT = {
   breadboard: "같은 번호 줄의 다섯 칸은 속에서 서로 이어져 있어요. + − 줄은 옆으로 길게 이어져 있어요.",
   bootLed: "보드에 붙어 있는 작은 LED 예요. 2번 핀을 켜면 함께 켜져요.",
   button: "EN 은 보드를 처음부터 다시 시작하고, BOOT 는 새 프로그램을 받을 때 써요.",
+  flash: "보드 안의 저장 칩(플래시)과 이어진 핀이라 쓰지 않아요.",
+  expansion: "ESP32 를 꽂아 쓰는 확장 보드예요. 핀마다 S(신호) · V(전원) · G(접지) 세 핀이 한 기둥으로 나와 있어서 모듈 선을 바로 꽂아요.",
+  female: "ESP32 DevKit 의 다리를 꽂는 노란 구멍 줄이에요. USB 가 전원 잭 쪽을 보게 꽂아요.",
+  jumper: "노란 점퍼 캡을 어디에 꽂느냐에 따라 V 줄 전압이 정해져요. 평소에는 V–3.3V, 서보 · 초음파처럼 5V 가 필요한 수업만 5V–V 로 옮겨요.",
+  usbPower: "USB5V: 전기만 넣는 USB-C 구멍이에요. 코드는 위에 꽂은 DevKit 의 USB 로 올려요.",
+  microUsb: "전기를 넣는 마이크로 USB 구멍이에요.",
+  dcJack: "6.5~16V 어댑터로 전기를 넣는 곳이에요. 모터처럼 전기를 많이 쓰는 작품에 써요.",
+  caps: "전기를 잠깐 모아 두었다가 고르게 내보내는 콘덴서예요 (47µF 35V).",
+  powerHeader: "GND 넷, 3V 둘, 5V 둘이 모인 전원 핀이에요. 여러 부품이 전원을 나눠 쓸 때 써요.",
+  i2cHeader: "OLED 같은 I2C 부품을 꽂는 자리예요: GND · VCC · D21(SDA) · D22(SCL). VCC 는 V 줄 전압(점퍼)을 따라가요. 바깥 줄은 UART(RX · TX).",
 };
+
+/** 확장 보드 핀 이름 → 쓰임 ("P13 S" · "P13 V" · "GND S" · "VCC" · "3V3" · 점퍼 "5V" "V" "3V3") */
+export function expansionPinText(label: string, used: boolean, jumper: "3V3" | "5V", row?: string): string {
+  const volt = jumper === "5V" ? "5V" : "3.3V";
+  const col = label.replace(/ [SVG]$/, "");
+  const text =
+    row === "jump" ? TEXT.jumper
+    : / V$/.test(label) || label === "VCC" ? `V 줄 전원 핀이에요. 전압은 JUMP 점퍼가 정해요 (지금 ${volt}).`
+    : / G$/.test(label) || /^GND/.test(label) ? TEXT.gnd
+    : /^(CMD|CLK|SD\d)$/.test(col) ? TEXT.flash
+    : /^SV[PN]$/.test(col) ? TEXT.inputOnly
+    : pinText(col, false);
+  return used ? `${text} 이번에 선을 꽂는 핀이에요.` : text;
+}
 
 export const MODULE: Record<string, { name: string; text: string }> = {
   ultrasonic: { name: "초음파 센서", text: "귀에 안 들리는 소리를 쏘고 메아리가 돌아오는 시간을 재서 거리를 알아내요." },

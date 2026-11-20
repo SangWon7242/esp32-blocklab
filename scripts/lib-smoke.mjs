@@ -50,7 +50,8 @@ assert.equal(lib.checkAiCardCode(lib.aiCardStarterCode()).ok, true);
 assert.equal(lib.checkAiCardCode("").ok, false);
 
 // 수업 보드: window 없는 Node 에서도 부를 수 있다 (저장은 건너뛴다)
-assert.deepEqual(lib.BOARD_IDS, ["plus", "devkit"]);
+assert.deepEqual(lib.BOARD_IDS, ["plus", "devkit", "expansion"]);
+assert.equal(lib.BOARD_LABELS.expansion, "확장 보드 (DevKit 38핀)");
 assert.equal(typeof lib.BOARD_LABELS.devkit, "string");
 lib.setBoardChoice("devkit");
 lib.setBoardChoice("plus");

@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { BoardId } from "@/track/board";
 import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
 import { useBoardChoice } from "../board/boardChoice";
-import { Illustration, resolveBoardImage } from "./Illustration";
+import { Illustration, JumperNotice, resolveBoardImage, shownJumperNotice } from "./Illustration";
 
 // three.js 는 3D 탭을 처음 열 때만 불러온다
 const Wiring3DView = lazy(() => import("./wiring3d/Wiring3DView").then((m) => ({ default: m.Wiring3DView })));
@@ -44,11 +44,14 @@ export function WiringFigure({ chapterId, image, caption, className, board: boar
   }, [tab, has3d, chapterId, shown]);
 
   const onUnsupported = useCallback(() => { setUnsupported(true); setTab("picture"); }, []);
-  const picture = <Illustration chapterId={chapterId} image={image} caption={caption} className={className} board={boardProp} zoomable />;
+  const jumper = shownJumperNotice(chapterId, shown);
+  const picture = <Illustration chapterId={chapterId} image={image} caption={caption} className={className} board={boardProp} zoomable showJumper={!has3d} />;
   if (!has3d) return picture;
 
   return (
     <Tabs value={tab} onValueChange={setTab} data-testid="wiring-figure">
+      {/* 확장 보드 점퍼 5V 안내: 그림 · 3D 어느 쪽을 보든 한 번 */}
+      {jumper && <JumperNotice text={jumper} />}
       <TabsList>
         <TabsTrigger value="picture"><ImageIcon className="size-4" />그림</TabsTrigger>
         <TabsTrigger value="3d" data-testid="wiring-3d-tab"><Box className="size-4" />3D 로 보기</TabsTrigger>

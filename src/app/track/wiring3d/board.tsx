@@ -6,11 +6,12 @@ import { Box, Cyl, Decal, Part, roundedBox } from "./kit";
 import { BB_H, HEADER_H, PCB_H, PIN_LEN, type Layout } from "./layout";
 import { K, svgToBoard } from "./plusLayout";
 import { Devkit38 } from "./devkit38";
+import { ExpansionBoard, SeatedDevkit } from "./expansion";
 import { COLOR, noOutline, toon, toonOwn } from "./materials";
 import { useViewerApi } from "./store";
 import { pinText, TEXT } from "./texts";
 
-type BoardData = Scene3D["boards"][number];
+type BoardData = Extract<Scene3D["boards"][number], { kind: "plus" | "devkit" }>;
 type BB = Scene3D["breadboards"][number];
 
 /** 모서리가 둥근 두꺼운 판 (윗면 · 옆면 두 재질) */
@@ -305,7 +306,13 @@ function paintPlusSilk(g: CanvasRenderingContext2D, b: BoardData) {
   g.restore();
 }
 
-export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index: number; blueLed: THREE.MeshStandardMaterial }) {
+/** 보드 하나: ESP32 Plus · 기본 보드 DevKit 38핀 · 38핀 확장 보드 (그 위에 꽂힌 DevKit 은 확장 보드 높이에) */
+export function Board({ b, L, index, blueLed }: { b: Scene3D["boards"][number]; L: Layout; index: number; blueLed: THREE.MeshStandardMaterial }) {
+  if (b.kind === "expansion") return <ExpansionBoard b={b} L={L} index={index} />;
+  return <ChipBoard b={b} L={L} index={index} blueLed={blueLed} />;
+}
+
+function ChipBoard({ b, L, index, blueLed }: { b: BoardData; L: Layout; index: number; blueLed: THREE.MeshStandardMaterial }) {
   const api = useViewerApi();
   const devkit = b.kind === "devkit";
   const kz = devkit ? L.F : 1;
@@ -341,6 +348,7 @@ export function Board({ b, L, index, blueLed }: { b: BoardData; L: Layout; index
   };
 
   // 기본 보드: ESP32-DevKitC 38핀 실물 모양 (devkit38.tsx)
+  if (devkit && b.seatedOn === "expansion") return <SeatedDevkit b={b} L={L} index={index} blueLed={blueLed} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} />;
   if (devkit) return <Devkit38 b={b} L={L} index={index} blueLed={blueLed} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} />;
   return (
     <group>

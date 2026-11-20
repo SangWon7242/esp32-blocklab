@@ -13,21 +13,23 @@ import { defaultInputs, Simulator } from "./engine";
 
 const ROOT = join(import.meta.dirname, "../../../content/chapters");
 
-/** 그 챕터 배선도 가운데 3D 장면이 있는 첫 그림 (board: plus | devkit) */
-export function sceneFor(chapterId: string, board: "plus" | "devkit" = "plus"): Scene3D | undefined {
+type SimBoard = "plus" | "devkit" | "expansion";
+
+/** 그 챕터 배선도 가운데 3D 장면이 있는 첫 그림 (board: plus | devkit | expansion) */
+export function sceneFor(chapterId: string, board: SimBoard = "plus"): Scene3D | undefined {
   const dir = join(ROOT, chapterId, "images");
   if (!existsSync(dir)) return undefined;
   const yaml = readFileSync(join(ROOT, chapterId, "chapter.yaml"), "utf8");
   const image = /^wiring:\s*\n\s+image:\s*images\/([\w.-]+)\.svg/m.exec(yaml)?.[1];
   const names = image ? [image] : [];
   for (const n of names) {
-    const f = join(dir, `${n}${board === "devkit" ? ".devkit" : ""}.3d.json`);
+    const f = join(dir, `${n}${board === "plus" ? "" : `.${board}`}.3d.json`);
     if (existsSync(f)) return JSON.parse(readFileSync(f, "utf8")) as Scene3D;
   }
   return undefined;
 }
 
-export function simFor(chapterId: string, board: "plus" | "devkit" = "plus"): Simulator {
+export function simFor(chapterId: string, board: SimBoard = "plus"): Simulator {
   const scene = sceneFor(chapterId, board) ?? sceneFor(chapterId, board === "plus" ? "devkit" : "plus");
   if (!scene) throw new Error(`${chapterId}: 3D 장면이 없어요`);
   return new Simulator(readDevices(scene), behaviorFor(chapterId), defaultInputs());

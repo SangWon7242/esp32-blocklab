@@ -126,6 +126,19 @@ describe("슬라이드 내보내기", () => {
     expect(plus.body).not.toContain("기본보드전용부품");
   }, 60_000);
 
+  it("--board expansion: 확장 보드 그림·captionExpansion·확장 보드 준비물, 점퍼 5V 안내가 설명 끝에 (실제 10장)", () => {
+    const loaded = loadChapter(ROOT, "10-auto-door");
+    const x = chapterForSlideBoard(loaded, "expansion").chapter;
+    expect(x.wiring?.image).toBe("images/wiring-door.expansion.svg");
+    expect(x.wiring?.caption).toMatch(/^JUMP 점퍼는 5V 쪽\..*\(이번 수업은 점퍼를 5V 쪽으로 옮겨요 \(끝나면 3\.3V 로\)\)$/);
+    expect(x.materials?.map((m) => m.name)).toContain("확장 보드 (38핀)");
+    expect(x.materials?.map((m) => m.name)).not.toContain("점퍼선(M-M) 3가닥");
+    // 1장은 점퍼 3.3V (평소 자리) — 안내 없음
+    const led = chapterForSlideBoard(loadChapter(ROOT, "01-led"), "expansion").chapter;
+    expect(led.wiring?.image).toBe("images/wiring-led.expansion.svg");
+    expect(led.wiring?.caption).not.toContain("점퍼를 5V");
+  });
+
   it("한 문단에 문단 속성(pPr)은 하나뿐이고, 동아시아 글꼴은 한글 charset", async () => {
     const { all } = await exportChapter("01-led");
     for (const [, para] of all.matchAll(/<a:p>([\s\S]*?)<\/a:p>/g)) expect((para.match(/<a:pPr\b/g) ?? []).length).toBeLessThanOrEqual(1);

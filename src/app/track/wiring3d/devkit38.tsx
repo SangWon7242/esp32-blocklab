@@ -17,11 +17,15 @@ import { pinText, TEXT } from "./texts";
  * 좌표는 보드 왼쪽 위에서 잰 배선도 px (가로 470 × 세로 150, 세로는 3D 에서 L.F 배로 늘어난다).
  */
 
-type BoardData = Scene3D["boards"][number];
+type BoardData = Extract<Scene3D["boards"][number], { kind: "plus" | "devkit" }>;
 
-export function Devkit38({ b, L, index, blueLed, pressEn, releaseEn, enCap }: {
+/**
+ * toWorld: 확장 보드에 꽂힌 DevKit 처럼 줄인 그룹 안에 그릴 때, 핀에 올린 표시(장면 좌표)로 옮기는 함수와 그 배율 (SeatedDevkit)
+ */
+export function Devkit38({ b, L, index, blueLed, pressEn, releaseEn, enCap, toWorld }: {
   b: BoardData; L: Layout; index: number; blueLed: THREE.MeshStandardMaterial;
   pressEn: (e: ThreeEvent<PointerEvent>) => void; releaseEn: () => void; enCap: RefObject<THREE.Mesh | null>;
+  toWorld?: { at: (v: THREE.Vector3) => THREE.Vector3; scale: number };
 }) {
   const api = useViewerApi();
   const F = L.F;
@@ -80,7 +84,9 @@ export function Devkit38({ b, L, index, blueLed, pressEn, releaseEn, enCap }: {
     if (st.dragging || e.instanceId === undefined) return;
     const p = live[e.instanceId];
     if (st.hover?.id === hid(e.instanceId)) return;
-    st.set({ hover: { id: hid(e.instanceId), label: p.label, text: pinText(p.label, p.used), marks: [new THREE.Vector3(L.X(p.x), top + 1.2, L.Z(p.y))], markSize: [9, 2, 9 * F * 0.6] } });
+    const mark = new THREE.Vector3(L.X(p.x), top + 1.2, L.Z(p.y));
+    const k = toWorld?.scale ?? 1;
+    st.set({ hover: { id: hid(e.instanceId), label: p.label, text: pinText(p.label, p.used), marks: [toWorld ? toWorld.at(mark) : mark], markSize: [9 * k, 2 * k, 9 * F * 0.6 * k] } });
     st.invalidate();
   };
   const out = () => { const st = api.getState(); if (st.hover?.id.startsWith(`dk${index}:`)) { st.set({ hover: null }); st.invalidate(); } };

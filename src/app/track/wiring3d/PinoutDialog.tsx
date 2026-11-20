@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { Scene3D } from "@/track/wiring3d";
 import { ADC2_NOTE, KIND, pinInfo, type PinInfo, type PinKind } from "./pinout";
 import { DK38_BOT, DK38_TOP, K } from "./plusLayout";
+import { TEXT } from "./texts";
 
 /*
  * 핀 배치도 (한글): 지금 보드(기본 보드 38핀 · ESP32 Plus)를 위에서 본 그림과, 핀마다 할 수 있는 일.
@@ -151,6 +152,65 @@ function PlusSheet({ board, onHit, hit }: { board: Board | undefined; onHit: (h:
   );
 }
 
+/* ───────── 38핀 확장 보드: 배선도 기록 그대로 (위에서 본 모습), S/V/G 칸마다 ───────── */
+type ExBoard = Extract<Board, { kind: "expansion" }>;
+function expansionInfo(p: ExBoard["pins"][number], jumper: ExBoard["jumper"]): PinInfo {
+  const volt = jumper === "5V" ? "5V" : "3.3V";
+  const col = p.label.replace(/ [SVG]$/, "");
+  if (p.row === "jump") return { label: `JUMP ${p.label === "3V3" ? "3.3V" : p.label}`, gpio: null, kind: "power", tags: [], note: TEXT.jumper };
+  if (p.row === "V" || p.label === "VCC") return { label: p.row === "V" ? p.label : `${p.row?.toUpperCase()} VCC`, gpio: null, kind: "power", tags: [volt], note: `V 줄 전원이에요. 전압은 JUMP 점퍼가 정해요 (지금 ${volt}). I2C 헤더 VCC 도 같아요.` };
+  if (p.row === "G" || /^GND/.test(p.label)) return { ...pinInfo("GND"), label: p.label };
+  const i = pinInfo(col === "3V3" ? "3V3" : col);
+  return { ...i, label: p.row === "i2c" || p.row === "uart" ? `${p.row.toUpperCase()} ${col}` : p.row === "pwr" ? `전원 헤더 ${col}` : p.label };
+}
+
+function ExpansionSheet({ board, onHit, hit }: { board: ExBoard; onHit: (h: Hit) => void; hit: Hit | null }) {
+  const b = board;
+  const vx = b.x - 34, vy = b.y - 64, vw = b.w + 50, vh = b.h + 128;
+  const sPins = b.pins.filter((p) => p.row === "S");
+  const topS = Math.min(...sPins.map((p) => p.y));
+  const dk = b.devkit;
+  const female = b.female.filter((f) => f.row !== "top-inner");
+  const fill = (p: ExBoard["pins"][number]) => (p.row === "S" ? "#facc15" : p.row === "V" ? "#dc2626" : p.row === "G" ? "#27272a" : p.fill);
+  return (
+    <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} className="mx-auto block h-auto w-full min-w-[820px] max-w-[1100px]" role="img" aria-label="확장 보드 (DevKit 38핀) 핀 배치도">
+      <path d={`M${b.x} ${b.y + 4} L${b.x + 4} ${b.y} H${b.x + b.w - 14} L${b.x + b.w} ${b.y + 14} V${b.y + b.h - 14} L${b.x + b.w - 14} ${b.y + b.h} H${b.x + 4} L${b.x} ${b.y + b.h - 4} Z`} fill="#5f1fa3" />
+      {[...new Set(female.map((f) => f.y))].map((y) => {
+        const xs = female.filter((f) => f.y === y).map((f) => f.x);
+        return <rect key={y} x={Math.min(...xs) - 11} y={y - 10} width={Math.max(...xs) - Math.min(...xs) + 22} height={20} rx={2} fill="#f5c518" />;
+      })}
+      <rect x={dk.x + 2 * dk.scale} y={dk.y + 10 * dk.scale} width={418 * dk.scale} height={130 * dk.scale} rx={8} fill="#1d1d20" opacity={0.92} />
+      <text x={dk.x + 220 * dk.scale} y={dk.y + 75 * dk.scale} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={800} fill="#f8f9fa">DevKit 38핀 (노란 암 헤더에 꽂아요)</text>
+      <text x={dk.x - 6} y={dk.y + 75 * dk.scale} textAnchor="end" dominantBaseline="middle" fontSize={11} fontWeight={700} fill="#f8f9fa">USB</text>
+      {b.pins.map((p, i) => {
+        const where = `x${i}`;
+        const info = expansionInfo(p, b.jumper);
+        const sel = hit?.where === where;
+        return (
+          <g key={where} className="cursor-pointer" onMouseEnter={() => onHit({ info, where })} onClick={() => onHit({ info, where })}>
+            <rect x={p.x - 9} y={p.y - 9} width={18} height={18} rx={3} fill={fill(p)} stroke={sel ? "#38bdf8" : p.used ? "#f59f00" : "#18181b"} strokeWidth={sel || p.used ? 3 : 1} />
+            <rect x={p.x - 2.5} y={p.y - 2.5} width={5} height={5} fill="#fef08a" />
+          </g>
+        );
+      })}
+      {sPins.map((p) => {
+        const up = p.y === topS, t = p.label.replace(/ S$/, ""), ty = up ? p.y - 14 : p.y + 14;
+        return <text key={p.label + p.y} x={p.x} y={ty} textAnchor={up ? "start" : "end"} dominantBaseline="middle" fontSize={11} fontWeight={800} fill={p.used ? "#fde047" : "#f8f9fa"} transform={`rotate(-90 ${p.x} ${ty})`}>{t}</text>;
+      })}
+      {/* 전원 헤더 · I2C/UART · JUMP 칸 이름 */}
+      {b.pins.filter((p) => p.row && !"SVG".includes(p.row)).map((p, i) => {
+        const pw = b.pins.filter((q) => q.row === "pwr");
+        const above = p.row === "i2c" || (p.row === "pwr" && p.y === Math.min(...pw.map((q) => q.y)));
+        const t = p.row === "jump" ? (p.label === "3V3" ? "3.3V" : p.label) : p.label === "3V3" ? "3V" : p.label;
+        return p.row === "jump"
+          ? <text key={`h${i}`} x={p.x - 13} y={p.y} textAnchor="end" dominantBaseline="middle" fontSize={10} fontWeight={800} fill="#f8f9fa">{t}</text>
+          : <text key={`h${i}`} x={p.x} y={p.y + (above ? -15 : 15)} textAnchor="middle" dominantBaseline="middle" fontSize={9} fontWeight={800} fill="#f8f9fa">{t}</text>;
+      })}
+      <text x={b.x + 8} y={b.y - 40} fontSize={12} fontWeight={700} fill="#5b6168">S 노랑 = 신호 · V 빨강 = 전원(JUMP 점퍼: 지금 {b.jumper === "5V" ? "5V" : "3.3V"}) · G 검정 = GND · 왼쪽: 전원 헤더 · JUMP · I2C/UART 헤더</text>
+    </svg>
+  );
+}
+
 export function PinoutDialog({ scene, onClose }: { scene: Scene3D; onClose: () => void }) {
   const board = scene.boards[0];
   const used = useMemo(() => usedSet(board), [board]);
@@ -161,13 +221,14 @@ export function PinoutDialog({ scene, onClose }: { scene: Scene3D; onClose: () =
     return () => window.removeEventListener("keydown", k, true);
   }, [onClose]);
   const devkit = board?.kind === "devkit";
+  const expansion = board?.kind === "expansion" ? board : undefined;
   const legend: PinKind[] = ["safe", "care", "input", "serial", "flash", "power", "gnd", "en"];
   return (
     <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#0f2239]/35 p-3 backdrop-blur-[2px]" onClick={onClose} data-testid="wiring-3d-pinout">
       <div role="dialog" aria-label="핀 배치도" className="flex max-h-full w-full max-w-[1180px] flex-col overflow-hidden rounded-2xl border bg-[#fffcf8] text-[#0f2239] shadow-[0_6px_0_rgba(15,34,57,0.2)]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 border-b px-4 py-2.5">
           <MapIcon className="size-4" />
-          <p className="text-sm font-bold">핀 배치도 · {devkit ? "기본 보드 ESP32 (38핀)" : "ESP32 Plus 확장 보드"}</p>
+          <p className="text-sm font-bold">핀 배치도 · {expansion ? "확장 보드 (DevKit 38핀)" : devkit ? "기본 보드 ESP32 (38핀)" : "ESP32 Plus 확장 보드"}</p>
           <span className="hidden text-xs text-[#5b6168] sm:inline">핀에 마우스를 올리면 설명이 나와요 · 노란 테두리는 이번 챕터에서 쓰는 핀</span>
           <Button type="button" size="icon" variant="ghost" className="ml-auto size-8" aria-label="핀 배치도 닫기" onClick={onClose}><X className="size-4" /></Button>
         </div>
@@ -177,7 +238,7 @@ export function PinoutDialog({ scene, onClose }: { scene: Scene3D; onClose: () =
           ))}
         </div>
         <div className="min-h-0 flex-1 overflow-auto bg-white px-2 py-2">
-          {devkit ? <Devkit38Sheet used={used} onHit={setHit} hit={hit} /> : <PlusSheet board={board} onHit={setHit} hit={hit} />}
+          {expansion ? <ExpansionSheet board={expansion} onHit={setHit} hit={hit} /> : devkit ? <Devkit38Sheet used={used} onHit={setHit} hit={hit} /> : <PlusSheet board={board} onHit={setHit} hit={hit} />}
         </div>
         <div className={cn("border-t px-4 py-2.5 text-sm leading-relaxed break-keep", !hit && "text-[#5b6168]")} data-testid="wiring-3d-pinout-info" aria-live="polite">
           {hit ? (

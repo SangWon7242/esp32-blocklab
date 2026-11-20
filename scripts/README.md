@@ -19,7 +19,7 @@ npm run slides -- all                  # 모든 챕터
 | `--no-images` | 그림 없이 (브라우저를 띄우지 않음) |
 | `--font <글꼴>` | 본문 글꼴. 기본: macOS 는 `Apple SD Gothic Neo`, 그 밖은 `Malgun Gothic` |
 | `--code-font <글꼴>` | 코드 글꼴. 기본: macOS 는 `Menlo`, 그 밖은 `Consolas` |
-| `--board <plus\|devkit>` | 수업 보드. 기본 `plus`(ESP32 Plus 확장 보드). `devkit` 이면 기본 보드(DevKit 38핀)용: 그림은 같은 이름의 `.devkit.svg`(없으면 기본 그림), 설명은 `captionDevkit`, 준비물은 `board: devkit` 이거나 board 가 없는 것만. 결과 `slides/<id>.devkit.pptx` |
+| `--board <plus\|devkit\|expansion>` | 수업 보드. 기본 `plus`(ESP32 Plus 확장 보드). `devkit` 이면 기본 보드(DevKit 38핀)용: 그림은 같은 이름의 `.devkit.svg`(없으면 기본 그림), 설명은 `captionDevkit`, 준비물은 `board: devkit` 이거나 board 가 없는 것만. 결과 `slides/<id>.devkit.pptx`. `expansion` 이면 확장 보드(DevKit 38핀)용: 그림 `.expansion.svg` → `.devkit.svg` → 기본, 설명 `captionExpansion` → `captionDevkit` → `caption`, 준비물 `board: expansion`(없으면 devkit 것), 점퍼 5V 그림이면 설명 끝에 점퍼 안내. 결과 `slides/<id>.expansion.pptx` |
 
 결과 `slides/<id>.pptx` 와 그림 캐시 `slides/.cache/` 는 git 에 올리지 않는다(`.gitignore`).
 

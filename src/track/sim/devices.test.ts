@@ -21,4 +21,15 @@ describe("배선 장면 → 장치 (핀 번호)", () => {
       expect(pins(a), id).toEqual(pins(b));
     }
   });
+  it("확장 보드판도 장치 핀이 기본 판과 같다 (P13 S · I2C D21 · P4 기둥 …)", () => {
+    let n = 0;
+    for (const id of readdirSync(ROOT)) {
+      const a = sceneFor(id, "plus"), x = sceneFor(id, "expansion");
+      if (!a || !x) continue;
+      n++;
+      const pins = (s: typeof a) => readDevices(s).map((d) => JSON.stringify({ ...d, part: undefined, color: undefined })).sort();
+      expect(pins(x), id).toEqual(pins(a));
+    }
+    expect(n).toBeGreaterThanOrEqual(2);
+  });
 });

@@ -4,8 +4,9 @@
  *   npm run slides -- 01-led 10-auto-door 여러 개
  *   npm run slides -- all                 모든 챕터
  * 옵션: --out <폴더>(기본 slides), --no-images(그림 빼기), --font <글꼴>, --code-font <글꼴>,
- *       --board <plus|devkit>(기본 plus. devkit 이면 기본 보드 그림 .devkit.svg·captionDevkit·기본 보드 준비물)
- * 결과: slides/<id>.pptx (--board devkit 이면 slides/<id>.devkit.pptx). 그림(SVG)은 Playwright chromium 으로 PNG 로 그려 slides/.cache/ 에 둔다.
+ *       --board <plus|devkit|expansion>(기본 plus. devkit 이면 기본 보드 그림 .devkit.svg·captionDevkit·기본 보드 준비물,
+ *       expansion 이면 확장 보드 그림 .expansion.svg·captionExpansion·확장 보드 준비물과 점퍼 안내)
+ * 결과: slides/<id>.pptx (--board devkit 이면 slides/<id>.devkit.pptx, expansion 이면 slides/<id>.expansion.pptx). 그림(SVG)은 Playwright chromium 으로 PNG 로 그려 slides/.cache/ 에 둔다.
  */
 import { mkdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -18,7 +19,7 @@ import { createPlaywrightRasterizer } from "./slides/raster.ts";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function usage(): never {
-  console.error("사용법: npm run slides -- <챕터 id ...|all> [--out 폴더] [--no-images] [--font 글꼴] [--code-font 글꼴] [--board plus|devkit]");
+  console.error("사용법: npm run slides -- <챕터 id ...|all> [--out 폴더] [--no-images] [--font 글꼴] [--code-font 글꼴] [--board plus|devkit|expansion]");
   console.error(`챕터: ${listChapterIds(ROOT).join(", ")}`);
   process.exit(1);
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  BOARD_IDS, BOARD_LABELS, DEFAULT_BOARD, boardImageRef, chapterForBoard, chapterHasBoardChoice, devkitImageRef, figureCaption, isBoardId,
-  materialsForBoard,
+  BOARD_IDS, BOARD_LABELS, DEFAULT_BOARD, JUMPER_5V_NOTICE, boardImageRef, boardVariantRef, chapterForBoard, chapterHasBoardChoice, devkitImageRef,
+  figureCaption, imageBoard, isBoardId, jumperNotice, materialsForBoard, svgJumper,
 } from "./board";
 import { parseChapter } from "./content";
 import { allSteps } from "./gating";
@@ -30,11 +30,12 @@ const yaml = chapter(
 );
 
 describe("이름·라벨", () => {
-  it("보드는 plus(기본)·devkit 둘", () => {
-    expect(BOARD_IDS).toEqual(["plus", "devkit"]);
+  it("보드는 plus(기본)·devkit·expansion 셋", () => {
+    expect(BOARD_IDS).toEqual(["plus", "devkit", "expansion"]);
     expect(DEFAULT_BOARD).toBe("plus");
-    expect(BOARD_LABELS).toEqual({ plus: "ESP32 Plus 확장 보드", devkit: "기본 보드 (DevKit 38핀)" });
+    expect(BOARD_LABELS).toEqual({ plus: "ESP32 Plus 확장 보드", devkit: "기본 보드 (DevKit 38핀)", expansion: "확장 보드 (DevKit 38핀)" });
     expect(isBoardId("devkit")).toBe(true);
+    expect(isBoardId("expansion")).toBe(true);
     for (const v of ["uno", "", null, undefined, 1, "PLUS"]) expect(isBoardId(v)).toBe(false);
   });
 });
@@ -116,5 +117,57 @@ describe("그림·설명·준비물 고르기", () => {
     // 원본은 바뀌지 않는다
     expect(ch.wiring?.captionDevkit).toBe("기본 보드 D13");
     expect(ch.materials).toHaveLength(3);
+  });
+
+  it("확장 보드: 그림은 .expansion.svg → .devkit.svg → 기본, 설명은 captionExpansion → captionDevkit → caption", () => {
+    expect(boardVariantRef("images/w.svg", "expansion")).toBe("images/w.expansion.svg");
+    expect(boardVariantRef("images/w.devkit.svg", "expansion")).toBe("images/w.devkit.svg");
+    expect(imageBoard("images/w.expansion.svg")).toBe("expansion");
+    expect(imageBoard("images/w.svg")).toBeUndefined();
+    const both = has(["images/w.svg", "images/w.devkit.svg", "images/w.expansion.svg"]);
+    expect(boardImageRef("images/w.svg", "expansion", both)).toBe("images/w.expansion.svg");
+    expect(boardImageRef("images/w.svg", "devkit", both)).toBe("images/w.devkit.svg");
+    expect(boardImageRef("images/w.svg", "expansion", has(["images/w.devkit.svg"]))).toBe("images/w.devkit.svg");
+    expect(boardImageRef("images/w.svg", "expansion", has([]))).toBe("images/w.svg");
+    expect(figureCaption({ caption: "a", captionDevkit: "b", captionExpansion: "c" }, "expansion")).toBe("c");
+    expect(figureCaption({ caption: "a", captionDevkit: "b", captionExpansion: "c" }, "devkit")).toBe("b");
+    expect(figureCaption({ caption: "a", captionDevkit: "b" }, "expansion")).toBe("b");
+    expect(figureCaption({ caption: "a" }, "expansion")).toBe("a");
+  });
+
+  it("확장 보드 준비물: board: expansion 이 있으면 그것, 하나도 없으면 devkit 것으로 물러난다", () => {
+    const ch = parseChapter(yaml, files, "x");
+    expect(materialsForBoard(ch.materials, "expansion").map((m) => m.name)).toEqual(["ESP32 DevKit 보드", "초음파 센서"]);
+    const own = [{ name: "a" }, { name: "b", board: "devkit" as const }, { name: "c", board: "expansion" as const }];
+    expect(materialsForBoard(own, "expansion").map((m) => m.name)).toEqual(["a", "c"]);
+    expect(materialsForBoard(own, "devkit").map((m) => m.name)).toEqual(["a", "b"]);
+    expect(materialsForBoard(own, "plus").map((m) => m.name)).toEqual(["a"]);
+  });
+
+  it("점퍼 안내: 확장 보드 그림이 5V 일 때만", () => {
+    const svgs: Record<string, string> = {
+      "images/w.expansion.svg": '<svg><polygon data-expansion-jumper="5V"/></svg>',
+      "images/l.expansion.svg": '<svg><polygon data-expansion-jumper="3V3"/></svg>',
+      "images/w.devkit.svg": '<svg data-expansion-jumper="5V"></svg>',
+    };
+    const of = (r: string) => svgs[r];
+    expect(svgJumper(svgs["images/w.expansion.svg"])).toBe("5V");
+    expect(svgJumper("<svg/>")).toBeUndefined();
+    expect(jumperNotice("images/w.expansion.svg", of)).toBe(JUMPER_5V_NOTICE);
+    expect(JUMPER_5V_NOTICE).toBe("이번 수업은 점퍼를 5V 쪽으로 옮겨요 (끝나면 3.3V 로)");
+    expect(jumperNotice("images/l.expansion.svg", of)).toBeUndefined();
+    expect(jumperNotice("images/w.devkit.svg", of)).toBeUndefined();
+    expect(jumperNotice(undefined, of)).toBeUndefined();
+  });
+
+  it("chapterForBoard (슬라이드, expansion): 확장 보드 그림·설명, svgOf 를 주면 점퍼 안내를 설명 끝에", () => {
+    const ch = parseChapter(yaml.replace("captionDevkit: 기본 보드 D13 }", "captionDevkit: 기본 보드 D13, captionExpansion: 확장 P13 }"), files, "x");
+    const exists = has(["images/wiring.expansion.svg", "images/scene.devkit.svg"]);
+    const svgOf = (r: string) => (r === "images/wiring.expansion.svg" ? '<polygon data-expansion-jumper="5V"/>' : undefined);
+    const x = chapterForBoard(ch, "expansion", exists, { svgOf });
+    expect(x.wiring).toEqual({ image: "images/wiring.expansion.svg", caption: `확장 P13 (${JUMPER_5V_NOTICE})` });
+    expect(allSteps(x)[0].scene).toEqual({ image: "images/scene.devkit.svg", caption: "기본 장면" });
+    expect(chapterForBoard(ch, "expansion", exists).wiring?.caption).toBe("확장 P13");
+    expect(chapterHasBoardChoice(parseChapter(chapter(""), files, "x"), ["images/a.expansion.svg"])).toBe(true);
   });
 });

@@ -2,12 +2,13 @@ import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, ty
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import { Armchair, Cable, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon } from "lucide-react";
+import { Armchair, Cable, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { behaviorFor } from "@/track/sim/behaviors";
 import { readDevices, type Device } from "@/track/sim/circuit";
 import { defaultInputs, Simulator } from "@/track/sim/engine";
+import { JUMPER_5V_NOTICE } from "@/track/board";
 import type { Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
 import { makeLayout, siteLayout } from "./layout";
@@ -204,6 +205,12 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
           <Button type="button" size="sm" variant="outline" className={cn("h-8", step !== null ? "border-[#0f2239] bg-[#0f2239] text-white hover:bg-[#0f2239]/90 hover:text-white" : "bg-background/95")} aria-pressed={step !== null} data-testid="wiring-3d-steps" onClick={() => goStep(step === null ? 0 : null)} title="한 단계씩 꽂아 보기">
             <ListOrdered className="size-3.5" />조립 순서
           </Button>
+        )}
+        {/* 확장 보드 점퍼 5V: 이 배선은 V 줄을 5V 로 쓴다 (평소 3.3V) */}
+        {!site && scene.boards[0]?.kind === "expansion" && scene.boards[0].jumper === "5V" && (
+          <span className="inline-flex h-8 items-center gap-1 rounded-lg border border-amber-500/60 bg-amber-50 px-2 text-sm font-semibold text-amber-900" title={JUMPER_5V_NOTICE} data-testid="wiring-3d-jumper">
+            <Zap className="size-3.5" />점퍼 5V
+          </span>
         )}
         {!site && scene.boards.length > 0 && (
           <Button type="button" size="sm" variant="outline" className={cn("h-8", pinout ? "border-[#0f2239] bg-[#0f2239] text-white hover:bg-[#0f2239]/90 hover:text-white" : "bg-background/95")} aria-pressed={pinout} data-testid="wiring-3d-pinout-open" onClick={() => setPinout((v) => !v)} title="보드의 핀마다 무엇을 할 수 있는지 봐요">

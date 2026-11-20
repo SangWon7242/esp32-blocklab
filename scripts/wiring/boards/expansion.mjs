@@ -22,7 +22,10 @@
  *
  * makeExpansion({ x, y, jumper }) 는 보드 왼쪽 위 모서리를 받는다. 보드 612×314 + 아래 메모 한 줄(bounds.h = 338).
  * DC 잭 · USB-C 는 왼쪽으로 조금 (최대 18) 나온다. x 는 18~22 가 알맞다 (폭 640 안).
- * jumper: "5V"(기본, V 줄 = 5V — 서보 · 5V 모듈) 또는 "3V3".
+ * jumper: "3V3"(기본, V 줄 = 3.3V — 수업 보드의 평소 자리) 또는 "5V"(서보 · 초음파 같은 5V 부품을 쓰는 수업).
+ *   점퍼 위치는 수업마다 정한다. 한 챕터의 확장 보드 그림은 모두 같은 점퍼로 그린다 (src/track/README.md "수업 보드").
+ *   기판 바깥선(polygon)에 data-expansion-jumper="3V3|5V" 를 남겨, 화면이 그림만 보고 "점퍼를 5V 로" 안내를 띄운다.
+ *   I2C 헤더 VCC 는 V 줄을 따라간다 (선생님 실측: 점퍼 3.3V → 3.24V, 5V → 약 4.6V).
  */
 import { PIN_FILL as FILL, vtext, vtextDown } from "../common.mjs";
 import { makeDevkit } from "./devkit.mjs";
@@ -54,7 +57,8 @@ const HDR = [-88, -68, -48, -28].map((d) => LP + d); // 전원 헤더 · I2C 헤
 const PWR_Y = [44, 44 + P];
 const JUMP = { x: 86, ys: [104, 104 + P, 104 + 2 * P] };
 
-export function makeExpansion({ x = 22, y = 200, jumper = "5V" } = {}) {
+export function makeExpansion({ x = 22, y = 200, jumper = "3V3" } = {}) {
+  if (jumper !== "3V3" && jumper !== "5V") throw new Error(`점퍼는 "3V3" 또는 "5V": ${jumper}`);
   const BOARD = { x, y, w: W, h: H + 24 };
   const X0 = x + LP;
   const colX = (i) => Math.round((X0 + i * P) * 10) / 10;
@@ -185,7 +189,7 @@ export function makeExpansion({ x = 22, y = 200, jumper = "5V" } = {}) {
 
     // 기판 (보라) — 오른쪽 두 모서리를 비스듬히 깎은 꼴 · 고정 구멍
     const outline = [[0, 4], [4, 0], [W - 14, 0], [W, 14], [W, H - 14], [W - 14, H], [4, H], [0, H - 4]].map(([a, b]) => `${r1(x + a)},${r1(y + b)}`).join(" ");
-    base.push(`<polygon points="${outline}" fill="#5f1fa3" stroke="#2e0b52" stroke-width="1.5"/>`);
+    base.push(`<polygon points="${outline}" fill="#5f1fa3" stroke="#2e0b52" stroke-width="1.5" data-expansion-jumper="${jumper}"/>`);
     for (const h of PARTS.holes) base.push(circ(h.x, h.y, h.r, 'fill="#ffffff" stroke="#d9c7f0" stroke-width="2"'));
 
     // ── 전원부 ──
@@ -269,7 +273,7 @@ export function makeExpansion({ x = 22, y = 200, jumper = "5V" } = {}) {
       const add = (nm, label, fill, row) => { const p = pin(nm); pins.push({ x: p.x, y: p.y, label, fill, row, used: usedSet.has(nm) }); };
       for (const [side, list] of sides) list.slice(0, MALE).forEach((n) => ROWS.forEach((r) => add(`${side}:${n}:${r}`, `${n} ${r}`, FILL[r], r)));
       for (let k = 0; k < 4; k++) add(`pwr:GND:${k}`, "GND", FILL.G, "pwr");
-      for (let k = 0; k < 2; k++) add(`pwr:3V:${k}`, "3V", "#f08c00", "pwr");
+      for (let k = 0; k < 2; k++) add(`pwr:3V:${k}`, "3V3", "#f08c00", "pwr");
       for (let k = 0; k < 2; k++) add(`pwr:5V:${k}`, "5V", FILL.V, "pwr");
       I2C.forEach(([k, t, f]) => add(`i2c:${k}`, t, f, "i2c"));
       UART.forEach(([k, t, f]) => add(`uart:${k}`, t, f, "uart"));
@@ -300,7 +304,7 @@ export function makeExpansion({ x = 22, y = 200, jumper = "5V" } = {}) {
 
     if (note) {
       const nx = note === "left" ? x : x + W;
-      labels.push(`<text x="${nx}" y="${y + H + 14}" text-anchor="${note === "left" ? "start" : "end"}" dominant-baseline="central" font-size="12" fill="currentColor" stroke="none">V 줄 전압은 JUMP 점퍼로 골라요 (그림은 ${jumper === "3V3" ? "3.3V" : "5V"})</text>`);
+      labels.push(`<text x="${nx}" y="${y + H + 14}" text-anchor="${note === "left" ? "start" : "end"}" dominant-baseline="central" font-size="12" fill="currentColor" stroke="none">${jumper === "3V3" ? "JUMP 점퍼는 3.3V 쪽 (V 줄 = 3.3V)" : "JUMP 점퍼를 5V 쪽으로 (V 줄 = 5V, 끝나면 3.3V 로)"}</text>`);
     }
 
     const marks = names.map((n) => {

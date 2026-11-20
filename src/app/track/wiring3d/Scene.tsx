@@ -7,12 +7,12 @@ import { Board, Breadboard } from "./board";
 import { Diorama } from "./diorama";
 import { StepMarks, StepShow } from "./assemblyView";
 import { HoverMarks, SelectionRing } from "./kit";
-import { BB_H, DEVKIT_TOP, HEADER_H, PCB_H, type Layout } from "./layout";
+import { BB_H, DEVKIT_TOP, EX_PIN, HEADER_H, PCB_H, type Layout } from "./layout";
 import { COLOR, toonOwn } from "./materials";
 import { Button, Buzzer, Dip, IrRx, Led, Module, Photo, Pot, Prop, Remote, Resistor, Rgb, Seg7, Servo, Tilt, Touch } from "./parts";
 import { PanFloor, Rig } from "./rig";
 import { useViewerApi } from "./store";
-import { MODULE, pinText, TEXT } from "./texts";
+import { expansionPinText, MODULE, pinText, TEXT } from "./texts";
 import { Flow, ledChains, WireView } from "./wires";
 
 /* 3D 장면 전체 (Canvas 안). 화면 위 글자(설명 카드 · 점선)는 DOM 이고, 여기서 자리만 맞춰 준다. */
@@ -31,6 +31,10 @@ export function anchorsOf(scene: Scene3D, L: Layout): Anchor[] {
   for (const b of scene.boards) {
     for (const p of b.pins.filter((q) => q.used)) {
       const gnd = /GND|\bG$/.test(p.label);
+      if (b.kind === "expansion") {
+        add(p.label.replace(/ ([SVG])$/, " 칸 $1"), expansionPinText(p.label, true, b.jumper, p.row), gnd ? "#495057" : "#f08c00", L.v(p, PCB_H + EX_PIN + 12), true);
+        continue;
+      }
       add(p.label.replace(/ \(.*\)$/, ""), pinText(p.label, true), gnd ? "#495057" : "#f08c00", L.v(p, (b.kind === "devkit" ? DEVKIT_TOP : PCB_H + HEADER_H) + 15), true);
     }
   }

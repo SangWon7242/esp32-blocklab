@@ -1,21 +1,29 @@
 # 배선도 그리기 도구 (scripts/wiring)
 
-챕터 배선도를 **두 보드**로 만든다. 학생은 챕터 화면 위의 보드 선택으로 둘 중 하나를 본다.
+챕터 배선도를 **세 보드**로 만든다. 학생은 챕터 화면 위의 보드 선택으로 하나를 본다.
 
 | 보드 | 파일 | 연결 방식 |
 |---|---|---|
 | ESP32 Plus 확장 보드 (Keyestudio KS5020, 기본) | `images/<이름>.svg` | 모듈은 F-F 듀폰선(서보는 플러그)으로 보드 핀 묶음에 **바로**. 맨 부품(LED·저항·버튼·부저·가변저항·포토레지스터·틸트 스위치)만 브레드보드 |
 | 기본 보드 ESP32 DevKit 38핀 | `images/<이름>.devkit.svg` | 모듈 신호선은 F-F 로 바로. 전원을 여러 부품이 나눠 쓰면 브레드보드 + − 줄. 맨 부품은 브레드보드 |
+| 확장 보드 (38핀 확장 보드 + DevKit 38핀) | `images/<이름>.expansion.svg` | 3핀 모듈은 F-F 로 그 GPIO 칸의 S · V · G 에 **바로**, 서보는 플러그째 기둥에, I2C 모듈은 I2C 헤더(GND VCC D21 D22). 맨 부품은 브레드보드 + M-F(칸의 S 핀 · GND 칸 S 핀) |
 
 ```bash
 node scripts/wiring/build.mjs 10-auto-door
 ```
-`chapters/<id>.mjs` 의 명세를 읽어 `content/chapters/<id>/images/` 에 두 파일을 쓴다. 확인용으로 다른 폴더에 쓰려면 두 번째 인자로 폴더를 준다.
+`chapters/<id>.mjs` 의 명세(`{ "wiring-x.svg": { plus, devkit, expansion } }`)를 읽어 `content/chapters/<id>/images/` 에 판마다 그림과 3D 장면(`.3d.json`)을 쓴다. 확인용으로 다른 폴더에 쓰려면 두 번째 인자로 폴더를 준다.
 
 ## 파일
 - `common.mjs` — `svgDoc`, `compose`(겹 순서: 보드 판·핀 → 부품 → 선 → 보드 글자 → 노란 테두리 → 표), 선 `ffWire`(F-F) · `mfWire`(보드 핀 f → 브레드보드 구멍 m) · `mmWire`(구멍↔구멍) · `wire(from, to, color, { via, style, ends })`, `connectionTable`(아래 연결 표, 글이 길면 한 칸), `name`·`note`, 색 `COLORS`.
   - 선 모양 `style`: `"vv"`(세로로 나가 세로로 들어감, 기본) · `"hv"` · `"vh"` · `"orth"`(via 점들을 직각으로 — 길게 돌아가는 선에) · `"line"`.
 - `boards/plus.mjs` — `makePlus({ x, y })` (크기 428×300). `boards/devkit.mjs` — `makeDevkit({ x, y })` (크기 470×150, USB 왼쪽).
+- `boards/expansion.mjs` — `makeExpansion({ x, y, jumper })` (보드 612×314 + 아래 메모 한 줄, x 는 22 쯤). DevKit 그림(`devkit.mjs`)을 0.9 배로 줄여 노란 암 헤더 위에 얹는다(새로 그리지 않음).
+  핀 이름 `"top:P13:S"` · `"bot:P4:G"` · `"pwr:GND:0..3"` · `"pwr:3V:0..1"` · `"pwr:5V:0..1"` · `"i2c:GND|VCC|SDA|SCL"` · `"uart:…"` · `"jump:5V|V|3V3"`.
+  `b.gpio(n)` = 그 칸의 S 핀(라벨 `P13` · `SVP(36)` …, `{ at: "i2c" }` 면 21 · 22 를 I2C 헤더로), `b.triple(n)` = 세로 기둥 `{ S, V, G, side }`,
+  `b.power("5V"|"3V3"|"GND", k)`, `b.i2c(0)` = I2C 헤더, `b.uart()`. 서보는 같은 파일의 `columnServo(b.triple(n), { gap })`. 자세한 표는 파일 머리말.
+  - **JUMP 점퍼** `jumper: "3V3"`(기본, 평소 자리) 또는 `"5V"`. V 줄과 I2C 헤더 VCC 가 그 전압이 된다. 서보 · 초음파처럼 5V 가 필요한 수업만 `"5V"`,
+    그리고 **한 챕터의 확장 보드 그림은 모두 같은 점퍼**로(콘텐츠 검사). 그림 기판에 `data-expansion-jumper` 가 남아 화면이 "점퍼를 5V 쪽으로" 안내를 저절로 띄운다.
+  - 본보기: `chapters/01-led.mjs`(맨 부품, 3.3V) · `chapters/10-auto-door.mjs`(초음파 · OLED · 서보, 5V). 확인용: `node scripts/wiring/preview-expansion.mjs [폴더]`.
 - `parts.mjs` — 모듈과 맨 부품, 브레드보드.
 
 ## 보드 공통 함수 (두 보드가 같은 이름)

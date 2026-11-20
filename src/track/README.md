@@ -10,19 +10,30 @@
 그림을 가리키는 키(`cover`, `materials[].image`, `wiring.image`, `principle.image`, `scene.image`)는 **챕터 폴더 기준 `images/<이름>.svg`** 만 쓴다
 (`image: images/wiring-led.svg`, 영문·숫자·`_`·`.`·`-` 이름). 없는 그림, 다른 모양(`.png`, 하위 폴더, `../`)은 테스트에서 걸린다.
 
-## 수업 보드 (plus · devkit)
+## 수업 보드 (plus · devkit · expansion)
 
-수업은 두 보드로 할 수 있다: **ESP32 Plus 확장 보드**(Keyestudio, `plus`, 기본)와 **기본 보드 (DevKit 38핀)**(ESP32-DevKitC 38í, `devkit`).
+수업은 세 보드로 할 수 있다: **ESP32 Plus 확장 보드**(Keyestudio, `plus`, 기본), **기본 보드 (DevKit 38핀)**(ESP32-DevKitC 38핀, `devkit`),
+**확장 보드 (DevKit 38핀)**(보라색 ESP32 38핀 확장 보드 Goouuu V4 에 DevKit 38핀을 꽂은 것, `expansion`).
 학생이 챕터 화면 위(단계 화면 윗줄)에서 고르고, 고른 값은 그 기기(localStorage `esp32-blocklab:board`)에 남아 모든 챕터에 적용된다.
 보드 고르는 칸은 배선도(`wiring`)가 있거나 아래 셋 가운데 하나라도 있는 챕터에만 보인다. 콘텐츠의 기본은 늘 `plus` 이고, 다른 보드용은 덧붙이기만 한다.
 
-- **그림**: 기본 보드용 그림은 같은 이름에 `.devkit.svg` 를 붙여 같은 `images/` 폴더에 둔다 (`images/wiring-door.svg` → `images/wiring-door.devkit.svg`).
-  YAML 에는 적지 않는다 — `devkit` 을 고르면 화면(크게 보기 창 포함)이 그 그림이 있을 때 저절로 바꿔 그리고, 없으면 기본 그림을 쓴다.
-  표지·부품·배선·원리·장면 그림 모두 같다. 그림의 `<title>` 은 "기본 보드" 로 시작한다.
-- **설명**: 그림(`wiring`, `scene` — `{ image, caption?, captionDevkit? }`)에 `captionDevkit` 을 적으면 `devkit` 일 때 `caption` 대신 보인다 (없으면 `caption`).
-- **준비물**: `materials[]` 항목에 `board: plus` 또는 `board: devkit` 을 적으면 그 보드를 골랐을 때만 보인다 (없으면 두 보드 모두).
+- **그림**: 보드 그림은 같은 이름에 `.devkit.svg` · `.expansion.svg` 를 붙여 같은 `images/` 폴더에 둔다
+  (`images/wiring-door.svg` → `images/wiring-door.devkit.svg` · `images/wiring-door.expansion.svg`).
+  YAML 에는 적지 않는다 — 보드를 고르면 화면(크게 보기 창 포함)이 그 그림이 있을 때 저절로 바꿔 그린다. 없으면 물러난다:
+  `devkit` → 기본 그림, `expansion` → `.devkit.svg` → 기본 그림 (확장 보드 위의 DevKit 은 기본 보드와 GPIO 번호가 같아 기본 보드 그림이 가장 가깝다).
+  표지·부품·배선·원리·장면 그림 모두 같다. 그림의 `<title>` 은 기본 보드면 "기본 보드", 확장 보드면 "확장 보드" 로 시작한다. 3D 장면(`.3d.json`)도 같은 이름 규칙.
+- **설명**: 그림(`wiring`, `scene` — `{ image, caption?, captionDevkit?, captionExpansion? }`)에 `captionDevkit` 을 적으면 `devkit` 일 때 `caption` 대신 보인다.
+  `captionExpansion` 은 `expansion` 일 때 (없으면 `captionDevkit` → `caption` — 그림이 물러나는 차례와 같다).
+  `.expansion.svg` 가 있는 그림에 `captionDevkit`(보드마다 다른 설명)이 있으면 `captionExpansion` 도 적어야 하고, `captionExpansion` 은 `.expansion.svg` 가 있는 그림에만 적는다 (콘텐츠 검사).
+- **준비물**: `materials[]` 항목에 `board: plus` · `board: devkit` · `board: expansion` 을 적으면 그 보드를 골랐을 때만 보인다 (없으면 모든 보드).
+  `board: expansion` 준비물이 하나도 없는 챕터는 확장 보드를 골라도 `devkit` 준비물이 보인다 (그림과 같은 물러나기).
+- **JUMP 점퍼 (확장 보드)**: V 줄(과 I2C 헤더 VCC)의 전압은 JUMP 점퍼로 정한다. 평소 자리는 **V–3.3V**.
+  서보·초음파처럼 5V 가 필요한 수업만 그 챕터의 확장 보드 그림을 모두 `makeExpansion({ jumper: "5V" })` 로 그린다.
+  그러면 그림 기판에 `data-expansion-jumper="5V"` 가 남고, 학생이 확장 보드를 고르고 그 그림을 볼 때 화면이 그림 위(배선 칸·단계 안내·크게 보기, 3D 는 도구 줄의 「점퍼 5V」)에
+  **"이번 수업은 점퍼를 5V 쪽으로 옮겨요 (끝나면 3.3V 로)"** 를 저절로 보인다 (YAML 키 없음, `src/track/board.ts` `jumperNotice`). 슬라이드는 그 설명 끝에 붙는다.
+  한 챕터의 확장 보드 그림은 모두 같은 점퍼여야 한다 (콘텐츠 검사).
 
-슬라이드도 같은 규칙: `npm run slides -- 10-auto-door --board devkit` (scripts/README.md). 고르는 법(순수 함수)은 `src/track/board.ts`.
+슬라이드도 같은 규칙: `npm run slides -- 10-auto-door --board devkit` · `--board expansion` (scripts/README.md). 고르는 법(순수 함수)은 `src/track/board.ts`.
 
 ## 챕터
 
@@ -45,7 +56,7 @@ cover: images/cover.svg   # 선택. 표지 그림
 materials:                # 선택. 준비물(부품) 칩
   - { name: ESP32 보드, image: images/part-esp32.svg }
   - { name: 220Ω 저항, note: 빨강-빨강-갈색 }      # image·note 는 선택
-  - { name: ESP32 DevKit 38핀, board: devkit }     # board 는 선택: plus | devkit — 그 보드를 골랐을 때만 (아래 "수업 보드")
+  - { name: ESP32 DevKit 38핀, board: devkit }     # board 는 선택: plus | devkit | expansion — 그 보드를 골랐을 때만 (아래 "수업 보드")
 wiring: { image: images/wiring-led.svg, caption: "LED 긴 다리 → 저항 → 26번", captionDevkit: "LED 긴 다리 → 저항 → D26" }   # 선택. 배선도 (captionDevkit 선택)
 principle:                # 선택. 원리 카드 (아래 "Keyestudio 수업 구조")
   image: images/led-parts.svg   # 선택. 카드 왼쪽 그림

@@ -43,6 +43,16 @@ describe("boardChoice", () => {
     expect(boardChoice()).toBe("devkit");
   });
 
+  it("expansion 도 저장하고 다시 읽는다", () => {
+    const s = memoryStorage({ [BOARD_STORAGE_KEY]: "expansion" });
+    stubWindow(s);
+    expect(boardChoice()).toBe("expansion");
+    setBoardChoice("devkit");
+    expect(s.data.get(BOARD_STORAGE_KEY)).toBe("devkit");
+    setBoardChoice("expansion");
+    expect(s.data.get(BOARD_STORAGE_KEY)).toBe("expansion");
+  });
+
   it("저장한 값을 읽고, devkit 은 저장하고 plus 로 돌리면 지운다", () => {
     const s = memoryStorage({ [BOARD_STORAGE_KEY]: "devkit" });
     stubWindow(s);
@@ -105,5 +115,6 @@ describe("boardChoice", () => {
   it("라벨은 한국어 두 개", () => {
     expect(BOARD_LABELS.plus).toBe("ESP32 Plus 확장 보드");
     expect(BOARD_LABELS.devkit).toBe("기본 보드 (DevKit 38핀)");
+    expect(BOARD_LABELS.expansion).toBe("확장 보드 (DevKit 38핀)");
   });
 });

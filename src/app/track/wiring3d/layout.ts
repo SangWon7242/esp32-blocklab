@@ -18,6 +18,21 @@ export const DEVKIT_F = 1.7;
 export const DEVKIT_LIFT = 12;
 export const DEVKIT_TOP = DEVKIT_LIFT + PCB_H + 2;
 
+/*
+ * 38핀 확장 보드: 바닥 크기는 실물 비율(77.8 × 53.3mm). 배선도 그림은 DevKit 에 맞춰 암 헤더 두 줄 사이가 납작하므로
+ * 3D 에서는 그 사이(위 암 헤더 바깥 줄 ~ 아래 암 헤더)만 실물 25.5mm 가 되게 늘리고, 그 바깥(S/V/G · 전원부)은 그림 그대로다
+ * (그림의 핀 간격 19.8px 가 곧 2.54mm). 높이는 다른 3D 부품(브레드보드 · 모듈)과 어울리게 실물의 약 절반(1mm ≈ 4)으로 줄였다.
+ */
+/** 노란 암 헤더 높이 (실물 8.5mm) */
+export const EX_FEMALE = 34;
+/** S/V/G 수 헤더: 색 받침 높이 (2.5mm) · 핀 끝 높이 (기판 위 11.5mm) */
+export const EX_BASE = 10;
+export const EX_PIN = 46;
+/** 선 머리(F, 높이 14)가 수 핀 끝을 덮고 앉는 높이 */
+export const EX_SEAT = PCB_H + EX_PIN - 13;
+/** 실물 암 헤더 두 줄 사이 (mm) */
+const EX_ROWS_MM = 25.5;
+
 type Rect = { x: number; y: number; w: number; h: number };
 export const inRect = (p: Pt, r: Rect) => p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
 
@@ -48,6 +63,11 @@ export type Layout = {
   diorama: { at: THREE.Vector3; w: number; d: number } | null;
   /** 장면에서 가장 높은 것의 높이 (카메라 맞춤, 기본 60) */
   height?: number;
+  /**
+   * 확장 보드가 있으면: 늘린 띠(위 암 헤더 바깥 줄 y0 ~ 아래 암 헤더 y1, 그림 px)와 그 배수 F.
+   * 확장 보드에 꽂힌 DevKit 은 이 F 로 세로를 늘려 핀이 암 헤더에 맞는다.
+   */
+  seat?: { y0: number; y1: number; F: number } | null;
 };
 
 /** 현장 보기: 현장 모형만 가운데에 (회로는 그리지 않는다) */
@@ -70,10 +90,18 @@ const SONAR_ROOM = 230;
 
 export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): Layout {
   // 현장 모형은 이제 현장 보기에 따로 그린다 (diorama 를 주면 예전처럼 회로 옆에 자리를 비운다)
-  const dk = scene.boards.find((b) => b.kind === "devkit");
+  // 세로로 늘리는 띠: 맨 DevKit 은 보드 전체를 DEVKIT_F 배, 확장 보드는 암 헤더 두 줄 사이를 실물 25.5mm 로 (그 위에 꽂힌 DevKit 은 따로)
+  const ex = scene.boards.find((b) => b.kind === "expansion");
+  const dk = ex ? undefined : scene.boards.find((b) => b.kind === "devkit");
+  const seat = ex ? (() => {
+    const ys = ex.female.filter((f) => f.row !== "top-inner").map((f) => f.y);
+    const y0 = Math.min(...ys), y1 = Math.max(...ys);
+    return { y0, y1, F: (EX_ROWS_MM * ex.mm) / (y1 - y0) };
+  })() : null;
+  const band = dk ? { y0: dk.y, h: dk.h, F: DEVKIT_F } : seat ? { y0: seat.y0, h: seat.y1 - seat.y0, F: seat.F } : null;
   const F = dk ? DEVKIT_F : 1;
-  const stretch = (y: number) => (!dk || y <= dk.y ? y : y >= dk.y + dk.h ? y + (F - 1) * dk.h : dk.y + (y - dk.y) * F);
-  const unstretch = (y: number) => (!dk || y <= dk.y ? y : y >= dk.y + dk.h * F ? y - (F - 1) * dk.h : dk.y + (y - dk.y) / F);
+  const stretch = (y: number) => (!band || y <= band.y0 ? y : y >= band.y0 + band.h ? y + (band.F - 1) * band.h : band.y0 + (y - band.y0) * band.F);
+  const unstretch = (y: number) => (!band || y <= band.y0 ? y : y >= band.y0 + band.h * band.F ? y - (band.F - 1) * band.h : band.y0 + (y - band.y0) / band.F);
   const owners = scene.parts.flatMap((p) => {
     if (p.type === "module") return [{ x: p.x - 2, y: p.y - 18, w: p.w + 4, h: p.h + 36, dz: stretch(p.y + p.h / 2) - (p.y + p.h / 2) }];
     if (p.type === "servo") {
@@ -122,7 +150,7 @@ export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): 
     if (pad) return pad.top;
     if (scene.breadboards.some((b) => inRect(p, b))) return BB_H;
     const board = scene.boards.find((b) => inRect(p, b));
-    return board ? (board.kind === "devkit" ? DEVKIT_TOP : PCB_H + HEADER_H) : 0;
+    return board ? (board.kind === "devkit" ? DEVKIT_TOP : board.kind === "expansion" ? EX_SEAT : PCB_H + HEADER_H) : 0;
   };
 
   const sonars: SonarTrack[] = [];
@@ -159,7 +187,8 @@ export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): 
   const az0 = Math.min(...all.map((r) => stretch(r.y)), dRect ? dRect.y : Infinity), az1 = Math.max(...all.map((r) => stretch(r.y + r.h)), dRect ? dRect.y + dRect.h : -Infinity);
 
   return {
-    X, Z, Zp, zIn, topAt, F, sonars,
+    X, Z, Zp, zIn, topAt, F, sonars, seat,
+    ...(ex ? { height: 80 } : {}),
     v: (p, y) => new THREE.Vector3(X(p.x), y, Zp(p)),
     unZ: (z) => unstretch(z + cz),
     size: { w: Math.max(maxX - minX, ax1 - ax0), d: Math.max(maxY - minY, az1 - az0) },

@@ -13,12 +13,13 @@ import { BOARD_SELECT_TEXT, BoardSelect, chapterShowsBoardSelect } from "./Board
 const EMOJI = /\p{Extended_Pictographic}/u;
 
 describe("BoardSelect", () => {
-  it("radiogroup + 라디오 두 개, plus 가 골라져 있다 (서버 렌더)", () => {
+  it("radiogroup + 라디오 세 개, plus 가 골라져 있다 (서버 렌더)", () => {
     const html = renderToStaticMarkup(createElement(BoardSelect));
     expect(html).toContain('role="radiogroup"');
-    expect(html.match(/role="radio"/g)).toHaveLength(2);
+    expect(html.match(/role="radio"/g)).toHaveLength(3);
     expect(html).toContain('aria-label="ESP32 Plus 확장 보드"');
     expect(html).toContain('aria-label="기본 보드 (DevKit 38핀)"');
+    expect(html).toContain('aria-label="확장 보드 (DevKit 38핀)"');
     expect(html).toMatch(/aria-checked="true"[^>]*data-testid="board-option-plus"|data-testid="board-option-plus"[^>]*aria-checked="true"/);
     expect(html).toContain('data-board="plus"');
     expect(html).toContain(BOARD_SELECT_TEXT.label);

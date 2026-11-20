@@ -3,7 +3,7 @@ import { BOARD_IDS, BOARD_LABELS, DEFAULT_BOARD, isBoardId, type BoardId } from 
 
 /*
  * 수업 보드 고르기 (보는 사람 편의 설정). 학생이 챕터 화면 위에서 고른 보드를 이 기기(브라우저) localStorage 에 둔다
- * (키 esp32-blocklab:board, 값 "devkit" — 기본값 plus 는 지운다). 모든 챕터가 같은 값을 따르고, 다른 탭에서 바꾼 값도 따른다.
+ * (키 esp32-blocklab:board, 값 "devkit" · "expansion" — 기본값 plus 는 지운다). 모든 챕터가 같은 값을 따르고, 다른 탭에서 바꾼 값도 따른다.
  * 저장이 막혀 있거나(사생활 보호 창 등) 값이 이상하면 plus. 막혀도 이 화면에서는 고른 값이 그대로 유지된다.
  * 모듈을 import 할 때는 window·localStorage 를 건드리지 않는다 (허브 서버 import 용). 서버 렌더에서는 plus.
  */
@@ -78,7 +78,7 @@ export function subscribeBoardChoice(listener: () => void): () => void {
 
 const serverSnapshot = (): BoardId => DEFAULT_BOARD;
 
-/** 고른 보드 ("plus" | "devkit"). 바꾸면 모든 구독자가 다시 그린다 */
+/** 고른 보드 ("plus" | "devkit" | "expansion"). 바꾸면 모든 구독자가 다시 그린다 */
 export function useBoardChoice(): BoardId {
   return useSyncExternalStore(subscribeBoardChoice, boardChoice, serverSnapshot);
 }
