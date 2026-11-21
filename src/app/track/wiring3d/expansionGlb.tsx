@@ -51,7 +51,7 @@ function interp(v: number, pts: [number, number][]) {
 /** 확장 보드 부품 이름 → 묶음 */
 type ExGroup = "board" | "female" | "svg" | "jumper" | "usb" | "micro" | "dc" | "reg" | "caps" | "pwrhdr" | "uart" | "small";
 function exGroupOf(name: string): ExGroup {
-  if (/^(ExpPCB|ExpSilk)/.test(name)) return "board";
+  if (/^(ExpPCB|ExpSilk|PinSilk|SilkLine)/.test(name)) return "board";
   if (/^Sock_/.test(name)) return "female";
   if (/^Hdr_/.test(name)) return "svg";
   if (/^Jump/.test(name)) return "jumper";
@@ -87,10 +87,12 @@ export function ExpansionGlb({ b, L, index }: { b: ExpansionBoard3D; L: Layout; 
       const g = m.geometry.clone();
       g.applyMatrix4(rel);
       const shift = m.name === "Jumper_Cap" && b.jumper === "5V" ? 2.54 : 0;
+      // 기판 글자 · 선(1.6~1.63mm)은 높이를 늘리면 기판 윗면과 거의 붙어 돌릴 때 깜빡인다 — 조금 띄운다
+      const silk = /^(ExpSilk|PinSilk|SilkLine|Silk|Mark)/.test(m.name) ? 0.35 : 0;
       const pos = g.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i), y = pos.getY(i) + shift, z = pos.getZ(i);
-        pos.setXYZ(i, L.X(b.x + fx(x)), Math.max(0, z) * hs, L.Z(b.y + interp(TOP_Y_MM - y, Y_MAP)));
+        pos.setXYZ(i, L.X(b.x + fx(x)), Math.max(0, z) * hs + silk, L.Z(b.y + interp(TOP_Y_MM - y, Y_MAP)));
       }
       pos.needsUpdate = true;
       g.computeVertexNormals();
