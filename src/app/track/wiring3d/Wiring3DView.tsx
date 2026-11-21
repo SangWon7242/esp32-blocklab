@@ -58,8 +58,8 @@ export function Wiring3DView(props: Props) {
 }
 
 function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
-  // 기본 보드는 실물 모델 DevKit 으로(devkitGlb.tsx), 확장 보드는 시험 챕터만 실물 조립 모델로(expansionGlb.tsx)
-  const scene = useMemo(() => withGlbExpansion(withGlbDevkit(sceneIn), chapterId), [sceneIn, chapterId]);
+  // 기본 보드는 실물 모델 DevKit 으로(devkitGlb.tsx), 확장 보드는 실물 조립 모델로(expansionGlb.tsx)
+  const scene = useMemo(() => withGlbExpansion(withGlbDevkit(sceneIn)), [sceneIn]);
   // 융합 챕터: 현장 보기(가전 · 가구에 단 모듈로 시뮬레이션)가 먼저, 회로 보기는 배선만
   const room = dioramaRoom(chapterId);
   const [mode, setMode] = useState<"site" | "circuit">(room ? "site" : "circuit");

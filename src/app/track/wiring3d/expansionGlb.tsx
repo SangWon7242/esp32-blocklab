@@ -20,12 +20,13 @@ import { expansionPinText, TEXT } from "./texts";
  *   - 높이: 핀 끝(10.1mm)이 지금 3D 의 핀 끝(PCB_H + EX_PIN)에 오게 — 선이 앉는 높이는 그대로
  * 그래서 S/V/G 핀 · 암 헤더가 배선도 선 끝과 정확히 맞는다. 전원부 부품은 왼쪽 띠에 맞춰 조금 좁아진다.
  * JUMP 점퍼 캡은 b.jumper 에 따라: 3V3(평소) = V–3.3V 두 핀, 5V = 5V–V 두 핀(2.54mm 옮김).
+ * 전원 헤더(2×4) · I2C/UART 헤더(2×4)는 선이 꽂히는 핀이라, 헤더와 그 옆 글자를 통째로 배선도의 그 헤더 자리로 옮긴다(실물 간격 그대로).
+ * JUMP 는 선을 꽂지 않아 모델 자리 그대로.
  */
-export const EXP_GLB_CHAPTERS: ReadonlySet<string> = new Set(["01-led"]);
 
-/** 시험 챕터면 확장 보드와 거기 꽂힌 DevKit 에 model: "glb" 를 단다(꽂힌 DevKit 은 조립 모델이 함께 그린다) */
-export function withGlbExpansion(scene: Scene3D, chapterId: string | null | undefined): Scene3D {
-  if (!chapterId || !EXP_GLB_CHAPTERS.has(chapterId) || !scene.boards.some((b) => b.kind === "expansion")) return scene;
+/** 확장 보드 장면이면 확장 보드와 거기 꽂힌 DevKit 에 model: "glb" 를 단다(꽂힌 DevKit 은 조립 모델이 함께 그린다) */
+export function withGlbExpansion(scene: Scene3D): Scene3D {
+  if (!scene.boards.some((b) => b.kind === "expansion")) return scene;
   return { ...scene, boards: scene.boards.map((b) => (b.kind === "expansion" || (b.kind === "devkit" && b.seatedOn === "expansion") ? { ...b, model: "glb" as const } : b)) };
 }
 
@@ -80,6 +81,46 @@ export function ExpansionGlb({ b, L, index }: { b: ExpansionBoard3D; L: Layout; 
     const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
     const fx = (x: number) => (x <= COL0_MM ? ((x - LEFT_MM) / (COL0_MM - LEFT_MM)) * COL0_PX : COL0_PX + (x - COL0_MM) * pxPerMm);
     const rel = new THREE.Matrix4();
+
+    // 전원 헤더 · I2C/UART 헤더: 모델의 핀 자리(첫 열 x · 먼 줄 y)와 배선도의 핀 자리(첫 열 · 위 줄)를 맞춰 통째로 옮긴다
+    type Spot = { box: THREE.Box3; glbX0: number; glbY0: number; px0: number; py0: number };
+    const centerOf = (m: THREE.Mesh) => {
+      const g = m.geometry.clone();
+      g.applyMatrix4(rel.multiplyMatrices(inv, m.matrixWorld));
+      g.computeBoundingBox();
+      const box = g.boundingBox!.clone();
+      g.dispose();
+      return box;
+    };
+    const spotFor = (prefix: string, rows: string[]): Spot | null => {
+      const scenePins = b.pins.filter((p) => p.row && rows.includes(p.row));
+      if (!scenePins.length) return null;
+      let box: THREE.Box3 | null = null;
+      const pins: THREE.Vector3[] = [];
+      root.traverse((o) => {
+        const m = o as THREE.Mesh;
+        if (!m.isMesh || !m.name.startsWith(prefix)) return;
+        const bb = centerOf(m);
+        box = box ? box.union(bb) : bb;
+        if (/_P\d+$/.test(m.name)) pins.push(bb.getCenter(new THREE.Vector3()));
+      });
+      if (!box || !pins.length) return null;
+      return {
+        box: (box as THREE.Box3).clone().expandByVector(new THREE.Vector3(1, 2.6, 0)),
+        glbX0: Math.min(...pins.map((v) => v.x)), glbY0: Math.max(...pins.map((v) => v.y)),
+        px0: Math.min(...scenePins.map((p) => p.x)) - b.x, py0: Math.min(...scenePins.map((p) => p.y)) - b.y,
+      };
+    };
+    const pwrSpot = spotFor("PwrHdr", ["pwr"]), uartSpot = spotFor("UartHdr", ["i2c", "uart"]);
+    const spots = [pwrSpot, uartSpot].filter((v): v is Spot => v !== null);
+    const spotOf = (m: THREE.Mesh, c: THREE.Vector3) => {
+      if (m.name.startsWith("PwrHdr")) return pwrSpot;
+      if (m.name.startsWith("UartHdr")) return uartSpot;
+      // 헤더 바로 옆 글자(핀 이름)는 헤더와 함께
+      if (/^(PinSilk|ExpSilk|SilkLine)/.test(m.name)) return spots.find((sp) => sp.box.containsPoint(c)) ?? null;
+      return null;
+    };
+
     root.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
@@ -89,10 +130,14 @@ export function ExpansionGlb({ b, L, index }: { b: ExpansionBoard3D; L: Layout; 
       const shift = m.name === "Jumper_Cap" && b.jumper === "5V" ? 2.54 : 0;
       // 기판 글자 · 선(1.6~1.63mm)은 높이를 늘리면 기판 윗면과 거의 붙어 돌릴 때 깜빡인다 — 조금 띄운다
       const silk = /^(ExpSilk|PinSilk|SilkLine|Silk|Mark)/.test(m.name) ? 0.35 : 0;
+      g.computeBoundingBox();
+      const spot = spotOf(m, g.boundingBox!.getCenter(new THREE.Vector3()));
       const pos = g.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i), y = pos.getY(i) + shift, z = pos.getZ(i);
-        pos.setXYZ(i, L.X(b.x + fx(x)), Math.max(0, z) * hs + silk, L.Z(b.y + interp(TOP_Y_MM - y, Y_MAP)));
+        const px = spot ? spot.px0 + (x - spot.glbX0) * pxPerMm : fx(x);
+        const py = spot ? spot.py0 + (spot.glbY0 - y) * pxPerMm : interp(TOP_Y_MM - y, Y_MAP);
+        pos.setXYZ(i, L.X(b.x + px), Math.max(0, z) * hs + silk, L.Z(b.y + py));
       }
       pos.needsUpdate = true;
       g.computeVertexNormals();
