@@ -22,7 +22,10 @@ export function Sign({ w, h, at, rotY = 0, px = 256, paint }: { w: number; h: nu
   return <mesh position={at} rotation={[0, rotY, 0]} material={mat} raycast={() => null}><planeGeometry args={[w, h]} /></mesh>;
 }
 
-/** 시뮬레이션 OLED 글자를 그대로 비추는 세운 화면 (앞이 +z) */
+/**
+ * 시뮬레이션 OLED 글자를 그대로 비추는 세운 화면 (앞이 +z).
+ * `at` 은 화면 **가운데**다 — 바닥 · 책상 · 상자 윗면에 세울 때는 그 면 높이 + (h + 8) / 2 로 올려야 아래가 묻히지 않는다.
+ */
 export function LiveOled({ w, h, at, rotY = 0 }: { w: number; h: number; at: V3; rotY?: number }) {
   const api = useViewerApi();
   const tex = useMemo(() => canvasTexture(256, 128, (g, cw, ch) => paintOled(g, cw, ch, null)), []);

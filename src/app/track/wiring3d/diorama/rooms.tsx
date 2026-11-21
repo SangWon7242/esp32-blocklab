@@ -388,7 +388,8 @@ export function GameConsole({ pads }: { pads: "touch" | "bomb" | "runner" }) {
       <Desk w={170} d={110} top={46} />
       <group position={[0, 46, 0]} rotation={[-0.5, 0, 0]}>
         <Box size={[120, 10, 74]} at={[0, 5, 0]} mat={toon("#5f3dc4")} />
-        <LiveOled w={58} h={30} at={[0, 10.4, -10]} rotY={0} />
+        {/* 화면은 게임기 윗면(y 10) 위에 선다 — LiveOled 의 at 은 화면 가운데라, 틀 높이(h + 8)의 반만큼 올린다(몸통 · 책상 밑으로 박히지 않게) */}
+        <LiveOled w={58} h={30} at={[0, 10 + (30 + 8) / 2, -10]} rotY={0} />
         {pads === "touch" && (
           <>
             {/* 호일 터치 패드 A(32) · B(33) · C(27) · 시작 버튼(14) */}
