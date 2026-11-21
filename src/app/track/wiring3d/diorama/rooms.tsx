@@ -5,7 +5,7 @@ import { Ball, Box, Cyl } from "../kit";
 import { glowTexture, noOutline, toon, toonOwn } from "../materials";
 import { useViewerApi } from "../store";
 import { buzzing, deviceKind, ease, pinLevel, rgbOf, servoAngle } from "./common";
-import { LiveOled, Plant, Sign } from "./pieces";
+import { HideFromBehind, LiveOled, Plant, Sign } from "./pieces";
 import { Clap, CoverToggle, KnobDial, Lighter, PressPad, Slider, TiltToggle, Walker } from "./controls";
 import { HandFigure, PersonFigure } from "../figures";
 
@@ -23,13 +23,21 @@ function Desk({ w, d, top = 60 }: { w: number; d: number; top?: number }) {
   );
 }
 
-/** 방 한 귀퉁이: 바닥 · 뒷벽 */
+/**
+ * 방 한 귀퉁이: 바닥 · 뒷벽. 뒷벽 앞면은 z = -d / 2 + 8 (wallFront).
+ * 벽에 거는 것(칠판 · 표지 · 창문 · 게시판)은 앞면이 벽 앞면보다 0.5 이상 앞에 와야 한다 —
+ * 같은 면이면 돌릴 때마다 깜빡이고(z-fighting), 뒤면 벽에 묻혀 안 보인다.
+ */
+export const wallFront = (d: number) => -d / 2 + 8;
 function Corner({ w, d, h = 160 }: { w: number; d: number; h?: number }) {
   return (
     <group>
       <Box size={[w, 4, d]} at={[0, 2, 0]} mat={toon(FLOOR)} />
-      <Box size={[w, h, 8]} at={[0, h / 2, -d / 2 + 4]} mat={toon(WALL)} />
-      <Box size={[w, 8, 10]} at={[0, 8, -d / 2 + 6]} mat={toon("#ced4da")} />
+      {/* 뒤로 돌려 보면 벽을 감춰 벽에 건 칠판 · 게시판이 가려지지 않게 */}
+      <HideFromBehind frontZ={wallFront(d)}>
+        <Box size={[w, h, 8]} at={[0, h / 2, -d / 2 + 4]} mat={toon(WALL)} />
+        <Box size={[w, 8, 10]} at={[0, 8, -d / 2 + 6]} mat={toon("#ced4da")} />
+      </HideFromBehind>
     </group>
   );
 }
@@ -179,7 +187,7 @@ export function DeskFan() {
           <group rotation={[0, Math.PI, 0]}><HandFigure /></group>
         </Slider>
       </group>
-      <Sign w={70} h={14} at={[70, 120, -105.5]} paint={(g, cw, ch) => { g.fillStyle = "#fff3bf"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#e8590c"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("손이 가까우면 멈춰요", cw / 2, ch / 2 + 1); }} />
+      <Sign w={70} h={14} at={[70, 120, wallFront(220) + 0.6]} paint={(g, cw, ch) => { g.fillStyle = "#fff3bf"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#e8590c"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("손이 가까우면 멈춰요", cw / 2, ch / 2 + 1); }} />
     </group>
   );
 }
@@ -228,7 +236,7 @@ export function HammerGame() {
           <group rotation={[0, Math.PI, 0]}><HandFigure /></group>
         </Slider>
       </group>
-      <Sign w={56} h={14} at={[0, 125, -95.5]} paint={(g, cw, ch) => { g.fillStyle = "#e7f5ff"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#1864ab"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("3번에 1번 성공!", cw / 2, ch / 2 + 1); }} />
+      <Sign w={56} h={14} at={[0, 125, wallFront(200) + 0.6]} paint={(g, cw, ch) => { g.fillStyle = "#e7f5ff"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#1864ab"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("3번에 1번 성공!", cw / 2, ch / 2 + 1); }} />
     </group>
   );
 }
@@ -256,10 +264,10 @@ export function AlarmRoom() {
     <group>
       <Corner w={240} d={200} h={170} />
       {/* 칠판 · 비상구 표시 · 경광등 */}
-      <Box size={[130, 60, 4]} at={[-30, 100, -94]} mat={toon("#2f5d50")} />
-      <Box size={[136, 4, 8]} at={[-30, 68, -92]} mat={toon("#b08a5b")} />
-      <Box size={[40, 18, 3]} at={[80, 140, -94.5]} mat={toon("#2b8a3e")} />
-      <Sign w={38} h={16} at={[80, 140, -92.8]} paint={(g, cw, ch) => { g.fillStyle = "#2b8a3e"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#fff"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("비상구", cw / 2, ch / 2 + 1); }} />
+      <Box size={[130, 60, 4]} at={[-30, 100, wallFront(200) + 2.5]} mat={toon("#2f5d50")} />
+      <Box size={[136, 4, 8]} at={[-30, 68, wallFront(200) + 4]} mat={toon("#b08a5b")} />
+      <Box size={[40, 18, 3]} at={[80, 140, wallFront(200) + 2]} mat={toon("#2b8a3e")} />
+      <Sign w={38} h={16} at={[80, 140, wallFront(200) + 4]} paint={(g, cw, ch) => { g.fillStyle = "#2b8a3e"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#fff"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("비상구", cw / 2, ch / 2 + 1); }} />
       <group position={[80, 100, -88]}>
         <Box size={[18, 6, 12]} at={[0, -3, 0]} mat={toon("#495057")} />
         <group ref={spin}>
@@ -268,8 +276,8 @@ export function AlarmRoom() {
         <sprite material={halo} position={[0, 8, 6]} scale={[90, 90, 1]} raycast={() => null} />
       </group>
       {/* 벽의 불꽃 센서 · 그 앞 라이터 / 흔들림 상자(기울기 스위치) / 「여기 있어요」 버튼 */}
-      <Box size={[22, 14, 4]} at={[-100, 60, -94]} mat={toon("#1c5fa8")} />
-      <Ball r={4} at={[-100, 60, -90]} mat={toon("#212529")} />
+      <Box size={[22, 14, 4]} at={[-100, 60, wallFront(200) + 2.5]} mat={toon("#1c5fa8")} />
+      <Ball r={4} at={[-100, 60, wallFront(200) + 4.5]} mat={toon("#212529")} />
       <Lighter at={[-100, 4, -70]} />
       <group position={[20, 4, -60]}>
         <TiltToggle pin={14} label="흔들림 상자 (기울기 스위치)" axis="x" angle={0.6}>
@@ -309,8 +317,8 @@ export function ClimateRoom() {
     <group>
       <Corner w={240} d={200} h={170} />
       {/* 창문 */}
-      <Box size={[80, 60, 3]} at={[-60, 110, -94.5]} mat={toon("#a5d8ff")} />
-      <Box size={[84, 4, 6]} at={[-60, 78, -92]} mat={toon("#868e96")} />
+      <Box size={[80, 60, 3]} at={[-60, 110, wallFront(200) + 2]} mat={toon("#a5d8ff")} />
+      <Box size={[84, 4, 6]} at={[-60, 78, wallFront(200) + 3]} mat={toon("#868e96")} />
       {/* 벽걸이 선풍기 */}
       <group position={[70, 130, -84]}>
         <Box size={[16, 16, 12]} at={[0, 0, -2]} mat={toon("#f1f3f5")} />
@@ -386,7 +394,8 @@ export function GameConsole({ pads }: { pads: "touch" | "bomb" | "runner" }) {
     <group>
       <Corner w={200} d={170} h={120} />
       <Desk w={170} d={110} top={46} />
-      <group position={[0, 46, 0]} rotation={[-0.5, 0, 0]}>
+      {/* 게임기는 책상 위에 반듯하게 놓는다(기울이지 않는다) */}
+      <group position={[0, 46, 0]}>
         <Box size={[120, 10, 74]} at={[0, 5, 0]} mat={toon("#5f3dc4")} />
         {/* 화면은 게임기 윗면(y 10) 위에 선다 — LiveOled 의 at 은 화면 가운데라, 틀 높이(h + 8)의 반만큼 올린다(몸통 · 책상 밑으로 박히지 않게) */}
         <LiveOled w={58} h={30} at={[0, 10 + (30 + 8) / 2, -10]} rotY={0} />
@@ -415,10 +424,11 @@ export function SensorBoard() {
   return (
     <group>
       <Corner w={220} d={180} h={170} />
-      <Box size={[150, 90, 6]} at={[0, 100, -85]} mat={toon("#c99d66")} />
-      <Box size={[140, 80, 2]} at={[0, 100, -81.6]} mat={toon("#e6c9a0")} />
-      <LiveOled w={70} h={36} at={[-20, 104, -80]} />
-      {[["#ffd8a8", 40, 120], ["#c3fae8", 44, 86], ["#ffc9c9", -60, 78]].map(([c, x, y], k) => <Box key={k} size={[22, 22, 1]} at={[x as number, y as number, -80.2]} mat={toon(c as string)} cast={false} />)}
+      {/* 게시판 판(벽 앞) → 코르크(판 앞) → 화면 · 쪽지(코르크 앞): 앞면끼리 1 씩 떨어뜨려 깜빡이지 않게 */}
+      <Box size={[150, 90, 6]} at={[0, 100, wallFront(180) + 3.5]} mat={toon("#c99d66")} />
+      <Box size={[140, 80, 2]} at={[0, 100, wallFront(180) + 7.5]} mat={toon("#e6c9a0")} />
+      <LiveOled w={70} h={36} at={[-20, 104, wallFront(180) + 10]} />
+      {[["#ffd8a8", 40, 120], ["#c3fae8", 44, 86], ["#ffc9c9", -60, 78]].map(([c, x, y], k) => <Box key={k} size={[22, 22, 1]} at={[x as number, y as number, wallFront(180) + 8.5]} mat={toon(c as string)} cast={false} />)}
       {[-50, 30].map((x) => <group key={x} position={[x, 0, 30]}><Desk w={60} d={40} top={40} /></group>)}
       {/* 책상 위 센서들: 빛(누르면 가림) · 손잡이 · 흔들림 상자 · 소리(손뼉) · 움직임(사람) */}
       <CoverToggle pin={34} at={[-64, 40, 30]} label="빛 센서" />

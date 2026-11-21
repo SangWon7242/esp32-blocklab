@@ -73,7 +73,7 @@ export function Entrance({ mode }: { mode: "card" | "oled" | "auto" }) {
       <Box size={[84, 1.6, 36]} at={[0, 6.8, wallZ + 22]} mat={toon("#4b5563", { outline: false })} cast={false} />
       {/* 간판 */}
       <Box size={[96, 20, 3]} at={[mode === "auto" ? 100 : 0, mode === "auto" ? 132 : 6 + H - 6, wallZ + 2]} mat={toon("#1f2937")} />
-      <Sign w={90} h={15} at={[mode === "auto" ? 100 : 0, mode === "auto" ? 132 : 6 + H - 6, wallZ + 3.7]} paint={(g, cw, ch) => {
+      <Sign w={90} h={15} at={[mode === "auto" ? 100 : 0, mode === "auto" ? 132 : 6 + H - 6, wallZ + 4.1]} paint={(g, cw, ch) => {
         g.fillStyle = "#1f2937"; g.fillRect(0, 0, cw, ch);
         g.fillStyle = "#ffffff"; g.font = `700 ${Math.round(ch * 0.62)}px system-ui, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
         g.fillText(mode === "auto" ? "자동문" : "출입 통제 구역", cw / 2, ch / 2 + 1);
@@ -83,7 +83,7 @@ export function Entrance({ mode }: { mode: "card" | "oled" | "auto" }) {
         <>
           {/* 카드 리더기: 문 오른쪽 벽 */}
           <Box size={[22, 30, 5]} at={[gapW / 2 + 22, 72, wallZ + 2.5]} mat={toon("#111827")} />
-          <Sign w={18} h={18} at={[gapW / 2 + 22, 75, wallZ + 5.2]} px={128} paint={(g, cw, ch) => {
+          <Sign w={18} h={18} at={[gapW / 2 + 22, 75, wallZ + 5.6]} px={128} paint={(g, cw, ch) => {
             g.fillStyle = "#111827"; g.fillRect(0, 0, cw, ch);
             g.strokeStyle = "#74c0fc"; g.lineWidth = 6;
             for (const r of [14, 28, 42]) { g.beginPath(); g.arc(cw * 0.3, ch * 0.7, r, -Math.PI / 2, 0); g.stroke(); }
@@ -99,7 +99,8 @@ export function Entrance({ mode }: { mode: "card" | "oled" | "auto" }) {
           <sprite material={halo} position={[0, 6 + 128 + 9, wallZ + 10]} scale={[40, 40, 1]} raycast={() => null} />
         </>
       )}
-      {mode === "oled" && <LiveOled w={44} h={22} at={[gapW / 2 + 70, 78, wallZ + 3]} />}
+      {/* 안내 화면: 창문(아래 끝 65) 밑에 — 창틀과 겹치지 않게 */}
+      {mode === "oled" && <LiveOled w={44} h={22} at={[gapW / 2 + 70, 46, wallZ + 3]} />}
       {mode === "auto" && (
         <>
           {/* 문 위 초음파 센서: 사람이 오는 쪽(앞)을 본다 */}

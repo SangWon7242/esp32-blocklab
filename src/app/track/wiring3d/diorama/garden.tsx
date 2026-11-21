@@ -5,7 +5,7 @@ import { Ball, Box, Cyl, Part, Tube } from "../kit";
 import { noOutline, toon, toonOwn } from "../materials";
 import { useViewerApi, type ViewerState } from "../store";
 import { deviceKind, ease, pinLevel } from "./common";
-import { LiveOled, Sign } from "./pieces";
+import { HideFromBehind, LiveOled, Sign } from "./pieces";
 
 /*
  * 44장 스마트 화분: 베란다 화분대 위의 화분 · 물통 · 펌프 · 화분 지킴이(보드 상자).
@@ -295,7 +295,9 @@ function Veranda() {
   return (
     <group>
       <Box size={[w, 4, d]} at={[0, 2, 0]} mat={toon(TILE)} />
-      <Box size={[w, 176, 8]} at={[0, 88, -d / 2 + 4]} mat={toon(WALL)} />
+      <HideFromBehind frontZ={-d / 2 + 8}>
+        <Box size={[w, 176, 8]} at={[0, 88, -d / 2 + 4]} mat={toon(WALL)} />
+      </HideFromBehind>
       {/* 창문 */}
       <Box size={[150, 82, 2]} at={[-20, 128, -d / 2 + 8.6]} mat={sky} cast={false} />
       <Box size={[156, 5, 6]} at={[-20, 169, -d / 2 + 10]} mat={frame} />

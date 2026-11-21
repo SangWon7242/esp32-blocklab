@@ -11,6 +11,27 @@ import { simOut } from "./common";
 
 type V3 = [number, number, number];
 
+/**
+ * 뒷벽처럼 한쪽(앞 = +z)에서만 보는 것: 카메라가 뒤로(z 가 frontZ 보다 작게) 돌아가면 감춘다.
+ * 360도로 돌려도 벽이 칠판 · 게시판 · 표지를 가리지 않게. frontZ 는 이 그룹 좌표(부모와 같음)의 앞면 z.
+ */
+export function HideFromBehind({ frontZ, children }: { frontZ: number; children: ReactNode }) {
+  const ref = useRef<THREE.Group>(null);
+  const cam = useMemo(() => new THREE.Vector3(), []);
+  useFrame(({ camera, invalidate }) => {
+    const g = ref.current;
+    if (!g) return;
+    g.worldToLocal(cam.copy(camera.position));
+    // 벽 앞면에서 조금 뒤까지는 보인다(벽 옆을 스칠 때 깜빡이지 않게)
+    const show = cam.z > frontZ - 12;
+    if (g.visible !== show) {
+      g.visible = show;
+      invalidate();
+    }
+  });
+  return <group ref={ref}>{children}</group>;
+}
+
 /** 세운 글자 판 (앞이 +z). 처음 한 번 그린다 */
 export function Sign({ w, h, at, rotY = 0, px = 256, paint }: { w: number; h: number; at: V3; rotY?: number; px?: number; paint: (g: CanvasRenderingContext2D, cw: number, ch: number) => void }) {
   const { tex, mat } = useMemo(() => {

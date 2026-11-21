@@ -132,7 +132,7 @@ export function Crosswalk() {
       {[[red, 133, "#ff3b30"], [green, 107, "#2fd158"]].map(([m, y, c], k) => (
         <group key={k}>
           <Box size={[20, 20, 2]} at={[-70, y as number, -79.4]} mat={m as THREE.Material} cast={false} />
-          <Sign w={16} h={16} at={[-70, y as number, -78.2]} px={96} paint={(g2, cw, ch) => {
+          <Sign w={16} h={16} at={[-70, y as number, -77.8]} px={96} paint={(g2, cw, ch) => {
             g2.fillStyle = c as string; g2.globalAlpha = 0.95;
             const x = cw / 2;
             g2.beginPath(); g2.arc(x, ch * 0.2, ch * 0.1, 0, Math.PI * 2); g2.fill();
