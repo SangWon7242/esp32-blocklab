@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
+import { Suspense, useEffect, useMemo, useRef, type ReactNode, type RefObject } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Scene3D } from "@/track/wiring3d";
@@ -6,6 +6,7 @@ import { Box, Cyl, Decal, Part, roundedBox } from "./kit";
 import { BB_H, HEADER_H, PCB_H, PIN_LEN, type Layout } from "./layout";
 import { K, svgToBoard } from "./plusLayout";
 import { Devkit38 } from "./devkit38";
+import { DevkitGlb } from "./devkitGlb";
 import { ExpansionBoard, SeatedDevkit } from "./expansion";
 import { COLOR, noOutline, toon, toonOwn } from "./materials";
 import { useViewerApi } from "./store";
@@ -349,6 +350,12 @@ function ChipBoard({ b, L, index, blueLed }: { b: BoardData; L: Layout; index: n
 
   // 기본 보드: ESP32-DevKitC 38핀 실물 모양 (devkit38.tsx)
   if (devkit && b.seatedOn === "expansion") return <SeatedDevkit b={b} L={L} index={index} blueLed={blueLed} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} />;
+  // 실물 모델(시험 챕터): 모델을 받는 동안은 손으로 그린 보드를 보여 준다
+  if (devkit && b.model === "glb") return (
+    <Suspense fallback={<Devkit38 b={b} L={L} index={index} blueLed={blueLed} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} />}>
+      <DevkitGlb b={b} L={L} index={index} pressEn={pressEn} releaseEn={releaseEn} />
+    </Suspense>
+  );
   if (devkit) return <Devkit38 b={b} L={L} index={index} blueLed={blueLed} pressEn={pressEn} releaseEn={releaseEn} enCap={enCap} />;
   return (
     <group>

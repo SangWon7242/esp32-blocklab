@@ -17,6 +17,15 @@ export const DEVKIT_F = 1.7;
 /** DevKit 38핀: 아래로 난 핀 위에 올라서 있는 높이 · 선 머리가 윗면 패드에 앉는 높이 */
 export const DEVKIT_LIFT = 12;
 export const DEVKIT_TOP = DEVKIT_LIFT + PCB_H + 2;
+/**
+ * 실물 모델 DevKit(devkitGlb.tsx, mm): 첫 핀 가운데 x · 핀 간격 · 줄 가운데에서 핀 줄까지 · 헤더 윗면 · 핀 끝 높이.
+ * 모델은 핀이 위로 나 있어 선 머리(F, 높이 14)가 핀 끝을 덮고 앉는다 — seat 는 그 높이(3D 단위).
+ */
+export const DEVKIT_GLB = (() => {
+  const pitchMm = 2.54, pin0Mm = -24.23, rowMm = 12.7, headerTopMm = 4.1, pinTipMm = 10.1;
+  const s = 22 / pitchMm; // DK38_P(22 px) 를 2.54mm 에
+  return { pitchMm, pin0Mm, rowMm, headerTopMm, pinTipMm, seat: pinTipMm * s - 13 };
+})();
 
 /*
  * 38핀 확장 보드: 바닥 크기는 실물 비율(77.8 × 53.3mm). 배선도 그림은 DevKit 에 맞춰 암 헤더 두 줄 사이가 납작하므로
@@ -150,7 +159,7 @@ export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): 
     if (pad) return pad.top;
     if (scene.breadboards.some((b) => inRect(p, b))) return BB_H;
     const board = scene.boards.find((b) => inRect(p, b));
-    return board ? (board.kind === "devkit" ? DEVKIT_TOP : board.kind === "expansion" ? EX_SEAT : PCB_H + HEADER_H) : 0;
+    return board ? (board.kind === "devkit" ? (board.model === "glb" ? DEVKIT_GLB.seat : DEVKIT_TOP) : board.kind === "expansion" ? EX_SEAT : PCB_H + HEADER_H) : 0;
   };
 
   const sonars: SonarTrack[] = [];
