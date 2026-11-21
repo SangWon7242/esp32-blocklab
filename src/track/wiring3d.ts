@@ -54,6 +54,8 @@ export type ExpansionBoard3D = {
     caps: { x: number; y: number; r: number }[]; holes: { x: number; y: number; r: number }[];
   };
   devkit: { x: number; y: number; scale: number };
+  /** "glb": 실물 조립 모델(public/blocklab/models/esp32_on_expansion_assembly.glb)로 그린다 — 시험 챕터만(expansionGlb.tsx) */
+  model?: "glb";
 };
 
 export type Board3D = ChipBoard3D | ExpansionBoard3D;

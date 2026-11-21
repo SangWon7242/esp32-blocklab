@@ -7,6 +7,7 @@ import { BB_H, HEADER_H, PCB_H, PIN_LEN, type Layout } from "./layout";
 import { K, svgToBoard } from "./plusLayout";
 import { Devkit38 } from "./devkit38";
 import { DevkitGlb } from "./devkitGlb";
+import { ExpansionGlb } from "./expansionGlb";
 import { ExpansionBoard, SeatedDevkit } from "./expansion";
 import { COLOR, noOutline, toon, toonOwn } from "./materials";
 import { useViewerApi } from "./store";
@@ -309,7 +310,15 @@ function paintPlusSilk(g: CanvasRenderingContext2D, b: BoardData) {
 
 /** 보드 하나: ESP32 Plus · 기본 보드 DevKit 38핀 · 38핀 확장 보드 (그 위에 꽂힌 DevKit 은 확장 보드 높이에) */
 export function Board({ b, L, index, blueLed }: { b: Scene3D["boards"][number]; L: Layout; index: number; blueLed: THREE.MeshStandardMaterial }) {
+  // 확장 보드 실물 조립 모델(시험 챕터): 모델을 받는 동안은 손으로 그린 보드
+  if (b.kind === "expansion" && b.model === "glb") return (
+    <Suspense fallback={<ExpansionBoard b={b} L={L} index={index} />}>
+      <ExpansionGlb b={b} L={L} index={index} />
+    </Suspense>
+  );
   if (b.kind === "expansion") return <ExpansionBoard b={b} L={L} index={index} />;
+  // 조립 모델이 꽂힌 DevKit 까지 함께 그린다
+  if (b.kind === "devkit" && b.seatedOn === "expansion" && b.model === "glb") return null;
   return <ChipBoard b={b} L={L} index={index} blueLed={blueLed} />;
 }
 

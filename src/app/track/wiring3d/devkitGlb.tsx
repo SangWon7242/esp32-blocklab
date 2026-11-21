@@ -33,8 +33,8 @@ export function withGlbDevkit(scene: Scene3D): Scene3D {
 }
 
 /** 모델 부품 이름 → 묶음 */
-type GroupId = "board" | "header" | "usb" | "en" | "boot" | "usbchip" | "reg" | "pwr" | "module" | "small";
-function groupOf(name: string): GroupId {
+export type GroupId = "board" | "header" | "usb" | "en" | "boot" | "usbchip" | "reg" | "pwr" | "module" | "small";
+export function groupOf(name: string): GroupId {
   if (/^(PCB|Silk)/.test(name)) return "board";
   if (/^(Header_|Pin)/.test(name)) return "header";
   if (/^USB_(C|Tongue)/.test(name)) return "usb";
@@ -47,7 +47,7 @@ function groupOf(name: string): GroupId {
   return "small";
 }
 
-const GROUPS: readonly { id: GroupId; label: string; text: string; lift: boolean; glow: boolean; card: boolean }[] = [
+export const GROUPS: readonly { id: GroupId; label: string; text: string; lift: boolean; glow: boolean; card: boolean }[] = [
   { id: "board", label: "ESP32 DevKit 기판", text: TEXT.board, lift: false, glow: false, card: false },
   { id: "header", label: "핀 헤더 (38핀)", text: "선을 꽂는 금색 핀 38개예요. 핀마다 이름(번호)이 있고, 위 줄 · 아래 줄에 19개씩 있어요.", lift: true, glow: true, card: true },
   { id: "usb", label: "USB-C", text: TEXT.usb, lift: true, glow: true, card: true },
