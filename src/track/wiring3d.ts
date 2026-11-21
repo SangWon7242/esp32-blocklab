@@ -34,7 +34,7 @@ export type ChipBoard3D = {
   usb: Rect;
   pins: BoardPin[];
   seatedOn?: "expansion";
-  /** "glb": 실물 모델(public/models/esp32_devkit_38pin.glb)로 그린다 — 시험 중인 챕터만(devkitGlb.ts) */
+  /** "glb": 실물 모델(public/blocklab/models/esp32_devkit_38pin.glb)로 그린다 — 맨 기본 보드(devkitGlb.tsx) */
   model?: "glb";
   scale?: number;
 };

@@ -55,6 +55,8 @@ writeFileSync(path.join(out, "core.d.ts"), 'export * from "./types/lib/core";\n'
 cpSync(path.join(root, "public/lib"), path.join(out, "lib"), { recursive: true, filter: (src) => !src.endsWith("README.md") });
 // 코드 글꼴 (lib-v1.0.5): style.css 의 @font-face 가 절대 경로 /blocklab/fonts/ 로 부른다 (vite.lib.config.ts 는 publicDir:false 라 주소를 그대로 둔다)
 cpSync(path.join(root, "public/blocklab/fonts"), path.join(out, "fonts"), { recursive: true });
+// 3D 실물 모델 (lib-v1.9.0): 기본 보드 DevKit GLB. 화면이 <BASE_URL>blocklab/models/ 로 부른다 — 호스트가 /blocklab/models/ 로 서빙
+cpSync(path.join(root, "public/blocklab/models"), path.join(out, "models"), { recursive: true });
 
 // 4. package.json
 const libPkg = {

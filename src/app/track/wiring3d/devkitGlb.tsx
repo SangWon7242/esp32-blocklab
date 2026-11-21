@@ -12,7 +12,7 @@ import { pinText, TEXT } from "./texts";
 
 /*
  * 기본 보드 3D — 선생님이 다시 모델링한 실물 모델(public/models/esp32_devkit_38pin.glb, mm 단위, Z 위)로 그린다.
- * 시험 중: GLB_CHAPTERS 의 챕터만 이 모델을 쓰고, 나머지는 손으로 그린 Devkit38 그대로.
+ * 모든 챕터의 맨 기본 보드가 이 모델을 쓴다. 확장 보드에 꽂힌 DevKit(SeatedDevkit)은 핀이 아래로 가야 해서 손으로 그린 Devkit38 그대로.
  *
  * 맞추는 법: 모델의 핀 간격 2.54mm 를 배선도 핀 간격(DK38_P px)에, 두 줄 사이 25.4mm 를 3D 의 두 줄 사이에 맞춘다
  * (가로 · 세로 배율이 조금 다르다 — 배선도 세로를 DEVKIT_F 배로 늘린 것을 따른다). 모델은 핀이 위로 나 있어
@@ -20,15 +20,14 @@ import { pinText, TEXT } from "./texts";
  *
  * 부품은 모델 이름으로 묶어 Part 로 감싼다 → 마우스를 올리면 들리고 설명이 나온다(손으로 그린 보드와 같은 방식).
  */
-export const GLB_CHAPTERS: ReadonlySet<string> = new Set(["01-led"]);
 
-const MODEL_URL = `${import.meta.env.BASE_URL ?? "/"}models/esp32_devkit_38pin.glb`;
+/** 모델 주소: 앱은 <BASE_URL>blocklab/models/, 라이브러리(허브)는 /blocklab/models/ — 호스트가 dist-lib/models/ 를 그 자리에 둔다 */
+const MODEL_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/esp32_devkit_38pin.glb`;
 
 type BoardData = Extract<Scene3D["boards"][number], { kind: "plus" | "devkit" }>;
 
-/** 시험 챕터면 기본 보드(맨 DevKit)에 model: "glb" 를 단 장면을 돌려준다 */
-export function withGlbDevkit(scene: Scene3D, chapterId: string | null | undefined): Scene3D {
-  if (!chapterId || !GLB_CHAPTERS.has(chapterId)) return scene;
+/** 기본 보드(맨 DevKit)에 model: "glb" 를 단 장면을 돌려준다 */
+export function withGlbDevkit(scene: Scene3D): Scene3D {
   if (!scene.boards.some((b) => b.kind === "devkit" && !b.seatedOn)) return scene;
   return { ...scene, boards: scene.boards.map((b) => (b.kind === "devkit" && !b.seatedOn ? { ...b, model: "glb" as const } : b)) };
 }
