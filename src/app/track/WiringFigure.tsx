@@ -7,6 +7,7 @@ import type { BoardId } from "@/track/board";
 import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
 import { useBoardChoice } from "../board/boardChoice";
 import { Illustration, JumperNotice, resolveBoardImage, shownJumperNotice } from "./Illustration";
+import { SafetyNotice } from "./SafetyNotice";
 
 // three.js 는 3D 탭을 처음 열 때만 불러온다
 const Wiring3DView = lazy(() => import("./wiring3d/Wiring3DView").then((m) => ({ default: m.Wiring3DView })));
@@ -46,10 +47,13 @@ export function WiringFigure({ chapterId, image, caption, className, board: boar
   const onUnsupported = useCallback(() => { setUnsupported(true); setTab("picture"); }, []);
   const jumper = shownJumperNotice(chapterId, shown);
   const picture = <Illustration chapterId={chapterId} image={image} caption={caption} className={className} board={boardProp} zoomable showJumper={!has3d} />;
-  if (!has3d) return picture;
+  // 조립 안전 안내(과열 · 고장 · 다칠 수 있는 챕터만): 배선하기 전에 먼저 보이게 맨 위에
+  const safety = <SafetyNotice chapterId={chapterId} className="mb-2" />;
+  if (!has3d) return <>{safety}{picture}</>;
 
   return (
     <Tabs value={tab} onValueChange={setTab} data-testid="wiring-figure">
+      {safety}
       {/* 확장 보드 점퍼 5V 안내: 그림 · 3D 어느 쪽을 보든 한 번 */}
       {jumper && <JumperNotice text={jumper} />}
       <TabsList>

@@ -19,6 +19,7 @@ import { useBoardChoice } from "../board/boardChoice";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
 import { Illustration, JumperNotice, resolveBoardImage, shownJumperNotice } from "./Illustration";
+import { SafetyNotice } from "./SafetyNotice";
 import { PAGE_GUTTER } from "./layout";
 import { MaterialChips } from "./Materials";
 import { useChapterRecords, useProgress } from "./progressState";
@@ -243,6 +244,8 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
             {chapter.wiring && (
               <div id="chapter-panel-wiring" role="tabpanel" aria-labelledby="chapter-tab-wiring" hidden={panel !== "wiring"} className="min-w-0 space-y-3 px-4 py-4 lg:px-5" data-testid="chapter-wiring-info">
                 {/* 3D 를 보고 있으면 연결 · 부품 목록이 여기로 온다 (줄을 누르면 작업대의 그 선만 또렷해진다) */}
+                {/* 조립 안전 안내(과열 · 고장 · 다칠 수 있는 챕터만): 연결 표보다 먼저 */}
+                <SafetyNotice chapterId={chapter.id} />
                 {/* 확장 보드 점퍼 5V 안내: 3D 를 보고 있어도 보인다 */}
                 {shownJumperNotice(chapter.id, shown) && <JumperNotice text={shownJumperNotice(chapter.id, shown)!} />}
                 <div ref={setInfoBox} />

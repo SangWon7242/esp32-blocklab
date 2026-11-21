@@ -257,6 +257,29 @@ test("3D 조립 순서: 보드 놓기부터 한 단계씩 넘기고, 단계마�
   await expect(card).toHaveCount(0);
 });
 
+test("조립 안전: 위험한 챕터는 배선 탭에 경고, 조립 순서는 「USB 를 뺐어요」 뒤에 넘어간다", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
+  await page.goto("/#/track/07-fan");
+  await page.getByRole("tab", { name: "배선" }).click();
+  const notice = page.getByTestId("chapter-wiring-info").getByTestId("safety-notice");
+  await expect(notice).toHaveAttribute("data-level", "danger");
+  await expect(notice).toContainText("USB 를 먼저 빼고 조립해요");
+  const wiring = page.getByTestId("chapter-wiring");
+  await wiring.getByTestId("wiring-3d-steps").click();
+  const card = wiring.getByTestId("wiring-3d-step");
+  await expect(card.getByTestId("wiring-3d-safety-gate")).toBeVisible();
+  await expect(wiring.getByTestId("wiring-3d-step-next")).toBeDisabled();
+  await page.keyboard.press("ArrowRight");
+  await expect(card).toContainText("1 /");
+  await card.getByTestId("wiring-3d-safety-ok").check();
+  await wiring.getByTestId("wiring-3d-step-next").click();
+  await expect(card).toContainText("2 /");
+  // 경고가 없는 챕터는 띠도 없다
+  await page.goto("/#/track/01-led");
+  await page.getByRole("tab", { name: "배선" }).click();
+  await expect(page.getByTestId("safety-notice")).toHaveCount(0);
+});
+
 test("융합 챕터 3D: 현장 보기가 먼저, 회로 보기로 바꾸면 조립 순서가 나온다", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("esp32-blocklab:3d", "on"));
   await page.goto("/#/track/10-auto-door");

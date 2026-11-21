@@ -2,13 +2,15 @@ import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, ty
 import { createPortal } from "react-dom";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import { Armchair, Cable, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon, Zap } from "lucide-react";
+import { Armchair, Cable, ShieldAlert, TriangleAlert, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { behaviorFor } from "@/track/sim/behaviors";
 import { readDevices, type Device } from "@/track/sim/circuit";
 import { defaultInputs, Simulator } from "@/track/sim/engine";
 import { JUMPER_5V_NOTICE } from "@/track/board";
+import { chapterSafety } from "@/track/safety";
+import { SAFETY_TONE, SafetyBody } from "../SafetyNotice";
 import type { Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
 import { makeLayout, siteLayout } from "./layout";
@@ -83,6 +85,12 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
   const step = useViewer((s) => s.step);
   const assembly = useViewer((s) => s.assembly);
   const hasSchematic = schematicRows(scene).length > 0;
+  // 조립 안전: 위험한 챕터는 조립 순서 첫 단계에서 「USB 를 뺐어요」 를 눌러야 다음으로 간다(챕터마다 다시)
+  const safety = chapterSafety(chapterId);
+  const [safetyOk, setSafetyOk] = useState(false);
+  const [safetyFor, setSafetyFor] = useState(chapterId);
+  if (safetyFor !== chapterId) { setSafetyFor(chapterId); setSafetyOk(false); }
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const [pinout, setPinout] = useState(false);
   const [schematic, setSchematic] = useState(Boolean(stage || large));
   const boxRef = useRef<HTMLDivElement>(null);
@@ -101,7 +109,9 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
   // 조립 순서: 켜면 처음(보드 놓기)부터. 실행 · 고른 부품은 멈춘다
   const goStep = (n: number | null) => {
     const last = (assembly?.steps.length ?? 1) - 1;
-    const next = n === null ? null : Math.max(0, Math.min(last, n));
+    let next = n === null ? null : Math.max(0, Math.min(last, n));
+    // 안전 확인 전에는 첫 단계를 넘지 않는다
+    if (next !== null && next > 0 && safety && !safetyOk) next = 0;
     set({ step: next, ...(next !== null ? { running: false, selected: null, picked: null, hover: null } : {}) });
     invalidate();
   };
@@ -212,6 +222,14 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
             <Zap className="size-3.5" />점퍼 5V
           </span>
         )}
+        {/* 조립 안전: 누르면 안내 카드 */}
+        {safety && (
+          <Button type="button" size="sm" variant="outline" aria-pressed={safetyOpen} data-testid="wiring-3d-safety" title="조립하기 전에 읽어요"
+            className={cn("h-8 font-semibold", safety.level === "danger" ? "border-red-500/60 bg-red-50 text-red-900 hover:bg-red-100" : "border-amber-500/60 bg-amber-50 text-amber-900 hover:bg-amber-100")}
+            onClick={() => setSafetyOpen((v) => !v)}>
+            {safety.level === "danger" ? <TriangleAlert className="size-3.5" /> : <ShieldAlert className="size-3.5" />}조립 안전
+          </Button>
+        )}
         {!site && scene.boards.length > 0 && (
           <Button type="button" size="sm" variant="outline" className={cn("h-8", pinout ? "border-[#0f2239] bg-[#0f2239] text-white hover:bg-[#0f2239]/90 hover:text-white" : "bg-background/95")} aria-pressed={pinout} data-testid="wiring-3d-pinout-open" onClick={() => setPinout((v) => !v)} title="보드의 핀마다 무엇을 할 수 있는지 봐요">
             <MapIcon className="size-3.5" />핀 배치도
@@ -228,7 +246,13 @@ function Viewer({ scene, chapterId, onUnsupported, large, toolbar, stage, infoCo
       {selected && <PartCard />}
       <OledZoom />
       {pinout && <PinoutDialog scene={scene} onClose={() => setPinout(false)} />}
-      {step !== null && assembly && <StepCard step={step} go={goStep} />}
+      {safety && safetyOpen && step === null && (
+        <div role="note" aria-label="조립 안전 안내" className={cn("absolute top-12 left-2 z-20 w-[min(22rem,calc(100%-1rem))] rounded-xl border px-3 py-2 shadow-[0_4px_0_rgba(15,34,57,0.2)]", SAFETY_TONE[safety.level])} data-testid="wiring-3d-safety-card">
+          <SafetyBody safety={safety} compact />
+          <div className="mt-2 flex justify-end"><Button type="button" size="sm" variant="outline" className="h-7 bg-white/80" onClick={() => setSafetyOpen(false)}>닫기</Button></div>
+        </div>
+      )}
+      {step !== null && assembly && <StepCard step={step} go={goStep} safety={step === 0 ? safety : null} safetyOk={safetyOk} onSafetyOk={setSafetyOk} />}
       {step === null && <Controls has={has} />}
       {behavior && <SerialMonitor />}
       <Phone />
@@ -291,7 +315,14 @@ function nodeRef(dom: ViewerState["dom"], id: string, key: "dot" | "card" | "lin
 }
 
 /** 조립 순서 카드: 지금 단계에서 꽂을 부품과 이을 선. ← → 로 넘긴다 */
-function StepCard({ step, go }: { step: number; go: (n: number | null) => void }) {
+function StepCard({ step, go, safety, safetyOk, onSafetyOk }: {
+  step: number;
+  go: (n: number | null) => void;
+  /** 첫 단계에서만: 그 챕터의 조립 안전 안내(없으면 null) */
+  safety: ReturnType<typeof chapterSafety>;
+  safetyOk: boolean;
+  onSafetyOk: (ok: boolean) => void;
+}) {
   const assembly = useViewer((s) => s.assembly);
   if (!assembly) return null;
   const { steps } = assembly;
@@ -309,6 +340,15 @@ function StepCard({ step, go }: { step: number; go: (n: number | null) => void }
         <button type="button" className="-mr-1 rounded-md p-1 text-[#5b6168] outline-none hover:bg-neutral-100 focus-visible:ring-3 focus-visible:ring-ring/60" aria-label="조립 순서 닫기" onClick={() => go(null)}><XIcon className="size-4" /></button>
       </div>
       <div className="min-h-0 overflow-y-auto px-3 py-2">
+        {safety && (
+          <div className={cn("mb-2 rounded-lg border px-2.5 py-2", SAFETY_TONE[safety.level])} data-testid="wiring-3d-safety-gate" data-level={safety.level}>
+            <SafetyBody safety={safety} compact />
+            <label className="mt-2 flex cursor-pointer items-center gap-2 rounded-md bg-white/80 px-2 py-1.5 text-sm font-bold">
+              <input type="checkbox" className="size-4 accent-[#e8590c]" checked={safetyOk} onChange={(e) => onSafetyOk(e.target.checked)} data-testid="wiring-3d-safety-ok" />
+              USB 를 뺐어요. 조심해서 조립할게요
+            </label>
+          </div>
+        )}
         <p className="text-[0.8rem] leading-snug break-keep text-[#5b6168]">{lead}</p>
         {cur.lines.length > 0 && (
           <ul className="mt-2 grid gap-1">
@@ -328,7 +368,7 @@ function StepCard({ step, go }: { step: number; go: (n: number | null) => void }
         </div>
         {last
           ? <Button type="button" size="sm" className="h-8" onClick={() => go(null)}>다 꽂았어요</Button>
-          : <Button type="button" size="sm" className="h-8" onClick={() => go(step + 1)} aria-label="다음 단계 (→)" data-testid="wiring-3d-step-next">다음<ChevronRight className="size-4" /></Button>}
+          : <Button type="button" size="sm" className="h-8" onClick={() => go(step + 1)} disabled={Boolean(safety) && !safetyOk} title={safety && !safetyOk ? "위의 안전 확인을 먼저 눌러요" : undefined} aria-label="다음 단계 (→)" data-testid="wiring-3d-step-next">다음<ChevronRight className="size-4" /></Button>}
       </div>
     </div>
   );
