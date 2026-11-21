@@ -6,6 +6,7 @@ import { Box, Cyl, Decal, Part, roundedBox } from "./kit";
 import { BB_H, HEADER_H, PCB_H, PIN_LEN, type Layout } from "./layout";
 import { K, svgToBoard } from "./plusLayout";
 import { Devkit38 } from "./devkit38";
+import { BreadboardGlbBody, canUseGlbBreadboard } from "./breadboardGlb";
 import { DevkitGlb } from "./devkitGlb";
 import { ExpansionGlb } from "./expansionGlb";
 import { ExpansionBoard, SeatedDevkit } from "./expansion";
@@ -91,7 +92,7 @@ export function Breadboard({ bb, L, index }: { bb: BB; L: Layout; index: number 
     if (st.hover?.id.startsWith(`bb${index}`)) { st.set({ hover: null }); st.invalidate(); }
   };
   const d = L.Z(bb.y + bb.h) - L.Z(bb.y);
-  return (
+  const drawn = (
     <group>
       <Slab x={L.X(bb.x + bb.w / 2)} y={(L.Z(bb.y) + L.Z(bb.y + bb.h)) / 2} w={bb.w} d={d} h={BB_H} radius={7} top={toon(COLOR.breadboard)} side={toon(COLOR.breadboardSide)} onPointerMove={move} onPointerOut={out} />
       {split && <Box size={[bb.w - 12, 1.2, bb.gap[1] - bb.gap[0]]} at={[L.X(bb.x + bb.w / 2), BB_H + 0.1, L.Z((bb.gap[0] + bb.gap[1]) / 2)]} mat={toon("#d7d2c6", { outline: false })} cast={false} />}
@@ -104,6 +105,13 @@ export function Breadboard({ bb, L, index }: { bb: BB; L: Layout; index: number 
         return <Box key={r.y} size={[bb.w - 28, 0.8, 2]} at={[L.X(bb.x + bb.w / 2), BB_H + 0.3, L.Z(ly)]} mat={toon(r.plus ? "#e03131" : "#1971c2", { outline: false })} cast={false} />;
       })}
     </group>
+  );
+  // 실물 모델 브레드보드(breadboardGlb.tsx): 그릴 수 있는 보드만. 모델을 받는 동안은 손으로 그린 보드
+  if (!canUseGlbBreadboard(bb)) return drawn;
+  return (
+    <Suspense fallback={drawn}>
+      <BreadboardGlbBody bb={bb} L={L} onPointerMove={move} onPointerOut={out} />
+    </Suspense>
   );
 }
 
