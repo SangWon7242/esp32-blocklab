@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Device } from "@/track/sim/circuit";
@@ -12,6 +12,7 @@ import { paintOled } from "./oled";
 import { sonarTargetFor } from "./diorama";
 import { useViewer, useViewerApi, type ViewerState } from "./store";
 import { MODULE, TEXT } from "./texts";
+import { SERVO_MM, ServoGlbBody, SONAR_MM, SonarGlbBody } from "./moduleGlb";
 
 /*
  * 부품 3D 모델과 그 움직임.
@@ -396,12 +397,21 @@ export function Servo({ p, i, L }: P<"servo">) {
     if (Math.abs(diff) > 0.002) { g.rotation.y += Math.sign(diff) * Math.min(Math.abs(diff), 0.09); s.invalidate(); }
   });
   const xs = p.plug.map((q) => q.x), ys = p.plug.map((q) => q.y);
-  return (
-    <Part id={`part${i}`} label="서보 모터" text={TEXT.servo}>
+  // 실물 모델 SG90: 몸통 길이를 그림 몸통 66px 에 맞춘다 → 축이 그림의 팔 자리(x + 44)에 온다. 팔은 모델에 없어 그대로 그린다
+  const sv = 66 / SERVO_MM.len;
+  const drawn = (
+    <>
       <Box size={[66, 36, 44]} at={[L.X(x + 33), 18, zz(y + 22)]} mat={blue} />
       <Box size={[82, 4, 14]} at={[L.X(x + 33), 26, zz(y + 22)]} mat={blue} />
       <Cyl r={13} h={5} at={[L.X(x + 44), 38.5, zz(y + 22)]} mat={blue} seg={24} />
-      <group ref={horn} position={[L.X(x + 44), 43, zz(y + 22)]}>
+    </>
+  );
+  return (
+    <Part id={`part${i}`} label="서보 모터" text={TEXT.servo}>
+      <Suspense fallback={drawn}>
+        <ServoGlbBody x={L.X(x + 33)} z={zz(y + 22)} s={sv} />
+      </Suspense>
+      <group ref={horn} position={[L.X(x + 33) + SERVO_MM.shaftX * sv, SERVO_MM.shaftTop * sv + 1, zz(y + 22)]}>
         <Cyl r={5} h={6} at={[0, 0, 0]} mat={toon(COLOR.white)} seg={16} />
         {/* 한쪽 팔: 각도를 읽기 쉽게 (문 · 차단기 막대) */}
         <Box size={[8, 2.6, 44]} at={[0, 3, -18]} mat={toon(COLOR.white)} />
@@ -409,7 +419,7 @@ export function Servo({ p, i, L }: P<"servo">) {
       </group>
       {["#8b5a2b", "#e03131", "#f76707"].map((color, k) => {
         const end = p.plug[k];
-        const from = new THREE.Vector3(L.X(left ? x : x + 66), 12, zz(y + 13 + k * 9));
+        const from = new THREE.Vector3(L.X(left ? x : x + 66), SERVO_MM.wireZ * sv, zz(y + 13 + k * 9));
         const out = from.clone().add(new THREE.Vector3(left ? -16 : 16, 0, 0));
         const to = L.v(end, plugTop);
         return <Tube key={k} points={[from, out, out.clone().lerp(to, 0.5).setY(Math.max(18, plugTop + 16)), to.clone().setY(plugTop + 8), to]} radius={1.8} mat={toon(color, { outline: false })} />;
@@ -629,14 +639,10 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
         <group position={[0, 4, zz(edge)]} rotation={[tilt, 0, 0]}>
           {/* 세운 판 안의 좌표: z 는 핀 쪽 가장자리에서 위로 */}
           <group position={[0, 0, -zz(edge)]}>
-            <Box size={[p.w, 4, p.h]} at={[L.X(p.x + p.w / 2), 0, zz(p.y + p.h / 2)]} mat={toon(p.color)} />
-            {[p.x + 36, p.x + 116].map((ex) => (
-              <group key={ex}>
-                <Cyl r={24} h={22} at={[L.X(ex), -13, zz(p.y + 34)]} mat={toon(COLOR.metalLight)} seg={28} />
-                <Cyl r={13} h={1} at={[L.X(ex), -24.3, zz(p.y + 34)]} mat={toon("#495057", { outline: false })} seg={24} />
-              </group>
-            ))}
-            <Decal under w={44} d={12} at={[L.X(p.x + p.w / 2), -2.2, zz(p.y + 34)]} paint={(g, cw, ch) => { g.fillStyle = "#fff"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("HC-SR04", cw / 2, ch / 2); }} />
+            {/* 실물 모델 HC-SR04(moduleGlb.tsx): 판 폭을 그림 폭에 맞춘다. 받는 동안은 그린 판 */}
+            <Suspense fallback={<SonarDrawn p={p} L={L} zz={zz} />}>
+              <SonarGlbBody cx={L.X(p.x + p.w / 2)} pinEdgeZ={zz(edge)} grow={face < 0 ? -1 : 1} s={p.w / SONAR_MM.w} />
+            </Suspense>
           </group>
         </group>
         <PinNames p={p} L={L} zz={zz} y={4.2} />
@@ -653,6 +659,22 @@ function Ultrasonic({ p, i, L, zz, name, text }: { p: Mod; i: number; L: Layout;
         {target === "car" ? <ToyCar /> : target === "person" ? <PersonFigure /> : target === "hand" ? <HandFigure /> : <WallFigure />}
         <sprite material={tag.mat} position={[0, tagY, 0]} scale={[60, 22.8, 1]} renderOrder={7} raycast={() => null} />
       </group>}
+    </>
+  );
+}
+
+/** 모델을 받는 동안 보이는 손으로 그린 초음파 판 · 눈 (세운 판 안의 좌표) */
+function SonarDrawn({ p, L, zz }: { p: Mod; L: Layout; zz: (y: number) => number }) {
+  return (
+    <>
+      <Box size={[p.w, 4, p.h]} at={[L.X(p.x + p.w / 2), 0, zz(p.y + p.h / 2)]} mat={toon(p.color)} />
+      {[p.x + 36, p.x + 116].map((ex) => (
+        <group key={ex}>
+          <Cyl r={24} h={22} at={[L.X(ex), -13, zz(p.y + 34)]} mat={toon(COLOR.metalLight)} seg={28} />
+          <Cyl r={13} h={1} at={[L.X(ex), -24.3, zz(p.y + 34)]} mat={toon("#495057", { outline: false })} seg={24} />
+        </group>
+      ))}
+      <Decal under w={44} d={12} at={[L.X(p.x + p.w / 2), -2.2, zz(p.y + 34)]} paint={(g, cw, ch) => { g.fillStyle = "#fff"; g.font = `700 ${Math.round(ch * 0.6)}px system-ui`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("HC-SR04", cw / 2, ch / 2); }} />
     </>
   );
 }

@@ -91,6 +91,9 @@ export function siteLayout(room: { w: number; d: number }): Layout {
   };
 }
 
+/** HC-SR04 실물 모델(mm): 판 폭 · 핀 쪽 가장자리에서 눈 가운데까지 · 판에서 눈 앞면까지 (moduleGlb.tsx 의 SONAR_MM 과 같은 값) */
+const SONAR_W_MM = 45, SONAR_EYE_MM = 10.5, SONAR_FRONT_MM = 13.6;
+
 /** 현장 모형과 회로 사이 틈 (그림 px) */
 const DIORAMA_GAP = 90;
 
@@ -169,9 +172,10 @@ export function makeLayout(scene: Scene3D, diorama?: { w: number; d: number }): 
     const face = sonarFace(p);
     // 세운 판의 눈 높이 · 판 앞면 (핀 쪽 가장자리를 축으로 세운다)
     const edge = face < 0 ? p.y + p.h : p.y;
-    // 눈 가운데: 세운 판에서 핀 쪽 가장자리로부터 눈까지의 거리가 높이가 된다. 눈은 판 앞으로 24 나와 있다
-    const eyeUp = face < 0 ? p.h - 34 : 34;
-    sonars.push({ part, origin: new THREE.Vector3(X(p.x + p.w / 2), 4 + eyeUp, zz(edge) + face * 26), face, perCm: 6 });
+    // 실물 모델 HC-SR04(moduleGlb.tsx, 판 폭을 그림 폭에 맞춘 배율): 핀 쪽 가장자리에서 눈 가운데까지 10.5mm 가 높이,
+    // 눈(캔) 앞면은 판에서 13.6mm 나와 있다 — 소리 고리 · 물체 거리는 그 앞면에서 잰다
+    const s = p.w / SONAR_W_MM;
+    sonars.push({ part, origin: new THREE.Vector3(X(p.x + p.w / 2), 4 + SONAR_EYE_MM * s, zz(edge) + face * SONAR_FRONT_MM * s), face, perCm: 6 });
   });
 
   // 손으로 다루는 소품 자리: PIR 앞 사람 · RFID 카드 · 리모컨 · 라이터
