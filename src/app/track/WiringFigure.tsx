@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { BoardId } from "@/track/board";
-import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
-import { useBoardChoice } from "../board/boardChoice";
+import { canShow3D, hasScene3D } from "@/track/wiring3d";
+import { BOARD_IDS, useBoardChoice } from "../board/boardChoice";
 import { Illustration, JumperNotice, resolveBoardImage, shownJumperNotice } from "./Illustration";
 import { SafetyNotice } from "./SafetyNotice";
+import { useScene3D } from "./useScene3D";
 
 // three.js 는 3D 탭을 처음 열 때만 불러온다
 const Wiring3DView = lazy(() => import("./wiring3d/Wiring3DView").then((m) => ({ default: m.Wiring3DView })));
@@ -31,18 +32,12 @@ export function WiringFigure({ chapterId, image, caption, className, board: boar
   const board = boardProp ?? chosen;
   const shown = resolveBoardImage(chapterId, image, board);
   const [tab, setTab] = useState("picture");
-  const [scene, setScene] = useState<Scene3D | null>(null);
   const [unsupported, setUnsupported] = useState(false);
   useEffect(() => { if (!canShow3D()) setUnsupported(true); }, []);
   const has3d = hasScene3D(chapterId, shown) && !unsupported;
 
-  useEffect(() => {
-    setScene(null);
-    if (tab !== "3d" || !has3d) return;
-    let alive = true;
-    void loadScene3D(chapterId, shown)?.then((s) => { if (alive) setScene(s); });
-    return () => { alive = false; };
-  }, [tab, has3d, chapterId, shown]);
+  // 보드를 바꿔도 3D 보기는 그대로 두고 장면만 바꾼다 (다른 보드 장면은 한가할 때 미리)
+  const { scene, pending } = useScene3D(chapterId, shown, { enabled: tab === "3d" && has3d, siblings: BOARD_IDS.map((b) => resolveBoardImage(chapterId, image, b)) });
 
   const onUnsupported = useCallback(() => { setUnsupported(true); setTab("picture"); }, []);
   const jumper = shownJumperNotice(chapterId, shown);
@@ -66,6 +61,7 @@ export function WiringFigure({ chapterId, image, caption, className, board: boar
           <Suspense fallback={<Loading />}>
             <Wiring3DView
               scene={scene}
+              pending={pending}
               chapterId={chapterId}
               onUnsupported={onUnsupported}
               toolbar={

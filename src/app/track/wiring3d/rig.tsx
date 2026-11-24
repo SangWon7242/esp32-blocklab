@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Layout } from "./layout";
@@ -47,8 +47,9 @@ export function Rig({ L, cardsRoom }: { L: Layout; cardsRoom: boolean }) {
   });
 
   // 화면 크기에 맞춰 장면 전체가 들어오게 (설명 카드가 양옆에 설 자리를 남긴다)
+  // 첫 화면을 그리기 전에 맞춘다 (보드를 바꾼 첫 화면이 이전 장면의 확대 · 자리로 한 번 그려지지 않게)
   const fitted = useRef(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (size.width < 10 || size.height < 10) return;
     const s = st.current;
     const was = s.fit;

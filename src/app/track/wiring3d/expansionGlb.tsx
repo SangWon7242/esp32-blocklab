@@ -30,7 +30,7 @@ export function withGlbExpansion(scene: Scene3D): Scene3D {
   return { ...scene, boards: scene.boards.map((b) => (b.kind === "expansion" || (b.kind === "devkit" && b.seatedOn === "expansion") ? { ...b, model: "glb" as const } : b)) };
 }
 
-const MODEL_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/esp32_on_expansion_assembly.glb`;
+export const EXPANSION_GLB_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/esp32_on_expansion_assembly.glb`;
 
 /** 모델 세로(mm, 기판 위 끝에서) → 배선도 y(px, 보드 위 끝에서) */
 const Y_MAP: [number, number][] = [[0, 0], [10.37, 40], [12.91, 59.8], [15.45, 79.6], [21.8, 103.6], [24.34, 123.4], [47.2, 209.8], [53.55, 233.8], [56.09, 253.6], [58.63, 273.4], [69, 314]];
@@ -66,102 +66,127 @@ function exGroupOf(name: string): ExGroup {
   return "small";
 }
 
+/** 옮긴 기하 한 조각: 모델의 메시 하나 (재질은 모델 것 그대로 함께 쓴다) */
+type Piece = { geo: THREE.BufferGeometry; mat: THREE.Material | THREE.Material[]; devkit: boolean; group: string };
+
+/** 꼭짓점마다 mm → 3D 로 옮긴 기하 (모델 전체를 훑어 수십 ms 든다) */
+function buildPieces(gltf: { scene: THREE.Object3D }, b: ExpansionBoard3D, L: Layout, hs: number, pxPerMm: number): Piece[] {
+  const out: Piece[] = [];
+  const root = gltf.scene.children[0] ?? gltf.scene;
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
+  const fx = (x: number) => (x <= COL0_MM ? ((x - LEFT_MM) / (COL0_MM - LEFT_MM)) * COL0_PX : COL0_PX + (x - COL0_MM) * pxPerMm);
+  const rel = new THREE.Matrix4();
+
+  // 전원 헤더 · I2C/UART 헤더: 모델의 핀 자리(첫 열 x · 먼 줄 y)와 배선도의 핀 자리(첫 열 · 위 줄)를 맞춰 통째로 옮긴다
+  type Spot = { box: THREE.Box3; glbX0: number; glbY0: number; px0: number; py0: number };
+  const centerOf = (m: THREE.Mesh) => {
+    const g = m.geometry.clone();
+    g.applyMatrix4(rel.multiplyMatrices(inv, m.matrixWorld));
+    g.computeBoundingBox();
+    const box = g.boundingBox!.clone();
+    g.dispose();
+    return box;
+  };
+  const spotFor = (prefix: string, rows: string[]): Spot | null => {
+    const scenePins = b.pins.filter((p) => p.row && rows.includes(p.row));
+    if (!scenePins.length) return null;
+    let box: THREE.Box3 | null = null;
+    const pins: THREE.Vector3[] = [];
+    root.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || !m.name.startsWith(prefix)) return;
+      const bb = centerOf(m);
+      box = box ? box.union(bb) : bb;
+      if (/_P\d+$/.test(m.name)) pins.push(bb.getCenter(new THREE.Vector3()));
+    });
+    if (!box || !pins.length) return null;
+    return {
+      box: (box as THREE.Box3).clone().expandByVector(new THREE.Vector3(1, 2.6, 0)),
+      glbX0: Math.min(...pins.map((v) => v.x)), glbY0: Math.max(...pins.map((v) => v.y)),
+      px0: Math.min(...scenePins.map((p) => p.x)) - b.x, py0: Math.min(...scenePins.map((p) => p.y)) - b.y,
+    };
+  };
+  const pwrSpot = spotFor("PwrHdr", ["pwr"]), uartSpot = spotFor("UartHdr", ["i2c", "uart"]);
+  const spots = [pwrSpot, uartSpot].filter((v): v is Spot => v !== null);
+  const spotOf = (m: THREE.Mesh, c: THREE.Vector3) => {
+    if (m.name.startsWith("PwrHdr")) return pwrSpot;
+    if (m.name.startsWith("UartHdr")) return uartSpot;
+    // 헤더 바로 옆 글자(핀 이름)는 헤더와 함께
+    if (/^(PinSilk|ExpSilk|SilkLine)/.test(m.name)) return spots.find((sp) => sp.box.containsPoint(c)) ?? null;
+    return null;
+  };
+
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh) return;
+    rel.multiplyMatrices(inv, m.matrixWorld);
+    const g = m.geometry.clone();
+    g.applyMatrix4(rel);
+    const shift = m.name === "Jumper_Cap" && b.jumper === "5V" ? 2.54 : 0;
+    // 기판 글자 · 선(1.6~1.63mm)은 높이를 늘리면 기판 윗면과 거의 붙어 돌릴 때 깜빡인다 — 조금 띄운다
+    const silk = /^(ExpSilk|PinSilk|SilkLine|Silk|Mark)/.test(m.name) ? 0.35 : 0;
+    g.computeBoundingBox();
+    const spot = spotOf(m, g.boundingBox!.getCenter(new THREE.Vector3()));
+    const pos = g.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i) + shift, z = pos.getZ(i);
+      const px = spot ? spot.px0 + (x - spot.glbX0) * pxPerMm : fx(x);
+      const py = spot ? spot.py0 + (spot.glbY0 - y) * pxPerMm : interp(TOP_Y_MM - y, Y_MAP);
+      pos.setXYZ(i, L.X(b.x + px), Math.max(0, z) * hs + silk, L.Z(b.y + py));
+    }
+    pos.needsUpdate = true;
+    g.computeVertexNormals();
+    g.computeBoundingBox();
+    g.computeBoundingSphere();
+    const mats = (Array.isArray(m.material) ? m.material : [m.material]).map((mat) => noOutline(mat));
+    // 조립 모델의 DevKit 쪽(부모가 ESP32_DevKit) 은 DevKit 묶음으로
+    const onDevkit = (() => { for (let p = m.parent; p && p !== root; p = p.parent) if (/DevKit/i.test(p.name)) return true; return false; })();
+    out.push({ geo: g, mat: mats.length === 1 ? mats[0] : mats, devkit: onDevkit, group: onDevkit ? devkitGroupOf(m.name) : exGroupOf(m.name) });
+  });
+  return out;
+}
+
+/*
+ * 옮긴 기하 캐시: 보드를 바꿨다가 확장 보드로 돌아오면(같은 장면의 같은 보드 · 같은 배치) 다시 옮기지 않는다 — 전환 때 가장 긴 멈춤이 이것이었다.
+ * 최근 두 장면만 쥐고, 밀려난 것은 GPU 버퍼를 놓는다(아직 그리는 화면이 있으면 three 가 다시 올린다).
+ */
+const pieceCache: { b: ExpansionBoard3D; fp: string; pieces: Piece[] }[] = [];
+const PIECE_CACHE = 2;
+function cachedPieces(gltf: { scene: THREE.Object3D }, b: ExpansionBoard3D, L: Layout, hs: number, pxPerMm: number): Piece[] {
+  // 배치(L)는 장면에서 정해지지만, 혹시 달라졌으면 다시 짓도록 몇 자리를 찍어 둔다
+  const fp = [gltf.scene.uuid, hs, pxPerMm, L.X(b.x), L.X(b.x + b.w), L.Z(b.y), L.Z(b.y + b.h / 2), L.Z(b.y + b.h)].join("|");
+  const i = pieceCache.findIndex((c) => c.b === b && c.fp === fp);
+  if (i >= 0) {
+    const [hit] = pieceCache.splice(i, 1);
+    pieceCache.unshift(hit);
+    return hit.pieces;
+  }
+  const pieces = buildPieces(gltf, b, L, hs, pxPerMm);
+  pieceCache.unshift({ b, fp, pieces });
+  for (const old of pieceCache.splice(PIECE_CACHE)) for (const p of old.pieces) p.geo.dispose();
+  return pieces;
+}
+
 export function ExpansionGlb({ b, L, index }: { b: ExpansionBoard3D; L: Layout; index: number }) {
   const api = useViewerApi();
-  const gltf = useGLTF(MODEL_URL);
+  const gltf = useGLTF(EXPANSION_GLB_URL);
   const top = PCB_H + EX_PIN;
   const hs = top / PIN_TIP_MM;
   const pxPerMm = b.pitch / 2.54;
 
-  // 꼭짓점마다 mm → 3D 로 옮긴 메시를 묶음별로
+  // 꼭짓점마다 mm → 3D 로 옮긴 기하(캐시)로 화면마다 메시를 만들어 묶음별로 (메시는 화면마다 따로 — 큰 창과 함께 떠도 된다)
   const built = useMemo(() => {
     const ex = new Map<ExGroup, THREE.Mesh[]>(), dk = new Map<string, THREE.Mesh[]>();
-    const root = gltf.scene.children[0] ?? gltf.scene;
-    root.updateMatrixWorld(true);
-    const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
-    const fx = (x: number) => (x <= COL0_MM ? ((x - LEFT_MM) / (COL0_MM - LEFT_MM)) * COL0_PX : COL0_PX + (x - COL0_MM) * pxPerMm);
-    const rel = new THREE.Matrix4();
-
-    // 전원 헤더 · I2C/UART 헤더: 모델의 핀 자리(첫 열 x · 먼 줄 y)와 배선도의 핀 자리(첫 열 · 위 줄)를 맞춰 통째로 옮긴다
-    type Spot = { box: THREE.Box3; glbX0: number; glbY0: number; px0: number; py0: number };
-    const centerOf = (m: THREE.Mesh) => {
-      const g = m.geometry.clone();
-      g.applyMatrix4(rel.multiplyMatrices(inv, m.matrixWorld));
-      g.computeBoundingBox();
-      const box = g.boundingBox!.clone();
-      g.dispose();
-      return box;
-    };
-    const spotFor = (prefix: string, rows: string[]): Spot | null => {
-      const scenePins = b.pins.filter((p) => p.row && rows.includes(p.row));
-      if (!scenePins.length) return null;
-      let box: THREE.Box3 | null = null;
-      const pins: THREE.Vector3[] = [];
-      root.traverse((o) => {
-        const m = o as THREE.Mesh;
-        if (!m.isMesh || !m.name.startsWith(prefix)) return;
-        const bb = centerOf(m);
-        box = box ? box.union(bb) : bb;
-        if (/_P\d+$/.test(m.name)) pins.push(bb.getCenter(new THREE.Vector3()));
-      });
-      if (!box || !pins.length) return null;
-      return {
-        box: (box as THREE.Box3).clone().expandByVector(new THREE.Vector3(1, 2.6, 0)),
-        glbX0: Math.min(...pins.map((v) => v.x)), glbY0: Math.max(...pins.map((v) => v.y)),
-        px0: Math.min(...scenePins.map((p) => p.x)) - b.x, py0: Math.min(...scenePins.map((p) => p.y)) - b.y,
-      };
-    };
-    const pwrSpot = spotFor("PwrHdr", ["pwr"]), uartSpot = spotFor("UartHdr", ["i2c", "uart"]);
-    const spots = [pwrSpot, uartSpot].filter((v): v is Spot => v !== null);
-    const spotOf = (m: THREE.Mesh, c: THREE.Vector3) => {
-      if (m.name.startsWith("PwrHdr")) return pwrSpot;
-      if (m.name.startsWith("UartHdr")) return uartSpot;
-      // 헤더 바로 옆 글자(핀 이름)는 헤더와 함께
-      if (/^(PinSilk|ExpSilk|SilkLine)/.test(m.name)) return spots.find((sp) => sp.box.containsPoint(c)) ?? null;
-      return null;
-    };
-
-    root.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (!m.isMesh) return;
-      rel.multiplyMatrices(inv, m.matrixWorld);
-      const g = m.geometry.clone();
-      g.applyMatrix4(rel);
-      const shift = m.name === "Jumper_Cap" && b.jumper === "5V" ? 2.54 : 0;
-      // 기판 글자 · 선(1.6~1.63mm)은 높이를 늘리면 기판 윗면과 거의 붙어 돌릴 때 깜빡인다 — 조금 띄운다
-      const silk = /^(ExpSilk|PinSilk|SilkLine|Silk|Mark)/.test(m.name) ? 0.35 : 0;
-      g.computeBoundingBox();
-      const spot = spotOf(m, g.boundingBox!.getCenter(new THREE.Vector3()));
-      const pos = g.attributes.position as THREE.BufferAttribute;
-      for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i), y = pos.getY(i) + shift, z = pos.getZ(i);
-        const px = spot ? spot.px0 + (x - spot.glbX0) * pxPerMm : fx(x);
-        const py = spot ? spot.py0 + (spot.glbY0 - y) * pxPerMm : interp(TOP_Y_MM - y, Y_MAP);
-        pos.setXYZ(i, L.X(b.x + px), Math.max(0, z) * hs + silk, L.Z(b.y + py));
-      }
-      pos.needsUpdate = true;
-      g.computeVertexNormals();
-      g.computeBoundingBox();
-      g.computeBoundingSphere();
-      const mats = (Array.isArray(m.material) ? m.material : [m.material]).map((mat) => noOutline(mat));
-      const mesh = new THREE.Mesh(g, mats.length === 1 ? mats[0] : mats);
+    for (const p of cachedPieces(gltf, b, L, hs, pxPerMm)) {
+      const mesh = new THREE.Mesh(p.geo, p.mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      // 조립 모델의 DevKit 쪽(부모가 ESP32_DevKit) 은 DevKit 묶음으로
-      const onDevkit = (() => { for (let p = m.parent; p && p !== root; p = p.parent) if (/DevKit/i.test(p.name)) return true; return false; })();
-      if (onDevkit) {
-        const id = devkitGroupOf(m.name);
-        dk.set(id, [...(dk.get(id) ?? []), mesh]);
-      } else {
-        const id = exGroupOf(m.name);
-        ex.set(id, [...(ex.get(id) ?? []), mesh]);
-      }
-    });
+      if (p.devkit) dk.set(p.group, [...(dk.get(p.group) ?? []), mesh]);
+      else ex.set(p.group as ExGroup, [...(ex.get(p.group as ExGroup) ?? []), mesh]);
+    }
     return { ex, dk };
   }, [gltf, b, L, hs, pxPerMm]);
-  useEffect(() => () => {
-    for (const list of [...built.ex.values(), ...built.dk.values()]) for (const m of list) m.geometry.dispose();
-  }, [built]);
 
   const show = (list: THREE.Mesh[] | undefined) => list?.map((m) => <primitive key={m.uuid} object={m} />) ?? null;
   const jumperLabel = `JUMP 점퍼 (지금 ${b.jumper === "5V" ? "5V" : "3.3V"})`;

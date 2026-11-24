@@ -17,7 +17,7 @@ import { noOutline } from "./materials";
  * + − 줄 색: 배선도는 양쪽 모두 바깥 줄이 + 다. 모델과 다르면 그쪽 빨강 · 파랑 선과 + − 표시를 바꿔 놓는다.
  * 배선도가 이 모델로 못 그리는 보드(+ − 줄만 · 구멍 간격이 다름 · 30열 넘음 · 줄 수가 10 · 5 가 아님)는 손으로 그린 브레드보드 그대로.
  */
-const MODEL_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/breadboard_400.glb`;
+export const BREADBOARD_GLB_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/breadboard_400.glb`;
 
 type BB = Scene3D["breadboards"][number];
 
@@ -52,7 +52,7 @@ export function BreadboardGlbBody({ bb, L, onPointerMove, onPointerOut }: {
   bb: BB; L: Layout;
   onPointerMove: (e: ThreeEvent<PointerEvent>) => void; onPointerOut: () => void;
 }) {
-  const gltf = useGLTF(MODEL_URL);
+  const gltf = useGLTF(BREADBOARD_GLB_URL);
 
   const meshes = useMemo(() => {
     const { xs, ys, pitch } = shape(bb);

@@ -1,8 +1,9 @@
-import { Component, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { Component, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import * as THREE from "three";
-import { Canvas } from "@react-three/fiber";
-import { Armchair, Cable, ShieldAlert, TriangleAlert, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon, Zap } from "lucide-react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { Armchair, Cable, ShieldAlert, TriangleAlert, ChevronLeft, Map as MapIcon, ChevronRight, CircuitBoard, Eye, Hand, ListOrdered, Loader2, LocateFixed, Minus, Play, Plus, RotateCcw, RotateCw, Square, Sun, Thermometer, Volume2, VolumeX, X as XIcon, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { behaviorFor } from "@/track/sim/behaviors";
@@ -11,8 +12,9 @@ import { defaultInputs, Simulator } from "@/track/sim/engine";
 import { JUMPER_5V_NOTICE } from "@/track/board";
 import { chapterSafety } from "@/track/safety";
 import { SAFETY_TONE, SafetyBody } from "../SafetyNotice";
-import type { Scene3D } from "@/track/wiring3d";
+import { onBoardSwitchIntent, type Scene3D } from "@/track/wiring3d";
 import { buildAssembly } from "./assembly";
+import { boardModelUrls, preloadBoardModels } from "./boardModels";
 import { withGlbDevkit } from "./devkitGlb";
 import { withGlbExpansion } from "./expansionGlb";
 import { makeLayout, siteLayout } from "./layout";
@@ -20,8 +22,8 @@ import { OledZoom } from "./OledZoom";
 import { PinoutDialog } from "./PinoutDialog";
 import { dioramaRoom } from "./diorama";
 import { Schematic, schematicRows } from "./Schematic";
-import { anchorsOf, Scene3DView } from "./Scene";
-import { createViewerStore, useViewer, ViewerContext, type ViewerState } from "./store";
+import { anchorsOf, RoomLight, Scene3DView } from "./Scene";
+import { createViewerStore, useViewer, useViewerApi, ViewerContext, type ViewerState } from "./store";
 
 /*
  * 3D 배선 보기 (React Three Fiber).
@@ -36,6 +38,11 @@ const ink = "border-[#0f2239]/80";
 
 type Props = {
   scene: Scene3D;
+  /**
+   * 새 장면을 받는 중 (보드를 바꿈): scene 은 바로 전 장면이다. 보기(WebGL 캔버스)는 내리지 않고
+   * 이전 장면을 가린 채 「준비하고 있어요」 — 이전 장면과 새 장면이 겹쳐 보이는 프레임이 없다
+   */
+  pending?: boolean;
   /** 챕터 id: 실행할 동작을 고른다 */
   chapterId?: string;
   onUnsupported?: () => void;
@@ -57,9 +64,40 @@ export function Wiring3DView(props: Props) {
   );
 }
 
-function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
+/** 장면마다 이름표 (같은 장면 객체면 같은 번호) — 3D 속 장면을 장면마다 새로 짓는 key */
+const sceneIds = new WeakMap<Scene3D, number>();
+let nextSceneId = 1;
+function sceneId(s: Scene3D): number {
+  let id = sceneIds.get(s);
+  if (id === undefined) sceneIds.set(s, (id = nextSceneId++));
+  return id;
+}
+
+const glbScenes = new WeakMap<Scene3D, Scene3D>();
+function glbScene(s: Scene3D): Scene3D {
+  let out = glbScenes.get(s);
+  if (!out) glbScenes.set(s, (out = withGlbExpansion(withGlbDevkit(s))));
+  return out;
+}
+
+/** 보드를 바꾼 뒤 새 보드 실물 모델을 기다리는 가장 긴 시간: 넘으면 손으로 그린 보드부터 (느린 망) */
+const MODEL_WAIT_MS = 2500;
+
+function Viewer({ scene: sceneIn, pending = false, chapterId, onUnsupported, large, toolbar, stage, infoContainer }: Props) {
   // 기본 보드는 실물 모델 DevKit 으로(devkitGlb.tsx), 확장 보드는 실물 조립 모델로(expansionGlb.tsx)
-  const scene = useMemo(() => withGlbExpansion(withGlbDevkit(sceneIn)), [sceneIn]);
+  // 같은 장면이면 같은 객체(보드를 바꿨다 돌아와도) — 확장 보드 모델의 옮긴 기하 캐시가 보드 객체로 찾는다
+  const scene = useMemo(() => glbScene(sceneIn), [sceneIn]);
+  const sceneKey = sceneId(sceneIn);
+  // 보드를 바꾼 뒤(이 보기가 처음 그린 장면이 아니면): 새 보드 실물 모델을 다 받을 때까지 이전 장면을 가리고 기다렸다가 한 번에 바꾼다.
+  // 처음 열 때는 기다리지 않고 손으로 그린 보드부터 보여 준다(받는 동안 빈 화면이 길지 않게)
+  const [firstKey] = useState(sceneKey);
+  const [waitOver, setWaitOver] = useState<number | null>(null);
+  useEffect(() => {
+    if (sceneKey === firstKey) return;
+    const id = window.setTimeout(() => setWaitOver(sceneKey), MODEL_WAIT_MS);
+    return () => window.clearTimeout(id);
+  }, [sceneKey, firstKey]);
+  const gate = sceneKey !== firstKey && waitOver !== sceneKey;
   // 융합 챕터: 현장 보기(가전 · 가구에 단 모듈로 시뮬레이션)가 먼저, 회로 보기는 배선만
   const room = dioramaRoom(chapterId);
   const [mode, setMode] = useState<"site" | "circuit">(room ? "site" : "circuit");
@@ -70,8 +108,8 @@ function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stag
   const anchors = useMemo(() => (site ? [] : anchorsOf(scene, L)), [scene, L, site]);
   const set = useViewer((s) => s.set);
   const behavior = behaviorFor(chapterId);
-  // 장면이 바뀌면 시뮬레이션 · 조립 순서도 새로
-  useEffect(() => {
+  // 장면이 바뀌면 시뮬레이션 · 조립 순서도 새로 (새 장면을 처음 그리기 전에 — 이전 장면의 고른 부품 · 빛이 한 번이라도 그려지지 않게)
+  useLayoutEffect(() => {
     const devices = readDevices(scene);
     set({ sim: new Simulator(devices, behavior, defaultInputs()), devices, running: false, selected: null, hover: null, picked: null, readings: [], serial: [], assembly: buildAssembly(scene), step: null, chapterId: chapterId ?? null, oledZoom: null });
   }, [scene, behavior, set, chapterId]);
@@ -99,6 +137,11 @@ function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stag
   const [schematic, setSchematic] = useState(Boolean(stage || large));
   const boxRef = useRef<HTMLDivElement>(null);
   const tipRef = useRef<HTMLDivElement>(null);
+  // 새 장면 준비 중: 받는 중(pending) 이거나 새 보드 실물 모델을 기다리는 중(loading)
+  const loading = useViewer((s) => s.loading);
+  const hidden = pending || loading;
+  // 보드 고르기 칸에 마우스를 올리면(바꾸려는 기미) 세 보드 실물 모델을 미리 받아 둔다
+  useEffect(() => onBoardSwitchIntent(preloadBoardModels), []);
 
   useBuzzerSound(running && sound);
 
@@ -144,8 +187,10 @@ function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stag
   const canvas = (
     <div
       ref={boxRef}
-      className={cn("overflow-hidden outline-none focus-visible:ring-3 focus-visible:ring-ring/60", stage ? "absolute inset-0" : "relative w-full rounded-xl border bg-[#f8f4ec] dark:bg-[#24262b]", !stage && (large ? "h-[min(70dvh,42rem)]" : tall ? "aspect-[4/3] max-h-[70dvh]" : "aspect-[16/10] max-h-[70dvh]"))}
+      // isolate: 안의 z 순서(단추 · 카드 · 준비 중 가림막)를 이 칸 안에 가둔다 — 가림막이 바깥(작업대의 3D | 그림 단추)을 덮지 않게
+      className={cn("isolate overflow-hidden outline-none focus-visible:ring-3 focus-visible:ring-ring/60", stage ? "absolute inset-0" : "relative w-full rounded-xl border bg-[#f8f4ec] dark:bg-[#24262b]", !stage && (large ? "h-[min(70dvh,42rem)]" : tall ? "aspect-[4/3] max-h-[70dvh]" : "aspect-[16/10] max-h-[70dvh]"))}
       data-testid="wiring-3d"
+      data-pending={hidden ? "true" : undefined}
       tabIndex={0}
       onKeyDown={onKeyDown}
       onPointerMove={moveTip}
@@ -161,12 +206,22 @@ function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stag
         style={{ position: "absolute", inset: 0, touchAction: "none" }}
         aria-label={`3D 배선 보기: ${scene.rows.map((r) => `${r.part} → ${r.to}`).join(", ")}`}
       >
-        <Scene3DView key={site ? "site" : "circuit"} scene={scene} L={L} anchors={anchors} cardsRoom={!site && Boolean(stage || large)} site={site} />
+        {/* 주변 빛(PMREM)은 캔버스마다 한 번 — 장면을 바꿔도 다시 만들지 않는다 */}
+        <RoomLight />
+        {/* 장면마다 새로 짓는다(카메라 맞춤 · 부품 상태가 이전 보드를 따라오지 않게). 캔버스 · 셰이더 · 모델은 그대로 */}
+        {!pending && (
+          <Suspense key={sceneKey} fallback={<ModelWait />}>
+            {gate && !site && boardModelUrls(scene).map((url) => <ModelGate key={url} url={url} />)}
+            <Scene3DView key={site ? "site" : "circuit"} scene={scene} L={L} anchors={anchors} cardsRoom={!site && Boolean(stage || large)} site={site} />
+          </Suspense>
+        )}
+        <DrawnProbe host={boxRef} />
       </Canvas>
       </GlBoundary>
 
       {/* 설명 카드(넓을 때) · 이름표(좁을 때): 부품 위의 점에서 점선으로 */}
-      <div ref={(el) => { dom.callouts = el; }} data-mode="pills" className="group/callouts pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-150" data-testid="wiring-3d-callouts">
+      {/* 장면마다 새로: 3D 자리에 놓이기 전(첫 화면)에는 숨겨 둔다 — 왼쪽 위 구석에 이름표가 쌓여 보이지 않게 (OverlaySync 가 보이게 한다) */}
+      <div key={sceneKey} ref={(el) => { dom.callouts = el; }} data-mode="pills" style={{ visibility: "hidden" }} className="group/callouts pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-150" data-testid="wiring-3d-callouts">
         <svg className="absolute inset-0 size-full" aria-hidden>
           {anchors.map((a) => <line key={a.id} ref={nodeRef(dom, a.id, "line")} stroke={a.color} strokeWidth="2" strokeLinecap="round" strokeDasharray="1 5" />)}
         </svg>
@@ -271,6 +326,13 @@ function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stag
         </div>
       )}
 
+      {hidden && (
+        // 준비 중: 캔버스(WebGL)는 그대로 두고 그 위를 덮어 이전 장면 · 글자 · 단추를 모두 가린다
+        <div data-wiring-loading className="absolute inset-0 z-40 flex items-center justify-center gap-2 bg-[#f8f4ec] text-sm text-muted-foreground dark:bg-[#24262b]" data-testid="wiring-3d-loading" role="status">
+          <Loader2 className="size-4 animate-spin" />3D 배선을 준비하고 있어요
+        </div>
+      )}
+
       {/* 보기 조절 */}
       <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-xl border bg-background/95 p-1 shadow-sm">
         <Button type="button" size="icon" variant="ghost" className={tool} aria-label="왼쪽으로 돌리기 (Q)" title="왼쪽으로 돌리기 (Q) · 마우스 오른쪽 버튼을 누른 채 끌면 360도로 돌아가요" data-testid="wiring-3d-rotate-left" onClick={() => camera?.rotate(-1)}><RotateCcw className="size-4" /></Button>
@@ -294,6 +356,41 @@ function Viewer({ scene: sceneIn, chapterId, onUnsupported, large, toolbar, stag
       {info}
     </div>
   );
+}
+
+/**
+ * 새 보드 실물 모델을 다 받을 때까지 장면을 미룬다(받는 동안은 위의 Suspense 가 ModelWait).
+ * 주소 하나씩 부른다: drei 캐시는 [로더, 주소들] 로 찾아서, 배열로 부르면 보드 그리는 쪽(useGLTF(주소))과 따로 또 받고 또 푼다
+ */
+function ModelGate({ url }: { url: string }) {
+  useGLTF(url);
+  return null;
+}
+
+/** 모델을 기다리는 동안: 이전 장면을 가리고 「준비하고 있어요」 */
+function ModelWait() {
+  const api = useViewerApi();
+  useLayoutEffect(() => {
+    api.getState().set({ loading: true });
+    return () => api.getState().set({ loading: false });
+  }, [api]);
+  return null;
+}
+
+/**
+ * 시험 · 진단용: 실제로 그리는 3D 장면에 들어 있는 보드(맨 위 묶음 이름 "board:<종류>")를 3D 보기 칸의 data-drawn-boards 에 적는다(쉼표).
+ * 보드를 바꾼 뒤 이전 보드가 남아 있으면 여기에 함께 나온다.
+ */
+function DrawnProbe({ host }: { host: RefObject<HTMLDivElement | null> }) {
+  useFrame(({ scene }) => {
+    const el = host.current;
+    if (!el) return;
+    const boards: string[] = [];
+    for (const o of scene.children) if (o.visible && o.name.startsWith("board:")) boards.push(o.name.slice(6));
+    const list = boards.join(",");
+    if (el.dataset.drawnBoards !== list) el.dataset.drawnBoards = list;
+  });
+  return null;
 }
 
 /** WebGL 을 만들지 못하면(오래된 기기 등) 그림으로 돌아가게 알린다 */

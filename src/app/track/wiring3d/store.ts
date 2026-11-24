@@ -65,6 +65,8 @@ export type ViewerState = {
   chapterId: string | null;
   /** OLED 화면 크게 보기 (부품 번호, 닫으면 null) */
   oledZoom: number | null;
+  /** 새 장면의 보드 실물 모델을 받는 중 (보드를 바꾼 뒤): 이전 장면을 가리고 「준비하고 있어요」 */
+  loading: boolean;
   /** 장면이 다시 그려지게 (R3F invalidate) */
   invalidate: () => void;
   /** 화면 위 글자들이 따라갈 DOM (부품 카드 · 점선 · 설명 카드 …) */
@@ -87,7 +89,7 @@ export function createViewerStore(): StoreApi<ViewerState> {
     hover: null, selected: null, picked: null, preview: null,
     running: false, sound: false, topView: false, dragging: false,
     ledColor: {}, dim: 1, readings: [], serial: [], phone: null,
-    sim: null, devices: [], step: null, assembly: null, chapterId: null, oledZoom: null,
+    sim: null, devices: [], step: null, assembly: null, chapterId: null, oledZoom: null, loading: false,
     invalidate: () => {},
     dom: { partCard: null, leader: null, leaderHalo: null, leaderDot: null, tip: null, callouts: null, nodes: new Map() },
     camera: null,

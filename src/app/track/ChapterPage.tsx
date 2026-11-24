@@ -13,9 +13,10 @@ import { getChapter, loadChapters, type LoadedChapter } from "@/track/content";
 import { allSteps, stepStates, type StepState } from "@/track/gating";
 import type { Step } from "@/track/schema";
 import { TRACK_NAME } from "@/track/tracks";
-import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
+import { canShow3D, hasScene3D } from "@/track/wiring3d";
+import { useScene3D } from "./useScene3D";
 import { BoardSelect, chapterShowsBoardSelect } from "../board/BoardSelect";
-import { useBoardChoice } from "../board/boardChoice";
+import { BOARD_IDS, useBoardChoice } from "../board/boardChoice";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
 import { Illustration, JumperNotice, resolveBoardImage, shownJumperNotice } from "./Illustration";
@@ -69,7 +70,6 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
   const board = useBoardChoice();
   const [panel, setPanel] = useState<PanelId>("steps");
   const [view, setView] = useState<"3d" | "picture">("3d");
-  const [scene, setScene] = useState<Scene3D | null>(null);
   const [no3d, setNo3d] = useState(false);
   // 이 기기에서 3D 를 보여 줄지는 화면이 뜬 뒤에 정한다 (그래픽 가속이 없으면 그림으로)
   useEffect(() => { if (!canShow3D()) setNo3d(true); }, []);
@@ -77,18 +77,10 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
   // 고른 보드의 배선 그림에 3D 장면이 있으면 받아 둔다
   const shown = chapter?.wiring ? resolveBoardImage(chapterId, chapter.wiring.image, board) : undefined;
   const has3d = hasScene3D(chapterId, shown) && !no3d;
-  useEffect(() => {
-    setScene(null);
-    if (!has3d) return;
-    let alive = true;
-    // 단계 목록 · 머리띠가 먼저 그려지고 눌릴 수 있게, 3D 는 브라우저가 한가해진 뒤에 올린다
-    const idle = (run: () => void) => {
-      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(run, { timeout: 1200 });
-      else setTimeout(run, 200);
-    };
-    void loadScene3D(chapterId, shown)?.then((sc) => idle(() => { if (alive) setScene(sc); }));
-    return () => { alive = false; };
-  }, [has3d, chapterId, shown]);
+  // 단계 목록 · 머리띠가 먼저 그려지고 눌릴 수 있게, 처음 3D 는 브라우저가 한가해진 뒤에 올린다.
+  // 보드를 바꾸면 3D 보기는 그대로 두고 장면만 바꾼다 (다른 보드 장면은 한가할 때 미리 받아 둔다)
+  const siblings = chapter?.wiring ? BOARD_IDS.map((b) => resolveBoardImage(chapterId, chapter.wiring!.image, b)) : undefined;
+  const { scene, pending } = useScene3D(chapterId, shown, { enabled: has3d, idle: true, siblings });
   const onUnsupported = useCallback(() => setNo3d(true), []);
 
   // 없는 챕터는 목록으로 돌려보낸다
@@ -178,7 +170,7 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
                 scene ? (
                   <div className="absolute inset-0">
                     <Suspense fallback={null}>
-                      <Wiring3DView scene={scene} chapterId={chapter.id} stage infoContainer={infoBox} onUnsupported={onUnsupported} />
+                      <Wiring3DView scene={scene} pending={pending} chapterId={chapter.id} stage infoContainer={infoBox} onUnsupported={onUnsupported} />
                     </Suspense>
                   </div>
                 ) : (

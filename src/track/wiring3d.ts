@@ -86,9 +86,44 @@ export function hasScene3D(chapterId: string, svgRef: string | undefined): boole
   return k !== undefined && k in scenes;
 }
 
+/** 한 번 받은 장면 (보드를 바꿨다 돌아오면 기다리지 않고 바로 그린다) */
+const loaded = new Map<string, Scene3D>();
+
 export function loadScene3D(chapterId: string, svgRef: string | undefined): Promise<Scene3D> | undefined {
   const k = key(chapterId, svgRef);
-  return k !== undefined && k in scenes ? scenes[k]() : undefined;
+  if (k === undefined || !(k in scenes)) return undefined;
+  const hit = loaded.get(k);
+  if (hit) return Promise.resolve(hit);
+  return scenes[k]().then((s) => {
+    // 같은 장면을 두 번 받아도(동시에 부름) 처음 것만 쓴다 — 장면 객체가 같아야 3D 가 다시 짓지 않는다
+    if (!loaded.has(k)) loaded.set(k, s);
+    return loaded.get(k)!;
+  });
+}
+
+/** 이미 받아 둔 장면 (없으면 undefined). 렌더 중에 불러도 된다 */
+export function peekScene3D(chapterId: string, svgRef: string | undefined): Scene3D | undefined {
+  const k = key(chapterId, svgRef);
+  return k === undefined ? undefined : loaded.get(k);
+}
+
+/** 장면 이름표: 같은 챕터 · 같은 그림이면 같다 (3D 장면이 없으면 undefined) */
+export function scene3DKey(chapterId: string, svgRef: string | undefined): string | undefined {
+  const k = key(chapterId, svgRef);
+  return k !== undefined && k in scenes ? k : undefined;
+}
+
+/*
+ * 보드를 바꾸려는 기미(보드 고르기 칸에 마우스를 올림 · 초점 · 손가락)가 보이면 3D 쪽에 미리 알린다.
+ * 3D 조각(three.js)이 이미 떠 있을 때만 그쪽이 등록한 일(보드 실물 모델 미리 받기)을 한다 — 이 파일은 가볍게 둔다.
+ */
+const warmers = new Set<() => void>();
+export function onBoardSwitchIntent(fn: () => void): () => void {
+  warmers.add(fn);
+  return () => { warmers.delete(fn); };
+}
+export function warmBoardSwitch(): void {
+  warmers.forEach((fn) => fn());
 }
 
 /** 3D 를 강제로 켜거나 끄는 값을 두는 곳 (localStorage). "on" · "off" — 없으면 기기를 보고 정한다 */

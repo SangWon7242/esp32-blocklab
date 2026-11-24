@@ -11,7 +11,7 @@ import { BB_H, DEVKIT_TOP, EX_PIN, HEADER_H, PCB_H, type Layout } from "./layout
 import { COLOR, toonOwn } from "./materials";
 import { Button, Buzzer, Dip, IrRx, Led, Module, Photo, Pot, Prop, Remote, Resistor, Rgb, Seg7, Servo, Tilt, Touch } from "./parts";
 import { PanFloor, Rig } from "./rig";
-import { useViewerApi } from "./store";
+import { useViewer, useViewerApi } from "./store";
 import { expansionPinText, MODULE, pinText, TEXT } from "./texts";
 import { Flow, ledChains, WireView } from "./wires";
 
@@ -168,6 +168,8 @@ function OverlaySync({ anchors, L }: { anchors: Anchor[]; L: Layout }) {
         node.line?.setAttribute("x2", String(p.x + 16)); node.line?.setAttribute("y2", String(py + 14));
       }
     }
+    // 자리를 다 잡았으니 보인다 (장면을 바꾼 첫 화면 전에는 숨겨 둔다)
+    if (s.dom.callouts && s.dom.callouts.style.visibility === "hidden") s.dom.callouts.style.visibility = "";
     // 누른 부품 ↔ 부품 카드
     const { partCard: card, leader, leaderHalo, leaderDot } = s.dom;
     if (s.selected && card && leader && leaderDot) {
@@ -239,13 +241,13 @@ export function Scene3DView({ scene, L, anchors, cardsRoom, site = false }: { sc
   const blueLed = useMemo(() => toonOwn({ color: "#74c0fc", emissive: COLOR.signal, emissiveIntensity: 0.25, outline: false }), []);
   useEffect(() => () => blueLed.dispose(), [blueLed]);
   const chains = useMemo(() => ledChains(scene, L), [scene, L]);
-  const devices = api.getState().devices;
+  // 장치 목록이 정해지면(장면을 바꾼 직후) 다시 — LED 빛 흐름이 그 장면의 핀을 따른다
+  const devices = useViewer((s) => s.devices);
   const ledPins = useMemo(() => Object.fromEntries(devices.flatMap((d) => (d.kind === "led" ? [[d.part, d.pin]] : []))), [devices]);
   const hasIr = scene.parts.some((p) => p.type === "irrx");
   const irPart = scene.parts.find((p): p is Extract<typeof p, { type: "irrx" }> => p.type === "irrx");
   return (
     <>
-      <RoomLight />
       <hemisphereLight args={["#ffffff", "#d8cfbf", 0.55]} />
       <directionalLight position={[-r * 0.5, r * 1.1, r * 0.35]} intensity={2.1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-normalBias={0.6} shadow-radius={6}
         shadow-camera-left={-r} shadow-camera-right={r} shadow-camera-top={r} shadow-camera-bottom={-r} shadow-camera-near={1} shadow-camera-far={r * 4} />
@@ -256,7 +258,8 @@ export function Scene3DView({ scene, L, anchors, cardsRoom, site = false }: { sc
       {/* 현장 보기: 가전 · 가구에 단 모듈만 (회로는 회로 보기에서) */}
       {site ? <Diorama L={L} /> : <>
       {scene.breadboards.map((bb, i) => <Breadboard key={i} bb={bb} L={L} index={i} />)}
-      {scene.boards.map((b, i) => <Board key={i} b={b} L={L} index={i} blueLed={blueLed} />)}
+      {/* 묶음 이름 "board:<종류>": 그린 장면에 어떤 보드가 있는지 시험이 본다 (Wiring3DView 의 DrawnProbe) */}
+      {scene.boards.map((b, i) => <group key={i} name={`board:${b.kind}${b.kind === "devkit" && b.seatedOn ? "@expansion" : ""}`}><Board b={b} L={L} index={i} blueLed={blueLed} /></group>)}
       {scene.parts.map((p, i) => <StepShow key={i} part={i}>{partView(p, i, L)}</StepShow>)}
       {hasIr && irPart && <StepShow part={scene.parts.indexOf(irPart)}><Remote at={new THREE.Vector3(L.X(irPart.legs[1].x) + 90, 0, L.Zp(irPart.legs[1]) + 40)} /></StepShow>}
       {scene.wires.map((w, i) => <StepShow key={i} wire={i}><WireView w={w} i={i} L={L} scene={scene} /></StepShow>)}

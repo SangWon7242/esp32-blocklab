@@ -3,6 +3,7 @@ import { Cpu } from "lucide-react";
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { chapterHasBoardChoice } from "@/track/board";
+import { warmBoardSwitch } from "@/track/wiring3d";
 import { chapterImageRefs } from "@/track/images";
 import type { Chapter } from "@/track/schema";
 import { BOARD_IDS, BOARD_LABELS, isBoardId, setBoardChoice, useBoardChoice, type BoardId } from "./boardChoice";
@@ -42,6 +43,10 @@ export function BoardSelect({ compact = false, className }: Props) {
       className={cn("flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5", compact && "flex-nowrap gap-x-1", className)}
       data-testid="board-select"
       data-board={board}
+      // 바꾸려는 기미가 보이면 3D 보기(떠 있으면)가 보드 실물 모델을 미리 받는다 — 누를 때 멈칫 · 임시 보드가 덜 보이게
+      onPointerEnter={warmBoardSwitch}
+      onPointerDown={warmBoardSwitch}
+      onFocus={warmBoardSwitch}
     >
       {compact ? (
         <Cpu className="size-4 shrink-0 text-muted-foreground" aria-hidden />

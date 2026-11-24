@@ -1,12 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { Box, Image as ImageIcon, Loader2, Maximize2, Zap } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { boardImageRef, jumperNotice, type BoardId } from "@/track/board";
 import { chapterImage, sanitizeSvg } from "@/track/images";
-import { canShow3D, hasScene3D, loadScene3D, type Scene3D } from "@/track/wiring3d";
+import { canShow3D, hasScene3D } from "@/track/wiring3d";
 import { useBoardChoice } from "../board/boardChoice";
+import { useScene3D } from "./useScene3D";
 
 // three.js 는 크게 보기 창에서 3D 를 처음 열 때만 불러온다
 const Wiring3DView = lazy(() => import("./wiring3d/Wiring3DView").then((m) => ({ default: m.Wiring3DView })));
@@ -153,15 +154,8 @@ function Loading3D() {
 function ZoomWith3D({ chapterId, shown, svg }: { chapterId: string; shown: string | undefined; svg: string }) {
   const [unsupported, setUnsupported] = useState(() => !canShow3D());
   const [tab, setTab] = useState("3d");
-  const [scene, setScene] = useState<Scene3D | null>(null);
-
-  useEffect(() => {
-    setScene(null);
-    if (unsupported) return;
-    let alive = true;
-    void loadScene3D(chapterId, shown)?.then((s) => { if (alive) setScene(s); });
-    return () => { alive = false; };
-  }, [unsupported, chapterId, shown]);
+  // 보드가 바뀌어도 3D 보기는 그대로 두고 장면만 바꾼다
+  const { scene, pending } = useScene3D(chapterId, shown, { enabled: !unsupported });
 
   const onUnsupported = useCallback(() => { setUnsupported(true); setTab("picture"); }, []);
   const picture = <div className={BIG_SVG} dangerouslySetInnerHTML={{ __html: svg }} />;
@@ -183,7 +177,7 @@ function ZoomWith3D({ chapterId, shown, svg }: { chapterId: string; shown: strin
       <TabsContent value="3d" className="min-w-0">
         {scene ? (
           <Suspense fallback={<Loading3D />}>
-            <Wiring3DView scene={scene} chapterId={chapterId} large onUnsupported={onUnsupported} />
+            <Wiring3DView scene={scene} pending={pending} chapterId={chapterId} large onUnsupported={onUnsupported} />
           </Suspense>
         ) : <Loading3D />}
       </TabsContent>

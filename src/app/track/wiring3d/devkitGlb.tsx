@@ -22,7 +22,7 @@ import { pinText, TEXT } from "./texts";
  */
 
 /** 모델 주소: 앱은 <BASE_URL>blocklab/models/, 라이브러리(허브)는 /blocklab/models/ — 호스트가 dist-lib/models/ 를 그 자리에 둔다 */
-const MODEL_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/esp32_devkit_38pin.glb`;
+export const DEVKIT_GLB_URL = `${import.meta.env.BASE_URL ?? "/"}blocklab/models/esp32_devkit_38pin.glb`;
 
 type BoardData = Extract<Scene3D["boards"][number], { kind: "plus" | "devkit" }>;
 
@@ -65,7 +65,7 @@ export function DevkitGlb({ b, L, index, pressEn, releaseEn }: {
   pressEn: (e: ThreeEvent<PointerEvent>) => void; releaseEn: () => void; enCap?: RefObject<THREE.Mesh | null>;
 }) {
   const api = useViewerApi();
-  const gltf = useGLTF(MODEL_URL);
+  const gltf = useGLTF(DEVKIT_GLB_URL);
 
   // 배선도 → 3D: 두 핀 줄의 3D 자리
   const rows = useMemo(() => [...new Set(b.pins.map((p) => Math.round(p.y - b.y)))].sort((a, c) => a - c), [b]);
