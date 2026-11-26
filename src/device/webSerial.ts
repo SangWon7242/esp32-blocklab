@@ -6,20 +6,27 @@ import { DEVICE_BUSY_MESSAGE, DeviceError, type Device, type RunResult, type Tra
  * Web Serial (Chrome 전용). TypeScript DOM 라이브러리에 Web Serial 타입이 없어 쓰는 부분만 여기 적는다
  * (전역 Navigator 를 넓히지 않고, open() 안에서만 navigator.serial 을 꺼낸다).
  */
-interface SerialPortLike extends EventTarget {
+export interface SerialPortLike extends EventTarget {
   readonly readable: ReadableStream<Uint8Array> | null;
   readonly writable: WritableStream<Uint8Array> | null;
   open(options: { baudRate: number }): Promise<void>;
   close(): Promise<void>;
   setSignals?(signals: { dataTerminalReady?: boolean; requestToSend?: boolean }): Promise<void>;
+  /** USB 장치 번호 (USB 가 아닌 포트는 비어 있다) */
+  getInfo?(): { usbVendorId?: number; usbProductId?: number };
 }
-interface SerialLike {
+export interface SerialLike extends EventTarget {
   requestPort(options?: { filters?: Array<{ usbVendorId?: number; usbProductId?: number }> }): Promise<SerialPortLike>;
   /** 전에 허락한 포트들 (오래된 브라우저는 없을 수 있다) */
   getPorts?(): Promise<SerialPortLike[]>;
 }
 
 const BAUD_RATE = 115200;
+
+/** 이 브라우저의 Web Serial (Chrome·Edge 데스크톱만 있다). 없으면 undefined */
+export function getSerial(): SerialLike | undefined {
+  return typeof navigator === "undefined" ? undefined : (navigator as Navigator & { serial?: SerialLike }).serial;
+}
 
 export class WebSerialTransport implements Transport {
   private readonly port: SerialPortLike;
@@ -35,7 +42,7 @@ export class WebSerialTransport implements Transport {
 
   /** 포트 고르기 창 → 115200 으로 열기. 미지원 → unsupported, 취소 → cancelled, 열기 실패 → busy */
   static async open(): Promise<WebSerialTransport> {
-    const serial = typeof navigator === "undefined" ? undefined : (navigator as Navigator & { serial?: SerialLike }).serial;
+    const serial = getSerial();
     if (!serial) throw new DeviceError("unsupported");
     // 전에 허락한 보드가 꽂혀 있으면 고르기 창 없이 바로 연다 (학생이 매번 포트를 고르지 않게)
     const granted = (await serial.getPorts?.().catch(() => [])) ?? [];
@@ -62,6 +69,20 @@ export class WebSerialTransport implements Transport {
         throw new DeviceError("busy", { cause });
       }
     }
+    return WebSerialTransport.ready(port);
+  }
+
+  /** 이미 고른 포트를 연다 (펌웨어 확인). 열기 실패 → busy */
+  static async openPort(port: SerialPortLike): Promise<WebSerialTransport> {
+    try {
+      await port.open({ baudRate: BAUD_RATE });
+    } catch (cause) {
+      throw new DeviceError("busy", { cause });
+    }
+    return WebSerialTransport.ready(port);
+  }
+
+  private static async ready(port: SerialPortLike): Promise<WebSerialTransport> {
     // ESP32 자동 리셋 회로: DTR/RTS 를 내려 EN/IO0 을 건드리지 않게 (지원하지 않으면 그냥 넘어감)
     try {
       await port.setSignals?.({ dataTerminalReady: false, requestToSend: false });

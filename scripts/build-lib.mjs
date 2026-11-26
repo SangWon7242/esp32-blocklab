@@ -5,6 +5,7 @@
  *   2. tsc -p tsconfig.lib.json           → types/**.d.ts (@/ 별칭을 상대 경로로 고쳐 쓴다) + index.d.ts·core.d.ts
  *      zod 를 import 하는 d.ts 는 펼친 평범한 타입으로 다시 쓴다 (scripts/dts-strip-zod.mjs — 허브에는 zod 가 없다)
  *   3. public/lib/*.py                    → lib/ (보드에 올리는 라이브러리. 호스트가 /lib/<이름> 으로 서빙해야 한다 — src/device/libs.ts)
+ *      public/blocklab/firmware/         → firmware/ (MicroPython 펌웨어 .bin, lib-v1.13.0. 「펌웨어 설치」가 /blocklab/firmware/ 로 부른다)
  *      public/blocklab/fonts/            → fonts/ (코드 글꼴 D2Coding woff2 + OFL.txt, lib-v1.0.5. style.css 가 /blocklab/fonts/ 로 부른다 — 호스트가 그 주소에서 서빙)
  *   4. package.json                       → 이름·version·exports
  *   5. scripts/lib-smoke.mjs              → window 없는 Node 에서 import 해 순수 API 를 부른다
@@ -57,6 +58,8 @@ cpSync(path.join(root, "public/lib"), path.join(out, "lib"), { recursive: true, 
 cpSync(path.join(root, "public/blocklab/fonts"), path.join(out, "fonts"), { recursive: true });
 // 3D 실물 모델 (lib-v1.9.0): 기본 보드 DevKit GLB. 화면이 <BASE_URL>blocklab/models/ 로 부른다 — 호스트가 /blocklab/models/ 로 서빙
 cpSync(path.join(root, "public/blocklab/models"), path.join(out, "models"), { recursive: true });
+// MicroPython 펌웨어 (lib-v1.13.0): 「펌웨어 설치」 창이 /blocklab/firmware/<파일> 을 받는다 — 호스트가 /blocklab/firmware/ 로 서빙
+cpSync(path.join(root, "public/blocklab/firmware"), path.join(out, "firmware"), { recursive: true, filter: (src) => !src.endsWith("README.md") });
 
 // 4. package.json
 const libPkg = {

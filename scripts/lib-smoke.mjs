@@ -226,9 +226,15 @@ assert.ok(css.includes('"D2Coding", "D2Coding ligature", ui-monospace, "SF Mono"
 assert.ok(/font-variant-ligatures:\s*none/.test(css), "style.css 에 리가처 끄기(font-variant-ligatures: none)가 없어요");
 assert.ok(css.includes("--blocklab-code-font-size"), "style.css 에 --blocklab-code-font-size 가 없어요");
 
+// lib-v1.13.0: 「펌웨어 설치」가 /blocklab/firmware/<파일> 을 받는다 — dist-lib/firmware/ 에 ESP 이미지(머리 0xE9)가 있어야 한다
+const firmwareDir = path.join(dist, "firmware");
+const firmwareBins = existsSync(firmwareDir) ? readdirSync(firmwareDir).filter((f) => f.endsWith(".bin")) : [];
+assert.equal(firmwareBins.length, 1, "dist-lib/firmware/ 에 펌웨어 .bin 이 하나 있어야 해요");
+assert.equal(readFileSync(path.join(firmwareDir, firmwareBins[0]))[0], 0xe9, "펌웨어 .bin 이 ESP 이미지가 아니에요");
+
 console.log(
   `dist-lib 연기 검사 통과: v${lib.LIB_VERSION}, 챕터 ${chapters.length}개, 01-led 미션 판정 ${verdict.pass ? "통과" : `실패(${verdict.failures.length})`}, ` +
-    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, 글꼴 ${woff2.join("·")} + OFL.txt, d.ts zod 0\n` +
+    `judgeSnapshot ${summary.passed}/${summary.missions}, 정적 조각 ${reached.size}개, define.amd 0, media ${readdirSync(mediaDir).length}개, 글꼴 ${woff2.join("·")} + OFL.txt, 펌웨어 ${firmwareBins[0]}, d.ts zod 0\n` +
     `core 입구 통과: judgeSnapshot ${coreSummary.passed}/${coreSummary.missions}, 정적 조각 ${coreReached.size}개(${(coreBytes / 1024).toFixed(1)} kB), ` +
     `외부 import 0, "use client"·React·Blockly·CodeMirror·CSS 0, 함수 ${CORE_FUNCTIONS.length}개 index 와 같음, 문장 상수 ${CORE_STRINGS.length}개`,
 );

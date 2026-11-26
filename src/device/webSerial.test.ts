@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FakeTransport, type ScriptStep } from "./fake";
 import { RAW_PROMPT } from "./rawRepl";
-import type { DeviceStatus, OutputEvent } from "./types";
+import { DEVICE_ERROR_MESSAGES, type DeviceStatus, type OutputEvent } from "./types";
 import { WebSerialDevice, WebSerialTransport } from "./webSerial";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -95,7 +95,7 @@ describe("WebSerialDevice (가짜 전송)", () => {
     vi.useFakeTimers();
     try {
       const { t, d } = setup([]);
-      const check = expect(d.connect()).rejects.toMatchObject({ code: "no-response", message: "보드가 대답하지 않아요. MicroPython이 들어 있는 보드인지 확인해 주세요" });
+      const check = expect(d.connect()).rejects.toMatchObject({ code: "no-response", message: DEVICE_ERROR_MESSAGES["no-response"] });
       await vi.advanceTimersByTimeAsync(6000);
       await check;
       expect(d.status).toBe("disconnected");

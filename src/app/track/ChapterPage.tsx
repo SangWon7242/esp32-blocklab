@@ -16,6 +16,7 @@ import { TRACK_NAME } from "@/track/tracks";
 import { canShow3D, hasScene3D } from "@/track/wiring3d";
 import { useScene3D } from "./useScene3D";
 import { BoardSelect, chapterShowsBoardSelect } from "../board/BoardSelect";
+import { FirmwareInstallButton } from "../firmware/FirmwareInstall";
 import { BOARD_IDS, useBoardChoice } from "../board/boardChoice";
 import { useSettings } from "../settings/settings";
 import { GuideBody } from "./GuideBody";
@@ -114,7 +115,13 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
           </div>
           {/* 수업 보드 (배선이 있는 챕터만): 고르면 배선 그림·설명·준비물이 그 보드로 바뀌고 모든 챕터에 적용된다.
               뒤로 가기 줄의 오른쪽에 두어 머리띠 높이를 늘리지 않는다 (첫 화면 단계 카드 수). 좁으면 다음 줄로 */}
-          {chapterShowsBoardSelect(chapter) && <BoardSelect className="sm:ml-auto" />}
+          {/* 펌웨어 설치: 수업 전에 보드에 MicroPython 이 있는지 보고 없으면 바로 설치 (열람 모드엔 없음) */}
+          {(chapterShowsBoardSelect(chapter) || !review) && (
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 sm:ml-auto">
+              {chapterShowsBoardSelect(chapter) && <BoardSelect />}
+              {!review && <FirmwareInstallButton />}
+            </div>
+          )}
           {/* 호스트 끼움 자리 (lib-v1.1.1): 저장 상태 등. 줄 끝에 붙는다 */}
           {slots.headerEnd && (
             <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2" data-slot="blocklab-header-end">{slots.headerEnd}</div>

@@ -6,6 +6,7 @@ import {
 } from "./deviceConsole";
 import { saveToBoard, syncLibs, type DeviceProgram } from "./saveToBoard";
 import { leaveDevice, sharedDevices } from "./sharedDevice";
+import { canRequestFirmwareInstall, requestFirmwareInstall } from "../firmware/firmwareRequest";
 
 export type { DeviceProgram };
 export { createDevice } from "./sharedDevice";
@@ -123,7 +124,12 @@ export function useDevice({ fake, getProgram, onErrorLine, showConsole, onRunEnd
     // 뽑힘은 장치가 이미 "보드 연결이 끊겼어요" 행을 냈다 (실행·저장이 그 때문에 실패해도 두 번 알리지 않는다)
     if (e instanceof DeviceError && e.code === "disconnected" && device.status === "disconnected") return;
     const message = e instanceof Error ? e.message : String(e);
-    toast.error(message);
+    // MicroPython 이 없는 보드: 알림에서 바로 펌웨어 설치 창을 연다
+    if (e instanceof DeviceError && e.code === "no-response" && canRequestFirmwareInstall()) {
+      toast.error(message, { duration: 15_000, action: { label: "펌웨어 설치", onClick: () => { requestFirmwareInstall(); } } });
+    } else {
+      toast.error(message);
+    }
     push("system", message);
   }, [device, push]);
 

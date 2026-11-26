@@ -22,6 +22,7 @@ import { countCodeBlocks, editorReducer, initialEditorState, initialEditorStateF
 import { BottomPanel, type BottomTab } from "./BottomPanel";
 import { ConsolePanel } from "./ConsolePanel";
 import { DeviceBar } from "./DeviceBar";
+import { FirmwareDialogHost } from "../firmware/FirmwareInstall";
 import { blockTypesIn } from "./deviceConsole";
 import { useDevice, type RunEndResult } from "./useDevice";
 import { ProblemsPanel } from "./ProblemsPanel";
@@ -469,6 +470,8 @@ export function EditorWorkbench({
           {toolbarEnd && <div className="flex shrink-0 items-center gap-2" data-slot="blocklab-header-end">{toolbarEnd}</div>}
         </div>
       </div>
+      {/* 보드 연결이 "대답하지 않아요"(MicroPython 없음)로 실패하면 알림의 「펌웨어 설치」 단추가 이 창을 연다 */}
+      {!readOnly && <FirmwareDialogHost fake={fake} />}
       {banner}
 
       <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
